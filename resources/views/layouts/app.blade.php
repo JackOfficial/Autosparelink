@@ -9,7 +9,7 @@
     <meta content="Free HTML Templates" name="description">
 
     <!-- Favicon -->
-    <link href="img/favicon.ico" rel="icon">
+    <link href="img/logo.png" rel="icon">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -76,11 +76,10 @@
                 </div>
             </div>
         </div>
-        <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
-            <div class="col-lg-4">
-                <a href="" class="text-decoration-none">
-                    <span class="h1 text-uppercase text-primary bg-dark px-2">Multi</span>
-                    <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Shop</span>
+        <div class="row align-items-center bg-light px-xl-5 d-none d-lg-flex">
+            <div class="col-lg-4 py-1">
+                <a href="">
+                   <img src="{{ asset('frontend/img/logo.png') }}" style="width: 200px;">
                 </a>
             </div>
             <div class="col-lg-4 col-6 text-left">

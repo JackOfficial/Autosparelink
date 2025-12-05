@@ -20,27 +20,27 @@ class PageController extends Controller
 {
     function index(){
         
-        $blogs = Blog::with(['blogPhoto', 'cause', 'user', 'likes', 'comments'])->latest()->get();
+        // $blogs = Blog::with(['blogPhoto', 'cause', 'user', 'likes', 'comments'])->latest()->get();
 
-        $projects = Project::with('project_photo', 'cause')->latest()->get();
+        // $projects = Project::with('project_photo', 'cause')->latest()->get();
 
-        $current_project = Project::with('project_photo', 'cause')->latest()->first();
+        // $current_project = Project::with('project_photo', 'cause')->latest()->first();
 
-        $events = Event::latest()->take(3)->get();
+        // $events = Event::latest()->take(3)->get();
 
-        $causes = Cause::with('mainPhoto')->latest()->take(4)->get(); 
+        // $causes = Cause::with('mainPhoto')->latest()->take(4)->get(); 
 
-        $partners = Partner::all();
+        // $partners = Partner::all();
 
-        $stories= Story::with(['organization', 'user', 'cause', 'photo'])->latest()->take(3)->get();
+        // $stories= Story::with(['organization', 'user', 'cause', 'photo'])->latest()->take(3)->get();
 
-        $header = Page::where('page_name', 'Home')->first();
+        // $header = Page::where('page_name', 'Home')->first();
         
-        $gallery = Photo::with('imageable')->latest()->take(6)->get();
+        // $gallery = Photo::with('imageable')->latest()->take(6)->get();
         
-        $organization = Organization::first();
+        // $organization = Organization::first();
 
-        return view('index', compact('header', 'blogs', 'projects', 'current_project', 'events', 'causes', 'partners', 'stories', 'gallery', 'organization')); 
+        return view('index'); 
     }
 
     function about(){
