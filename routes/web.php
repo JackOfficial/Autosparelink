@@ -28,8 +28,19 @@ use App\Http\Controllers\VolunteerController;
 use App\Http\Controllers\SampleController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\Admin\ApplicationsController;
+use App\Http\Controllers\admin\BodyTypeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Admin\OrganizationController;
+
+/////////////
+use App\Http\Controllers\admin\BrandController;
+use App\Http\Controllers\admin\CategoryController;
+use App\Http\Controllers\Admin\DriveTypeController;
+use App\Http\Controllers\admin\EngineTypeController;
+use App\Http\Controllers\admin\ModelController;
+use App\Http\Controllers\admin\TransmissionTypeController;
+use App\Http\Controllers\admin\VariantController;
+use App\Models\TransmissionType;
 
 //Guest routes
 // Route::get('/', function() {
@@ -106,11 +117,20 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::get('/downloadfiles', [ApplicationsController::class, 'downloadfiles']);
     Route::post('applications/hire', [ApplicationsController::class, 'hire']);
     Route::post('applications/reject', [ApplicationsController::class, 'reject']);
-    Route::resource('volunteers', VolunteersController::class);
     Route::resource('events', EventController::class);
     Route::resource('users', UsersController::class);
     Route::resource('partners', PartnerController::class);
     Route::resource('organization', OrganizationController::class);
+    //////////////////////////////////
+
+    Route::resource('brands', BrandController::class);
+    Route::resource('categories', CategoryController::class);
+    Route::resource('body-types', BodyTypeController::class);
+    Route::resource('engine-types', EngineTypeController::class);
+    Route::resource('transmission-types', TransmissionTypeController::class);
+    Route::resource('drive-types', DriveTypeController::class);
+    Route::resource('vehicle-models', ModelController::class);
+    Route::resource('variants', VariantController::class);
 });
 
 //Testing routes
@@ -125,3 +145,4 @@ Route::get('/test-admin', function () {
 Route::get('/checkifemailisverified', function () {
     return "You have verified";
 })->middleware(['verified']);
+

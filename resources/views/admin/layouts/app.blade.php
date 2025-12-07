@@ -29,7 +29,7 @@
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
- <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+ <link rel="icon" type="image/png" href="{{ asset('frontend/img/logo.png') }}">
 @livewireStyles
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -37,7 +37,7 @@
 
   <!-- Preloader -->
   <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="{{ asset('back/dist/img/AdminLTELogo.png') }}" alt="AdminLTELogo" height="60" width="60">
+    <img class="animation__shake" src="{{ asset('frontend/img/logo.png') }}" alt="AdminLTELogo" height="60" width="60">
   </div>
 
   <!-- Navbar -->
@@ -182,8 +182,8 @@
 <aside class="main-sidebar sidebar-dark-pink elevation-4">
   <!-- Brand Logo -->
   <a href="/admin" class="brand-link">
-    <img src="/Front/images/hfro logo.png" alt="HFRO Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-    <span class="brand-text font-weight-light">HFRO</span>
+    <img src="{{ asset('frontend/img/logo.png') }}" alt="AutoSpaceLink" class="brand-image img-circle elevation-3" style="opacity: .8">
+    <span class="brand-text font-weight-light">AutoSpaceLink</span>
   </a>
 
   <!-- Sidebar -->
@@ -229,29 +229,74 @@
         <!-- Blogs -->
         <li class="nav-item has-treeview">
           <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-newspaper"></i>
-            <p>Blogs <i class="right fas fa-angle-left"></i></p>
+            <i class="nav-icon fas fa-car"></i>
+            <p>Vehicle Management <i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="/admin/bloggers" class="nav-link"><i class="fas fa-users"></i><p>Bloggers</p></a></li>
-            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-tags nav-icon"></i><p>Blog Categories</p></a></li>
-            <li class="nav-item"><a href="/admin/blogs" class="nav-link"><i class="fa-solid fa-newspaper nav-icon"></i><p>All Blogs</p></a></li>
+            <li class="nav-item"><a href="/admin/brands" class="nav-link"><i class="fas fa-tags nav-icon"></i><p>Brands</p></a></li>
+            <li class="nav-item"><a href="/admin/vehicle-models" class="nav-link"><i class="fas fa-car-side nav-icon"></i><p>Models</p></a></li>
+            <li class="nav-item"><a href="/admin/variants" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Variants</p></a></li>
+            <li class="nav-item"><a href="/admin/body-types" class="nav-link"><i class="fas fa-car nav-icon"></i><p>Body Types</p></a></li>
+            <li class="nav-item"><a href="/admin/engine-types" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>Engine Types</p></a></li>
+            <li class="nav-item"><a href="/admin/transmission-types" class="nav-link"><i class="fas fa-exchange-alt nav-icon"></i><p>Transmission Types</p></a></li>
+            <li class="nav-item"><a href="/admin/drive-types" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Drive Types</p></a></li>
+            <li class="nav-item"><a href="/admin/categories" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Categories</p></a></li>
           </ul>
-        </li>
+          </li>
 
-        <li class="nav-item"><a href="/admin/stories" class="nav-link"><i class="nav-icon fas fa-book-open"></i><p>Stories</p></a></li>
-        <li class="nav-item"><a href="/admin/causes" class="nav-link"><i class="nav-icon fas fa-hand-holding-heart"></i><p>Causes</p></a></li>
-        <li class="nav-item"><a href="/admin/projects" class="nav-link"><i class="nav-icon fas fa-calendar-alt"></i><p>Projects</p></a></li>
-        <li class="nav-item"><a href="/admin/gallery" class="nav-link"><i class="nav-icon fas fa-image"></i><p>Gallery</p></a></li>
-        <li class="nav-item"><a href="/admin/team" class="nav-link"><i class="nav-icon fas fa-users"></i><p>Team</p></a></li>
-        <li class="nav-item"><a href="/admin/partners" class="nav-link"><i class="nav-icon fas fa-handshake"></i><p>Partners</p></a></li>
-        <li class="nav-item"><a href="/admin/events" class="nav-link"><i class="nav-icon fa-solid fa-calendar-days"></i><p>Events</p></a></li>
-         <li class="nav-item"><a href="/admin/organization" class="nav-link"><i class="nav-icon fas fa-home-alt"></i><p>Organization</p></a></li>
+          <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-boxes"></i>
+            <p>Spare Parts <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item"><a href="/admin/bloggers" class="nav-link"><i class="fas fa-th-list nav-icon"></i><p>Categories</p></a></li>
+            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Spare Parts</p></a></li>
+            <li class="nav-item"><a href="/admin/blogs" class="nav-link"><i class="fas fa-tools nav-icon"></i><p>Parts Fitments</p></a></li>
+          </ul>
+          </li>
+
+           <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-shopping-cart"></i>
+            <p>E-Commerce <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item"><a href="/admin/bloggers" class="nav-link"><i class="fas fa-shopping-cart nav-icon"></i><p>Carts</p></a></li>
+            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-receipt nav-icon"></i><p>Orders</p></a></li>
+            <li class="nav-item"><a href="/admin/blogs" class="nav-link"><i class="fas fa-credit-card nav-icon"></i><p>Payments</p></a></li>
+            <li class="nav-item"><a href="/admin/blogs" class="nav-link"><i class="fas fa-truck nav-icon"></i><p>Shippings</p></a></li>
+            <li class="nav-item"><a href="/admin/blogs" class="nav-link"><i class="fas fa-map-marker-alt nav-icon"></i><p>Addresses</p></a></li>
+          </ul>
+          </li>
+
+          <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-users"></i>
+            <p>Users & Access <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item"><a href="/admin/bloggers" class="nav-link"><i class="fas fa-user nav-icon"></i><p>Users</p></a></li>
+            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-user-shield nav-icon"></i><p>Roles & Permissions</p></a></li>
+          </ul>
+          </li>
+
+           <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-chart-pie"></i>
+            <p>Reports & Settings <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item"><a href="/admin/bloggers" class="nav-link"><i class="fas fa-chart-line nav-icon"></i><p>Sales Reports</p></a></li>
+            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Inventory Reports</p></a></li>
+            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>System Settings</p></a></li>
+          </ul>
+          </li>
+
         <!-- Community & Engagement -->
         <li class="nav-header">COMMUNITY & ENGAGEMENT</li>
 
         <li class="nav-item"><a href="/admin/careers" class="nav-link"><i class="nav-icon fas fa-briefcase"></i><p>Careers</p></a></li>
-        <li class="nav-item"><a href="/admin/volunteers" class="nav-link"><i class="nav-icon fas fa-hand-paper"></i><p>Volunteers</p></a></li>
         <li class="nav-item"><a href="/admin/applications" class="nav-link"><i class="nav-icon fas fa-gear"></i><p>Applications</p></a></li>
 
         <!-- Mailbox -->
@@ -266,17 +311,6 @@
             <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Read</p></a></li>
           </ul>
         </li>
-
-        <!-- User Management -->
-        <li class="nav-header">USER MANAGEMENT</li>
-        <li class="nav-item"><a href="/admin/users" class="nav-link"><i class="nav-icon fas fa-user-shield"></i><p>Users</p></a></li>
-
-        <!-- System Settings -->
-        <li class="nav-header">SYSTEM SETTINGS</li>
-        <li class="nav-item"><a href="/admin/widgets" class="nav-link"><i class="nav-icon fas fa-cubes"></i><p>Widgets</p></a></li>
-        <li class="nav-item"><a href="/admin/settings" class="nav-link"><i class="nav-icon fa-solid fa-gear"></i><p>Site Settings</p></a></li>
-        <li class="nav-item"><a href="/admin/reports" class="nav-link"><i class="nav-icon fas fa-chart-line"></i><p>Reports & Analytics</p></a></li>
-        <li class="nav-item"><a href="/admin/backups" class="nav-link"><i class="nav-icon fas fa-database"></i><p>Backups</p></a></li>
 
         <!-- Logout -->
         @if(Auth::check())
@@ -303,7 +337,7 @@
   </div>
   <!-- /.content-wrapper -->
   <footer class="main-footer">
-    <strong>Copyright &copy; {{ date('Y') }} <a href="/">HFRO</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="/">AutoSpaceLink</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
       <b>Version</b> 3.2.0

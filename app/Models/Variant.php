@@ -6,5 +6,40 @@ use Illuminate\Database\Eloquent\Model;
 
 class Variant extends Model
 {
-    //
+    protected $fillable = [
+        'vehicle_model_id',
+        'body_type_id',
+        'engine_type_id',
+        'transmission_type_id',
+        'fuel_capacity',
+        'seats',
+        'doors',
+        'drive_type',
+        'horsepower',
+        'torque',
+        'fuel_efficiency',
+        'photo',
+        'status'
+    ];
+
+    // Relationships
+    public function vehicleModel()
+    {
+        return $this->belongsTo(VehicleModel::class);
+    }
+
+    public function bodyType()
+    {
+        return $this->belongsTo(BodyType::class);
+    }
+
+    public function engineType()
+    {
+        return $this->belongsTo(EngineType::class);
+    }
+
+    public function transmissionType()
+    {
+        return $this->belongsTo(TransmissionType::class);
+    }
 }

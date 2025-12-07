@@ -6,5 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class EngineType extends Model
 {
-    //
+     protected $fillable = [
+        'name',
+        'description',
+        'icon_url',
+    ];
 }
