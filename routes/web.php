@@ -38,9 +38,10 @@ use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\Admin\DriveTypeController;
 use App\Http\Controllers\admin\EngineTypeController;
 use App\Http\Controllers\admin\ModelController;
+use App\Http\Controllers\admin\PartController;
+use App\Http\Controllers\admin\PartFitmentController;
 use App\Http\Controllers\admin\TransmissionTypeController;
 use App\Http\Controllers\admin\VariantController;
-use App\Models\TransmissionType;
 
 //Guest routes
 // Route::get('/', function() {
@@ -131,6 +132,9 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('drive-types', DriveTypeController::class);
     Route::resource('vehicle-models', ModelController::class);
     Route::resource('variants', VariantController::class);
+    Route::resource('spare-parts', PartController::class);
+    Route::resource('fitments', PartFitmentController::class);
+    Route::delete('fitments/photos/{id}', [PartFitmentController::class, 'deletePhoto'])->name('fitments.deletePhoto');
 });
 
 //Testing routes

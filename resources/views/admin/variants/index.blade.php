@@ -42,6 +42,7 @@
                     <tr>
                         <th>#</th>
                         <th>Photo</th>
+                        <th>Variant Name</th>
                         <th>Vehicle Model</th>
                         <th>Body Type</th>
                         <th>Engine Type</th>
@@ -61,6 +62,18 @@
                                 <img src="{{ asset('storage/' . $variant->photo) }}" class="img-thumbnail" style="width: 80px;">
                             @else
                                 <span class="text-muted">No photo</span>
+                            @endif
+                        </td>
+
+                        <!-- Variant Name -->
+                        <td>
+                            @if($variant->name)
+                                {{ $variant->name }}
+                            @else
+                                {{ $variant->vehicleModel->model_name ?? '-' }}
+                                | {{ $variant->bodyType->name ?? '-' }}
+                                | {{ $variant->engineType->name ?? '-' }}
+                                | {{ $variant->transmissionType->name ?? '-' }}
                             @endif
                         </td>
 
@@ -95,7 +108,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted">No variants available at the moment.</td>
+                        <td colspan="9" class="text-center text-muted">No variants available at the moment.</td>
                     </tr>
                     @endforelse
                 </tbody>

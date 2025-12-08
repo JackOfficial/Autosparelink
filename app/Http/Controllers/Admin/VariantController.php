@@ -32,6 +32,7 @@ class VariantController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'name' => 'nullable|string|max:255',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'body_type_id' => 'required|exists:body_types,id',
             'engine_type_id' => 'required|exists:engine_types,id',
@@ -71,6 +72,7 @@ class VariantController extends Controller
     public function update(Request $request, Variant $variant)
     {
         $request->validate([
+            'name' => 'nullable|string|max:255',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'body_type_id' => 'required|exists:body_types,id',
             'engine_type_id' => 'required|exists:engine_types,id',

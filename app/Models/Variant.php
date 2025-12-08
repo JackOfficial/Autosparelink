@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Variant extends Model
 {
     protected $fillable = [
+        'name',
         'vehicle_model_id',
         'body_type_id',
         'engine_type_id',

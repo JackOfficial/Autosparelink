@@ -32,6 +32,12 @@
                     <form action="{{ route('admin.variants.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
+                        <!-- Variant Name -->
+                        <div class="form-group">
+                            <label for="name">Variant Name</label>
+                            <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" placeholder="Optional: leave blank to generate automatically">
+                        </div>
+
                         <div class="form-group">
                             <label for="vehicle_model_id">Vehicle Model <span class="text-danger">*</span></label>
                             <select name="vehicle_model_id" id="vehicle_model_id" class="form-control" required>

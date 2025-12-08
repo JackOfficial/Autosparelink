@@ -33,7 +33,14 @@
                         @csrf
                         @method('PUT')
 
-                        <!-- Same form fields as create, but pre-filled -->
+                        <!-- Variant Name -->
+                        <div class="form-group">
+                            <label for="name">Variant Name</label>
+                            <input type="text" name="name" id="name" class="form-control"
+                                   value="{{ old('name', $variant->name) }}" placeholder="Optional: leave blank to generate automatically">
+                        </div>
+
+                        <!-- Vehicle Model -->
                         <div class="form-group">
                             <label for="vehicle_model_id">Vehicle Model <span class="text-danger">*</span></label>
                             <select name="vehicle_model_id" id="vehicle_model_id" class="form-control" required>
@@ -46,6 +53,7 @@
                             </select>
                         </div>
 
+                        <!-- Body Type -->
                         <div class="form-group">
                             <label for="body_type_id">Body Type <span class="text-danger">*</span></label>
                             <select name="body_type_id" id="body_type_id" class="form-control" required>
@@ -58,6 +66,7 @@
                             </select>
                         </div>
 
+                        <!-- Engine Type -->
                         <div class="form-group">
                             <label for="engine_type_id">Engine Type <span class="text-danger">*</span></label>
                             <select name="engine_type_id" id="engine_type_id" class="form-control" required>
@@ -70,6 +79,7 @@
                             </select>
                         </div>
 
+                        <!-- Transmission Type -->
                         <div class="form-group">
                             <label for="transmission_type_id">Transmission Type <span class="text-danger">*</span></label>
                             <select name="transmission_type_id" id="transmission_type_id" class="form-control" required>
@@ -82,14 +92,42 @@
                             </select>
                         </div>
 
-                        <!-- Other fields prefilled -->
-                        <input type="text" name="fuel_capacity" class="form-control" value="{{ $variant->fuel_capacity }}">
-                        <input type="text" name="drive_type" class="form-control" value="{{ $variant->drive_type }}">
-                        <input type="number" name="seats" class="form-control" value="{{ $variant->seats }}">
-                        <input type="number" name="doors" class="form-control" value="{{ $variant->doors }}">
-                        <input type="text" name="horsepower" class="form-control" value="{{ $variant->horsepower }}">
-                        <input type="text" name="torque" class="form-control" value="{{ $variant->torque }}">
-                        <input type="text" name="fuel_efficiency" class="form-control" value="{{ $variant->fuel_efficiency }}">
+                        <!-- Other Fields -->
+                        <div class="row">
+                            <div class="col-md-6"><div class="form-group">
+                                <label for="fuel_capacity">Fuel Capacity</label>
+                                <input type="text" name="fuel_capacity" id="fuel_capacity" class="form-control" value="{{ old('fuel_capacity', $variant->fuel_capacity) }}">
+                            </div></div>
+                            <div class="col-md-6"><div class="form-group">
+                                <label for="drive_type">Drive Type</label>
+                                <input type="text" name="drive_type" id="drive_type" class="form-control" value="{{ old('drive_type', $variant->drive_type) }}">
+                            </div></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4"><div class="form-group">
+                                <label for="seats">Seats</label>
+                                <input type="number" name="seats" id="seats" class="form-control" value="{{ old('seats', $variant->seats) }}">
+                            </div></div>
+                            <div class="col-md-4"><div class="form-group">
+                                <label for="doors">Doors</label>
+                                <input type="number" name="doors" id="doors" class="form-control" value="{{ old('doors', $variant->doors) }}">
+                            </div></div>
+                            <div class="col-md-4"><div class="form-group">
+                                <label for="horsepower">Horsepower</label>
+                                <input type="text" name="horsepower" id="horsepower" class="form-control" value="{{ old('horsepower', $variant->horsepower) }}">
+                            </div></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="torque">Torque</label>
+                            <input type="text" name="torque" id="torque" class="form-control" value="{{ old('torque', $variant->torque) }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fuel_efficiency">Fuel Efficiency</label>
+                            <input type="text" name="fuel_efficiency" id="fuel_efficiency" class="form-control" value="{{ old('fuel_efficiency', $variant->fuel_efficiency) }}">
+                        </div>
 
                         <!-- Photo -->
                         <div class="form-group">
@@ -104,7 +142,9 @@
                         </div>
 
                         <div class="form-group mt-3">
-                            <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Update Variant</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save"></i> Update Variant
+                            </button>
                         </div>
 
                     </form>

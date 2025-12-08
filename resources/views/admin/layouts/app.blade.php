@@ -240,8 +240,7 @@
             <li class="nav-item"><a href="/admin/engine-types" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>Engine Types</p></a></li>
             <li class="nav-item"><a href="/admin/transmission-types" class="nav-link"><i class="fas fa-exchange-alt nav-icon"></i><p>Transmission Types</p></a></li>
             <li class="nav-item"><a href="/admin/drive-types" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Drive Types</p></a></li>
-            <li class="nav-item"><a href="/admin/categories" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Categories</p></a></li>
-          </ul>
+           </ul>
           </li>
 
           <li class="nav-item has-treeview">
@@ -250,9 +249,9 @@
             <p>Spare Parts <i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="/admin/bloggers" class="nav-link"><i class="fas fa-th-list nav-icon"></i><p>Categories</p></a></li>
-            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Spare Parts</p></a></li>
-            <li class="nav-item"><a href="/admin/blogs" class="nav-link"><i class="fas fa-tools nav-icon"></i><p>Parts Fitments</p></a></li>
+            <li class="nav-item"><a href="/admin/categories" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Categories</p></a></li>
+            <li class="nav-item"><a href="/admin/spare-parts" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Spare Parts</p></a></li>
+            <li class="nav-item"><a href="/admin/fitments" class="nav-link"><i class="fas fa-tools nav-icon"></i><p>Parts Fitments</p></a></li>
           </ul>
           </li>
 
