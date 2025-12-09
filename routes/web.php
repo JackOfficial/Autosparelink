@@ -42,13 +42,14 @@ use App\Http\Controllers\admin\PartController;
 use App\Http\Controllers\admin\PartFitmentController;
 use App\Http\Controllers\admin\TransmissionTypeController;
 use App\Http\Controllers\admin\VariantController;
+use App\Http\Controllers\HomeContoller;
 
 //Guest routes
 // Route::get('/', function() {
 //   return view('under-maintainence');
 // });
 
-Route::get('/', [PageController::class, 'index']);
+Route::get('/', [HomeContoller::class, 'index']);
 Route::get('/about', [PageController::class, 'about']);
 Route::get('/gallery', [PageController::class, 'gallery']);
 Route::get('/blogs', [PageController::class, 'blogs']);

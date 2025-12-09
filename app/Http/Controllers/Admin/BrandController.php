@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BrandController extends Controller
 {
@@ -76,39 +77,44 @@ public function store(Request $request)
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        $brand = Brand::findOrFail($id);
+   public function update(Request $request, string $id)
+{
+    $brand = Brand::findOrFail($id);
 
-        $request->validate([
-            'brand_name' => 'required|string|max:255',
-            'brand_logo' => 'nullable|image|mimes:jpg,png,jpeg,webp|max:2048',
-            'description' => 'nullable|string',
-            'country' => 'nullable|string|max:255',
-            'website' => 'nullable|url|max:255',
-        ]);
+    $request->validate([
+        'brand_name' => 'required|string|max:255',
+        'brand_logo' => 'nullable|image|mimes:jpg,png,jpeg,webp|max:2048',
+        'description' => 'nullable|string',
+        'country' => 'nullable|string|max:255',
+        'website' => 'nullable|url|max:255',
+    ]);
 
-        $logoName = $brand->brand_logo;
+    $logoPath = $brand->brand_logo; // keep old image by default
 
-        if ($request->hasFile('brand_logo')) {
-            if ($logoName && file_exists(public_path('uploads/brands/' . $logoName))) {
-                unlink(public_path('uploads/brands/' . $logoName));
-            }
+    // If a new image is uploaded
+    if ($request->hasFile('brand_logo')) {
 
-            $logoName = time() . '.' . $request->brand_logo->extension();
-            $request->brand_logo->move(public_path('uploads/brands'), $logoName);
+        // Delete old image if it exists
+        if ($logoPath && Storage::disk('public')->exists($logoPath)) {
+            Storage::disk('public')->delete($logoPath);
         }
 
-        $brand->update([
-            'brand_name' => $request->brand_name,
-            'brand_logo' => $logoName,
-            'description' => $request->description,
-            'country' => $request->country,
-            'website' => $request->website,
-        ]);
-
-        return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully');
+        // Store new image
+        $logoPath = $request->file('brand_logo')->store('brands', 'public');
     }
+
+    // Update brand
+    $brand->update([
+        'brand_name' => $request->brand_name,
+        'brand_logo' => $logoPath,
+        'description' => $request->description,
+        'country' => $request->country,
+        'website' => $request->website,
+    ]);
+
+    return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully');
+}
+
 
     /**
      * Remove the specified resource from storage.

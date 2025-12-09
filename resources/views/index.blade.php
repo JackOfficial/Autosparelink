@@ -68,197 +68,93 @@
 
 
     <!-- Featured Start -->
-    <div class="container-fluid pt-5">
-        <div class="row px-xl-5 pb-3">
-            <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-                <div class="d-flex align-items-center bg-light mb-4" style="padding: 30px;">
-                    <h1 class="fa fa-check text-primary m-0 mr-3"></h1>
-                    <h5 class="font-weight-semi-bold m-0">Quality Product</h5>
+<div class="container-fluid py-5 bg-light">
+    <div class="row px-xl-5 gy-4">
+
+        <!-- Quality Product -->
+        <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="feature-card d-flex align-items-center p-4 bg-white border rounded shadow-sm hover-shadow">
+                <div class="feature-icon text-primary d-flex align-items-center justify-content-center me-3" style="width:60px; height:60px;">
+                    <i class="fa fa-check fa-lg"></i>
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-                <div class="d-flex align-items-center bg-light mb-4" style="padding: 30px;">
-                    <h1 class="fa fa-shipping-fast text-primary m-0 mr-2"></h1>
-                    <h5 class="font-weight-semi-bold m-0">Free Shipping</h5>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-                <div class="d-flex align-items-center bg-light mb-4" style="padding: 30px;">
-                    <h1 class="fas fa-exchange-alt text-primary m-0 mr-3"></h1>
-                    <h5 class="font-weight-semi-bold m-0">14-Day Return</h5>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-                <div class="d-flex align-items-center bg-light mb-4" style="padding: 30px;">
-                    <h1 class="fa fa-phone-volume text-primary m-0 mr-3"></h1>
-                    <h5 class="font-weight-semi-bold m-0">24/7 Support</h5>
+                <div>
+                    <h6 class="fw-bold mb-1">Genuine Quality</h6>
+                    <small class="text-muted">OEM and top-grade spare parts only</small>
                 </div>
             </div>
         </div>
+
+        <!-- Fast Shipping -->
+        <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="feature-card d-flex align-items-center p-4 bg-white border rounded shadow-sm hover-shadow">
+                <div class="feature-icon text-primary d-flex align-items-center justify-content-center me-3" style="width:60px; height:60px;">
+                    <i class="fa fa-shipping-fast fa-lg"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-1">Fast Worldwide Shipping</h6>
+                    <small class="text-muted">Delivering right to your doorstep</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Parts Count -->
+        <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="feature-card d-flex align-items-center p-4 bg-white border rounded shadow-sm hover-shadow">
+                <div class="feature-icon text-primary d-flex align-items-center justify-content-center me-3" style="width:60px; height:60px;">
+                    <i class="fas fa-cogs fa-lg"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-1">{{ number_format($partsCounter) }} {{ $partsCounter > 1 ? 'Parts' : 'Part' }} Available</h6>
+                    <small class="text-muted">Explore our full parts catalog</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support -->
+        <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="feature-card d-flex align-items-center p-4 bg-white border rounded shadow-sm hover-shadow">
+                <div class="feature-icon text-primary d-flex align-items-center justify-content-center me-3" style="width:60px; height:60px;">
+                    <i class="fa fa-headset fa-lg"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-1">24/7 Expert Support</h6>
+                    <small class="text-muted">Get assistance anytime you need</small>
+                </div>
+            </div>
+        </div>
+
     </div>
+</div>
+<!-- Featured End -->
+
     <!-- Featured End -->
 
 
     <!-- Categories Start -->
     <div class="container-fluid pt-5">
-        <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4"><span class="bg-secondary pr-3">Categories</span></h2>
+        <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4"><span class="bg-secondary pr-3">Genuine Parts Online Catalogs</span></h2>
         <div class="row px-xl-5 pb-3">
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-1.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
+            @forelse ($brands as $brand)
+                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
                 <a class="text-decoration-none" href="">
                     <div class="cat-item img-zoom d-flex align-items-center mb-4">
                         <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-2.jpg') }}" alt="">
+                            <img class="img-fluid" src="{{ asset('storage/' . $brand->brand_logo) }}" alt="">
                         </div>
                         <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
+                            <h6>{{ $brand->brand_name }}</h6>
                             <small class="text-body">100 Products</small>
                         </div>
                     </div>
                 </a>
             </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-3.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
+            @empty
+                  <div class="col-md-12">
+                    <h6 class="text-center my-2">
+                        No Brand available at the moment!
+                    </h6>
                     </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-4.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-4.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-3.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-2.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-1.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-2.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-1.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-4.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                <a class="text-decoration-none" href="">
-                    <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                        <div class="overflow-hidden" style="width: 100px; height: 100px;">
-                            <img class="img-fluid" src="{{ asset('frontend/img/cat-3.jpg') }}" alt="">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6>Category Name</h6>
-                            <small class="text-body">100 Products</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
+            @endforelse
         </div>
     </div>
     <!-- Categories End -->

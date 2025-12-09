@@ -1,6 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Vehicle Models')
-
+@section('title', 'Engine Types')
 @section('content')
 
 <!-- Content Header -->
@@ -8,19 +7,19 @@
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1>Vehicle Models ({{ $models->count() }})</h1>
+                <h1>Engine Types ({{ $engineTypes->count() }})</h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-                    <li class="breadcrumb-item active">Vehicle Models</li>
+                    <li class="breadcrumb-item active">Engine Types</li>
                 </ol>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Main Content -->
+<!-- Main content -->
 <section class="content">
 
     @if (session('success'))
@@ -34,8 +33,8 @@
 
     <div class="card">
         <div class="card-header">
-            <a href="{{ route('admin.vehicle-models.create') }}" class="btn btn-primary btn-sm">
-                <i class="fa fa-plus"></i> Add Vehicle Model
+            <a href="{{ route('admin.engine-types.create') }}" class="btn btn-primary btn-sm">
+                <i class="fa fa-plus"></i> Add Engine Type
             </a>
         </div>
 
@@ -45,57 +44,52 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Photo</th>
-                            <th>Model Name</th>
-                            <th>Brand</th>
+                            <th>Icon</th>
+                            <th>Name</th>
                             <th>Description</th>
                             <th style="width:150px;">Actions</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        @forelse($models as $model)
+                        @forelse($engineTypes as $engine)
                         <tr>
+                            <td>{{ $engine->id }}</td>
 
-                            <td>{{ $model->id }}</td>
-
-                            <!-- Photo -->
+                            <!-- Icon -->
                             <td>
-                                @if($model->photo)
-                                    <img src="{{ asset('storage/'.$model->photo) }}"
+                                @if($engine->icon_url)
+                                    <img src="{{ asset('storage/' . $engine->icon_url) }}"
                                          class="img-thumbnail"
-                                         style="width: 80px; height:auto;">
+                                         style="width: 70px; height:auto;" />
                                 @else
-                                    <span class="text-muted">No photo</span>
+                                    <span class="text-muted">No icon</span>
                                 @endif
                             </td>
 
-                            <!-- Model Name -->
+                            <!-- Name -->
                             <td>
-                                <strong>{{ $model->name }}</strong>
+                                <strong>{{ $engine->name }}</strong>
                                 <br>
                                 <small class="text-muted">
-                                    {{ $model->created_at->format('Y-m-d') }}
+                                    {{ $engine->created_at }}
                                 </small>
                             </td>
 
-                            <!-- Brand -->
-                            <td>{{ $model->brand->name ?? '—' }}</td>
-
                             <!-- Description -->
-                            <td>{!! Str::limit($model->description, 50) !!}</td>
+                            <td>{!! Str::limit($engine->description, 60) !!}</td>
 
                             <!-- Actions -->
                             <td class="d-flex">
 
-                                <a href="{{ route('admin.vehicle-models.edit', $model->id) }}"
+                                <a href="{{ route('admin.engine-types.edit', $engine->id) }}"
                                    class="btn btn-info btn-sm mr-2">
                                     <i class="fas fa-edit"></i>
                                 </a>
 
-                                <form action="{{ route('admin.vehicle-models.destroy', $model->id) }}"
+                                <form action="{{ route('admin.engine-types.destroy', $engine->id) }}"
                                       method="POST"
-                                      onsubmit="return confirm('Are you sure you want to delete this model?');">
+                                      onsubmit="return confirm('Are you sure you want to delete this engine type?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -109,8 +103,8 @@
 
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted">
-                                No vehicle models available at the moment.
+                            <td colspan="5" class="text-center text-muted">
+                                No engine types available at the moment.
                             </td>
                         </tr>
                         @endforelse
