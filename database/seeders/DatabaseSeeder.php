@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
         EngineTypeSeeder::class,
         TransmissionTypesTableSeeder::class,
         DriveTypesSeeder::class,
+        VehicleModelSeeder::class,
+        VariantsSeeder::class,
         ]);
     }
 }

@@ -80,8 +80,7 @@
         <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
             <div class="col-lg-4">
                 <a href="{{ route('home') }}" class="text-decoration-none">
-                    <span class="h1 text-uppercase text-primary bg-dark px-2">Auto</span>
-                    <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Spare</span>
+                    <img src="{{ asset('frontend/img/logo.png') }}" class="w-25">
                 </a>
             </div>
             <div class="col-lg-4 col-6 text-left">
@@ -105,7 +104,7 @@
     <!-- Topbar End -->
 
     <!-- Navbar Start -->
-    <div class="container-fluid bg-dark mb-30">
+    <div class="container-fluid bg-dark mb-30 sticky-top">
         <div class="row px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
                 <a class="btn d-flex align-items-center justify-content-between bg-primary w-100" data-toggle="collapse"
