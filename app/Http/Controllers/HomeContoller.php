@@ -12,6 +12,8 @@ class HomeContoller extends Controller
      function index(){
        $brands = Brand::latest()->get();
        $partsCounter = Part::count();
-       return view('index', compact('brands', 'partsCounter'));
+       $parts = Part::with(['category', 'brand'])->latest()->get();
+       $recent_parts = Part::with(['category', 'brand'])->latest()->get();
+       return view('index', compact('brands', 'partsCounter', 'parts', 'recent_parts'));
     }
 }

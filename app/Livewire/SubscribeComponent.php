@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Subscriptions;
+use App\Models\Subscription;
 use Livewire\Component;
 
 class SubscribeComponent extends Component
@@ -14,7 +14,7 @@ class SubscribeComponent extends Component
          'email' => 'required|email|unique:subscriptions,email'
         ]);
 
-        $subscribe = Subscriptions::create([
+        $subscribe = Subscription::create([
             'email' => $this->email
         ]);
 

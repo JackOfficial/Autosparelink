@@ -24,6 +24,64 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{{ asset('frontend/css/style.css') }}" rel="stylesheet">
+
+    <style>
+/* Navbar matches button width and aligns properly */
+.navbar-vertical {
+    width: 100%; /* same width as parent column/button */
+    top: 65px;   /* right below toggle button */
+    left: 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    max-height: 400px; /* adjust as needed */
+    overflow-y: auto;
+    z-index: 999;
+    border-radius: 0 0 4px 4px;
+    transition: all 0.3s;
+}
+
+/* Scrollbar style */
+.navbar-vertical-scroll {
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.navbar-vertical-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+.navbar-vertical-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 3px;
+}
+
+/* Subcategories */
+.subcategory-list {
+    display: none;
+    padding-left: 15px;
+}
+.category-item.active .subcategory-list {
+    display: block;
+}
+
+/* Subcategory look */
+.subcategory-link {
+    font-size: 0.9rem;
+    color: #555;
+    padding-left: 20px;
+}
+.subcategory-link:hover {
+    background-color: #f0f0f0;
+    color: #000;
+    border-radius: 3px;
+}
+
+/* Arrow animation */
+.toggle-arrow {
+    transition: transform 0.3s;
+}
+.category-item.active .toggle-arrow {
+    transform: rotate(180deg);
+}
+    </style>
 </head>
 
 <body>
@@ -106,24 +164,7 @@
     <!-- Navbar Start -->
     <div class="container-fluid bg-dark mb-30 sticky-top">
         <div class="row px-xl-5">
-            <div class="col-lg-3 d-none d-lg-block">
-                <a class="btn d-flex align-items-center justify-content-between bg-primary w-100" data-toggle="collapse"
-                    href="#navbar-vertical" style="height: 65px; padding: 0 30px;">
-                    <h6 class="text-dark m-0"><i class="fa fa-bars mr-2"></i>Categories</h6>
-                    <i class="fa fa-angle-down text-dark"></i>
-                </a>
-                <nav class="collapse position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light"
-                    id="navbar-vertical" style="width: calc(100% - 30px); z-index: 999;">
-                    <div class="navbar-nav w-100">
-                        @php
-                        $categories = ['Engine Parts','Suspension','Brakes','Lights','Wheels','Accessories','Filters','Oils & Fluids'];
-                        @endphp
-                        @foreach($categories as $category)
-                        <a href="" class="nav-item nav-link">{{ $category }}</a>
-                        @endforeach
-                    </div>
-                </nav>
-            </div>
+            <livewire:categories-component />
             <div class="col-lg-9">
                 <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
                     <a href="{{ route('home') }}" class="text-decoration-none d-block d-lg-none">
@@ -166,7 +207,7 @@
                 <h5 class="text-secondary text-uppercase mb-4">Get In Touch</h5>
                 <p>Need help? Contact us or visit our store to find the original auto parts you need.</p>
                 <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>123 AutoStreet, Kigali, Rwanda</p>
-                <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>support@autospare.com</p>
+                <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>support@autosparelink.com</p>
                 <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+250 788 430 122</p>
             </div>
             <div class="col-lg-8 col-md-12">
@@ -193,14 +234,7 @@
                     <div class="col-md-4 mb-5">
                         <h5 class="text-secondary text-uppercase mb-4">Newsletter</h5>
                         <p>Subscribe for the latest offers and updates.</p>
-                        <form action="">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Your Email Address">
-                                <div class="input-group-append">
-                                    <button class="btn btn-primary">Sign Up</button>
-                                </div>
-                            </div>
-                        </form>
+                        <livewire:subscribe-component />
                         <h6 class="text-secondary text-uppercase mt-4 mb-3">Follow Us</h6>
                         <div class="d-flex">
                             <a class="btn btn-primary btn-square mr-2" href="#"><i class="fab fa-twitter"></i></a>
@@ -214,7 +248,7 @@
         </div>
         <div class="row border-top mx-xl-5 py-4" style="border-color: rgba(256, 256, 256, .1) !important;">
             <div class="col-md-6 px-xl-0 text-center text-md-left mb-2 mb-md-0">
-                <p class="mb-0 text-secondary">&copy; <a class="text-primary" href="#">AutoSpare</a>. All Rights Reserved.</p>
+                <p class="mb-0 text-secondary">&copy; <a class="text-primary" href="#">AutoSpareLink</a>. All Rights Reserved.</p>
             </div>
             <div class="col-md-6 px-xl-0 text-center text-md-right">
                 <img class="img-fluid" src="{{ asset('frontend/img/payments.png') }}" alt="Payments">
