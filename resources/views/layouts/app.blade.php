@@ -25,63 +25,7 @@
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{{ asset('frontend/css/style.css') }}" rel="stylesheet">
 
-    <style>
-/* Navbar matches button width and aligns properly */
-.navbar-vertical {
-    width: 100%; /* same width as parent column/button */
-    top: 65px;   /* right below toggle button */
-    left: 0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    max-height: 400px; /* adjust as needed */
-    overflow-y: auto;
-    z-index: 999;
-    border-radius: 0 0 4px 4px;
-    transition: all 0.3s;
-}
 
-/* Scrollbar style */
-.navbar-vertical-scroll {
-    max-height: 100%;
-    overflow-y: auto;
-}
-
-.navbar-vertical-scroll::-webkit-scrollbar {
-    width: 6px;
-}
-.navbar-vertical-scroll::-webkit-scrollbar-thumb {
-    background-color: rgba(0,0,0,0.2);
-    border-radius: 3px;
-}
-
-/* Subcategories */
-.subcategory-list {
-    display: none;
-    padding-left: 15px;
-}
-.category-item.active .subcategory-list {
-    display: block;
-}
-
-/* Subcategory look */
-.subcategory-link {
-    font-size: 0.9rem;
-    color: #555;
-    padding-left: 20px;
-}
-.subcategory-link:hover {
-    background-color: #f0f0f0;
-    color: #000;
-    border-radius: 3px;
-}
-
-/* Arrow animation */
-.toggle-arrow {
-    transition: transform 0.3s;
-}
-.category-item.active .toggle-arrow {
-    transform: rotate(180deg);
-}
-    </style>
 </head>
 
 <body>
@@ -91,7 +35,7 @@
             <div class="col-lg-6 d-none d-lg-block">
                 <div class="d-inline-flex align-items-center h-100">
                     <a class="text-body mr-3" href="">About</a>
-                    <a class="text-body mr-3" href="">Contact</a>
+                    <a class="text-body mr-3" href="/contact">Contact</a>
                     <a class="text-body mr-3" href="">Help</a>
                     <a class="text-body mr-3" href="">FAQs</a>
                 </div>
@@ -179,7 +123,7 @@
                             <a href="{{ route('home') }}" class="nav-item nav-link active">Home</a>
                             <a href="" class="nav-item nav-link">Shop</a>
                             <a href="" class="nav-item nav-link">About Us</a>
-                            <a href="" class="nav-item nav-link">Contact Us</a>
+                            <a href="/contact" class="nav-item nav-link">Contact Us</a>
                         </div>
                         <div class="navbar-nav ml-auto py-0 d-none d-lg-flex">
                             <a href="" class="btn px-0">
@@ -218,7 +162,7 @@
                             <a class="text-secondary mb-2" href=""><i class="fa fa-angle-right mr-2"></i>Home</a>
                             <a class="text-secondary mb-2" href=""><i class="fa fa-angle-right mr-2"></i>Shop</a>
                             <a class="text-secondary mb-2" href=""><i class="fa fa-angle-right mr-2"></i>About Us</a>
-                            <a class="text-secondary mb-2" href=""><i class="fa fa-angle-right mr-2"></i>Contact Us</a>
+                            <a class="text-secondary mb-2" href="/contact"><i class="fa fa-angle-right mr-2"></i>Contact Us</a>
                         </div>
                     </div>
                     <div class="col-md-4 mb-5">
