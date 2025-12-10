@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Variant;
 use App\Models\VehicleModel;
 use App\Models\BodyType;
+use App\Models\DriveType;
 use App\Models\EngineType;
 use App\Models\TransmissionType;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +16,14 @@ class VariantController extends Controller
 {
     public function index()
     {
-        $variants = Variant::with(['vehicleModel', 'bodyType', 'engineType', 'transmissionType'])->latest()->get();
+        $variants = Variant::with([
+            'vehicleModel', 
+            'bodyType', 
+            'engineType', 
+            'transmissionType', 
+            'driveType'
+        ])->latest()->get();
+
         return view('admin.variants.index', compact('variants'));
     }
 
@@ -24,9 +32,10 @@ class VariantController extends Controller
         $vehicleModels = VehicleModel::all();
         $bodyTypes = BodyType::all();
         $engineTypes = EngineType::all();
+        $driveTypes = DriveType::all();
         $transmissionTypes = TransmissionType::all();
 
-        return view('admin.variants.create', compact('vehicleModels','bodyTypes','engineTypes','transmissionTypes'));
+        return view('admin.variants.create', compact('vehicleModels','bodyTypes','engineTypes','transmissionTypes', 'driveTypes'));
     }
 
     public function store(Request $request)
@@ -37,13 +46,22 @@ class VariantController extends Controller
             'body_type_id' => 'required|exists:body_types,id',
             'engine_type_id' => 'required|exists:engine_types,id',
             'transmission_type_id' => 'required|exists:transmission_types,id',
+            'drive_type_id' => 'nullable|exists:drive_types,id',
+            'chassis_code' => 'nullable|string|max:255',
+            'model_code' => 'nullable|string|max:255',
+            'options' => 'nullable|string',
             'fuel_capacity' => 'nullable|string|max:255',
             'seats' => 'nullable|integer',
             'doors' => 'nullable|integer',
             'drive_type' => 'nullable|string|max:255',
+            'steering_position' => 'nullable|string|max:255',
+            'trim_level' => 'nullable|string|max:255',
+            'color' => 'nullable|string|max:255',
             'horsepower' => 'nullable|string|max:255',
             'torque' => 'nullable|string|max:255',
             'fuel_efficiency' => 'nullable|string|max:255',
+            'production_start' => 'nullable|string|max:255',
+            'production_end' => 'nullable|string|max:255',
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status' => 'nullable|integer',
         ]);
@@ -64,9 +82,10 @@ class VariantController extends Controller
         $vehicleModels = VehicleModel::all();
         $bodyTypes = BodyType::all();
         $engineTypes = EngineType::all();
+        $driveTypes = DriveType::all();
         $transmissionTypes = TransmissionType::all();
 
-        return view('admin.variants.edit', compact('variant','vehicleModels','bodyTypes','engineTypes','transmissionTypes'));
+        return view('admin.variants.edit', compact('variant','vehicleModels','bodyTypes','engineTypes','transmissionTypes','driveTypes'));
     }
 
     public function update(Request $request, Variant $variant)
@@ -77,13 +96,22 @@ class VariantController extends Controller
             'body_type_id' => 'required|exists:body_types,id',
             'engine_type_id' => 'required|exists:engine_types,id',
             'transmission_type_id' => 'required|exists:transmission_types,id',
+            'drive_type_id' => 'nullable|exists:drive_types,id',
+            'chassis_code' => 'nullable|string|max:255',
+            'model_code' => 'nullable|string|max:255',
+            'options' => 'nullable|string',
             'fuel_capacity' => 'nullable|string|max:255',
             'seats' => 'nullable|integer',
             'doors' => 'nullable|integer',
             'drive_type' => 'nullable|string|max:255',
+            'steering_position' => 'nullable|string|max:255',
+            'trim_level' => 'nullable|string|max:255',
+            'color' => 'nullable|string|max:255',
             'horsepower' => 'nullable|string|max:255',
             'torque' => 'nullable|string|max:255',
             'fuel_efficiency' => 'nullable|string|max:255',
+            'production_start' => 'nullable|string|max:255',
+            'production_end' => 'nullable|string|max:255',
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status' => 'nullable|integer',
         ]);

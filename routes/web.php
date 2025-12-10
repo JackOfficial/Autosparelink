@@ -43,6 +43,9 @@ use App\Http\Controllers\admin\PartFitmentController;
 use App\Http\Controllers\admin\TransmissionTypeController;
 use App\Http\Controllers\admin\VariantController;
 use App\Http\Controllers\HomeContoller;
+use App\Http\Controllers\SparePartController;
+use App\Http\Controllers\SpecificationController;
+use App\Http\Controllers\VehicleModelController;
 
 //Guest routes
 // Route::get('/', function() {
@@ -80,6 +83,11 @@ Route::resource('careers', Careers::class);
 Route::resource('applications', ApplicationsController::class);
 Route::get('/export-excel', [ExportsController::class, 'exportAll']);
 Route::get('/export-excel/{id}', [ExportsController::class, 'exportSelected']);
+Route::get('/models', [VehicleModelController::class, 'index']);
+Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
+Route::get('/model-specification/{id}', [SpecificationController::class, 'model_specification']);
+Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
+Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 
 // Social login routes
 Route::get('/auth/redirect/{provider}', [SocialLoginController::class, 'redirect']);

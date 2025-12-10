@@ -42,11 +42,17 @@
                     <tr>
                         <th>#</th>
                         <th>Photo</th>
-                        <th>Variant Name</th>
+                        <th>Variant / Model Code</th>
+                        <th>Chassis Code</th>
                         <th>Vehicle Model</th>
                         <th>Body Type</th>
                         <th>Engine Type</th>
                         <th>Transmission</th>
+                        <th>Drive Type</th>
+                        <th>Steering</th>
+                        <th>Trim</th>
+                        <th>Color</th>
+                        <th>Production Period</th>
                         <th>Status</th>
                         <th style="width:150px;">Actions</th>
                     </tr>
@@ -65,23 +71,24 @@
                             @endif
                         </td>
 
-                        <!-- Variant Name -->
-                        <td>
-                            @if($variant->name)
-                                {{ $variant->name }}
-                            @else
-                                {{ $variant->vehicleModel->model_name ?? '-' }}
-                                | {{ $variant->bodyType->name ?? '-' }}
-                                | {{ $variant->engineType->name ?? '-' }}
-                                | {{ $variant->transmissionType->name ?? '-' }}
-                            @endif
-                        </td>
+                        <!-- Variant / Model Code -->
+                        <td>{{ $variant->name ?? '-' }} <br> {{ $variant->model_code ?? '-' }}</td>
+
+                        <!-- Chassis Code -->
+                        <td>{{ $variant->chassis_code ?? '-' }}</td>
 
                         <!-- Related Info -->
                         <td>{{ $variant->vehicleModel->model_name ?? '-' }}</td>
                         <td>{{ $variant->bodyType->name ?? '-' }}</td>
                         <td>{{ $variant->engineType->name ?? '-' }}</td>
                         <td>{{ $variant->transmissionType->name ?? '-' }}</td>
+                        <td>{{ $variant->driveType->name ?? '-' }} ahangaha</td>
+                        <td>{{ $variant->steering_position ?? '-' }}</td>
+                        <td>{{ $variant->trim_level ?? '-' }}</td>
+                        <td>{{ $variant->color ?? '-' }}</td>
+                        <td>
+                            {{ $variant->production_start ?? '-' }} - {{ $variant->production_end ?? '-' }}
+                        </td>
 
                         <!-- Status -->
                         <td>
@@ -108,7 +115,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="text-center text-muted">No variants available at the moment.</td>
+                        <td colspan="16" class="text-center text-muted">No variants available at the moment.</td>
                     </tr>
                     @endforelse
                 </tbody>

@@ -21,4 +21,9 @@ class VehicleModel extends Model
     {
         return $this->belongsTo(Brand::class);
     }
+
+    public function variants()
+    {
+        return $this->hasMany(Variant::class);
+    }
 }

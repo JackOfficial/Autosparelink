@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('body_type_id')->constrained('body_types')->cascadeOnDelete();
             $table->foreignId('engine_type_id')->constrained('engine_types')->cascadeOnDelete();
             $table->foreignId('transmission_type_id')->constrained('transmission_types')->cascadeOnDelete();
+             $table->string('name')->nullable();
             $table->string('fuel_capacity')->nullable();
             $table->integer('seats')->nullable();
             $table->integer('doors')->nullable();

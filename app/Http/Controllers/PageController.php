@@ -44,11 +44,7 @@ class PageController extends Controller
     }
 
     function about(){
-        $causes = Cause::with('mainPhoto')->latest()->take(4)->get(); 
-        $team = Team::all();
-        $eventsCounter = Event::count();
-        $projectsCounter = Project::count();
-        return view('about', compact('causes', 'team', 'eventsCounter', 'projectsCounter')); 
+        return view('about'); 
     }
     
     function gallery(){

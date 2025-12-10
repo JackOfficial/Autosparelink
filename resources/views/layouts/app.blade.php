@@ -24,8 +24,7 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{{ asset('frontend/css/style.css') }}" rel="stylesheet">
-
-
+ @yield('style')
 </head>
 
 <body>
@@ -34,7 +33,7 @@
         <div class="row bg-secondary py-1 px-xl-5">
             <div class="col-lg-6 d-none d-lg-block">
                 <div class="d-inline-flex align-items-center h-100">
-                    <a class="text-body mr-3" href="">About</a>
+                    <a class="text-body mr-3" href="/about">About</a>
                     <a class="text-body mr-3" href="/contact">Contact</a>
                     <a class="text-body mr-3" href="">Help</a>
                     <a class="text-body mr-3" href="">FAQs</a>
@@ -122,7 +121,7 @@
                         <div class="navbar-nav mr-auto py-0">
                             <a href="{{ route('home') }}" class="nav-item nav-link active">Home</a>
                             <a href="" class="nav-item nav-link">Shop</a>
-                            <a href="" class="nav-item nav-link">About Us</a>
+                            <a href="/about" class="nav-item nav-link">About Us</a>
                             <a href="/contact" class="nav-item nav-link">Contact Us</a>
                         </div>
                         <div class="navbar-nav ml-auto py-0 d-none d-lg-flex">
@@ -161,7 +160,7 @@
                         <div class="d-flex flex-column justify-content-start">
                             <a class="text-secondary mb-2" href=""><i class="fa fa-angle-right mr-2"></i>Home</a>
                             <a class="text-secondary mb-2" href=""><i class="fa fa-angle-right mr-2"></i>Shop</a>
-                            <a class="text-secondary mb-2" href=""><i class="fa fa-angle-right mr-2"></i>About Us</a>
+                            <a class="text-secondary mb-2" href="/about"><i class="fa fa-angle-right mr-2"></i>About Us</a>
                             <a class="text-secondary mb-2" href="/contact"><i class="fa fa-angle-right mr-2"></i>Contact Us</a>
                         </div>
                     </div>
