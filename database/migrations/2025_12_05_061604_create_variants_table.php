@@ -18,9 +18,17 @@ return new class extends Migration
             $table->foreignId('engine_type_id')->constrained('engine_types')->cascadeOnDelete();
             $table->foreignId('transmission_type_id')->constrained('transmission_types')->cascadeOnDelete();
              $table->string('name')->nullable();
+              $table->string('chassis_code')->nullable();
+            $table->string('model_code')->nullable();
+            $table->string('steering_position')->nullable();
+            $table->string('trim_level')->nullable();
+            $table->string('color')->nullable();
+            $table->string('production_start')->nullable();
+            $table->string('production_end')->nullable();
             $table->string('fuel_capacity')->nullable();
             $table->integer('seats')->nullable();
             $table->integer('doors')->nullable();
+             $table->foreignId('drive_type_id')->nullable()->constrained('drive_types')->cascadeOnDelete();
             $table->string('drive_type')->nullable();
             $table->string('horsepower')->nullable();
             $table->string('torque')->nullable();

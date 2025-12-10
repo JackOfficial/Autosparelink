@@ -16,13 +16,16 @@ class SpecificationController extends Controller
   }
 
   public function variant_specification($id){
-    $variant = Variant::with(['vehicleModel.brand', 'vehicleModel.variants'])
-                ->where('id', $id)
-                ->firstOrFail();
+       // Get the clicked variant with its model and brand
+    $variant = Variant::with(['vehicleModel.brand', 'vehicleModel.variants'])->findOrFail($id);
 
-    // Get model through the relationship
-    $model = $variant->vehicleModel;           
-    return view('variation-specification', compact('variant', 'model'));
+    // Get the model of the clicked variant
+    $model = $variant->vehicleModel;
+
+    // All variants of the same model
+    $variants = $model->variants;
+
+    return view('variation-specification', compact('variant', 'model', 'variants'));
   }
 
 }

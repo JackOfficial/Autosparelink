@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/fantnsmp/autosparelink.fanterasafaris.com/
+    - /bin/cp -R * $DEPLOYPATH

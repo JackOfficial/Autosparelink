@@ -2,16 +2,15 @@
 
 @section('style')
 <style>
-.toggle-btn i {
-    transition: transform 0.3s;
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
 }
-.collapse.show + .toggle-btn i,
-.collapse.show ~ .toggle-btn i {
-    transform: rotate(180deg);
-}
-.model-row:hover {
-    background: #f8f9fa;
+.info-icon {
     cursor: pointer;
+}
+.options-tooltip {
+    font-size: 0.85rem;
+    color: #555;
 }
 </style>
 @endsection
@@ -30,94 +29,114 @@
         </div>
     </div>
 </div>
-<!-- End Breadcrumb -->
 
 <!-- Header -->
 <div class="container-fluid px-xl-5">
     <div class="bg-white p-4 shadow-sm rounded mb-3">
-        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-            <div>
-                <h4 class="text-uppercase mb-1" style="font-weight: 600;">
-                    @if($model->brand->brand_logo)
-                        <img src="{{ asset('storage/' . $model->brand->brand_logo) }}"
-                             style="width: 50px; height:auto;" />
-                    @endif
-                    {{ $model->brand->brand_name }} Part Catalog – {{ $model->model_name }}
-                </h4>
-            </div>
-
-            <div class="mt-3 mt-md-0">
-                <span class="text-muted small">
-                    Showing <strong>1</strong> Variant Specification
-                </span>
-            </div>
-        </div>
+        <h4 class="text-uppercase mb-1" style="font-weight: 600;">
+            @if($model->brand->brand_logo)
+                <img src="{{ asset('storage/' . $model->brand->brand_logo) }}"
+                     style="width: 50px; height:auto;" />
+            @endif
+            {{ $model->brand->brand_name }} – {{ $model->model_name }}
+        </h4>
+        <small class="text-muted">Click the <i class="fas fa-info-circle"></i> icon for full variant details.</small>
     </div>
 </div>
 
 <!-- Filters -->
-<div class="container-fluid px-xl-5">
+<div class="container-fluid px-xl-5 mb-3">
     <div class="card">
         <div class="card-header">Filters</div>
         <div class="card-body">
-            <div class="form-group">
-                <input type="text" class="form-control" placeholder="Frame">
-            </div>
-            <div class="form-group">
-                <input type="text" class="form-control" placeholder="Year">
-            </div>
-            <div class="form-group">
-                <input type="text" class="form-control" placeholder="Body">
-            </div>
-            <div class="form-group">
-                <input type="text" class="form-control" placeholder="Driver's Position">
-            </div>
-            <div class="form-group">
-                <input type="text" class="form-control" placeholder="Engine">
-            </div>
-            <button class="btn btn-sm btn-primary">Filter</button>
+            <form method="GET" action="">
+                <div class="row">
+                    <div class="col-md-2 form-group">
+                        <input type="text" name="frame" class="form-control" placeholder="Frame" value="{{ request('frame') }}">
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <input type="text" name="year" class="form-control" placeholder="Year" value="{{ request('year') }}">
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <input type="text" name="body" class="form-control" placeholder="Body" value="{{ request('body') }}">
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <input type="text" name="driver_position" class="form-control" placeholder="Driver's Position" value="{{ request('driver_position') }}">
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <input type="text" name="engine" class="form-control" placeholder="Engine" value="{{ request('engine') }}">
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <button class="btn btn-sm btn-primary w-100" type="submit">Filter</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Variant Specification Table -->
-<div class="container-fluid px-xl-5 my-2">
-    <div class="bg-white p-4 shadow-sm rounded mb-4">
-        <h6 class="text-uppercase mb-1">
-            Specifications for {{ $model->brand->brand_name }} {{ $model->model_name }}
-        </h6>
+<!-- Variants Table -->
+<div class="container-fluid px-xl-5">
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Variant Name</th>
+                        <th>Description</th>
+                        <th>Model</th>
+                        <th>Production Period</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($variants as $v)
+                    <tr>
+                        <td><a href="/spare-parts/{{ $v->id }}">{{ $v->name ?? 'N/A' }}</a></td>
+                        <td>{{ $v->model_code ?? '-' }}</td>
+                        <td>{{ $v->chassis_code ?? '-' }}</td>
+                        <td>
+                            {{ $v->production_start ?? '-' }} 
+                            - 
+                            {{ $v->production_end ?? '-' }}
+                        </td>
+                        <td>
+                            <a class="info-icon" data-toggle="collapse" href="#variant-{{ $v->id }}" role="button" aria-expanded="false" aria-controls="variant-{{ $v->id }}">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <!-- Collapsible Row for Detailed Specs -->
+                    <tr class="collapse" id="variant-{{ $v->id }}">
+                        <td colspan="5">
+                            <div class="p-3 bg-light rounded">
+                                <div class="row">
+                                    <div class="col-md-4 options-tooltip">
+                                        <strong>Body:</strong> {{ $v->bodyType->name ?? '-' }}<br>
+                                        <strong>Engine Type:</strong> {{ $v->engineType->name ?? '-' }}<br>
+                                        <strong>Transmission:</strong> {{ $v->transmissionType->name ?? '-' }}
+                                    </div>
+                                    <div class="col-md-4 options-tooltip">
+                                        <strong>Drive Type:</strong> {{ $v->driveType->name ?? '-' }}<br>
+                                        <strong>Steering:</strong> {{ $v->steering_position ?? '-' }}<br>
+                                        <strong>Trim:</strong> {{ $v->trim_level ?? '-' }}
+                                    </div>
+                                    <div class="col-md-4 options-tooltip">
+                                        <strong>Doors:</strong> {{ $v->doors ?? '-' }}<br>
+                                        <strong>Seats:</strong> {{ $v->seats ?? '-' }}<br>
+                                        <strong>Horsepower:</strong> {{ $v->horsepower ?? '-' }}<br>
+                                        <strong>Torque:</strong> {{ $v->torque ?? '-' }}<br>
+                                        <strong>Fuel Efficiency:</strong> {{ $v->fuel_efficiency ?? '-' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Variant Name</th>
-                <th>Body</th>
-                <th>Engine</th>
-                <th>Transmission</th>
-                <th>Horsepower</th>
-                <th>Torque</th>
-                <th><i class="fas fa-info"></i></th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <tr>
-                <td>{{ $variant->name ?? 'No name' }}</td>
-                <td>{{ $variant->bodyType->name ?? '-' }}</td>
-                <td>{{ $variant->engineType->name ?? '-' }}</td>
-                <td>{{ $variant->transmissionType->name ?? '-' }}</td>
-                <td>{{ $variant->horsepower ?? 'N/A' }}</td>
-                <td>{{ $variant->torque ?? 'N/A' }}</td>
-
-                <td>
-                    <a href="#" class="btn btn-sm btn-info">
-                        <i class="fas fa-info"></i>
-                    </a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
 </div>
 
 @endsection
