@@ -61,11 +61,13 @@
 
                                 <td>
                                     @if($user->roles == 0)
-                                        <span class="badge badge-warning">Super Admin</span>
-                                    @elseif($user->roles == 1)
-                                        <span class="badge badge-success">User</span>
-                                    @elseif($user->roles == 2)
-                                        <span class="badge badge-danger">Admin</span>
+                                    <div class="badge badge-warning">Disactive</div>
+                                    @endif
+                                    @if($user->roles == 1)
+                                    <div class="badge badge-success">Active</div>
+                                    @endif
+                                    @if($user->roles == 2)
+                                    <div class="badge badge-danger">Banned</div>
                                     @endif
                                 </td>
 
