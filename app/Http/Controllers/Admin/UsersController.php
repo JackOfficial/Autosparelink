@@ -14,9 +14,8 @@ class UsersController extends Controller
     public function index()
     {
         // Fetch only users with a specific Spatie role
-        $users = User::role('Admin')->orderBy('id', 'DESC')->get();
-
-        return view('admin.users.index', compact('users'));
+       $users = User::orderBy('id', 'DESC')->get();
+       return view('admin.users.index', compact('users'));
     }
 
     /**
