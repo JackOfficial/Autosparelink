@@ -30,6 +30,7 @@
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
  <link rel="icon" type="image/png" href="{{ asset('frontend/img/logo.png') }}">
+ 
 @livewireStyles
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -275,8 +276,8 @@
             <p>Users & Access <i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="/admin/bloggers" class="nav-link"><i class="fas fa-user nav-icon"></i><p>Users</p></a></li>
-            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-user-shield nav-icon"></i><p>Roles & Permissions</p></a></li>
+            <li class="nav-item"><a href="/admin/users" class="nav-link"><i class="fas fa-user nav-icon"></i><p>Users</p></a></li>
+            <li class="nav-item"><a href="/admin/roles-and-permissions" class="nav-link"><i class="fas fa-user-shield nav-icon"></i><p>Roles & Permissions</p></a></li>
           </ul>
           </li>
 
