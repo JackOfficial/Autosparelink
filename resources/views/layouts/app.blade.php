@@ -110,7 +110,7 @@
             <livewire:categories-component />
             <div class="col-lg-9">
                 <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
-                    <a href="{{ route('home') }}" class="text-decoration-none d-block d-lg-none">
+                    <a href="/" class="text-decoration-none d-block d-lg-none">
                          <img src="{{ asset('frontend/img/logo.png') }}" style="width: 100px; height:auto">
                     </a>
                     <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
