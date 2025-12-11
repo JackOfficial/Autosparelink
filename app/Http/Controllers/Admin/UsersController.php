@@ -13,10 +13,9 @@ class UsersController extends Controller
      */
     public function index()
     {
-        // Fetch only role = 1 users
-        $users = User::where('roles', '1')->orderBy('id', 'DESC')->get();
+        // Fetch only users with a specific Spatie role
+        $users = User::role('Admin')->orderBy('id', 'DESC')->get();
 
-        // Return Blade view
         return view('admin.users.index', compact('users'));
     }
 
@@ -33,18 +32,20 @@ class UsersController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate user data
         $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'role'  => 'required|string',   // Admin, Manager, etc.
         ]);
 
-        // Create user
-        User::create([
+        // Create user WITHOUT password because Fortify handles password flow
+        $user = User::create([
             'name'  => $request->name,
             'email' => $request->email,
-            'roles' => 1,
         ]);
+
+        // Assign Spatie Role
+        $user->assignRole($request->role);
 
         return redirect()->route('admin.users.index')
                          ->with('message', 'User created successfully');
@@ -78,14 +79,19 @@ class UsersController extends Controller
         $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
+            'role'  => 'required|string',
         ]);
 
         $user = User::findOrFail($id);
 
+        // Update user data
         $user->update([
             'name'  => $request->name,
             'email' => $request->email,
         ]);
+
+        // Update role (remove old and set new)
+        $user->syncRoles([$request->role]);
 
         return redirect()->route('admin.users.index')
                          ->with('message', 'User updated successfully');
@@ -96,7 +102,7 @@ class UsersController extends Controller
      */
     public function destroy($id)
     {
-        $deleted = User::where('id', $id)->delete();
+        $deleted = User::destroy($id);
 
         return redirect()->back()->with(
             'message',
