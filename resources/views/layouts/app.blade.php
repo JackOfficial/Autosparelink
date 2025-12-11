@@ -80,7 +80,7 @@
 
         <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
             <div class="col-lg-4">
-                <a href="{{ route('home') }}" class="text-decoration-none">
+                <a href="/" class="text-decoration-none">
                     <img src="{{ asset('frontend/img/logo.png') }}" class="w-25">
                 </a>
             </div>
