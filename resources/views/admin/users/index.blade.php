@@ -60,7 +60,7 @@
                                 <td>{{ $user->email }}</td>
 
                                 <td>
-                                    @if($user->roles == 0)
+                                    {{-- @if($user->roles == 0)
                                     <div class="badge badge-warning">Disactive</div>
                                     @endif
                                     @if($user->roles == 1)
@@ -68,7 +68,7 @@
                                     @endif
                                     @if($user->roles == 2)
                                     <div class="badge badge-danger">Banned</div>
-                                    @endif
+                                    @endif --}}
                                 </td>
 
                                 <td>{{ $user->created_at->format('Y-m-d') }}</td>
