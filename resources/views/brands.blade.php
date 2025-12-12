@@ -97,7 +97,7 @@
 <!-- Page Header -->
 <div class="page-header">
     <h1>Trusted Brands We Work With</h1>
-    <p>Your reliable source for Genuine & Aftermarket Auto Spare Parts</p>
+    <p class="text-dark">Your reliable source for Genuine & Aftermarket Auto Spare Parts</p>
 </div>
 
 <!-- Vehicle Brands -->
