@@ -164,13 +164,10 @@
                 <!-- brands row (small pills) -->
                 <div class="hero-brands" aria-hidden="true">
                     {{-- Use a couple of top brand logos if available in your storage, else show text pills --}}
-                    @php $sampleBrands = ['toyota','nissan','honda','bmw','mercedes']; @endphp
-                    @foreach($sampleBrands as $b)
+                    @foreach($brands as $brand)
                         <div class="brand-pill">
-                            @if(file_exists(public_path("frontend/img/brands/{$b}.png")))
-                                <img src="{{ asset("frontend/img/brands/{$b}.png") }}" alt="{{ $b }} logo">
-                            @endif
-                            {{ strtoupper($b) }}
+                                <img src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }} logo">
+                            {{ strtoupper($brand->brand_name) }}
                         </div>
                     @endforeach
                 </div>
