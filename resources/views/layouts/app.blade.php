@@ -112,7 +112,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top py-2">
         <div class="container-fluid">
             <!-- Logo -->
-            <a class="navbar-brand mr-5" href="{{ route('home') }}">
+            <a class="navbar-brand mr-5" href="/">
                 <img src="{{ asset('frontend/img/logo.png') }}" alt="Logo">
             </a>
 

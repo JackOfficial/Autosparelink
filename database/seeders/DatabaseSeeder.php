@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         VehicleModelSeeder::class,
         VariantsSeeder::class,
         PartSeeder::class,
+        PartBrandsSeeder::class,
         ]);
     }
 }
