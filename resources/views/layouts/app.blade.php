@@ -138,7 +138,7 @@
 
                     <!-- Mega Menu for Brands -->
                     <li class="nav-item dropdown position-static">
-                        <a class="nav-link dropdown-toggle" href="#" id="brandsDropdown" role="button" data-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="/brands" id="brandsDropdown" role="button" data-toggle="dropdown">
                             Brands
                         </a>
                         <div class="dropdown-menu w-100 bg-light shadow-sm" aria-labelledby="brandsDropdown">

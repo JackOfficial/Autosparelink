@@ -42,6 +42,7 @@ use App\Http\Controllers\admin\PartController;
 use App\Http\Controllers\admin\PartFitmentController;
 use App\Http\Controllers\admin\TransmissionTypeController;
 use App\Http\Controllers\admin\VariantController;
+use App\Http\Controllers\BrandsController;
 use App\Http\Controllers\HomeContoller;
 use App\Http\Controllers\SparePartController;
 use App\Http\Controllers\SpecificationController;
@@ -59,6 +60,8 @@ Route::get('/blogs', [PageController::class, 'blogs']);
 Route::get('/news', [PageController::class, 'news']);
 Route::get('/articles', [PageController::class, 'articles']);
 Route::get('/policies', [PageController::class, 'policies']);
+Route::get('/brands', [BrandsController::class, 'brands']);
+
 Route::get('/terms-and-conditions', [PageController::class, 'terms_and_conditions']);
 Route::get('/faqs', [PageController::class, 'faqs']);
 Route::get('/cart', [PageController::class, 'cart']);
