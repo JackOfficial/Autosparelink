@@ -12,24 +12,57 @@ class PartBrandsSeeder extends Seeder
      */
     public function run(): void
     {
-        $brands = [
+        // -------------------------------
+        // OEM BRANDS (Original Manufacturer)
+        // -------------------------------
+        $oemBrands = [
+            "Aisin",
+            "Denso",
+            "Bosch",
+            "NGK",
+            "NTK",
+            "Delphi",
+            "Magneti Marelli",
+            "Hella",
+            "Mahle",
+            "Mann Filter",
+            "ZF",
+            "Lemforder",
+            "Bilstein",
+            "Brembo",
+            "Akebono",
+            "Gates",
+            "Contitech",
+            "Koito",
+            "NSK",
+            "NTN",
+            "NPR",
+            "NipponDenso",
+            "Hitachi",
+            "KYB",
+        ];
+
+        // -------------------------------
+        // AFTERMARKET / REPLACEMENT BRANDS
+        // -------------------------------
+        $aftermarketBrands = [
             "Replacement OEM", "555", "888", "Acura", "Ac Delco", "Aisin", "Allied Nippon",
             "Anchor", "Aquil Star", "Asimco", "Asso", "Ate", "Atek", "Bando", "Bbt", "Behr",
-            "Bendu", "Bentley", "Beral", "Beru", "Besf1Ts", "Bilstein", "Blackbelt", "Bock",
-            "Bomag", "Bosal", "Bosch", "Boss", "Bremi", "Bw", "Camellia", "Century", "Clifford",
-            "Compak", "Contitech", "Corteco", "Crosland", "Ctr", "Cummins", "Daido",
-            "Daikin-Exedy", "Denki", "Denso", "Depo", "Detroit Diesel", "Diesel Technic",
+            "Bendu", "Bentley", "Beral", "Beru", "Besf1Ts", "Blackbelt", "Bock",
+            "Bomag", "Bosal", "Boss", "Bremi", "Bw", "Camellia", "Century", "Clifford",
+            "Compak", "Corteco", "Crosland", "Ctr", "Cummins", "Daido",
+            "Daikin-Exedy", "Denki", "Depo", "Detroit Diesel", "Diesel Technic",
             "Dokuro", "Dph", "Dtp", "Elgrin", "Elring", "Eristic", "Etg", "Eurotech G",
             "Euro Tech", "Exedy", "Fag", "Fbk", "Febest", "Febi", "Fic", "Fifft", "Filtron",
             "Flag", "Fleet Guard", "Flosser", "Forch", "Fram", "Fte", "Fujiayma", "Fyh", "Gk",
             "Glyco", "Gmb", "Goetze", "Gsp", "Hansa", "Hasaki", "Hdk", "Hd Coil Springs",
-            "Hella", "Hengst", "Hkt", "Hyundai", "Icer", "Iljin", "Iwis", "Izumi", "Jag", "Jeep",
+            "Hkt", "Hyundai", "Icer", "Iljin", "Iwis", "Izumi", "Jag", "Jeep",
             "Jfbk", "Jpc", "Jp Group", "Js Asakashi", "Kashiyama", "Kashiyama Blue", "Kayaba",
-            "Kg", "Knecht", "Koito", "Kolbenschmidt", "Komatsu", "Koyo", "Ks", "Ksm", "Kyb",
-            "Kyosan", "Lemforder", "Magneti Marelli", "Mahle", "Maxpart", "Mbs", "Mercedes-Benz",
+            "Kg", "Knecht", "Komatsu", "Koyo", "Ks", "Ksm",
+            "Kyosan", "Maxpart", "Mbs", "Mercedes-Benz",
             "Mitsu", "Mitsuboshi", "Mobil", "Mobis", "Mrk", "Musashi", "Nachi", "Nakamoto",
-            "Napco", "Ndc", "New Era", "Ngk", "Nis", "Nissens", "Nkk", "Nkn", "Nok", "Npr",
-            "Npw", "Nsk", "Ntn", "Onnuri", "Osk", "Paraut", "Pluto", "Rbi", "Rik", "Riken",
+            "Napco", "Ndc", "New Era", "Nis", "Nissens", "Nkk", "Nkn", "Nok",
+            "Npw", "Ntn", "Onnuri", "Osk", "Paraut", "Pluto", "Rbi", "Rik", "Riken",
             "Rocky", "Roulunds", "Sabah", "Sachs", "Sam", "Sankei", "Sbk", "Seiken", "Seiwa",
             "Sh", "Simer", "Skf", "Ssangyong", "Stone", "Subaki", "Sun", "Taiho", "Tama",
             "Tayen", "Teikin", "Teikoku Piston", "Textar", "Timken", "Tkd", "Toa", "Tokico",
@@ -38,10 +71,21 @@ class PartBrandsSeeder extends Seeder
             "Yamaha", "Yec"
         ];
 
-        foreach ($brands as $brand) {
+        // Insert OEM brands
+        foreach ($oemBrands as $brand) {
             DB::table('part_brands')->insert([
                 'name' => $brand,
-                'type' => 'Aftermarket', // default type
+                'type' => 'OEM',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Insert Aftermarket brands
+        foreach ($aftermarketBrands as $brand) {
+            DB::table('part_brands')->insert([
+                'name' => $brand,
+                'type' => 'Aftermarket',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
