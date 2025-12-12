@@ -56,6 +56,13 @@ Route::get('/', [HomeContoller::class, 'index']);
 Route::get('/about', [PageController::class, 'about']);
 Route::get('/gallery', [PageController::class, 'gallery']);
 Route::get('/blogs', [PageController::class, 'blogs']);
+Route::get('/news', [PageController::class, 'news']);
+Route::get('/articles', [PageController::class, 'articles']);
+Route::get('/policies', [PageController::class, 'policies']);
+Route::get('/terms-and-conditions', [PageController::class, 'terms_and_conditions']);
+Route::get('/faqs', [PageController::class, 'faqs']);
+Route::get('/cart', [PageController::class, 'cart']);
+
 Route::get('/blog/{title}', [PageController::class, 'blog']);
 Route::get('/blogs/{id}', [PageController::class, 'blog_category']);
 Route::get('/projects', [PageController::class, 'projects']);

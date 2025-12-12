@@ -62,11 +62,31 @@ class PageController extends Controller
         return Inertia::render('Blogs', compact('blogs', 'keyword')); 
     }
     function blogs(){
-        $blogs = Blogs::join('blog_categories', 'blogs.blog_category_id', 'blog_categories.id')
-        ->join('bloggers', 'blogs.blogger_id', 'bloggers.id')
-        ->select('blogs.*', 'blog_categories.blog_category', 'bloggers.first_name', 'bloggers.last_name')
-        ->paginate(6);
-        return view('blogs', compact('blogs')); 
+        return view('blogs'); 
+    }
+
+    function news(){
+        return view('news'); 
+    }
+
+     function articles(){
+        return view('articles'); 
+    }
+
+      function policies(){
+        return view('policies'); 
+    }
+
+    function terms_and_conditions(){
+       return view('terms-and-conditions'); 
+    }
+
+     function faqs(){
+        return view('faqs'); 
+    }
+
+      function cart(){
+        return view('cart'); 
     }
 
     function blog_category($id){

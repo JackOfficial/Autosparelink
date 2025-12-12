@@ -24,121 +24,214 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{{ asset('frontend/css/style.css') }}" rel="stylesheet">
- @yield('style')
+
+    @yield('style')
+
+    <style>
+        /* Navbar Custom Styles */
+        .navbar {
+            padding: 1rem 2rem;
+        }
+
+        .navbar-brand img {
+            height: 60px;
+        }
+
+        .nav-item.nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.nav-link:hover {
+            color: #0d6efd;
+        }
+
+        .btn-pill {
+            border-radius: 50px;
+            padding: 0.5rem 1.8rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .navbar-icons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .navbar-icons a {
+            position: relative;
+            font-size: 1.25rem;
+            color: #fff;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-icons a:hover {
+            color: #0d6efd;
+        }
+
+        .navbar-icons .badge {
+            position: absolute;
+            top: -6px;
+            right: -10px;
+            font-size: 0.65rem;
+            padding: 0.25rem 0.45rem;
+        }
+
+        /* Mega Menu Hover */
+        .dropdown-menu.position-static {
+            top: 100% !important;
+        }
+
+        @media (min-width: 992px) {
+            .dropdown:hover>.dropdown-menu {
+                display: block;
+            }
+        }
+
+        /* Full-width Banner */
+        .banner-container {
+            margin: 0;
+            padding: 0;
+            position: relative;
+            width: 100%;
+        }
+
+        .banner-container img {
+            width: 100%;
+            height: auto;
+            max-height: 600px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .banner-overlay h1 {
+            font-size: 2.5rem;
+        }
+
+        .banner-overlay p {
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 992px) {
+            .banner-overlay h1 {
+                font-size: 1.8rem;
+            }
+
+            .banner-overlay p {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .banner-overlay h1 {
+                font-size: 1.4rem;
+            }
+
+            .banner-overlay p {
+                font-size: 0.9rem;
+            }
+
+            .banner-overlay a.btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Topbar Start -->
-    <div class="container-fluid">
-        <div class="row bg-secondary py-1 px-xl-5">
-            <div class="col-lg-6 d-none d-lg-block">
-                <div class="d-inline-flex align-items-center h-100">
-                    <a class="text-body mr-3" href="/about">About</a>
-                    <a class="text-body mr-3" href="/contact">Contact</a>
-                    <a class="text-body mr-3" href="">Help</a>
-                    <a class="text-body mr-3" href="">FAQs</a>
-                </div>
-            </div>
-            <div class="col-lg-6 text-center text-lg-right">
-                <div class="d-inline-flex align-items-center">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">My Account</button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a href="/login" class="dropdown-item" type="button">Sign in</a>
-                            <a href="/register" class="dropdown-item" type="button">Sign up</a>
-                        </div>
-                    </div>
-                    <div class="btn-group mx-2">
-                        <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">USD</button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <button class="dropdown-item" type="button">FRW</button>
-                            <button class="dropdown-item" type="button">USD</button>
-                            <button class="dropdown-item" type="button">EUR</button>
-                        </div>
-                    </div>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">EN</button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <button class="dropdown-item" type="button">EN</button>
-                            <button class="dropdown-item" type="button">FR</button>
-                            <button class="dropdown-item" type="button">KI</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="d-inline-flex align-items-center d-block d-lg-none">
-                    <a href="" class="btn px-0 ml-2">
-                        <i class="fas fa-heart text-dark"></i>
-                        <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
-                    </a>
-                    <a href="" class="btn px-0 ml-2">
-                        <i class="fas fa-shopping-cart text-dark"></i>
-                        <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
-            <div class="col-lg-4">
-                <a href="/" class="text-decoration-none">
-                    <img src="{{ asset('frontend/img/logo.png') }}" class="w-25">
-                </a>
-            </div>
-            <div class="col-lg-4 col-6 text-left">
-                <form action="" method="GET">
-                    <div class="input-group">
-                        <input type="text" name="query" class="form-control" placeholder="Part Number or VIN">
-                        <div class="input-group-append">
-                            <button class="input-group-text bg-primary text-white">
-                                <i class="fa fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="col-lg-4 col-6 text-right">
-                <p class="m-0">Customer Service</p>
-                <h5 class="m-0">+250 788 430 122</h5>
-            </div>
-        </div>
-    </div>
-    <!-- Topbar End -->
-
     <!-- Navbar Start -->
-    <div class="container-fluid bg-dark mb-30 sticky-top">
-        <div class="row px-xl-5">
-            <livewire:categories-component />
-            <div class="col-lg-9">
-                <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
-                    <a href="/" class="text-decoration-none d-block d-lg-none">
-                         <img src="{{ asset('frontend/img/logo.png') }}" style="width: 100px; height:auto">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top py-2">
+        <div class="container-fluid">
+            <!-- Logo -->
+            <a class="navbar-brand" href="/">
+                <img src="{{ asset('frontend/img/logo.png') }}" alt="Logo">
+            </a>
+
+            <!-- Toggler for Mobile -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar Items -->
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item"><a class="nav-link" href="/about">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/blogs">News</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/faqs">FAQ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
+
+                    <!-- Mega Menu for Categories -->
+                    <li class="nav-item dropdown position-static">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown">
+                            Genuine Catalogs
+                        </a>
+                        <livewire:categories-component />
+                    </li>
+
+                    <!-- Mega Menu for Brands -->
+                    <li class="nav-item dropdown position-static">
+                        <a class="nav-link dropdown-toggle" href="#" id="brandsDropdown" role="button" data-toggle="dropdown">
+                            Brands
+                        </a>
+                        <div class="dropdown-menu w-100 bg-light shadow-sm" aria-labelledby="brandsDropdown">
+                            <div class="container">
+                                <div class="row py-3">
+                                    @php
+                                        $brands = ['Toyota','Lexus','Nissan','Infiniti','Mitsubishi','Subaru','Hyundai','Kia','Mazda','Suzuki','Isuzu','Honda','Mercedes-Benz','BMW','Chevrolet','Renault','Volkswagen','Porsche','Land Rover','Volvo','Chrysler','Peugeot','Jeep','Dodge','Ram'];
+                                        $chunks = array_chunk($brands, 5);
+                                    @endphp
+                                    @foreach($chunks as $chunk)
+                                        <div class="col-lg-2 col-md-3 col-6">
+                                            <ul class="list-unstyled">
+                                                @foreach($chunk as $brand)
+                                                    <li>
+                                                        <a class="dropdown-item text-dark py-1" href="#">{{ $brand }}</a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <!-- Right Side Icons and Login -->
+                <div class="ml-auto d-flex align-items-center">
+                    <a href="" class="text-white mr-3 position-relative" title="Wishlist">
+                        <i class="fas fa-heart fa-lg"></i>
+                        <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
                     </a>
-                    <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                        <div class="navbar-nav mr-auto py-0">
-                            <a href="{{ route('home') }}" class="nav-item nav-link active">Home</a>
-                            <a href="" class="nav-item nav-link">Shop</a>
-                            <a href="/about" class="nav-item nav-link">About Us</a>
-                            <a href="/contact" class="nav-item nav-link">Contact Us</a>
-                        </div>
-                        <div class="navbar-nav ml-auto py-0 d-none d-lg-flex">
-                            <a href="" class="btn px-0">
-                                <i class="fas fa-heart text-primary"></i>
-                                <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
-                            </a>
-                            <a href="" class="btn px-0 ml-3">
-                                <i class="fas fa-shopping-cart text-primary"></i>
-                                <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
-                            </a>
-                        </div>
-                    </div>
-                </nav>
+                    <a href="" class="text-white mr-3 position-relative" title="Cart">
+                        <i class="fas fa-shopping-cart fa-lg"></i>
+                        <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
+                    </a>
+                    <a href="/login" class="btn btn-primary btn-pill ml-2">Login / Register</a>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- Navbar End -->
+    </nav>
 
     @yield('content')
 
