@@ -135,7 +135,8 @@
                         </a>
                         <livewire:categories-component />
                     </li>
-                   <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
+
+                   <li class="nav-item"><a class="nav-link" href="/brands">Brands</a></li>
 
                     <!-- Resources Dropdown -->
                     <li class="nav-item dropdown">
