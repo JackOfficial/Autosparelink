@@ -180,7 +180,7 @@
                                 <i class="fas fa-bullhorn mr-2 text-primary"></i> News
                             </a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item d-flex align-items-center" href="/terms">
+                            <a class="dropdown-item d-flex align-items-center" href="/terms-and-conditions">
                                 <i class="fas fa-file-contract mr-2 text-primary"></i> Terms & Conditions
                             </a>
                             <a class="dropdown-item d-flex align-items-center" href="/policies">
@@ -257,7 +257,7 @@
                             <a class="text-secondary mb-2" href="/blogs"><i class="fa fa-angle-right mr-2"></i>Blogs</a>
                             <a class="text-secondary mb-2" href="/articles"><i class="fa fa-angle-right mr-2"></i>Articles</a>
                             <a class="text-secondary mb-2" href="/news"><i class="fa fa-angle-right mr-2"></i>News</a>
-                            <a class="text-secondary mb-2" href="/terms"><i class="fa fa-angle-right mr-2"></i>Terms & Conditions</a>
+                            <a class="text-secondary mb-2" href="/terms-and-conditions"><i class="fa fa-angle-right mr-2"></i>Terms & Conditions</a>
                             <a class="text-secondary mb-2" href="/policies"><i class="fa fa-angle-right mr-2"></i>Policies</a>
                         </div>
                     </div>
