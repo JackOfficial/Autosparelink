@@ -97,7 +97,7 @@
         @foreach($parts_brands as $brand)
             <div class="brand-card">
                 <img src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }}">
-                <span>{{ strtoupper($brand->brand_name) }}</span>
+                <span>{{ strtoupper($brand->name) }}</span>
             </div>
         @endforeach
     </div>
