@@ -79,217 +79,158 @@
             padding: 0.25rem 0.45rem;
         }
 
-        /* Mega Menu Hover */
-        .dropdown-menu.position-static {
-            top: 100% !important;
+        /* Increase space between logo and menu links */
+        .navbar-nav {
+            margin-left: 40px;
         }
 
-        @media (min-width: 992px) {
-            .dropdown:hover>.dropdown-menu {
-                display: block;
-            }
+        /* Enhanced Dropdown Styles */
+        .dropdown-menu a.dropdown-item {
+            transition: all 0.2s ease-in-out;
+            font-weight: 500;
         }
 
-        /* Full-width Banner */
-        .banner-container {
-            margin: 0;
-            padding: 0;
-            position: relative;
-            width: 100%;
+        .dropdown-menu a.dropdown-item:hover {
+            background-color: #f1f5f9;
+            color: #0d6efd;
+            transform: translateX(5px);
         }
 
-        .banner-container img {
-            width: 100%;
-            height: auto;
-            max-height: 600px;
-            object-fit: cover;
-            display: block;
+        .dropdown-menu i {
+            font-size: 1rem;
         }
 
-        .banner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            color: #fff;
-            padding: 20px;
+        .btn-pill.dropdown-toggle {
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
         }
-
-        .banner-overlay h1 {
-            font-size: 2.5rem;
-        }
-
-        .banner-overlay p {
-            font-size: 1.2rem;
-        }
-
-        @media (max-width: 992px) {
-            .banner-overlay h1 {
-                font-size: 1.8rem;
-            }
-
-            .banner-overlay p {
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .banner-overlay h1 {
-                font-size: 1.4rem;
-            }
-
-            .banner-overlay p {
-                font-size: 0.9rem;
-            }
-
-            .banner-overlay a.btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.9rem;
-            }
-        }
-
-          /* Increase space between logo and menu links */
-    .navbar-nav {
-        margin-left: 40px; /* adjust as needed */
-    }
-
-    /* Enhanced Dropdown Styles */
-    .dropdown-menu a.dropdown-item {
-        transition: all 0.2s ease-in-out;
-        font-weight: 500;
-    }
-
-    .dropdown-menu a.dropdown-item:hover {
-        background-color: #f1f5f9;
-        color: #0d6efd;
-        transform: translateX(5px);
-    }
-
-    .dropdown-menu i {
-        font-size: 1rem;
-    }
-
-    .btn-pill.dropdown-toggle {
-        border-radius: 50px;
-        padding: 0.5rem 1.5rem;
-    }
     </style>
 </head>
 
 <body>
     <!-- Navbar Start -->
-   <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top py-2">
-    <div class="container-fluid">
-        <!-- Logo -->
-        <a class="navbar-brand mr-5" href="{{ route('home') }}">
-            <img src="{{ asset('frontend/img/logo.png') }}" alt="Logo">
-        </a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top py-2">
+        <div class="container-fluid">
+            <!-- Logo -->
+            <a class="navbar-brand mr-5" href="{{ route('home') }}">
+                <img src="{{ asset('frontend/img/logo.png') }}" alt="Logo">
+            </a>
 
-        <!-- Toggler for Mobile -->
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+            <!-- Toggler for Mobile -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <!-- Navbar Items -->
-        <div class="collapse navbar-collapse" id="mainNavbar">
-            <ul class="navbar-nav mr-auto ml-4">
-                <li class="nav-item"><a class="nav-link" href="/about">About Us</a></li>
-                <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
-                <li class="nav-item"><a class="nav-link" href="/blogs">News</a></li>
-                <li class="nav-item"><a class="nav-link" href="/faqs">FAQ</a></li>
-                <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
+            <!-- Navbar Items -->
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav mr-auto ml-4">
+                    <li class="nav-item"><a class="nav-link" href="/about">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
 
-                <!-- Mega Menu for Categories -->
-                <li class="nav-item dropdown position-static">
-                    <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown">
-                        Genuine Catalogs
-                    </a>
-                    <livewire:categories-component />
-                </li>
+                    <!-- Mega Menu for Categories -->
+                    <li class="nav-item dropdown position-static">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown">
+                            Genuine Catalogs
+                        </a>
+                        <livewire:categories-component />
+                    </li>
 
-                <!-- Mega Menu for Brands -->
-                <li class="nav-item dropdown position-static">
-                    <a class="nav-link dropdown-toggle" href="#" id="brandsDropdown" role="button" data-toggle="dropdown">
-                        Brands
-                    </a>
-                    <div class="dropdown-menu w-100 bg-light shadow-sm" aria-labelledby="brandsDropdown">
-                        <div class="container">
-                            <div class="row py-3">
-                                @php
-                                    $brands = ['Toyota','Lexus','Nissan','Infiniti','Mitsubishi','Subaru','Hyundai','Kia','Mazda','Suzuki','Isuzu','Honda','Mercedes-Benz','BMW','Chevrolet','Renault','Volkswagen','Porsche','Land Rover','Volvo','Chrysler','Peugeot','Jeep','Dodge','Ram'];
-                                    $chunks = array_chunk($brands, 5);
-                                @endphp
-                                @foreach($chunks as $chunk)
-                                    <div class="col-lg-2 col-md-3 col-6">
-                                        <ul class="list-unstyled">
-                                            @foreach($chunk as $brand)
-                                                <li>
-                                                    <a class="dropdown-item text-dark py-1" href="#">{{ $brand }}</a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                @endforeach
+                    <!-- Mega Menu for Brands -->
+                    <li class="nav-item dropdown position-static">
+                        <a class="nav-link dropdown-toggle" href="#" id="brandsDropdown" role="button" data-toggle="dropdown">
+                            Brands
+                        </a>
+                        <div class="dropdown-menu w-100 bg-light shadow-sm" aria-labelledby="brandsDropdown">
+                            <div class="container">
+                                <div class="row py-3">
+                                    @php
+                                        $brands = ['Toyota','Lexus','Nissan','Infiniti','Mitsubishi','Subaru','Hyundai','Kia','Mazda','Suzuki','Isuzu','Honda','Mercedes-Benz','BMW','Chevrolet','Renault','Volkswagen','Porsche','Land Rover','Volvo','Chrysler','Peugeot','Jeep','Dodge','Ram'];
+                                        $chunks = array_chunk($brands, 5);
+                                    @endphp
+                                    @foreach($chunks as $chunk)
+                                        <div class="col-lg-2 col-md-3 col-6">
+                                            <ul class="list-unstyled">
+                                                @foreach($chunk as $brand)
+                                                    <li>
+                                                        <a class="dropdown-item text-dark py-1" href="#">{{ $brand }}</a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </li>
-            </ul>
+                    </li>
 
-            <!-- Right Side Icons and Login/User Info -->
-            <div class="ml-auto d-flex align-items-center">
+                    <!-- Resources Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="resourcesDropdown" role="button" data-toggle="dropdown">
+                            Resources
+                        </a>
+                        <div class="dropdown-menu shadow-sm" aria-labelledby="resourcesDropdown">
+                            <a class="dropdown-item d-flex align-items-center" href="/blogs">
+                                <i class="fas fa-newspaper mr-2 text-primary"></i> Blogs
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center" href="/articles">
+                                <i class="fas fa-file-alt mr-2 text-primary"></i> Articles
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center" href="/news">
+                                <i class="fas fa-bullhorn mr-2 text-primary"></i> News
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item d-flex align-items-center" href="/terms">
+                                <i class="fas fa-file-contract mr-2 text-primary"></i> Terms & Conditions
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center" href="/policies">
+                                <i class="fas fa-shield-alt mr-2 text-primary"></i> Policies
+                            </a>
+                        </div>
+                    </li>
+                </ul>
 
-                <!-- Wishlist Icon -->
-                <a href="#" class="text-white mr-3 position-relative" title="Wishlist">
-                    <i class="fas fa-heart fa-lg"></i>
-                    <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
-                </a>
+                <!-- Right Side Icons and Login/User Info -->
+                <div class="ml-auto d-flex align-items-center">
+                    <!-- Wishlist Icon -->
+                    <a href="#" class="text-white mr-3 position-relative" title="Wishlist">
+                        <i class="fas fa-heart fa-lg"></i>
+                        <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
+                    </a>
 
-                <!-- Cart Icon -->
-                <a href="#" class="text-white mr-3 position-relative" title="Cart">
-                    <i class="fas fa-shopping-cart fa-lg"></i>
-                    <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
-                </a>
+                    <!-- Cart Icon -->
+                    <a href="#" class="text-white mr-3 position-relative" title="Cart">
+                        <i class="fas fa-shopping-cart fa-lg"></i>
+                        <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
+                    </a>
 
-                <!-- Authentication Links -->
-                @guest
-                    <a href="{{ route('login') }}" class="btn btn-primary btn-pill ml-2">Login / Register</a>
-                @else
-                   <div class="dropdown">
-    <a href="#" class="btn btn-outline-primary btn-pill dropdown-toggle d-flex align-items-center" id="userDropdown" data-toggle="dropdown">
-        <i class="fas fa-user-circle fa-lg mr-2"></i> {{ Auth::user()->name }}
-    </a>
-    <div class="dropdown-menu dropdown-menu-right shadow-sm p-0" aria-labelledby="userDropdown" style="min-width: 200px; border-radius: 12px; overflow: hidden;">
-        
-        <a class="dropdown-item d-flex align-items-center py-2 px-3" href="">
-            <i class="fas fa-user mr-2 text-primary"></i> Profile
-        </a>
-
-        <div class="dropdown-divider m-0"></div>
-
-        <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('logout') }}"
-           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="fas fa-sign-out-alt mr-2 text-danger"></i> Logout
-        </a>
-
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-            @csrf
-        </form>
-    </div>
-</div>
-                @endguest
-
+                    <!-- Authentication Links -->
+                    @guest
+                        <a href="{{ route('login') }}" class="btn btn-primary btn-pill ml-2">Login / Register</a>
+                    @else
+                        <div class="dropdown">
+                            <a href="#" class="btn btn-outline-primary btn-pill dropdown-toggle d-flex align-items-center" id="userDropdown" data-toggle="dropdown">
+                                <i class="fas fa-user-circle fa-lg mr-2"></i> {{ Auth::user()->name }}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow-sm p-0" aria-labelledby="userDropdown" style="min-width: 200px; border-radius: 12px; overflow: hidden;">
+                                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="">
+                                    <i class="fas fa-user mr-2 text-primary"></i> Profile
+                                </a>
+                                <div class="dropdown-divider m-0"></div>
+                                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('logout') }}"
+                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="fas fa-sign-out-alt mr-2 text-danger"></i> Logout
+                                </a>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    @csrf
+                                </form>
+                            </div>
+                        </div>
+                    @endguest
+                </div>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
     @yield('content')
 
@@ -305,15 +246,23 @@
             </div>
             <div class="col-lg-8 col-md-12">
                 <div class="row">
+                    <!-- Quick Links -->
                     <div class="col-md-4 mb-5">
                         <h5 class="text-secondary text-uppercase mb-4">Quick Links</h5>
                         <div class="d-flex flex-column justify-content-start">
-                            <a class="text-secondary mb-2" href=""><i class="fa fa-angle-right mr-2"></i>Home</a>
-                            <a class="text-secondary mb-2" href=""><i class="fa fa-angle-right mr-2"></i>Shop</a>
+                            <a class="text-secondary mb-2" href="/"><i class="fa fa-angle-right mr-2"></i>Home</a>
+                            <a class="text-secondary mb-2" href="/shop"><i class="fa fa-angle-right mr-2"></i>Shop</a>
                             <a class="text-secondary mb-2" href="/about"><i class="fa fa-angle-right mr-2"></i>About Us</a>
                             <a class="text-secondary mb-2" href="/contact"><i class="fa fa-angle-right mr-2"></i>Contact Us</a>
+                            <a class="text-secondary mb-2" href="/blogs"><i class="fa fa-angle-right mr-2"></i>Blogs</a>
+                            <a class="text-secondary mb-2" href="/articles"><i class="fa fa-angle-right mr-2"></i>Articles</a>
+                            <a class="text-secondary mb-2" href="/news"><i class="fa fa-angle-right mr-2"></i>News</a>
+                            <a class="text-secondary mb-2" href="/terms"><i class="fa fa-angle-right mr-2"></i>Terms & Conditions</a>
+                            <a class="text-secondary mb-2" href="/policies"><i class="fa fa-angle-right mr-2"></i>Policies</a>
                         </div>
                     </div>
+
+                    <!-- Popular Brands -->
                     <div class="col-md-4 mb-5">
                         <h5 class="text-secondary text-uppercase mb-4">Popular Brands</h5>
                         <div class="d-flex flex-column justify-content-start">
@@ -324,6 +273,8 @@
                             <a class="text-secondary mb-2" href="#">BMW</a>
                         </div>
                     </div>
+
+                    <!-- Newsletter -->
                     <div class="col-md-4 mb-5">
                         <h5 class="text-secondary text-uppercase mb-4">Newsletter</h5>
                         <p>Subscribe for the latest offers and updates.</p>
