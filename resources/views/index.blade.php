@@ -164,7 +164,7 @@
                 <!-- brands row (small pills) -->
                 <div class="hero-brands" aria-hidden="true">
                     {{-- Use a couple of top brand logos if available in your storage, else show text pills --}}
-                    @foreach($brands as $brand)
+                    @foreach($brands->take(5) as $brand)
                         <div class="brand-pill">
                                 <img src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }} logo">
                             {{ strtoupper($brand->brand_name) }}
