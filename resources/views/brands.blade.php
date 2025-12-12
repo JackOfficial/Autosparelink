@@ -9,7 +9,6 @@
         padding: 80px 0;
         text-align: center;
         color: #fff;
-        position: relative;
     }
 
     .page-header h1 {
@@ -30,7 +29,7 @@
         border: 1px solid #eee;
         text-align: center;
         transition: all 0.3s ease-in-out;
-        height: 150px;
+        min-height: 170px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -43,14 +42,42 @@
     }
 
     .brand-card img {
-        height: 50px;
+        height: 55px;
         object-fit: contain;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
 
-    .brand-card span {
-        font-weight: 600;
+    .brand-name {
+        font-weight: 700;
+        font-size: 0.95rem;
         color: #333;
+        margin-bottom: 6px;
+    }
+
+    .brand-type-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .badge-oem {
+        background: #e6f0ff;
+        color: #0056d6;
+        border: 1px solid #c8dcff;
+    }
+
+    .badge-aftermarket {
+        background: #e8f7ed;
+        color: #1b8a4d;
+        border: 1px solid #c9edd5;
+    }
+
+    .brand-type-badge i {
+        margin-right: 5px;
+        font-size: 0.8rem;
     }
 
     .brands-section {
@@ -59,8 +86,8 @@
 
     .brands-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 22px;
     }
 </style>
 @endsection
@@ -81,8 +108,18 @@
     <div class="brands-grid">
         @foreach($vehicle_brands as $brand)
             <div class="brand-card">
-                <img src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }}">
-                <span>{{ strtoupper($brand->brand_name) }}</span>
+                <img src="{{ asset('storage/' . $brand->logo) }}" alt="{{ $brand->name }}">
+                <div class="brand-name">{{ strtoupper($brand->name) }}</div>
+
+                @if($brand->type === 'OEM')
+                    <div class="brand-type-badge badge-oem">
+                        <i class="fas fa-certificate"></i> OEM
+                    </div>
+                @else
+                    <div class="brand-type-badge badge-aftermarket">
+                        <i class="fas fa-tools"></i> Aftermarket
+                    </div>
+                @endif
             </div>
         @endforeach
     </div>
@@ -96,8 +133,18 @@
     <div class="brands-grid">
         @foreach($parts_brands as $brand)
             <div class="brand-card">
-                <img src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }}">
-                <span>{{ strtoupper($brand->name) }}</span>
+                <img src="{{ asset('storage/' . $brand->logo) }}" alt="{{ $brand->name }}">
+                <div class="brand-name">{{ strtoupper($brand->name) }}</div>
+
+                @if($brand->type === 'OEM')
+                    <div class="brand-type-badge badge-oem">
+                        <i class="fas fa-certificate"></i> OEM
+                    </div>
+                @else
+                    <div class="brand-type-badge badge-aftermarket">
+                        <i class="fas fa-tools"></i> Aftermarket
+                    </div>
+                @endif
             </div>
         @endforeach
     </div>
