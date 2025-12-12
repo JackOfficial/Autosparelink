@@ -135,34 +135,7 @@
                         </a>
                         <livewire:categories-component />
                     </li>
-
-                    <!-- Mega Menu for Brands -->
-                    <li class="nav-item dropdown position-static">
-                        <a class="nav-link dropdown-toggle" href="/brands" id="brandsDropdown" role="button" data-toggle="dropdown">
-                            Brands
-                        </a>
-                        <div class="dropdown-menu w-100 bg-light shadow-sm" aria-labelledby="brandsDropdown">
-                            <div class="container">
-                                <div class="row py-3">
-                                    @php
-                                        $brands = ['Toyota','Lexus','Nissan','Infiniti','Mitsubishi','Subaru','Hyundai','Kia','Mazda','Suzuki','Isuzu','Honda','Mercedes-Benz','BMW','Chevrolet','Renault','Volkswagen','Porsche','Land Rover','Volvo','Chrysler','Peugeot','Jeep','Dodge','Ram'];
-                                        $chunks = array_chunk($brands, 5);
-                                    @endphp
-                                    @foreach($chunks as $chunk)
-                                        <div class="col-lg-2 col-md-3 col-6">
-                                            <ul class="list-unstyled">
-                                                @foreach($chunk as $brand)
-                                                    <li>
-                                                        <a class="dropdown-item text-dark py-1" href="#">{{ $brand }}</a>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                    </li>
+                   <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
 
                     <!-- Resources Dropdown -->
                     <li class="nav-item dropdown">
