@@ -123,7 +123,7 @@
     <div class="brands-grid">
         @foreach($parts_brands as $brand)
             <div class="brand-card">
-                <img src="{{ asset('storage/' . $brand->logo) }}" alt="{{ $brand->name }}">
+                <img src="{{ asset('storage/' . $brand->logo) }}" class="d-none" alt="{{ $brand->name }}">
                 <div class="brand-name">{{ strtoupper($brand->name) }}</div>
 
                 @if($brand->type === 'OEM')
