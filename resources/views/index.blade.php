@@ -405,12 +405,12 @@
 
                 <!-- Toyota -->
                 <div class="bg-light p-4">
-                    <img src="{{ asset('frontend/img/brands/toyota.png') }}" alt="Toyota" style="max-height: 50px;">
+                    <img src="{{ asset('frontend/img/brands/toyota.jpg') }}" alt="Toyota" style="max-height: 50px;">
                 </div>
 
                 <!-- Mercedes-Benz -->
                 <div class="bg-light p-4">
-                    <img src="{{ asset('frontend/img/brands/mercedes.png') }}" alt="Mercedes-Benz" style="max-height: 50px;">
+                    <img src="{{ asset('frontend/img/brands/mercedes.jpg') }}" alt="Mercedes-Benz" style="max-height: 50px;">
                 </div>
 
                 <!-- BMW -->
