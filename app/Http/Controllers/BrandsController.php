@@ -11,7 +11,7 @@ class BrandsController extends Controller
 {
    public function brands(){
      $vehicle_brands = Brand::orderBy('brand_name')->get();
-    $parts_brands   = PartBrands::orderBy('brand_name')->get();
+    $parts_brands   = PartBrands::orderBy('name')->get();
 
     return view('brands', compact('vehicle_brands', 'parts_brands'));
    }
