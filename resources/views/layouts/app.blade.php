@@ -154,84 +154,142 @@
                 font-size: 0.9rem;
             }
         }
+
+          /* Increase space between logo and menu links */
+    .navbar-nav {
+        margin-left: 40px; /* adjust as needed */
+    }
+
+    /* Enhanced Dropdown Styles */
+    .dropdown-menu a.dropdown-item {
+        transition: all 0.2s ease-in-out;
+        font-weight: 500;
+    }
+
+    .dropdown-menu a.dropdown-item:hover {
+        background-color: #f1f5f9;
+        color: #0d6efd;
+        transform: translateX(5px);
+    }
+
+    .dropdown-menu i {
+        font-size: 1rem;
+    }
+
+    .btn-pill.dropdown-toggle {
+        border-radius: 50px;
+        padding: 0.5rem 1.5rem;
+    }
     </style>
 </head>
 
 <body>
     <!-- Navbar Start -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top py-2">
-        <div class="container-fluid">
-            <!-- Logo -->
-            <a class="navbar-brand" href="/">
-                <img src="{{ asset('frontend/img/logo.png') }}" alt="Logo">
-            </a>
+   <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top py-2">
+    <div class="container-fluid">
+        <!-- Logo -->
+        <a class="navbar-brand mr-5" href="{{ route('home') }}">
+            <img src="{{ asset('frontend/img/logo.png') }}" alt="Logo">
+        </a>
 
-            <!-- Toggler for Mobile -->
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNavbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <!-- Toggler for Mobile -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <!-- Navbar Items -->
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item"><a class="nav-link" href="/about">About Us</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/blogs">News</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/faqs">FAQ</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
+        <!-- Navbar Items -->
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav mr-auto ml-4">
+                <li class="nav-item"><a class="nav-link" href="/about">About Us</a></li>
+                <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+                <li class="nav-item"><a class="nav-link" href="/blogs">News</a></li>
+                <li class="nav-item"><a class="nav-link" href="/faqs">FAQ</a></li>
+                <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
 
-                    <!-- Mega Menu for Categories -->
-                    <li class="nav-item dropdown position-static">
-                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown">
-                            Genuine Catalogs
-                        </a>
-                        <livewire:categories-component />
-                    </li>
+                <!-- Mega Menu for Categories -->
+                <li class="nav-item dropdown position-static">
+                    <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown">
+                        Genuine Catalogs
+                    </a>
+                    <livewire:categories-component />
+                </li>
 
-                    <!-- Mega Menu for Brands -->
-                    <li class="nav-item dropdown position-static">
-                        <a class="nav-link dropdown-toggle" href="#" id="brandsDropdown" role="button" data-toggle="dropdown">
-                            Brands
-                        </a>
-                        <div class="dropdown-menu w-100 bg-light shadow-sm" aria-labelledby="brandsDropdown">
-                            <div class="container">
-                                <div class="row py-3">
-                                    @php
-                                        $brands = ['Toyota','Lexus','Nissan','Infiniti','Mitsubishi','Subaru','Hyundai','Kia','Mazda','Suzuki','Isuzu','Honda','Mercedes-Benz','BMW','Chevrolet','Renault','Volkswagen','Porsche','Land Rover','Volvo','Chrysler','Peugeot','Jeep','Dodge','Ram'];
-                                        $chunks = array_chunk($brands, 5);
-                                    @endphp
-                                    @foreach($chunks as $chunk)
-                                        <div class="col-lg-2 col-md-3 col-6">
-                                            <ul class="list-unstyled">
-                                                @foreach($chunk as $brand)
-                                                    <li>
-                                                        <a class="dropdown-item text-dark py-1" href="#">{{ $brand }}</a>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    @endforeach
-                                </div>
+                <!-- Mega Menu for Brands -->
+                <li class="nav-item dropdown position-static">
+                    <a class="nav-link dropdown-toggle" href="#" id="brandsDropdown" role="button" data-toggle="dropdown">
+                        Brands
+                    </a>
+                    <div class="dropdown-menu w-100 bg-light shadow-sm" aria-labelledby="brandsDropdown">
+                        <div class="container">
+                            <div class="row py-3">
+                                @php
+                                    $brands = ['Toyota','Lexus','Nissan','Infiniti','Mitsubishi','Subaru','Hyundai','Kia','Mazda','Suzuki','Isuzu','Honda','Mercedes-Benz','BMW','Chevrolet','Renault','Volkswagen','Porsche','Land Rover','Volvo','Chrysler','Peugeot','Jeep','Dodge','Ram'];
+                                    $chunks = array_chunk($brands, 5);
+                                @endphp
+                                @foreach($chunks as $chunk)
+                                    <div class="col-lg-2 col-md-3 col-6">
+                                        <ul class="list-unstyled">
+                                            @foreach($chunk as $brand)
+                                                <li>
+                                                    <a class="dropdown-item text-dark py-1" href="#">{{ $brand }}</a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
-                    </li>
-                </ul>
+                    </div>
+                </li>
+            </ul>
 
-                <!-- Right Side Icons and Login -->
-                <div class="ml-auto d-flex align-items-center">
-                    <a href="" class="text-white mr-3 position-relative" title="Wishlist">
-                        <i class="fas fa-heart fa-lg"></i>
-                        <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
-                    </a>
-                    <a href="" class="text-white mr-3 position-relative" title="Cart">
-                        <i class="fas fa-shopping-cart fa-lg"></i>
-                        <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
-                    </a>
-                    <a href="/login" class="btn btn-primary btn-pill ml-2">Login / Register</a>
-                </div>
+            <!-- Right Side Icons and Login/User Info -->
+            <div class="ml-auto d-flex align-items-center">
+
+                <!-- Wishlist Icon -->
+                <a href="#" class="text-white mr-3 position-relative" title="Wishlist">
+                    <i class="fas fa-heart fa-lg"></i>
+                    <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
+                </a>
+
+                <!-- Cart Icon -->
+                <a href="#" class="text-white mr-3 position-relative" title="Cart">
+                    <i class="fas fa-shopping-cart fa-lg"></i>
+                    <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
+                </a>
+
+                <!-- Authentication Links -->
+                @guest
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-pill ml-2">Login / Register</a>
+                @else
+                   <div class="dropdown">
+    <a href="#" class="btn btn-outline-primary btn-pill dropdown-toggle d-flex align-items-center" id="userDropdown" data-toggle="dropdown">
+        <i class="fas fa-user-circle fa-lg mr-2"></i> {{ Auth::user()->name }}
+    </a>
+    <div class="dropdown-menu dropdown-menu-right shadow-sm p-0" aria-labelledby="userDropdown" style="min-width: 200px; border-radius: 12px; overflow: hidden;">
+        
+        <a class="dropdown-item d-flex align-items-center py-2 px-3" href="">
+            <i class="fas fa-user mr-2 text-primary"></i> Profile
+        </a>
+
+        <div class="dropdown-divider m-0"></div>
+
+        <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('logout') }}"
+           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <i class="fas fa-sign-out-alt mr-2 text-danger"></i> Logout
+        </a>
+
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+            @csrf
+        </form>
+    </div>
+</div>
+                @endguest
+
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
     @yield('content')
 
