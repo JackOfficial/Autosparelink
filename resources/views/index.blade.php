@@ -402,19 +402,52 @@
     <div class="row px-xl-5">
         <div class="col">
             <div class="owl-carousel vendor-carousel">
-                {{-- Using your existing vendor images (Option A) --}}
-                <div class="bg-light p-4"><img src="{{ asset('frontend/img/vendor-1.jpg') }}" alt="vendor"></div>
-                <div class="bg-light p-4"><img src="{{ asset('frontend/img/vendor-2.jpg') }}" alt="vendor"></div>
-                <div class="bg-light p-4"><img src="{{ asset('frontend/img/vendor-3.jpg') }}" alt="vendor"></div>
-                <div class="bg-light p-4"><img src="{{ asset('frontend/img/vendor-4.jpg') }}" alt="vendor"></div>
-                <div class="bg-light p-4"><img src="{{ asset('frontend/img/vendor-5.jpg') }}" alt="vendor"></div>
-                <div class="bg-light p-4"><img src="{{ asset('frontend/img/vendor-6.jpg') }}" alt="vendor"></div>
-                <div class="bg-light p-4"><img src="{{ asset('frontend/img/vendor-7.jpg') }}" alt="vendor"></div>
-                <div class="bg-light p-4"><img src="{{ asset('frontend/img/vendor-8.jpg') }}" alt="vendor"></div>
+
+                <!-- Toyota -->
+                <div class="bg-light p-4">
+                    <img src="{{ asset('frontend/img/brands/toyota.png') }}" alt="Toyota" style="max-height: 50px;">
+                </div>
+
+                <!-- Mercedes-Benz -->
+                <div class="bg-light p-4">
+                    <img src="{{ asset('frontend/img/brands/mercedes.png') }}" alt="Mercedes-Benz" style="max-height: 50px;">
+                </div>
+
+                <!-- BMW -->
+                <div class="bg-light p-4">
+                    <img src="{{ asset('frontend/img/brands/bmw.png') }}" alt="BMW" style="max-height: 50px;">
+                </div>
+
+                <!-- Volkswagen -->
+                <div class="bg-light p-4">
+                    <img src="{{ asset('frontend/img/brands/volkswagen.png') }}" alt="Volkswagen" style="max-height: 50px;">
+                </div>
+
+                <!-- Hyundai -->
+                <div class="bg-light p-4">
+                    <img src="{{ asset('frontend/img/brands/hyundai.jpg') }}" alt="Hyundai" style="max-height: 50px;">
+                </div>
+
+                <!-- KIA -->
+                <div class="bg-light p-4">
+                    <img src="{{ asset('frontend/img/brands/kia.png') }}" alt="KIA" style="max-height: 50px;">
+                </div>
+
+                 <!-- HONDA -->
+                <div class="bg-light p-4">
+                    <img src="{{ asset('frontend/img/brands/honda.jpg') }}" alt="HONDA" style="max-height: 50px;">
+                </div>
+
+                 <!-- NISAN -->
+                <div class="bg-light p-4">
+                    <img src="{{ asset('frontend/img/brands/nisan.png') }}" alt="NISAN" style="max-height: 50px;">
+                </div>
+
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- =================== PERFORMANCE SCRIPTS / NOTES =================== -->
 <script>
