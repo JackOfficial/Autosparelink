@@ -105,11 +105,6 @@
             padding: 0.5rem 1.5rem;
         }
 
-        .nav-link.active {
-    color: #0d6efd !important;
-    font-weight: 600;
-}
-
     </style>
 </head>
 
