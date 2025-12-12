@@ -123,24 +123,24 @@
             </button>
 
             <!-- Navbar Items -->
-            <li class="nav-item">
-    <a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="/">Home</a>
+            <li class="nav-item {{ Request::is('/') ? 'active' : '' }}">
+    <a class="nav-link" href="/">Home</a>
 </li>
 
-<li class="nav-item">
-    <a class="nav-link {{ Request::is('about') ? 'active' : '' }}" href="/about">About Us</a>
+<li class="nav-item {{ Request::is('about') ? 'active' : '' }}">
+    <a class="nav-link" href="/about">About Us</a>
 </li>
 
-<li class="nav-item">
-    <a class="nav-link {{ Request::is('contact') ? 'active' : '' }}" href="/contact">Contact</a>
+<li class="nav-item {{ Request::is('contact') ? 'active' : '' }}">
+    <a class="nav-link" href="/contact">Contact</a>
 </li>
 
-<li class="nav-item">
-    <a class="nav-link {{ Request::is('shop') ? 'active' : '' }}" href="/shop">Shop</a>
+<li class="nav-item {{ Request::is('shop') ? 'active' : '' }}">
+    <a class="nav-link" href="/shop">Shop</a>
 </li>
 
-<li class="nav-item dropdown position-static">
-    <a class="nav-link dropdown-toggle {{ Request::is('categories*') ? 'active' : '' }}" 
+<li class="nav-item dropdown position-static {{ Request::is('categories*') ? 'active' : '' }}">
+    <a class="nav-link dropdown-toggle" 
        href="#" id="categoriesDropdown" data-toggle="dropdown">
        Genuine Catalogs
     </a>
