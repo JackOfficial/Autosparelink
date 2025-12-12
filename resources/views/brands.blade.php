@@ -108,18 +108,8 @@
     <div class="brands-grid">
         @foreach($vehicle_brands as $brand)
             <div class="brand-card">
-                <img src="{{ asset('storage/' . $brand->logo) }}" alt="{{ $brand->name }}">
-                <div class="brand-name">{{ strtoupper($brand->name) }}</div>
-
-                @if($brand->type === 'OEM')
-                    <div class="brand-type-badge badge-oem">
-                        <i class="fas fa-certificate"></i> OEM
-                    </div>
-                @else
-                    <div class="brand-type-badge badge-aftermarket">
-                        <i class="fas fa-tools"></i> Aftermarket
-                    </div>
-                @endif
+                <img src="{{ asset('storage/' . $brand->logo) }}" alt="{{ $brand->brand_name }}">
+                <div class="brand-name">{{ strtoupper($brand->brand_name) }}</div>
             </div>
         @endforeach
     </div>
