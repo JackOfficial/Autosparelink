@@ -104,6 +104,12 @@
             border-radius: 50px;
             padding: 0.5rem 1.5rem;
         }
+
+        .nav-link.active {
+    color: #0d6efd !important;
+    font-weight: 600;
+}
+
     </style>
 </head>
 
@@ -122,88 +128,69 @@
             </button>
 
             <!-- Navbar Items -->
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav mr-auto ml-4">
-                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/about">About Us</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/shop">Shop</a></li>
+            <li class="nav-item">
+    <a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="/">Home</a>
+</li>
 
-                    <!-- Mega Menu for Categories -->
-                    <li class="nav-item dropdown position-static">
-                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown">
-                            Genuine Catalogs
-                        </a>
-                        <livewire:categories-component />
-                    </li>
+<li class="nav-item">
+    <a class="nav-link {{ Request::is('about') ? 'active' : '' }}" href="/about">About Us</a>
+</li>
 
-                   <li class="nav-item"><a class="nav-link" href="/brands">Brands</a></li>
+<li class="nav-item">
+    <a class="nav-link {{ Request::is('contact') ? 'active' : '' }}" href="/contact">Contact</a>
+</li>
 
-                    <!-- Resources Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="resourcesDropdown" role="button" data-toggle="dropdown">
-                            Resources
-                        </a>
-                        <div class="dropdown-menu shadow-sm" aria-labelledby="resourcesDropdown">
-                            <a class="dropdown-item d-flex align-items-center" href="/blogs">
-                                <i class="fas fa-newspaper mr-2 text-primary"></i> Blogs
-                            </a>
-                            <a class="dropdown-item d-flex align-items-center" href="/articles">
-                                <i class="fas fa-file-alt mr-2 text-primary"></i> Articles
-                            </a>
-                            <a class="dropdown-item d-flex align-items-center" href="/news">
-                                <i class="fas fa-bullhorn mr-2 text-primary"></i> News
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item d-flex align-items-center" href="/terms-and-conditions">
-                                <i class="fas fa-file-contract mr-2 text-primary"></i> Terms & Conditions
-                            </a>
-                            <a class="dropdown-item d-flex align-items-center" href="/policies">
-                                <i class="fas fa-shield-alt mr-2 text-primary"></i> Policies
-                            </a>
-                        </div>
-                    </li>
-                </ul>
+<li class="nav-item">
+    <a class="nav-link {{ Request::is('shop') ? 'active' : '' }}" href="/shop">Shop</a>
+</li>
 
-                <!-- Right Side Icons and Login/User Info -->
-                <div class="ml-auto d-flex align-items-center">
-                    <!-- Wishlist Icon -->
-                    <a href="#" class="text-white mr-3 position-relative" title="Wishlist">
-                        <i class="fas fa-heart fa-lg"></i>
-                        <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
-                    </a>
+<li class="nav-item dropdown position-static">
+    <a class="nav-link dropdown-toggle {{ Request::is('categories*') ? 'active' : '' }}" 
+       href="#" id="categoriesDropdown" data-toggle="dropdown">
+       Genuine Catalogs
+    </a>
+    <livewire:categories-component/>
+</li>
 
-                    <!-- Cart Icon -->
-                    <a href="#" class="text-white mr-3 position-relative" title="Cart">
-                        <i class="fas fa-shopping-cart fa-lg"></i>
-                        <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
-                    </a>
+<li class="nav-item">
+    <a class="nav-link {{ Request::is('brands') ? 'active' : '' }}" href="/brands">Brands</a>
+</li>
 
-                    <!-- Authentication Links -->
-                    @guest
-                        <a href="{{ route('login') }}" class="btn btn-primary btn-pill ml-2">Login / Register</a>
-                    @else
-                        <div class="dropdown">
-                            <a href="#" class="btn btn-outline-primary btn-pill dropdown-toggle d-flex align-items-center" id="userDropdown" data-toggle="dropdown">
-                                <i class="fas fa-user-circle fa-lg mr-2"></i> {{ Auth::user()->name }}
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right shadow-sm p-0" aria-labelledby="userDropdown" style="min-width: 200px; border-radius: 12px; overflow: hidden;">
-                                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="">
-                                    <i class="fas fa-user mr-2 text-primary"></i> Profile
-                                </a>
-                                <div class="dropdown-divider m-0"></div>
-                                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('logout') }}"
-                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    <i class="fas fa-sign-out-alt mr-2 text-danger"></i> Logout
-                                </a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    @csrf
-                                </form>
-                            </div>
-                        </div>
-                    @endguest
-                </div>
-            </div>
+<!-- Resources Dropdown -->
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle 
+        {{ Request::is('blogs') || Request::is('articles') || Request::is('news') || 
+           Request::is('terms-and-conditions') || Request::is('policies') 
+           ? 'active' : '' }}"
+       href="#" id="resourcesDropdown" role="button" data-toggle="dropdown">
+        Resources
+    </a>
+
+    <div class="dropdown-menu shadow-sm" aria-labelledby="resourcesDropdown">
+        <a class="dropdown-item {{ Request::is('blogs') ? 'active' : '' }}" href="/blogs">
+            <i class="fas fa-newspaper mr-2 text-primary"></i> Blogs
+        </a>
+
+        <a class="dropdown-item {{ Request::is('articles') ? 'active' : '' }}" href="/articles">
+            <i class="fas fa-file-alt mr-2 text-primary"></i> Articles
+        </a>
+
+        <a class="dropdown-item {{ Request::is('news') ? 'active' : '' }}" href="/news">
+            <i class="fas fa-bullhorn mr-2 text-primary"></i> News
+        </a>
+
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item {{ Request::is('terms-and-conditions') ? 'active' : '' }}" href="/terms-and-conditions">
+            <i class="fas fa-file-contract mr-2 text-primary"></i> Terms & Conditions
+        </a>
+
+        <a class="dropdown-item {{ Request::is('policies') ? 'active' : '' }}" href="/policies">
+            <i class="fas fa-shield-alt mr-2 text-primary"></i> Policies
+        </a>
+    </div>
+</li>
+
         </div>
     </nav>
 
