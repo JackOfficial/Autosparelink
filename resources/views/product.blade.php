@@ -108,7 +108,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><a href="#">Hyundai / KIA</a></td>
+                            <td><a href="/cataloge/1">Hyundai / KIA</a></td>
                             <td>0K01133200A</td>
                             <td>HUB-FREE WHEEL</td>
                             <td>0</td>
@@ -119,7 +119,7 @@
                         </tr>
                         <tr>
                             <td>Hyundai / KIA</td>
-                            <td><a href="#" class="text-primary">0K01133200</a></td>
+                            <td>0K01133200</td>
                             <td>HUB-FREE WHEEL</td>
                             <td><span class="badge badge-warning">0</span></td>
                             <td>0.138</td>
