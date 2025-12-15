@@ -93,6 +93,10 @@ class PageController extends Controller
         return view('news-details');
     }
 
+     function article($id){
+        return view('article-details');
+    }
+
     function blog_category($id){
         $blogs = Blogs::join('blog_categories', 'blogs.blog_category_id', 'blog_categories.id')
         ->join('bloggers', 'blogs.blogger_id', 'bloggers.id')

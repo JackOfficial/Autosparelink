@@ -7,7 +7,7 @@
     <div class="row px-xl-5">
         <div class="col-12">
             <nav class="breadcrumb bg-light mb-30">
-                <a class="breadcrumb-item text-dark" href="#">Home</a>
+                <a class="breadcrumb-item text-dark" href="/">Home</a>
                 <span class="breadcrumb-item active">Articles</span>
             </nav>
         </div>
@@ -76,7 +76,7 @@
                 <div class="media mb-3">
                     <img src="{{ asset('frontend/img/parts.jpg') }}" class="mr-3" style="width: 80px; height: 60px; object-fit: cover;">
                     <div class="media-body">
-                        <a class="text-dark" href="#">
+                        <a class="text-dark" href="/articles/1">
                             <h6 class="mt-0 text-truncate">Sample Article Title {{ $i }}</h6>
                         </a>
                         <small><i class="fa fa-calendar text-primary mr-1"></i> 12 Dec, 2025</small>
@@ -114,7 +114,7 @@
                                 <small class="text-muted">
                                     <i class="fa fa-calendar text-primary mr-1"></i> 12 Dec, 2025
                                 </small>
-                                <a href="#" class="btn btn-sm btn-primary">Read More <i class="fa fa-angle-right"></i></a>
+                                <a href="/articles/1" class="btn btn-sm btn-primary">Read More <i class="fa fa-angle-right"></i></a>
                             </div>
                         </div>
                     </div>

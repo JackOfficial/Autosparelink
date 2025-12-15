@@ -60,6 +60,7 @@ Route::get('/blogs', [PageController::class, 'blogs']);
 Route::get('/news', [PageController::class, 'news']);
 Route::get('/news/{id}', [PageController::class, 'news_details']);
 Route::get('/articles', [PageController::class, 'articles']);
+Route::get('/articles/{id}', [PageController::class, 'article']);
 Route::get('/policies', [PageController::class, 'policies']);
 Route::get('/brands', [BrandsController::class, 'brands']);
 
