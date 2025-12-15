@@ -1,66 +1,46 @@
 @extends('layouts.app')
 
-@section('title', 'Shop All Products | AutoSpareLink')
+@section('title', 'All Products | AutoSpareLink')
 
 @section('content')
 
-<!-- Shop Header -->
+<!-- Reading Progress Bar -->
+<div id="reading-progress"></div>
+
+<!-- Page Header -->
 <div class="container-fluid mt-4">
     <div class="row px-xl-5">
         <div class="col-12">
-            <nav class="breadcrumb bg-light mb-30" aria-label="breadcrumb">
-                <a class="breadcrumb-item text-dark" href="/">Home</a>
-                <span class="breadcrumb-item active" aria-current="page">Shop</span>
-            </nav>
+            <h1 class="mb-4 font-weight-bold">All Products</h1>
         </div>
     </div>
 </div>
 
-<!-- Page Title -->
-<div class="container-fluid mb-3">
-    <div class="row px-xl-5">
-        <div class="col-12 text-center">
-            <h1 class="display-4 font-weight-bold mb-3">All Products</h1>
-        </div>
-    </div>
-</div>
-
-<!-- Search Section -->
-<div class="container-fluid mb-5">
+<!-- Search Box -->
+<div class="container-fluid mb-4">
     <div class="row px-xl-5 justify-content-center">
-        <div class="col-lg-10">
-            <div class="bg-white p-4 rounded shadow-sm">
-
-                <!-- Search Input -->
-                <div class="input-group input-group-lg mb-2">
-                    <input type="text" class="form-control border-primary" placeholder="Enter Part Number or VIN / Frame">
-                    <div class="input-group-append">
-                        <button class="btn btn-primary">
-                            <i class="fa fa-search mr-1"></i> Search
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Helper Text -->
-                <div class="d-flex justify-content-between small text-muted mb-3">
-                    <span>Example: ZJ0118400A, 2562035130, 3VW217AUXFM052349, 5TDDK3EH7CS147140</span>
-                    <a href="#" class="text-primary">Where is VIN/Frame?</a>
-                </div>
-
-                <!-- Optional Part Number List Toggle -->
-                {{-- Future: Add dropdown to enter multiple parts if needed --}}
+        <div class="col-lg-10 col-md-12">
+            <div class="bg-light p-4 rounded shadow-sm d-flex flex-column flex-md-row align-items-center">
+                <input type="text" class="form-control rounded-pill mr-md-3 mb-2 mb-md-0" placeholder="Search by part number, VIN or frame...">
+                <button class="btn btn-primary rounded-pill px-4">
+                    <i class="fa fa-search mr-1"></i> Search
+                </button>
+            </div>
+            <div class="d-flex justify-content-between mt-2 small text-muted">
+                <span>Example: ZJ0118400A, 2562035130, 3VW217AUXFM052349, 5TDDK3EH7CS147140</span>
+                <a href="#" class="text-primary">Where is VIN/Frame?</a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Products Table -->
+<!-- Product Table -->
 <div class="container-fluid mb-5">
     <div class="row px-xl-5">
         <div class="col-12">
-            <div class="bg-white p-4 rounded shadow-sm table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="thead-light text-uppercase">
+            <div class="table-responsive shadow-sm">
+                <table class="table table-striped table-hover bg-white">
+                    <thead class="thead-dark">
                         <tr>
                             <th>Make</th>
                             <th>Number</th>
@@ -72,6 +52,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @for ($i = 0; $i < 10; $i++)
                         <tr>
                             <td>Hyundai / KIA</td>
                             <td>0K01133200B</td>
@@ -80,51 +61,12 @@
                             <td>1</td>
                             <td>7</td>
                             <td>
-                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                <a href="#" class="btn btn-sm btn-primary">
                                     <i class="fa fa-search mr-1"></i> View
                                 </a>
                             </td>
                         </tr>
-                        <tr>
-                            <td>Hyundai / KIA</td>
-                            <td>0K08133044</td>
-                            <td>SPACER</td>
-                            <td>$2.88</td>
-                            <td>5</td>
-                            <td>6</td>
-                            <td>
-                                <a href="#" class="btn btn-sm btn-outline-primary">
-                                    <i class="fa fa-search mr-1"></i> View
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Hyundai / KIA</td>
-                            <td>0K9BV105F0A</td>
-                            <td>S/ASSY-B/PLATE,LH</td>
-                            <td>$2.71</td>
-                            <td>30</td>
-                            <td>7</td>
-                            <td>
-                                <a href="#" class="btn btn-sm btn-outline-primary">
-                                    <i class="fa fa-search mr-1"></i> View
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Hyundai / KIA</td>
-                            <td>0PN1113H51</td>
-                            <td>WASHER-NOZZLE</td>
-                            <td>$0.29</td>
-                            <td>697</td>
-                            <td>2</td>
-                            <td>
-                                <a href="#" class="btn btn-sm btn-outline-primary">
-                                    <i class="fa fa-search mr-1"></i> View
-                                </a>
-                            </td>
-                        </tr>
-                        <!-- Add more placeholder rows as needed -->
+                        @endfor
                     </tbody>
                 </table>
             </div>
@@ -132,22 +74,53 @@
     </div>
 </div>
 
+<!-- Pagination -->
+<div class="container-fluid mb-5">
+    <div class="row px-xl-5">
+        <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-center">
+
+            <!-- Results Info -->
+            <div class="mb-2 mb-md-0 text-muted">
+                Displaying 1-10 of 555,634 results
+            </div>
+
+            <!-- Pagination -->
+            <nav>
+                <ul class="pagination mb-0">
+                    <li class="page-item disabled"><span class="page-link">&laquo; Previous</span></li>
+                    <li class="page-item active"><span class="page-link">1</span></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Next &raquo;</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
 <!-- Styles -->
 <style>
-.table-hover tbody tr:hover {
-    background-color: #f0f8ff;
+#reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: #007bff;
+    width: 0%;
+    z-index: 9999;
 }
-.table thead th {
-    font-weight: 600;
-}
-.btn-outline-primary:hover {
-    background-color: #007bff;
-    color: #fff;
-    border-color: #007bff;
-}
-.bg-white {
-    background-color: #ffffff !important;
+.table th, .table td {
+    vertical-align: middle;
 }
 </style>
+
+<!-- Reading Progress Script -->
+<script>
+window.addEventListener('scroll', () => {
+    const scrollTop = document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    document.getElementById('reading-progress').style.width = (scrollTop / height) * 100 + '%';
+});
+</script>
 
 @endsection
