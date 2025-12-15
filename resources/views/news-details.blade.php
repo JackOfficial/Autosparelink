@@ -62,7 +62,7 @@
 
                 @for ($i = 1; $i <= 4; $i++)
                 <div class="media mb-3">
-                    <img src="{{ asset('frontend/img/news.jpg') }}"
+                    <img src="{{ asset('frontend/img/parts.jpg') }}"
                          class="mr-3"
                          style="width:80px;height:60px;object-fit:cover;">
                     <div class="media-body">
@@ -164,7 +164,7 @@
                 <div class="d-flex related-scroll">
                     @for ($i = 1; $i <= 6; $i++)
                     <div class="card mr-3" style="min-width:260px;">
-                        <img src="{{ asset('frontend/img/news.jpg') }}"
+                        <img src="{{ asset('frontend/img/parts.jpg') }}"
                              class="card-img-top"
                              style="height:160px;object-fit:cover;">
                         <div class="card-body">
