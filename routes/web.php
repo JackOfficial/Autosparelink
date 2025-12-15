@@ -44,6 +44,7 @@ use App\Http\Controllers\admin\TransmissionTypeController;
 use App\Http\Controllers\admin\VariantController;
 use App\Http\Controllers\BrandsController;
 use App\Http\Controllers\HomeContoller;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SparePartController;
 use App\Http\Controllers\SpecificationController;
 use App\Http\Controllers\VehicleModelController;
@@ -63,7 +64,7 @@ Route::get('/articles', [PageController::class, 'articles']);
 Route::get('/articles/{id}', [PageController::class, 'article']);
 Route::get('/policies', [PageController::class, 'policies']);
 Route::get('/brands', [BrandsController::class, 'brands']);
-
+Route::get('/shop/products', [ProductController::class, 'products']);
 Route::get('/terms-and-conditions', [PageController::class, 'terms_and_conditions']);
 Route::get('/faqs', [PageController::class, 'faqs']);
 Route::get('/cart', [PageController::class, 'cart']);
