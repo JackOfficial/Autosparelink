@@ -4,7 +4,7 @@
 
 @section('content')
 
-<!-- Breadcrumb Start -->
+<!-- Breadcrumb -->
 <div class="container-fluid mt-4">
     <div class="row px-xl-5">
         <div class="col-12">
@@ -16,13 +16,12 @@
         </div>
     </div>
 </div>
-<!-- Breadcrumb End -->
 
-<!-- Blog Post Start -->
+<!-- Blog Page -->
 <div class="container-fluid">
     <div class="row px-xl-5">
 
-        <!-- Sidebar Start -->
+        <!-- Sidebar -->
         <div class="col-lg-3 col-md-4">
 
             <!-- Search -->
@@ -30,16 +29,14 @@
                 <h5 class="section-title position-relative text-uppercase mb-3">
                     <span class="bg-secondary pr-3">Search</span>
                 </h5>
-                <form>
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search blog...">
-                        <div class="input-group-append">
-                            <span class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </span>
-                        </div>
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search blog...">
+                    <div class="input-group-append">
+                        <span class="input-group-text bg-transparent text-primary">
+                            <i class="fa fa-search"></i>
+                        </span>
                     </div>
-                </form>
+                </div>
             </div>
 
             <!-- Categories -->
@@ -63,10 +60,11 @@
 
                 @for ($i = 1; $i <= 4; $i++)
                 <div class="media mb-3">
-                    <img src="{{ asset('frontend/img/parts.jpg') }}" class="mr-3" style="width: 80px; height: 60px; object-fit: cover;">
+                    <img src="{{ asset('frontend/img/parts.jpg') }}" class="mr-3"
+                         style="width:80px;height:60px;object-fit:cover;">
                     <div class="media-body">
-                        <a class="text-dark" href="#">
-                            <h6 class="mt-0 text-truncate">Sample Blog Title {{ $i }}</h6>
+                        <a href="#" class="text-dark">
+                            <h6 class="mt-0 text-truncate">Recent Blog {{ $i }}</h6>
                         </a>
                         <small class="text-muted">
                             <i class="fa fa-calendar text-primary mr-1"></i> 12 Dec, 2025
@@ -77,31 +75,37 @@
             </div>
 
         </div>
-        <!-- Sidebar End -->
 
-        <!-- Blog Content Start -->
+        <!-- Blog Content -->
         <div class="col-lg-9 col-md-8">
 
             <div class="bg-light p-4 mb-30">
 
+                <!-- Back Button -->
+                <a href="/blogs" class="btn btn-outline-primary btn-sm mb-3">
+                    <i class="fa fa-arrow-left mr-1"></i> Back to Blog
+                </a>
+
                 <!-- Featured Image -->
                 <img src="{{ asset('frontend/img/part.png') }}"
-                     alt="How to choose spare parts"
                      class="img-fluid w-100 mb-4"
-                     style="max-height: 420px; object-fit: cover;">
+                     style="max-height:420px;object-fit:cover;">
 
                 <!-- Title -->
-                <h1 class="mb-3 font-weight-bold">
+                <h1 class="font-weight-bold mb-2">
                     How to Choose the Right Spare Parts for Your Car
                 </h1>
 
                 <!-- Meta -->
-                <div class="d-flex flex-wrap text-muted mb-4" style="font-size: 14px;">
+                <div class="d-flex flex-wrap text-muted mb-4" style="font-size:14px;">
                     <span class="mr-3">
-                        <i class="fa fa-user text-primary mr-1"></i> AutoSpareLink Team
+                        <i class="fa fa-user text-primary mr-1"></i> AutoSpareLink
                     </span>
                     <span class="mr-3">
                         <i class="fa fa-calendar text-primary mr-1"></i> 12 Dec, 2025
+                    </span>
+                    <span class="mr-3">
+                        <i class="fa fa-clock text-primary mr-1"></i> 5 min read
                     </span>
                     <span>
                         <i class="fa fa-folder text-primary mr-1"></i> Spare Parts
@@ -109,95 +113,107 @@
                 </div>
 
                 <!-- Content -->
-                <div class="blog-content text-dark" style="line-height: 1.8; font-size: 15px;">
-
+                <div class="blog-content" style="line-height:1.8;font-size:15px;">
                     <p>
-                        Choosing the right spare parts for your vehicle is essential for performance,
-                        safety, and long-term reliability. At <strong>AutoSpareLink</strong>, we help
-                        drivers find genuine and high-quality aftermarket parts with confidence.
+                        Choosing the correct spare parts is critical for performance,
+                        safety, and long-term vehicle reliability. At <strong>AutoSpareLink</strong>,
+                        we make sourcing trusted OEM and aftermarket parts simple.
                     </p>
 
-                    <h4 class="mt-4">1. Understand OEM vs Aftermarket Parts</h4>
+                    <h4 class="mt-4">OEM vs Aftermarket</h4>
                     <p>
-                        OEM (Original Equipment Manufacturer) parts are made by the same manufacturer
-                        that produced the original parts in your car. Aftermarket parts are produced
-                        by third-party companies and often offer more affordable alternatives.
-                    </p>
-
-                    <h4 class="mt-4">2. Verify Compatibility</h4>
-                    <p>
-                        Always ensure the part number matches your vehicle’s make, model, and year.
-                        Incorrect parts can cause serious mechanical issues and unnecessary costs.
-                    </p>
-
-                    <h4 class="mt-4">3. Buy from Trusted Suppliers</h4>
-                    <p>
-                        Purchasing spare parts from a trusted supplier like AutoSpareLink ensures
-                        authenticity, warranty support, and professional guidance.
+                        OEM parts are produced by original manufacturers, while aftermarket
+                        parts offer cost-effective alternatives with wide availability.
                     </p>
 
                     <blockquote class="blockquote bg-white p-3 border-left border-primary my-4">
                         <p class="mb-0 font-italic">
-                            “The right spare part saves you money, time, and stress in the long run.”
+                            “Quality spare parts protect your vehicle investment.”
                         </p>
                     </blockquote>
 
                     <p>
-                        Whether you are a professional mechanic or a car owner, making informed
-                        decisions when buying spare parts will keep your vehicle running smoothly.
+                        Always confirm compatibility and buy from trusted suppliers to avoid
+                        unnecessary breakdowns.
                     </p>
-
-                </div>
-
-                <!-- Tags -->
-                <div class="mt-4">
-                    <strong>Tags:</strong>
-                    <a href="#" class="badge badge-secondary ml-1">Spare Parts</a>
-                    <a href="#" class="badge badge-secondary ml-1">OEM</a>
-                    <a href="#" class="badge badge-secondary ml-1">Car Maintenance</a>
                 </div>
 
             </div>
 
-            <!-- Related Posts -->
-            <div class="bg-light p-4">
+            <!-- Related Posts (Horizontal Scroll) -->
+            <div class="bg-light p-4 mb-30">
                 <h4 class="section-title position-relative text-uppercase mb-4">
                     <span class="bg-secondary pr-3">Related Posts</span>
                 </h4>
 
-                <div class="row">
-                    @for ($i = 1; $i <= 3; $i++)
-                    <div class="col-md-4">
-                        <div class="bg-white shadow-sm mb-4 hover-shadow">
-                            <img src="{{ asset('frontend/img/part.png') }}"
-                                 class="img-fluid w-100"
-                                 style="height: 180px; object-fit: cover;">
-                            <div class="p-3">
-                                <a href="#" class="h6 d-block text-dark text-decoration-none">
-                                    Related Blog Title {{ $i }}
-                                </a>
-                                <small class="text-muted">
-                                    <i class="fa fa-calendar text-primary mr-1"></i> 10 Dec, 2025
-                                </small>
-                            </div>
+                <div class="related-scroll d-flex overflow-auto pb-2">
+                    @for ($i = 1; $i <= 6; $i++)
+                    <div class="related-card bg-white shadow-sm mr-3">
+                        <img src="{{ asset('frontend/img/part.png') }}"
+                             style="height:160px;object-fit:cover;width:100%;">
+                        <div class="p-3">
+                            <a href="#" class="h6 text-dark text-decoration-none">
+                                Related Blog {{ $i }}
+                            </a>
+                            <small class="text-muted d-block mt-1">
+                                <i class="fa fa-calendar text-primary mr-1"></i> 10 Dec, 2025
+                            </small>
                         </div>
                     </div>
                     @endfor
                 </div>
             </div>
 
+            <!-- Comments -->
+            <div class="bg-light p-4">
+                <h4 class="section-title position-relative text-uppercase mb-4">
+                    <span class="bg-secondary pr-3">Comments (3)</span>
+                </h4>
+
+                <!-- Comment -->
+                <div class="media mb-4">
+                    <i class="fa fa-user-circle fa-2x text-primary mr-3"></i>
+                    <div class="media-body">
+                        <h6 class="mt-0 mb-1">John Doe</h6>
+                        <small class="text-muted">2 days ago</small>
+                        <p class="mt-2 mb-0">
+                            Very informative article. Helped me choose the right parts!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Add Comment -->
+                <form>
+                    <div class="form-group">
+                        <label>Your Comment</label>
+                        <textarea class="form-control" rows="4" placeholder="Write your comment..."></textarea>
+                    </div>
+                    <button class="btn btn-primary">
+                        <i class="fa fa-paper-plane mr-1"></i> Post Comment
+                    </button>
+                </form>
+            </div>
+
         </div>
-        <!-- Blog Content End -->
 
     </div>
 </div>
-<!-- Blog Post End -->
 
 <style>
-    .hover-shadow:hover {
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        transition: all 0.3s ease;
-    }
+.related-card {
+    min-width: 260px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.related-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.related-scroll::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
 </style>
 
 @endsection
