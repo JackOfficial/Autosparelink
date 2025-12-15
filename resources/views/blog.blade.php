@@ -83,7 +83,7 @@
 
                 <!-- Back Button -->
                 <a href="/blogs" class="btn btn-outline-primary btn-sm mb-3">
-                    <i class="fa fa-arrow-left mr-1"></i> Back to Blog
+                    <i class="fa fa-arrow-left mr-1"></i> Back to Blogs
                 </a>
 
                 <!-- Featured Image -->

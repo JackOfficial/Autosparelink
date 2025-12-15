@@ -58,6 +58,7 @@ Route::get('/about', [PageController::class, 'about']);
 Route::get('/gallery', [PageController::class, 'gallery']);
 Route::get('/blogs', [PageController::class, 'blogs']);
 Route::get('/news', [PageController::class, 'news']);
+Route::get('/news/{id}', [PageController::class, 'news_details']);
 Route::get('/articles', [PageController::class, 'articles']);
 Route::get('/policies', [PageController::class, 'policies']);
 Route::get('/brands', [BrandsController::class, 'brands']);
