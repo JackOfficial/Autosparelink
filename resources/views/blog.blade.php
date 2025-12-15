@@ -5,7 +5,7 @@
 <!-- Reading Progress Bar -->
 <div id="reading-progress"></div>
 
-<div class="container-fluid mt-4">
+<div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center px-xl-5 bg-light">
         <nav class="breadcrumb mb-30">
             <a class="breadcrumb-item text-dark" href="/">Home</a>
