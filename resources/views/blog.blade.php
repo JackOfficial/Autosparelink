@@ -6,8 +6,8 @@
 <div id="reading-progress"></div>
 
 <div class="container-fluid mt-4">
-      <div class="d-flex justify-content-between align-items-center px-xl-5">
-        <nav class="breadcrumb bg-light bg-light mb-30">
+      <div class="d-flex justify-content-between align-items-center px-xl-5 bg-light">
+        <nav class="breadcrumb mb-30">
             <a class="breadcrumb-item text-dark" href="/">Home</a>
             <a class="breadcrumb-item text-dark" href="/blog">Blog</a>
             <span class="breadcrumb-item active">Blog Details</span>
