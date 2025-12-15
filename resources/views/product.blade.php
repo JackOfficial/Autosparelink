@@ -36,21 +36,29 @@
                 <!-- Manufacturer / Part Number -->
                 <p class="mb-1"><strong>Make:</strong> Hyundai / KIA</p>
                 <p class="mb-1"><strong>Part Number:</strong> 0K01133200B</p>
+                <p class="mb-1"><strong>Weight:</strong> 0.138 kg</p>
 
                 <!-- Price -->
                 <h4 class="text-primary mb-3">$71.16 USD</h4>
 
                 <!-- Availability -->
-                <p class="mb-1"><strong>Availability:</strong> 1</p>
-                <p class="mb-3"><strong>Ship In:</strong> 7 days</p>
+                <p class="mb-3"><strong>Availability:</strong> 1</p>
 
                 <!-- Quantity Selector -->
-                <div class="mb-3 d-flex align-items-center">
-                    <label class="mr-2 mb-0">Quantity:</label>
-                    <input type="number" class="form-control w-25" value="1" min="1">
+                <div class="mb-4">
+                    <label class="mb-2">Quantity:</label>
+                    <div class="input-group w-50">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-outline-secondary btn-minus" type="button"><i class="fa fa-minus"></i></button>
+                        </div>
+                        <input type="number" class="form-control text-center" value="1" min="1" id="quantity-input">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary btn-plus" type="button"><i class="fa fa-plus"></i></button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Add to Cart / Buttons -->
+                <!-- Add to Cart / Wishlist -->
                 <div class="mb-4">
                     <button class="btn btn-primary btn-lg mr-2">
                         <i class="fa fa-shopping-cart mr-1"></i> Add to Cart
@@ -61,7 +69,7 @@
                 </div>
 
                 <!-- Share Buttons -->
-                <div class="mb-3">
+                <div class="mb-4">
                     <strong class="mr-2">Share:</strong>
                     <a href="#" class="btn btn-sm btn-success mr-1"><i class="fab fa-whatsapp"></i></a>
                     <a href="#" class="btn btn-sm btn-dark mr-1"><i class="fab fa-x-twitter"></i></a>
@@ -76,45 +84,94 @@
                         Ideal for replacement and maintenance.
                     </p>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- Related Products -->
+    <!-- Substitutions Table -->
     <div class="row px-xl-5">
-        <div class="col-12">
-            <h4 class="mb-3">Related Products</h4>
-            <div class="d-flex overflow-auto related-scroll pb-2">
-                @for ($i = 1; $i <= 6; $i++)
-                <div class="card mr-3" style="min-width: 200px;">
-                    <img src="{{ asset('frontend/img/parts.jpg') }}" class="card-img-top" style="height:140px;object-fit:cover;">
-                    <div class="card-body">
-                        <h6 class="card-title text-truncate">Product {{ $i }}</h6>
-                        <p class="text-primary mb-1">$50.00</p>
-                        <a href="#" class="btn btn-sm btn-primary btn-block">View</a>
-                    </div>
-                </div>
-                @endfor
+        <div class="col-12 mb-4">
+            <h4 class="mb-3">Substitutions</h4>
+            <div class="table-responsive bg-light p-3 rounded shadow-sm">
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Make</th>
+                            <th>Number</th>
+                            <th>Name</th>
+                            <th>Availability</th>
+                            <th>Weight, kg</th>
+                            <th>Processing, days</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Hyundai / KIA</td>
+                            <td>0K01133200A</td>
+                            <td>HUB-FREE WHEEL</td>
+                            <td>0</td>
+                            <td>0.023</td>
+                            <td>-</td>
+                            <td>179.96$</td>
+                        </tr>
+                        <tr>
+                            <td>Hyundai / KIA</td>
+                            <td>0K01133200</td>
+                            <td>HUB-FREE WHEEL</td>
+                            <td>0</td>
+                            <td>0.138</td>
+                            <td>-</td>
+                            <td>132.46$</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compatibility Table -->
+    <div class="row px-xl-5">
+        <div class="col-12 mb-4">
+            <h4 class="mb-3">Compatibility</h4>
+            <div class="table-responsive bg-light p-3 rounded shadow-sm">
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Market</th>
+                            <th>Model</th>
+                            <th>Year From</th>
+                            <th>Year To</th>
+                            <th>Diagram</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>DOM</td>
+                            <td>Sportage</td>
+                            <td>1999</td>
+                            <td>2002</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
 </div>
 
-<!-- Styles -->
-<style>
-.related-scroll {
-    overflow-x: auto;
-    padding-bottom: 10px;
-}
-.related-scroll::-webkit-scrollbar {
-    height: 6px;
-}
-.related-scroll::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 10px;
-}
-</style>
+<!-- Quantity Button Script -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('quantity-input');
+    document.querySelector('.btn-plus').addEventListener('click', () => {
+        input.value = parseInt(input.value) + 1;
+    });
+    document.querySelector('.btn-minus').addEventListener('click', () => {
+        if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
+    });
+});
+</script>
 
 @endsection
