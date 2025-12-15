@@ -5,29 +5,21 @@
 <!-- Reading Progress Bar -->
 <div id="reading-progress"></div>
 
-<div class="container-fluid bg-light border-bottom">
-    <div class="d-flex justify-content-between align-items-center px-xl-5 py-3">
+<div class="container-fluid mt-4">
+    <div class="row px-xl-5">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb bg-light mb-30 flex-grow-1 mr-3">
+                <a class="breadcrumb-item text-dark" href="/">Home</a>
+                <a class="breadcrumb-item text-dark" href="/blog">Blog</a>
+                <span class="breadcrumb-item active">Blog Details</span>
+            </nav>
 
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb" class="mb-0">
-            <ol class="breadcrumb bg-transparent p-0 mb-0">
-                <li class="breadcrumb-item">
-                    <a href="/" class="text-dark">Home</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="/blog" class="text-dark">Blog</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">
-                    Blog Details
-                </li>
-            </ol>
-        </nav>
-
-        <!-- Back Button -->
-        <a href="/blogs" class="btn btn-sm btn-outline-primary">
-            <i class="fa fa-arrow-left mr-1"></i> Back to Blog
-        </a>
-
+            <!-- Back to Blog Button -->
+            <a href="/blog" class="btn btn-sm btn-outline-primary mb-30">
+                <i class="fa fa-arrow-left mr-1"></i> Back to Blogs
+            </a>
+        </div>
     </div>
 </div>
 
