@@ -118,7 +118,7 @@
                             <td><span class="badge badge-warning">Not Available</span></td>
                         </tr>
                         <tr>
-                            <td>Hyundai / KIA</td>
+                            <td><a href="/cataloge/1">Hyundai / KIA</a></td>
                             <td>0K01133200</td>
                             <td>HUB-FREE WHEEL</td>
                             <td><span class="badge badge-warning">0</span></td>
