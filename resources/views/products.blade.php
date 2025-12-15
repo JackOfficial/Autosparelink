@@ -16,19 +16,26 @@
     </div>
 </div>
 
-<!-- Search Box -->
+<!-- Search Box with Helper Text -->
 <div class="container-fluid mb-4">
-    <div class="row px-xl-5 justify-content-center">
-        <div class="col-lg-10 col-md-12">
-            <div class="bg-light p-4 rounded shadow-sm d-flex flex-column flex-md-row align-items-center">
-                <input type="text" class="form-control rounded-pill mr-md-3 mb-2 mb-md-0" placeholder="Search by part number, VIN or frame...">
-                <button class="btn btn-primary rounded-pill px-4">
-                    <i class="fa fa-search mr-1"></i> Search
-                </button>
-            </div>
-            <div class="d-flex justify-content-between mt-2 small text-muted">
-                <span>Example: ZJ0118400A, 2562035130, 3VW217AUXFM052349, 5TDDK3EH7CS147140</span>
-                <a href="#" class="text-primary">Where is VIN/Frame?</a>
+    <div class="row px-xl-5">
+        <div class="col-lg-12 col-md-12">
+            <div class="bg-light p-4 rounded shadow-sm">
+                <!-- Input Group -->
+                <div class="input-group input-group-lg rounded-pill overflow-hidden">
+                    <input type="text" class="form-control rounded-left" placeholder="Search by part number, VIN or frame...">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary rounded-right">
+                            <i class="fa fa-search mr-1"></i> Search
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Helper Texts -->
+                <div class="d-flex justify-content-between mt-2 small text-muted px-2">
+                    <span>Example: ZJ0118400A, 2562035130, 3VW217AUXFM052349, 5TDDK3EH7CS147140</span>
+                    <a href="#" class="text-primary">Where is VIN/Frame?</a>
+                </div>
             </div>
         </div>
     </div>
@@ -111,6 +118,10 @@
 }
 .table th, .table td {
     vertical-align: middle;
+}
+.input-group-lg .form-control {
+    height: calc(2.875rem + 2px);
+    font-size: 1.125rem;
 }
 </style>
 
