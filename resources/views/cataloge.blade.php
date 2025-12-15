@@ -42,7 +42,6 @@
                 // Add more rows as needed
             ]
         ];
-        $sectionImage = asset('frontend/img/axle-brake.jpg'); // replace with actual image
     @endphp
 
     @foreach($sections as $sectionName => $parts)
@@ -82,7 +81,7 @@
 
                     <!-- Image -->
                     <div class="col-lg-4 d-flex align-items-center justify-content-center">
-                        <img src="{{ $sectionImage }}" class="img-fluid rounded shadow-sm" alt="{{ $sectionName }}">
+                        <img src="{{ asset('frontend/img/parts.jpg') }}" class="img-fluid rounded shadow-sm" alt="{{ $sectionName }}">
                     </div>
                 </div>
             </div>
