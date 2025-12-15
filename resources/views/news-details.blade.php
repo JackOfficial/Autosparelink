@@ -105,7 +105,7 @@
                 </div>
 
                 <!-- Image -->
-                <img src="{{ asset('frontend/img/news-featured.jpg') }}"
+                <img src="{{ asset('frontend/img/part.png') }}"
                      class="img-fluid w-100 mb-4"
                      style="max-height:450px;object-fit:cover;"
                      alt="Auto industry news">
