@@ -5,9 +5,8 @@
 <!-- Reading Progress Bar -->
 <div id="reading-progress"></div>
 
-<!-- FULL WIDTH Breadcrumb -->
-<div class="container-fluid bg-light py-3 mb-4">
-    <div class="d-flex justify-content-between align-items-center px-xl-5">
+<div class="container-fluid mt-4">
+      <div class="d-flex justify-content-between align-items-center px-xl-5">
         <nav class="breadcrumb bg-light mb-0 p-0">
             <a class="breadcrumb-item text-dark" href="/">Home</a>
             <a class="breadcrumb-item text-dark" href="/blog">Blog</a>
