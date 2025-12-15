@@ -13,7 +13,7 @@
             <span class="breadcrumb-item active">Blog Details</span>
         </nav>
 
-        <a href="/blog" class="btn btn-sm btn-outline-primary">
+        <a href="/blogs" class="btn btn-sm btn-outline-primary">
             ← Back to Blog
         </a>
     </div>
