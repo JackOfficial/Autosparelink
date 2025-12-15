@@ -7,7 +7,7 @@
 
 <div class="container-fluid mt-4">
       <div class="d-flex justify-content-between align-items-center px-xl-5">
-        <nav class="breadcrumb bg-light mb-0 p-0">
+        <nav class="breadcrumb bg-light bg-light mb-30">
             <a class="breadcrumb-item text-dark" href="/">Home</a>
             <a class="breadcrumb-item text-dark" href="/blog">Blog</a>
             <span class="breadcrumb-item active">Blog Details</span>
