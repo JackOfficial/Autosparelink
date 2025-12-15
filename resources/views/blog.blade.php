@@ -7,22 +7,23 @@
 
 <div class="container-fluid mt-4">
     <div class="row px-xl-5">
-        <div class="col-12 d-flex justify-content-between align-items-center">
-            <!-- Breadcrumb -->
-            <nav class="breadcrumb bg-light mb-30 flex-grow-1 mr-3">
-                <a class="breadcrumb-item text-dark" href="/">Home</a>
-                <a class="breadcrumb-item text-dark" href="/blog">Blog</a>
-                <span class="breadcrumb-item active">Blog Details</span>
-            </nav>
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center bg-light p-3 mb-30 rounded">
+                <!-- Breadcrumb -->
+                <nav class="breadcrumb mb-0 flex-grow-1 mr-3">
+                    <a class="breadcrumb-item text-dark" href="/">Home</a>
+                    <a class="breadcrumb-item text-dark" href="/blog">Blog</a>
+                    <span class="breadcrumb-item active">Blog Details</span>
+                </nav>
 
-            <!-- Back to Blog Button -->
-            <a href="/blog" class="btn btn-sm btn-outline-primary mb-30">
-                <i class="fa fa-arrow-left mr-1"></i> Back to Blogs
-            </a>
+                <!-- Back to Blog Button -->
+                <a href="/blog" class="btn btn-sm btn-outline-primary">
+                    <i class="fa fa-arrow-left mr-1"></i> Back to Blogs
+                </a>
+            </div>
         </div>
     </div>
 </div>
-
 
 <!-- Blog Details -->
 <div class="container-fluid">
