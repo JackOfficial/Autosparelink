@@ -4,28 +4,26 @@
 
 @section('content')
 
-<!-- Reading Progress Bar -->
-<div id="reading-progress"></div>
-
-<!-- Page Header -->
+<!-- Page Title -->
 <div class="container-fluid mt-4">
     <div class="row px-xl-5">
         <div class="col-12">
-            <h1 class="mb-4 font-weight-bold">All Products</h1>
+            <h1 class="display-5 font-weight-bold mb-4">All Products</h1>
         </div>
     </div>
 </div>
 
-<!-- Search Box with Helper Text -->
+<!-- Search Box -->
 <div class="container-fluid mb-4">
     <div class="row px-xl-5">
         <div class="col-lg-12 col-md-12">
-            <div class="bg-light p-4 rounded shadow-sm">
+            <div class="bg-light p-4 rounded shadow-sm searchbox-container">
+                
                 <!-- Input Group -->
-                <div class="input-group input-group-lg rounded-pill overflow-hidden">
-                    <input type="text" class="form-control rounded-left" placeholder="Search by part number, VIN or frame...">
+                <div class="input-group searchbox-wrapper">
+                    <input type="text" class="form-control searchbox-input" placeholder="Search by part number, VIN or frame...">
                     <div class="input-group-append">
-                        <button class="btn btn-primary rounded-right">
+                        <button class="btn btn-primary searchbox-btn">
                             <i class="fa fa-search mr-1"></i> Search
                         </button>
                     </div>
@@ -36,18 +34,20 @@
                     <span>Example: ZJ0118400A, 2562035130, 3VW217AUXFM052349, 5TDDK3EH7CS147140</span>
                     <a href="#" class="text-primary">Where is VIN/Frame?</a>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
 
-<!-- Product Table -->
+<!-- Products Table -->
 <div class="container-fluid mb-5">
     <div class="row px-xl-5">
         <div class="col-12">
-            <div class="table-responsive shadow-sm">
-                <table class="table table-striped table-hover bg-white">
-                    <thead class="thead-dark">
+
+            <div class="table-responsive bg-white rounded shadow-sm p-3">
+                <table class="table table-hover table-bordered mb-0">
+                    <thead class="thead-light">
                         <tr>
                             <th>Make</th>
                             <th>Number</th>
@@ -77,61 +77,88 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Pagination -->
-<div class="container-fluid mb-5">
-    <div class="row px-xl-5">
-        <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-center">
-
-            <!-- Results Info -->
-            <div class="mb-2 mb-md-0 text-muted">
-                Displaying 1-10 of 555,634 results
+            <!-- Pagination Info -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <small class="text-muted">Displaying 1–30 of 555,634 results</small>
+                
+                <!-- Pagination -->
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+                </nav>
             </div>
 
-            <!-- Pagination -->
-            <nav>
-                <ul class="pagination mb-0">
-                    <li class="page-item disabled"><span class="page-link">&laquo; Previous</span></li>
-                    <li class="page-item active"><span class="page-link">1</span></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#">Next &raquo;</a></li>
-                </ul>
-            </nav>
         </div>
     </div>
 </div>
 
 <!-- Styles -->
 <style>
-#reading-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 4px;
-    background: #007bff;
-    width: 0%;
-    z-index: 9999;
+/* Search Box Styles */
+.searchbox-container {
+    border-radius: 15px;
+    background: #f8f9fa;
 }
+
+.searchbox-wrapper {
+    border-radius: 50px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+.searchbox-input {
+    border: none;
+    padding-left: 20px;
+    font-size: 1rem;
+    height: 50px;
+    border-radius: 0;
+}
+
+.searchbox-btn {
+    border: none;
+    height: 50px;
+    padding: 0 25px;
+    font-size: 1rem;
+    border-radius: 0;
+}
+
+.searchbox-wrapper .form-control:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+/* Table */
 .table th, .table td {
     vertical-align: middle;
 }
-.input-group-lg .form-control {
-    height: calc(2.875rem + 2px);
-    font-size: 1.125rem;
+
+/* Pagination hover */
+.pagination .page-item .page-link {
+    border-radius: 50%;
+    margin: 0 2px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .searchbox-input,
+    .searchbox-btn {
+        height: 45px;
+        font-size: 0.9rem;
+    }
 }
 </style>
-
-<!-- Reading Progress Script -->
-<script>
-window.addEventListener('scroll', () => {
-    const scrollTop = document.documentElement.scrollTop;
-    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    document.getElementById('reading-progress').style.width = (scrollTop / height) * 100 + '%';
-});
-</script>
 
 @endsection
