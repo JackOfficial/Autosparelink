@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Shop | AutoSpareLink')
+@section('title', 'Shop All Products | AutoSpareLink')
 
 @section('content')
 
@@ -8,36 +8,59 @@
 <div class="container-fluid mt-4">
     <div class="row px-xl-5">
         <div class="col-12">
-            <nav class="breadcrumb bg-light mb-30">
+            <nav class="breadcrumb bg-light mb-30" aria-label="breadcrumb">
                 <a class="breadcrumb-item text-dark" href="/">Home</a>
-                <span class="breadcrumb-item active">Shop</span>
+                <span class="breadcrumb-item active" aria-current="page">Shop</span>
             </nav>
         </div>
     </div>
 </div>
 
-<!-- Search Section -->
-<div class="container-fluid mb-4">
+<!-- Page Title -->
+<div class="container-fluid mb-3">
     <div class="row px-xl-5">
-        <div class="col-12">
-            <div class="bg-light p-4 rounded shadow-sm d-flex align-items-center">
-                <input type="text" class="form-control form-control-lg mr-3"
-                       placeholder="Enter Part Number or VIN / Frame">
-                <button class="btn btn-primary btn-lg">
-                    <i class="fa fa-search mr-1"></i> Search
-                </button>
+        <div class="col-12 text-center">
+            <h1 class="display-4 font-weight-bold mb-3">All Products</h1>
+        </div>
+    </div>
+</div>
+
+<!-- Search Section -->
+<div class="container-fluid mb-5">
+    <div class="row px-xl-5 justify-content-center">
+        <div class="col-lg-10">
+            <div class="bg-white p-4 rounded shadow-sm">
+
+                <!-- Search Input -->
+                <div class="input-group input-group-lg mb-2">
+                    <input type="text" class="form-control border-primary" placeholder="Enter Part Number or VIN / Frame">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-search mr-1"></i> Search
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Helper Text -->
+                <div class="d-flex justify-content-between small text-muted mb-3">
+                    <span>Example: ZJ0118400A, 2562035130, 3VW217AUXFM052349, 5TDDK3EH7CS147140</span>
+                    <a href="#" class="text-primary">Where is VIN/Frame?</a>
+                </div>
+
+                <!-- Optional Part Number List Toggle -->
+                {{-- Future: Add dropdown to enter multiple parts if needed --}}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Parts Table -->
-<div class="container-fluid">
+<!-- Products Table -->
+<div class="container-fluid mb-5">
     <div class="row px-xl-5">
         <div class="col-12">
-            <div class="table-responsive bg-light p-4 rounded shadow-sm">
+            <div class="bg-white p-4 rounded shadow-sm table-responsive">
                 <table class="table table-bordered table-hover">
-                    <thead class="thead-light">
+                    <thead class="thead-light text-uppercase">
                         <tr>
                             <th>Make</th>
                             <th>Number</th>
@@ -45,6 +68,7 @@
                             <th>Price, USD</th>
                             <th>Availability</th>
                             <th>Ship In, Days</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,6 +79,11 @@
                             <td>$71.16</td>
                             <td>1</td>
                             <td>7</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa fa-search mr-1"></i> View
+                                </a>
+                            </td>
                         </tr>
                         <tr>
                             <td>Hyundai / KIA</td>
@@ -63,6 +92,11 @@
                             <td>$2.88</td>
                             <td>5</td>
                             <td>6</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa fa-search mr-1"></i> View
+                                </a>
+                            </td>
                         </tr>
                         <tr>
                             <td>Hyundai / KIA</td>
@@ -71,6 +105,11 @@
                             <td>$2.71</td>
                             <td>30</td>
                             <td>7</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa fa-search mr-1"></i> View
+                                </a>
+                            </td>
                         </tr>
                         <tr>
                             <td>Hyundai / KIA</td>
@@ -79,6 +118,11 @@
                             <td>$0.29</td>
                             <td>697</td>
                             <td>2</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa fa-search mr-1"></i> View
+                                </a>
+                            </td>
                         </tr>
                         <!-- Add more placeholder rows as needed -->
                     </tbody>
@@ -92,13 +136,17 @@
 <style>
 .table-hover tbody tr:hover {
     background-color: #f0f8ff;
-    cursor: pointer;
 }
 .table thead th {
     font-weight: 600;
 }
-.bg-light {
-    background-color: #f8f9fa !important;
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+.bg-white {
+    background-color: #ffffff !important;
 }
 </style>
 
