@@ -156,9 +156,9 @@
                             <td>1999</td>
                             <td>2002</td>
                             <td>
-                                <button class="btn btn-sm btn-primary">
+                                <a href="/cataloge/1" class="btn btn-sm btn-primary">
                                     <i class="fas fa-info"></i> View
-                                </button>
+                                </a>
                             </td>
                         </tr>
                     </tbody>
