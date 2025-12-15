@@ -8,7 +8,7 @@
 <div class="container-fluid mt-4">
     <div class="row px-xl-5">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center bg-light p-3 mb-30 rounded">
+            <div class="d-flex justify-content-between align-items-center p-3 mb-30 rounded">
                 <!-- Breadcrumb -->
                 <nav class="breadcrumb mb-0 flex-grow-1 mr-3">
                     <a class="breadcrumb-item text-dark" href="/">Home</a>
