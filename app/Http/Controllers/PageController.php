@@ -103,32 +103,32 @@ class PageController extends Controller
         return redirect()->back();
     }
     function blog($title){
-        $blog = Blogs::join('blog_categories', 'blogs.blog_category_id', 'blog_categories.id')
-        ->join('bloggers', 'blogs.blogger_id', 'bloggers.id')
-        ->where('blogs.title', $title)
-        ->select('blogs.*', 'blog_categories.blog_category', 'bloggers.first_name', 'bloggers.last_name')
-        ->first();
+        // $blog = Blogs::join('blog_categories', 'blogs.blog_category_id', 'blog_categories.id')
+        // ->join('bloggers', 'blogs.blogger_id', 'bloggers.id')
+        // ->where('blogs.title', $title)
+        // ->select('blogs.*', 'blog_categories.blog_category', 'bloggers.first_name', 'bloggers.last_name')
+        // ->first();
 
-        $latest_blogs= Blogs::join('blog_categories', 'blogs.blog_category_id', 'blog_categories.id')
-        ->join('bloggers', 'blogs.blogger_id', 'bloggers.id')
-        ->select('blogs.*', 'blog_categories.blog_category', 'bloggers.first_name', 'bloggers.last_name')
-        ->get();
+        // $latest_blogs= Blogs::join('blog_categories', 'blogs.blog_category_id', 'blog_categories.id')
+        // ->join('bloggers', 'blogs.blogger_id', 'bloggers.id')
+        // ->select('blogs.*', 'blog_categories.blog_category', 'bloggers.first_name', 'bloggers.last_name')
+        // ->get();
 
-        $categories = Blog_categories::all();
+        // $categories = Blog_categories::all();
 
-        $related = Blogs::join('blog_categories', 'blogs.blog_category_id', 'blog_categories.id')
-        ->join('bloggers', 'blogs.blogger_id', 'bloggers.id')
-        ->select('blogs.*', 'blog_categories.blog_category', 'bloggers.first_name', 'bloggers.last_name')
-        ->get();
+        // $related = Blogs::join('blog_categories', 'blogs.blog_category_id', 'blog_categories.id')
+        // ->join('bloggers', 'blogs.blogger_id', 'bloggers.id')
+        // ->select('blogs.*', 'blog_categories.blog_category', 'bloggers.first_name', 'bloggers.last_name')
+        // ->get();
 
-        $comments = Comments::join('blogs', 'comments.blog_id', 'blogs.id')
-        ->join('users', 'comments.user_id', 'users.id')
-        ->where('comments.blog_id', $blog->id)
-        ->select('comments.*', 'users.name', 'users.avatar')
-        ->orderBy('comments.id', 'DESC')
-        ->get();
+        // $comments = Comments::join('blogs', 'comments.blog_id', 'blogs.id')
+        // ->join('users', 'comments.user_id', 'users.id')
+        // ->where('comments.blog_id', $blog->id)
+        // ->select('comments.*', 'users.name', 'users.avatar')
+        // ->orderBy('comments.id', 'DESC')
+        // ->get();
 
-        return view('blog', compact('blog', 'latest_blogs', 'related', 'categories', 'comments')); 
+        return view('blog'); 
     }
 
     function donate(){

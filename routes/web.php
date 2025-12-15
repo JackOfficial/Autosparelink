@@ -66,7 +66,7 @@ Route::get('/terms-and-conditions', [PageController::class, 'terms_and_condition
 Route::get('/faqs', [PageController::class, 'faqs']);
 Route::get('/cart', [PageController::class, 'cart']);
 
-Route::get('/blog/{title}', [PageController::class, 'blog']);
+Route::get('/blog/{id}', [PageController::class, 'blog']);
 Route::get('/blogs/{id}', [PageController::class, 'blog_category']);
 Route::get('/projects', [PageController::class, 'projects']);
 Route::get('/project/{id}', [PageController::class, 'project']);
