@@ -28,24 +28,24 @@
 
         <!-- Product Info -->
         <div class="col-lg-7 col-md-6 mb-4">
-            <div class="bg-light p-4 rounded shadow-sm">
+            <div class="bg-light p-4 rounded shadow-sm position-relative">
 
                 <!-- Title -->
                 <h2 class="font-weight-bold mb-3">HUB-FREE WHEEL</h2>
 
-                <!-- Manufacturer / Part Number -->
+                <!-- Manufacturer / Part Number / Weight -->
                 <p class="mb-1"><strong>Make:</strong> Hyundai / KIA</p>
                 <p class="mb-1"><strong>Part Number:</strong> 0K01133200B</p>
                 <p class="mb-1"><strong>Weight:</strong> 0.138 kg</p>
 
                 <!-- Price -->
-                <h4 class="text-primary mb-3">$71.16 USD</h4>
+                <h3 class="text-primary mb-3">$71.16 <small class="text-muted">USD</small></h3>
 
                 <!-- Availability -->
-                <p class="mb-3"><strong>Availability:</strong> 1</p>
+                <p class="mb-3"><strong>Availability:</strong> <span class="badge badge-success">1</span></p>
 
                 <!-- Quantity Selector -->
-                <div class="mb-4">
+                <div class="mb-4 position-relative quantity-wrapper">
                     <label class="mb-2">Quantity:</label>
                     <div class="input-group w-50">
                         <div class="input-group-prepend">
@@ -59,11 +59,11 @@
                 </div>
 
                 <!-- Add to Cart / Wishlist -->
-                <div class="mb-4">
+                <div class="mb-4 d-flex align-items-center position-relative">
                     <button class="btn btn-primary btn-lg mr-2">
                         <i class="fa fa-shopping-cart mr-1"></i> Add to Cart
                     </button>
-                    <button class="btn btn-outline-secondary btn-lg">
+                    <button class="btn btn-outline-secondary btn-lg wishlist-btn">
                         <i class="fa fa-heart mr-1"></i> Add to Wishlist
                     </button>
                 </div>
@@ -103,6 +103,7 @@
                             <th>Weight, kg</th>
                             <th>Processing, days</th>
                             <th>Price</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -114,15 +115,17 @@
                             <td>0.023</td>
                             <td>-</td>
                             <td>179.96$</td>
+                            <td><span class="badge badge-warning">Not Available</span></td>
                         </tr>
                         <tr>
                             <td>Hyundai / KIA</td>
-                            <td>0K01133200</td>
+                            <td><a href="#" class="text-primary">0K01133200</a></td>
                             <td>HUB-FREE WHEEL</td>
-                            <td>0</td>
+                            <td><span class="badge badge-warning">0</span></td>
                             <td>0.138</td>
                             <td>-</td>
                             <td>132.46$</td>
+                            <td><span class="badge badge-warning">Not Available</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -134,6 +137,7 @@
     <div class="row px-xl-5">
         <div class="col-12 mb-4">
             <h4 class="mb-3">Compatibility</h4>
+            <button class="btn btn-primary rounded my-1">Sportage</button>
             <div class="table-responsive bg-light p-3 rounded shadow-sm">
                 <table class="table table-bordered table-hover mb-0">
                     <thead class="thead-light">
@@ -151,7 +155,11 @@
                             <td>Sportage</td>
                             <td>1999</td>
                             <td>2002</td>
-                            <td>-</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary">
+                                    <i class="fas fa-info"></i> View
+                                </button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -173,5 +181,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
+<!-- Hover Styles for Wishlist & Quantity -->
+<style>
+.quantity-wrapper .btn-minus,
+.quantity-wrapper .btn-plus,
+.wishlist-btn {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.quantity-wrapper:hover .btn-minus,
+.quantity-wrapper:hover .btn-plus,
+.wishlist-btn:hover {
+    opacity: 1;
+}
+
+.wishlist-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+</style>
 
 @endsection
