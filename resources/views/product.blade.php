@@ -34,8 +34,8 @@
                 <h2 class="font-weight-bold mb-3">HUB-FREE WHEEL</h2>
 
                 <!-- Manufacturer / Part Number / Weight -->
-                <p class="mb-1"><strong>Make:</strong> Hyundai / KIA</p>
-                <p class="mb-1"><strong>Part Number:</strong> 0K01133200B</p>
+                <p class="mb-1"><strong>Make:</strong> <a href="#">Hyundai / KIA</a></p>
+                <p class="mb-1"><strong>Part Number:</strong> <a href="#">0K01133200B</a></p>
                 <p class="mb-1"><strong>Weight:</strong> 0.138 kg</p>
 
                 <!-- Price -->
@@ -108,7 +108,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Hyundai / KIA</td>
+                            <td><a href="#">Hyundai / KIA</a></td>
                             <td>0K01133200A</td>
                             <td>HUB-FREE WHEEL</td>
                             <td>0</td>
