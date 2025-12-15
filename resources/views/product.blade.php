@@ -28,7 +28,7 @@
 
         <!-- Product Info -->
         <div class="col-lg-7 col-md-6 mb-4">
-            <div class="bg-light p-4 rounded shadow-sm position-relative">
+            <div class="bg-light p-4 rounded shadow-sm product-card position-relative">
 
                 <!-- Title -->
                 <h2 class="font-weight-bold mb-3">HUB-FREE WHEEL</h2>
@@ -59,7 +59,7 @@
                 </div>
 
                 <!-- Add to Cart / Wishlist -->
-                <div class="mb-4 d-flex align-items-center position-relative">
+                <div class="mb-4 d-flex align-items-center">
                     <button class="btn btn-primary btn-lg mr-2">
                         <i class="fa fa-shopping-cart mr-1"></i> Add to Cart
                     </button>
@@ -72,7 +72,7 @@
                 <div class="mb-4">
                     <strong class="mr-2">Share:</strong>
                     <a href="#" class="btn btn-sm btn-success mr-1"><i class="fab fa-whatsapp"></i></a>
-                    <a href="#" class="btn btn-sm btn-dark mr-1"><i class="fab fa-x-twitter"></i></a>
+                    <a href="#" class="btn btn-sm btn-dark mr-1"><i class="fab fa-twitter"></i></a>
                     <a href="#" class="btn btn-sm btn-primary"><i class="fab fa-facebook-f"></i></a>
                 </div>
 
@@ -169,7 +169,6 @@
 
 </div>
 
-<!-- Quantity Button Script -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('quantity-input');
@@ -182,25 +181,25 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- Hover Styles for Wishlist & Quantity -->
 <style>
-.quantity-wrapper .btn-minus,
-.quantity-wrapper .btn-plus,
+/* Wishlist button appears on card hover */
+.product-card:hover .wishlist-btn {
+    opacity: 1;
+}
 .wishlist-btn {
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
-.quantity-wrapper:hover .btn-minus,
-.quantity-wrapper:hover .btn-plus,
-.wishlist-btn:hover {
-    opacity: 1;
+/* Quantity buttons appear on hover */
+.quantity-wrapper .btn-minus,
+.quantity-wrapper .btn-plus {
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
-
-.wishlist-btn {
-    position: absolute;
-    right: 0;
-    top: 0;
+.quantity-wrapper:hover .btn-minus,
+.quantity-wrapper:hover .btn-plus {
+    opacity: 1;
 }
 
 .table-hover tbody tr:hover {
