@@ -5,19 +5,32 @@
 <!-- Reading Progress Bar -->
 <div id="reading-progress"></div>
 
-<div class="container mt-4">
-      <div class="d-flex justify-content-between align-items-center px-xl-5 bg-light">
-        <nav class="breadcrumb mb-30">
-            <a class="breadcrumb-item text-dark" href="/">Home</a>
-            <a class="breadcrumb-item text-dark" href="/blog">Blog</a>
-            <span class="breadcrumb-item active">Blog Details</span>
+<div class="container-fluid bg-light border-bottom">
+    <div class="d-flex justify-content-between align-items-center px-xl-5 py-3">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-0">
+            <ol class="breadcrumb bg-transparent p-0 mb-0">
+                <li class="breadcrumb-item">
+                    <a href="/" class="text-dark">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/blog" class="text-dark">Blog</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Blog Details
+                </li>
+            </ol>
         </nav>
 
+        <!-- Back Button -->
         <a href="/blogs" class="btn btn-sm btn-outline-primary">
-            ← Back to Blog
+            <i class="fa fa-arrow-left mr-1"></i> Back to Blog
         </a>
+
     </div>
 </div>
+
 
 <!-- Blog Details -->
 <div class="container-fluid">
