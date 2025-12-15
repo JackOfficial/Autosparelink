@@ -62,7 +62,7 @@
                         @for ($i = 0; $i < 10; $i++)
                         <tr>
                             <td>Hyundai / KIA</td>
-                            <td>0K01133200B</td>
+                            <td><a href="/shop/products/1">0K01133200B</a></td>
                             <td>HUB-FREE WHEEL</td>
                             <td>$71.16</td>
                             <td>1</td>

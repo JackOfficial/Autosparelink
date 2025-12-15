@@ -65,6 +65,7 @@ Route::get('/articles/{id}', [PageController::class, 'article']);
 Route::get('/policies', [PageController::class, 'policies']);
 Route::get('/brands', [BrandsController::class, 'brands']);
 Route::get('/shop/products', [ProductController::class, 'products']);
+Route::get('/shop/products/{id}', [ProductController::class, 'product']);
 Route::get('/terms-and-conditions', [PageController::class, 'terms_and_conditions']);
 Route::get('/faqs', [PageController::class, 'faqs']);
 Route::get('/cart', [PageController::class, 'cart']);
