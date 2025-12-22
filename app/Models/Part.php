@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Part extends Model
 {
     protected $fillable = [
-        'part_number',
+        'sku',             // Internal SKU
+        'part_number',     // Manufacturer/Supplier part number
         'part_name',
         'category_id',
-        'brand_id',
+        'part_brand_id',   // References PartBrand
+        'oem_number',      // Optional OEM number
         'description',
         'price',
         'stock_quantity',
@@ -18,14 +20,19 @@ class Part extends Model
         'photo',
     ];
 
-
+    /**
+     * Get the category of the part.
+     */
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function brand()
+    /**
+     * Get the brand of the part.
+     */
+    public function partBrand()
     {
-        return $this->belongsTo(PartBrand::class);
+        return $this->belongsTo(PartBrand::class, 'part_brand_id');
     }
 }
