@@ -78,7 +78,7 @@
                             <td>{{ $part->part_number }}</td>
                             <td>{{ $part->part_name }}</td>
                             <td>{{ $part->category->category_name }}</td>
-                            <td>{{ $part->partBrand->name }} ({{ $part->partBrand->type }})</td>
+                            <td>{{ $part->partBrand->name ?? '-' }} ({{ $part->partBrand->type ?? '-' }})</td>
                             <td>{{ $part->oem_number ?? '-' }}</td>
 
                             <td>${{ number_format($part->price, 2) }}</td>
