@@ -77,7 +77,7 @@
                             @foreach($partBrands as $brand)
                                 <option value="{{ $brand->id }}"
                                     {{ $brand->id == $part->part_brand_id ? 'selected' : '' }}>
-                                    {{ $brand->name }}
+                                     {{ $brand->name }} ({{ $brand->type }})
                                 </option>
                             @endforeach
                         </select>

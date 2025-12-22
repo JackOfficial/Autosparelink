@@ -68,7 +68,7 @@
                         <select name="part_brand_id" class="form-control" required>
                             @foreach($partBrands as $brand)
                                 <option value="{{ $brand->id }}" {{ old('part_brand_id') == $brand->id ? 'selected' : '' }}>
-                                    {{ $brand->name }}
+                                    {{ $brand->name }} ({{ $brand->type }})
                                 </option>
                             @endforeach
                         </select>
