@@ -33,6 +33,6 @@ class Part extends Model
      */
     public function partBrand()
     {
-        return $this->belongsTo(PartBrand::class, 'part_brand_id');
+        return $this->belongsTo(PartBrand::class);
     }
 }
