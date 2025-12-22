@@ -79,12 +79,12 @@
                             <!-- Brand Type -->
                             <td>
                                 <span class="badge 
-                                    @if($brand->brand_type === 'IAM') badge-info
+                                    @if($brand->brand_type === 'Aftermarket') badge-info
                                     @elseif($brand->brand_type === 'OEM') badge-warning
                                     @elseif($brand->brand_type === 'Genuine') badge-success
                                     @else badge-secondary
                                     @endif">
-                                    {{ $brand->brand_type }}
+                                    {{ $brand->type }}
                                 </span>
                             </td>
 
