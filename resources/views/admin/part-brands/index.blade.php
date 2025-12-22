@@ -79,9 +79,9 @@
                             <!-- Brand Type -->
                             <td>
                                 <span class="badge 
-                                    @if($brand->brand_type === 'Aftermarket') badge-info
-                                    @elseif($brand->brand_type === 'OEM') badge-warning
-                                    @elseif($brand->brand_type === 'Genuine') badge-success
+                                    @if($brand->type === 'Aftermarket') badge-info
+                                    @elseif($brand->type === 'OEM') badge-warning
+                                    @elseif($brand->type === 'Genuine') badge-success
                                     @else badge-secondary
                                     @endif">
                                     {{ $brand->type }}
