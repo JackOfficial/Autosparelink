@@ -11,8 +11,8 @@ class BodyTypeController extends Controller
 {
     public function index()
     {
-        $bodyTypes = BodyType::all();
-        return view('admin.body-types.index', compact('bodyTypes'));
+        // $bodyTypes = BodyType::all();
+        // return view('admin.body-types.index', compact('bodyTypes'));
     }
 
     public function create()
