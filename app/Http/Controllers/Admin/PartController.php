@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Part;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\PartBrand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +22,7 @@ class PartController extends Controller
     {
         return view('admin.parts.create', [
             'categories' => Category::all(),
-            'brands' => Brand::all()
+            'partBrands' => PartBrand::all()
         ]);
     }
 
@@ -54,7 +55,7 @@ class PartController extends Controller
         return view('admin.parts.edit', [
             'part' => Part::findOrFail($id),
             'categories' => Category::all(),
-            'brands' => Brand::all()
+            'partBrands' => PartBrand::all()
         ]);
     }
 

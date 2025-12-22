@@ -26,6 +26,6 @@ class Part extends Model
 
     public function brand()
     {
-        return $this->belongsTo(Brand::class);
+        return $this->belongsTo(PartBrand::class);
     }
 }

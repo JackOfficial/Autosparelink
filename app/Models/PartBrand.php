@@ -15,4 +15,9 @@ class PartBrand extends Model
     'website',
     ];
 
+    public function parts()
+    {
+        return $this->hasMany(Part::class);
+    }
+
 }
