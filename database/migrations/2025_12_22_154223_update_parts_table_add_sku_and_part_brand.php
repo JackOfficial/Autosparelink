@@ -1,112 +1,63 @@
-<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-namespace App\Http\Controllers\Admin;
-
-use App\Http\Controllers\Controller;
-use App\Models\Part;
-use App\Models\Category;
-use App\Models\PartBrand;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-
-class PartController extends Controller
+return new class extends Migration
 {
-    public function index()
+    public function up(): void
     {
-        $parts = Part::with(['category', 'partBrand'])->latest()->get();
-        return view('admin.parts.index', compact('parts'));
-    }
+        Schema::table('parts', function (Blueprint $table) {
 
-    public function create()
-    {
-        return view('admin.parts.create', [
-            'categories' => Category::all(),
-            'partBrands' => PartBrand::all(),
-        ]);
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'sku'             => 'required|string|max:255|unique:parts,sku',
-            'part_number'     => 'nullable|string|max:255',
-            'part_name'       => 'required|string|max:255',
-            'category_id'     => 'required|exists:categories,id',
-            'part_brand_id'   => 'required|exists:part_brands,id',
-            'oem_number'      => 'nullable|string|max:255',
-            'description'     => 'nullable|string',
-            'price'           => 'required|numeric|min:0',
-            'stock_quantity'  => 'required|integer|min:0',
-            'status'          => 'required|integer',
-            'photo'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
-
-        // Store photo if uploaded
-        if ($request->hasFile('photo')) {
-            $validated['photo'] = $request->file('photo')->store('parts', 'public');
-        }
-
-        Part::create($validated);
-
-        return redirect()
-            ->route('admin.spare-parts.index')
-            ->with('success', 'Part created successfully.');
-    }
-
-    public function edit(string $id)
-    {
-        return view('admin.parts.edit', [
-            'part'       => Part::findOrFail($id),
-            'categories' => Category::all(),
-            'partBrands' => PartBrand::all(),
-        ]);
-    }
-
-    public function update(Request $request, string $id)
-    {
-        $part = Part::findOrFail($id);
-
-        $validated = $request->validate([
-            'sku'             => "required|string|max:255|unique:parts,sku,{$id}",
-            'part_number'     => 'nullable|string|max:255',
-            'part_name'       => 'required|string|max:255',
-            'category_id'     => 'required|exists:categories,id',
-            'part_brand_id'   => 'required|exists:part_brands,id',
-            'oem_number'      => 'nullable|string|max:255',
-            'description'     => 'nullable|string',
-            'price'           => 'required|numeric|min:0',
-            'stock_quantity'  => 'required|integer|min:0',
-            'status'          => 'required|integer',
-            'photo'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
-
-        // Handle photo
-        if ($request->hasFile('photo')) {
-            if ($part->photo && Storage::disk('public')->exists($part->photo)) {
-                Storage::disk('public')->delete($part->photo);
+            /* ADD SKU */
+            if (!Schema::hasColumn('parts', 'sku')) {
+                $table->string('sku')->unique()->after('id');
             }
-            $validated['photo'] = $request->file('photo')->store('parts', 'public');
-        }
 
-        $part->update($validated);
+            /* ADD PART BRAND RELATION */
+            if (!Schema::hasColumn('parts', 'part_brand_id')) {
+                $table->foreignId('part_brand_id')
+                      ->after('category_id')
+                      ->constrained('part_brands')
+                      ->cascadeOnDelete();
+            }
 
-        return redirect()
-            ->route('admin.spare-parts.index')
-            ->with('success', 'Part updated successfully.');
+            /* ADD OEM NUMBER (OPTIONAL) */
+            if (!Schema::hasColumn('parts', 'oem_number')) {
+                $table->string('oem_number')->nullable()->after('part_number');
+            }
+
+            /* REMOVE OLD brand_id IF IT EXISTS */
+            if (Schema::hasColumn('parts', 'brand_id')) {
+                $table->dropForeign(['brand_id']);
+                $table->dropColumn('brand_id');
+            }
+        });
     }
 
-    public function destroy(string $id)
+    public function down(): void
     {
-        $part = Part::findOrFail($id);
+        Schema::table('parts', function (Blueprint $table) {
 
-        if ($part->photo && Storage::disk('public')->exists($part->photo)) {
-            Storage::disk('public')->delete($part->photo);
-        }
+            if (Schema::hasColumn('parts', 'sku')) {
+                $table->dropColumn('sku');
+            }
 
-        $part->delete();
+            if (Schema::hasColumn('parts', 'oem_number')) {
+                $table->dropColumn('oem_number');
+            }
 
-        return redirect()
-            ->route('admin.spare-parts.index')
-            ->with('success', 'Part deleted successfully.');
+            if (Schema::hasColumn('parts', 'part_brand_id')) {
+                $table->dropForeign(['part_brand_id']);
+                $table->dropColumn('part_brand_id');
+            }
+
+            /* RESTORE brand_id IF YOU EVER ROLLBACK */
+            if (!Schema::hasColumn('parts', 'brand_id')) {
+                $table->foreignId('brand_id')
+                      ->nullable()
+                      ->constrained('brands')
+                      ->nullOnDelete();
+            }
+        });
     }
-}
+};
