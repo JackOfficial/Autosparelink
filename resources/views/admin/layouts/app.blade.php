@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-   @yield('title')
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>@yield('title', 'AutoSpareLink Admin')</title>
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <!-- Font Awesome -->
@@ -184,7 +185,7 @@
   <!-- Brand Logo -->
   <a href="/admin" class="brand-link">
     <img src="{{ asset('frontend/img/logo.png') }}" alt="AutoSpaceLink" class="brand-image img-circle elevation-3" style="opacity: .8">
-    <span class="brand-text font-weight-light">AutoSpaceLink</span>
+    <span class="brand-text font-weight-light">AutoSpareLink</span>
   </a>
 
   <!-- Sidebar -->
@@ -234,7 +235,7 @@
             <p>Vehicle Management <i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="/admin/brands" class="nav-link"><i class="fas fa-tags nav-icon"></i><p>Brands</p></a></li>
+            <li class="nav-item"><a href="/admin/vehicle-brands" class="nav-link"><i class="fas fa-tags nav-icon"></i><p>Brands</p></a></li>
             <li class="nav-item"><a href="/admin/vehicle-models" class="nav-link"><i class="fas fa-car-side nav-icon"></i><p>Models</p></a></li>
             <li class="nav-item"><a href="/admin/variants" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Variants</p></a></li>
             <li class="nav-item"><a href="/admin/body-types" class="nav-link"><i class="fas fa-car nav-icon"></i><p>Body Types</p></a></li>
@@ -250,6 +251,7 @@
             <p>Spare Parts <i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
+            <li class="nav-item"><a href="/admin/part-brands" class="nav-link"><i class="fas fa-road nav-icon"></i><p>OEM/After Market Brands</p></a></li>
             <li class="nav-item"><a href="/admin/categories" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Categories</p></a></li>
             <li class="nav-item"><a href="/admin/spare-parts" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Spare Parts</p></a></li>
             <li class="nav-item"><a href="/admin/fitments" class="nav-link"><i class="fas fa-tools nav-icon"></i><p>Parts Fitments</p></a></li>
@@ -262,11 +264,11 @@
             <p>E-Commerce <i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="/admin/bloggers" class="nav-link"><i class="fas fa-shopping-cart nav-icon"></i><p>Carts</p></a></li>
-            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-receipt nav-icon"></i><p>Orders</p></a></li>
-            <li class="nav-item"><a href="/admin/blogs" class="nav-link"><i class="fas fa-credit-card nav-icon"></i><p>Payments</p></a></li>
-            <li class="nav-item"><a href="/admin/blogs" class="nav-link"><i class="fas fa-truck nav-icon"></i><p>Shippings</p></a></li>
-            <li class="nav-item"><a href="/admin/blogs" class="nav-link"><i class="fas fa-map-marker-alt nav-icon"></i><p>Addresses</p></a></li>
+            <li class="nav-item"><a href="/admin/carts" class="nav-link"><i class="fas fa-shopping-cart nav-icon"></i><p>Carts</p></a></li>
+            <li class="nav-item"><a href="/admin/orders" class="nav-link"><i class="fas fa-receipt nav-icon"></i><p>Orders</p></a></li>
+            <li class="nav-item"><a href="/admin/payments" class="nav-link"><i class="fas fa-credit-card nav-icon"></i><p>Payments</p></a></li>
+            <li class="nav-item"><a href="/admin/shipments" class="nav-link"><i class="fas fa-truck nav-icon"></i><p>Shippings</p></a></li>
+            <li class="nav-item"><a href="/admin/addresses" class="nav-link"><i class="fas fa-map-marker-alt nav-icon"></i><p>Addresses</p></a></li>
           </ul>
           </li>
 
@@ -337,7 +339,7 @@
   </div>
   <!-- /.content-wrapper -->
   <footer class="main-footer">
-    <strong>Copyright &copy; {{ date('Y') }} <a href="/">AutoSpaceLink</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="/">AutoSpareLink</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
       <b>Version</b> 3.2.0

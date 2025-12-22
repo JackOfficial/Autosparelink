@@ -14,12 +14,10 @@ return new class extends Migration
         Schema::create('part_brands', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique(); // e.g., Bosch, Denso, Aisin
-            $table->string('country')->nullable(); // optional: Japan, Germany, USA
+            $table->string('country')->nullable();
             $table->enum('type', ['OEM', 'Aftermarket'])->default('Aftermarket'); 
-                // OEM = original suppliers
-                // Aftermarket = replacement brands
-            $table->text('description')->nullable(); // optional brand info
-            $table->string('logo')->nullable(); // store brand logo path
+            $table->text('description')->nullable();
+            $table->string('logo')->nullable();
             $table->timestamps();
         });
     }

@@ -38,6 +38,7 @@ use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\Admin\DriveTypeController;
 use App\Http\Controllers\admin\EngineTypeController;
 use App\Http\Controllers\admin\ModelController;
+use App\Http\Controllers\admin\PartBrandController;
 use App\Http\Controllers\admin\PartController;
 use App\Http\Controllers\admin\PartFitmentController;
 use App\Http\Controllers\admin\TransmissionTypeController;
@@ -148,7 +149,8 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('organization', OrganizationController::class);
     //////////////////////////////////
 
-    Route::resource('brands', BrandController::class);
+    Route::resource('vehicle-brands', BrandController::class);
+    Route::resource('part-brands', PartBrandController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('body-types', BodyTypeController::class);
     Route::resource('engine-types', EngineTypeController::class);
