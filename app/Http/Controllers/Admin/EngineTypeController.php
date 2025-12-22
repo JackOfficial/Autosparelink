@@ -17,7 +17,7 @@ class EngineTypeController extends Controller
 
     public function create()
     {
-        return view('admin.engine_types.create');
+        return view('admin.engine-types.create');
     }
 
     public function store(Request $request)
@@ -29,7 +29,7 @@ class EngineTypeController extends Controller
         ]);
 
         $iconPath = $request->hasFile('icon_url') 
-            ? $request->file('icon_url')->store('engine_types', 'public') 
+            ? $request->file('icon_url')->store('engine-types', 'public') 
             : null;
 
         EngineType::create([
@@ -43,7 +43,7 @@ class EngineTypeController extends Controller
 
     public function edit(EngineType $engineType)
     {
-        return view('admin.engine_types.edit', compact('engineType'));
+        return view('admin.engine-types.edit', compact('engineType'));
     }
 
     public function update(Request $request, EngineType $engineType)
@@ -58,7 +58,7 @@ class EngineTypeController extends Controller
             if ($engineType->icon_url) {
                 Storage::disk('public')->delete($engineType->icon_url);
             }
-            $engineType->icon_url = $request->file('icon_url')->store('engine_types', 'public');
+            $engineType->icon_url = $request->file('icon_url')->store('engine-types', 'public');
         }
 
         $engineType->update([
