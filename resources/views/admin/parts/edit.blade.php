@@ -25,7 +25,6 @@
     <div class="card">
         <div class="card-body">
 
-            <!-- FIX IS HERE -->
             <form action="{{ route('admin.spare-parts.update', $part->id) }}" 
                   method="POST" 
                   enctype="multipart/form-data">
@@ -34,17 +33,25 @@
 
                 <div class="row">
 
+                    <!-- SKU -->
+                    <div class="col-md-6 mb-3">
+                        <label>SKU <span class="text-danger">*</span></label>
+                        <input type="text" name="sku" 
+                               value="{{ $part->sku }}" 
+                               class="form-control" required>
+                    </div>
+
                     <!-- Part Number -->
                     <div class="col-md-6 mb-3">
                         <label>Part Number</label>
                         <input type="text" name="part_number" 
                                value="{{ $part->part_number }}" 
-                               class="form-control" required>
+                               class="form-control">
                     </div>
 
                     <!-- Part Name -->
                     <div class="col-md-6 mb-3">
-                        <label>Part Name</label>
+                        <label>Part Name <span class="text-danger">*</span></label>
                         <input type="text" name="part_name" 
                                value="{{ $part->part_name }}"
                                class="form-control" required>
@@ -63,17 +70,25 @@
                         </select>
                     </div>
 
-                    <!-- Brand -->
+                    <!-- Part Brand -->
                     <div class="col-md-6 mb-3">
-                        <label>Brand</label>
-                        <select name="brand_id" class="form-control" required>
-                            @foreach($brands as $brand)
+                        <label>Part Brand</label>
+                        <select name="part_brand_id" class="form-control" required>
+                            @foreach($partBrands as $brand)
                                 <option value="{{ $brand->id }}"
-                                    {{ $brand->id == $part->brand_id ? 'selected' : '' }}>
-                                    {{ $brand->brand_name }}
+                                    {{ $brand->id == $part->part_brand_id ? 'selected' : '' }}>
+                                    {{ $brand->name }}
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <!-- OEM Number -->
+                    <div class="col-md-6 mb-3">
+                        <label>OEM Number</label>
+                        <input type="text" name="oem_number" 
+                               value="{{ $part->oem_number }}" 
+                               class="form-control">
                     </div>
 
                     <!-- Description -->
@@ -114,10 +129,7 @@
                         <div x-data="{ preview: null }">
 
                             <input type="file" name="photo" accept="image/*" class="form-control"
-                                   @change="
-                                        const file = $event.target.files[0];
-                                        preview = URL.createObjectURL(file);
-                                   ">
+                                   @change="preview = URL.createObjectURL($event.target.files[0])">
 
                             <!-- Existing Image -->
                             @if($part->photo)

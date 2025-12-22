@@ -45,11 +45,13 @@
                     <thead>
                         <tr>
                             <th>#</th>
+                            <th>SKU</th>
                             <th>Photo</th>
                             <th>Part No.</th>
                             <th>Name</th>
                             <th>Category</th>
                             <th>Brand</th>
+                            <th>OEM Number</th>
                             <th>Price</th>
                             <th>Stock</th>
                             <th>Status</th>
@@ -61,6 +63,7 @@
                         @foreach($parts as $part)
                         <tr>
                             <td>{{ $part->id }}</td>
+                            <td>{{ $part->sku }}</td>
 
                             <td>
                                 @if($part->photo)
@@ -75,7 +78,8 @@
                             <td>{{ $part->part_number }}</td>
                             <td>{{ $part->part_name }}</td>
                             <td>{{ $part->category->category_name }}</td>
-                            <td>{{ $part->brand->brand_name }}</td>
+                            <td>{{ $part->partBrand->name }}</td>
+                            <td>{{ $part->oem_number ?? '-' }}</td>
 
                             <td>${{ number_format($part->price, 2) }}</td>
                             <td>{{ $part->stock_quantity }}</td>

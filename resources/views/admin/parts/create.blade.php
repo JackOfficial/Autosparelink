@@ -32,62 +32,78 @@
 
                 <div class="row">
 
+                    <!-- SKU -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">SKU <span class="text-danger">*</span></label>
+                        <input type="text" name="sku" class="form-control" value="{{ old('sku') }}" required>
+                    </div>
+
                     <!-- Part Number -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Part Number</label>
-                        <input type="text" name="part_number" class="form-control" required>
+                        <input type="text" name="part_number" class="form-control" value="{{ old('part_number') }}">
                     </div>
 
                     <!-- Part Name -->
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Part Name</label>
-                        <input type="text" name="part_name" class="form-control" required>
+                        <label class="form-label">Part Name <span class="text-danger">*</span></label>
+                        <input type="text" name="part_name" class="form-control" value="{{ old('part_name') }}" required>
                     </div>
 
                     <!-- Category -->
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Category</label>
+                        <label class="form-label">Category <span class="text-danger">*</span></label>
                         <select name="category_id" class="form-control" required>
                             @foreach($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->category_name }}</option>
+                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->category_name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <!-- Brand -->
+                    <!-- Part Brand -->
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Brand</label>
-                        <select name="brand_id" class="form-control" required>
-                            @foreach($brands as $brand)
-                                <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
+                        <label class="form-label">Part Brand <span class="text-danger">*</span></label>
+                        <select name="part_brand_id" class="form-control" required>
+                            @foreach($partBrands as $brand)
+                                <option value="{{ $brand->id }}" {{ old('part_brand_id') == $brand->id ? 'selected' : '' }}>
+                                    {{ $brand->name }}
+                                </option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <!-- OEM Number -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">OEM Number</label>
+                        <input type="text" name="oem_number" class="form-control" value="{{ old('oem_number') }}">
                     </div>
 
                     <!-- Description -->
                     <div class="col-md-12 mb-3">
                         <label class="form-label">Description</label>
-                        <textarea name="description" class="form-control" rows="3"></textarea>
+                        <textarea name="description" class="form-control" rows="3">{{ old('description') }}</textarea>
                     </div>
 
                     <!-- Price -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Price</label>
-                        <input type="number" name="price" step="0.01" class="form-control" required>
+                        <input type="number" name="price" step="0.01" class="form-control" value="{{ old('price') }}" required>
                     </div>
 
                     <!-- Stock Quantity -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Stock Quantity</label>
-                        <input type="number" name="stock_quantity" class="form-control" required>
+                        <input type="number" name="stock_quantity" class="form-control" value="{{ old('stock_quantity') }}" required>
                     </div>
 
                     <!-- Status -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Status</label>
                         <select name="status" class="form-control">
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
+                            <option value="1" {{ old('status') == 1 ? 'selected' : '' }}>Active</option>
+                            <option value="0" {{ old('status') == 0 ? 'selected' : '' }}>Inactive</option>
                         </select>
                     </div>
 
@@ -101,10 +117,7 @@
                                 name="photo" 
                                 accept="image/*" 
                                 class="form-control"
-                                @change="
-                                    const file = $event.target.files[0];
-                                    preview = URL.createObjectURL(file);
-                                "
+                                @change="preview = URL.createObjectURL($event.target.files[0])"
                             >
 
                             <template x-if="preview">
