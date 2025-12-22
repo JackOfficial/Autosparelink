@@ -7,7 +7,7 @@ use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class BrandController extends Controller
+class VehicleBrandController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,7 +15,7 @@ class BrandController extends Controller
     public function index()
     {
         $brands = Brand::all();
-        return view('admin.brands.index', compact('brands'));
+        return view('admin.vehicle-brands.index', compact('brands'));
     }
 
     /**
@@ -23,7 +23,7 @@ class BrandController extends Controller
      */
     public function create()
     {
-        return view('admin.brands.create');
+        return view('admin.vehicle-brands.create');
     }
 
     /**
@@ -54,7 +54,7 @@ public function store(Request $request)
         'website' => $request->website,
     ]);
 
-    return redirect()->route('admin.brands.index')->with('success', 'Brand created successfully');
+    return redirect()->route('admin.vehicle-brands.index')->with('success', 'Brand created successfully');
 }
 
     /**
@@ -71,7 +71,7 @@ public function store(Request $request)
     public function edit(string $id)
     {
        $brand = Brand::findOrFail($id);
-        return view('admin.brands.edit', compact('brand'));
+        return view('admin.vehicle-brands.edit', compact('brand'));
     }
 
     /**
@@ -112,7 +112,7 @@ public function store(Request $request)
         'website' => $request->website,
     ]);
 
-    return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully');
+    return redirect()->route('admin.vehicle-brands.index')->with('success', 'Brand updated successfully');
 }
 
 
@@ -129,6 +129,6 @@ public function store(Request $request)
 
         $brand->delete();
 
-        return redirect()->route('admin.brands.index')->with('success', 'Brand deleted successfully');
+        return redirect()->route('admin.vehicle-brands.index')->with('success', 'Brand deleted successfully');
     }
 }

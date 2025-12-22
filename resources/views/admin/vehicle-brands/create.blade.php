@@ -45,7 +45,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('admin.brands.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.vehicle-brands.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <!-- Brand Name -->

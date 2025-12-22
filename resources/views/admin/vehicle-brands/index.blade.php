@@ -33,7 +33,7 @@
 
     <div class="card">
         <div class="card-header">
-            <a href="{{ route('admin.brands.create') }}" class="btn btn-primary btn-sm">
+            <a href="{{ route('admin.vehicle-brands.create') }}" class="btn btn-primary btn-sm">
                 <i class="fa fa-plus"></i> Add Brand
             </a>
         </div>
@@ -94,12 +94,12 @@
                             <!-- Actions -->
                             <td class="d-flex">
 
-                                <a href="{{ route('admin.brands.edit', $brand->id) }}"
+                                <a href="{{ route('admin.vehicle-brands.edit', $brand->id) }}"
                                    class="btn btn-info btn-sm mr-2">
                                     <i class="fas fa-edit"></i>
                                 </a>
 
-                                <form action="{{ route('admin.brands.destroy', $brand->id) }}"
+                                <form action="{{ route('admin.vehicle-brands.destroy', $brand->id) }}"
                                       method="POST"
                                       onsubmit="return confirm('Are you sure you want to delete this brand?');">
                                     @csrf
