@@ -11,9 +11,8 @@ class EngineTypeController extends Controller
 {
     public function index()
     {
-        dd("Hello");
-        // $engineTypes = EngineType::all();
-        // return view('admin.engine-types.index', compact('engineTypes'));
+        $engineTypes = EngineType::all();
+        return view('admin.engine-types.index', compact('engineTypes'));
     }
 
     public function create()
