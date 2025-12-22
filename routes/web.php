@@ -1,48 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
+//Oauth Controllers
 use App\Http\Controllers\Auth\SocialLoginController;
 
-use App\Http\Controllers\Admin\AdminController;
+//User Controllers
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SubscriptionsController;
 use App\Http\Controllers\CareersController;
-use App\Http\Controllers\Admin\CareersController as Careers;
-use App\Http\Controllers\Admin\CauseController;
-use App\Http\Controllers\Admin\BloggersController;
-use App\Http\Controllers\Admin\BlogCategoriesController;
-use App\Http\Controllers\Admin\BlogController;
-use App\Http\Controllers\Admin\GalleryController;
-use App\Http\Controllers\Admin\ProjectController;
-use App\Http\Controllers\Admin\TeamController;
-use App\Http\Controllers\Admin\VolunteersController;
-use App\Http\Controllers\Admin\EventController;
-use App\Http\Controllers\Admin\HomepageController;
-use App\Http\Controllers\Admin\PartnerController;
-use App\Http\Controllers\Admin\UsersController;
-use App\Http\Controllers\Admin\StoryController;
-use App\Http\Controllers\Admin\WebpagesController;
-use App\Http\Controllers\DonateController;
-use App\Http\Controllers\ExportsController;
-use App\Http\Controllers\VolunteerController;
-use App\Http\Controllers\SampleController;
-use App\Http\Controllers\SuperAdminController;
-use App\Http\Controllers\Admin\ApplicationsController;
-use App\Http\Controllers\admin\BodyTypeController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\Admin\OrganizationController;
-
-/////////////
-use App\Http\Controllers\admin\BrandController;
-use App\Http\Controllers\admin\CategoryController;
-use App\Http\Controllers\Admin\DriveTypeController;
-use App\Http\Controllers\admin\EngineTypeController;
-use App\Http\Controllers\admin\ModelController;
-use App\Http\Controllers\admin\PartBrandController;
-use App\Http\Controllers\admin\PartController;
-use App\Http\Controllers\admin\PartFitmentController;
-use App\Http\Controllers\admin\TransmissionTypeController;
-use App\Http\Controllers\admin\VariantController;
 use App\Http\Controllers\BrandsController;
 use App\Http\Controllers\CatalogeController;
 use App\Http\Controllers\HomeContoller;
@@ -50,12 +16,45 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SparePartController;
 use App\Http\Controllers\SpecificationController;
 use App\Http\Controllers\VehicleModelController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\DonateController;
+use App\Http\Controllers\ExportsController;
+use App\Http\Controllers\VolunteerController;
+
+//Admin Controllers
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\CareersController as Careers;
+use App\Http\Controllers\Admin\CauseController;
+use App\Http\Controllers\Admin\BloggersController;
+use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\GalleryController;
+use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\Admin\TeamController;
+use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\PartnerController;
+use App\Http\Controllers\Admin\UsersController;
+use App\Http\Controllers\Admin\StoryController;
+use App\Http\Controllers\Admin\WebpagesController;
+use App\Http\Controllers\Admin\ApplicationsController;
+use App\Http\Controllers\Admin\BodyTypeController;
+use App\Http\Controllers\Admin\OrganizationController;
+use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DriveTypeController;
+use App\Http\Controllers\Admin\EngineTypeController;
+use App\Http\Controllers\Admin\ModelController;
+use App\Http\Controllers\Admin\PartBrandController;
+use App\Http\Controllers\Admin\PartController;
+use App\Http\Controllers\Admin\PartFitmentController;
+use App\Http\Controllers\Admin\TransmissionTypeController;
+use App\Http\Controllers\Admin\VariantController;
 
 //Guest routes
 // Route::get('/', function() {
 //   return view('under-maintainence');
 // });
 
+//User Routes
 Route::get('/', [HomeContoller::class, 'index']);
 Route::get('/about', [PageController::class, 'about']);
 Route::get('/gallery', [PageController::class, 'gallery']);
@@ -112,8 +111,8 @@ Route::get('/auth/callback/{provider}', [SocialLoginController::class, 'callback
 //Authenticated user routes
 Route::middleware(['auth', 'verified', 'role:user'])->group(function () { 
     Route::get('/home', [PageController::class, 'index'])->name('home');
-    Route::post('/comment', [PagesController::class, 'post']);
-    Route::post('/deleteComment/{id}', [PagesController::class, 'deleteComment']);
+    Route::post('/comment', [PageController::class, 'post']);
+    Route::post('/deleteComment/{id}', [PageController::class, 'deleteComment']);
 });
 
 //Admin and super admin Routes
@@ -127,7 +126,6 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('causes', CauseController::class);
     Route::resource('stories', StoryController::class);
     Route::resource('bloggers', BloggersController::class);
-    Route::resource('blogCategories', BlogCategoriesController::class);
     Route::resource('blogs', BlogController::class);
     Route::resource('gallery', GalleryController::class);
     Route::resource('projects', ProjectController::class);
