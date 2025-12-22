@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Part;
 use App\Models\Category;
-use App\Models\Brand;
 use App\Models\PartBrand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +13,8 @@ class PartController extends Controller
 {
     public function index()
     {
-        $parts = Part::with(['category', 'brand'])->latest()->get();
+        // Load relationships: category and partBrand
+        $parts = Part::with(['category', 'partBrand'])->latest()->get();
         return view('admin.parts.index', compact('parts'));
     }
 
@@ -22,82 +22,81 @@ class PartController extends Controller
     {
         return view('admin.parts.create', [
             'categories' => Category::all(),
-            'partBrands' => PartBrand::all()
+            'partBrands' => PartBrand::all(),
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'part_number'     => 'required|string|max:255',
-            'part_name'       => 'required|string|max:255',
-            'category_id'     => 'required|exists:categories,id',
-            'brand_id'        => 'required|exists:brands,id',
-            'description'     => 'nullable|string',
-            'price'           => 'required|numeric|min:0',
-            'stock_quantity'  => 'required|integer|min:0',
-            'status'          => 'required|integer',
-            'photo'           => 'nullable|image|max:2048',
+            'sku'              => 'required|string|max:255|unique:parts,sku',
+            'part_number'      => 'nullable|string|max:255',
+            'part_name'        => 'required|string|max:255',
+            'category_id'      => 'required|exists:categories,id',
+            'part_brand_id'    => 'required|exists:part_brands,id',
+            'oem_number'       => 'nullable|string|max:255',
+            'description'      => 'nullable|string',
+            'price'            => 'required|numeric|min:0',
+            'stock_quantity'   => 'required|integer|min:0',
+            'status'           => 'required|integer',
+            'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        // Store the photo using Storage
+        // Handle photo upload
         if ($request->hasFile('photo')) {
             $validated['photo'] = $request->file('photo')->store('parts', 'public');
         }
 
         Part::create($validated);
 
-        return redirect()->route('admin.spare-parts.index')->with('success', 'Part created successfully.');
+        return redirect()->route('admin.spare-parts.index')
+                         ->with('success', 'Part created successfully.');
     }
 
-    public function edit(string $id)
-    {
-        return view('admin.parts.edit', [
-            'part' => Part::findOrFail($id),
-            'categories' => Category::all(),
-            'partBrands' => PartBrand::all()
-        ]);
-    }
-
-    public function update(Request $request, string $id)
+    public function edit($id)
     {
         $part = Part::findOrFail($id);
 
-        $request->validate([
-            'part_number'    => 'required|string|max:255',
-            'part_name'      => 'required|string|max:255',
-            'category_id'    => 'required|exists:categories,id',
-            'brand_id'       => 'required|exists:brands,id',
-            'description'    => 'nullable|string',
-            'price'          => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
-            'status'         => 'required|integer',
-            'photo'          => 'nullable|image|mimes:jpg,png,jpeg,webp|max:2048',
+        return view('admin.parts.edit', [
+            'part'       => $part,
+            'categories' => Category::all(),
+            'partBrands' => PartBrand::all(),
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $part = Part::findOrFail($id);
+
+        $validated = $request->validate([
+            'sku'              => "required|string|max:255|unique:parts,sku,{$part->id}",
+            'part_number'      => 'nullable|string|max:255',
+            'part_name'        => 'required|string|max:255',
+            'category_id'      => 'required|exists:categories,id',
+            'part_brand_id'    => 'required|exists:part_brands,id',
+            'oem_number'       => 'nullable|string|max:255',
+            'description'      => 'nullable|string',
+            'price'            => 'required|numeric|min:0',
+            'stock_quantity'   => 'required|integer|min:0',
+            'status'           => 'required|integer',
+            'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $data = $request->except('photo');
-
-        // If user uploads new photo
+        // Handle photo replacement
         if ($request->hasFile('photo')) {
-
-            // Delete old photo from storage
             if ($part->photo && Storage::disk('public')->exists($part->photo)) {
                 Storage::disk('public')->delete($part->photo);
             }
-
-            // Store new photo
-            $data['photo'] = $request->file('photo')->store('parts', 'public');
+            $validated['photo'] = $request->file('photo')->store('parts', 'public');
         }
 
-        // Update part
-        $part->update($data);
+        $part->update($validated);
 
-        return redirect()
-            ->route('admin.spare-parts.index')
-            ->with('success', 'Part updated successfully');
+        return redirect()->route('admin.spare-parts.index')
+                         ->with('success', 'Part updated successfully.');
     }
 
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $part = Part::findOrFail($id);
 
@@ -107,8 +106,7 @@ class PartController extends Controller
 
         $part->delete();
 
-        return redirect()
-            ->route('admin.spare-parts.index')
-            ->with('success', 'Part deleted successfully.');
+        return redirect()->route('admin.spare-parts.index')
+                         ->with('success', 'Part deleted successfully.');
     }
 }
