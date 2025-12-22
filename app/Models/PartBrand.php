@@ -13,6 +13,6 @@ class PartBrand extends Model
     'description',
     'logo',
     'website',
-];
+    ];
 
 }
