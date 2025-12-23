@@ -57,14 +57,13 @@
                         <input type="password" name="password_confirmation" class="form-control">
                     </div>
 
-                    <!-- Roles & Permissions (Only for Super Admin) -->
+                    <!-- Roles & Permissions (only for super-admin) -->
                     @if(auth()->user()->hasRole('super-admin'))
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Roles</label>
                             <select name="roles[]" class="form-control" multiple>
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->name }}" 
-                                        {{ $user->hasRole($role->name) ? 'selected' : '' }}>
+                                    <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
                                         {{ ucfirst($role->name) }}
                                     </option>
                                 @endforeach
@@ -76,8 +75,7 @@
                             <label class="form-label">Permissions</label>
                             <select name="permissions[]" class="form-control" multiple>
                                 @foreach($permissions as $permission)
-                                    <option value="{{ $permission->name }}" 
-                                        {{ $user->hasPermissionTo($permission->name) ? 'selected' : '' }}>
+                                    <option value="{{ $permission->name }}" {{ $user->hasPermissionTo($permission->name) ? 'selected' : '' }}>
                                         {{ ucfirst($permission->name) }}
                                     </option>
                                 @endforeach
@@ -88,40 +86,39 @@
 
                     <!-- Profile Photo -->
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Profile Photo</label>
+                        <label class="form-label">Profile Photo (optional)</label>
                         <div x-data="{ preview: null }">
-                            
                             <input type="file" name="photo" accept="image/*" class="form-control"
                                 @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
-
-                            <!-- Existing Photo -->
-                            @if($user->provider === 'google' && $user->avatar)
-                                <img src="{{ $user->avatar }}" class="img-thumbnail mt-2" width="100">
-                                <p class="text-muted small">Avatar from Google. Uploading a photo will override it.</p>
-                            @elseif($user->photo)
+                            
+                            <!-- Show uploaded photo if exists -->
+                            @if($user->photo)
                                 <img src="{{ asset($user->photo) }}" class="img-thumbnail mt-2" width="100">
+                            <!-- Else show Google avatar -->
+                            @elseif($user->provider === 'google' && $user->avatar)
+                                <img src="{{ $user->avatar }}" class="img-thumbnail mt-2" width="100">
                             @endif
 
-                            <!-- Preview New Upload -->
+                            <!-- New preview -->
                             <template x-if="preview">
                                 <img :src="preview" class="img-thumbnail mt-2" width="100">
                             </template>
                         </div>
+                        <small class="text-muted">Upload a photo to override existing or Google avatar</small>
                     </div>
 
-                    <!-- Social Login Providers -->
+                    <!-- Social Login -->
                     <div class="col-md-12 mb-3">
                         <label class="form-label">Social Login</label>
                         <div class="d-flex gap-2">
-                            @foreach(['google','facebook','twitter'] as $provider)
+                            @foreach(['google'] as $provider)
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="social_providers[]" value="{{ $provider }}" id="provider-{{ $provider }}"
-                                        {{ in_array($provider, $user->social_providers ?? []) ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="checkbox" name="social_providers[]" value="{{ $provider }}" id="provider-{{ $provider }}" {{ in_array($provider, $user->social_providers ?? []) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="provider-{{ $provider }}">{{ ucfirst($provider) }}</label>
                                 </div>
                             @endforeach
                         </div>
-                        <small class="text-muted">Check the providers the user can use to login via Socialite</small>
+                        <small class="text-muted">Check the providers the user can use to login</small>
                     </div>
 
                     <!-- Status -->
