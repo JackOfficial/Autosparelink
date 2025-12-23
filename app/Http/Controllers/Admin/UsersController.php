@@ -38,37 +38,40 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'nullable|string|confirmed|min:8',
-            'status'   => 'required|boolean',
-            'photo'    => 'nullable|image|max:2048',
-            'roles'    => 'nullable|array',
-            'permissions' => 'nullable|array',
+            'name'             => 'required|string|max:255',
+            'email'            => 'required|email|unique:users,email',
+            'password'         => 'nullable|string|confirmed|min:8',
+            'status'           => 'required|boolean',
+            'photo'            => 'nullable|image|max:2048',
+            'roles'            => 'nullable|array',
+            'permissions'      => 'nullable|array',
             'social_providers' => 'nullable|array',
         ]);
 
-        // Upload photo if exists
+        // Handle photo upload
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('users', 'public');
         }
 
+        // Create user
         $user = User::create([
-            'name'   => $request->name,
-            'email'  => $request->email,
-            'password' => $request->password ? Hash::make($request->password) : null,
-            'status' => $request->status,
-            'photo'  => $photoPath,
+            'name'             => $request->name,
+            'email'            => $request->email,
+            'password'         => $request->password ? Hash::make($request->password) : Hash::make(str()->random(16)),
+            'status'           => $request->status,
+            'photo'            => $photoPath,
             'social_providers' => $request->social_providers ?? [],
         ]);
 
-        // Assign roles if current user is super-admin
+        // Assign roles
         if (auth()->user()->hasRole('super-admin') && $request->filled('roles')) {
             $user->syncRoles($request->roles);
+        } else {
+            $user->assignRole('user'); // default role
         }
 
-        // Assign permissions if current user is super-admin
+        // Assign permissions if super-admin
         if (auth()->user()->hasRole('super-admin') && $request->filled('permissions')) {
             $user->syncPermissions($request->permissions);
         }
@@ -106,13 +109,13 @@ class UsersController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|string|confirmed|min:8',
-            'status'   => 'required|boolean',
-            'photo'    => 'nullable|image|max:2048',
-            'roles'    => 'nullable|array',
-            'permissions' => 'nullable|array',
+            'name'             => 'required|string|max:255',
+            'email'            => 'required|email|unique:users,email,' . $id,
+            'password'         => 'nullable|string|confirmed|min:8',
+            'status'           => 'required|boolean',
+            'photo'            => 'nullable|image|max:2048',
+            'roles'            => 'nullable|array',
+            'permissions'      => 'nullable|array',
             'social_providers' => 'nullable|array',
         ]);
 
@@ -134,7 +137,7 @@ class UsersController extends Controller
 
         $user->update($data);
 
-        // Sync roles & permissions if current user is super-admin
+        // Sync roles & permissions if super-admin
         if (auth()->user()->hasRole('super-admin')) {
             if ($request->filled('roles')) {
                 $user->syncRoles($request->roles);
@@ -155,6 +158,7 @@ class UsersController extends Controller
     {
         $user = User::findOrFail($id);
 
+        // Delete local photo if exists
         if ($user->photo && Storage::disk('public')->exists($user->photo)) {
             Storage::disk('public')->delete($user->photo);
         }
