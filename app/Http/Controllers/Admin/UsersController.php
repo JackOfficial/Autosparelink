@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class UsersController extends Controller
 {
@@ -13,9 +17,8 @@ class UsersController extends Controller
      */
     public function index()
     {
-        // Fetch only users with a specific Spatie role
-       $users = User::orderBy('id', 'DESC')->get();
-       return view('admin.users.index', compact('users'));
+        $users = User::orderBy('id', 'DESC')->get();
+        return view('admin.users.index', compact('users'));
     }
 
     /**
@@ -23,7 +26,10 @@ class UsersController extends Controller
      */
     public function create()
     {
-        return view('admin.users.create');
+        $roles = Role::all();
+        $permissions = Permission::all();
+
+        return view('admin.users.create', compact('roles', 'permissions'));
     }
 
     /**
@@ -32,19 +38,40 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'role'  => 'required|string',   // Admin, Manager, etc.
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'nullable|string|confirmed|min:8',
+            'status'   => 'required|boolean',
+            'photo'    => 'nullable|image|max:2048',
+            'roles'    => 'nullable|array',
+            'permissions' => 'nullable|array',
+            'social_providers' => 'nullable|array',
         ]);
 
-        // Create user WITHOUT password because Fortify handles password flow
+        // Upload photo if exists
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('users', 'public');
+        }
+
         $user = User::create([
-            'name'  => $request->name,
-            'email' => $request->email,
+            'name'   => $request->name,
+            'email'  => $request->email,
+            'password' => $request->password ? Hash::make($request->password) : null,
+            'status' => $request->status,
+            'photo'  => $photoPath,
+            'social_providers' => $request->social_providers ?? [],
         ]);
 
-        // Assign Spatie Role
-        $user->assignRole($request->role);
+        // Assign roles if current user is super-admin
+        if (auth()->user()->hasRole('super-admin') && $request->filled('roles')) {
+            $user->syncRoles($request->roles);
+        }
+
+        // Assign permissions if current user is super-admin
+        if (auth()->user()->hasRole('super-admin') && $request->filled('permissions')) {
+            $user->syncPermissions($request->permissions);
+        }
 
         return redirect()->route('admin.users.index')
                          ->with('message', 'User created successfully');
@@ -56,7 +83,6 @@ class UsersController extends Controller
     public function show($id)
     {
         $user = User::findOrFail($id);
-
         return view('admin.users.show', compact('user'));
     }
 
@@ -66,8 +92,10 @@ class UsersController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
+        $roles = Role::all();
+        $permissions = Permission::all();
 
-        return view('admin.users.edit', compact('user'));
+        return view('admin.users.edit', compact('user', 'roles', 'permissions'));
     }
 
     /**
@@ -75,22 +103,46 @@ class UsersController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $user = User::findOrFail($id);
+
         $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
-            'role'  => 'required|string',
+            'password' => 'nullable|string|confirmed|min:8',
+            'status'   => 'required|boolean',
+            'photo'    => 'nullable|image|max:2048',
+            'roles'    => 'nullable|array',
+            'permissions' => 'nullable|array',
+            'social_providers' => 'nullable|array',
         ]);
 
-        $user = User::findOrFail($id);
+        $data = $request->only(['name', 'email', 'status']);
+        $data['social_providers'] = $request->social_providers ?? [];
 
-        // Update user data
-        $user->update([
-            'name'  => $request->name,
-            'email' => $request->email,
-        ]);
+        // Handle password update
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
 
-        // Update role (remove old and set new)
-        $user->syncRoles([$request->role]);
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            if ($user->photo && Storage::disk('public')->exists($user->photo)) {
+                Storage::disk('public')->delete($user->photo);
+            }
+            $data['photo'] = $request->file('photo')->store('users', 'public');
+        }
+
+        $user->update($data);
+
+        // Sync roles & permissions if current user is super-admin
+        if (auth()->user()->hasRole('super-admin')) {
+            if ($request->filled('roles')) {
+                $user->syncRoles($request->roles);
+            }
+            if ($request->filled('permissions')) {
+                $user->syncPermissions($request->permissions);
+            }
+        }
 
         return redirect()->route('admin.users.index')
                          ->with('message', 'User updated successfully');
@@ -101,11 +153,14 @@ class UsersController extends Controller
      */
     public function destroy($id)
     {
-        $deleted = User::destroy($id);
+        $user = User::findOrFail($id);
 
-        return redirect()->back()->with(
-            'message',
-            $deleted ? 'User has been deleted' : 'User could not be deleted'
-        );
+        if ($user->photo && Storage::disk('public')->exists($user->photo)) {
+            Storage::disk('public')->delete($user->photo);
+        }
+
+        $user->delete();
+
+        return redirect()->back()->with('message', 'User has been deleted successfully.');
     }
 }

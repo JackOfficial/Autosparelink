@@ -88,13 +88,21 @@
 
                     <!-- Profile Photo -->
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Profile Photo (optional)</label>
+                        <label class="form-label">Profile Photo</label>
                         <div x-data="{ preview: null }">
+                            
                             <input type="file" name="photo" accept="image/*" class="form-control"
-                                @change="const file = $event.target.files[0]; preview = file ? URL.createObjectURL(file) : null;">
-                            @if($user->photo)
+                                @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
+
+                            <!-- Existing Photo -->
+                            @if($user->provider === 'google' && $user->avatar)
+                                <img src="{{ $user->avatar }}" class="img-thumbnail mt-2" width="100">
+                                <p class="text-muted small">Avatar from Google. Uploading a photo will override it.</p>
+                            @elseif($user->photo)
                                 <img src="{{ asset($user->photo) }}" class="img-thumbnail mt-2" width="100">
                             @endif
+
+                            <!-- Preview New Upload -->
                             <template x-if="preview">
                                 <img :src="preview" class="img-thumbnail mt-2" width="100">
                             </template>
