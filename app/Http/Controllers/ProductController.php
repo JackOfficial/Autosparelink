@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
    function products(){
-     $parts = Part::with('partBrand')->latest()->get();
+     $parts = Part::with('partBrand')->latest()->paginate(30);
      return view('products', compact('parts'));
    }
 

@@ -71,7 +71,7 @@
 
                 <td>{{ $part->part_name }}</td>
 
-                <td>${{ number_format($part->price, 2) }}</td>
+                <td>{{ number_format($part->price, 2) }} RWF</td>
 
                 <td>{{ $part->stock_quantity }}</td>
 
@@ -98,19 +98,18 @@
 
             <!-- Pagination Info -->
             <div class="d-flex justify-content-between align-items-center mt-3">
-                <small class="text-muted">Displaying 1–30 of 555,634 results</small>
-                
-                <!-- Pagination -->
-                <nav>
-                    <ul class="pagination mb-0">
-                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                    </ul>
-                </nav>
-            </div>
+    <small class="text-muted">
+        Displaying
+        {{ $parts->firstItem() ?? 0 }}–{{ $parts->lastItem() ?? 0 }}
+        of {{ number_format($parts->total()) }} results
+    </small>
+
+    <!-- Pagination -->
+    <nav>
+        {{ $parts->links('pagination::bootstrap-4') }}
+    </nav>
+</div>
+
 
         </div>
     </div>
