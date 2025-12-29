@@ -130,7 +130,7 @@
                     <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
                     <div class="mb-3">
                         <label class="form-label"><i class="fas fa-list"></i> Compatible Variants</label>
-                        <select name="variants[]" class="form-control select2-multiple" multiple="multiple" style="width: 100%;">
+                        <select name="variants[]" class="form-control select2-multiple" multiple="multiple" style="width: 50%;">
                             @foreach($variants as $variant)
                                 <option value="{{ $variant->id }}"
                                     {{ in_array($variant->id, old('variants', [])) ? 'selected' : '' }}>
@@ -145,7 +145,7 @@
 
                     <div class="mb-3">
                         <label class="form-label"><i class="fas fa-align-left"></i> Description</label>
-                        <textarea name="description" class="form-control" rows="5">{{ old('description') }}</textarea>
+                        <textarea name="description" class="form-control" rows="2">{{ old('description') }}</textarea>
                     </div>
 
                     <div class="mb-3">
