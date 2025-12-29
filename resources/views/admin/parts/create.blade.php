@@ -68,17 +68,13 @@
                 <fieldset>
                     <legend><i class="fas fa-info-circle"></i> General Info</legend>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><i class="fas fa-barcode"></i> SKU <span class="text-danger">*</span></label>
-                            <input type="text" name="sku" class="form-control" value="{{ old('sku') }}" required>
-                            @error('sku') <small class="text-danger">{{ $message }}</small> @enderror
-                        </div>
+                      
                         <div class="col-md-6 mb-3">
                             <label class="form-label"><i class="fas fa-hashtag"></i> Part Number</label>
                             <input type="text" name="part_number" class="form-control" value="{{ old('part_number') }}">
                             @error('part_number') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label"><i class="fas fa-tools"></i> Part Name <span class="text-danger">*</span></label>
                             <input type="text" name="part_name" class="form-control" value="{{ old('part_name') }}" required>
                             @error('part_name') <small class="text-danger">{{ $message }}</small> @enderror
