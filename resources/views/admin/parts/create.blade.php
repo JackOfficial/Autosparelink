@@ -2,7 +2,6 @@
 @section('title', 'Add Spare Part')
 
 @section('styles')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
     fieldset { 
         border: 1px solid #ddd; 
@@ -52,6 +51,13 @@
 </section>
 
 <section class="content">
+     <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">Part</h3>
+                </div>
+
+                <div class="card-body">
+
     <form action="{{ route('admin.spare-parts.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="row">
@@ -171,12 +177,13 @@
             </button>
         </div>
     </form>
+                </div>
+     </div>
 </section>
 
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
         $('.select2-multiple').select2({
