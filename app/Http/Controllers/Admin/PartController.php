@@ -56,8 +56,15 @@ class PartController extends Controller
 
         $part = Part::create($validated);
 
-        // Attach variants
-        $part->variants()->sync($request->variants ?? []);
+        // Attach variants with vehicle_model_id
+        if ($request->has('variants')) {
+            $syncData = collect($request->variants)->mapWithKeys(function ($variantId) {
+                $variant = Variant::find($variantId);
+                return [$variantId => ['vehicle_model_id' => $variant->vehicle_model_id]];
+            })->toArray();
+
+            $part->variants()->sync($syncData);
+        }
 
         return redirect()->route('admin.spare-parts.index')
                          ->with('success', 'Part created successfully.');
@@ -117,8 +124,17 @@ class PartController extends Controller
 
         $part->update($validated);
 
-        // Sync variants
-        $part->variants()->sync($request->variants ?? []);
+        // Sync variants with vehicle_model_id
+        if ($request->has('variants')) {
+            $syncData = collect($request->variants)->mapWithKeys(function ($variantId) {
+                $variant = Variant::find($variantId);
+                return [$variantId => ['vehicle_model_id' => $variant->vehicle_model_id]];
+            })->toArray();
+
+            $part->variants()->sync($syncData);
+        } else {
+            $part->variants()->sync([]);
+        }
 
         return redirect()->route('admin.spare-parts.index')
                          ->with('success', 'Part updated successfully.');
@@ -139,3 +155,4 @@ class PartController extends Controller
                          ->with('success', 'Part deleted successfully.');
     }
 }
+
