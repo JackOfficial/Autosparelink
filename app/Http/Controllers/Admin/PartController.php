@@ -15,7 +15,7 @@ class PartController extends Controller
     public function index()
     {
         // Load relationships: category and partBrand
-        $parts = Part::with(['category', 'partBrand', 'variants'])->latest()->get();
+       $parts = Part::with(['category', 'partBrand', 'variants'])->latest()->paginate(20);
         return view('admin.parts.index', compact('parts'));
     }
 

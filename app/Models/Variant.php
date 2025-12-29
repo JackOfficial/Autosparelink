@@ -57,8 +57,19 @@ class Variant extends Model
         return $this->belongsTo(DriveType::class);
     }
 
-//     public function parts()
-//    {
-//      return $this->belongsToMany(Part::class, 'part_variants');
-//    }
+     public function fitments()
+    {
+        return $this->hasMany(PartFitment::class);
+    }
+
+    public function parts()
+    {
+        return $this->belongsToMany(
+            Part::class,
+            'part_fitments',
+            'variant_id',
+            'part_id'
+        )->withPivot(['vehicle_model_id', 'status', 'year_start', 'year_end'])
+         ->withTimestamps();
+    }
 }
