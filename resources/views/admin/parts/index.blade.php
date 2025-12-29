@@ -62,9 +62,8 @@
                     <tbody>
                         @foreach($parts as $part)
                         <tr>
-                            <td>{{ $part->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td>{{ $part->sku }}</td>
-
                             <td>
                                 @if($part->photo)
                                     <img src="{{ asset('storage/'.$part->photo) }}"
