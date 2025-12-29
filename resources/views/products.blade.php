@@ -18,16 +18,20 @@
     <div class="row px-xl-5">
         <div class="col-lg-12 col-md-12">
             <div class="bg-light p-4 rounded shadow-sm searchbox-container">
-                
-                <!-- Input Group -->
-                <div class="input-group searchbox-wrapper">
-                    <input type="text" class="form-control searchbox-input" placeholder="Search by part number, VIN or frame...">
-                    <div class="input-group-append">
-                        <button class="btn btn-primary searchbox-btn">
-                            <i class="fa fa-search mr-1"></i> Search
-                        </button>
+
+                <!-- Search Form -->
+                <form action="{{ url('/shop/products') }}" method="GET">
+                    <div class="input-group searchbox-wrapper">
+                        <input type="text" name="q" class="form-control searchbox-input"
+                               placeholder="Search by part number, VIN or frame..."
+                               value="{{ request('q') }}">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary searchbox-btn" type="submit">
+                                <i class="fa fa-search mr-1"></i> Search
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
 
                 <!-- Helper Texts -->
                 <div class="d-flex justify-content-between mt-2 small text-muted px-2">
@@ -47,75 +51,67 @@
 
             <div class="table-responsive bg-white rounded shadow-sm p-3">
                 <table class="table table-hover table-bordered mb-0">
-    <thead class="thead-light">
-        <tr>
-            <th>Make</th>
-            <th>Number</th>
-            <th>Name</th>
-            <th>Price, USD</th>
-            <th>Availability</th>
-            <th>Ship In, Days</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @forelse ($parts as $part)
-            <tr>
-                <td>{{ $part->partBrand->name ?? '—' }}</td>
-
-                <td>
-                    <a href="{{ url('/shop/products/' . $part->id) }}">
-                        {{ $part->part_number }}
-                    </a>
-                </td>
-
-                <td>{{ $part->part_name }}</td>
-
-                <td>{{ number_format($part->price, 2) }} RWF</td>
-
-                <td>{{ $part->stock_quantity }}</td>
-
-                <td>1</td>
-
-                <td>
-                    <a href="{{ url('/shop/products/' . $part->id) }}"
-                       class="btn btn-sm btn-primary">
-                        <i class="fa fa-search mr-1"></i> View
-                    </a>
-                </td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="7" class="text-center text-muted">
-                    No products available
-                </td>
-            </tr>
-        @endforelse
-    </tbody>
-</table>
-
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Make</th>
+                            <th>Number</th>
+                            <th>Name</th>
+                            <th>Price, USD</th>
+                            <th>Availability</th>
+                            <th>Ship In, Days</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($parts as $part)
+                            <tr>
+                                <td>{{ $part->partBrand->name ?? '—' }}</td>
+                                <td>
+                                    <a href="{{ url('/shop/products/' . $part->id) }}">
+                                        {{ $part->part_number }}
+                                    </a>
+                                </td>
+                                <td>{{ $part->part_name }}</td>
+                                <td>{{ number_format($part->price, 2) }} RWF</td>
+                                <td>{{ $part->stock_quantity }}</td>
+                                <td>1</td>
+                                <td>
+                                    <a href="{{ url('/shop/products/' . $part->id) }}"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fa fa-search mr-1"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">
+                                    No products available
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
 
             <!-- Pagination Info -->
             <div class="d-flex justify-content-between align-items-center mt-3">
-    <small class="text-muted">
-        Displaying
-        {{ $parts->firstItem() ?? 0 }}–{{ $parts->lastItem() ?? 0 }}
-        of {{ number_format($parts->total()) }} results
-    </small>
+                <small class="text-muted">
+                    Displaying
+                    {{ $parts->firstItem() ?? 0 }}–{{ $parts->lastItem() ?? 0 }}
+                    of {{ number_format($parts->total()) }} results
+                </small>
 
-    <!-- Pagination -->
-    <nav>
-        {{ $parts->links('pagination::bootstrap-4') }}
-    </nav>
-</div>
-
+                <!-- Pagination -->
+                <nav>
+                    {{ $parts->links('pagination::bootstrap-4') }}
+                </nav>
+            </div>
 
         </div>
     </div>
 </div>
 
-<!-- Styles -->
+<!-- Styles (unchanged) -->
 <style>
 /* Search Box Styles */
 .searchbox-container {
