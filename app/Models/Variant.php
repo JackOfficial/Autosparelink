@@ -56,4 +56,9 @@ class Variant extends Model
     {
         return $this->belongsTo(DriveType::class);
     }
+
+    public function parts()
+   {
+     return $this->belongsToMany(Part::class, 'part_variants');
+   }
 }

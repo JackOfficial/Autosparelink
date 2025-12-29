@@ -187,19 +187,30 @@
                             <a href="#" class="btn btn-outline-primary btn-pill dropdown-toggle d-flex align-items-center" id="userDropdown" data-toggle="dropdown">
                                 <i class="fas fa-user-circle fa-lg mr-2"></i> {{ Auth::user()->name }}
                             </a>
-                            <div class="dropdown-menu dropdown-menu-right shadow-sm p-0" aria-labelledby="userDropdown" style="min-width: 200px; border-radius: 12px; overflow: hidden;">
-                                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="">
-                                    <i class="fas fa-user mr-2 text-primary"></i> Profile
-                                </a>
-                                <div class="dropdown-divider m-0"></div>
-                                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('logout') }}"
-                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    <i class="fas fa-sign-out-alt mr-2 text-danger"></i> Logout
-                                </a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    @csrf
-                                </form>
-                            </div>
+                           <div class="dropdown-menu dropdown-menu-right shadow-sm p-0" aria-labelledby="userDropdown" style="min-width: 200px; border-radius: 12px; overflow: hidden;">
+
+    @if(auth()->user()->hasAnyRole(['admin', 'super-admin']))
+        <a class="dropdown-item d-flex align-items-center py-2 px-3" href="/admin">
+            <i class="fas fa-cogs mr-2 text-primary"></i> Admin Panel
+        </a>
+    @else
+        <a class="dropdown-item d-flex align-items-center py-2 px-3" href="/profile">
+            <i class="fas fa-user mr-2 text-primary"></i> Profile
+        </a>
+    @endif
+
+    <div class="dropdown-divider m-0"></div>
+
+    <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('logout') }}"
+       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <i class="fas fa-sign-out-alt mr-2 text-danger"></i> Logout
+    </a>
+
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+        @csrf
+    </form>
+</div>
+
                         </div>
                     @endguest
                 </div>

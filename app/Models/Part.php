@@ -35,4 +35,9 @@ class Part extends Model
     {
         return $this->belongsTo(PartBrand::class);
     }
+
+    public function variants()
+{
+    return $this->belongsToMany(Variant::class, 'part_variants');
+}
 }
