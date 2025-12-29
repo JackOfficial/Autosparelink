@@ -1,57 +1,46 @@
 @extends('admin.layouts.app')
 @section('title', 'Add Spare Part')
 
+@section('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .card-header { font-weight: bold; font-size: 1.1rem; }
+    .form-label { font-weight: 500; }
+    .select2-container--default .select2-selection--multiple {
+        min-height: 45px;
+    }
+    .action-bar { position: sticky; bottom: 0; background: #fff; padding: 10px 0; z-index: 10; border-top: 1px solid #ddd; }
+</style>
+@endsection
+
 @section('content')
-
-<!-- Content Header -->
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1>Add New Spare Part</h1>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.spare-parts.index') }}">Spare Parts</a></li>
-                    <li class="breadcrumb-item active">Add New</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Main Content -->
 <section class="content">
+    <div class="row">
 
-    <div class="card">
-        <div class="card-body">
-
-            <form action="{{ route('admin.spare-parts.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-
-                <div class="row">
-
-                    <!-- SKU -->
-                    <div class="col-md-6 mb-3">
+        <!-- Left Column -->
+        <div class="col-lg-6">
+            <div class="card mb-3">
+                <div class="card-header">General Info</div>
+                <div class="card-body">
+                    <div class="mb-3">
                         <label class="form-label">SKU <span class="text-danger">*</span></label>
                         <input type="text" name="sku" class="form-control" value="{{ old('sku') }}" required>
+                        @error('sku') <small class="text-danger">{{ $message }}</small> @enderror
                     </div>
 
-                    <!-- Part Number -->
-                    <div class="col-md-6 mb-3">
+                    <div class="mb-3">
                         <label class="form-label">Part Number</label>
                         <input type="text" name="part_number" class="form-control" value="{{ old('part_number') }}">
+                        @error('part_number') <small class="text-danger">{{ $message }}</small> @enderror
                     </div>
 
-                    <!-- Part Name -->
-                    <div class="col-md-6 mb-3">
+                    <div class="mb-3">
                         <label class="form-label">Part Name <span class="text-danger">*</span></label>
                         <input type="text" name="part_name" class="form-control" value="{{ old('part_name') }}" required>
+                        @error('part_name') <small class="text-danger">{{ $message }}</small> @enderror
                     </div>
 
-                    <!-- Category -->
-                    <div class="col-md-6 mb-3">
+                    <div class="mb-3">
                         <label class="form-label">Category <span class="text-danger">*</span></label>
                         <select name="category_id" class="form-control" required>
                             @foreach($categories as $category)
@@ -60,10 +49,10 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('category_id') <small class="text-danger">{{ $message }}</small> @enderror
                     </div>
 
-                    <!-- Part Brand -->
-                    <div class="col-md-6 mb-3">
+                    <div class="mb-3">
                         <label class="form-label">Part Brand <span class="text-danger">*</span></label>
                         <select name="part_brand_id" class="form-control" required>
                             @foreach($partBrands as $brand)
@@ -72,16 +61,41 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('part_brand_id') <small class="text-danger">{{ $message }}</small> @enderror
                     </div>
 
-                    <!-- OEM Number -->
-                    <div class="col-md-6 mb-3">
+                    <div class="mb-3">
                         <label class="form-label">OEM Number</label>
                         <input type="text" name="oem_number" class="form-control" value="{{ old('oem_number') }}">
                     </div>
 
-                    <!-- Compatible Variants -->
-                    <div class="col-md-12 mb-3">
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="number" name="price" step="0.01" class="form-control" value="{{ old('price') }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Stock Quantity</label>
+                        <input type="number" name="stock_quantity" class="form-control" value="{{ old('stock_quantity') }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-control">
+                            <option value="1" {{ old('status') == 1 ? 'selected' : '' }}>Active</option>
+                            <option value="0" {{ old('status') == 0 ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-6">
+            <div class="card mb-3">
+                <div class="card-header">Fitment & Media</div>
+                <div class="card-body">
+                    <div class="mb-3">
                         <label class="form-label">Compatible Variants</label>
                         <select name="variants[]" class="form-control select2-multiple" multiple="multiple" style="width: 100%;">
                             @foreach($variants as $variant)
@@ -96,37 +110,13 @@
                         <small class="text-muted">Search and select all variants that this part is compatible with.</small>
                     </div>
 
-                    <!-- Description -->
-                    <div class="col-md-12 mb-3">
+                    <div class="mb-3">
                         <label class="form-label">Description</label>
-                        <textarea name="description" class="form-control" rows="3">{{ old('description') }}</textarea>
+                        <textarea name="description" class="form-control" rows="5">{{ old('description') }}</textarea>
                     </div>
 
-                    <!-- Price -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Price</label>
-                        <input type="number" name="price" step="0.01" class="form-control" value="{{ old('price') }}" required>
-                    </div>
-
-                    <!-- Stock Quantity -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Stock Quantity</label>
-                        <input type="number" name="stock_quantity" class="form-control" value="{{ old('stock_quantity') }}" required>
-                    </div>
-
-                    <!-- Status -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-control">
-                            <option value="1" {{ old('status') == 1 ? 'selected' : '' }}>Active</option>
-                            <option value="0" {{ old('status') == 0 ? 'selected' : '' }}>Inactive</option>
-                        </select>
-                    </div>
-
-                    <!-- Photo + Alpine Preview -->
-                    <div class="col-md-6 mb-3">
+                    <div class="mb-3">
                         <label class="form-label">Photo</label>
-                        
                         <div x-data="{ preview: null }">
                             <input 
                                 type="file" 
@@ -135,22 +125,25 @@
                                 class="form-control"
                                 @change="preview = URL.createObjectURL($event.target.files[0])"
                             >
-
                             <template x-if="preview">
-                                <img :src="preview" class="img-thumbnail mt-2" width="120">
+                                <div class="mt-2 position-relative">
+                                    <img :src="preview" class="img-thumbnail" width="200">
+                                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" @click="preview=null">×</button>
+                                </div>
                             </template>
                         </div>
                     </div>
-
                 </div>
-
-                <button class="btn btn-primary mt-2">
-                    <i class="fas fa-save"></i> Save Part
-                </button>
-
-            </form>
-
+            </div>
         </div>
+
+    </div>
+
+    <!-- Sticky Save Button -->
+    <div class="action-bar text-end">
+        <button class="btn btn-success">
+            <i class="fas fa-save"></i> Save Part
+        </button>
     </div>
 
 </section>
@@ -158,7 +151,6 @@
 @endsection
 
 @section('scripts')
-<!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
