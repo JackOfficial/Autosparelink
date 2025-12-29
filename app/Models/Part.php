@@ -27,7 +27,6 @@ class Part extends Model
     {
         return $this->belongsTo(Category::class);
     }
-
     /**
      * Get the brand of the part.
      */
