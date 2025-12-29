@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Part;
 use App\Models\Category;
 use App\Models\PartBrand;
+use App\Models\Variant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,7 +15,7 @@ class PartController extends Controller
     public function index()
     {
         // Load relationships: category and partBrand
-        $parts = Part::with(['category', 'partBrand'])->latest()->get();
+        $parts = Part::with(['category', 'partBrand', 'variants'])->latest()->get();
         return view('admin.parts.index', compact('parts'));
     }
 
@@ -23,6 +24,7 @@ class PartController extends Controller
         return view('admin.parts.create', [
             'categories' => Category::all(),
             'partBrands' => PartBrand::all(),
+            'variants'   => Variant::with(['vehicleModel.brand', 'engineType'])->get(),
         ]);
     }
 
@@ -40,6 +42,8 @@ class PartController extends Controller
             'stock_quantity'   => 'required|integer|min:0',
             'status'           => 'required|integer',
             'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'variants'         => 'nullable|array',
+            'variants.*'       => 'exists:variants,id',
         ]);
 
         // Handle photo upload
@@ -47,7 +51,12 @@ class PartController extends Controller
             $validated['photo'] = $request->file('photo')->store('parts', 'public');
         }
 
-        Part::create($validated);
+        $part = Part::create($validated);
+
+        // Attach variants (fitments)
+        if ($request->has('variants')) {
+            $part->variants()->sync($request->variants);
+        }
 
         return redirect()->route('admin.spare-parts.index')
                          ->with('success', 'Part created successfully.');
@@ -55,12 +64,13 @@ class PartController extends Controller
 
     public function edit($id)
     {
-        $part = Part::findOrFail($id);
+        $part = Part::with('variants')->findOrFail($id);
 
         return view('admin.parts.edit', [
             'part'       => $part,
             'categories' => Category::all(),
             'partBrands' => PartBrand::all(),
+            'variants'   => Variant::with(['vehicleModel.vehicleBrand', 'engineType'])->get(),
         ]);
     }
 
@@ -80,6 +90,8 @@ class PartController extends Controller
             'stock_quantity'   => 'required|integer|min:0',
             'status'           => 'required|integer',
             'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'variants'         => 'nullable|array',
+            'variants.*'       => 'exists:variants,id',
         ]);
 
         // Handle photo replacement
@@ -92,6 +104,9 @@ class PartController extends Controller
 
         $part->update($validated);
 
+        // Sync variants
+        $part->variants()->sync($request->variants ?? []);
+
         return redirect()->route('admin.spare-parts.index')
                          ->with('success', 'Part updated successfully.');
     }
@@ -100,9 +115,13 @@ class PartController extends Controller
     {
         $part = Part::findOrFail($id);
 
+        // Delete photo
         if ($part->photo && Storage::disk('public')->exists($part->photo)) {
             Storage::disk('public')->delete($part->photo);
         }
+
+        // Detach variants
+        $part->variants()->detach();
 
         $part->delete();
 

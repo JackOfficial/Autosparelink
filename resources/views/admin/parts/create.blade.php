@@ -74,6 +74,22 @@
                         </select>
                     </div>
 
+                    <!-- Compatible Variants -->
+<div class="col-md-12 mb-3">
+    <label class="form-label">Compatible Variants</label>
+    <select name="variants[]" class="form-control" multiple>
+        @foreach($variants as $variant)
+            <option value="{{ $variant->id }}"
+                {{ in_array($variant->id, old('variants', [])) ? 'selected' : '' }}>
+                {{ $variant->vehicleModel->vehicleBrand->name ?? '—' }} /
+                {{ $variant->vehicleModel->model_name ?? '—' }} -
+                {{ $variant->name }} ({{ $variant->engineType->name ?? '—' }})
+            </option>
+        @endforeach
+    </select>
+    <small class="text-muted">Select all variants that this part is compatible with.</small>
+</div>
+
                     <!-- OEM Number -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">OEM Number</label>
