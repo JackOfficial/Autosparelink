@@ -69,7 +69,7 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label"><i class="fas fa-barcode"></i> SKU <span class="text-danger">*</span></label>
-                                    <input type="text" name="sku" class="form-control" value="{{ old('sku', $part->sku) }}" required>
+                                    <input type="text" name="sku" class="form-control" value="{{ old('sku', $part->sku) }}" required readonly>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label"><i class="fas fa-hashtag"></i> Part Number</label>
@@ -126,12 +126,16 @@
                     <div class="col-lg-6">
                         <fieldset>
                             <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
+
+                            @php
+                                $selectedVariants = old('variants', $part->variants ? $part->variants->pluck('id')->toArray() : []);
+                            @endphp
+
                             <div class="mb-3">
                                 <label class="form-label"><i class="fas fa-list"></i> Compatible Variants</label>
                                 <select name="variants[]" class="form-control select2-multiple" multiple="multiple" style="width: 100%;">
                                     @foreach($variants as $variant)
-                                        <option value="{{ $variant->id }}"
-                                            {{ in_array($variant->id, old('variants', $part->partFitment->pluck('id')->toArray())) ? 'selected' : '' }}>
+                                        <option value="{{ $variant->id }}" {{ in_array($variant->id, $selectedVariants) ? 'selected' : '' }}>
                                             {{ $variant->vehicleModel->brand->brand_name ?? '—' }} /
                                             {{ $variant->vehicleModel->model_name ?? '—' }} -
                                             {{ $variant->name }} ({{ $variant->engineType->name ?? '—' }})
@@ -161,7 +165,6 @@
                             </div>
                         </fieldset>
                     </div>
-
                 </div>
 
                 <!-- Sticky Save Button -->
