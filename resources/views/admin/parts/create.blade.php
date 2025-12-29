@@ -138,7 +138,7 @@
                             @foreach($variants as $variant)
                                 <option value="{{ $variant->id }}"
                                     {{ in_array($variant->id, old('variants', [])) ? 'selected' : '' }}>
-                                    {{ $variant->vehicleModel->vehicleBrand->name ?? '—' }} /
+                                    {{ $variant->vehicleModel->brand->brand_name ?? '—' }} /
                                     {{ $variant->vehicleModel->model_name ?? '—' }} -
                                     {{ $variant->name }} ({{ $variant->engineType->name ?? '—' }})
                                 </option>
