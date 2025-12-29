@@ -74,26 +74,26 @@
                         </select>
                     </div>
 
-                    <!-- Compatible Variants -->
-<div class="col-md-12 mb-3">
-    <label class="form-label">Compatible Variants</label>
-    <select name="variants[]" class="form-control" multiple>
-        @foreach($variants as $variant)
-            <option value="{{ $variant->id }}"
-                {{ in_array($variant->id, old('variants', [])) ? 'selected' : '' }}>
-                {{ $variant->vehicleModel->vehicleBrand->name ?? '—' }} /
-                {{ $variant->vehicleModel->model_name ?? '—' }} -
-                {{ $variant->name }} ({{ $variant->engineType->name ?? '—' }})
-            </option>
-        @endforeach
-    </select>
-    <small class="text-muted">Select all variants that this part is compatible with.</small>
-</div>
-
                     <!-- OEM Number -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">OEM Number</label>
                         <input type="text" name="oem_number" class="form-control" value="{{ old('oem_number') }}">
+                    </div>
+
+                    <!-- Compatible Variants -->
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Compatible Variants</label>
+                        <select name="variants[]" class="form-control select2-multiple" multiple="multiple" style="width: 100%;">
+                            @foreach($variants as $variant)
+                                <option value="{{ $variant->id }}"
+                                    {{ in_array($variant->id, old('variants', [])) ? 'selected' : '' }}>
+                                    {{ $variant->vehicleModel->vehicleBrand->name ?? '—' }} /
+                                    {{ $variant->vehicleModel->model_name ?? '—' }} -
+                                    {{ $variant->name }} ({{ $variant->engineType->name ?? '—' }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">Search and select all variants that this part is compatible with.</small>
                     </div>
 
                     <!-- Description -->
@@ -155,4 +155,17 @@
 
 </section>
 
+@endsection
+
+@section('scripts')
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2-multiple').select2({
+            placeholder: "Search and select variants",
+            allowClear: true
+        });
+    });
+</script>
 @endsection
