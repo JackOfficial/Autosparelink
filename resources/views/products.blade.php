@@ -47,35 +47,53 @@
 
             <div class="table-responsive bg-white rounded shadow-sm p-3">
                 <table class="table table-hover table-bordered mb-0">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Make</th>
-                            <th>Number</th>
-                            <th>Name</th>
-                            <th>Price, USD</th>
-                            <th>Availability</th>
-                            <th>Ship In, Days</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for ($i = 0; $i < 10; $i++)
-                        <tr>
-                            <td>Hyundai / KIA</td>
-                            <td><a href="/shop/products/1">0K01133200B</a></td>
-                            <td>HUB-FREE WHEEL</td>
-                            <td>$71.16</td>
-                            <td>1</td>
-                            <td>7</td>
-                            <td>
-                                <a href="#" class="btn btn-sm btn-primary">
-                                    <i class="fa fa-search mr-1"></i> View
-                                </a>
-                            </td>
-                        </tr>
-                        @endfor
-                    </tbody>
-                </table>
+    <thead class="thead-light">
+        <tr>
+            <th>Make</th>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Price, USD</th>
+            <th>Availability</th>
+            <th>Ship In, Days</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse ($parts as $part)
+            <tr>
+                <td>{{ $part->partBrand->name ?? '—' }}</td>
+
+                <td>
+                    <a href="{{ url('/shop/products/' . $part->id) }}">
+                        {{ $part->part_number }}
+                    </a>
+                </td>
+
+                <td>{{ $part->part_name }}</td>
+
+                <td>${{ number_format($part->price, 2) }}</td>
+
+                <td>{{ $part->stock_quantity }}</td>
+
+                <td>1</td>
+
+                <td>
+                    <a href="{{ url('/shop/products/' . $part->id) }}"
+                       class="btn btn-sm btn-primary">
+                        <i class="fa fa-search mr-1"></i> View
+                    </a>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="7" class="text-center text-muted">
+                    No products available
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
+
             </div>
 
             <!-- Pagination Info -->
