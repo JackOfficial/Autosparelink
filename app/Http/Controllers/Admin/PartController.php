@@ -14,66 +14,84 @@ class PartController extends Controller
 {
     public function index()
     {
-        $parts = Part::with(['category', 'partBrand', 'variants'])->latest()->paginate(20);
+        $parts = Part::with(['category', 'partBrand', 'photos', 'variants'])
+            ->latest()
+            ->paginate(20);
+
         return view('admin.parts.index', compact('parts'));
     }
 
     public function create()
     {
         return view('admin.parts.create', [
-            'categories' => Category::OrderBy('category_name', 'ASC')->get(),
-            'partBrands' => PartBrand::OrderBy('name', 'ASC')->get(),
-            'variants'   => Variant::with(['vehicleModel.brand', 'engineType'])->OrderBy('name', 'ASC')->get(),
+            'categories' => Category::orderBy('category_name')->get(),
+            'partBrands' => PartBrand::orderBy('name')->get(),
+            'variants'   => Variant::with(['vehicleModel.brand', 'engineType'])
+                                ->orderBy('name')
+                                ->get(),
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'part_number'      => 'nullable|string|max:255',
-            'part_name'        => 'required|string|max:255',
-            'category_id'      => 'required|exists:categories,id',
-            'part_brand_id'    => 'required|exists:part_brands,id',
-            'oem_number'       => 'nullable|string|max:255',
-            'description'      => 'nullable|string',
-            'price'            => 'required|numeric|min:0',
-            'stock_quantity'   => 'required|integer|min:0',
-            'status'           => 'required|integer',
-            'photos'           => 'nullable|array',
-            'photos.*'         => 'image|mimes:jpg,jpeg,png,webp|max:2048',
-            'variants'         => 'nullable|array',
-            'variants.*'       => 'exists:variants,id',
+            'part_number'    => 'nullable|string|max:255',
+            'part_name'      => 'required|string|max:255',
+            'category_id'    => 'required|exists:categories,id',
+            'part_brand_id'  => 'required|exists:part_brands,id',
+            'oem_number'     => 'nullable|string|max:255',
+            'description'    => 'nullable|string',
+            'price'          => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'status'         => 'required|integer',
+
+            'photos'   => 'nullable|array',
+            'photos.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+
+            'variants'   => 'nullable|array',
+            'variants.*' => 'exists:variants,id',
         ]);
 
-        // Generate SEO-friendly SKU
-        $brandName = PartBrand::findOrFail($request->part_brand_id)->name;
-        $categoryName = Category::findOrFail($request->category_id)->category_name;
-        $validated['sku'] = Part::generateSku($brandName, $categoryName, $request->part_name);
+        // Generate SKU
+        $brandName = PartBrand::findOrFail($validated['part_brand_id'])->name;
+        $categoryName = Category::findOrFail($validated['category_id'])->category_name;
+        $validated['sku'] = Part::generateSku($brandName, $categoryName, $validated['part_name']);
 
-        // Handle photo upload
-        if ($request->hasFile('photo')) {
-            $validated['photo'] = $request->file('photo')->store('parts', 'public');
-        }
-
+        // Create part
         $part = Part::create($validated);
 
+        // Save photos (MULTIPLE)
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $index => $photo) {
+                $path = $photo->store('parts', 'public');
+
+                $part->photos()->create([
+                    'photo_url' => $path,
+                    'type'      => $index === 0 ? 'main' : 'detail',
+                ]);
+            }
+        }
+
         // Attach variants with vehicle_model_id
-        if ($request->has('variants')) {
+        if ($request->filled('variants')) {
             $syncData = collect($request->variants)->mapWithKeys(function ($variantId) {
                 $variant = Variant::find($variantId);
-                return [$variantId => ['vehicle_model_id' => $variant->vehicle_model_id]];
+                return [
+                    $variantId => ['vehicle_model_id' => $variant->vehicle_model_id]
+                ];
             })->toArray();
 
             $part->variants()->sync($syncData);
         }
 
-        return redirect()->route('admin.spare-parts.index')
-                         ->with('success', 'Part created successfully.');
+        return redirect()
+            ->route('admin.spare-parts.index')
+            ->with('success', 'Part created successfully.');
     }
 
     public function edit($id)
     {
-        $part = Part::with('variants')->findOrFail($id);
+        $part = Part::with(['photos', 'variants'])->findOrFail($id);
 
         return view('admin.parts.edit', [
             'part'       => $part,
@@ -85,51 +103,66 @@ class PartController extends Controller
 
     public function update(Request $request, $id)
     {
-        $part = Part::findOrFail($id);
+        $part = Part::with('photos')->findOrFail($id);
 
         $validated = $request->validate([
-            'part_number'      => 'nullable|string|max:255',
-            'part_name'        => 'required|string|max:255',
-            'category_id'      => 'required|exists:categories,id',
-            'part_brand_id'    => 'required|exists:part_brands,id',
-            'oem_number'       => 'nullable|string|max:255',
-            'description'      => 'nullable|string',
-            'price'            => 'required|numeric|min:0',
-            'stock_quantity'   => 'required|integer|min:0',
-            'status'           => 'required|integer',
-            'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'variants'         => 'nullable|array',
-            'variants.*'       => 'exists:variants,id',
+            'part_number'    => 'nullable|string|max:255',
+            'part_name'      => 'required|string|max:255',
+            'category_id'    => 'required|exists:categories,id',
+            'part_brand_id'  => 'required|exists:part_brands,id',
+            'oem_number'     => 'nullable|string|max:255',
+            'description'    => 'nullable|string',
+            'price'          => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'status'         => 'required|integer',
+
+            'photos'   => 'nullable|array',
+            'photos.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+
+            'variants'   => 'nullable|array',
+            'variants.*' => 'exists:variants,id',
         ]);
 
-        // Regenerate SKU if part name, brand, or category changes
+        // Regenerate SKU if needed
         if (
-            $request->part_name !== $part->part_name ||
-            $request->category_id != $part->category_id ||
-            $request->part_brand_id != $part->part_brand_id
+            $validated['part_name'] !== $part->part_name ||
+            $validated['category_id'] != $part->category_id ||
+            $validated['part_brand_id'] != $part->part_brand_id
         ) {
-            $brandName = PartBrand::findOrFail($request->part_brand_id)->name;
-            $categoryName = Category::findOrFail($request->category_id)->category_name;
-            $validated['sku'] = Part::generateSku($brandName, $categoryName, $request->part_name);
+            $brandName = PartBrand::findOrFail($validated['part_brand_id'])->name;
+            $categoryName = Category::findOrFail($validated['category_id'])->category_name;
+            $validated['sku'] = Part::generateSku($brandName, $categoryName, $validated['part_name']);
         } else {
-            $validated['sku'] = $part->sku; // keep old SKU
-        }
-
-        // Handle photo replacement
-        if ($request->hasFile('photo')) {
-            if ($part->photo && Storage::disk('public')->exists($part->photo)) {
-                Storage::disk('public')->delete($part->photo);
-            }
-            $validated['photo'] = $request->file('photo')->store('parts', 'public');
+            $validated['sku'] = $part->sku;
         }
 
         $part->update($validated);
 
-        // Sync variants with vehicle_model_id
-        if ($request->has('variants')) {
+        // Replace photos if new ones uploaded
+        if ($request->hasFile('photos')) {
+
+            foreach ($part->photos as $photo) {
+                Storage::disk('public')->delete($photo->photo_url);
+                $photo->delete();
+            }
+
+            foreach ($request->file('photos') as $index => $file) {
+                $path = $file->store('parts', 'public');
+
+                $part->photos()->create([
+                    'photo_url' => $path,
+                    'type'      => $index === 0 ? 'main' : 'detail',
+                ]);
+            }
+        }
+
+        // Sync variants
+        if ($request->filled('variants')) {
             $syncData = collect($request->variants)->mapWithKeys(function ($variantId) {
                 $variant = Variant::find($variantId);
-                return [$variantId => ['vehicle_model_id' => $variant->vehicle_model_id]];
+                return [
+                    $variantId => ['vehicle_model_id' => $variant->vehicle_model_id]
+                ];
             })->toArray();
 
             $part->variants()->sync($syncData);
@@ -137,23 +170,24 @@ class PartController extends Controller
             $part->variants()->sync([]);
         }
 
-        return redirect()->route('admin.spare-parts.index')
-                         ->with('success', 'Part updated successfully.');
+        return redirect()
+            ->route('admin.spare-parts.index')
+            ->with('success', 'Part updated successfully.');
     }
 
     public function destroy($id)
     {
-        $part = Part::findOrFail($id);
+        $part = Part::with('photos')->findOrFail($id);
 
-        if ($part->photo && Storage::disk('public')->exists($part->photo)) {
-            Storage::disk('public')->delete($part->photo);
+        foreach ($part->photos as $photo) {
+            Storage::disk('public')->delete($photo->photo_url);
         }
 
         $part->variants()->detach();
         $part->delete();
 
-        return redirect()->route('admin.spare-parts.index')
-                         ->with('success', 'Part deleted successfully.');
+        return redirect()
+            ->route('admin.spare-parts.index')
+            ->with('success', 'Part deleted successfully.');
     }
 }
-

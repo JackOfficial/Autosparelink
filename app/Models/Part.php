@@ -40,6 +40,11 @@ class Part extends Model
    return $this->hasMany(PartFitment::class);
 }
 
+ public function photos()
+{
+   return $this->hasMany(PartPhoto::class);
+}
+
 public function variants()
     {
         return $this->belongsToMany(
