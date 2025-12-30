@@ -150,16 +150,28 @@
 
                     <div class="mb-3">
                         <label class="form-label"><i class="fas fa-image"></i> Photo</label>
-                        <div x-data="{ preview: null }">
-                            <input type="file" name="photo" accept="image/*" class="form-control"
-                                @change="preview = URL.createObjectURL($event.target.files[0])">
-                            <template x-if="preview">
-                                <div class="mt-2 position-relative">
-                                    <img :src="preview" class="img-thumbnail" width="200">
-                                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" @click="preview=null">×</button>
-                                </div>
-                            </template>
-                        </div>
+                       <div x-data="{ previews: [] }">
+    <input type="file"
+           name="photos[]"
+           accept="image/*"
+           class="form-control"
+           multiple
+           @change="
+               previews = [];
+               Array.from($event.target.files).forEach(file => {
+                   previews.push(URL.createObjectURL(file));
+               })
+           ">
+
+    <div class="mt-2 d-flex flex-wrap gap-2">
+        <template x-for="(image, index) in previews" :key="index">
+            <div class="position-relative">
+                <img :src="image" class="img-thumbnail" width="120">
+            </div>
+        </template>
+    </div>
+</div>
+
                     </div>
                 </fieldset>
             </div>

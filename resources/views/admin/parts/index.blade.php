@@ -61,7 +61,7 @@
 
                     <tbody>
                         @foreach($parts as $part)
-                        <tr>
+                        <tr class="{{ $part->stock_quantity < 5 ? 'bg-danger' : '' }}">
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $part->sku }}</td>
                             <td>
@@ -80,7 +80,7 @@
                             <td>{{ $part->partBrand->name ?? '-' }} ({{ $part->partBrand->type ?? '-' }})</td>
                             <td>{{ $part->oem_number ?? '-' }}</td>
 
-                            <td>${{ number_format($part->price, 2) }}</td>
+                            <td>{{ number_format($part->price, 2) }} RWF</td>
                             <td>{{ $part->stock_quantity }}</td>
 
                             <td>

@@ -21,9 +21,9 @@ class PartController extends Controller
     public function create()
     {
         return view('admin.parts.create', [
-            'categories' => Category::all(),
-            'partBrands' => PartBrand::all(),
-            'variants'   => Variant::with(['vehicleModel.brand', 'engineType'])->get(),
+            'categories' => Category::OrderBy('category_name', 'ASC')->get(),
+            'partBrands' => PartBrand::OrderBy('name', 'ASC')->get(),
+            'variants'   => Variant::with(['vehicleModel.brand', 'engineType'])->OrderBy('name', 'ASC')->get(),
         ]);
     }
 
@@ -39,7 +39,8 @@ class PartController extends Controller
             'price'            => 'required|numeric|min:0',
             'stock_quantity'   => 'required|integer|min:0',
             'status'           => 'required|integer',
-            'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'photos'           => 'nullable|array',
+            'photos.*'         => 'image|mimes:jpg,jpeg,png,webp|max:2048',
             'variants'         => 'nullable|array',
             'variants.*'       => 'exists:variants,id',
         ]);
