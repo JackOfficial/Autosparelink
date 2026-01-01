@@ -29,6 +29,21 @@
         z-index: 10; 
         border-top: 1px solid #ddd; 
     }
+    .photo-stack img {
+        position: relative;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+    .photo-stack .stack-more {
+        position: relative;
+        margin-left: 5px;
+        font-weight: bold;
+        font-size: 1rem;
+        padding: 5px 10px;
+        background: #000;
+        color: #fff;
+        border-radius: 5px;
+    }
 </style>
 @endsection
 
@@ -129,6 +144,7 @@
 
                             @php
                                 $selectedVariants = old('variants', $part->variants ? $part->variants->pluck('id')->toArray() : []);
+                                $existingPhotos = $part->photos ?? collect([]);
                             @endphp
 
                             <div class="mb-3">
@@ -151,18 +167,36 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label"><i class="fas fa-image"></i> Photo</label>
-                                <div x-data="{ preview: '{{ $part->photo ? asset('storage/'.$part->photo) : '' }}' }">
-                                    <input type="file" name="photo" accept="image/*" class="form-control"
-                                        @change="preview = URL.createObjectURL($event.target.files[0])">
-                                    <template x-if="preview">
-                                        <div class="mt-2 position-relative">
-                                            <img :src="preview" class="img-thumbnail" width="200">
-                                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" @click="preview=null">×</button>
-                                        </div>
-                                    </template>
+                                <label class="form-label"><i class="fas fa-image"></i> Photos</label>
+                                <div x-data="{ previews: [] }">
+                                    <input type="file"
+                                           name="photos[]"
+                                           accept="image/*"
+                                           class="form-control"
+                                           multiple
+                                           @change="
+                                               previews = [];
+                                               Array.from($event.target.files).forEach(file => {
+                                                   previews.push(URL.createObjectURL(file));
+                                               })
+                                           ">
+
+                                    <div class="mt-2 d-flex flex-wrap gap-2">
+                                        <!-- Existing photos -->
+                                        @foreach($existingPhotos as $photo)
+                                            <img src="{{ asset('storage/'.$photo->photo_url) }}" class="img-thumbnail" width="120">
+                                        @endforeach
+
+                                        <!-- New previews -->
+                                        <template x-for="(image, index) in previews" :key="index">
+                                            <div class="position-relative">
+                                                <img :src="image" class="img-thumbnail" width="120">
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
+
                         </fieldset>
                     </div>
                 </div>
