@@ -2,30 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Brand;
-use App\Models\Part;
 use Illuminate\Http\Request;
+use App\Models\Part;
+use App\Models\Brand;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        // Get all brands, latest first
-        $brands = Brand::latest()->get();
-
-        // Count of all parts
+        $parts = Part::with('photos')->latest()->take(8)->get();
+        $recent_parts = Part::with('photos')->latest()->take(8)->get();
+        $brands = Brand::withCount('parts')->get();
         $partsCounter = Part::count();
+        $currencySymbol = 'RWF';
 
-        // All parts with their category and brand
-        $parts = Part::with(['category', 'partBrand'])->latest()->get();
-
-        // Recent parts (limit to 10 for example)
-        $recent_parts = Part::with(['category', 'partBrand'])
-                            ->latest()
-                            ->take(10)
-                            ->get();
-
-        return view('index', compact('brands', 'partsCounter', 'parts', 'recent_parts'));
+        return view('home', compact('parts','recent_parts','brands','partsCounter','currencySymbol'));
     }
 }
