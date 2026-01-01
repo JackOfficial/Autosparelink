@@ -1,9 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Product Details | AutoSpareLink')
+@section('title', $part->part_name . ' | AutoSpareLink')
 
 @section('content')
-
 <div class="container-fluid mt-4">
 
     <!-- Breadcrumb -->
@@ -12,7 +11,7 @@
             <nav class="breadcrumb bg-light mb-4 p-3 rounded">
                 <a class="breadcrumb-item text-dark" href="/">Home</a>
                 <a class="breadcrumb-item text-dark" href="/shop">Shop</a>
-                <span class="breadcrumb-item active">HUB-FREE WHEEL</span>
+                <span class="breadcrumb-item active">{{ $part->part_name }}</span>
             </nav>
         </div>
     </div>
@@ -22,7 +21,35 @@
         <!-- Product Image -->
         <div class="col-lg-5 col-md-6 mb-4">
             <div class="bg-light p-3 rounded shadow-sm">
-                <img src="{{ asset('frontend/img/parts.jpg') }}" class="img-fluid w-100" alt="HUB-FREE WHEEL">
+
+                <div class="main-image position-relative overflow-hidden rounded">
+                    <img
+                        id="currentImage"
+                        src="{{ $part->photos->first() ? asset('storage/'.$part->photos->first()->photo_url) : asset('frontend/img/parts.jpg') }}"
+                        class="img-fluid w-100"
+                        alt="{{ $part->part_name }}"
+                        loading="lazy"
+                    >
+
+                    @if($part->photos->count() > 1)
+                        <button type="button" class="gallery-btn prev-btn">&lsaquo;</button>
+                        <button type="button" class="gallery-btn next-btn">&rsaquo;</button>
+                    @endif
+                </div>
+
+                @if($part->photos->count() > 1)
+                    <div class="thumbnail-wrapper mt-3">
+                        @foreach($part->photos as $photo)
+                            <img
+                                src="{{ asset('storage/'.$photo->photo_url) }}"
+                                data-full="{{ asset('storage/'.$photo->photo_url) }}"
+                                class="thumbnail-img"
+                                loading="lazy"
+                            >
+                        @endforeach
+                    </div>
+                @endif
+
             </div>
         </div>
 
@@ -31,18 +58,22 @@
             <div class="bg-light p-4 rounded shadow-sm product-card position-relative">
 
                 <!-- Title -->
-                <h2 class="font-weight-bold mb-3">HUB-FREE WHEEL</h2>
+                <h2 class="font-weight-bold mb-3">{{ $part->part_name }}</h2>
 
-                <!-- Manufacturer / Part Number / Weight -->
-                <p class="mb-1"><strong>Make:</strong> <a href="#">Hyundai / KIA</a></p>
-                <p class="mb-1"><strong>Part Number:</strong> <a href="#">0K01133200B</a></p>
-                <p class="mb-1"><strong>Weight:</strong> 0.138 kg</p>
+                <!-- Make / Part Number / Weight -->
+                <p class="mb-1"><strong>Make:</strong> <a href="#">{{ $part->partBrand->name }}</a></p>
+                <p class="mb-1"><strong>Part Number:</strong> <a href="#">{{ $part->part_number ?? 'N/A' }}</a></p>
+                <p class="mb-1"><strong>Weight:</strong> {{ $part->weight ?? 'N/A' }} kg</p>
 
                 <!-- Price -->
-                <h3 class="text-primary mb-3">$71.16 <small class="text-muted">USD</small></h3>
+                <h3 class="text-primary mb-3">{{ number_format($part->price, 2) }} <small class="text-muted">RWF</small></h3>
 
                 <!-- Availability -->
-                <p class="mb-3"><strong>Availability:</strong> <span class="badge badge-success">1</span></p>
+                <p class="mb-3"><strong>Availability:</strong>
+                    <span class="badge badge-{{ $part->stock_quantity > 0 ? 'success' : 'warning' }}">
+                        {{ $part->stock_quantity }}
+                    </span>
+                </p>
 
                 <!-- Quantity Selector -->
                 <div class="mb-4 position-relative quantity-wrapper">
@@ -79,16 +110,14 @@
                 <!-- Product Description -->
                 <div class="border-top pt-3">
                     <h5 class="mb-2">Product Description</h5>
-                    <p>
-                        Genuine Hyundai / KIA HUB-FREE WHEEL, high-quality OEM part ensuring perfect fit and durability.
-                        Ideal for replacement and maintenance.
-                    </p>
+                    <p>{{ $part->description ?? 'No description available.' }}</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Substitutions Table -->
+    @if($substitutions->count() > 0)
     <div class="row px-xl-5">
         <div class="col-12 mb-4">
             <h4 class="mb-3">Substitutions</h4>
@@ -107,37 +136,36 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach($substitutions as $sub)
                         <tr>
-                            <td><a href="/cataloge/1">Hyundai / KIA</a></td>
-                            <td>0K01133200A</td>
-                            <td>HUB-FREE WHEEL</td>
-                            <td>0</td>
-                            <td>0.023</td>
+                            <td><a href="#">{{ $sub->partBrand->name }}</a></td>
+                            <td>{{ $sub->part_number ?? 'N/A' }}</td>
+                            <td>{{ $sub->part_name }}</td>
+                            <td>{{ $sub->stock_quantity }}</td>
+                            <td>{{ $sub->weight ?? 'N/A' }}</td>
                             <td>-</td>
-                            <td>179.96$</td>
-                            <td><span class="badge badge-warning">Not Available</span></td>
+                            <td>{{ number_format($sub->price, 2) }}</td>
+                            <td>
+                                @if($sub->stock_quantity > 0)
+                                    <span class="badge badge-success">Available</span>
+                                @else
+                                    <span class="badge badge-warning">Not Available</span>
+                                @endif
+                            </td>
                         </tr>
-                        <tr>
-                            <td><a href="/cataloge/1">Hyundai / KIA</a></td>
-                            <td>0K01133200</td>
-                            <td>HUB-FREE WHEEL</td>
-                            <td><span class="badge badge-warning">0</span></td>
-                            <td>0.138</td>
-                            <td>-</td>
-                            <td>132.46$</td>
-                            <td><span class="badge badge-warning">Not Available</span></td>
-                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Compatibility Table -->
+    @if($compatibilities->count() > 0)
     <div class="row px-xl-5">
         <div class="col-12 mb-4">
             <h4 class="mb-3">Compatibility</h4>
-            <button class="btn btn-primary rounded my-1">Sportage</button>
             <div class="table-responsive bg-light p-3 rounded shadow-sm">
                 <table class="table table-bordered table-hover mb-0">
                     <thead class="thead-light">
@@ -150,22 +178,25 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach($compatibilities as $comp)
                         <tr>
-                            <td>DOM</td>
-                            <td>Sportage</td>
-                            <td>1999</td>
-                            <td>2002</td>
+                            <td>{{ $comp->market ?? '-' }}</td>
+                            <td>{{ $comp->vehicleModel->name ?? '-' }}</td>
+                            <td>{{ $comp->year_from ?? '-' }}</td>
+                            <td>{{ $comp->year_to ?? '-' }}</td>
                             <td>
-                                <a href="/cataloge/1" class="btn btn-sm btn-primary">
+                                <a href="#" class="btn btn-sm btn-primary">
                                     <i class="fas fa-info"></i> View
                                 </a>
                             </td>
                         </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+    @endif
 
 </div>
 
@@ -207,5 +238,4 @@ document.addEventListener('DOMContentLoaded', () => {
     cursor: pointer;
 }
 </style>
-
 @endsection
