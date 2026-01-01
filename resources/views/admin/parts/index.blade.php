@@ -4,36 +4,34 @@
 @section('content')
 
 <style>
-    /* Facebook-style stacked avatars */
-    .brand-stack {
-        display: flex;
-        align-items: center;
+    /* Facebook-style stacked photos */
+    .photo-stack {
+        position: relative;
+        width: 90px;
+        height: 60px;
     }
 
-    .brand-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        border: 2px solid #fff;
-        background-color: #6c757d;
-        color: #fff;
-        font-size: 12px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        margin-left: -10px;
-    }
-
-    .brand-avatar:first-child {
-        margin-left: 0;
-    }
-
-    .brand-avatar img {
-        width: 100%;
-        height: 100%;
+    .stack-img {
+        position: absolute;
+        width: 50px;
+        height: 50px;
         object-fit: cover;
+        border-radius: 6px;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        background: #f8f9fa;
+    }
+
+    .stack-more {
+        position: absolute;
+        right: -6px;
+        bottom: -6px;
+        background: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        font-size: 11px;
+        padding: 3px 6px;
+        border-radius: 12px;
+        font-weight: bold;
     }
 </style>
 
@@ -54,6 +52,7 @@
     </div>
 </section>
 
+<!-- Main Content -->
 <section class="content">
 
     @if (session('success'))
@@ -83,7 +82,7 @@
                             <th>Part No.</th>
                             <th>Name</th>
                             <th>Category</th>
-                            <th>Brand(s)</th>
+                            <th>Brand</th>
                             <th>OEM Number</th>
                             <th>Price</th>
                             <th>Stock</th>
@@ -98,10 +97,19 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $part->sku }}</td>
 
+                            <!-- Stacked photos -->
                             <td>
-                                @if($part->photo)
-                                    <img src="{{ asset('storage/'.$part->photo) }}"
-                                         class="img-thumbnail" style="width:70px;">
+                                @if($part->photos && $part->photos->count())
+                                    <div class="photo-stack">
+                                        @foreach($part->photos->take(3) as $index => $photo)
+                                            <img src="{{ asset('storage/'.$photo->photo_url) }}"
+                                                 class="stack-img"
+                                                 style="left: {{ $index * 15 }}px; z-index: {{ 10 - $index }};">
+                                        @endforeach
+                                        @if($part->photos->count() > 3)
+                                            <span class="stack-more">+{{ $part->photos->count() - 3 }}</span>
+                                        @endif
+                                    </div>
                                 @else
                                     <span class="text-muted">No photo</span>
                                 @endif
@@ -109,23 +117,12 @@
 
                             <td>{{ $part->part_number }}</td>
                             <td>{{ $part->part_name }}</td>
-                            <td>{{ $part->category->category_name }}</td>
+                            <td>{{ $part->category->category_name ?? '-' }}</td>
 
-                            <!-- ✅ BRAND STACK -->
+                            <!-- Single brand -->
                             <td>
-                                @if($part->partBrands->count())
-                                    <div class="brand-stack">
-                                        @foreach($part->partBrands as $brand)
-                                            <div class="brand-avatar"
-                                                 title="{{ $brand->name }} ({{ $brand->type }})">
-                                                @if($brand->logo)
-                                                    <img src="{{ asset('storage/'.$brand->logo) }}">
-                                                @else
-                                                    {{ strtoupper(substr($brand->name, 0, 2)) }}
-                                                @endif
-                                            </div>
-                                        @endforeach
-                                    </div>
+                                @if($part->partBrand)
+                                    {{ $part->partBrand->name }} ({{ $part->partBrand->type }})
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
@@ -164,6 +161,11 @@
                         @endforeach
                     </tbody>
                 </table>
+
+                <!-- Pagination -->
+                <div class="mt-3">
+                    {{ $parts->links() }}
+                </div>
             </div>
         </div>
     </div>
