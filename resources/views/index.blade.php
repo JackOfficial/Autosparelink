@@ -148,7 +148,7 @@
     <div class="row px-xl-5 pb-3">
         @forelse ($brands as $brand)
             <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-                <a class="text-decoration-none" href="{{ url('models/'.$brand->id) }}">
+                <a href="#" class="text-decoration-none" href="{{ url('models/'.$brand->id) }}">
                     <div class="cat-item d-flex align-items-center gap-3 p-3">
                         <div class="overflow-hidden" style="width:85px; height:85px;">
                             <img class="img-fluid" src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }}" loading="lazy">
@@ -192,7 +192,7 @@
                         </div>
                     </div>
                     <div class="text-center py-3 px-2">
-                        <a class="h6 text-truncate d-block mb-1 text-dark" href="#">{{ \Illuminate\Support\Str::limit($part->part_name, 30) }}</a>
+                        <a class="h6 text-truncate d-block mb-1 text-dark" href="shop/products/{{ $part->id }}">{{ Str::limit($part->part_name, 30) }}</a>
                         <div class="d-flex align-items-center justify-content-center mb-2">
                             <h5 class="mb-0">{{ number_format($part->price, 2) }} {{ $currencySymbol ?? 'RWF' }}</h5>
                             @if(!empty($part->old_price)) <h6 class="price-old mb-0">{{ number_format($part->old_price, 2) }}</h6> @endif
@@ -240,7 +240,7 @@
                         </div>
                     </div>
                     <div class="text-center py-3 px-2">
-                        <a class="h6 text-truncate d-block mb-1 text-dark" href="#">{{ \Illuminate\Support\Str::limit($recent_part->part_name, 30) }}</a>
+                        <a href="shop/products/{{ $recent_part->id }}" class="h6 text-truncate d-block mb-1 text-dark" href="#">{{ Str::limit($recent_part->part_name, 30) }}</a>
                         <div class="d-flex align-items-center justify-content-center">
                             <h5 class="mb-0">{{ number_format($recent_part->price, 2) }} {{ $currencySymbol ?? 'RWF' }}</h5>
                             @if(!empty($recent_part->old_price)) <h6 class="price-old mb-0">{{ number_format($recent_part->old_price, 2) }}</h6> @endif
