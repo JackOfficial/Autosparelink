@@ -201,42 +201,75 @@
 
 </div>
 
+<!-- Gallery JS -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Quantity buttons
     const input = document.getElementById('quantity-input');
-    document.querySelector('.btn-plus').addEventListener('click', () => {
-        input.value = parseInt(input.value) + 1;
-    });
-    document.querySelector('.btn-minus').addEventListener('click', () => {
-        if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
-    });
+    document.querySelector('.btn-plus').addEventListener('click', () => input.value = parseInt(input.value)+1);
+    document.querySelector('.btn-minus').addEventListener('click', () => { if(input.value>1) input.value--; });
+
+    // Gallery
+    const mainImage = document.getElementById('currentImage');
+    const thumbnails = document.querySelectorAll('.thumbnail-img');
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+
+    if (thumbnails.length > 0) {
+        let images = Array.from(thumbnails).map(t => t.dataset.full);
+        let index = 0;
+
+        function showImage(i) {
+            index = i;
+            mainImage.src = images[i];
+            thumbnails.forEach((t,k) => t.classList.toggle('active-thumb', k===i));
+        }
+
+        showImage(0);
+
+        thumbnails.forEach((thumb,i) => thumb.addEventListener('click', () => showImage(i)));
+
+        prevBtn?.addEventListener('click', () => showImage((index-1+images.length)%images.length));
+        nextBtn?.addEventListener('click', () => showImage((index+1)%images.length));
+
+        // Fullscreen on click
+        const modal = document.createElement('div');
+        modal.style = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);justify-content:center;align-items:center;z-index:9999;';
+        const modalImg = document.createElement('img');
+        modalImg.style.maxWidth='90%';
+        modalImg.style.maxHeight='90%';
+        modal.appendChild(modalImg);
+        document.body.appendChild(modal);
+        mainImage.addEventListener('click', () => { modal.style.display='flex'; modalImg.src = mainImage.src; });
+        modal.addEventListener('click', () => modal.style.display='none');
+    }
+
 });
 </script>
 
 <style>
 /* Wishlist button appears on card hover */
-.product-card:hover .wishlist-btn {
-    opacity: 1;
-}
-.wishlist-btn {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
+.product-card:hover .wishlist-btn { opacity: 1; }
+.wishlist-btn { opacity: 0; transition: opacity 0.3s ease; }
 
 /* Quantity buttons appear on hover */
 .quantity-wrapper .btn-minus,
-.quantity-wrapper .btn-plus {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
+.quantity-wrapper .btn-plus { opacity: 0; transition: opacity 0.3s ease; }
 .quantity-wrapper:hover .btn-minus,
-.quantity-wrapper:hover .btn-plus {
-    opacity: 1;
-}
+.quantity-wrapper:hover .btn-plus { opacity: 1; }
 
-.table-hover tbody tr:hover {
-    background-color: #f1f1f1;
-    cursor: pointer;
-}
+/* Table hover effect */
+.table-hover tbody tr:hover { background-color: #f1f1f1; cursor: pointer; }
+
+/* Gallery */
+.main-image img { cursor: zoom-in; transition: transform .3s ease; }
+.main-image:hover img { transform: scale(1.15); }
+.gallery-btn { position:absolute; top:50%; transform:translateY(-50%); width:42px; height:42px; border-radius:50%; background:rgba(0,0,0,.6); color:#fff; border:none; font-size:26px; opacity:0; transition:opacity .3s; }
+.main-image:hover .gallery-btn { opacity:1; }
+.prev-btn { left:10px; } .next-btn { right:10px; }
+.thumbnail-wrapper { display:flex; gap:10px; overflow-x:auto; margin-top:10px; }
+.thumbnail-img { width:70px; height:70px; object-fit:cover; border-radius:6px; border:2px solid transparent; cursor:pointer; }
+.thumbnail-img.active-thumb { border-color:#007bff; }
 </style>
 @endsection
