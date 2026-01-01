@@ -3,6 +3,40 @@
 
 @section('content')
 
+<style>
+    /* Facebook-style stacked avatars */
+    .brand-stack {
+        display: flex;
+        align-items: center;
+    }
+
+    .brand-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        background-color: #6c757d;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin-left: -10px;
+    }
+
+    .brand-avatar:first-child {
+        margin-left: 0;
+    }
+
+    .brand-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
+
 <!-- Content Header -->
 <section class="content-header">
     <div class="container-fluid">
@@ -20,11 +54,10 @@
     </div>
 </section>
 
-<!-- Main Content -->
 <section class="content">
 
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show">
             <i class="fas fa-check-circle"></i> {{ session('success') }}
             <button type="button" class="close" data-dismiss="alert">
                 <span>&times;</span>
@@ -41,7 +74,7 @@
 
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example1" class="table table-striped projects">
+                <table class="table table-striped projects">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -50,7 +83,7 @@
                             <th>Part No.</th>
                             <th>Name</th>
                             <th>Category</th>
-                            <th>Brand</th>
+                            <th>Brand(s)</th>
                             <th>OEM Number</th>
                             <th>Price</th>
                             <th>Stock</th>
@@ -64,11 +97,11 @@
                         <tr class="{{ $part->stock_quantity < 5 ? 'bg-danger' : '' }}">
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $part->sku }}</td>
+
                             <td>
                                 @if($part->photo)
                                     <img src="{{ asset('storage/'.$part->photo) }}"
-                                         class="img-thumbnail"
-                                         style="width: 70px;">
+                                         class="img-thumbnail" style="width:70px;">
                                 @else
                                     <span class="text-muted">No photo</span>
                                 @endif
@@ -77,9 +110,28 @@
                             <td>{{ $part->part_number }}</td>
                             <td>{{ $part->part_name }}</td>
                             <td>{{ $part->category->category_name }}</td>
-                            <td>{{ $part->partBrand->name ?? '-' }} ({{ $part->partBrand->type ?? '-' }})</td>
-                            <td>{{ $part->oem_number ?? '-' }}</td>
 
+                            <!-- ✅ BRAND STACK -->
+                            <td>
+                                @if($part->partBrands->count())
+                                    <div class="brand-stack">
+                                        @foreach($part->partBrands as $brand)
+                                            <div class="brand-avatar"
+                                                 title="{{ $brand->name }} ({{ $brand->type }})">
+                                                @if($brand->logo)
+                                                    <img src="{{ asset('storage/'.$brand->logo) }}">
+                                                @else
+                                                    {{ strtoupper(substr($brand->name, 0, 2)) }}
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+
+                            <td>{{ $part->oem_number ?? '-' }}</td>
                             <td>{{ number_format($part->price, 2) }} RWF</td>
                             <td>{{ $part->stock_quantity }}</td>
 
@@ -102,22 +154,19 @@
                                       onsubmit="return confirm('Delete this part?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
-                                            class="btn btn-danger btn-sm">
+                                    <button class="btn btn-danger btn-sm">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
-
                             </td>
+
                         </tr>
                         @endforeach
                     </tbody>
-
                 </table>
             </div>
         </div>
     </div>
 
 </section>
-
 @endsection
