@@ -30,8 +30,45 @@ class ProductController extends Controller
     }
 
     // Single product view
-    public function product()
-    {
-        return view('product');
-    }
+public function product($id)
+{
+    // Main product with all required relationships
+    $part = Part::with([
+        'category',
+        'partBrand',
+        'photos',
+        'variants.vehicleModel',
+        'variants.engineType',
+    ])->findOrFail($id);
+
+    // Main image (safe fallback guaranteed)
+    $mainPhoto = $part->photos
+        ->where('type', 'main')
+        ->first()
+        ?? $part->photos->first();
+
+    // All photos (used for gallery, thumbnails, fullscreen)
+    $photos = $part->photos;
+
+    // Substitutions (same name or OEM, different product)
+    $substitutions = Part::with('partBrand')
+        ->where('id', '!=', $part->id)
+        ->where(function ($q) use ($part) {
+            $q->where('part_name', $part->part_name)
+              ->orWhere('oem_number', $part->oem_number);
+        })
+        ->limit(10)
+        ->get();
+
+    // Compatibility (via variants pivot)
+    $compatibilities = $part->variants;
+
+    return view('product', compact(
+        'part',
+        'photos',
+        'mainPhoto',
+        'substitutions',
+        'compatibilities'
+    ));
+}
 }
