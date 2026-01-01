@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Part;
+use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use App\Models\Part;
+use Illuminate\Http\Request;
 
-class HomeController extends Controller
+class HomeContoller extends Controller
 {
-    public function index()
-    {
-        $parts = Part::with('photos')->latest()->take(8)->get();
+     function index(){
+      $parts = Part::with('photos')->latest()->take(8)->get();
         $recent_parts = Part::with('photos')->latest()->take(8)->get();
         $brands = Brand::withCount('parts')->get();
         $partsCounter = Part::count();
