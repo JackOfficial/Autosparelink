@@ -76,7 +76,7 @@
     <div class="hero-overlay"></div>
     <div class="container-fluid">
         <div class="hero-content text-white px-4">
-            <h1 class="hero-title fw-bold mb-2 animate__animated animate__fadeInDown">Find Genuine Spare Parts.</h1>
+            <h1 class="hero-title text-white fw-bold mb-2 animate__animated animate__fadeInDown">Find Genuine Spare Parts.</h1>
             <p class="hero-sub mb-3 animate__animated animate__fadeInUp">Use your VIN or Frame number to instantly find parts that fit your exact vehicle model.</p>
 
             <!-- VIN Search Box -->
