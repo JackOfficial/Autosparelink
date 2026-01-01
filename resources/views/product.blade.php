@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
-@section('title', $part->part_name . ' | AutoSpareLink')
+@section('title', 'Product Details | AutoSpareLink')
 
 @section('content')
+
 <div class="container-fluid mt-4">
 
     <!-- Breadcrumb -->
@@ -11,210 +12,200 @@
             <nav class="breadcrumb bg-light mb-4 p-3 rounded">
                 <a class="breadcrumb-item text-dark" href="/">Home</a>
                 <a class="breadcrumb-item text-dark" href="/shop">Shop</a>
-                <span class="breadcrumb-item active">{{ $part->part_name }}</span>
+                <span class="breadcrumb-item active">HUB-FREE WHEEL</span>
             </nav>
         </div>
     </div>
 
+    <!-- Product Details -->
     <div class="row px-xl-5">
-
-        <!-- ================= PRODUCT GALLERY ================= -->
+        <!-- Product Image -->
         <div class="col-lg-5 col-md-6 mb-4">
             <div class="bg-light p-3 rounded shadow-sm">
-
-                <div class="main-image position-relative overflow-hidden rounded">
-                    <img
-                        id="currentImage"
-                        src="{{ $part->photos->first()
-                            ? asset('storage/'.$part->photos->first()->photo_url)
-                            : asset('frontend/img/parts.jpg') }}"
-                        class="img-fluid w-100"
-                        alt="{{ $part->part_name }}"
-                        loading="lazy"
-                    >
-
-                    <button type="button" class="gallery-btn prev-btn">&lsaquo;</button>
-                    <button type="button" class="gallery-btn next-btn">&rsaquo;</button>
-                </div>
-
-                <div class="thumbnail-wrapper mt-3">
-                    @foreach($part->photos as $photo)
-                        <img
-                            src="{{ asset('storage/'.$photo->photo_url) }}"
-                            data-full="{{ asset('storage/'.$photo->photo_url) }}"
-                            class="thumbnail-img"
-                            loading="lazy"
-                        >
-                    @endforeach
-                </div>
-
+                <img src="{{ asset('frontend/img/parts.jpg') }}" class="img-fluid w-100" alt="HUB-FREE WHEEL">
             </div>
         </div>
 
-        <!-- ================= PRODUCT INFO ================= -->
+        <!-- Product Info -->
         <div class="col-lg-7 col-md-6 mb-4">
-            <div class="bg-light p-4 rounded shadow-sm">
+            <div class="bg-light p-4 rounded shadow-sm product-card position-relative">
 
-                <h2 class="font-weight-bold">{{ $part->part_name }}</h2>
+                <!-- Title -->
+                <h2 class="font-weight-bold mb-3">HUB-FREE WHEEL</h2>
 
-                <p><strong>Make:</strong> {{ $part->partBrand->name }}</p>
-                <p><strong>Part Number:</strong> {{ $part->part_number ?? 'N/A' }}</p>
-                <p><strong>OEM Number:</strong> {{ $part->oem_number ?? 'N/A' }}</p>
+                <!-- Manufacturer / Part Number / Weight -->
+                <p class="mb-1"><strong>Make:</strong> <a href="#">Hyundai / KIA</a></p>
+                <p class="mb-1"><strong>Part Number:</strong> <a href="#">0K01133200B</a></p>
+                <p class="mb-1"><strong>Weight:</strong> 0.138 kg</p>
 
-                <h3 class="text-primary my-3">
-                    {{ number_format($part->price, 2) }} RWF
-                </h3>
+                <!-- Price -->
+                <h3 class="text-primary mb-3">$71.16 <small class="text-muted">USD</small></h3>
 
-                <p>
-                    <strong>Availability:</strong>
-                    <span class="badge badge-{{ $part->stock_quantity > 0 ? 'success' : 'warning' }}">
-                        {{ $part->stock_quantity }}
-                    </span>
-                </p>
+                <!-- Availability -->
+                <p class="mb-3"><strong>Availability:</strong> <span class="badge badge-success">1</span></p>
 
-                <div class="border-top pt-3">
-                    <h5>Description</h5>
-                    <p>{{ $part->description ?? 'No description available.' }}</p>
+                <!-- Quantity Selector -->
+                <div class="mb-4 position-relative quantity-wrapper">
+                    <label class="mb-2">Quantity:</label>
+                    <div class="input-group w-50">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-outline-secondary btn-minus" type="button"><i class="fa fa-minus"></i></button>
+                        </div>
+                        <input type="number" class="form-control text-center" value="1" min="1" id="quantity-input">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary btn-plus" type="button"><i class="fa fa-plus"></i></button>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- Add to Cart / Wishlist -->
+                <div class="mb-4 d-flex align-items-center">
+                    <button class="btn btn-primary btn-lg mr-2">
+                        <i class="fa fa-shopping-cart mr-1"></i> Add to Cart
+                    </button>
+                    <button class="btn btn-outline-secondary btn-lg wishlist-btn">
+                        <i class="fa fa-heart mr-1"></i> Add to Wishlist
+                    </button>
+                </div>
+
+                <!-- Share Buttons -->
+                <div class="mb-4">
+                    <strong class="mr-2">Share:</strong>
+                    <a href="#" class="btn btn-sm btn-success mr-1"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="btn btn-sm btn-dark mr-1"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="btn btn-sm btn-primary"><i class="fab fa-facebook-f"></i></a>
+                </div>
+
+                <!-- Product Description -->
+                <div class="border-top pt-3">
+                    <h5 class="mb-2">Product Description</h5>
+                    <p>
+                        Genuine Hyundai / KIA HUB-FREE WHEEL, high-quality OEM part ensuring perfect fit and durability.
+                        Ideal for replacement and maintenance.
+                    </p>
+                </div>
             </div>
         </div>
-
     </div>
+
+    <!-- Substitutions Table -->
+    <div class="row px-xl-5">
+        <div class="col-12 mb-4">
+            <h4 class="mb-3">Substitutions</h4>
+            <div class="table-responsive bg-light p-3 rounded shadow-sm">
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Make</th>
+                            <th>Number</th>
+                            <th>Name</th>
+                            <th>Availability</th>
+                            <th>Weight, kg</th>
+                            <th>Processing, days</th>
+                            <th>Price</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="/cataloge/1">Hyundai / KIA</a></td>
+                            <td>0K01133200A</td>
+                            <td>HUB-FREE WHEEL</td>
+                            <td>0</td>
+                            <td>0.023</td>
+                            <td>-</td>
+                            <td>179.96$</td>
+                            <td><span class="badge badge-warning">Not Available</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="/cataloge/1">Hyundai / KIA</a></td>
+                            <td>0K01133200</td>
+                            <td>HUB-FREE WHEEL</td>
+                            <td><span class="badge badge-warning">0</span></td>
+                            <td>0.138</td>
+                            <td>-</td>
+                            <td>132.46$</td>
+                            <td><span class="badge badge-warning">Not Available</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compatibility Table -->
+    <div class="row px-xl-5">
+        <div class="col-12 mb-4">
+            <h4 class="mb-3">Compatibility</h4>
+            <button class="btn btn-primary rounded my-1">Sportage</button>
+            <div class="table-responsive bg-light p-3 rounded shadow-sm">
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Market</th>
+                            <th>Model</th>
+                            <th>Year From</th>
+                            <th>Year To</th>
+                            <th>Diagram</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>DOM</td>
+                            <td>Sportage</td>
+                            <td>1999</td>
+                            <td>2002</td>
+                            <td>
+                                <a href="/cataloge/1" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-info"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<!-- FULLSCREEN MODAL -->
-<div id="imageModal" class="image-modal">
-    <span class="close-modal">&times;</span>
-    <img id="modalImage">
-</div>
-
-<!-- ================= INLINE JS (GUARANTEED TO LOAD) ================= -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    var mainImage = document.getElementById('currentImage');
-    var thumbnails = document.querySelectorAll('.thumbnail-img');
-    var prevBtn = document.querySelector('.prev-btn');
-    var nextBtn = document.querySelector('.next-btn');
-
-    if (thumbnails.length === 0) return;
-
-    var images = [];
-    thumbnails.forEach(function (t) {
-        images.push(t.getAttribute('data-full'));
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('quantity-input');
+    document.querySelector('.btn-plus').addEventListener('click', () => {
+        input.value = parseInt(input.value) + 1;
     });
-
-    var index = 0;
-
-    function showImage(i) {
-        index = i;
-        mainImage.src = images[i];
-        thumbnails.forEach(function (t, k) {
-            t.classList.toggle('active-thumb', k === i);
-        });
-    }
-
-    showImage(0);
-
-    thumbnails.forEach(function (thumb, i) {
-        thumb.addEventListener('click', function () {
-            showImage(i);
-        });
+    document.querySelector('.btn-minus').addEventListener('click', () => {
+        if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
     });
-
-    prevBtn.addEventListener('click', function () {
-        showImage((index - 1 + images.length) % images.length);
-    });
-
-    nextBtn.addEventListener('click', function () {
-        showImage((index + 1) % images.length);
-    });
-
-    /* Fullscreen */
-    var modal = document.getElementById('imageModal');
-    var modalImg = document.getElementById('modalImage');
-    var close = document.querySelector('.close-modal');
-
-    mainImage.addEventListener('click', function () {
-        modal.style.display = 'flex';
-        modalImg.src = mainImage.src;
-    });
-
-    close.addEventListener('click', function () {
-        modal.style.display = 'none';
-    });
-
 });
 </script>
 
-<!-- ================= INLINE CSS ================= -->
 <style>
-.main-image img {
-    cursor: zoom-in;
-    transition: transform .3s ease;
-}
-.main-image:hover img {
-    transform: scale(1.15);
-}
-
-.gallery-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: rgba(0,0,0,.6);
-    color: #fff;
-    border: none;
-    font-size: 26px;
-    opacity: 0;
-    transition: opacity .3s;
-}
-.main-image:hover .gallery-btn {
+/* Wishlist button appears on card hover */
+.product-card:hover .wishlist-btn {
     opacity: 1;
 }
-.prev-btn { left: 10px; }
-.next-btn { right: 10px; }
-
-.thumbnail-wrapper {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-}
-.thumbnail-img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 6px;
-    border: 2px solid transparent;
-    cursor: pointer;
-}
-.thumbnail-img.active-thumb {
-    border-color: #007bff;
+.wishlist-btn {
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.image-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.9);
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+/* Quantity buttons appear on hover */
+.quantity-wrapper .btn-minus,
+.quantity-wrapper .btn-plus {
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
-.image-modal img {
-    max-width: 90%;
-    max-height: 90%;
+.quantity-wrapper:hover .btn-minus,
+.quantity-wrapper:hover .btn-plus {
+    opacity: 1;
 }
-.close-modal {
-    position: absolute;
-    top: 20px;
-    right: 30px;
-    font-size: 36px;
-    color: #fff;
+
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
     cursor: pointer;
 }
 </style>
+
 @endsection
