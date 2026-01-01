@@ -33,10 +33,13 @@
                         loading="lazy"
                     >
 
-                    <button type="button" class="gallery-btn prev-btn">&lsaquo;</button>
-                    <button type="button" class="gallery-btn next-btn">&rsaquo;</button>
+                    @if($part->photos->count() > 1)
+                        <button type="button" class="gallery-btn prev-btn">&lsaquo;</button>
+                        <button type="button" class="gallery-btn next-btn">&rsaquo;</button>
+                    @endif
                 </div>
 
+                @if($part->photos->count() > 1)
                 <div class="thumbnail-wrapper mt-3">
                     @foreach($part->photos as $photo)
                         <img
@@ -47,6 +50,7 @@
                         >
                     @endforeach
                 </div>
+                @endif
 
             </div>
         </div>
@@ -89,7 +93,7 @@
     <img id="modalImage">
 </div>
 
-<!-- ================= INLINE JS (GUARANTEED TO LOAD) ================= -->
+@section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -98,38 +102,40 @@ document.addEventListener('DOMContentLoaded', function () {
     var prevBtn = document.querySelector('.prev-btn');
     var nextBtn = document.querySelector('.next-btn');
 
-    if (thumbnails.length === 0) return;
+    // Only run gallery if there is more than one image
+    if (thumbnails.length > 1) {
 
-    var images = [];
-    thumbnails.forEach(function (t) {
-        images.push(t.getAttribute('data-full'));
-    });
+        var images = [];
+        thumbnails.forEach(function (t) {
+            images.push(t.getAttribute('data-full'));
+        });
 
-    var index = 0;
+        var index = 0;
 
-    function showImage(i) {
-        index = i;
-        mainImage.src = images[i];
-        thumbnails.forEach(function (t, k) {
-            t.classList.toggle('active-thumb', k === i);
+        function showImage(i) {
+            index = i;
+            mainImage.src = images[i];
+            thumbnails.forEach(function (t, k) {
+                t.classList.toggle('active-thumb', k === i);
+            });
+        }
+
+        showImage(0);
+
+        thumbnails.forEach(function (thumb, i) {
+            thumb.addEventListener('click', function () {
+                showImage(i);
+            });
+        });
+
+        prevBtn.addEventListener('click', function () {
+            showImage((index - 1 + images.length) % images.length);
+        });
+
+        nextBtn.addEventListener('click', function () {
+            showImage((index + 1) % images.length);
         });
     }
-
-    showImage(0);
-
-    thumbnails.forEach(function (thumb, i) {
-        thumb.addEventListener('click', function () {
-            showImage(i);
-        });
-    });
-
-    prevBtn.addEventListener('click', function () {
-        showImage((index - 1 + images.length) % images.length);
-    });
-
-    nextBtn.addEventListener('click', function () {
-        showImage((index + 1) % images.length);
-    });
 
     /* Fullscreen */
     var modal = document.getElementById('imageModal');
@@ -147,8 +153,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
+@endsection
 
-<!-- ================= INLINE CSS ================= -->
+@section('styles')
 <style>
 .main-image img {
     cursor: zoom-in;
