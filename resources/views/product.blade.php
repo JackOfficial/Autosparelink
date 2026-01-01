@@ -18,6 +18,7 @@
 
     <!-- Product Details -->
     <div class="row px-xl-5">
+
         <!-- Product Image -->
         <div class="col-lg-5 col-md-6 mb-4">
             <div class="bg-light p-3 rounded shadow-sm">
@@ -117,7 +118,7 @@
     </div>
 
     <!-- Substitutions Table -->
-    @if($substitutions->count() > 0)
+    @if($substitutions->count())
     <div class="row px-xl-5">
         <div class="col-12 mb-4">
             <h4 class="mb-3">Substitutions</h4>
@@ -162,7 +163,7 @@
     @endif
 
     <!-- Compatibility Table -->
-    @if($compatibilities->count() > 0)
+    @if($compatibilities->count())
     <div class="row px-xl-5">
         <div class="col-12 mb-4">
             <h4 class="mb-3">Compatibility</h4>
