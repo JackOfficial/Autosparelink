@@ -16,6 +16,6 @@ class HomeContoller extends Controller
         $partsCounter = Part::count();
         $currencySymbol = 'RWF';
 
-        return view('home', compact('parts','recent_parts','brands','partsCounter','currencySymbol'));
+        return view('index', compact('parts','recent_parts','brands','partsCounter','currencySymbol'));
     }
 }
