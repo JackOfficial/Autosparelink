@@ -20,28 +20,23 @@
 
         <!-- ================= PRODUCT GALLERY ================= -->
         <div class="col-lg-5 col-md-6 mb-4">
-            <div class="product-gallery bg-light p-3 rounded shadow-sm">
+            <div class="bg-light p-3 rounded shadow-sm">
 
-                <!-- MAIN IMAGE -->
                 <div class="main-image position-relative overflow-hidden rounded">
                     <img
                         id="currentImage"
                         src="{{ $part->photos->first()
-                                ? asset('storage/'.$part->photos->first()->photo_url)
-                                : asset('frontend/img/parts.jpg') }}"
-                        class="img-fluid w-100 zoom-image"
-                        loading="lazy"
+                            ? asset('storage/'.$part->photos->first()->photo_url)
+                            : asset('frontend/img/parts.jpg') }}"
+                        class="img-fluid w-100"
                         alt="{{ $part->part_name }}"
+                        loading="lazy"
                     >
 
-                    @if($part->photos->count() > 1)
-                        <button class="gallery-btn prev-btn">&lsaquo;</button>
-                        <button class="gallery-btn next-btn">&rsaquo;</button>
-                    @endif
+                    <button type="button" class="gallery-btn prev-btn">&lsaquo;</button>
+                    <button type="button" class="gallery-btn next-btn">&rsaquo;</button>
                 </div>
 
-                <!-- THUMBNAILS -->
-                @if($part->photos->count())
                 <div class="thumbnail-wrapper mt-3">
                     @foreach($part->photos as $photo)
                         <img
@@ -49,11 +44,9 @@
                             data-full="{{ asset('storage/'.$photo->photo_url) }}"
                             class="thumbnail-img"
                             loading="lazy"
-                            alt="thumbnail"
                         >
                     @endforeach
                 </div>
-                @endif
 
             </div>
         </div>
@@ -62,14 +55,14 @@
         <div class="col-lg-7 col-md-6 mb-4">
             <div class="bg-light p-4 rounded shadow-sm">
 
-                <h2 class="font-weight-bold mb-3">{{ $part->part_name }}</h2>
+                <h2 class="font-weight-bold">{{ $part->part_name }}</h2>
 
                 <p><strong>Make:</strong> {{ $part->partBrand->name }}</p>
                 <p><strong>Part Number:</strong> {{ $part->part_number ?? 'N/A' }}</p>
                 <p><strong>OEM Number:</strong> {{ $part->oem_number ?? 'N/A' }}</p>
 
                 <h3 class="text-primary my-3">
-                    {{ number_format($part->price, 2) }} <small class="text-muted">RWF</small>
+                    {{ number_format($part->price, 2) }} RWF
                 </h3>
 
                 <p>
@@ -79,30 +72,6 @@
                     </span>
                 </p>
 
-                <!-- Quantity -->
-                <div class="mb-4">
-                    <label>Quantity</label>
-                    <div class="input-group w-50">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-outline-secondary btn-minus">-</button>
-                        </div>
-                        <input type="number" id="qtyInput" class="form-control text-center"
-                               value="1" min="1" max="{{ $part->stock_quantity }}">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary btn-plus">+</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <button class="btn btn-primary btn-lg mr-2">
-                        <i class="fa fa-shopping-cart"></i> Add to Cart
-                    </button>
-                    <button class="btn btn-outline-secondary btn-lg">
-                        <i class="fa fa-heart"></i>
-                    </button>
-                </div>
-
                 <div class="border-top pt-3">
                     <h5>Description</h5>
                     <p>{{ $part->description ?? 'No description available.' }}</p>
@@ -110,88 +79,85 @@
 
             </div>
         </div>
+
     </div>
 </div>
 
-<!-- ================= FULLSCREEN MODAL ================= -->
+<!-- FULLSCREEN MODAL -->
 <div id="imageModal" class="image-modal">
     <span class="close-modal">&times;</span>
-    <img class="modal-content" id="modalImage">
+    <img id="modalImage">
 </div>
-@endsection
 
-
-{{-- ================= SCRIPTS ================= --}}
-@section('scripts')
+<!-- ================= INLINE JS (GUARANTEED TO LOAD) ================= -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function () {
 
-    const mainImage = document.getElementById('currentImage');
-    const thumbs = Array.from(document.querySelectorAll('.thumbnail-img'));
-    const prev = document.querySelector('.prev-btn');
-    const next = document.querySelector('.next-btn');
+    var mainImage = document.getElementById('currentImage');
+    var thumbnails = document.querySelectorAll('.thumbnail-img');
+    var prevBtn = document.querySelector('.prev-btn');
+    var nextBtn = document.querySelector('.next-btn');
 
-    if (!thumbs.length) return;
+    if (thumbnails.length === 0) return;
 
-    const images = thumbs.map(t => t.dataset.full);
-    let index = 0;
+    var images = [];
+    thumbnails.forEach(function (t) {
+        images.push(t.getAttribute('data-full'));
+    });
 
-    function update(i) {
+    var index = 0;
+
+    function showImage(i) {
         index = i;
         mainImage.src = images[i];
-        thumbs.forEach((t, k) => t.classList.toggle('active-thumb', k === i));
+        thumbnails.forEach(function (t, k) {
+            t.classList.toggle('active-thumb', k === i);
+        });
     }
 
-    update(0);
+    showImage(0);
 
-    thumbs.forEach((t, i) => t.addEventListener('click', () => update(i)));
+    thumbnails.forEach(function (thumb, i) {
+        thumb.addEventListener('click', function () {
+            showImage(i);
+        });
+    });
 
-    prev?.addEventListener('click', () =>
-        update((index - 1 + images.length) % images.length)
-    );
+    prevBtn.addEventListener('click', function () {
+        showImage((index - 1 + images.length) % images.length);
+    });
 
-    next?.addEventListener('click', () =>
-        update((index + 1) % images.length)
-    );
+    nextBtn.addEventListener('click', function () {
+        showImage((index + 1) % images.length);
+    });
 
     /* Fullscreen */
-    const modal = document.getElementById('imageModal');
-    const modalImg = document.getElementById('modalImage');
-    const close = document.querySelector('.close-modal');
+    var modal = document.getElementById('imageModal');
+    var modalImg = document.getElementById('modalImage');
+    var close = document.querySelector('.close-modal');
 
-    mainImage.addEventListener('click', () => {
+    mainImage.addEventListener('click', function () {
         modal.style.display = 'flex';
         modalImg.src = mainImage.src;
     });
 
-    close.addEventListener('click', () => modal.style.display = 'none');
-
-    /* Swipe */
-    let startX = 0;
-    mainImage.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-    mainImage.addEventListener('touchend', e => {
-        const diff = e.changedTouches[0].clientX - startX;
-        if (diff > 50) prev?.click();
-        if (diff < -50) next?.click();
+    close.addEventListener('click', function () {
+        modal.style.display = 'none';
     });
 
 });
 </script>
-@endsection
 
-
-{{-- ================= STYLES ================= --}}
-@section('styles')
+<!-- ================= INLINE CSS ================= -->
 <style>
 .main-image img {
-    transition: transform .3s ease;
     cursor: zoom-in;
+    transition: transform .3s ease;
 }
 .main-image:hover img {
     transform: scale(1.15);
 }
 
-/* Nav buttons */
 .gallery-btn {
     position: absolute;
     top: 50%;
@@ -212,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
 .prev-btn { left: 10px; }
 .next-btn { right: 10px; }
 
-/* Thumbnails */
 .thumbnail-wrapper {
     display: flex;
     gap: 10px;
@@ -230,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
     border-color: #007bff;
 }
 
-/* Modal */
 .image-modal {
     display: none;
     position: fixed;
@@ -240,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     align-items: center;
     z-index: 9999;
 }
-.modal-content {
+.image-modal img {
     max-width: 90%;
     max-height: 90%;
 }
