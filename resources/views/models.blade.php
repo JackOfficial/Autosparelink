@@ -65,11 +65,6 @@ body {
     font-size: 14px;
 }
 
-.collapse.show + .toggle-btn i,
-.collapse.show ~ .toggle-btn i {
-    transform: rotate(180deg);
-}
-
 /* Variant items */
 .variant-item {
     font-size: 13px;
@@ -91,13 +86,25 @@ body {
 }
 
 /* -------------------------- */
-/* MODEL GRID SPACING         */
+/* BRAND DESCRIPTION          */
+/* -------------------------- */
+.brand-description-box {
+    border-left: 5px solid #007bff;
+}
+
+.brand-description-text {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #555;
+}
+
+/* -------------------------- */
+/* GRID SPACING               */
 /* -------------------------- */
 .model-container {
     margin-bottom: 25px;
 }
 
-/* Responsive Adjustments */
 @media(max-width: 768px) {
     h3 {
         font-size: 20px;
@@ -121,7 +128,9 @@ body {
 <!-- Page Header -->
 <div class="container-fluid px-xl-5">
     <div class="bg-white p-4 shadow-sm rounded genuine-search-box mb-4">
-        <h3 class="text-uppercase mb-1" style="font-weight:700;">Genuine Parts Locator</h3>
+        <h3 class="text-uppercase mb-1 font-weight-bold">
+            Genuine Parts Locator
+        </h3>
         <small class="text-muted">
             Enter your VIN or Frame Number to search genuine {{ $brand->brand_name }} parts
         </small>
@@ -133,9 +142,9 @@ body {
     <div class="bg-white p-4 shadow-sm rounded">
         <form class="row g-3 align-items-center">
             <div class="col-lg-10 col-md-9 col-sm-12 mb-2">
-                <input 
-                    type="text" 
-                    class="form-control form-control-lg" 
+                <input
+                    type="text"
+                    class="form-control form-control-lg"
                     placeholder="Enter VIN or Frame Number (e.g., JTMHX09J604123456)"
                 >
             </div>
@@ -152,10 +161,12 @@ body {
         <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
 
             <div>
-                <h4 class="text-uppercase mb-1 fw-bold">
+                <h4 class="text-uppercase mb-1 font-weight-bold">
                     @if($brand->brand_logo)
-                        <img src="{{ asset('storage/' . $brand->brand_logo) }}" 
-                             style="width: 45px; margin-top:-5px;" />
+                        <img
+                            src="{{ asset('storage/'.$brand->brand_logo) }}"
+                            style="width:45px; margin-top:-5px"
+                        >
                     @endif
                     {{ $brand->brand_name }} Models
                 </h4>
@@ -166,7 +177,7 @@ body {
 
             <div class="mt-3 mt-md-0">
                 <span class="text-muted small">
-                    Showing <strong>{{ count($models) }}</strong> models
+                    Showing <strong>{{ $models->count() }}</strong> models
                 </span>
             </div>
 
@@ -183,7 +194,6 @@ body {
 
                 <div class="model-card h-100">
 
-                    <!-- Header -->
                     <div class="d-flex align-items-center justify-content-between">
 
                         <div class="d-flex align-items-center">
@@ -209,31 +219,23 @@ body {
                     </div>
 
                     <div class="model-years mt-2">
-                        {{ $model->production_start_year }} - {{ $model->production_end_year }}
+                        {{ $model->production_start_year ?? '?' }}
+                        -
+                        {{ $model->production_end_year ?? 'Present' }}
                     </div>
 
-                    <!-- Variants -->
                     @if($model->variants->count() > 0)
                     <div class="collapse mt-3" id="variants{{ $model->id }}">
                         <div class="list-group list-group-flush">
-
                             @foreach($model->variants as $variant)
-                            <a 
-                                href="/variant-specification/{{ $variant->id }}" 
-                                class="list-group-item bg-transparent border-0 variant-item"
-                            >
-                                <i class="fas fa-circle"></i>
-
-                                @if($variant->name)
-                                    {{ $variant->name }}
-                                @else
-                                    {{ $variant->body_type->name ?? 'Body' }} /
-                                    {{ $variant->engine_type->name ?? 'Engine' }} /
-                                    {{ $variant->transmission_type->name ?? 'Transmission' }}
-                                @endif
-                            </a>
+                                <a
+                                    href="/variant-specification/{{ $variant->id }}"
+                                    class="list-group-item bg-transparent border-0 variant-item"
+                                >
+                                    <i class="fas fa-circle"></i>
+                                    {{ $variant->name ?? 'Variant' }}
+                                </a>
                             @endforeach
-
                         </div>
                     </div>
                     @endif
@@ -242,14 +244,41 @@ body {
 
             </div>
         @empty
-        <div class="col-md-12 py-4">
-            <p class="text-center text-muted">
-                No models found for {{ $brand->brand_name }} at the moment.
-            </p>
-        </div>
+            <div class="col-12 py-4">
+                <p class="text-center text-muted">
+                    No models found for {{ $brand->brand_name }}.
+                </p>
+            </div>
         @endforelse
 
     </div>
 </div>
+
+<!-- BRAND DESCRIPTION SECTION -->
+@if($brand->description)
+<div class="container-fluid px-xl-5 mt-4 mb-5">
+    <div class="bg-white p-4 shadow-sm rounded brand-description-box">
+
+        <div class="d-flex align-items-center mb-2">
+            @if($brand->brand_logo)
+                <img
+                    src="{{ asset('storage/'.$brand->brand_logo) }}"
+                    style="width:50px"
+                    class="mr-3"
+                >
+            @endif
+
+            <h4 class="mb-0 font-weight-bold text-uppercase">
+                About {{ $brand->brand_name }}
+            </h4>
+        </div>
+
+        <p class="brand-description-text mb-0">
+            {{ $brand->description }}
+        </p>
+
+    </div>
+</div>
+@endif
 
 @endsection
