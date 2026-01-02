@@ -178,7 +178,8 @@
                 $mainPhoto = $part->photos->first()?->photo_url ?? 'frontend/img/placeholder.png';
                 $discount = !empty($part->old_price) && $part->old_price > $part->price ? round((($part->old_price - $part->price)/$part->old_price)*100) : null;
             @endphp
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <a href="shop/products/{{ $part->id }}">
+                 <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="product-item bg-white">
                     <div class="product-img position-relative">
                         @if(!empty($part->is_new)) <div class="badge-custom badge-new">NEW</div> @endif
@@ -212,6 +213,7 @@
                     </div>
                 </div>
             </div>
+            </a>
         @empty
             <div class="col-12 text-center py-3">No spare parts found.</div>
         @endforelse
@@ -227,7 +229,8 @@
     <div class="row px-xl-5">
         @forelse ($recent_parts as $recent_part)
             @php $mainPhoto = $recent_part->photos->first()?->photo_url ?? 'frontend/img/placeholder.png'; @endphp
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <a href="shop/products/{{ $recent_part->id }}">
+                  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="product-item bg-white">
                     <div class="product-img position-relative">
                         @if(!empty($recent_part->is_new)) <div class="badge-custom badge-new">NEW</div> @endif
@@ -248,6 +251,7 @@
                     </div>
                 </div>
             </div>
+            </a>
         @empty
             <div class="col-12 text-center py-3">No recent spare parts available.</div>
         @endforelse
