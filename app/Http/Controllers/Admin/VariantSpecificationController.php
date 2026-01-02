@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Specification;
@@ -11,7 +11,7 @@ use App\Models\TransmissionType;
 use App\Models\DriveType;
 use Illuminate\Http\Request;
 
-class SpecificationController extends Controller
+class VariantSpecificationController extends Controller
 {
     /**
      * List all specifications (with optional filtering).
