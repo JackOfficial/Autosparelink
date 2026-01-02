@@ -207,7 +207,7 @@
                             <small class="text-muted">({{ $part->reviews_count ?? 0 }})</small>
                         </div>
                         <div class="d-flex gap-2 justify-content-center">
-                            <a href="#" class="btn btn-outline-primary btn-sm">View details</a>
+                            <a href="shop/products/{{ $part->id }}" class="btn btn-outline-primary btn-sm">View details</a>
                             <a href="#" class="btn btn-primary btn-sm">Add to cart</a>
                         </div>
                     </div>
