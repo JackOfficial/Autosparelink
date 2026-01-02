@@ -32,7 +32,7 @@
         </div>
         <div class="col-md-6 text-right">
             <span class="text-muted">
-                Total: <strong>{{ $variants->total() }}</strong> variants
+                Total: <strong>{{ $variants->count() }}</strong> variants
             </span>
         </div>
     </div>
