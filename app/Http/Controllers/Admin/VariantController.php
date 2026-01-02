@@ -16,13 +16,9 @@ class VariantController extends Controller
 {
     public function index()
     {
-        $variants = Variant::with([
-            'vehicleModel', 
-            'bodyType', 
-            'engineType', 
-            'transmissionType', 
-            'driveType'
-        ])->latest()->get();
+         $variants = Variant::with(['vehicleModel.brand'])
+        ->latest()
+        ->get();
 
         return view('admin.variants.index', compact('variants'));
     }

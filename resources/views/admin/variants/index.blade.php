@@ -1,13 +1,14 @@
 @extends('admin.layouts.app')
+
 @section('title', 'Variants')
+
 @section('content')
 
-<!-- Content Header -->
 <section class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1>Variants ({{ $variants->count() }})</h1>
+                <h1>Vehicle Variants</h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
@@ -19,110 +20,130 @@
     </div>
 </section>
 
-<!-- Main Content -->
 <section class="content">
+<div class="container-fluid">
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-        </div>
-    @endif
-
-    <div class="card">
-        <div class="card-header">
-            <a href="{{ route('admin.variants.create') }}" class="btn btn-primary btn-sm">
+    {{-- ACTION BAR --}}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <a href="{{ route('admin.variants.create') }}" class="btn btn-primary">
                 <i class="fa fa-plus"></i> Add Variant
             </a>
         </div>
+        <div class="col-md-6 text-right">
+            <span class="text-muted">
+                Total: <strong>{{ $variants->total() }}</strong> variants
+            </span>
+        </div>
+    </div>
 
-        <div class="card-body table-responsive">
-            <table class="table table-striped projects">
+    {{-- FLASH MESSAGE --}}
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- TABLE --}}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Variant List</h3>
+        </div>
+
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover text-nowrap">
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Photo</th>
-                        <th>Variant / Model Code</th>
-                        <th>Chassis Code</th>
-                        <th>Vehicle Model</th>
-                        <th>Body Type</th>
-                        <th>Engine Type</th>
-                        <th>Transmission</th>
-                        <th>Drive Type</th>
-                        <th>Steering</th>
+                        <th>Variant Name</th>
+                        <th>Model</th>
+                        <th>Brand</th>
                         <th>Trim</th>
-                        <th>Color</th>
-                        <th>Production Period</th>
+                        <th>Chassis Code</th>
                         <th>Status</th>
-                        <th style="width:150px;">Actions</th>
+                        <th width="160">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($variants as $variant)
+
+                @forelse($variants as $variant)
                     <tr>
-                        <td>{{ $variant->id }}</td>
+                        <td>{{ $loop->iteration + ($variants->currentPage() - 1) * $variants->perPage() }}</td>
 
-                        <!-- Photo -->
                         <td>
-                            @if($variant->photo)
-                                <img src="{{ asset('storage/' . $variant->photo) }}" class="img-thumbnail" style="width: 80px;">
-                            @else
-                                <span class="text-muted">No photo</span>
-                            @endif
+                            <strong>{{ $variant->name ?? '—' }}</strong>
                         </td>
 
-                        <!-- Variant / Model Code -->
-                        <td>{{ $variant->name ?? '-' }} <br> {{ $variant->model_code ?? '-' }}</td>
-
-                        <!-- Chassis Code -->
-                        <td>{{ $variant->chassis_code ?? '-' }}</td>
-
-                        <!-- Related Info -->
-                        <td>{{ $variant->vehicleModel->model_name ?? '-' }}</td>
-                        <td>{{ $variant->bodyType->name ?? '-' }}</td>
-                        <td>{{ $variant->engineType->name ?? '-' }}</td>
-                        <td>{{ $variant->transmissionType->name ?? '-' }}</td>
-                        <td>{{ $variant->driveType->name ?? '-' }} ahangaha</td>
-                        <td>{{ $variant->steering_position ?? '-' }}</td>
-                        <td>{{ $variant->trim_level ?? '-' }}</td>
-                        <td>{{ $variant->color ?? '-' }}</td>
                         <td>
-                            {{ $variant->production_start ?? '-' }} - {{ $variant->production_end ?? '-' }}
+                            {{ $variant->vehicleModel->model_name ?? '—' }}
                         </td>
 
-                        <!-- Status -->
                         <td>
-                            @if($variant->status == 1)
+                            {{ $variant->vehicleModel->brand->brand_name ?? '—' }}
+                        </td>
+
+                        <td>
+                            {{ $variant->trim_level ?? '—' }}
+                        </td>
+
+                        <td>
+                            {{ $variant->chassis_code ?? '—' }}
+                        </td>
+
+                        <td>
+                            @if($variant->status)
                                 <span class="badge badge-success">Active</span>
                             @else
-                                <span class="badge badge-warning">Inactive</span>
+                                <span class="badge badge-secondary">Inactive</span>
                             @endif
                         </td>
 
-                        <!-- Actions -->
-                        <td class="d-flex">
-                            <a href="{{ route('admin.variants.edit', $variant->id) }}" class="btn btn-info btn-sm mr-2">
-                                <i class="fas fa-edit"></i>
+                        <td>
+                            <a href="{{ route('admin.variants.edit', $variant->id) }}"
+                               class="btn btn-sm btn-warning">
+                                <i class="fa fa-edit"></i>
                             </a>
-                            <form action="{{ route('admin.variants.destroy', $variant->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this variant?');">
+
+                            <a href="{{ route('admin.specifications.index', ['variant_id' => $variant->id]) }}"
+                               class="btn btn-sm btn-info"
+                               title="Specifications">
+                                <i class="fa fa-cogs"></i>
+                            </a>
+
+                            <form action="{{ route('admin.variants.destroy', $variant->id) }}"
+                                  method="POST"
+                                  class="d-inline"
+                                  onsubmit="return confirm('Delete this variant?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">
-                                    <i class="fas fa-trash"></i>
+                                <button class="btn btn-sm btn-danger">
+                                    <i class="fa fa-trash"></i>
                                 </button>
                             </form>
                         </td>
                     </tr>
-                    @empty
+                @empty
                     <tr>
-                        <td colspan="16" class="text-center text-muted">No variants available at the moment.</td>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No variants found.
+                        </td>
                     </tr>
-                    @endforelse
+                @endforelse
+
                 </tbody>
             </table>
         </div>
+
+        {{-- PAGINATION --}}
+        @if($variants->hasPages())
+        <div class="card-footer clearfix">
+            {{ $variants->links() }}
+        </div>
+        @endif
+
     </div>
 
+</div>
 </section>
 
 @endsection
