@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('model_code')->nullable();
             $table->string('steering_position')->nullable();
             $table->string('trim_level')->nullable();
+            $table->boolean('is_default')->default(false); // for models without real variants
             $table->string('color')->nullable();
             $table->year('production_start')->nullable();
             $table->year('production_end')->nullable();

@@ -28,6 +28,7 @@ return new class extends Migration
     $table->string('fuel_efficiency')->nullable();
     $table->string('steering_position')->nullable();
     $table->string('color')->nullable();
+    $table->tinyInteger('status')->default(1);
         });
     }
 
