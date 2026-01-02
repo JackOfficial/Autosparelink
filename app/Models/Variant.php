@@ -6,62 +6,41 @@ use Illuminate\Database\Eloquent\Model;
 
 class Variant extends Model
 {
-   protected $fillable = [
-    'name',
-    'vehicle_model_id',
-    'body_type_id',
-    'engine_type_id',
-    'transmission_type_id',
-    'chassis_code',
-    'model_code',
-    'fuel_capacity',
-    'seats',
-    'doors',
-    'drive_type',
-    'steering_position',
-    'trim_level',
-    'color',
-    'horsepower',
-    'torque',
-    'fuel_efficiency',
-    'production_start',
-    'production_end',
-    'photo',
-    'status'
-];
+  protected $fillable = [
+        'vehicle_model_id',
+        'name',
+        'chassis_code',
+        'model_code',
+        'trim_level',
+        'photo',
+        'is_default',
+        'status',
+    ];
 
+    /* =======================
+     | Relationships
+     ======================= */
 
-    // Relationships
+    // Variant belongs to a vehicle model
     public function vehicleModel()
     {
         return $this->belongsTo(VehicleModel::class);
     }
 
-    public function bodyType()
+    // Variant has many specifications (year / engine / transmission etc.)
+    public function specifications()
     {
-        return $this->belongsTo(BodyType::class);
+        return $this->hasMany(Specification::class);
     }
 
-    public function engineType()
+    // Optional: active specifications only
+    public function activeSpecifications()
     {
-        return $this->belongsTo(EngineType::class);
+        return $this->hasMany(Specification::class)
+                    ->where('status', 1);
     }
 
-    public function transmissionType()
-    {
-        return $this->belongsTo(TransmissionType::class);
-    }
-
-     public function driveType()
-    {
-        return $this->belongsTo(DriveType::class);
-    }
-
-     public function fitments()
-    {
-        return $this->hasMany(PartFitment::class);
-    }
-
+    // Parts fitted to this variant
     public function parts()
     {
         return $this->belongsToMany(
@@ -69,7 +48,16 @@ class Variant extends Model
             'part_fitments',
             'variant_id',
             'part_id'
-        )->withPivot(['vehicle_model_id', 'status', 'year_start', 'year_end'])
-         ->withTimestamps();
+        )->withPivot([
+            'vehicle_model_id',
+            'status',
+            'year_start',
+            'year_end',
+        ])->withTimestamps();
+    }
+
+    public function fitments()
+    {
+        return $this->hasMany(PartFitment::class);
     }
 }
