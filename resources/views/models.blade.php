@@ -2,6 +2,7 @@
 
 @section('style')
 <style>
+
 /* -------------------------- */
 /* GENERAL PAGE REFINEMENTS   */
 /* -------------------------- */
@@ -52,20 +53,20 @@ body {
     color: #888;
 }
 
-/* Toggle button */
+/* Chevron Button */
 .toggle-btn {
     border: none;
     background: transparent;
     padding: 4px;
-    cursor: pointer;
 }
 
 .toggle-btn i {
+    transition: 0.3s ease;
     font-size: 14px;
-    transition: transform .3s ease;
 }
 
-.toggle-btn i.rotate {
+.collapse.show + .toggle-btn i,
+.collapse.show ~ .toggle-btn i {
     transform: rotate(180deg);
 }
 
@@ -82,7 +83,7 @@ body {
     background: #f1f5ff;
 }
 
-/* Bullet */
+/* Small bullet */
 .variant-item i {
     font-size: 6px;
     margin-right: 8px;
@@ -90,26 +91,19 @@ body {
 }
 
 /* -------------------------- */
-/* BRAND DESCRIPTION          */
+/* MODEL GRID SPACING         */
 /* -------------------------- */
-.brand-description-box {
-    border-left: 5px solid #007bff;
-}
-
-.brand-description-text {
-    font-size: 14px;
-    line-height: 1.8;
-    color: #555;
-}
-
-/* Grid spacing */
 .model-container {
     margin-bottom: 25px;
 }
 
+/* Responsive Adjustments */
 @media(max-width: 768px) {
-    h3 { font-size: 20px; }
+    h3 {
+        font-size: 20px;
+    }
 }
+
 </style>
 @endsection
 
@@ -127,9 +121,7 @@ body {
 <!-- Page Header -->
 <div class="container-fluid px-xl-5">
     <div class="bg-white p-4 shadow-sm rounded genuine-search-box mb-4">
-        <h3 class="text-uppercase mb-1 font-weight-bold">
-            Genuine Parts Locator
-        </h3>
+        <h3 class="text-uppercase mb-1" style="font-weight:700;">Genuine Parts Locator</h3>
         <small class="text-muted">
             Enter your VIN or Frame Number to search genuine {{ $brand->brand_name }} parts
         </small>
@@ -139,16 +131,16 @@ body {
 <!-- Search Box -->
 <div class="container-fluid px-xl-5 mb-4">
     <div class="bg-white p-4 shadow-sm rounded">
-        <form class="row align-items-center">
+        <form class="row g-3 align-items-center">
             <div class="col-lg-10 col-md-9 col-sm-12 mb-2">
-                <input type="text"
-                       class="form-control form-control-lg"
-                       placeholder="Enter VIN or Frame Number">
+                <input 
+                    type="text" 
+                    class="form-control form-control-lg" 
+                    placeholder="Enter VIN or Frame Number (e.g., JTMHX09J604123456)"
+                >
             </div>
             <div class="col-lg-2 col-md-3 col-sm-12 mb-2">
-                <button class="btn btn-primary btn-lg w-100">
-                    Search
-                </button>
+                <button class="btn btn-primary btn-lg w-100">Search</button>
             </div>
         </form>
     </div>
@@ -156,27 +148,33 @@ body {
 
 <!-- Brand Models Header -->
 <div class="container-fluid px-xl-5">
-    <div class="bg-white p-4 shadow-sm rounded mb-3 d-flex justify-content-between align-items-center">
-        <div>
-            <h4 class="text-uppercase mb-1 font-weight-bold">
-                @if($brand->brand_logo)
-                    <img src="{{ asset('storage/'.$brand->brand_logo) }}"
-                         style="width:45px; margin-top:-5px">
-                @endif
-                {{ $brand->brand_name }} Models
-            </h4>
-            <small class="text-muted">
-                Select your vehicle model to browse the parts catalog
-            </small>
-        </div>
+    <div class="bg-white p-4 shadow-sm rounded mb-3">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
 
-        <small class="text-muted">
-            Showing <strong>{{ $models->count() }}</strong> models
-        </small>
+            <div>
+                <h4 class="text-uppercase mb-1 fw-bold">
+                    @if($brand->brand_logo)
+                        <img src="{{ asset('storage/' . $brand->brand_logo) }}" 
+                             style="width: 45px; margin-top:-5px;" />
+                    @endif
+                    {{ $brand->brand_name }} Models
+                </h4>
+                <small class="text-muted">
+                    Select your vehicle model to browse the parts catalog
+                </small>
+            </div>
+
+            <div class="mt-3 mt-md-0">
+                <span class="text-muted small">
+                    Showing <strong>{{ count($models) }}</strong> models
+                </span>
+            </div>
+
+        </div>
     </div>
 </div>
 
-<!-- MODELS GRID -->
+<!-- Models Grid -->
 <div class="container-fluid px-xl-5">
     <div class="row">
 
@@ -185,41 +183,57 @@ body {
 
                 <div class="model-card h-100">
 
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">
+                    <!-- Header -->
+                    <div class="d-flex align-items-center justify-content-between">
+
+                        <div class="d-flex align-items-center">
                             <i class="fas fa-car-side text-primary mr-2"></i>
-                            <a href="/model-specification/{{ $model->id }}">
-                                {{ $model->model_name }}
-                            </a>
-                        </h6>
+                            <h6 class="mb-0">
+                                <a href="/model-specification/{{ $model->id }}">
+                                    {{ $model->model_name }}
+                                </a>
+                            </h6>
+                        </div>
 
                         @if($model->variants->count() > 0)
-                        <button class="toggle-btn"
-                                data-toggle="collapse"
-                                data-target="#variants{{ $model->id }}"
-                                aria-expanded="false"
-                                aria-controls="variants{{ $model->id }}">
+                        <button
+                            class="toggle-btn"
+                            type="button"
+                            data-toggle="collapse"
+                            data-target="#variants{{ $model->id }}"
+                        >
                             <i class="fas fa-chevron-down"></i>
                         </button>
                         @endif
+
                     </div>
 
                     <div class="model-years mt-2">
-                        {{ $model->production_start_year ?? '?' }}
-                        -
-                        {{ $model->production_end_year ?? 'Present' }}
+                        {{ $model->production_start_year }} - {{ $model->production_end_year }}
                     </div>
 
+                    <!-- Variants -->
                     @if($model->variants->count() > 0)
                     <div class="collapse mt-3" id="variants{{ $model->id }}">
                         <div class="list-group list-group-flush">
+
                             @foreach($model->variants as $variant)
-                                <a href="/variant-specification/{{ $variant->id }}"
-                                   class="list-group-item bg-transparent border-0 variant-item">
-                                    <i class="fas fa-circle"></i>
-                                    {{ $variant->name ?? 'Variant' }}
-                                </a>
+                            <a 
+                                href="/variant-specification/{{ $variant->id }}" 
+                                class="list-group-item bg-transparent border-0 variant-item"
+                            >
+                                <i class="fas fa-circle"></i>
+
+                                @if($variant->name)
+                                    {{ $variant->name }}
+                                @else
+                                    {{ $variant->body_type->name ?? 'Body' }} /
+                                    {{ $variant->engine_type->name ?? 'Engine' }} /
+                                    {{ $variant->transmission_type->name ?? 'Transmission' }}
+                                @endif
+                            </a>
                             @endforeach
+
                         </div>
                     </div>
                     @endif
@@ -228,11 +242,11 @@ body {
 
             </div>
         @empty
-            <div class="col-12 py-4">
-                <p class="text-center text-muted">
-                    No models found for {{ $brand->brand_name }}.
-                </p>
-            </div>
+        <div class="col-md-12 py-4">
+            <p class="text-center text-muted">
+                No models found for {{ $brand->brand_name }} at the moment.
+            </p>
+        </div>
         @endforelse
 
     </div>
@@ -258,25 +272,4 @@ body {
 </div>
 @endif
 
-@endsection
-
-
-@section('scripts')
-<script>
-$(document).ready(function () {
-
-    $('.collapse').on('show.bs.collapse', function () {
-        $(this).closest('.model-card')
-               .find('.toggle-btn i')
-               .addClass('rotate');
-    });
-
-    $('.collapse').on('hide.bs.collapse', function () {
-        $(this).closest('.model-card')
-               .find('.toggle-btn i')
-               .removeClass('rotate');
-    });
-
-});
-</script>
 @endsection
