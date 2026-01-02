@@ -387,14 +387,19 @@ body {
 </div>
 
 <script>
-    // Rotate chevron on collapse show/hide
+$(document).ready(function() {
+
+    // For each collapse toggle
     $('#faqAccordion .collapse').on('show.bs.collapse', function () {
-        $(this).prev().find('i').addClass('rotate');
+        // Find the icon inside the corresponding <a> using prev()
+        $(this).siblings('a').find('i').addClass('rotate');
     });
 
     $('#faqAccordion .collapse').on('hide.bs.collapse', function () {
-        $(this).prev().find('i').removeClass('rotate');
+        $(this).siblings('a').find('i').removeClass('rotate');
     });
+
+});
 </script>
 
 @endsection
