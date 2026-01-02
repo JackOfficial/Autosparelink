@@ -135,12 +135,9 @@
         </div>
 
         {{-- PAGINATION --}}
-        @if($variants->hasPages())
         <div class="card-footer clearfix">
             {{ $variants->links() }}
         </div>
-        @endif
-
     </div>
 
 </div>
