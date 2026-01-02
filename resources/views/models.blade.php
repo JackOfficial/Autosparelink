@@ -97,6 +97,19 @@ body {
     margin-bottom: 25px;
 }
 
+#faqAccordion a {
+    text-decoration: none;
+    padding: 10px 0;
+}
+
+#faqAccordion i {
+    transition: transform .3s ease;
+}
+
+#faqAccordion i.rotate {
+    transform: rotate(180deg);
+}
+
 /* Responsive Adjustments */
 @media(max-width: 768px) {
     h3 {
@@ -271,5 +284,117 @@ body {
     </div>
 </div>
 @endif
+
+<!-- FAQ SECTION -->
+<div class="container-fluid px-xl-5 mt-4 mb-5">
+    <div class="bg-white p-4 shadow-sm rounded">
+
+        <h4 class="font-weight-bold text-uppercase mb-4">
+            FAQ
+        </h4>
+
+        <div id="faqAccordion">
+
+            <!-- FAQ 1 -->
+            <div class="mb-3">
+                <a class="d-flex justify-content-between align-items-center text-dark font-weight-bold"
+                   data-toggle="collapse"
+                   href="#faq1"
+                   aria-expanded="true">
+                    How do I order {{ $brand->brand_name }} parts online?
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+
+                <div id="faq1" class="collapse show" data-parent="#faqAccordion">
+                    <div class="pt-3 text-muted" style="line-height:1.8">
+                        In order to order {{ $brand->brand_name }} parts online using our website,
+                        you need to select this car brand on the main page. Then you can:
+                        <ul class="mt-2">
+                            <li>Select your brand manually, then the specification of the car and a specific spare part.</li>
+                            <li>Or search for a part using Part Number or VIN / Frame.</li>
+                            <li>Click on <strong>Add</strong>, proceed to <strong>Checkout</strong>, and enter your account details.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- FAQ 2 -->
+            <div class="mb-3">
+                <a class="d-flex justify-content-between align-items-center text-dark font-weight-bold collapsed"
+                   data-toggle="collapse"
+                   href="#faq2">
+                    Are {{ $brand->brand_name }} parts expensive?
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+
+                <div id="faq2" class="collapse" data-parent="#faqAccordion">
+                    <div class="pt-3 text-muted" style="line-height:1.8">
+                        If we consider this issue using our platform, then the spare parts for
+                        {{ $brand->brand_name }} will be definitely affordable.
+                        We work directly with trusted global suppliers, which allows us
+                        to offer genuine parts at reasonable prices.
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- FAQ 3 -->
+            <div class="mb-3">
+                <a class="d-flex justify-content-between align-items-center text-dark font-weight-bold collapsed"
+                   data-toggle="collapse"
+                   href="#faq3">
+                    Can I buy genuine {{ $brand->brand_name }} parts here?
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+
+                <div id="faq3" class="collapse" data-parent="#faqAccordion">
+                    <div class="pt-3 text-muted" style="line-height:1.8">
+                        Yes. All parts available in our catalog are genuine.
+                        You can safely order parts for {{ $brand->brand_name }}
+                        without worrying about quality or service life.
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- FAQ 4 -->
+            <div>
+                <a class="d-flex justify-content-between align-items-center text-dark font-weight-bold collapsed"
+                   data-toggle="collapse"
+                   href="#faq4">
+                    How long does it take to get {{ $brand->brand_name }} parts?
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+
+                <div id="faq4" class="collapse" data-parent="#faqAccordion">
+                    <div class="pt-3 text-muted" style="line-height:1.8">
+                        Orders are usually shipped the next business day.
+                        If an order is placed after 17:00 or on Friday,
+                        dispatch may be delayed by one day.
+                        Delivery typically takes <strong>3 to 7 business days</strong>,
+                        depending on your location and courier service.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Rotate chevron on collapse show/hide
+    $('#faqAccordion .collapse').on('show.bs.collapse', function () {
+        $(this).prev().find('i').addClass('rotate');
+    });
+
+    $('#faqAccordion .collapse').on('hide.bs.collapse', function () {
+        $(this).prev().find('i').removeClass('rotate');
+    });
+</script>
 
 @endsection
