@@ -98,10 +98,12 @@
 
                 <div class="hero-brands mt-2">
                     @foreach($brands->take(5) as $brand)
+                    <a href="{{ url('models/'.$brand->id) }}">
                         <div class="brand-pill">
-                            <img src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }} logo">
+                             <img src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }} logo">
                             {{ strtoupper($brand->brand_name) }}
                         </div>
+                         </a>
                     @endforeach
                 </div>
             </form>
@@ -148,7 +150,7 @@
     <div class="row px-xl-5 pb-3">
         @forelse ($brands as $brand)
             <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-                <a href="#" class="text-decoration-none" href="{{ url('models/'.$brand->id) }}">
+                <a href="{{ url('models/'.$brand->id) }}" class="text-decoration-none">
                     <div class="cat-item d-flex align-items-center gap-3 p-3">
                         <div class="overflow-hidden" style="width:85px; height:85px;">
                             <img class="img-fluid" src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }}" loading="lazy">
