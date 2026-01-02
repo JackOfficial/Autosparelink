@@ -133,11 +133,6 @@
                 </tbody>
             </table>
         </div>
-
-        {{-- PAGINATION --}}
-        <div class="card-footer clearfix">
-            {{ $variants->links() }}
-        </div>
     </div>
 
 </div>
