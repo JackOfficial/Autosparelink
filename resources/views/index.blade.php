@@ -230,7 +230,7 @@
         @forelse ($recent_parts as $recent_part)
             @php $mainPhoto = $recent_part->photos->first()?->photo_url ?? 'frontend/img/placeholder.png'; @endphp
             <a href="shop/products/{{ $recent_part->id }}">
-                  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+               <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="product-item bg-white">
                     <div class="product-img position-relative">
                         @if(!empty($recent_part->is_new)) <div class="badge-custom badge-new">NEW</div> @endif
