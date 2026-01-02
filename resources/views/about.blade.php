@@ -186,19 +186,19 @@
             </div>
 
             <div class="col-md-3 mb-4 team-card">
-                <img src="{{ asset('frontend/img/user.jpg') }}" alt="Team Member">
+                <img src="{{ asset('frontend/img/part.png') }}" alt="Team Member">
                 <h6 class="mt-3">Jane Smith</h6>
                 <p class="text-muted">Operations Manager</p>
             </div>
 
             <div class="col-md-3 mb-4 team-card">
-                <img src="{{ asset('frontend/img/part.png') }}" alt="Team Member">
+                <img src="{{ asset('frontend/img/parts.jpg') }}" alt="Team Member">
                 <h6 class="mt-3">Mike Johnson</h6>
                 <p class="text-muted">Logistics & Support</p>
             </div>
 
             <div class="col-md-3 mb-4 team-card">
-                <img src="{{ asset('frontend/img/parts.jpg') }}" alt="Team Member">
+                <img src="{{ asset('frontend/img/part.png') }}" alt="Team Member">
                 <h6 class="mt-3">Sarah Lee</h6>
                 <p class="text-muted">Customer Relations</p>
             </div>
