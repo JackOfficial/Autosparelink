@@ -27,8 +27,8 @@ class PartController extends Controller
             'categories' => Category::orderBy('category_name')->get(),
             'partBrands' => PartBrand::orderBy('name')->get(),
             'variants'   => Variant::with(['vehicleModel.brand', 'specifications'])
-                                ->orderBy('name')
-                                ->get(),
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -55,12 +55,15 @@ class PartController extends Controller
         // Generate SKU
         $brandName = PartBrand::findOrFail($validated['part_brand_id'])->name;
         $categoryName = Category::findOrFail($validated['category_id'])->category_name;
-        $validated['sku'] = Part::generateSku($brandName, $categoryName, $validated['part_name']);
+        $validated['sku'] = Part::generateSku(
+            $brandName,
+            $categoryName,
+            $validated['part_name']
+        );
 
-        // Create part
         $part = Part::create($validated);
 
-        // Save photos (MULTIPLE)
+        // Save photos
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $index => $photo) {
                 $path = $photo->store('parts', 'public');
@@ -72,7 +75,7 @@ class PartController extends Controller
             }
         }
 
-        // Attach variants with vehicle_model_id
+        // Attach variants
         if ($request->filled('variants')) {
             $syncData = collect($request->variants)->mapWithKeys(function ($variantId) {
                 $variant = Variant::find($variantId);
@@ -123,7 +126,7 @@ class PartController extends Controller
             'variants.*' => 'exists:variants,id',
         ]);
 
-        // Regenerate SKU if needed
+        // Regenerate SKU only if needed
         if (
             $validated['part_name'] !== $part->part_name ||
             $validated['category_id'] != $part->category_id ||
@@ -131,23 +134,24 @@ class PartController extends Controller
         ) {
             $brandName = PartBrand::findOrFail($validated['part_brand_id'])->name;
             $categoryName = Category::findOrFail($validated['category_id'])->category_name;
-            $validated['sku'] = Part::generateSku($brandName, $categoryName, $validated['part_name']);
-        } else {
-            $validated['sku'] = $part->sku;
+            $validated['sku'] = Part::generateSku(
+                $brandName,
+                $categoryName,
+                $validated['part_name']
+            );
         }
 
         $part->update($validated);
 
         // Replace photos if new ones uploaded
         if ($request->hasFile('photos')) {
-
             foreach ($part->photos as $photo) {
                 Storage::disk('public')->delete($photo->photo_url);
                 $photo->delete();
             }
 
-            foreach ($request->file('photos') as $index => $file) {
-                $path = $file->store('parts', 'public');
+            foreach ($request->file('photos') as $index => $photo) {
+                $path = $photo->store('parts', 'public');
 
                 $part->photos()->create([
                     'photo_url' => $path,
@@ -181,6 +185,7 @@ class PartController extends Controller
 
         foreach ($part->photos as $photo) {
             Storage::disk('public')->delete($photo->photo_url);
+            $photo->delete();
         }
 
         $part->variants()->detach();
