@@ -107,7 +107,7 @@ class VariantSpecificationController extends Controller
         $driveTypes = DriveType::orderBy('name')->get();
 
         return view('admin.specifications.edit', compact(
-            'spec',
+            'specification',
             'variants',
             'bodyTypes',
             'engineTypes',
