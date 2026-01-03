@@ -100,7 +100,7 @@ class PartController extends Controller
             'part'       => $part,
             'categories' => Category::all(),
             'partBrands' => PartBrand::all(),
-            'variants'   => Variant::with(['vehicleModel.brand', 'engineType'])->get(),
+            'variants'   => Variant::with(['vehicleModel.brand', 'specifications'])->get(),
         ]);
     }
 
