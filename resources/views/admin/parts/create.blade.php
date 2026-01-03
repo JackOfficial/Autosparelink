@@ -197,9 +197,7 @@
      </div>
 </section>
 
-@endsection
-
-@section('scripts')
+@push('scripts')
 <script>
     $(document).ready(function() {
         $('.select2-multiple').select2({
@@ -208,4 +206,8 @@
         });
     });
 </script>
+@endpush
+
 @endsection
+
+
