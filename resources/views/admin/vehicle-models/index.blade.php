@@ -22,6 +22,7 @@
 <!-- Main content -->
 <section class="content">
 
+    {{-- Success Message --}}
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show">
         <i class="fas fa-check-circle"></i> {{ session('success') }}
@@ -36,14 +37,14 @@
             </a>
         </div>
 
-        <div class="card-body table-responsive">
-            <table class="table table-striped projects">
+        <div class="card-body table-responsive p-0">
+            <table class="table table-striped table-hover text-nowrap">
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>Photo</th>
                         <th>Brand</th>
                         <th>Model Name</th>
-                           <th>Photo</th>
                         <th>Production Years</th>
                         <th>Status</th>
                         <th style="width:150px;">Actions</th>
@@ -52,33 +53,44 @@
                 <tbody>
                     @forelse($vehicleModels as $model)
                     <tr>
-                        <td>{{ $model->id }}</td>
-                        <td>{{ $model->brand->brand_name ?? '—' }}</td>
-                        <td>
-    @if($model->photo)
-        <img src="{{ asset('storage/' . $model->photo) }}" class="img-thumbnail" style="width:80px;">
-    @else
-        <span class="text-muted">No photo</span>
-    @endif
-</td>
+                        <td>{{ $loop->iteration }}</td>
 
-                        <td>{{ $model->model_name }}</td>
+                        {{-- Photo --}}
                         <td>
-                            {{ $model->production_start_year ?? '—' }} 
-                            - {{ $model->production_end_year ?? '—' }}
-                        </td>
-                        <td>
-                            @if($model->status)
-                            <span class="badge badge-success">Active</span>
+                            @if($model->photo && file_exists(storage_path('app/public/' . $model->photo)))
+                                <img src="{{ asset('storage/' . $model->photo) }}" class="img-thumbnail" style="width:80px; height:auto;">
                             @else
-                            <span class="badge badge-warning">Inactive</span>
+                                <span class="text-muted">No photo</span>
                             @endif
                         </td>
-                        <td class="d-flex">
-                            <a href="{{ route('admin.vehicle-models.edit', $model->id) }}"
-                               class="btn btn-info btn-sm mr-2"><i class="fas fa-edit"></i></a>
 
-                            <form action="{{ route('admin.vehicle-models.destroy', $model->id) }}" method="POST"
+                        {{-- Brand safely --}}
+                        <td>{{ optional($model->brand)->brand_name ?? '-' }}</td>
+
+                        {{-- Model Name --}}
+                        <td>{{ $model->model_name ?? '-' }}</td>
+
+                        {{-- Production Years --}}
+                        <td>
+                            {{ $model->production_start_year ?? '-' }} - {{ $model->production_end_year ?? '-' }}
+                        </td>
+
+                        {{-- Status --}}
+                        <td>
+                            @if($model->status)
+                                <span class="badge badge-success">Active</span>
+                            @else
+                                <span class="badge badge-warning">Inactive</span>
+                            @endif
+                        </td>
+
+                        {{-- Actions --}}
+                        <td class="d-flex">
+                            <a href="{{ route('admin.vehicle-models.edit', $model->id) }}" class="btn btn-info btn-sm mr-2">
+                                <i class="fas fa-edit"></i>
+                            </a>
+
+                            <form action="{{ route('admin.vehicle-models.destroy', $model->id) }}" method="POST" 
                                   onsubmit="return confirm('Are you sure you want to delete this vehicle model?');">
                                 @csrf
                                 @method('DELETE')
@@ -90,7 +102,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted">No vehicle models available.</td>
+                        <td colspan="7" class="text-center text-muted">No vehicle models available.</td>
                     </tr>
                     @endforelse
                 </tbody>
