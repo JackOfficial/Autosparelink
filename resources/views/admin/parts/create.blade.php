@@ -136,7 +136,7 @@
                                     {{ in_array($variant->id, old('variants', [])) ? 'selected' : '' }}>
                                     {{ $variant->vehicleModel->brand->brand_name ?? '—' }} /
                                     {{ $variant->vehicleModel->model_name ?? '—' }} -
-                                    {{ $variant->name }} ({{ $variant->specification->production_start ?? '—' }})
+                                    {{ $variant->name }} ({{ $variant->specifications->production_start ?? '—' }})
                                 </option>
                             @endforeach
                         </select>
