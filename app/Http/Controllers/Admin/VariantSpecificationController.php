@@ -18,16 +18,21 @@ class VariantSpecificationController extends Controller
      */
     public function index(Request $request)
     {
-        // Optional: filter by variant if a variant_id is provided.
-        $query = Specification::with(['variant.vehicleModel', 'bodyType', 'engineType', 'transmissionType', 'driveType']);
+    $query = Specification::with([
+        'variant.vehicleModel.brand', // include brand directly
+        'bodyType',
+        'engineType',
+        'transmissionType',
+        'driveType'
+    ]);
 
-        if ($request->filled('variant_id')) {
-            $query->where('variant_id', $request->variant_id);
-        }
+    if ($request->filled('variant_id')) {
+        $query->where('variant_id', $request->variant_id);
+    }
 
-        $specifications = $query->latest()->get();
+    $specifications = $query->latest()->get();
 
-        return view('admin.specifications.index', compact('specifications'));
+    return view('admin.specifications.index', compact('specifications'));
     }
 
     /**
