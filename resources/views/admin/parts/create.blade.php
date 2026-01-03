@@ -28,6 +28,17 @@
         z-index: 10; 
         border-top: 1px solid #ddd; 
     }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    padding-right: 25px; /* add space for the × button */
+    margin-right: 5px;   /* space between selected items */
+    line-height: 1.5;    /* taller for easier click */
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    right: 5px;          /* move × button slightly away from edge */
+    top: 2px;             /* align vertically */
+}
 </style>
 @endsection
 
