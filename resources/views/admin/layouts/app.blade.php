@@ -33,7 +33,7 @@
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
  <link rel="icon" type="image/png" href="{{ asset('frontend/img/logo.png') }}">
- 
+ @yield('styles')
 @livewireStyles
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
