@@ -255,7 +255,6 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item"><a href="/admin/spare-parts" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Parts</p></a></li>
-            <li class="nav-item"><a href="/admin/fitments" class="nav-link"><i class="fas fa-tools nav-icon"></i><p>Parts Fitments</p></a></li>
             <li class="nav-item"><a href="/admin/part-brands" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Part Brands</p></a></li>
             <li class="nav-item"><a href="/admin/categories" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Categories</p></a></li>
           </ul>
