@@ -199,12 +199,19 @@
 
 @push('scripts')
 <script>
-    $(document).ready(function() {
-        $('.select2-multiple').select2({
-            placeholder: "Search and select variants",
-            allowClear: true
-        });
-    });
+   $('.select2-multiple').select2({
+    placeholder: "Search and select variant specifications",
+    allowClear: true,
+    width: '100%',
+    dropdownAutoWidth: true,
+    templateResult: function(data) {
+        return data.text; // You can later customize this with HTML
+    },
+    templateSelection: function(data) {
+        return data.text;
+    }
+});
+
 </script>
 @endpush
 
