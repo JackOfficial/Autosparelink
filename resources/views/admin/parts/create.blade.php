@@ -148,7 +148,7 @@
                             <input type="text" name="oem_number" class="form-control" value="{{ old('oem_number') }}">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label"><i class="fas fa-dollar-sign"></i> Price</label>
+                            <label class="form-label">Price (RWF)</label>
                             <input type="number" name="price" step="0.01" class="form-control" value="{{ old('price') }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
