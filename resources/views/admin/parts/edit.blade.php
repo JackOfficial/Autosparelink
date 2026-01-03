@@ -18,6 +18,7 @@
     }
     .form-label { font-weight: 500; }
 
+    /* Select2 styling */
     .select2-container--default .select2-selection--multiple {
         min-height: 50px;
     }
@@ -35,7 +36,7 @@
 
     .select2-container--default .select2-selection--multiple .select2-selection__choice {
         padding: 4px 10px 4px 28px !important;
-        margin-right: 5px !important;
+        margin-right: 6px !important;
         position: relative;
         border-radius: 4px;
     }
@@ -96,9 +97,17 @@
 @csrf
 @method('PUT')
 
+@php
+    /* ✅ NULL-SAFE selected fitments */
+    $selectedFitments = old(
+        'variant_specifications',
+        $part->fitments?->pluck('variant_specification_id')->toArray() ?? []
+    );
+@endphp
+
 <div class="row">
 
-<!-- LEFT -->
+<!-- LEFT COLUMN -->
 <div class="col-lg-6">
 <fieldset>
 <legend><i class="fas fa-info-circle"></i> General Info</legend>
@@ -169,7 +178,7 @@
 </fieldset>
 </div>
 
-<!-- RIGHT -->
+<!-- RIGHT COLUMN -->
 <div class="col-lg-6">
 <fieldset>
 <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
@@ -178,16 +187,22 @@
 <label class="form-label">Compatible Variant Specifications</label>
 <select name="variant_specifications[]" class="form-control select2-multiple" multiple>
 @foreach($variants as $variant)
-@foreach($variant->specifications as $spec)
-<option value="{{ $spec->id }}"
-    {{ in_array($spec->id, old('variant_specifications', $part->fitments->pluck('specification_id')->toArray())) ? 'selected' : '' }}>
-    {{ optional($variant->vehicleModel->brand)->brand_name }} /
-    {{ $variant->vehicleModel->model_name }} —
-    {{ $variant->name }}
-</option>
-@endforeach
+    @foreach($variant->specifications as $spec)
+        <option value="{{ $spec->id }}"
+            {{ in_array($spec->id, $selectedFitments) ? 'selected' : '' }}>
+            {{ optional($variant->vehicleModel->brand)->brand_name ?? '—' }} /
+            {{ $variant->vehicleModel->model_name ?? '—' }} —
+            {{ $variant->name ?? '—' }}
+            @if($spec->engineType || $spec->transmissionType || $spec->driveType)
+                [{{ optional($spec->engineType)->name ?? '—' }} /
+                {{ optional($spec->transmissionType)->name ?? '—' }} /
+                {{ optional($spec->driveType)->name ?? '—' }}]
+            @endif
+        </option>
+    @endforeach
 @endforeach
 </select>
+<small class="text-muted">Select all variant specifications this part fits.</small>
 </div>
 
 <div class="mb-3">
@@ -229,7 +244,8 @@
 <script>
 $('.select2-multiple').select2({
     width: '100%',
-    dropdownAutoWidth: true
+    dropdownAutoWidth: true,
+    placeholder: 'Select compatible variant specifications'
 });
 </script>
 @endpush
