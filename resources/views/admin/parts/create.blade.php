@@ -41,6 +41,36 @@
     top: 2px !important;
     font-size: 12px;                  /* optional, smaller × */
 }
+
+/* Make search box always readable inside multi-select */
+.select2-container--default .select2-selection--multiple .select2-search__field {
+    width: 100% !important;  /* Always take full width */
+    min-width: 150px;         /* Optional: set minimum width */
+}
+
+/* Optional: give more space for tags */
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    padding: 4px 8px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Fix remove button spacing */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    padding-right: 25px !important;
+    margin-right: 5px !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    right: 5px !important;
+    top: 2px !important;
+    font-size: 12px;
+}
+
+/* Increase container height if needed */
+.select2-container--default .select2-selection--multiple {
+    min-height: 50px;
+}
 </style>
 @endsection
 
