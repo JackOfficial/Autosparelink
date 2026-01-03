@@ -18,7 +18,7 @@
 
 <section class="content">
 <div class="row">
-<div class="col-md-10">
+<div class="col-md-11">
 <div class="card card-primary">
 <div class="card-header"><h3 class="card-title">Specification Details</h3></div>
 <div class="card-body">
@@ -37,7 +37,7 @@
 @csrf
 
 {{-- Variant --}}
-<fieldset class="border p-3 mb-3">
+<fieldset class="border p-3 mb-4">
 <legend class="w-auto">Variant</legend>
 <div class="row">
 <div class="col-md-6">
@@ -55,7 +55,7 @@
 </fieldset>
 
 {{-- Core Specs --}}
-<fieldset class="border p-3 mb-3">
+<fieldset class="border p-3 mb-4">
 <legend class="w-auto">Core Specifications</legend>
 <div class="row">
 <div class="col-md-3">
@@ -101,67 +101,91 @@
 </fieldset>
 
 {{-- Performance --}}
-<fieldset class="border p-3 mb-3">
+<fieldset class="border p-3 mb-4">
 <legend class="w-auto">Performance & Capacity</legend>
 <div class="row">
+
 <div class="col-md-3">
-<label>Horsepower</label>
-<input type="text" name="horsepower" class="form-control">
+<label>Horsepower (HP)</label>
+<input type="number" name="horsepower" class="form-control" min="0" placeholder="e.g. 150">
 </div>
+
 <div class="col-md-3">
-<label>Torque</label>
-<input type="text" name="torque" class="form-control">
+<label>Torque (Nm)</label>
+<input type="number" name="torque" class="form-control" min="0" placeholder="e.g. 320">
 </div>
+
 <div class="col-md-3">
-<label>Fuel Capacity</label>
-<input type="text" name="fuel_capacity" class="form-control">
+<label>Fuel Capacity (Liters)</label>
+<input type="number" name="fuel_capacity" class="form-control" min="0" step="0.1" placeholder="e.g. 55">
 </div>
+
 <div class="col-md-3">
-<label>Fuel Efficiency</label>
-<input type="text" name="fuel_efficiency" class="form-control">
+<label>Fuel Efficiency (km/L)</label>
+<input type="number" name="fuel_efficiency" class="form-control" min="0" step="0.1" placeholder="e.g. 14.5">
 </div>
+
 </div>
 </fieldset>
 
-{{-- Dimensions --}}
-<fieldset class="border p-3 mb-3">
+{{-- Interior --}}
+<fieldset class="border p-3 mb-4">
 <legend class="w-auto">Interior & Layout</legend>
 <div class="row">
-<div class="col-md-3">
+
+<div class="col-md-2">
 <label>Seats</label>
-<input type="number" name="seats" class="form-control">
+<input type="number" name="seats" class="form-control" min="1" max="20">
 </div>
-<div class="col-md-3">
+
+<div class="col-md-2">
 <label>Doors</label>
-<input type="number" name="doors" class="form-control">
+<input type="number" name="doors" class="form-control" min="1" max="6">
 </div>
-<div class="col-md-3">
-<label>Steering</label>
+
+<div class="col-md-4">
+<label>Steering Position</label>
 <select name="steering_position" class="form-control">
 <option value="">Select</option>
-<option value="LEFT">Left-Hand</option>
-<option value="RIGHT">Right-Hand</option>
+<option value="LEFT">Left-Hand Drive</option>
+<option value="RIGHT">Right-Hand Drive</option>
 </select>
 </div>
-<div class="col-md-3">
+
+<div class="col-md-4">
 <label>Color</label>
-<input type="text" name="color" class="form-control">
+<select name="color" class="form-control">
+<option value="">Select Color</option>
+<option value="Black">Black</option>
+<option value="White">White</option>
+<option value="Silver">Silver</option>
+<option value="Gray">Gray</option>
+<option value="Blue">Blue</option>
+<option value="Red">Red</option>
+<option value="Green">Green</option>
+<option value="Brown">Brown</option>
+<option value="Other">Other</option>
+</select>
 </div>
+
 </div>
 </fieldset>
 
 {{-- Production --}}
-<fieldset class="border p-3 mb-3">
+<fieldset class="border p-3 mb-4">
 <legend class="w-auto">Production</legend>
 <div class="row">
-<div class="col-md-4">
-<label>Production Start</label>
-<input type="number" name="production_start" class="form-control">
+
+<div class="col-md-3">
+<label>Production Start Year</label>
+<input type="number" name="production_start" class="form-control" min="1950" max="{{ date('Y') }}">
 </div>
-<div class="col-md-4">
-<label>Production End</label>
-<input type="number" name="production_end" class="form-control">
+
+<div class="col-md-3">
+<label>Production End Year</label>
+<input type="number" name="production_end" class="form-control" min="1950" max="{{ date('Y') + 2 }}">
 </div>
+
 </div>
 </fieldset>
 
