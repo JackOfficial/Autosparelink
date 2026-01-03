@@ -31,7 +31,7 @@ class VariantSpecificationController extends Controller
     }
 
     $specifications = $query->latest()->get();
-
+    dd($specifications->toArray());
     return view('admin.specifications.index', compact('specifications'));
     }
 

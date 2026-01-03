@@ -58,7 +58,7 @@
                             </td>
 
                             <td>
-                                {{ optional($spec->variant->vehicleModel->brand)->brand_name ?? '-' }}
+                                {{ optional(optional($spec->variant->vehicleModel)->brand)->brand_name ?? '-' }}
                             </td>
 
                             <td>
