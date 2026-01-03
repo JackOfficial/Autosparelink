@@ -54,15 +54,15 @@
                             <td>{{ $loop->iteration }}</td>
 
                             <td>
-                             {{ optional($spec->variant->vehicleModel)->model_name ?? '-' }}
+                             {{ optional(optional(optional($spec->variant)->vehicleModel)->brand)->brand_name ?? '-' }}
                             </td>
 
                             <td>
-                                {{ optional(optional($spec->variant->vehicleModel)->brand)->brand_name ?? '-' }}
+                               {{ optional(optional($spec->variant)->vehicleModel)->model_name ?? '-' }}
                             </td>
 
                             <td>
-                                {{ $spec->variant->name ?? '— No Variant —' }}
+                                {{ optional($spec->variant)->name ?? '-' }}
                             </td>
 
                             <td>
