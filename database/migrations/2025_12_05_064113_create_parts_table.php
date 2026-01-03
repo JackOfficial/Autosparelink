@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('parts', function (Blueprint $table) {
             $table->id(); // Primary Key, default 'id'
+            $table->string('sku')->unique()->after('id');
             $table->string('part_number');
             $table->string('part_name');
+            $table->string('oem_number')->nullable();
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
             $table->foreignId('brand_id')->constrained('brands')->cascadeOnDelete();
+            $table->foreignId('part_brand_id')->constrained('part_brands')->cascadeOnDelete();
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
             $table->integer('stock_quantity')->default(0);
