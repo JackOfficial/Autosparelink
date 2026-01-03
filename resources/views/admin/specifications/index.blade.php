@@ -24,7 +24,7 @@
 
     <div class="card card-primary card-outline">
         <div class="card-header">
-            <h3 class="card-title">Vehicle Specifications (Trims)</h3>
+            <h3 class="card-title">{{ $specifications->count() }} {{ $specifications->count() > 1 ? 'Vehicle Specifications (Trims)' : 'Vehicle Specification (Trim)' }}</h3>
             <div class="card-tools">
                 <a href="{{ route('admin.specifications.create') }}" class="btn btn-sm btn-primary">
                     <i class="fa fa-plus"></i> Add Specification
