@@ -30,47 +30,46 @@
     }
 
 /* Style for each selected item */
-.select2-container--default .select2-selection--multiple .select2-selection__choice {
-    padding-right: 25px !important;   /* space for remove button */
-    margin-right: 5px !important;     /* space between tags */
-}
-
-/* Move the remove button */
-.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-    right: 5px !important;
-    top: 2px !important;
-    font-size: 12px;                  /* optional, smaller × */
-}
-
-/* Make search box always readable inside multi-select */
-.select2-container--default .select2-selection--multiple .select2-search__field {
-    width: 100% !important;  /* Always take full width */
-    min-width: 150px;         /* Optional: set minimum width */
-}
-
-/* Optional: give more space for tags */
-.select2-container--default .select2-selection--multiple .select2-selection__rendered {
-    padding: 4px 8px;
-    display: flex;
-    flex-wrap: wrap;
-}
-
-/* Fix remove button spacing */
-.select2-container--default .select2-selection--multiple .select2-selection__choice {
-    padding-right: 25px !important;
-    margin-right: 5px !important;
-}
-
-.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-    right: 5px !important;
-    top: 2px !important;
-    font-size: 12px;
-}
-
-/* Increase container height if needed */
+/* Container & search input tweaks */
 .select2-container--default .select2-selection--multiple {
     min-height: 50px;
 }
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 4px 8px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search__field {
+    width: 100% !important;
+    min-width: 150px;
+}
+
+/* Style each tag */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    padding: 4px 10px 4px 28px !important; /* left space for icon */
+    margin-right: 5px !important;
+    position: relative;
+    border-radius: 4px;
+}
+
+/* Add custom remove icon before text */
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    position: absolute;
+    left: 6px; /* space from left */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: red;
+    cursor: pointer;
+}
+
+/* Optional: hover effect for remove */
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: darkred;
+}
+
 </style>
 @endsection
 
