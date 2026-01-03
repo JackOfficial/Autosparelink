@@ -128,7 +128,7 @@
             <div class="col-lg-6">
                 <fieldset>
                     <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
-                   <div class="mb-3">
+                  <div class="mb-3">
     <label class="form-label"><i class="fas fa-list"></i> Compatible Variant Specifications</label>
     <select name="variant_specifications[]" class="form-control select2-multiple" multiple="multiple" style="width: 100%;">
         @foreach($variants as $variant)
@@ -137,7 +137,13 @@
                     {{ in_array($spec->id, old('variant_specifications', [])) ? 'selected' : '' }}>
                     {{ optional($variant->vehicleModel->brand)->brand_name ?? '—' }} /
                     {{ $variant->vehicleModel->model_name ?? '—' }} —
-                    {{ $variant->name }} ({{ $spec->production_start ?? '—' }} - {{ $spec->production_end ?? '—' }})
+                    {{ $variant->name ?? '—' }} 
+                    ({{ $spec->production_start ?? '—' }} - {{ $spec->production_end ?? '—' }})
+                    @if($spec->engineType || $spec->transmissionType || $spec->driveType)
+                        [{{ optional($spec->engineType)->name ?? '—' }} / 
+                        {{ optional($spec->transmissionType)->name ?? '—' }} / 
+                        {{ optional($spec->driveType)->name ?? '—' }}]
+                    @endif
                 </option>
             @endforeach
         @endforeach
