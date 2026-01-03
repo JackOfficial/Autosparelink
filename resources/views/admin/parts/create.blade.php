@@ -128,20 +128,22 @@
             <div class="col-lg-6">
                 <fieldset>
                     <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
-                    <div class="mb-3">
-                        <label class="form-label"><i class="fas fa-list"></i> Compatible Variants</label>
-                        <select name="variants[]" class="form-control select2-multiple" multiple="multiple" style="width: 100%;">
-                            @foreach($variants as $variant)
-                                <option value="{{ $variant->id }}"
-                                    {{ in_array($variant->id, old('variants', [])) ? 'selected' : '' }}>
-                                    {{ $variant->vehicleModel->brand->brand_name ?? '—' }} /
-                                    {{ $variant->vehicleModel->model_name ?? '—' }} -
-                                    {{ $variant->name }} ({{ $variant->specifications->production_start ?? '—' }})
-                                </option>
-                            @endforeach
-                        </select>
-                        <small class="text-muted">Search and select all variants that this part is compatible with.</small>
-                    </div>
+                   <div class="mb-3">
+    <label class="form-label"><i class="fas fa-list"></i> Compatible Variant Specifications</label>
+    <select name="variant_specifications[]" class="form-control select2-multiple" multiple="multiple" style="width: 100%;">
+        @foreach($variants as $variant)
+            @foreach($variant->specifications as $spec)
+                <option value="{{ $spec->id }}"
+                    {{ in_array($spec->id, old('variant_specifications', [])) ? 'selected' : '' }}>
+                    {{ optional($variant->vehicleModel->brand)->brand_name ?? '—' }} /
+                    {{ $variant->vehicleModel->model_name ?? '—' }} —
+                    {{ $variant->name }} ({{ $spec->production_start ?? '—' }} - {{ $spec->production_end ?? '—' }})
+                </option>
+            @endforeach
+        @endforeach
+    </select>
+    <small class="text-muted">Search and select all variant specifications that this part is compatible with.</small>
+</div>
 
                     <div class="mb-3">
                         <label class="form-label"><i class="fas fa-align-left"></i> Description</label>
