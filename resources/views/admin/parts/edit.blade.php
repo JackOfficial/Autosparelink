@@ -180,7 +180,7 @@
 @foreach($variants as $variant)
 @foreach($variant->specifications as $spec)
 <option value="{{ $spec->id }}"
-    {{ in_array($spec->id, old('variant_specifications', $part->fitments->pluck('variant_specification_id')->toArray())) ? 'selected' : '' }}>
+    {{ in_array($spec->id, old('variant_specifications', $part->fitments->pluck('specification_id')->toArray())) ? 'selected' : '' }}>
     {{ optional($variant->vehicleModel->brand)->brand_name }} /
     {{ $variant->vehicleModel->model_name }} —
     {{ $variant->name }}
