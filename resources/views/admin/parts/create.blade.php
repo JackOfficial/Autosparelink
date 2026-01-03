@@ -61,7 +61,7 @@
     top: 50%;
     transform: translateY(-50%);
     font-size: 14px;
-    color: red;
+    color: rgb(240, 83, 83)
     cursor: pointer;
 }
 
@@ -241,7 +241,7 @@
 @push('scripts')
 <script>
    $('.select2-multiple').select2({
-    placeholder: "Search and select variant specifications",
+    placeholder: "",
     allowClear: true,
     width: '100%',
     dropdownAutoWidth: true,
