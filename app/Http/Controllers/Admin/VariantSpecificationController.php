@@ -98,7 +98,7 @@ class VariantSpecificationController extends Controller
      */
     public function edit($id)
     {
-        $spec = Specification::findOrFail($id);
+        $specification = Specification::findOrFail($id);
 
         $variants = Variant::with('vehicleModel')->orderBy('name')->get();
         $bodyTypes = BodyType::orderBy('name')->get();
