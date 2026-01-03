@@ -26,7 +26,7 @@ class PartController extends Controller
         return view('admin.parts.create', [
             'categories' => Category::orderBy('category_name')->get(),
             'partBrands' => PartBrand::orderBy('name')->get(),
-            'variants'   => Variant::with(['vehicleModel.brand'])
+            'variants'   => Variant::with(['vehicleModel.brand', 'specifications'])
                                 ->orderBy('name')
                                 ->get(),
         ]);
