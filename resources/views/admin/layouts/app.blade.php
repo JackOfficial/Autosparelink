@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="{{ asset('back/plugins/daterangepicker/daterangepicker.css') }}">
   <!-- summernote -->
   <link rel="stylesheet" href="{{ asset('back/plugins/summernote/summernote-bs4.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('back/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css') }}">
  <!-- DataTables -->
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
@@ -404,6 +405,7 @@
 <script src="{{ asset('back/plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
 <script src="{{ asset('back/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{{ asset('back/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js') }}"></script>
  <x-head.tinymce-config/>
 <!-- Page specific script -->
 <script>
@@ -424,5 +426,6 @@
     });
   </script>
   @livewireScripts
+  @stack('scripts')
 </body>
 </html>

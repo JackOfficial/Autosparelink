@@ -153,20 +153,21 @@
 </div>
 
 <div class="col-md-4">
-<label>Color</label>
-<select name="color" class="form-control">
-<option value="">Select Color</option>
-<option value="Black">Black</option>
-<option value="White">White</option>
-<option value="Silver">Silver</option>
-<option value="Gray">Gray</option>
-<option value="Blue">Blue</option>
-<option value="Red">Red</option>
-<option value="Green">Green</option>
-<option value="Brown">Brown</option>
-<option value="Other">Other</option>
-</select>
+    <label>Color</label>
+    <div class="input-group my-colorpicker2">
+        <input type="text"
+               name="color"
+               class="form-control"
+               placeholder="Pick color (HEX)">
+        <div class="input-group-append">
+            <span class="input-group-text">
+                <i class="fas fa-square"></i>
+            </span>
+        </div>
+    </div>
+    <small class="text-muted">Example: Black, Pearl White, Metallic Blue</small>
 </div>
+
 
 </div>
 </fieldset>
@@ -199,5 +200,13 @@
 </div>
 </div>
 </section>
+
+@push('scripts')
+<script>
+$(function () {
+    $('.my-colorpicker2').colorpicker()
+})
+</script>
+@endpush
 
 @endsection
