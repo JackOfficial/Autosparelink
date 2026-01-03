@@ -54,7 +54,7 @@
                             <td>{{ $loop->iteration }}</td>
 
                             <td>
-                                {{ optional($spec->vehicleModel->brand)->brand_name ?? '-' }}
+                              {{ optional(optional($spec->vehicleModel)->brand)->brand_name ?? '-' }}
                             </td>
 
                             <td>

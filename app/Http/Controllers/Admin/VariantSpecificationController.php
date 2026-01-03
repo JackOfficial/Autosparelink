@@ -25,7 +25,7 @@ class VariantSpecificationController extends Controller
             $query->where('variant_id', $request->variant_id);
         }
 
-        $specifications = $query->latest()->paginate(20);
+        $specifications = $query->latest()->get();
 
         return view('admin.specifications.index', compact('specifications'));
     }
