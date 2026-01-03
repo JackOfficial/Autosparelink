@@ -72,7 +72,7 @@
 
                         {{-- Production Years --}}
                         <td>
-                            {{ $model->production_start_year ?? '-' }} - {{ $model->production_end_year ?? '-' }}
+                            {{ $model->production_start_year ?? '-' }} - {{ $model->production_end_year ?? 'Present' }}
                         </td>
 
                         {{-- Status --}}
