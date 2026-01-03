@@ -138,7 +138,6 @@
                     {{ optional($variant->vehicleModel->brand)->brand_name ?? '—' }} /
                     {{ $variant->vehicleModel->model_name ?? '—' }} —
                     {{ $variant->name ?? '—' }} 
-                    ({{ $spec->production_start ?? '—' }} - {{ $spec->production_end ?? '—' }})
                     @if($spec->engineType || $spec->transmissionType || $spec->driveType)
                         [{{ optional($spec->engineType)->name ?? '—' }} / 
                         {{ optional($spec->transmissionType)->name ?? '—' }} / 
