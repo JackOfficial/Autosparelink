@@ -13,7 +13,9 @@
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.variants.index') }}">Variants</a></li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('admin.variants.index') }}">Variants</a>
+                    </li>
                     <li class="breadcrumb-item active">Add</li>
                 </ol>
             </div>
@@ -27,7 +29,9 @@
     <div class="row">
         <div class="col-md-10">
 
-            <div class="card card-primary">
+            <!-- IMPORTANT: Alpine initialized here -->
+            <div class="card card-primary" x-data="{ photoPreview: null }">
+
                 <div class="card-header">
                     <h3 class="card-title">Variant Details</h3>
                 </div>
@@ -56,7 +60,9 @@
 
                             <div class="row">
                                 <div class="col-md-6">
-                                    <label>Vehicle Model <span class="text-danger">*</span></label>
+                                    <label>
+                                        Vehicle Model <span class="text-danger">*</span>
+                                    </label>
                                     <select name="vehicle_model_id"
                                             class="form-control"
                                             required>
@@ -80,7 +86,6 @@
                                            placeholder="e.g. Corolla 1.8L Sedan">
                                 </div>
                             </div>
-
                         </fieldset>
 
                         {{-- IDENTIFIERS --}}
@@ -113,7 +118,6 @@
                                            placeholder="LE, SE, GX, Sport">
                                 </div>
                             </div>
-
                         </fieldset>
 
                         {{-- MEDIA --}}
@@ -123,10 +127,29 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <label>Default Photo</label>
+
                                     <input type="file"
                                            name="photo"
                                            class="form-control"
-                                           accept="image/*">
+                                           accept="image/*"
+                                           @change="
+                                                const file = $event.target.files[0];
+                                                if (file) {
+                                                    if (photoPreview) {
+                                                        URL.revokeObjectURL(photoPreview);
+                                                    }
+                                                    photoPreview = URL.createObjectURL(file);
+                                                }
+                                           ">
+
+                                    <template x-if="photoPreview">
+                                        <div class="mt-2">
+                                            <img :src="photoPreview"
+                                                 class="img-thumbnail"
+                                                 style="max-width:160px;">
+                                        </div>
+                                    </template>
+
                                     <small class="text-muted">
                                         Optional. Used as default variant image.
                                     </small>
@@ -135,16 +158,17 @@
                                 <div class="col-md-6">
                                     <label>Status</label>
                                     <select name="status" class="form-control">
-                                        <option value="1" {{ old('status', 1) == 1 ? 'selected' : '' }}>
+                                        <option value="1"
+                                            {{ old('status', 1) == 1 ? 'selected' : '' }}>
                                             Active
                                         </option>
-                                        <option value="0" {{ old('status') == 0 ? 'selected' : '' }}>
+                                        <option value="0"
+                                            {{ old('status') == 0 ? 'selected' : '' }}>
                                             Inactive
                                         </option>
                                     </select>
                                 </div>
                             </div>
-
                         </fieldset>
 
                     </div>
@@ -163,7 +187,6 @@
                 </form>
 
             </div>
-
         </div>
     </div>
 

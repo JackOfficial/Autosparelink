@@ -51,24 +51,39 @@
         </div>
 
         <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap">
+            <table class="table table-hover text-nowrap align-middle">
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>Photo</th>
                         <th>Variant Name</th>
                         <th>Model</th>
                         <th>Brand</th>
                         <th>Trim</th>
                         <th>Chassis Code</th>
                         <th>Status</th>
-                        <th width="160">Actions</th>
+                        <th width="170">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
 
+                <tbody>
                 @forelse($variants as $variant)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
+
+                        {{-- PHOTO --}}
+                        <td>
+                            @if($variant->photo)
+                                <a href="{{ asset('storage/'.$variant->photo) }}" target="_blank">
+                                    <img src="{{ asset('storage/'.$variant->photo) }}"
+                                         alt="Variant Photo"
+                                         class="img-thumbnail"
+                                         style="width:60px;height:60px;object-fit:cover;">
+                                </a>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
 
                         <td>
                             <strong>{{ $variant->name ?? '—' }}</strong>
@@ -100,7 +115,8 @@
 
                         <td>
                             <a href="{{ route('admin.variants.edit', $variant->id) }}"
-                               class="btn btn-sm btn-warning">
+                               class="btn btn-sm btn-warning"
+                               title="Edit">
                                 <i class="fa fa-edit"></i>
                             </a>
 
@@ -116,7 +132,7 @@
                                   onsubmit="return confirm('Delete this variant?');">
                                 @csrf
                                 @method('DELETE')
-                                <button class="btn btn-sm btn-danger">
+                                <button class="btn btn-sm btn-danger" title="Delete">
                                     <i class="fa fa-trash"></i>
                                 </button>
                             </form>
@@ -124,13 +140,13 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
+                        <td colspan="9" class="text-center text-muted py-4">
                             No variants found.
                         </td>
                     </tr>
                 @endforelse
-
                 </tbody>
+
             </table>
         </div>
     </div>
