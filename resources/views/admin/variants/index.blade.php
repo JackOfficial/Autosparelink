@@ -68,7 +68,7 @@
 
                 @forelse($variants as $variant)
                     <tr>
-                        <td>{{ $loop->iteration + ($variants->currentPage() - 1) * $variants->perPage() }}</td>
+                        <td>{{ $loop->iteration }}</td>
 
                         <td>
                             <strong>{{ $variant->name ?? '—' }}</strong>
