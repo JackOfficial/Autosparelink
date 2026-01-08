@@ -59,7 +59,7 @@
     <!-- Compatibility -->
   <div class="row mb-4">
     <div class="col-12">
-        <h4>Compatibility jack</h4>
+        <h4>Compatibility (jack)</h4>
         {{ $compatibilities }}
         <d>/////////////////////////////////////////////////////</d>
         @if($compatibilities->isEmpty())
