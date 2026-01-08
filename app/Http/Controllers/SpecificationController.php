@@ -54,7 +54,7 @@ public function model_specification($model_id)
 public function variant_specification($variant_id)
 {
  // Fetch the variant for the header
-    $variant = Variant::with('vehicle_model.brand')->findOrFail($variant_id);
+    $variant = Variant::with('vehicleModel.brand')->findOrFail($variant_id);
 
     // Fetch all specifications for this variant
     $specifications = Specification::with([
