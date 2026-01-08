@@ -30,17 +30,17 @@ class SpecificationController extends Controller
 
         return view('admin.specifications.index', compact('specifications'));
     }
-    
+
 public function model_specification($model_id)
 {
     // Fetch the model manually
-    $model = VehicleModel::with([
-        'brand',                   // Ensure brand is loaded
+     $model = VehicleModel::with([
+        'brand',                       // brand of the model
         'variants',
-        'variants.engine_type',
-        'variants.transmission_type',
-        'variants.drive_type',
-        'variants.body_type',
+        'variants.specifications.engine_type',
+        'variants.specifications.transmission_type',
+        'variants.specifications.drive_type',
+        'variants.specifications.body_type',
     ])->findOrFail($model_id);
 
     return view('specification', compact('model'));
