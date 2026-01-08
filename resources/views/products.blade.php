@@ -56,7 +56,7 @@
                             <th>Make</th>
                             <th>Number</th>
                             <th>Name</th>
-                            <th>Price, USD</th>
+                            <th>Price, RWF</th>
                             <th>Availability</th>
                             <th>Ship In, Days</th>
                             <th>Action</th>
