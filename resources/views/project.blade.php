@@ -1,44 +1,113 @@
 @extends('layouts.app')
-@section('content')
-<!-- Header Start -->
-<div class="container-fluid bg-breadcrumb" style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url({{ asset('storage/' . $project->photo) }});
-background-position: center center;
-         background-repeat: no-repeat;
-         background-size: cover;
-         padding: 100px 0 0 0;">
-    <div class="container text-center py-5" style="max-width: 900px;">
-        <h3 class="text-white display-3 mb-4">Project</h1>
-        <p class="fs-5 text-white mb-4">{{ $project->project }}</p>
-        <ol class="breadcrumb justify-content-center mb-0">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/projects">Projects</a></li>
-            <li class="breadcrumb-item active text-white">{{ $project->project }}</li>
-        </ol>    
-    </div>
-</div>
-<!-- Header End -->
-<div class="container-fluid event py-5">
-<div class="container py-5">
-	<div class="container">
-		<div class="row no-gutters">
-			<!-- section title -->
-			<div class="col-12">
-				<div class="title text-center">
-					<h2>{{ $project->project }}</h2>
-					<div class="border"></div>
-				</div>
-			</div>
-			<!-- /section title -->
-			
-            <div class="col-md-12">
-					<p>
-						<div>{!! $project->description !!}</div>
-						<div><b>Date:</b> {{ $project->created_at }}</div>
-					</p>
-            </div>
 
-		</div> <!-- End row -->
-	</div> <!-- End container -->
-</div> 
+@section('title', $part->part_name . ' | AutoSpareLink')
+
+@section('content')
+
+<div class="container mt-5">
+
+    <!-- Product Header -->
+    <div class="row mb-4">
+        <div class="col-md-6 text-center">
+            <!-- Main Photo -->
+            @if($mainPhoto)
+                <img src="{{ asset('storage/' . $mainPhoto->photo_url) }}" 
+                     class="img-fluid rounded" 
+                     alt="{{ $part->part_name }}">
+            @else
+                <img src="{{ asset('images/no-image.png') }}" 
+                     class="img-fluid rounded" 
+                     alt="No Image">
+            @endif
+        </div>
+        <div class="col-md-6">
+            <h2>{{ $part->part_name }}</h2>
+            <p><strong>Part Number:</strong> {{ $part->part_number ?? '—' }}</p>
+            <p><strong>Brand:</strong> {{ optional($part->partBrand)->name ?? '—' }}</p>
+            <p><strong>Category:</strong> {{ optional($part->category)->category_name ?? '—' }}</p>
+            <p><strong>Price:</strong> {{ number_format($part->price, 2) }} RWF</p>
+            <p><strong>Stock:</strong> {{ $part->stock_quantity }}</p>
+            <p><strong>Status:</strong> {{ $part->status == 1 ? 'Active' : 'Inactive' }}</p>
+        </div>
+    </div>
+
+    <!-- Description -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4>Description</h4>
+            <p>{!! $part->description ?? 'No description available.' !!}</p>
+        </div>
+    </div>
+
+    <!-- Photos Gallery -->
+    @if($photos->count() > 1)
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4>Gallery</h4>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach($photos as $photo)
+                    <img src="{{ asset('storage/' . $photo->photo_url) }}" 
+                         class="img-thumbnail" 
+                         width="120" 
+                         alt="Photo">
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Compatibility -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4>Compatibility</h4>
+            @if($compatibilities->isEmpty())
+                <p class="text-muted">No compatibility info available.</p>
+            @else
+                <ul>
+                    @foreach($compatibilities as $variant)
+                        @foreach($variant->specifications as $spec)
+                            <li>
+                                <strong>Vehicle:</strong> {{ optional($variant->vehicleModel->brand)->brand_name ?? '—' }} /
+                                {{ optional($variant->vehicleModel)->model_name ?? '—' }} —
+                                {{ $variant->name ?? '—' }}
+
+                                @if($spec->engineType || $spec->transmissionType || $spec->driveType)
+                                    [{{ optional($spec->engineType)->name ?? '—' }} / 
+                                    {{ optional($spec->transmissionType)->name ?? '—' }} / 
+                                    {{ optional($spec->driveType)->name ?? '—' }}]
+                                @endif
+
+                                (Start Year: {{ $spec->production_start ?? '—' }},
+                                 End Year: {{ $spec->production_end ?? '—' }})
+                            </li>
+                        @endforeach
+                    @endforeach
+                </ul>
+            @endif
+        </div>
+    </div>
+
+    <!-- Substitutions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4>Substitutions</h4>
+            @if($substitutions->isEmpty())
+                <p class="text-muted">No alternative parts available.</p>
+            @else
+                <ul>
+                    @foreach($substitutions as $sub)
+                        <li>
+                            <a href="{{ url('/shop/products/' . $sub->id) }}">
+                                {{ $sub->part_name }} ({{ $sub->part_number ?? '—' }}) - 
+                                Brand: {{ optional($sub->partBrand)->name ?? '—' }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </div>
+    </div>
+
 </div>
+
 @endsection
