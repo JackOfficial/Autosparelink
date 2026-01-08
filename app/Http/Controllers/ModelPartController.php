@@ -12,66 +12,65 @@ use App\Models\PartCategory;
 
 class ModelPartController extends Controller
 {
-   // Show parts for a specific variant
-public function variant_parts(Request $request, $variant_id)
-{
-    $variant = Variant::with('vehicleModel.brand')->findOrFail($variant_id);
+       /**
+     * Show parts for a specific vehicle model
+     */
+    public function model_parts(Request $request, $model_id)
+    {
+        $model = VehicleModel::with('brand', 'variants')->findOrFail($model_id);
 
-    $query = Part::with(['variant.vehicleModel.brand', 'vehicleModel.brand', 'category'])
-        ->whereHas('specifications', function($q) use ($variant_id) {
-            $q->where('variant_id', $variant_id);
-        });
+        // Get all variant IDs for this model
+        $variantIds = $model->variants->pluck('id')->toArray();
 
-    // Apply filters
-    if ($request->filled('category_id')) {
-        $query->where('category_id', $request->category_id);
-    }
-    if ($request->filled('part_name')) {
-        $query->where('name', 'like', '%' . $request->part_name . '%');
-    }
+        // Fetch parts related to these variants through specifications
+        $query = Part::with(['category', 'specifications.variant.vehicleModel.brand'])
+            ->whereHas('specifications', function ($q) use ($variantIds) {
+                $q->whereIn('specifications.variant_id', $variantIds); // avoid ambiguity
+            });
 
-    $parts = $query->latest()->get();
-    $categories = Category::all();
+        // Apply filters from request
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+        if ($request->filled('part_name')) {
+            $query->where('name', 'like', '%' . $request->part_name . '%');
+        }
+        if ($request->filled('variant_id')) {
+            $query->whereHas('specifications', function ($q) use ($request) {
+                $q->where('specifications.variant_id', $request->variant_id);
+            });
+        }
 
-    return view('parts.index', [
-        'variant' => $variant,
-        'parts' => $parts,
-        'categories' => $categories,
-    ]);
-}
+        $parts = $query->latest()->get();
+        $categories = Category::all();
 
-// Show parts for a specific model
-public function model_parts(Request $request, $model_id)
-{
-    $model = VehicleModel::with('brand', 'variants')->findOrFail($model_id);
-
-    $variantIds = $model->variants->pluck('id')->toArray();
-
-    $query = Part::with(['variant.vehicleModel.brand', 'vehicleModel.brand', 'category'])
-        ->whereHas('specifications', function($q) use ($variantIds) {
-            $q->whereIn('variant_id', $variantIds);
-        });
-
-    // Apply filters
-    if ($request->filled('category_id')) {
-        $query->where('category_id', $request->category_id);
-    }
-    if ($request->filled('part_name')) {
-        $query->where('name', 'like', '%' . $request->part_name . '%');
-    }
-    if ($request->filled('variant_id')) {
-        $query->whereHas('specifications', function($q) use ($request) {
-            $q->where('variant_id', $request->variant_id);
-        });
+        return view('parts.index', compact('model', 'parts', 'categories'));
     }
 
-    $parts = $query->latest()->get();
-    $categories = Category::all();
+    /**
+     * Show parts for a specific variant
+     */
+    public function variant_parts(Request $request, $variant_id)
+    {
+        $variant = Variant::with('vehicleModel.brand')->findOrFail($variant_id);
 
-    return view('parts.index', [
-        'vehicleModel' => $model,
-        'parts' => $parts,
-        'categories' => $categories,
-    ]);
-}
+        // Fetch parts for this variant through specifications
+        $query = Part::with(['category', 'specifications.variant.vehicleModel.brand'])
+            ->whereHas('specifications', function ($q) use ($variant_id) {
+                $q->where('specifications.variant_id', $variant_id); // specify table
+            });
+
+        // Apply filters
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+        if ($request->filled('part_name')) {
+            $query->where('name', 'like', '%' . $request->part_name . '%');
+        }
+
+        $parts = $query->latest()->get();
+        $categories = Category::all();
+
+        return view('parts.index', compact('variant', 'parts', 'categories'));
+    }
 }
