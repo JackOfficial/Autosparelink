@@ -30,20 +30,21 @@ class SpecificationController extends Controller
 
         return view('admin.specifications.index', compact('specifications'));
     }
+    
+public function model_specification($model_id)
+{
+    // Fetch the model manually
+    $model = VehicleModel::with([
+        'brand',                   // Ensure brand is loaded
+        'variants',
+        'variants.engine_type',
+        'variants.transmission_type',
+        'variants.drive_type',
+        'variants.body_type',
+    ])->findOrFail($model_id);
 
-        public function model_specification(VehicleModel $model)
-    {
-        // Eager load all related specifications and variants
-        $model->load([
-            'variants',
-            'variants.engine_type',
-            'variants.transmission_type',
-            'variants.drive_type',
-            'variants.body_type',
-        ]);
-
-        return view('specification', compact('model'));
-    }
+    return view('specification', compact('model'));
+}
 
     /**
      * Show form to create a new specification.
