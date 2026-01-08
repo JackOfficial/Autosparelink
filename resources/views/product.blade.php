@@ -1,30 +1,43 @@
 @extends('layouts.app')
 
 @section('title', $part->part_name . ' | AutoSpareLink')
+
+@push('styles')
 <style>
-/* Wishlist button appears on card hover */
+[x-cloak]{ display:none !important; }
+
+/* Wishlist */
 .product-card:hover .wishlist-btn { opacity: 1; }
-.wishlist-btn { opacity: 0; transition: opacity 0.3s ease; }
+.wishlist-btn { opacity: 0; transition: opacity .3s; }
 
-/* Quantity buttons appear on hover */
-.quantity-wrapper .btn-minus,
-.quantity-wrapper .btn-plus { opacity: 0; transition: opacity 0.3s ease; }
-.quantity-wrapper:hover .btn-minus,
-.quantity-wrapper:hover .btn-plus { opacity: 1; }
-
-/* Table hover effect */
-.table-hover tbody tr:hover { background-color: #f1f1f1; cursor: pointer; }
+/* Tables */
+.table-hover tbody tr:hover { background:#f1f1f1; cursor:pointer; }
 
 /* Gallery */
+.main-image { overflow:hidden; }
 .main-image img { cursor: zoom-in; transition: transform .3s ease; }
 .main-image:hover img { transform: scale(1.15); }
-.gallery-btn { position:absolute; top:50%; transform:translateY(-50%); width:42px; height:42px; border-radius:50%; background:rgba(0,0,0,.6); color:#fff; border:none; font-size:26px; opacity:0; transition:opacity .3s; }
+
+.gallery-btn {
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:42px; height:42px; border-radius:50%;
+    background:rgba(0,0,0,.6); color:#fff;
+    border:none; font-size:26px;
+    opacity:0; transition:opacity .3s;
+}
 .main-image:hover .gallery-btn { opacity:1; }
-.prev-btn { left:10px; } .next-btn { right:10px; }
-.thumbnail-wrapper { display:flex; gap:10px; overflow-x:auto; margin-top:10px; }
-.thumbnail-img { width:70px; height:70px; object-fit:cover; border-radius:6px; border:2px solid transparent; cursor:pointer; }
-.thumbnail-img.active-thumb { border-color:#007bff; }
+.prev-btn{ left:10px; } .next-btn{ right:10px; }
+
+.thumbnail-wrapper{ display:flex; gap:10px; overflow-x:auto; margin-top:10px; }
+.thumbnail-img{
+    width:70px; height:70px; object-fit:cover;
+    border-radius:6px; border:2px solid transparent;
+    cursor:pointer;
+}
+.thumbnail-img.active-thumb{ border-color:#007bff; }
 </style>
+@endpush
+
 @section('content')
 <div class="container-fluid mt-4">
 
@@ -42,37 +55,51 @@
     <!-- Product Details -->
     <div class="row px-xl-5">
 
-        <!-- Product Image -->
+        <!-- Product Gallery -->
         <div class="col-lg-5 col-md-6 mb-4">
-            <div class="bg-light p-3 rounded shadow-sm">
+            <div class="bg-light p-3 rounded shadow-sm"
+                 x-data="{
+                    images: @json(
+                        $part->photos->map(fn($p) => asset('storage/'.$p->photo_url))
+                    ),
+                    index: 0,
+                    init(){
+                        if(!this.images.length){
+                            this.images = ['{{ asset('frontend/img/parts.jpg') }}']
+                        }
+                    }
+                 }"
+                 x-cloak
+            >
 
-                <div class="main-image position-relative overflow-hidden rounded">
-                    <img
-                        id="currentImage"
-                        src="{{ optional($part->photos->first())->photo_url
-                            ? asset('storage/'.$part->photos->first()->photo_url)
-                            : asset('frontend/img/parts.jpg') }}"
-                        class="img-fluid w-100"
-                        alt="{{ $part->part_name }}"
-                    >
+                <div class="main-image position-relative rounded">
+                    <img :src="images[index]" class="img-fluid w-100" alt="{{ $part->part_name }}">
 
-                    @if($part->photos->count() > 1)
-                        <button type="button" class="gallery-btn prev-btn">&lsaquo;</button>
-                        <button type="button" class="gallery-btn next-btn">&rsaquo;</button>
-                    @endif
+                    <template x-if="images.length > 1">
+                        <button class="gallery-btn prev-btn"
+                                @click="index = (index - 1 + images.length) % images.length">
+                            &lsaquo;
+                        </button>
+                    </template>
+
+                    <template x-if="images.length > 1">
+                        <button class="gallery-btn next-btn"
+                                @click="index = (index + 1) % images.length">
+                            &rsaquo;
+                        </button>
+                    </template>
                 </div>
 
-                @if($part->photos->count() > 1)
-                    <div class="thumbnail-wrapper mt-3">
-                        @foreach($part->photos as $photo)
-                            <img
-                                src="{{ asset('storage/'.$photo->photo_url) }}"
-                                data-full="{{ asset('storage/'.$photo->photo_url) }}"
-                                class="thumbnail-img"
-                            >
-                        @endforeach
+                <template x-if="images.length > 1">
+                    <div class="thumbnail-wrapper">
+                        <template x-for="(img, i) in images" :key="i">
+                            <img :src="img"
+                                 class="thumbnail-img"
+                                 :class="{ 'active-thumb': index === i }"
+                                 @click="index = i">
+                        </template>
                     </div>
-                @endif
+                </template>
 
             </div>
         </div>
@@ -87,7 +114,9 @@
                 <p><strong>Part Number:</strong> {{ $part->part_number ?? '—' }}</p>
                 <p><strong>Weight:</strong> {{ $part->weight ?? '—' }} kg</p>
 
-                <h3 class="text-primary">{{ number_format($part->price, 2) }} RWF</h3>
+                <h3 class="text-primary mb-3">
+                    {{ number_format($part->price, 2) }} RWF
+                </h3>
 
                 <p>
                     <strong>Availability:</strong>
@@ -174,52 +203,4 @@
     @endif
 
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-
-    // Quantity buttons
-    const input = document.getElementById('quantity-input');
-    document.querySelector('.btn-plus').addEventListener('click', () => input.value = parseInt(input.value)+1);
-    document.querySelector('.btn-minus').addEventListener('click', () => { if(input.value>1) input.value--; });
-
-    // Gallery
-    const mainImage = document.getElementById('currentImage');
-    const thumbnails = document.querySelectorAll('.thumbnail-img');
-    const prevBtn = document.querySelector('.prev-btn');
-    const nextBtn = document.querySelector('.next-btn');
-
-    if (thumbnails.length > 0) {
-        let images = Array.from(thumbnails).map(t => t.dataset.full);
-        let index = 0;
-
-        function showImage(i) {
-            index = i;
-            mainImage.src = images[i];
-            thumbnails.forEach((t,k) => t.classList.toggle('active-thumb', k===i));
-        }
-
-        showImage(0);
-
-        thumbnails.forEach((thumb,i) => thumb.addEventListener('click', () => showImage(i)));
-
-        prevBtn?.addEventListener('click', () => showImage((index-1+images.length)%images.length));
-        nextBtn?.addEventListener('click', () => showImage((index+1)%images.length));
-
-        // Fullscreen on click
-        const modal = document.createElement('div');
-        modal.style = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);justify-content:center;align-items:center;z-index:9999;';
-        const modalImg = document.createElement('img');
-        modalImg.style.maxWidth='90%';
-        modalImg.style.maxHeight='90%';
-        modal.appendChild(modalImg);
-        document.body.appendChild(modal);
-        mainImage.addEventListener('click', () => { modal.style.display='flex'; modalImg.src = mainImage.src; });
-        modal.addEventListener('click', () => modal.style.display='none');
-    }
-
-});
-</script>
-
-
 @endsection
