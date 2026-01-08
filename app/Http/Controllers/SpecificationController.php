@@ -9,6 +9,7 @@ use App\Models\BodyType;
 use App\Models\EngineType;
 use App\Models\TransmissionType;
 use App\Models\DriveType;
+use App\Models\VehicleModel;
 use Illuminate\Http\Request;
 
 class SpecificationController extends Controller
@@ -28,6 +29,20 @@ class SpecificationController extends Controller
         $specifications = $query->latest()->paginate(20);
 
         return view('admin.specifications.index', compact('specifications'));
+    }
+
+        public function show(VehicleModel $model)
+    {
+        // Eager load all related specifications and variants
+        $model->load([
+            'variants',
+            'variants.engine_type',
+            'variants.transmission_type',
+            'variants.drive_type',
+            'variants.body_type',
+        ]);
+
+        return view('model.specification', compact('model'));
     }
 
     /**
