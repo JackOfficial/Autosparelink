@@ -54,6 +54,7 @@
 </div>
 
 <!-- Filters -->
+<!-- Filters -->
 <div class="container-fluid px-xl-5 mb-3">
     <div class="card shadow-sm filter-card">
         <div class="card-body">
@@ -75,6 +76,30 @@
                         <input type="text" name="drive" class="form-control" placeholder="Drive Type" value="{{ request('drive') }}">
                     </div>
                     <div class="col-md-2">
+                        <input type="number" name="production_start" class="form-control" placeholder="Year From" value="{{ request('production_start') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="production_end" class="form-control" placeholder="Year To" value="{{ request('production_end') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="seats" class="form-control" placeholder="Seats" value="{{ request('seats') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="doors" class="form-control" placeholder="Doors" value="{{ request('doors') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="horsepower" class="form-control" placeholder="Horsepower" value="{{ request('horsepower') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="torque" class="form-control" placeholder="Torque" value="{{ request('torque') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="steering_position" class="form-control" placeholder="Steering" value="{{ request('steering_position') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="fuel_efficiency" class="form-control" placeholder="Fuel Efficiency" value="{{ request('fuel_efficiency') }}">
+                    </div>
+                    <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">Filter</button>
                     </div>
                 </div>
@@ -82,6 +107,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Specifications Table -->
 <div class="container-fluid px-xl-5">
