@@ -8,14 +8,22 @@ class PartFitment extends Model
 {
     protected $fillable = [
         'part_id',
-        'variant_specification_id',
+        'variant_id',
+        'vehicle_model_id',
         'status',
+        'year_start',
+        'year_end',
     ];
 
     public function part()
     {
         return $this->belongsTo(Part::class);
     }
+
+    public function vehicleModel()
+{
+    return $this->belongsTo(VehicleModel::class, 'vehicle_model_id');
+}
 
     // public function model()
     // {
@@ -29,14 +37,9 @@ class PartFitment extends Model
 
     
     // The variant specification this fitment belongs to
-    public function Specification()
+    public function variant()
     {
-        return $this->belongsTo(Specification::class, 'specification_id');
-    }
-
-   public function photos()
-    {
-        return $this->hasMany(PartPhoto::class, 'part_id', 'part_id');
+        return $this->belongsTo(Variant::class);
     }
 
 }

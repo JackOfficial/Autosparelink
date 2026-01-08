@@ -7,6 +7,7 @@ use App\Models\Part;
 use App\Models\Category;
 use App\Models\PartBrand;
 use App\Models\Variant;
+use App\Models\PartFitment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -61,13 +62,13 @@ class PartController extends Controller
             $validated['part_name']
         );
 
+        // Create part
         $part = Part::create($validated);
 
-        // Save photos
+        // Save photos separately
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $index => $photo) {
                 $path = $photo->store('parts', 'public');
-
                 $part->photos()->create([
                     'photo_url' => $path,
                     'type'      => $index === 0 ? 'main' : 'detail',
@@ -75,16 +76,19 @@ class PartController extends Controller
             }
         }
 
-        // Attach variants
+        // Save fitments in part_fitments table
         if ($request->filled('variants')) {
-            $syncData = collect($request->variants)->mapWithKeys(function ($variantId) {
+            foreach ($request->variants as $variantId) {
                 $variant = Variant::find($variantId);
-                return [
-                    $variantId => ['vehicle_model_id' => $variant->vehicle_model_id]
-                ];
-            })->toArray();
-
-            $part->variants()->sync($syncData);
+                PartFitment::create([
+                    'part_id'          => $part->id,
+                    'variant_id'       => $variantId,
+                    'vehicle_model_id' => $variant->vehicle_model_id,
+                    'status'           => 1,
+                    'year_start'       => null,
+                    'year_end'         => null,
+                ]);
+            }
         }
 
         return redirect()
@@ -106,7 +110,7 @@ class PartController extends Controller
 
     public function update(Request $request, $id)
     {
-        $part = Part::with('photos')->findOrFail($id);
+        $part = Part::with('photos', 'variants')->findOrFail($id);
 
         $validated = $request->validate([
             'part_number'    => 'nullable|string|max:255',
@@ -152,7 +156,6 @@ class PartController extends Controller
 
             foreach ($request->file('photos') as $index => $photo) {
                 $path = $photo->store('parts', 'public');
-
                 $part->photos()->create([
                     'photo_url' => $path,
                     'type'      => $index === 0 ? 'main' : 'detail',
@@ -160,18 +163,20 @@ class PartController extends Controller
             }
         }
 
-        // Sync variants
+        // Replace all fitments
+        $part->variants()->detach(); // remove old fitments
         if ($request->filled('variants')) {
-            $syncData = collect($request->variants)->mapWithKeys(function ($variantId) {
+            foreach ($request->variants as $variantId) {
                 $variant = Variant::find($variantId);
-                return [
-                    $variantId => ['vehicle_model_id' => $variant->vehicle_model_id]
-                ];
-            })->toArray();
-
-            $part->variants()->sync($syncData);
-        } else {
-            $part->variants()->sync([]);
+                PartFitment::create([
+                    'part_id'          => $part->id,
+                    'variant_id'       => $variantId,
+                    'vehicle_model_id' => $variant->vehicle_model_id,
+                    'status'           => 1,
+                    'year_start'       => null,
+                    'year_end'         => null,
+                ]);
+            }
         }
 
         return redirect()
@@ -188,7 +193,9 @@ class PartController extends Controller
             $photo->delete();
         }
 
+        // Delete all fitments
         $part->variants()->detach();
+
         $part->delete();
 
         return redirect()

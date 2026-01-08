@@ -17,7 +17,6 @@ class Part extends Model
         'price',
         'stock_quantity',
         'status',
-        'photo',
     ];
 
     /**

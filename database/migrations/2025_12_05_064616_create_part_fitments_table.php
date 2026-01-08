@@ -1,4 +1,4 @@
-<?php
+<?
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -6,35 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-       Schema::create('part_fitments', function (Blueprint $table) {
-    $table->id();
+        Schema::create('part_fitments', function (Blueprint $table) {
+            $table->id();
 
-    $table->foreignId('part_id')
-        ->constrained('parts')
-        ->cascadeOnDelete();
+            $table->foreignId('part_id')->constrained()->onDelete('cascade');
+            $table->foreignId('variant_id')->constrained()->onDelete('cascade');
 
-    $table->foreignId('specification_id')
-        ->constrained('specifications')
-        ->cascadeOnDelete();
+            $table->year('start_year')->nullable();
+            $table->year('end_year')->nullable();
 
-    $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->enum('status', ['active', 'inactive'])->default('active');
 
-    $table->timestamps();
+            $table->timestamps();
 
-    // Prevent duplicate fitments
-    $table->unique(['part_id', 'specification_id']);
-});
-
+            $table->unique(['part_id', 'variant_id']);
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('part_fitments');
