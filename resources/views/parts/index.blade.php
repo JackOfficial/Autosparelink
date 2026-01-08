@@ -128,7 +128,7 @@
                                     @if(!empty($part->old_price)) <h6 class="price-old mb-0">{{ number_format($part->old_price,2) }}</h6> @endif
                                 </div>
                                 <div class="d-flex gap-2 justify-content-center">
-                                    <a href="{{ route('parts.show',$part->id) }}" class="btn btn-outline-primary btn-sm">View details</a>
+                                    <a href="shop/products/{{ $part->id }}" class="btn btn-outline-primary btn-sm">View details</a>
                                     <a href="#" class="btn btn-primary btn-sm">Add to cart</a>
                                 </div>
                             </div>
