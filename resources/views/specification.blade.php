@@ -6,6 +6,10 @@
 .info-icon { cursor: pointer; }
 .options-tooltip { font-size: 0.85rem; color: #555; }
 .collapse-row { transition: all 0.3s ease; }
+
+/* Filter Card */
+.filter-card .form-control { height: calc(2.2rem + 2px); }
+.filter-card .btn { height: calc(2.2rem + 2px); }
 </style>
 @endsection
 
@@ -45,7 +49,37 @@
                 {{ $variant->vehicleModel->brand->brand_name }} – {{ $variant->name }}
             @endif
         </h4>
-        <small class="text-muted">Below is the list of specifications.</small>
+        <small class="text-muted">Below is the list of specifications. Use filters to narrow down results.</small>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="container-fluid px-xl-5 mb-3">
+    <div class="card shadow-sm filter-card">
+        <div class="card-body">
+            <form method="GET" action="">
+                <div class="row g-2">
+                    <div class="col-md-2">
+                        <input type="text" name="variant_name" class="form-control" placeholder="Variant / Model" value="{{ request('variant_name') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="body" class="form-control" placeholder="Body" value="{{ request('body') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="engine" class="form-control" placeholder="Engine" value="{{ request('engine') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="transmission" class="form-control" placeholder="Transmission" value="{{ request('transmission') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="drive" class="form-control" placeholder="Drive Type" value="{{ request('drive') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -73,15 +107,7 @@
                 <tbody>
                     @forelse($specifications as $spec)
                         <tr>
-                            <td>
-                                @if($spec->variant)
-                                    {{ $spec->variant->name }}
-                                @elseif($spec->vehicle_model)
-                                    {{ $spec->vehicle_model->model_name }}
-                                @else
-                                    N/A
-                                @endif
-                            </td>
+                            <td>{{ $spec->variant->name ?? $spec->vehicle_model->model_name ?? 'N/A' }}</td>
                             <td>{{ $spec->bodyType->name ?? '-' }}</td>
                             <td>{{ $spec->engineType->name ?? '-' }}</td>
                             <td>{{ $spec->transmissionType->name ?? '-' }}</td>
