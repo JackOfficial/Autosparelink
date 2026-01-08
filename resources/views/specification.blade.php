@@ -95,7 +95,7 @@
                 <tbody>
                     @forelse($model->variants as $v)
                     <tr>
-                        <td><a href="{{ route('spare.parts', $v->id) }}">{{ $v->name ?? 'N/A' }}</a></td>
+                        <td><a href="{{ route('spare-parts', $v->id) }}">{{ $v->name ?? 'N/A' }}</a></td>
                         <td>{{ $v->model_code ?? '-' }}</td>
                         <td>{{ $v->chassis_code ?? '-' }}</td>
                         <td>
