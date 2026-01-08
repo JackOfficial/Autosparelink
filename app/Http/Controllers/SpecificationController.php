@@ -33,32 +33,42 @@ class SpecificationController extends Controller
 
 public function model_specification($model_id)
 {
+    $model = VehicleModel::with('brand')->findOrFail($model_id);
     // Fetch the model manually
-     $model = VehicleModel::with([
-        'brand',                       // brand of the model
-        'variants',
-        'variants.specifications.engineType',
-        'variants.specifications.transmissionType',
-        'variants.specifications.driveType',
-        'variants.specifications.bodyType',
-    ])->findOrFail($model_id);
+    $specifications = Specification::with([
+        'variant.vehicleModel.brand',
+        'bodyType',
+        'engineType',
+        'transmissionType',
+        'driveType'
+    ])
+    ->whereHas('variant', function($q) use ($model_id) {
+        $q->where('vehicle_model_id', $model_id);
+    })
+    ->latest()
+    ->get();
 
-    return view('specification', compact('model'));
+    return view('specification', compact('model', 'specifications'));
 }
 
-public function variant_specification($model_id)
+public function variant_specification($variant_id)
 {
-    // Fetch the model manually
-     $variant = Variant::with([
-        'vehicle_model',                       // brand of the model
-        'vehicle_model.brand',
-        'specifications.engineType',
-        'specifications.transmissionType',
-        'specifications.driveType',
-        'specifications.bodyType',
-    ])->findOrFail($model_id);
+ // Fetch the variant for the header
+    $variant = Variant::with('vehicle_model.brand')->findOrFail($variant_id);
 
-    return view('specification', compact('model'));
+    // Fetch all specifications for this variant
+    $specifications = Specification::with([
+        'variant.vehicleModel.brand',
+        'bodyType',
+        'engineType',
+        'transmissionType',
+        'driveType'
+    ])
+    ->where('variant_id', $variant_id)
+    ->latest()
+    ->get();
+
+    return view('specification', compact('variant', 'specifications'));
 }
 
     /**

@@ -17,8 +17,13 @@
         <div class="col-12">
             <nav class="breadcrumb bg-light mb-30">
                 <a class="breadcrumb-item text-dark" href="{{ route('home') }}">Home</a>
-                <a class="breadcrumb-item text-dark" href="{{ route('brand.models', $model->brand->id) }}">{{ $model->brand->brand_name }}</a>
-                <span class="breadcrumb-item active">{{ $model->model_name }}</span>
+                @if(isset($model))
+                    <a class="breadcrumb-item text-dark" href="{{ route('brand.models', $model->brand->id) }}">{{ $model->brand->brand_name }}</a>
+                    <span class="breadcrumb-item active">{{ $model->model_name }}</span>
+                @elseif(isset($variant))
+                    <a class="breadcrumb-item text-dark" href="{{ route('brand.models', $variant->vehicle_model->brand->id) }}">{{ $variant->vehicle_model->brand->brand_name }}</a>
+                    <span class="breadcrumb-item active">{{ $variant->name }}</span>
+                @endif
             </nav>
         </div>
     </div>
@@ -28,74 +33,73 @@
 <div class="container-fluid px-xl-5">
     <div class="bg-white p-4 shadow-sm rounded mb-3">
         <h4 class="text-uppercase mb-1" style="font-weight: 600;">
-            @if($model->brand->brand_logo)
-                <img src="{{ asset('storage/' . $model->brand->brand_logo) }}" style="width: 50px; height:auto;" />
+            @if(isset($model) && $model->brand->brand_logo)
+                <img src="{{ asset('storage/' . $model->brand->brand_logo) }}" style="width:50px; height:auto;" />
+            @elseif(isset($variant) && $variant->vehicle_model->brand->brand_logo)
+                <img src="{{ asset('storage/' . $variant->vehicle_model->brand->brand_logo) }}" style="width:50px; height:auto;" />
             @endif
-            {{ $model->brand->brand_name }} – {{ $model->model_name }}
+
+            @if(isset($model))
+                {{ $model->brand->brand_name }} – {{ $model->model_name }}
+            @elseif(isset($variant))
+                {{ $variant->vehicle_model->brand->brand_name }} – {{ $variant->name }}
+            @endif
         </h4>
-        <small class="text-muted">Click the <i class="fas fa-info-circle"></i> icon for full variant details.</small>
+        <small class="text-muted">Below is the list of specifications.</small>
     </div>
 </div>
 
-<!-- Variants Table -->
+<!-- Specifications Table -->
 <div class="container-fluid px-xl-5">
     <div class="card shadow-sm">
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
                 <thead class="thead-light">
                     <tr>
-                        <th>Variant Name</th>
-                        <th>Model Code</th>
-                        <th>Chassis Code</th>
-                        <th>Production Period</th>
-                        <th>Options</th>
+                        <th>Variant / Model</th>
+                        <th>Body</th>
+                        <th>Engine Type</th>
+                        <th>Transmission</th>
+                        <th>Drive Type</th>
+                        <th>Steering</th>
+                        <th>Trim</th>
+                        <th>Doors</th>
+                        <th>Seats</th>
+                        <th>Horsepower</th>
+                        <th>Torque</th>
+                        <th>Fuel Efficiency</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($model->variants as $v)
-                    <tr>
-                        <td><a href="{{ route('spare-parts', $v->id) }}">{{ $v->name ?? 'N/A' }}</a></td>
-                        <td>{{ $v->model_code ?? '-' }}</td>
-                        <td>{{ $v->chassis_code ?? '-' }}</td>
-                        <td>{{ $v->production_start ?? '-' }} - {{ $v->production_end ?? '-' }}</td>
-                        <td>
-                            <a class="info-icon" data-toggle="collapse" href="#variant-{{ $v->id }}" role="button" aria-expanded="false" aria-controls="variant-{{ $v->id }}">
-                                <i class="fas fa-info-circle"></i>
-                            </a>
-                        </td>
-                    </tr>
-
-                    <!-- Collapsible Row for Detailed Specs -->
-                    <tr class="collapse collapse-row" id="variant-{{ $v->id }}">
-                        <td colspan="5">
-                            <div class="p-3 bg-light rounded">
-                                <div class="row">
-                                    <div class="col-md-4 options-tooltip">
-                                        <strong>Body:</strong> {{ $v->body_type->name ?? '-' }}<br>
-                                        <strong>Engine Type:</strong> {{ $v->engine_type->name ?? '-' }}<br>
-                                        <strong>Transmission:</strong> {{ $v->transmission_type->name ?? '-' }}
-                                    </div>
-                                    <div class="col-md-4 options-tooltip">
-                                        <strong>Drive Type:</strong> {{ $v->drive_type->name ?? '-' }}<br>
-                                        <strong>Steering:</strong> {{ $v->steering_position ?? '-' }}<br>
-                                        <strong>Trim:</strong> {{ $v->trim_level ?? '-' }}
-                                    </div>
-                                    <div class="col-md-4 options-tooltip">
-                                        <strong>Doors:</strong> {{ $v->doors ?? '-' }}<br>
-                                        <strong>Seats:</strong> {{ $v->seats ?? '-' }}<br>
-                                        <strong>Horsepower:</strong> {{ $v->horsepower ?? '-' }}<br>
-                                        <strong>Torque:</strong> {{ $v->torque ?? '-' }}<br>
-                                        <strong>Fuel Efficiency:</strong> {{ $v->fuel_efficiency ?? '-' }}
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-
+                    @forelse($specifications as $spec)
+                        <tr>
+                            <td>
+                                @if($spec->variant)
+                                    {{ $spec->variant->name }}
+                                @elseif($spec->vehicle_model)
+                                    {{ $spec->vehicle_model->model_name }}
+                                @else
+                                    N/A
+                                @endif
+                            </td>
+                            <td>{{ $spec->bodyType->name ?? '-' }}</td>
+                            <td>{{ $spec->engineType->name ?? '-' }}</td>
+                            <td>{{ $spec->transmissionType->name ?? '-' }}</td>
+                            <td>{{ $spec->driveType->name ?? '-' }}</td>
+                            <td>{{ $spec->steering_position ?? '-' }}</td>
+                            <td>{{ $spec->trim_level ?? '-' }}</td>
+                            <td>{{ $spec->doors ?? '-' }}</td>
+                            <td>{{ $spec->seats ?? '-' }}</td>
+                            <td>{{ $spec->horsepower ?? '-' }}</td>
+                            <td>{{ $spec->torque ?? '-' }}</td>
+                            <td>{{ $spec->fuel_efficiency ?? '-' }}</td>
+                        </tr>
                     @empty
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">No variants found for this model.</td>
-                    </tr>
+                        <tr>
+                            <td colspan="12" class="text-center text-muted">
+                                No specifications found for this {{ isset($model) ? 'model' : 'variant' }}.
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
