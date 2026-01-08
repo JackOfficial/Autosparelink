@@ -15,7 +15,7 @@ class PartController extends Controller
 {
     public function index()
     {
-        $parts = Part::with(['category', 'partBrand', 'photos', 'variants'])
+        $parts = Part::with(['category', 'partBrand', 'photos', 'fitment.variant'])
             ->latest()
             ->paginate(20);
 
@@ -27,7 +27,7 @@ class PartController extends Controller
         return view('admin.parts.create', [
             'categories' => Category::orderBy('category_name')->get(),
             'partBrands' => PartBrand::orderBy('name')->get(),
-            'variants'   => Variant::with(['vehicleModel.brand', 'specifications'])
+            'variants'   => Variant::with(['vehicleModel.brand', 'specification'])
                 ->orderBy('name')
                 ->get(),
         ]);
@@ -76,17 +76,19 @@ class PartController extends Controller
             }
         }
 
-        // Save fitments in part_fitments table
+        // Save fitments in part_fitments table using variant specification
         if ($request->filled('variants')) {
             foreach ($request->variants as $variantId) {
-                $variant = Variant::find($variantId);
+                $variant = Variant::findOrFail($variantId);
+                $spec = $variant->specification;
+
                 PartFitment::create([
                     'part_id'          => $part->id,
                     'variant_id'       => $variantId,
                     'vehicle_model_id' => $variant->vehicle_model_id,
-                    'status'           => 1,
-                    'year_start'       => null,
-                    'year_end'         => null,
+                    'status'           => 1, // active
+                    'year_start'       => $spec->production_start ?? null,
+                    'year_end'         => $spec->production_end ?? null,
                 ]);
             }
         }
@@ -98,19 +100,19 @@ class PartController extends Controller
 
     public function edit($id)
     {
-        $part = Part::with(['photos', 'variants'])->findOrFail($id);
+        $part = Part::with(['photos', 'fitment.variant'])->findOrFail($id);
 
         return view('admin.parts.edit', [
             'part'       => $part,
             'categories' => Category::all(),
             'partBrands' => PartBrand::all(),
-            'variants'   => Variant::with(['vehicleModel.brand', 'specifications'])->get(),
+            'variants'   => Variant::with(['vehicleModel.brand', 'specification'])->get(),
         ]);
     }
 
     public function update(Request $request, $id)
     {
-        $part = Part::with('photos', 'variants')->findOrFail($id);
+        $part = Part::with('photos', 'fitment')->findOrFail($id);
 
         $validated = $request->validate([
             'part_number'    => 'nullable|string|max:255',
@@ -164,17 +166,19 @@ class PartController extends Controller
         }
 
         // Replace all fitments
-        $part->variants()->detach(); // remove old fitments
+        $part->fitment()->delete(); // remove old fitments
         if ($request->filled('variants')) {
             foreach ($request->variants as $variantId) {
-                $variant = Variant::find($variantId);
+                $variant = Variant::findOrFail($variantId);
+                $spec = $variant->specification;
+
                 PartFitment::create([
                     'part_id'          => $part->id,
                     'variant_id'       => $variantId,
                     'vehicle_model_id' => $variant->vehicle_model_id,
                     'status'           => 1,
-                    'year_start'       => null,
-                    'year_end'         => null,
+                    'year_start'       => $spec->production_start ?? null,
+                    'year_end'         => $spec->production_end ?? null,
                 ]);
             }
         }
@@ -186,16 +190,18 @@ class PartController extends Controller
 
     public function destroy($id)
     {
-        $part = Part::with('photos')->findOrFail($id);
+        $part = Part::with('photos', 'fitment')->findOrFail($id);
 
+        // Delete photos from storage
         foreach ($part->photos as $photo) {
             Storage::disk('public')->delete($photo->photo_url);
             $photo->delete();
         }
 
-        // Delete all fitments
-        $part->variants()->detach();
+        // Delete fitments
+        $part->fitment()->delete();
 
+        // Delete part
         $part->delete();
 
         return redirect()
