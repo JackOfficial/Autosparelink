@@ -53,47 +53,46 @@
     <div class="row px-xl-5">
 
         <!-- IMAGE GALLERY -->
-        <div class="col-lg-5 col-md-6 mb-4">
-            <div class="bg-light p-3 rounded shadow-sm"
-                 x-data="{
-                    images: @json($photos->map(fn($p) => asset('storage/'.$p->photo_url))),
-                    index: 0
-                 }"
-            >
+       <div class="col-lg-5 col-md-6 mb-4">
+    <div class="bg-light p-3 rounded shadow-sm"
+         x-data="{
+            images: {{ $photos->isNotEmpty() ? $photos->map(fn($p) => json_encode(asset('storage/'.$p->photo_url))) : json_encode([asset('frontend/img/parts.jpg')]) }},
+            index: 0,
+         }"
+    >
+        <!-- Main Image -->
+        <div class="main-image position-relative overflow-hidden rounded">
+            <img :src="JSON.parse(images[index])" class="img-fluid w-100" alt="{{ $part->part_name }}">
 
-                <!-- Main Image -->
-                <div class="main-image position-relative overflow-hidden rounded">
-                    <img :src="images[index]" class="img-fluid w-100" alt="{{ $part->part_name }}">
+            <template x-if="images.length > 1">
+                <button class="gallery-btn prev-btn"
+                        @click="index = (index - 1 + images.length) % images.length">
+                    &lsaquo;
+                </button>
+            </template>
 
-                    <template x-if="images.length > 1">
-                        <button class="gallery-btn prev-btn"
-                                @click="index = (index - 1 + images.length) % images.length">
-                            &lsaquo;
-                        </button>
-                    </template>
-
-                    <template x-if="images.length > 1">
-                        <button class="gallery-btn next-btn"
-                                @click="index = (index + 1) % images.length">
-                            &rsaquo;
-                        </button>
-                    </template>
-                </div>
-
-                <!-- Thumbnails -->
-                <template x-if="images.length > 1">
-                    <div class="thumbnail-wrapper">
-                        <template x-for="(img,i) in images" :key="i">
-                            <img :src="img"
-                                 class="thumbnail-img"
-                                 :class="{ 'active-thumb': index === i }"
-                                 @click="index = i">
-                        </template>
-                    </div>
-                </template>
-
-            </div>
+            <template x-if="images.length > 1">
+                <button class="gallery-btn next-btn"
+                        @click="index = (index + 1) % images.length">
+                    &rsaquo;
+                </button>
+            </template>
         </div>
+
+        <!-- Thumbnails -->
+        <template x-if="images.length > 1">
+            <div class="thumbnail-wrapper mt-3">
+                <template x-for="(img,i) in images" :key="i">
+                    <img :src="JSON.parse(img)"
+                         class="thumbnail-img"
+                         :class="{ 'active-thumb': index === i }"
+                         @click="index = i">
+                </template>
+            </div>
+        </template>
+    </div>
+</div>
+
 
         <!-- PRODUCT INFO -->
         <div class="col-lg-7 col-md-6 mb-4">
