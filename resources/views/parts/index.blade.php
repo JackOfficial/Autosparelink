@@ -118,11 +118,11 @@
                                     <a class="btn btn-light btn-square" href="#" title="Add to cart"><i class="fa fa-shopping-cart"></i></a>
                                     <a class="btn btn-light btn-square" href="#" title="Wishlist"><i class="far fa-heart"></i></a>
                                     <a class="btn btn-light btn-square" href="#" title="Compare"><i class="fa fa-sync-alt"></i></a>
-                                    <a class="btn btn-light btn-square" href="{{ route('parts.show', $part->id) }}" title="View"><i class="fa fa-search"></i></a>
+                                    <a class="btn btn-light btn-square" href="shop/products/{{ $part->id }}" title="View"><i class="fa fa-search"></i></a>
                                 </div>
                             </div>
                             <div class="text-center py-3 px-2">
-                                <a class="h6 text-truncate d-block mb-1 text-dark" href="{{ route('parts.show', $part->id) }}">{{ Str::limit($part->name, 30) }}</a>
+                                <a class="h6 text-truncate d-block mb-1 text-dark" href="shop/products/{{ $part->id }}">{{ Str::limit($part->name, 30) }}</a>
                                 <div class="d-flex align-items-center justify-content-center mb-2">
                                     <h5 class="mb-0">{{ number_format($part->price,2) }} {{ $currencySymbol ?? 'RWF' }}</h5>
                                     @if(!empty($part->old_price)) <h6 class="price-old mb-0">{{ number_format($part->old_price,2) }}</h6> @endif
