@@ -30,4 +30,8 @@ class BrandController extends Controller
 
         return view('brand.models', compact('brand', 'models'));
     }
+
+    public function show(){
+        
+    }
 }
