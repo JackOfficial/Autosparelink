@@ -110,7 +110,7 @@ Route::get('/model/{brand}', [BrandController::class, 'show'])->name('brand.mode
 Route::get('/spare-parts/{variant}', [ProductController::class, 'product'])->name('spare-parts');
 
 /////////////////
-Route::get('/brand/{brand}/models', [BrandController::class, 'models'])->name('brand.models');
+//Route::get('/brand/{brand}/models', [BrandController::class, 'models'])->name('brand.models');
 
 // Model specification page
 Route::get('/model-specification/{model}', [SpecificationController::class, 'model_specification'])->name('model.specification');
