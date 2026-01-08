@@ -57,35 +57,30 @@
     @endif
 
     <!-- Compatibility -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h4>Compatibility</h4>
-            @if($compatibilities->isEmpty())
-                <p class="text-muted">No compatibility info available.</p>
-            @else
-                <ul>
-                    @foreach($compatibilities as $variant)
-                        @foreach($variant->specifications as $spec)
-                            <li>
-                                <strong>Vehicle:</strong> {{ optional($variant->vehicleModel->brand)->brand_name ?? '—' }} /
-                                {{ optional($variant->vehicleModel)->model_name ?? '—' }} —
-                                {{ $variant->name ?? '—' }}
+  <div class="row mb-4">
+    <div class="col-12">
+        <h4>Compatibility</h4>
 
-                                @if($spec->engineType || $spec->transmissionType || $spec->driveType)
-                                    [{{ optional($spec->engineType)->name ?? '—' }} / 
-                                    {{ optional($spec->transmissionType)->name ?? '—' }} / 
-                                    {{ optional($spec->driveType)->name ?? '—' }}]
-                                @endif
+        @if($compatibilities->isEmpty())
+            <p class="text-muted">No compatibility info available.</p>
+        @else
+            <ul>
+                @foreach($compatibilities as $variant)
+                    <li>
+                        <strong>Vehicle:</strong>
+                        {{ optional($variant->vehicleModel->brand)->brand_name ?? '—' }} /
+                        {{ optional($variant->vehicleModel)->model_name ?? '—' }} —
+                        {{ $variant->name ?? '—' }}
 
-                                (Start Year: {{ $spec->production_start ?? '—' }},
-                                 End Year: {{ $spec->production_end ?? '—' }})
-                            </li>
-                        @endforeach
-                    @endforeach
-                </ul>
-            @endif
-        </div>
+                        ({{ $variant->pivot->year_start ?? '-' }}
+                        – {{ $variant->pivot->year_end ?? '-' }})
+                    </li>
+                @endforeach
+            </ul>
+        @endif
     </div>
+</div>
+
 
     <!-- Substitutions -->
     <div class="row mb-4">

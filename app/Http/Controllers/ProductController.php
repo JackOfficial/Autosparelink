@@ -66,8 +66,6 @@ public function product($id)
     // Compatibility (via variants pivot)
     $compatibilities = $part->variants;
 
-    dd($compatibilities);
-
     return view('product', compact(
         'part',
         'photos',
