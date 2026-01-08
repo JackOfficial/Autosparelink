@@ -33,13 +33,15 @@ class ProductController extends Controller
 public function product($id)
 {
     // Main product with all required relationships
-    $part = Part::with([
-        'category',
-        'partBrand',
-        'photos',
-        'variants.vehicleModel',
-        'variants.engineType',
-    ])->findOrFail($id);
+  $part = Part::with([
+    'category',
+    'partBrand',
+    'photos',
+    'variants.specifications.engineType',   // correct way
+    'variants.specifications.transmissionType',
+    'variants.specifications.driveType',
+    'variants.vehicleModel'
+])->findOrFail($id);
 
     // Main image (safe fallback guaranteed)
     $mainPhoto = $part->photos
@@ -57,7 +59,7 @@ public function product($id)
             $q->where('part_name', $part->part_name)
               ->orWhere('oem_number', $part->oem_number);
         })
-        ->limit(10)
+        ->take(10)
         ->get();
 
     // Compatibility (via variants pivot)
