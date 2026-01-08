@@ -101,7 +101,11 @@
     /* ✅ NULL-SAFE selected fitments */
     $selectedFitments = old(
         'variant_specifications',
+<<<<<<< HEAD
         $part->fitments?->pluck('variant_specification_id')->toArray() ?? []
+=======
+        $part->fitments?->pluck('specification_id')->toArray() ?? []
+>>>>>>> 44535a8 (Changed folder)
     );
 @endphp
 
