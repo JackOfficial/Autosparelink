@@ -37,6 +37,7 @@ public function product($id)
     'category',
     'partBrand',
     'photos',
+    'variants.vehicleModel.brand',
     'variants.specifications.engineType',   // correct way
     'variants.specifications.transmissionType',
     'variants.specifications.driveType',
