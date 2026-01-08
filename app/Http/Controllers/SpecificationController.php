@@ -31,7 +31,7 @@ class SpecificationController extends Controller
         return view('admin.specifications.index', compact('specifications'));
     }
 
-        public function show(VehicleModel $model)
+        public function model_specification(VehicleModel $model)
     {
         // Eager load all related specifications and variants
         $model->load([
@@ -42,7 +42,7 @@ class SpecificationController extends Controller
             'variants.body_type',
         ]);
 
-        return view('model.specification', compact('model'));
+        return view('specification', compact('model'));
     }
 
     /**

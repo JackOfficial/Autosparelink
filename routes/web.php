@@ -106,7 +106,7 @@ Route::get('/model-specification/{id}', [SpecificationController::class, 'model_
 Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
 Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 // Show all models for a brand
-Route::get('/brand/{brand}/models', [BrandController::class, 'showModels'])->name('brand.models');
+//Route::get('/model-specification/{brand}', [BrandController::class, 'show'])->name('brand.models');
 
 
 // Social login routes
