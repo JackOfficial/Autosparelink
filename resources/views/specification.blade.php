@@ -21,7 +21,7 @@
                     <a class="breadcrumb-item text-dark" href="{{ route('brand.models', $model->brand->id) }}">{{ $model->brand->brand_name }}</a>
                     <span class="breadcrumb-item active">{{ $model->model_name }}</span>
                 @elseif(isset($variant))
-                    <a class="breadcrumb-item text-dark" href="{{ route('brand.models', $variant->vehicle_model->brand->id) }}">{{ $variant->vehicle_model->brand->brand_name }}</a>
+                    <a class="breadcrumb-item text-dark" href="{{ route('brand.models', $variant->vehicleModel->brand->id) }}">{{ $variant->vehicleModel->brand->brand_name }}</a>
                     <span class="breadcrumb-item active">{{ $variant->name }}</span>
                 @endif
             </nav>
@@ -35,14 +35,14 @@
         <h4 class="text-uppercase mb-1" style="font-weight: 600;">
             @if(isset($model) && $model->brand->brand_logo)
                 <img src="{{ asset('storage/' . $model->brand->brand_logo) }}" style="width:50px; height:auto;" />
-            @elseif(isset($variant) && $variant->vehicle_model->brand->brand_logo)
-                <img src="{{ asset('storage/' . $variant->vehicle_model->brand->brand_logo) }}" style="width:50px; height:auto;" />
+            @elseif(isset($variant) && $variant->vehicleModel->brand->brand_logo)
+                <img src="{{ asset('storage/' . $variant->vehicleModel->brand->brand_logo) }}" style="width:50px; height:auto;" />
             @endif
 
             @if(isset($model))
                 {{ $model->brand->brand_name }} – {{ $model->model_name }}
             @elseif(isset($variant))
-                {{ $variant->vehicle_model->brand->brand_name }} – {{ $variant->name }}
+                {{ $variant->vehicleModel->brand->brand_name }} – {{ $variant->name }}
             @endif
         </h4>
         <small class="text-muted">Below is the list of specifications.</small>
