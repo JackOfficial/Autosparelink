@@ -37,10 +37,10 @@ public function model_specification($model_id)
      $model = VehicleModel::with([
         'brand',                       // brand of the model
         'variants',
-        'variants.specifications.engine_type',
-        'variants.specifications.transmission_type',
-        'variants.specifications.drive_type',
-        'variants.specifications.body_type',
+        'variants.specifications.engineType',
+        'variants.specifications.transmissionType',
+        'variants.specifications.driveType',
+        'variants.specifications.bodyType',
     ])->findOrFail($model_id);
 
     return view('specification', compact('model'));
