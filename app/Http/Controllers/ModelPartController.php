@@ -17,12 +17,11 @@ class ModelPartController extends Controller
     {
         $model = VehicleModel::with('brand', 'variants')->findOrFail($model_id);
 
-        // Fetch parts with relationships
-        $query = Part::with(['variant.vehicleModel.brand', 'vehicleModel.brand', 'category']);
+        // Get all variant IDs for this model
+        $variantIds = $model->variants->pluck('id')->toArray();
 
-        // Filter by model: include all parts of all variants
-        $variantIds = $model->variants->pluck('id');
-        $query->whereIn('variant_id', $variantIds);
+        $query = Part::with(['variant.vehicleModel.brand', 'vehicleModel.brand', 'category'])
+            ->whereIn('variant_id', $variantIds);
 
         // Apply filters
         if ($request->filled('category_id')) {
@@ -38,7 +37,11 @@ class ModelPartController extends Controller
         $parts = $query->latest()->get();
         $categories = Category::all();
 
-        return view('parts.index', compact('model', 'parts', 'categories'));
+        return view('parts.index', [
+            'vehicleModel' => $model,
+            'parts' => $parts,
+            'categories' => $categories,
+        ]);
     }
 
     // Show parts for a specific variant
@@ -60,6 +63,10 @@ class ModelPartController extends Controller
         $parts = $query->latest()->get();
         $categories = Category::all();
 
-        return view('parts.index', compact('variant', 'parts', 'categories'));
+        return view('parts.index', [
+            'variant' => $variant,
+            'parts' => $parts,
+            'categories' => $categories,
+        ]);
     }
 }
