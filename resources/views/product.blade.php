@@ -60,8 +60,6 @@
   <div class="row mb-4">
     <div class="col-12">
         <h4>Compatibility (jack)</h4>
-        {{ $compatibilities }}
-        <d>/////////////////////////////////////////////////////</d>
         @if($compatibilities->isEmpty())
             <p class="text-muted">No compatibility info available.</p>
         @else
