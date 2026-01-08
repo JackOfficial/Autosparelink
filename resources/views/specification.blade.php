@@ -199,7 +199,19 @@
                 <tbody>
                     @forelse($specifications as $spec)
                         <tr>
-                            <td>{{ $spec->variant->name ?? $spec->vehicle_model->model_name ?? 'N/A' }}</td>
+                            <td>
+                                @if($spec->variant)
+                                    <a href="{{ route('variant.parts', $spec->variant->id) }}">
+                                        {{ $spec->variant->name }}
+                                    </a>
+                                @elseif($spec->vehicle_model)
+                                    <a href="{{ route('model.parts', $spec->vehicle_model->id) }}">
+                                        {{ $spec->vehicle_model->model_name }}
+                                    </a>
+                                @else
+                                    N/A
+                                @endif
+                            </td>
                             <td>{{ $spec->bodyType->name ?? '-' }}</td>
                             <td>{{ $spec->engineType->name ?? '-' }}</td>
                             <td>{{ $spec->transmissionType->name ?? '-' }}</td>
@@ -224,5 +236,6 @@
         </div>
     </div>
 </div>
+
 
 @endsection

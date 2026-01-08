@@ -50,6 +50,7 @@ use App\Http\Controllers\Admin\PartFitmentController;
 use App\Http\Controllers\Admin\TransmissionTypeController;
 use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\VariantSpecificationController;
+use App\Http\Controllers\ModelPartController;
 
 //Guest routes
 // Route::get('/', function() {
@@ -109,6 +110,12 @@ Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 Route::get('/model/{brand}', [BrandController::class, 'show'])->name('brand.models');
 Route::get('/spare-parts/{variant}', [ProductController::class, 'product'])->name('spare-parts');
 
+Route::get('/models/{model_id}/parts', [ModelPartController::class, 'model_parts'])
+    ->name('model.parts');
+
+// Parts for a specific variant
+Route::get('/variants/{variant_id}/parts', [ModelPartController::class, 'variant_parts'])
+    ->name('variant.parts');
 /////////////////
 //Route::get('/brand/{brand}/models', [BrandController::class, 'models'])->name('brand.models');
 
