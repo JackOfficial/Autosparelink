@@ -2,20 +2,21 @@
 
 @section('style')
 <style>
-/* Hover effect for parts cards */
-.parts-card:hover { transform: translateY(-5px); transition: 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-
-/* Filter Card */
-.filter-card .form-control { height: calc(2.2rem + 2px); }
-.filter-card .btn { height: calc(2.2rem + 2px); }
-
-/* Sidebar */
+:root{--primary:#0d6efd;--muted:#6c757d;--card-radius:12px;}
 .sidebar { border-right: 1px solid #ddd; padding-right: 15px; }
-.sticky-spec { position: sticky; top: 0; z-index: 10; background-color: #fff; padding: 15px; border-bottom: 1px solid #ddd; }
-
-/* Parts Grid */
-.parts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-.parts-card img { width: 100%; height: 150px; object-fit: contain; }
+.sticky-spec { position: sticky; top: 0; z-index: 10; background-color: #fff; padding: 15px; border-bottom: 1px solid #ddd; border-radius: var(--card-radius); }
+.product-item { border-radius: var(--card-radius); overflow: hidden; transition: transform .18s ease, box-shadow .18s ease; }
+.product-item:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(2,6,23,0.08); }
+.product-img { position: relative; }
+.product-img img { width: 100%; height: 180px; object-fit: cover; }
+.product-action { position: absolute; top: 10px; right: 10px; display:flex; gap:6px; opacity:0; transition:opacity .15s ease; }
+.product-item:hover .product-action { opacity:1; }
+.btn-square { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+.badge-custom { position:absolute; left:10px; top:10px; padding:5px 10px; border-radius:8px; font-weight:700; font-size:0.75rem; color:#fff; }
+.badge-new { background: linear-gradient(90deg,#28a745,#20c997); }
+.badge-discount { background: linear-gradient(90deg,#ff7b00,#ff4d4d); }
+.price-old { color: var(--muted); font-size:0.85rem; text-decoration:line-through; margin-left:5px; }
+.parts-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
 </style>
 @endsection
 
@@ -39,9 +40,9 @@
     </div>
 </div>
 
-<!-- Chosen Variant/Model Specification (Sticky) -->
+<!-- Sticky Variant/Model -->
 <div class="container-fluid px-xl-5 mb-3">
-    <div class="sticky-spec shadow-sm rounded">
+    <div class="sticky-spec shadow-sm">
         <h5 class="mb-2">
             @if(isset($model))
                 {{ $model->brand->brand_name }} – {{ $model->model_name }}
@@ -56,13 +57,12 @@
             <li class="list-inline-item">Engine: {{ $variant->engineType->name ?? '-' }}</li>
             <li class="list-inline-item">Transmission: {{ $variant->transmissionType->name ?? '-' }}</li>
             <li class="list-inline-item">Drive: {{ $variant->driveType->name ?? '-' }}</li>
-            <li class="list-inline-item">Steering: {{ $variant->steering_position ?? '-' }}</li>
         </ul>
         @endif
     </div>
 </div>
 
-<!-- Page Layout: Sidebar Filters + Parts -->
+<!-- Page Layout -->
 <div class="container-fluid px-xl-5">
     <div class="row">
         <!-- Sidebar Filters -->
@@ -75,9 +75,7 @@
                             <select name="category_id" class="form-control">
                                 <option value="">All Categories</option>
                                 @foreach($categories as $cat)
-                                    <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
-                                        {{ $cat->name }}
-                                    </option>
+                                    <option value="{{ $cat->id }}" {{ request('category_id')==$cat->id?'selected':'' }}>{{ $cat->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -91,9 +89,7 @@
                                 <option value="">All Variants</option>
                                 @if(isset($model))
                                     @foreach($model->variants as $v)
-                                        <option value="{{ $v->id }}" {{ request('variant_id') == $v->id ? 'selected' : '' }}>
-                                            {{ $v->name }}
-                                        </option>
+                                        <option value="{{ $v->id }}" {{ request('variant_id')==$v->id?'selected':'' }}>{{ $v->name }}</option>
                                     @endforeach
                                 @elseif(isset($variant))
                                     <option value="{{ $variant->id }}" selected>{{ $variant->name }}</option>
@@ -109,19 +105,32 @@
         <!-- Parts Grid -->
         <div class="col-lg-9">
             @if($parts->isEmpty())
-                <div class="text-center text-muted">No parts found for this {{ isset($model) ? 'model' : 'variant' }}.</div>
+                <div class="text-center text-muted py-4">No parts found for this {{ isset($model)?'model':'variant' }}.</div>
             @else
                 <div class="parts-grid">
                     @foreach($parts as $part)
-                        <div class="card parts-card shadow-sm">
-                            <img src="{{ $part->image ? asset('storage/' . $part->image) : asset('images/placeholder.png') }}" alt="{{ $part->name }}">
-                            <div class="card-body">
-                                <h6 class="card-title">{{ $part->name }}</h6>
-                                <p class="mb-1 text-muted">{{ $part->category->name ?? '-' }}</p>
-                                <p class="mb-1">Variant: {{ $part->variant->name ?? $part->vehicleModel->model_name ?? '-' }}</p>
-                                <p class="mb-1">Stock: {{ $part->stock ?? '-' }}</p>
-                                <p class="mb-1">Price: {{ $part->price ? number_format($part->price, 2) : '-' }}</p>
-                                <a href="#" class="btn btn-sm btn-outline-primary w-100 mt-2">View Details</a>
+                        @php $mainPhoto = $part->image ?? 'frontend/img/placeholder.png'; @endphp
+                        <div class="product-item bg-white">
+                            <div class="product-img position-relative">
+                                @if(!empty($part->is_new)) <div class="badge-custom badge-new">NEW</div> @endif
+                                <img loading="lazy" src="{{ asset('storage/'.$mainPhoto) }}" alt="{{ $part->name }}">
+                                <div class="product-action">
+                                    <a class="btn btn-light btn-square" href="#" title="Add to cart"><i class="fa fa-shopping-cart"></i></a>
+                                    <a class="btn btn-light btn-square" href="#" title="Wishlist"><i class="far fa-heart"></i></a>
+                                    <a class="btn btn-light btn-square" href="#" title="Compare"><i class="fa fa-sync-alt"></i></a>
+                                    <a class="btn btn-light btn-square" href="{{ route('parts.show', $part->id) }}" title="View"><i class="fa fa-search"></i></a>
+                                </div>
+                            </div>
+                            <div class="text-center py-3 px-2">
+                                <a class="h6 text-truncate d-block mb-1 text-dark" href="{{ route('parts.show', $part->id) }}">{{ Str::limit($part->name, 30) }}</a>
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <h5 class="mb-0">{{ number_format($part->price,2) }} {{ $currencySymbol ?? 'RWF' }}</h5>
+                                    @if(!empty($part->old_price)) <h6 class="price-old mb-0">{{ number_format($part->old_price,2) }}</h6> @endif
+                                </div>
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a href="{{ route('parts.show',$part->id) }}" class="btn btn-outline-primary btn-sm">View details</a>
+                                    <a href="#" class="btn btn-primary btn-sm">Add to cart</a>
+                                </div>
                             </div>
                         </div>
                     @endforeach
