@@ -42,11 +42,13 @@
         <div class="col-lg-5 col-md-6 mb-4">
             <div class="bg-light p-3 rounded shadow-sm"
                  x-data="{
-                    images: {{ Js::from(
-                        $part->photos->count()
-                            ? $part->photos->map(fn($p) => asset('storage/'.$p->photo_url))
-                            : [asset('frontend/img/parts.jpg')]
-                    ) }},
+                    images: [
+                        @forelse($part->photos as $photo)
+                            '{{ asset('storage/'.$photo->photo_url) }}',
+                        @empty
+                            '{{ asset('frontend/img/parts.jpg') }}',
+                        @endforelse
+                    ],
                     index: 0
                  }"
             >
