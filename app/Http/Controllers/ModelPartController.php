@@ -19,16 +19,15 @@ class ModelPartController extends Controller
     {
         $model = VehicleModel::with('brand', 'variants')->findOrFail($model_id);
 
-        // Get all variant IDs for this model
         $variantIds = $model->variants->pluck('id')->toArray();
 
-        // Fetch parts related to these variants through specifications
-        $query = Part::with(['category', 'specifications.variant.vehicleModel.brand'])
-            ->whereHas('specifications', function ($q) use ($variantIds) {
-                $q->whereIn('specifications.variant_id', $variantIds); // avoid ambiguity
+        // Fetch parts linked to these variants via part_fitments
+        $query = Part::with(['category', 'variants.vehicleModel.brand'])
+            ->whereHas('variants', function ($q) use ($variantIds) {
+                $q->whereIn('variant_id', $variantIds);
             });
 
-        // Apply filters from request
+        // Filters
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
@@ -36,8 +35,8 @@ class ModelPartController extends Controller
             $query->where('name', 'like', '%' . $request->part_name . '%');
         }
         if ($request->filled('variant_id')) {
-            $query->whereHas('specifications', function ($q) use ($request) {
-                $q->where('specifications.variant_id', $request->variant_id);
+            $query->whereHas('variants', function ($q) use ($request) {
+                $q->where('variant_id', $request->variant_id);
             });
         }
 
@@ -54,13 +53,13 @@ class ModelPartController extends Controller
     {
         $variant = Variant::with('vehicleModel.brand')->findOrFail($variant_id);
 
-        // Fetch parts for this variant through specifications
-        $query = Part::with(['category', 'specifications.variant.vehicleModel.brand'])
-            ->whereHas('specifications', function ($q) use ($variant_id) {
-                $q->where('specifications.variant_id', $variant_id); // specify table
+        // Fetch parts linked to this variant via part_fitments
+        $query = Part::with(['category', 'variants.vehicleModel.brand'])
+            ->whereHas('variants', function ($q) use ($variant_id) {
+                $q->where('variant_id', $variant_id);
             });
 
-        // Apply filters
+        // Filters
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
