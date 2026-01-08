@@ -20,6 +20,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\DonateController;
 use App\Http\Controllers\ExportsController;
 use App\Http\Controllers\VolunteerController;
+use App\Http\Controllers\BrandController;
 
 //Admin Controllers
 use App\Http\Controllers\Admin\AdminController;
@@ -104,6 +105,9 @@ Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
 Route::get('/model-specification/{id}', [SpecificationController::class, 'model_specification']);
 Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
 Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
+// Show all models for a brand
+Route::get('/brand/{brand}/models', [BrandController::class, 'showModels'])->name('brand.models');
+
 
 // Social login routes
 Route::get('/auth/redirect/{provider}', [SocialLoginController::class, 'redirect']);
