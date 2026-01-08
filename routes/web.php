@@ -109,6 +109,16 @@ Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 Route::get('/model/{brand}', [BrandController::class, 'show'])->name('brand.models');
 Route::get('/spare-parts/{variant}', [ProductController::class, 'product'])->name('spare-parts');
 
+/////////////////
+Route::get('/brand/{brand}/models', [BrandController::class, 'models'])->name('brand.models');
+
+// Model specification page
+Route::get('/model-specification/{model}', [SpecificationController::class, 'model_specification'])->name('model.specification');
+
+// Variant specification page
+Route::get('/variant-specification/{variant}', [SpecificationController::class, 'variant_specification'])->name('variant.specification');
+///////////////
+
 // Social login routes
 Route::get('/auth/redirect/{provider}', [SocialLoginController::class, 'redirect']);
 Route::get('/auth/callback/{provider}', [SocialLoginController::class, 'callback']);

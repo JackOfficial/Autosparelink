@@ -2,19 +2,10 @@
 
 @section('style')
 <style>
-.table-hover tbody tr:hover {
-    background-color: #f8f9fa;
-}
-.info-icon {
-    cursor: pointer;
-}
-.options-tooltip {
-    font-size: 0.85rem;
-    color: #555;
-}
-.collapse-row {
-    transition: all 0.3s ease;
-}
+.table-hover tbody tr:hover { background-color: #f8f9fa; }
+.info-icon { cursor: pointer; }
+.options-tooltip { font-size: 0.85rem; color: #555; }
+.collapse-row { transition: all 0.3s ease; }
 </style>
 @endsection
 
@@ -38,43 +29,11 @@
     <div class="bg-white p-4 shadow-sm rounded mb-3">
         <h4 class="text-uppercase mb-1" style="font-weight: 600;">
             @if($model->brand->brand_logo)
-                <img src="{{ asset('storage/' . $model->brand->brand_logo) }}"
-                     style="width: 50px; height:auto;" />
+                <img src="{{ asset('storage/' . $model->brand->brand_logo) }}" style="width: 50px; height:auto;" />
             @endif
             {{ $model->brand->brand_name }} – {{ $model->model_name }}
         </h4>
         <small class="text-muted">Click the <i class="fas fa-info-circle"></i> icon for full variant details.</small>
-    </div>
-</div>
-
-<!-- Filters -->
-<div class="container-fluid px-xl-5 mb-3">
-    <div class="card">
-        <div class="card-header">Filters</div>
-        <div class="card-body">
-            <form method="GET" action="">
-                <div class="row">
-                    <div class="col-md-2 form-group">
-                        <input type="text" name="frame" class="form-control" placeholder="Frame" value="{{ request('frame') }}">
-                    </div>
-                    <div class="col-md-2 form-group">
-                        <input type="text" name="year" class="form-control" placeholder="Year" value="{{ request('year') }}">
-                    </div>
-                    <div class="col-md-2 form-group">
-                        <input type="text" name="body" class="form-control" placeholder="Body" value="{{ request('body') }}">
-                    </div>
-                    <div class="col-md-2 form-group">
-                        <input type="text" name="driver_position" class="form-control" placeholder="Driver's Position" value="{{ request('driver_position') }}">
-                    </div>
-                    <div class="col-md-2 form-group">
-                        <input type="text" name="engine" class="form-control" placeholder="Engine" value="{{ request('engine') }}">
-                    </div>
-                    <div class="col-md-2 form-group">
-                        <button class="btn btn-sm btn-primary w-100" type="submit">Filter</button>
-                    </div>
-                </div>
-            </form>
-        </div>
     </div>
 </div>
 
@@ -98,15 +57,14 @@
                         <td><a href="{{ route('spare-parts', $v->id) }}">{{ $v->name ?? 'N/A' }}</a></td>
                         <td>{{ $v->model_code ?? '-' }}</td>
                         <td>{{ $v->chassis_code ?? '-' }}</td>
-                        <td>
-                            {{ $v->production_start ?? '-' }} - {{ $v->production_end ?? '-' }}
-                        </td>
+                        <td>{{ $v->production_start ?? '-' }} - {{ $v->production_end ?? '-' }}</td>
                         <td>
                             <a class="info-icon" data-toggle="collapse" href="#variant-{{ $v->id }}" role="button" aria-expanded="false" aria-controls="variant-{{ $v->id }}">
                                 <i class="fas fa-info-circle"></i>
                             </a>
                         </td>
                     </tr>
+
                     <!-- Collapsible Row for Detailed Specs -->
                     <tr class="collapse collapse-row" id="variant-{{ $v->id }}">
                         <td colspan="5">
@@ -133,6 +91,7 @@
                             </div>
                         </td>
                     </tr>
+
                     @empty
                     <tr>
                         <td colspan="5" class="text-center text-muted">No variants found for this model.</td>

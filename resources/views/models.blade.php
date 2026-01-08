@@ -137,7 +137,7 @@ body { background: #f5f7fa !important; }
                         <div class="d-flex align-items-center">
                             <i class="fas fa-car-side text-primary me-2"></i>
                             <h6 class="mb-0">
-                                <a href="/model-specification/{{ $model->id }}">
+                                <a href="{{ route('model.specification', $model->id) }}">
                                     {{ $model->model_name }}
                                 </a>
                             </h6>
@@ -158,7 +158,7 @@ body { background: #f5f7fa !important; }
                     <div class="collapse mt-3" id="variants{{ $model->id }}">
                         <div class="list-group list-group-flush">
                             @foreach($model->variants as $variant)
-                            <a href="/variant-specification/{{ $variant->id }}" class="list-group-item bg-transparent border-0 variant-item">
+                            <a href="{{ route('variant.specification', $variant->id) }}" class="list-group-item bg-transparent border-0 variant-item">
                                 <span>
                                     <i class="fas fa-circle"></i>
                                     {{ $variant->name ?? $variant->body_type->name ?? 'Variant' }}

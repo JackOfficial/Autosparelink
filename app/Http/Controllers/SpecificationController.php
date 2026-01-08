@@ -37,7 +37,22 @@ public function model_specification($model_id)
      $model = VehicleModel::with([
         'brand',                       // brand of the model
         'variants',
-        'variants.specifications.engineType',
+        'specifications.engineType',
+        'specifications.transmissionType',
+        'specifications.driveType',
+        'specifications.bodyType',
+    ])->findOrFail($model_id);
+
+    return view('specification', compact('model'));
+}
+
+public function variant_specification($model_id)
+{
+    // Fetch the model manually
+     $variant = Variant::with([
+        'vehicle_model',                       // brand of the model
+        'vehicle_model.brand',
+        'specifications.engineType',
         'variants.specifications.transmissionType',
         'variants.specifications.driveType',
         'variants.specifications.bodyType',
