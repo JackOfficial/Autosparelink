@@ -9,13 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('specifications', function (Blueprint $table) {
-            $table->dropForeign(['variant_id']);
-            $table->foreignId('variant_id')->nullable()->change();
-            $table->foreign('variant_id')->references('id')->on('variants')->cascadeOnDelete();
+            $table->unsignedBigInteger('variant_id')->nullable()->change();
+    $table->foreign('variant_id')->references('id')->on('variants')->cascadeOnDelete();
 
-            if (!Schema::hasColumn('specifications', 'vehicle_model_id')) {
-                $table->foreignId('vehicle_model_id')->nullable()->after('variant_id')->constrained()->cascadeOnDelete();
-            }
+    if (!Schema::hasColumn('specifications', 'vehicle_model_id')) {
+        $table->foreignId('vehicle_model_id')->nullable()->after('variant_id')->constrained()->cascadeOnDelete();
+    }
         });
     }
 
