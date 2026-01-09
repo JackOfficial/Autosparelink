@@ -49,7 +49,7 @@ use App\Http\Controllers\Admin\PartController;
 use App\Http\Controllers\Admin\PartFitmentController;
 use App\Http\Controllers\Admin\TransmissionTypeController;
 use App\Http\Controllers\Admin\VariantController;
-use App\Http\Controllers\Admin\SpecificationController;
+use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
 use App\Http\Controllers\ModelPartController;
 
 //Guest routes
@@ -154,7 +154,7 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('team', TeamController::class);
     Route::resource('careers', Careers::class);
     Route::resource('applications', ApplicationsController::class);
-    Route::resource('specifications', SpecificationController::class);
+    Route::resource('specifications', AdminSpecificationController::class);
     Route::post('applications/shortlist', [ApplicationsController::class, 'shortlist']);
     Route::post('/applications/export-all', [ApplicationsController::class, 'exportAll']);
     Route::get('/applications/export-selected', [ApplicationsController::class, 'exportSelected']);
