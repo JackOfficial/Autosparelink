@@ -12,7 +12,7 @@ use App\Models\TransmissionType;
 use App\Models\DriveType;
 use Illuminate\Http\Request;
 
-class VariantSpecificationController extends Controller
+class SpecificationController extends Controller
 {
     public function index(Request $request)
     {
