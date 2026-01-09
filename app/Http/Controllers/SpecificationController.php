@@ -36,17 +36,15 @@ public function model_specification(Request $request, $model_id)
     $model = VehicleModel::with('brand')->findOrFail($model_id);
 
     // Start query for specifications
-    $query = Specification::with([
-        'variant.vehicleModel.brand',
-        'specifications.bodyType',
-        'specifications.engineType',
-        'specifications.transmissionType',
-        'specifications.driveType'
-    ])->where(function ($q) use ($model_id) {
-        $q->whereHas('variant', function ($q2) use ($model_id) {
-            $q2->where('vehicle_model_id', $model_id);
-        })->orWhere('vehicle_model_id', $model_id);
-    });
+   $query = Specification::with([
+    'variant.vehicleModel.brand',
+    'bodyType',
+    'engineType',
+    'transmissionType',
+    'driveType'
+])->whereHas('variant', function ($q) use ($model_id) {
+    $q->where('vehicle_model_id', $model_id);
+});
 
     // Apply filters from request
     if ($request->filled('body')) {
