@@ -35,20 +35,20 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('part_fitments', function (Blueprint $table) {
-            if (Schema::hasColumn('part_fitments', 'start_year')) {
-                $table->dropColumn('start_year');
-            }
-            if (Schema::hasColumn('part_fitments', 'end_year')) {
-                $table->dropColumn('end_year');
-            }
+            // if (Schema::hasColumn('part_fitments', 'start_year')) {
+            //     $table->dropColumn('start_year');
+            // }
+            // if (Schema::hasColumn('part_fitments', 'end_year')) {
+            //     $table->dropColumn('end_year');
+            // }
 
-            // Optional: revert status column to integer
-            if (Schema::hasColumn('part_fitments', 'status')) {
-                $table->integer('status')->default(1)->change();
-            }
+            // // Optional: revert status column to integer
+            // if (Schema::hasColumn('part_fitments', 'status')) {
+            //     $table->integer('status')->default(1)->change();
+            // }
 
-            // Optional: drop unique index
-            $table->dropUnique(['part_id', 'variant_id']);
+            // // Optional: drop unique index
+            // $table->dropUnique(['part_id', 'variant_id']);
         });
     }
 };
