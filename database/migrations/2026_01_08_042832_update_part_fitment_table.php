@@ -24,11 +24,11 @@ return new class extends Migration
             }
 
             // Add unique constraint if it doesn't exist
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexes = $sm->listTableIndexes('part_fitments');
-            if (!array_key_exists('part_fitments_part_id_variant_id_unique', $indexes)) {
-                $table->unique(['part_id', 'variant_id']);
-            }
+            // $sm = Schema::getConnection()->getDoctrineSchemaManager();
+            // $indexes = $sm->listTableIndexes('part_fitments');
+            // if (!array_key_exists('part_fitments_part_id_variant_id_unique', $indexes)) {
+            //     $table->unique(['part_id', 'variant_id']);
+            // }
         });
     }
 
