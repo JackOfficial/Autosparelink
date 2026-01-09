@@ -33,7 +33,7 @@ class SpecificationController extends Controller
 
 public function model_specification(Request $request, $model_id)
 {
-    $model = VehicleModel::with('brand')->findOrFail($model_id);
+   $model = VehicleModel::with(['brand', 'variants'])->findOrFail($model_id);
 
     // Start query for specifications
    $query = Specification::with([

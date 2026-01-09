@@ -46,6 +46,11 @@ body { background: #f5f7fa !important; }
     align-items: center;
     justify-content: space-between;
 }
+.model-name-disabled {
+    cursor: default;
+    opacity: 0.85;
+}
+
 .variant-item:hover { background: #f1f5ff; }
 .variant-badge { font-size: 10px; padding: 2px 5px; margin-left: 3px; border-radius: 4px; }
 
@@ -136,11 +141,20 @@ body { background: #f5f7fa !important; }
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
                             <i class="fas fa-car-side text-primary me-2"></i>
-                            <h6 class="mb-0">
-                                <a href="{{ route('model.specification', $model->id) }}">
-                                    {{ $model->model_name }}
-                                </a>
-                            </h6>
+                           <h6 class="mb-0">
+    @if($model->variants->count() > 0)
+        <!-- Model has variants: NOT clickable -->
+        <span class="fw-semibold text-dark model-name-disabled">
+            {{ $model->model_name }}
+        </span>
+    @else
+        <!-- Model has NO variants: clickable -->
+        <a href="{{ route('model.specification', $model->id) }}">
+            {{ $model->model_name }}
+        </a>
+    @endif
+</h6>
+
                         </div>
                         @if($model->variants->count() > 0)
                         <button class="toggle-btn" type="button" data-toggle="collapse" data-target="#variants{{ $model->id }}">
