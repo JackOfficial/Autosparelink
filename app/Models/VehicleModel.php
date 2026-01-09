@@ -41,4 +41,10 @@ public function specifications()
     {
         return $this->hasMany(Variant::class);
     }
+
+     public function spec()
+    {
+        return $this->hasMany(Specification::class)
+                    ->whereNull('variant_id'); // only specs directly for model
+    }
 }

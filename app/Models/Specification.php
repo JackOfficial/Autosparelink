@@ -37,6 +37,11 @@ class Specification extends Model
         return $this->belongsTo(Variant::class);
     }
 
+    public function vehicleModel()
+    {
+        return $this->belongsTo(VehicleModel::class);
+    }
+
     public function bodyType()
     {
         return $this->belongsTo(BodyType::class);
