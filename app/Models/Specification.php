@@ -10,6 +10,7 @@ class Specification extends Model
 
     protected $fillable = [
         'variant_id',
+        'model_id',
         'body_type_id',
         'engine_type_id',
         'transmission_type_id',

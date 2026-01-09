@@ -67,6 +67,25 @@
                             <input type="text" name="model_name" id="model_name" class="form-control" value="{{ old('model_name') }}" required>
                         </div>
 
+                        <!-- Has Variants -->
+<div class="form-group">
+    <label>Does this model have variants?</label>
+    <div class="custom-control custom-radio">
+        <input type="radio" id="has_variants_yes" name="has_variants" value="1"
+               class="custom-control-input"
+               {{ old('has_variants', 1) == 1 ? 'checked' : '' }}>
+        <label class="custom-control-label" for="has_variants_yes">Yes</label>
+    </div>
+
+    <div class="custom-control custom-radio">
+        <input type="radio" id="has_variants_no" name="has_variants" value="0"
+               class="custom-control-input"
+               {{ old('has_variants') == 0 ? 'checked' : '' }}>
+        <label class="custom-control-label" for="has_variants_no">No</label>
+    </div>
+</div>
+
+
                         <!-- Description -->
                         <div class="form-group">
                             <label for="description">Description</label>
