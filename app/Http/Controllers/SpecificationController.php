@@ -38,11 +38,10 @@ public function model_specification(Request $request, $model_id)
     // Start query for specifications
     $query = Specification::with([
         'variant.vehicleModel.brand',
-        'vehicle_model.brand',
-        'bodyType',
-        'engineType',
-        'transmissionType',
-        'driveType'
+        'specifications.bodyType',
+        'specifications.engineType',
+        'specifications.transmissionType',
+        'specifications.driveType'
     ])->where(function ($q) use ($model_id) {
         $q->whereHas('variant', function ($q2) use ($model_id) {
             $q2->where('vehicle_model_id', $model_id);
