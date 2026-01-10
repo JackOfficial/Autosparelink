@@ -160,7 +160,16 @@
     x-data="{ color: @entangle('spec.color').live }"
     class="input-group"
 >
-    <!-- TEXT INPUT (same as before) -->
+    <!-- Native color picker (VISIBLE but small) -->
+    <input
+        type="color"
+        x-model="color"
+        class="form-control form-control-color"
+        style="max-width: 50px"
+        title="Pick color"
+    >
+
+    <!-- Text input -->
     <input
         type="text"
         x-model="color"
@@ -168,21 +177,15 @@
         placeholder="Pick color (HEX)"
     >
 
-    <!-- COLOR PICKER BUTTON (replacement for plugin UI) -->
     <div class="input-group-append">
-        <label class="input-group-text mb-0" style="cursor:pointer">
-            <i class="fas fa-square" :style="{ color: color || '#000' }"></i>
-
-            <!-- HIDDEN native color input -->
-            <input
-                type="color"
-                x-model="color"
-                class="d-none"
-            >
-        </label>
+        <span
+            class="input-group-text"
+            :style="{ backgroundColor: color || '#ffffff' }"
+        >
+            <i class="fas fa-square"></i>
+        </span>
     </div>
 </div>
-
 
                                         </div>
                                     </div>
