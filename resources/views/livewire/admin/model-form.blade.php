@@ -1,42 +1,45 @@
 <div>
+    <section class="content-header mb-3">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <h1><i class="fas fa-car"></i> Add Vehicle Model</h1>
+            <small class="text-muted">Livewire v3 .live binding enabled</small>
+        </div>
+    </section>
 
     <section class="content">
         <div class="row">
-            <div class="col-md-10">
+            <div class="col-md-10 mx-auto">
                 <div class="card shadow-sm">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title"><i class="fas fa-car"></i> Model Information</h3>
+                        <h3 class="card-title"><i class="fas fa-info-circle"></i> Model Information</h3>
                     </div>
 
                     <div class="card-body">
-
                         <form wire:submit.prevent="save">
 
                             {{-- ================= VEHICLE MODEL ================= --}}
                             <fieldset class="border p-3 mb-4">
                                 <legend class="w-auto"><i class="fas fa-car-side"></i> Vehicle Model</legend>
-                               
+
+                                {{-- Brand + Model on same row --}}
                                 <div class="row">
                                     <div class="col-md-6">
-                                         {{-- Brand --}}
                                         <div class="form-group">
-                                    <label><i class="fas fa-industry"></i> Brand *</label>
-                                    <select wire:model.live="brand_id" class="form-control">
-                                        <option value="">Select Brand</option>
-                                        @foreach($brands as $brand)
-                                            <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                            <label><i class="fas fa-industry"></i> Brand *</label>
+                                            <select wire:model.live="brand_id" class="form-control">
+                                                <option value="">Select Brand</option>
+                                                @foreach($brands as $brand)
+                                                    <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    {{-- Model Name --}}
-                                <div class="form-group">
-                                    <label><i class="fas fa-key"></i> Model Name *</label>
-                                    <input type="text" wire:model.live="model_name" class="form-control" placeholder="Enter model name">
-                                </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-key"></i> Model Name *</label>
+                                            <input type="text" wire:model.live="model_name" class="form-control" placeholder="Enter model name">
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {{-- Has Variants --}}
@@ -174,7 +177,6 @@
                             </div>
 
                         </form>
-
                     </div>
                 </div>
             </div>
