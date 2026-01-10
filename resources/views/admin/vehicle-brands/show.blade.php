@@ -49,7 +49,7 @@
     {{-- ================= Vehicle Models Table ================= --}}
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Vehicle Models under {{ $brand->brand_name }}</h3>
+            <h3 class="card-title">{{ $brand->vehicleModels->count() }} Vehicle {{ $brand->vehicleModels->count() > 1 ? 'Models' : 'Model' }} under {{ $brand->brand_name }}</h3>
             <div class="card-tools">
                 <a href="{{ route('admin.vehicle-models.create') }}" class="btn btn-primary btn-sm">
                     <i class="fa fa-plus"></i> Add Model
