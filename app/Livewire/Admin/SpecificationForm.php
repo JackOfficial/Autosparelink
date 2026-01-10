@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
+use App\Models\Brand;
 use App\Models\Variant;
 use App\Models\VehicleModel;
 use App\Models\BodyType;
@@ -15,8 +16,9 @@ use Illuminate\Validation\ValidationException;
 class SpecificationForm extends Component
 {
     // ================= FIELDS =================
-    public $variant_id;
+    public $brand_id;
     public $vehicle_model_id;
+    public $variant_id;
 
     public $body_type_id;
     public $engine_type_id;
@@ -30,55 +32,80 @@ class SpecificationForm extends Component
     public $doors;
     public $steering_position;
     public $color;
+    public $production_start;
+    public $production_end;
 
     // ================= INIT =================
-    public $variants;         // All variants
-    public $filteredVariants; // Variants for selected model
-    public $vehicleModels;
+    public $brands;
+    public $vehicleModels;      // Filtered by brand
+    public $variants;           // All variants
+    public $filteredVariants;   // Filtered by selected model
     public $bodyTypes;
     public $engineTypes;
     public $transmissionTypes;
     public $driveTypes;
 
-    public $hideVariantSelect = false;
+    public $hideBrandModel = false; // true if redirected with preselected model
 
     public function mount($vehicle_model_id = null)
     {
+        $this->brands = Brand::orderBy('brand_name')->get();
         $this->variants = Variant::with('vehicleModel')->orderBy('name')->get();
-        $this->vehicleModels = VehicleModel::orderBy('model_name')->get();
+        $this->vehicleModels = collect();
+        $this->filteredVariants = collect();
+
         $this->bodyTypes = BodyType::orderBy('name')->get();
         $this->engineTypes = EngineType::orderBy('name')->get();
         $this->transmissionTypes = TransmissionType::orderBy('name')->get();
         $this->driveTypes = DriveType::orderBy('name')->get();
 
-        $this->filteredVariants = collect(); // initially empty
-
         if ($vehicle_model_id) {
             $this->vehicle_model_id = $vehicle_model_id;
-            $this->hideVariantSelect = true; // No variant selection allowed
+            $model = VehicleModel::find($vehicle_model_id);
+            if ($model) {
+                $this->brand_id = $model->brand_id;
+            }
+            $this->hideBrandModel = true; // skip brand/model dropdown
+            $this->updateVariants(); // prefilter variants for this model
         }
     }
 
-    // ================= DYNAMIC VARIANTS =================
-    public function updatedVehicleModelId($value)
+    // ================= DYNAMIC DROPDOWNS =================
+    public function updatedBrandId($value)
     {
         if ($value) {
-            // Filter variants that belong to this vehicle model
-            $this->filteredVariants = $this->variants->where('vehicle_model_id', $value);
+            $this->vehicleModels = VehicleModel::where('brand_id', $value)->orderBy('model_name')->get();
+        } else {
+            $this->vehicleModels = collect();
+        }
+
+        $this->vehicle_model_id = null;
+        $this->variant_id = null;
+        $this->filteredVariants = collect();
+    }
+
+    public function updatedVehicleModelId($value)
+    {
+        $this->updateVariants();
+        $this->variant_id = null;
+    }
+
+    private function updateVariants()
+    {
+        if ($this->vehicle_model_id) {
+            $this->filteredVariants = $this->variants->where('vehicle_model_id', $this->vehicle_model_id);
         } else {
             $this->filteredVariants = collect();
         }
-
-        // Reset variant selection
-        $this->variant_id = null;
     }
 
     // ================= VALIDATION =================
     protected function rules()
     {
         return [
-            'variant_id' => $this->hideVariantSelect ? 'nullable' : 'nullable|exists:variants,id',
+            'brand_id' => 'nullable|exists:brands,id',
             'vehicle_model_id' => 'nullable|exists:vehicle_models,id',
+            'variant_id' => 'nullable|exists:variants,id',
             'body_type_id' => 'required|exists:body_types,id',
             'engine_type_id' => 'required|exists:engine_types,id',
             'transmission_type_id' => 'required|exists:transmission_types,id',
@@ -91,6 +118,8 @@ class SpecificationForm extends Component
             'doors' => 'nullable|integer|min:1',
             'steering_position' => 'nullable|in:LEFT,RIGHT',
             'color' => 'nullable|string|max:20',
+            'production_start' => 'nullable|integer|min:1950|max:' . date('Y'),
+            'production_end' => 'nullable|integer|min:1950|max:' . (date('Y') + 2),
         ];
     }
 
@@ -99,8 +128,8 @@ class SpecificationForm extends Component
     {
         $this->validate();
 
-        // XOR enforcement only if variants are allowed
-        if (!$this->hideVariantSelect) {
+        // XOR logic for variant/model only if not preselected
+        if (!$this->hideBrandModel) {
             if (($this->variant_id && $this->vehicle_model_id) ||
                 (!$this->variant_id && !$this->vehicle_model_id)) {
                 throw ValidationException::withMessages([
@@ -124,6 +153,8 @@ class SpecificationForm extends Component
             'doors' => $this->doors,
             'steering_position' => $this->steering_position,
             'color' => $this->color,
+            'production_start' => $this->production_start,
+            'production_end' => $this->production_end,
         ]);
 
         session()->flash('success', 'Specification saved successfully.');
