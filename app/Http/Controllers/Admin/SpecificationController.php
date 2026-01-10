@@ -14,29 +14,29 @@ use Illuminate\Http\Request;
 
 class SpecificationController extends Controller
 {
-    public function index(Request $request)
-    {
-        $query = Specification::with([
-            'variant.vehicleModel.brand',
-            'vehicleModel',
-            'bodyType',
-            'engineType',
-            'transmissionType',
-            'driveType'
-        ]);
+   public function index(Request $request)
+{
+    $query = Specification::with([
+        'variant.vehicleModel.brand', // for variants
+        'vehicleModel.brand',         // for specs without variants
+        'bodyType',
+        'engineType',
+        'transmissionType',
+        'driveType'
+    ]);
 
-        if ($request->filled('variant_id')) {
-            $query->where('variant_id', $request->variant_id);
-        }
-
-        if ($request->filled('vehicle_model_id')) {
-            $query->where('vehicle_model_id', $request->vehicle_model_id);
-        }
-
-        $specifications = $query->latest()->get();
-
-        return view('admin.specifications.index', compact('specifications'));
+    if ($request->filled('variant_id')) {
+        $query->where('variant_id', $request->variant_id);
     }
+
+    if ($request->filled('vehicle_model_id')) {
+        $query->where('vehicle_model_id', $request->vehicle_model_id);
+    }
+
+    $specifications = $query->latest()->get();
+
+    return view('admin.specifications.index', compact('specifications'));
+}
 
     public function create()
     {
