@@ -157,12 +157,12 @@
                                         </div>
                                         <div class="col-md-4">
                                             <label><i class="fas fa-palette"></i> Color</label>
-                                              <div class="input-group my-colorpicker2">
-            <input type="text" wire:model.live="spec.color" class="form-control" placeholder="Pick color (HEX)">
-            <div class="input-group-append">
-                <span class="input-group-text"><i class="fas fa-square"></i></span>
-            </div>
-        </div>
+                                            <div x-data="{ color: @entangle('spec.color').live }" class="input-group">
+    <input type="text" x-model="color" class="form-control" placeholder="Pick color (HEX)">
+    <div class="input-group-append">
+        <span class="input-group-text" :style="{ backgroundColor: color }"><i class="fas fa-square"></i></span>
+    </div>
+</div>
         <small class="text-muted">Example: Black, Pearl White, Metallic Blue</small>
                                         </div>
                                     </div>
