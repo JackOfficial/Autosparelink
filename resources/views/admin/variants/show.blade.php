@@ -34,18 +34,22 @@
                     <img src="{{ asset('images/placeholder.png') }}" alt="Placeholder" class="img-thumbnail" style="width:180px; height:auto; object-fit:contain;">
                 @endif
             </div>
-            <div>
-                <p><strong>Brand:</strong> {{ $variant->vehicleModel->brand->brand_name ?? '-' }}</p>
+            <div class="row">
+                <div class="col-md-6">
+ <p><strong>Brand:</strong> {{ $variant->vehicleModel->brand->brand_name ?? '-' }}</p>
                 <p><strong>Model:</strong> {{ $variant->vehicleModel->model_name ?? '-' }}</p>
                 <p><strong>Variant Name:</strong> {{ $variant->name ?? '-' }}</p>
                 <p><strong>Chassis Code:</strong> {{ $variant->chassis_code ?? '-' }}</p>
-                <p><strong>Model Code:</strong> {{ $variant->model_code ?? '-' }}</p>
+                </div>
+               <div class="col-md-6">
+<p><strong>Model Code:</strong> {{ $variant->model_code ?? '-' }}</p>
                 <p><strong>Trim Level:</strong> {{ $variant->trim_level ?? '-' }}</p>
                 <p><strong>Status:</strong>
                     <span class="badge {{ $variant->status ? 'bg-success' : 'bg-secondary' }}">
                         {{ $variant->status ? 'Active' : 'Inactive' }}
                     </span>
                 </p>
+               </div>
             </div>
         </div>
     </div>
