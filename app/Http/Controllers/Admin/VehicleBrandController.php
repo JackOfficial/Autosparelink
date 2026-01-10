@@ -65,8 +65,9 @@ public function store(Request $request)
 public function show(string $id)
 {
     // Find the brand or fail
-    $brand = Brand::with('vehicleModels')->findOrFail($id);
-
+    $brand = Brand::with(['vehicleModels', 'vehicleModels.brand', 'vehicleModels.variants'])
+              ->withCount('vehicleModels')
+              ->findOrFail($id);
     // Pass to the view
     return view('admin.vehicle-brands.show', compact('brand'));
 }
