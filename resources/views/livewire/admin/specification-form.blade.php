@@ -12,34 +12,33 @@
             <fieldset class="border p-3 mb-4">
                 <legend class="w-auto">Variant or Vehicle Model <span class="text-danger">*</span></legend>
                 <div class="row">
-                    {{-- Variant --}}
-                    <div class="col-md-6" @if($vehicle_model_id && !$variant_id) style="display:none;" @endif>
-                        <label>Variant</label>
-                        <select wire:model="variant_id" class="form-control">
-                            <option value="">Select Variant (optional)</option>
-                            @foreach($variants as $variant)
-                                <option value="{{ $variant->id }}">
-                                    {{ $variant->name ?? 'Unnamed Variant' }} — {{ $variant->vehicleModel->model_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('variant_id') <span class="text-danger">{{ $message }}</span> @enderror
-                    </div>
-
                     {{-- Vehicle Model --}}
                     <div class="col-md-6">
                         <label>Vehicle Model</label>
                         <select wire:model="vehicle_model_id" class="form-control">
-                            <option value="">Select Vehicle Model (optional)</option>
+                            <option value="">Select Vehicle Model</option>
                             @foreach($vehicleModels as $model)
-                                <option value="{{ $model->id }}" 
-                                    @if($vehicle_model_id == $model->id) selected @endif>
-                                    {{ $model->model_name }} — {{ $model->brand->brand_name ?? 'No Brand' }}
-                                </option>
+                                <option value="{{ $model->id }}">{{ $model->model_name }} — {{ $model->brand->brand_name ?? 'No Brand' }}</option>
                             @endforeach
                         </select>
                         @error('vehicle_model_id') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
+
+                    {{-- Variant --}}
+                    @if(!$hideVariantSelect)
+    <div class="col-md-6">
+        <label>Variant</label>
+        <select wire:model="variant_id" class="form-control">
+            <option value="">Select Variant (optional)</option>
+            @foreach($filteredVariants as $variant)
+                <option value="{{ $variant->id }}">
+                    {{ $variant->name ?? 'Unnamed Variant' }}
+                </option>
+            @endforeach
+        </select>
+        @error('variant_id') <span class="text-danger">{{ $message }}</span> @enderror
+    </div>
+@endif
                 </div>
                 <small class="text-muted">You must select either a Variant or a Vehicle Model.</small>
             </fieldset>

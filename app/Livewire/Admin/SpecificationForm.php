@@ -32,14 +32,14 @@ class SpecificationForm extends Component
     public $color;
 
     // ================= INIT =================
-    public $variants;
+    public $variants;         // All variants
+    public $filteredVariants; // Variants for selected model
     public $vehicleModels;
     public $bodyTypes;
     public $engineTypes;
     public $transmissionTypes;
     public $driveTypes;
 
-    // Hide variant select if model is passed
     public $hideVariantSelect = false;
 
     public function mount($vehicle_model_id = null)
@@ -51,10 +51,26 @@ class SpecificationForm extends Component
         $this->transmissionTypes = TransmissionType::orderBy('name')->get();
         $this->driveTypes = DriveType::orderBy('name')->get();
 
+        $this->filteredVariants = collect(); // initially empty
+
         if ($vehicle_model_id) {
             $this->vehicle_model_id = $vehicle_model_id;
-            $this->hideVariantSelect = true; // No variants allowed
+            $this->hideVariantSelect = true; // No variant selection allowed
         }
+    }
+
+    // ================= DYNAMIC VARIANTS =================
+    public function updatedVehicleModelId($value)
+    {
+        if ($value) {
+            // Filter variants that belong to this vehicle model
+            $this->filteredVariants = $this->variants->where('vehicle_model_id', $value);
+        } else {
+            $this->filteredVariants = collect();
+        }
+
+        // Reset variant selection
+        $this->variant_id = null;
     }
 
     // ================= VALIDATION =================
