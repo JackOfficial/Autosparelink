@@ -62,33 +62,34 @@ class ModelForm extends Component
      // ================= SAVE =================
     public function save()
     {
-        $this->validate();
+        dd($this->name);
+        // $this->validate();
 
-        DB::transaction(function () {
+        // DB::transaction(function () {
 
-            // 1️⃣ Create Vehicle Model
-            $model = VehicleModel::create([
-                'brand_id' => $this->brand_id,
-                'model_name' => $this->model_name,
-                'description' => $this->description,
-                'has_variants' => $this->has_variants,
-                'production_start_year' => $this->production_start_year,
-                'production_end_year' => $this->production_end_year,
-                'status' => $this->status,
-            ]);
+        //     // 1️⃣ Create Vehicle Model
+        //     $model = VehicleModel::create([
+        //         'brand_id' => $this->brand_id,
+        //         'model_name' => $this->model_name,
+        //         'description' => $this->description,
+        //         'has_variants' => $this->has_variants,
+        //         'production_start_year' => $this->production_start_year,
+        //         'production_end_year' => $this->production_end_year,
+        //         'status' => $this->status,
+        //     ]);
 
-            // 2️⃣ Create Specification ONLY if NO variants
-            if ($this->has_variants == 0) {
-                Specification::create(array_merge(
-                    $this->spec,
-                    ['vehicle_model_id' => $model->id]
-                ));
-            }
-        });
+        //     // 2️⃣ Create Specification ONLY if NO variants
+        //     if ($this->has_variants == 0) {
+        //         Specification::create(array_merge(
+        //             $this->spec,
+        //             ['vehicle_model_id' => $model->id]
+        //         ));
+        //     }
+        // });
 
-        session()->flash('success', 'Vehicle model created successfully.');
+        // session()->flash('success', 'Vehicle model created successfully.');
 
-        return redirect()->route('admin.vehicle-models.index');
+        // return redirect()->route('admin.vehicle-models.index');
     }
 
     public function render()
