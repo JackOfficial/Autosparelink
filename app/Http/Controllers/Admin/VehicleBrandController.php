@@ -58,12 +58,18 @@ public function store(Request $request)
 }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+ * Display the specified brand along with its vehicle models.
+ */
+
+public function show(string $id)
+{
+    // Find the brand or fail
+    $brand = Brand::with('vehicleModels')->findOrFail($id);
+
+    // Pass to the view
+    return view('admin.vehicle-brands.show', compact('brand'));
+}
+
 
     /**
      * Show the form for editing the specified resource.
