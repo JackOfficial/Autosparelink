@@ -14,35 +14,43 @@
 
          {{-- ================= Show Redirected Model/Variant ================= --}}
         @if($vehicle_model_id || $variant_id)
-            @php
-                $displayModel = $variant_id ? $filteredVariants->firstWhere('id', $variant_id)->vehicleModel : $vehicleModels->firstWhere('id', $vehicle_model_id);
-                $displayVariant = $variant_id ? $filteredVariants->firstWhere('id', $variant_id) : null;
-            @endphp
+    @php
+        $displayVariant = $variant_id ? \App\Models\Variant::with('vehicleModel.brand', 'photos')->find($variant_id) : null;
 
-            <div class="card mb-4">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        @if($displayVariant && $displayVariant->photos->count())
-                            <img src="{{ asset('storage/' . $displayVariant->photos->first()->file_path) }}" class="img-fluid rounded-start" alt="Variant Photo">
-                        @elseif($displayModel && $displayModel->photo)
-                            <img src="{{ asset('storage/' . $displayModel->photo) }}" class="img-fluid rounded-start" alt="Model Photo">
-                        @else
-                            <img src="{{ asset('images/placeholder.png') }}" class="img-fluid rounded-start" alt="Placeholder">
-                        @endif
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ $displayVariant->name ?? $displayModel->model_name ?? 'N/A' }}</h5>
-                            <p class="card-text">
-                                Brand: {{ $displayModel->brand->brand_name ?? 'N/A' }} <br>
-                                Model: {{ $displayModel->model_name ?? 'N/A' }} <br>
-                                Variant: {{ $displayVariant->name ?? 'N/A' }}
-                            </p>
-                        </div>
-                    </div>
+        if ($variant_id) {
+            $displayModel = $displayVariant->vehicleModel ?? null;
+        } elseif ($vehicle_model_id) {
+            $displayModel = \App\Models\VehicleModel::with('brand')->find($vehicle_model_id);
+        } else {
+            $displayModel = null;
+        }
+    @endphp
+
+    <div class="card mb-4">
+        <div class="row g-0">
+            <div class="col-md-4">
+                @if($displayVariant && $displayVariant->photos->count())
+                    <img src="{{ asset('storage/' . $displayVariant->photos->first()->file_path) }}" class="img-fluid rounded-start" alt="Variant Photo">
+                @elseif($displayModel && $displayModel->photo)
+                    <img src="{{ asset('storage/' . $displayModel->photo) }}" class="img-fluid rounded-start" alt="Model Photo">
+                @else
+                    <img src="{{ asset('images/placeholder.png') }}" class="img-fluid rounded-start" alt="Placeholder">
+                @endif
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">{{ $displayVariant->name ?? $displayModel->model_name ?? 'N/A' }}</h5>
+                    <p class="card-text">
+                        Brand: {{ $displayModel->brand->brand_name ?? 'N/A' }} <br>
+                        Model: {{ $displayModel->model_name ?? 'N/A' }} <br>
+                        Variant: {{ $displayVariant->name ?? 'N/A' }}
+                    </p>
                 </div>
             </div>
-        @endif
+        </div>
+    </div>
+@endif
+
 
         <form wire:submit.prevent="save">
 
