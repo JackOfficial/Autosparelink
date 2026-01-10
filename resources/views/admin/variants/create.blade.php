@@ -28,10 +28,10 @@
 
     <div class="row">
         <div class="col-md-10">
-           <livewire:admin.variant-form />
+           <livewire:admin.variant-form :vehicle_model_id="request()->query('vehicle_model_id')"/>
         </div>
     </div>
-
+  
 </div>
 </section>
 
