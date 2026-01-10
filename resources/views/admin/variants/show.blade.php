@@ -111,9 +111,6 @@
                                 </span>
                             </td>
                             <td class="d-flex justify-content-center">
-                                <a href="{{ route('admin.specifications.show', $spec->id) }}" class="btn btn-info btn-sm me-1">
-                                    <i class="fa fa-eye"></i>
-                                </a>
                                 <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-warning btn-sm me-1">
                                     <i class="fa fa-edit"></i>
                                 </a>
