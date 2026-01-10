@@ -2,14 +2,6 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Brand;
-use App\Models\VehicleModel;
-use App\Models\Specification;
-use App\Models\BodyType;
-use App\Models\EngineType;
-use App\Models\TransmissionType;
-use App\Models\DriveType;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class ModelForm extends Component
