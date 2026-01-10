@@ -27,16 +27,10 @@
 </section>
 
 @push('scripts')
-{{-- <script>
-$(function () {
-    $('.my-colorpicker2').colorpicker()
-})
-</script> --}}
-
 <script>
 $(function () {
     $('#colorInput').colorpicker().on('colorpickerChange', function(e) {
-        @this.set('spec.color', e.color.toString());
+        @this.set('spec.color', e.color.toString()); // manually update Livewire
     });
 });
 </script>
