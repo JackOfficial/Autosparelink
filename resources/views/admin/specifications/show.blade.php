@@ -84,7 +84,7 @@
         @endphp
 
         @foreach($facts as $label => $value)
-            <div class="col-md-3 col-sm-6 mb-3">
+            <div class="col-md-2 col-sm-6 mb-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body text-center">
                         <small class="text-muted d-block mb-1">{{ $label }}</small>
