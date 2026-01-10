@@ -6,7 +6,7 @@
     <form wire:submit.prevent="save">
         <div class="card-body">
 
-            {{-- SUCCESS --}}
+            {{-- SUCCESS MESSAGE --}}
             @if (session()->has('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
@@ -16,20 +16,24 @@
                 <legend class="w-auto px-2">Vehicle Selection</legend>
 
                 <div class="row">
+                    {{-- Brand --}}
                     <div class="col-md-4">
-                        <label>Brand *</label>
-                        <select wire:model.live="brand_id" class="form-control">
+                        <label>Brand <span class="text-danger">*</span></label>
+                        <select wire:model="brand_id" class="form-control">
                             <option value="">Select Brand</option>
                             @foreach($brands as $brand)
                                 <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
                             @endforeach
                         </select>
-                        @error('brand_id') <small class="text-danger">{{ $message }}</small> @enderror
+                        @error('brand_id')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
                     </div>
 
+                    {{-- Vehicle Model --}}
                     <div class="col-md-4">
-                        <label>Vehicle Model *</label>
-                        <select wire:model.live="vehicle_model_id"
+                        <label>Vehicle Model <span class="text-danger">*</span></label>
+                        <select wire:model="vehicle_model_id"
                                 class="form-control"
                                 @disabled(empty($vehicleModels))>
                             <option value="">Select Model</option>
@@ -37,20 +41,24 @@
                                 <option value="{{ $model->id }}">{{ $model->model_name }}</option>
                             @endforeach
                         </select>
-                        @error('vehicle_model_id') <small class="text-danger">{{ $message }}</small> @enderror
+                        @error('vehicle_model_id')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
                     </div>
                 </div>
             </fieldset>
 
-            {{-- GENERAL --}}
+            {{-- GENERAL INFORMATION --}}
             <fieldset class="border p-3 mb-4">
                 <legend class="w-auto px-2">General Information</legend>
 
                 <div class="row">
                     <div class="col-md-6">
-                        <label>Variant Name *</label>
+                        <label>Variant Name <span class="text-danger">*</span></label>
                         <input type="text" wire:model="name" class="form-control">
-                        @error('name') <small class="text-danger">{{ $message }}</small> @enderror
+                        @error('name')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -64,15 +72,17 @@
             <fieldset class="border p-3 mb-4">
                 <legend class="w-auto px-2">Photos</legend>
 
-                <input type="file" wire:model="photos" multiple class="form-control">
+                <input type="file" wire:model="photos" multiple class="form-control" accept="image/*">
 
-                <div class="mt-2 d-flex flex-wrap gap-2">
-                    @foreach($photos as $photo)
-                        <img src="{{ $photo->temporaryUrl() }}"
-                             class="img-thumbnail"
-                             style="max-width:120px;">
-                    @endforeach
-                </div>
+                @if(!empty($photos))
+                    <div class="mt-2 d-flex flex-wrap gap-2">
+                        @foreach($photos as $photo)
+                            <img src="{{ $photo->temporaryUrl() }}"
+                                 class="img-thumbnail"
+                                 style="max-width:120px;">
+                        @endforeach
+                    </div>
+                @endif
             </fieldset>
 
             {{-- SPECIFICATIONS QUESTION --}}
@@ -80,9 +90,8 @@
                 <legend class="w-auto px-2">Specifications</legend>
 
                 <label>Does this variant have specifications?</label>
-
-                <div class="mt-2">
-                    <label class="mr-3">
+                <div class="mt-2 d-flex gap-3">
+                    <label>
                         <input type="radio" wire:model="has_specifications" value="1">
                         Yes
                     </label>
@@ -92,7 +101,6 @@
                         No
                     </label>
                 </div>
-
                 @error('has_specifications')
                     <small class="text-danger">{{ $message }}</small>
                 @enderror
@@ -100,14 +108,12 @@
 
         </div>
 
-        <div class="card-footer">
+        {{-- FOOTER --}}
+        <div class="card-footer d-flex gap-2">
             <button class="btn btn-primary">
                 <i class="fa fa-save"></i> Save Variant
             </button>
-
-            <a href="{{ route('admin.variants.index') }}" class="btn btn-secondary">
-                Cancel
-            </a>
+            <a href="{{ route('admin.variants.index') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>
