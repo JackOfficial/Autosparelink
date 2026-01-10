@@ -48,47 +48,48 @@ class SpecificationForm extends Component
     public $hideBrandModel = false; // true if redirected with preselected model
 
     public function mount($vehicle_model_id = null)
-    {
-        $this->brands = Brand::orderBy('brand_name')->get();
-        $this->variants = Variant::with('vehicleModel')->orderBy('name')->get();
-        $this->vehicleModels = collect();
-        $this->filteredVariants = collect();
+{
+    $this->brands = Brand::orderBy('brand_name')->get();
+    $this->variants = Variant::with('vehicleModel')->orderBy('name')->get();
+    $this->vehicleModels = collect();
+    $this->filteredVariants = collect();
 
-        $this->bodyTypes = BodyType::orderBy('name')->get();
-        $this->engineTypes = EngineType::orderBy('name')->get();
-        $this->transmissionTypes = TransmissionType::orderBy('name')->get();
-        $this->driveTypes = DriveType::orderBy('name')->get();
+    // Core options
+    $this->bodyTypes = BodyType::orderBy('name')->get();
+    $this->engineTypes = EngineType::orderBy('name')->get();
+    $this->transmissionTypes = TransmissionType::orderBy('name')->get();
+    $this->driveTypes = DriveType::orderBy('name')->get();
 
-        if ($vehicle_model_id) {
-            $this->vehicle_model_id = $vehicle_model_id;
-            $model = VehicleModel::find($vehicle_model_id);
-            if ($model) {
-                $this->brand_id = $model->brand_id;
-            }
-            $this->hideBrandModel = true; // skip brand/model dropdown
-            $this->updateVariants(); // prefilter variants for this model
+    if ($vehicle_model_id) {
+        $model = VehicleModel::with('variants')->find($vehicle_model_id);
+        if ($model) {
+            $this->vehicle_model_id = $model->id;
+            $this->brand_id = $model->brand_id;
+            $this->vehicleModels = collect([$model]); // only show this model
+            $this->filteredVariants = $model->variants; // prefill variants
         }
+        $this->hideBrandModel = true; // hide dropdowns for redirect
     }
+}
 
-    // ================= DYNAMIC DROPDOWNS =================
-    public function updatedBrandId($value)
-    {
-        if ($value) {
-            $this->vehicleModels = VehicleModel::where('brand_id', $value)->orderBy('model_name')->get();
-        } else {
-            $this->vehicleModels = collect();
-        }
+public function updatedBrandId($brand_id)
+{
+    $this->vehicle_model_id = null;
+    $this->variant_id = null;
 
-        $this->vehicle_model_id = null;
-        $this->variant_id = null;
-        $this->filteredVariants = collect();
-    }
+    $this->vehicleModels = $brand_id
+        ? VehicleModel::where('brand_id', $brand_id)->orderBy('model_name')->get()
+        : collect();
 
-    public function updatedVehicleModelId($value)
-    {
-        $this->updateVariants();
-        $this->variant_id = null;
-    }
+    $this->filteredVariants = collect(); // reset variants
+}
+
+public function updatedVehicleModelId($vehicle_model_id)
+{
+    $this->variant_id = null;
+    $model = VehicleModel::with('variants')->find($vehicle_model_id);
+    $this->filteredVariants = $model ? $model->variants : collect();
+}
 
     private function updateVariants()
     {
