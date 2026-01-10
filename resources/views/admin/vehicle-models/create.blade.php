@@ -27,10 +27,18 @@
 </section>
 
 @push('scripts')
-<script>
+{{-- <script>
 $(function () {
     $('.my-colorpicker2').colorpicker()
 })
+</script> --}}
+
+<script>
+$(function () {
+    $('#colorInput').colorpicker().on('colorpickerChange', function(e) {
+        @this.set('spec.color', e.color.toString());
+    });
+});
 </script>
 @endpush
 
