@@ -37,36 +37,46 @@ class ModelForm extends Component
     }
 
     // ================= SAVE FUNCTION =================
-    public function save()
-    {
-        $this->validate();
+   public function save()
+{
+    $this->validate();
 
-        DB::transaction(function () {
+    DB::transaction(function () {
 
-            // 1️⃣ Create Vehicle Model
-            $model = VehicleModel::create([
-                'brand_id' => $this->brand_id,
-                'model_name' => $this->model_name,
-                'description' => $this->description,
-                'has_variants' => $this->has_variants,
-                'production_start_year' => $this->production_start_year,
-                'production_end_year' => $this->production_end_year,
-                'status' => $this->status,
+        // 1️⃣ Create Vehicle Model
+        $model = VehicleModel::create([
+            'brand_id' => $this->brand_id,
+            'model_name' => $this->model_name,
+            'description' => $this->description,
+            'has_variants' => $this->has_variants,
+            'production_start_year' => $this->production_start_year,
+            'production_end_year' => $this->production_end_year,
+            'status' => $this->status,
+        ]);
+
+        // 2️⃣ Save uploaded photos
+        foreach ($this->photos as $photo) {
+            $path = $photo->store('vehicle_models/' . $model->id, 'public');
+            $model->photos()->create([
+                'file_path' => $path,
+                'caption' => null,
             ]);
+        }
 
-            // 2️⃣ Save uploaded photos to polymorphic Photo table
-            foreach ($this->photos as $photo) {
-                $path = $photo->store('vehicle_models/' . $model->id, 'public');
-                $model->photos()->create([
-                    'file_path' => $path,
-                    'caption' => null,
-                ]);
-            }
-        });
+        // 3️⃣ Redirect based on variants
+     if ($this->has_variants == 0) {
+    session()->flash('success', 'Vehicle model created. Add specifications now.');
+    return redirect()->route('admin.specifications.create', [
+        'vehicle_model_id' => $model->id
+    ]);
+} else {
+    session()->flash('success', 'Vehicle model created successfully.');
+    return redirect()->route('admin.vehicle-models.index');
+}
 
-        session()->flash('success', 'Vehicle model created successfully.');
-        return redirect()->route('admin.vehicle-models.index');
-    }
+    });
+}
+
 
     // ================= RENDER =================
     public function render()
