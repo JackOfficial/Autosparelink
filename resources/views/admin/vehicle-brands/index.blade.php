@@ -95,7 +95,7 @@
                             <td class="d-flex">
 
                                 <a href="{{ route('admin.vehicle-brands.show', $brand->id) }}"
-                                   class="btn btn-xs btn-info">
+                                   class="btn btn-xs btn-info mr-2">
                                     <i class="fa fa-eye"></i>
                                 </a>
 
