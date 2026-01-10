@@ -46,7 +46,7 @@
     {{-- ================= Specifications Table ================= --}}
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">{{ $variant->specifications->count() }} Specifications</h3>
+            <h3 class="card-title">{{ $variant->specifications->count() }} Variant Specifications</h3>
             <div class="card-tools">
                 <a href="{{ route('admin.specifications.create', ['variant_id' => $variant->id]) }}" class="btn btn-primary btn-sm">
                     <i class="fa fa-plus"></i> Add Specification
