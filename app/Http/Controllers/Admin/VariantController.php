@@ -73,7 +73,7 @@ class VariantController extends Controller
 public function show($id)
 {
     // Load variant with its vehicle model, brand, and specifications
-    $variant = Variant::with([
+    $variant = Variant::withCount([
         'vehicleModel.brand',
         'specifications.engineType',
         'specifications.transmissionType',

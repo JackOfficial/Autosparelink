@@ -61,7 +61,12 @@ class ModelController extends Controller
 public function show(VehicleModel $vehicleModel)
 {
     // Load related brand and variants
-    $vehicleModel->load(['brand', 'variants']);
+     $vehicleModel->load([
+        'brand',
+        'variants' => function ($query) {
+            $query->withCount('specifications');
+        }
+    ]);
 
     return view('admin.vehicle-models.show', compact('vehicleModel'));
 }
