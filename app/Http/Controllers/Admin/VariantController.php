@@ -68,6 +68,24 @@ class VariantController extends Controller
     }
 
     /**
+ * Display the specified variant and its specifications
+ */
+public function show($id)
+{
+    // Load variant with its vehicle model, brand, and specifications
+    $variant = Variant::with([
+        'vehicleModel.brand',
+        'specifications.engineType',
+        'specifications.transmissionType',
+        'specifications.driveType',
+        'specifications.bodyType',
+    ])->findOrFail($id);
+
+    return view('admin.variants.show', compact('variant'));
+}
+
+
+    /**
      * Show edit form
      */
     public function edit(Variant $variant)
