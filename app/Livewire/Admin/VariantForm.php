@@ -80,16 +80,25 @@ class VariantForm extends Component
 
         // Upload multiple photos if any
         if (!empty($this->photos)) {
-            foreach ($this->photos as $photo) {
-                $variant->photos()->create([
-                    'file_path' => $photo->store('variants', 'public'),
-                ]);
-            }
+             foreach ($this->photos as $photo) {
+            $path = $photo->store('variants/' . $variant->id, 'public');
+            $variant->photos()->create([
+                'file_path' => $path,
+                'caption' => null,
+            ]);
+        }
         }
 
-        session()->flash('success', 'Variant created successfully.');
-
-        return redirect()->route('admin.variants.index');
+         // Redirect based on specifications
+        if ($this->has_specifications == 1) {
+            session()->flash('success', 'Variant created successfully. Add specifications now.');
+            return redirect()->route('admin.specifications.create', [
+                'variant_id' => $variant->id
+            ]);
+        } else {
+            session()->flash('success', 'Variant created successfully.');
+            return redirect()->route('admin.variants.index');
+        }
     }
 
     public function render()

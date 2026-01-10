@@ -46,8 +46,9 @@ class SpecificationForm extends Component
     public $driveTypes;
 
     public $hideBrandModel = false; // true if redirected with preselected model
+    public $hideVariant = false;    // true if redirected with preselected variant
 
-    public function mount($vehicle_model_id = null)
+    public function mount($vehicle_model_id = null, $variant_id = null)
     {
         $this->brands = Brand::orderBy('brand_name')->get();
         $this->variants = Variant::with('vehicleModel')->orderBy('name')->get();
@@ -59,25 +60,36 @@ class SpecificationForm extends Component
         $this->transmissionTypes = TransmissionType::orderBy('name')->get();
         $this->driveTypes = DriveType::orderBy('name')->get();
 
+        // ====== If redirected from Vehicle Model ======
         if ($vehicle_model_id) {
             $this->vehicle_model_id = $vehicle_model_id;
             $model = VehicleModel::find($vehicle_model_id);
             if ($model) {
                 $this->brand_id = $model->brand_id;
             }
-            $this->hideBrandModel = true; // skip brand/model dropdown
-            $this->updateVariants(); // prefilter variants for this model
+            $this->hideBrandModel = true;
+            $this->updateVariants();
+        }
+
+        // ====== If redirected from Variant ======
+        if ($variant_id) {
+            $variant = Variant::find($variant_id);
+            if ($variant) {
+                $this->variant_id = $variant->id;
+                $this->vehicle_model_id = $variant->vehicle_model_id;
+                $this->brand_id = $variant->vehicleModel->brand_id ?? null;
+            }
+            $this->hideBrandModel = true;
+            $this->hideVariant = true;
         }
     }
 
     // ================= DYNAMIC DROPDOWNS =================
     public function updatedBrandId($value)
     {
-        if ($value) {
-            $this->vehicleModels = VehicleModel::where('brand_id', $value)->orderBy('model_name')->get();
-        } else {
-            $this->vehicleModels = collect();
-        }
+        $this->vehicleModels = $value
+            ? VehicleModel::where('brand_id', $value)->orderBy('model_name')->get()
+            : collect();
 
         $this->vehicle_model_id = null;
         $this->variant_id = null;
@@ -92,11 +104,9 @@ class SpecificationForm extends Component
 
     private function updateVariants()
     {
-        if ($this->vehicle_model_id) {
-            $this->filteredVariants = $this->variants->where('vehicle_model_id', $this->vehicle_model_id);
-        } else {
-            $this->filteredVariants = collect();
-        }
+        $this->filteredVariants = $this->vehicle_model_id
+            ? $this->variants->where('vehicle_model_id', $this->vehicle_model_id)
+            : collect();
     }
 
     // ================= VALIDATION =================
@@ -128,12 +138,13 @@ class SpecificationForm extends Component
     {
         $this->validate();
 
-       if (!$this->vehicle_model_id && !$this->variant_id) {
-    throw ValidationException::withMessages([
-        'vehicle_model_id' => 'You must select at least a Vehicle Model or a Variant.',
-        'variant_id' => 'You must select at least a Vehicle Model or a Variant.',
-    ]);
-}
+        // At least one of vehicle_model_id or variant_id is required
+        if (!$this->vehicle_model_id && !$this->variant_id) {
+            throw ValidationException::withMessages([
+                'vehicle_model_id' => 'You must select at least a Vehicle Model or a Variant.',
+                'variant_id' => 'You must select at least a Vehicle Model or a Variant.',
+            ]);
+        }
 
         Specification::create([
             'variant_id' => $this->variant_id,

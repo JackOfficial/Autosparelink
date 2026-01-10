@@ -2,38 +2,39 @@
     <div class="card-header"><h3 class="card-title">Specification Details</h3></div>
     <div class="card-body">
 
+        {{-- SUCCESS MESSAGE --}}
         @if (session()->has('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
         <form wire:submit.prevent="save">
 
-            {{-- Brand → Model → Variant --}}
+            {{-- ================= Brand → Model → Variant ================= --}}
             @if(!$hideBrandModel)
             <fieldset class="border p-3 mb-4">
                 <legend class="w-auto">Vehicle Selection <span class="text-danger">*</span></legend>
                 <div class="row">
+
                     {{-- Brand --}}
                     <div class="col-md-4">
-    <label>Brand</label>
-    <select wire:model.live="brand_id" class="form-control" @if($vehicle_model_id) disabled @endif>
-        <option value="">Select Brand</option>
-        @foreach($brands as $brand)
-            <option value="{{ $brand->id }}"
-                @if($vehicle_model_id && $brand->id == optional($vehicleModels->firstWhere('id', $vehicle_model_id))->brand_id) selected @endif
-            >
-                {{ $brand->brand_name }}
-            </option>
-        @endforeach
-    </select>
-    @error('brand_id') <span class="text-danger">{{ $message }}</span> @enderror
-</div>
-
+                        <label>Brand</label>
+                        <select wire:model.live="brand_id" class="form-control" @disabled($vehicle_model_id || $hideBrandModel)>
+                            <option value="">Select Brand</option>
+                            @foreach($brands as $brand)
+                                <option value="{{ $brand->id }}" 
+                                    @if($vehicle_model_id && $brand->id == optional($vehicleModels->firstWhere('id', $vehicle_model_id))->brand_id) selected @endif
+                                >
+                                    {{ $brand->brand_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('brand_id') <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
 
                     {{-- Vehicle Model --}}
                     <div class="col-md-4">
                         <label>Vehicle Model</label>
-                        <select wire:model.live="vehicle_model_id" class="form-control" @if(!$vehicleModels->count()) disabled @endif>
+                        <select wire:model.live="vehicle_model_id" class="form-control" @disabled(!$vehicleModels->count() || $hideBrandModel)>
                             <option value="">Select Model</option>
                             @foreach($vehicleModels as $model)
                                 <option value="{{ $model->id }}">{{ $model->model_name }}</option>
@@ -43,9 +44,10 @@
                     </div>
 
                     {{-- Variant --}}
+                    @if(!$hideVariant)
                     <div class="col-md-4">
                         <label>Variant</label>
-                        <select wire:model.live="variant_id" class="form-control" @if(!$filteredVariants->count()) disabled @endif>
+                        <select wire:model.live="variant_id" class="form-control" @disabled(!$filteredVariants->count())>
                             <option value="">Select Variant (optional)</option>
                             @foreach($filteredVariants as $variant)
                                 <option value="{{ $variant->id }}">{{ $variant->name ?? 'Unnamed Variant' }}</option>
@@ -53,12 +55,13 @@
                         </select>
                         @error('variant_id') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
+                    @endif
                 </div>
-                <small class="text-muted">Select brand first, then model, then variant. Variant is optional.</small>
+                <small class="text-muted">Select brand first, then model. Variant is optional.</small>
             </fieldset>
             @endif
 
-            {{-- Core Specs --}}
+            {{-- ================= Core Specs ================= --}}
             <fieldset class="border p-3 mb-4">
                 <legend class="w-auto">Core Specifications</legend>
                 <div class="row">
@@ -105,7 +108,7 @@
                 </div>
             </fieldset>
 
-            {{-- Performance --}}
+            {{-- ================= Performance & Capacity ================= --}}
             <fieldset class="border p-3 mb-4">
                 <legend class="w-auto">Performance & Capacity</legend>
                 <div class="row">
@@ -132,7 +135,7 @@
                 </div>
             </fieldset>
 
-            {{-- Interior --}}
+            {{-- ================= Interior & Layout ================= --}}
             <fieldset class="border p-3 mb-4">
                 <legend class="w-auto">Interior & Layout</legend>
                 <div class="row">
@@ -157,19 +160,14 @@
                     </div>
                     <div class="col-md-4">
                         <label>Color</label>
-                        <div class="input-group my-colorpicker2">
-                            <input type="text" wire:model="color" class="form-control" placeholder="Pick color (HEX)">
-                            <div class="input-group-append">
-                                <span class="input-group-text"><i class="fas fa-square"></i></span>
-                            </div>
-                        </div>
+                        <input type="text" wire:model="color" class="form-control" placeholder="e.g. Black, Pearl White">
                         @error('color') <span class="text-danger">{{ $message }}</span> @enderror
                         <small class="text-muted">Example: Black, Pearl White, Metallic Blue</small>
                     </div>
                 </div>
             </fieldset>
 
-            {{-- Production --}}
+            {{-- ================= Production ================= --}}
             <fieldset class="border p-3 mb-4">
                 <legend class="w-auto">Production</legend>
                 <div class="row">
@@ -189,6 +187,7 @@
             <button type="submit" class="btn btn-primary">
                 <i class="fa fa-save"></i> Save Specification
             </button>
+
         </form>
     </div>
 </div>
