@@ -30,7 +30,7 @@
 
 {{-- Model Name --}}
 <div class="form-group">
-    <label>Model Name *</label>
+    <label>Model Name *</label> ({{ $model_name }})
     <input type="text" wire:model="model_name" class="form-control">
 </div>
 
