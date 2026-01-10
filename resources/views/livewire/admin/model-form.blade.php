@@ -1,17 +1,11 @@
 <div>
-    <section class="content-header mb-3">
-        <div class="container-fluid d-flex align-items-center justify-content-between">
-            <h1><i class="fas fa-car"></i> Add Vehicle Model</h1>
-            <small class="text-muted">Livewire v3 .live binding enabled</small>
-        </div>
-    </section>
 
     <section class="content">
         <div class="row">
-            <div class="col-md-10 mx-auto">
+            <div class="col-md-10">
                 <div class="card shadow-sm">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title"><i class="fas fa-info-circle"></i> Model Information</h3>
+                        <h3 class="card-title"><i class="fas fa-car"></i> Model Information</h3>
                     </div>
 
                     <div class="card-body">
