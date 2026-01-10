@@ -105,7 +105,7 @@
                             </td>
 
                             <td>
-                                <a href="{{ route('admin.specifications.show', $spec->id) }}"
+                                <a href="{{ route('admin.variants.show', $spec->id) }}"
                                    class="btn btn-xs btn-info">
                                     <i class="fa fa-eye"></i>
                                 </a>
