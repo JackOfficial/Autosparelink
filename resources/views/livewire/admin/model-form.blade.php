@@ -10,6 +10,17 @@
                     <div class="card-body">
                         <form wire:submit.prevent="save">
 
+                            {{-- ================= GLOBAL ERROR MESSAGES ================= --}}
+                            @if ($errors->any())
+                                <div class="alert alert-danger mb-3">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                             {{-- ================= VEHICLE MODEL ================= --}}
                             <fieldset class="border p-3 mb-4 rounded bg-light">
                                 <legend class="w-auto fw-bold text-primary"><i class="fas fa-car-side"></i> Vehicle Model</legend>
@@ -39,37 +50,37 @@
 
                                 {{-- Photos --}}
                                 <div x-data="{ photos: [] }" class="form-group">
-                                        <label><i class="fas fa-upload"></i> Upload Photos</label>
-                                        <input type="file" multiple
-                                               x-on:change="
-                                                   photos = Array.from($event.target.files).map(file => URL.createObjectURL(file));
-                                                   @this.uploadMultiple('photos', $event.target.files);
-                                               "
-                                               class="form-control"
-                                        >
+                                    <label><i class="fas fa-upload"></i> Upload Photos</label>
+                                    <input type="file" multiple
+                                           x-on:change="
+                                               photos = Array.from($event.target.files).map(file => URL.createObjectURL(file));
+                                               @this.uploadMultiple('photos', $event.target.files);
+                                           "
+                                           class="form-control"
+                                    >
 
-                                        <div class="row mt-3" x-show="photos.length > 0">
-                                            <template x-for="(photo, index) in photos" :key="index">
-                                                <div class="col-sm-6 col-md-3 mb-3">
-                                                    <div class="card shadow-sm position-relative">
-                                                        <img :src="photo" class="card-img-top rounded" style="height:150px; object-fit:cover;">
-                                                        <button type="button"
-                                                                class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle"
-                                                                x-on:click="
-                                                                    photos.splice(index, 1);
-                                                                    @this.removeUpload('photos', index);
-                                                                "
-                                                                title="Remove">
-                                                            <i class="fas fa-times"></i>
-                                                        </button>
-                                                    </div>
+                                    <div class="row mt-3" x-show="photos.length > 0">
+                                        <template x-for="(photo, index) in photos" :key="index">
+                                            <div class="col-sm-6 col-md-3 mb-3">
+                                                <div class="card shadow-sm position-relative">
+                                                    <img :src="photo" class="card-img-top rounded" style="height:150px; object-fit:cover;">
+                                                    <button type="button"
+                                                            class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle"
+                                                            x-on:click="
+                                                                photos.splice(index, 1);
+                                                                @this.removeUpload('photos', index);
+                                                            "
+                                                            title="Remove">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
                                                 </div>
-                                            </template>
-                                        </div>
+                                            </div>
+                                        </template>
                                     </div>
-                                    <small class="text-muted d-block mt-2">You can upload multiple images. Preview appears immediately.</small>
-                               
-                                    {{-- Has Variants --}}
+                                </div>
+                                <small class="text-muted d-block mt-2">You can upload multiple images. Preview appears immediately.</small>
+
+                                {{-- Has Variants --}}
                                 <div class="form-group mt-2">
                                     <label><i class="fas fa-layer-group"></i> Does this model have variants?</label>
                                     <div class="form-check form-check-inline">
@@ -110,6 +121,11 @@
                                 <fieldset class="border p-3 mb-4 rounded bg-light">
                                     <legend class="w-auto text-primary fw-bold"><i class="fas fa-cogs"></i> Specifications</legend>
 
+                                    {{-- XOR Error Message --}}
+                                    @error('spec')
+                                        <div class="alert alert-danger mb-3">{{ $message }}</div>
+                                    @enderror
+
                                     {{-- Core Specs --}}
                                     <div class="row g-3">
                                         <div class="col-sm-6 col-md-3">
@@ -120,6 +136,7 @@
                                                     <option value="{{ $item->id }}">{{ $item->name }}</option>
                                                 @endforeach
                                             </select>
+                                            @error('spec.body_type_id') <span class="text-danger">{{ $message }}</span> @enderror
                                         </div>
                                         <div class="col-sm-6 col-md-3">
                                             <label><i class="fas fa-cogs"></i> Engine Type *</label>
@@ -129,6 +146,7 @@
                                                     <option value="{{ $item->id }}">{{ $item->name }}</option>
                                                 @endforeach
                                             </select>
+                                            @error('spec.engine_type_id') <span class="text-danger">{{ $message }}</span> @enderror
                                         </div>
                                         <div class="col-sm-6 col-md-3">
                                             <label><i class="fas fa-exchange-alt"></i> Transmission *</label>
@@ -138,6 +156,7 @@
                                                     <option value="{{ $item->id }}">{{ $item->name }}</option>
                                                 @endforeach
                                             </select>
+                                            @error('spec.transmission_type_id') <span class="text-danger">{{ $message }}</span> @enderror
                                         </div>
                                         <div class="col-sm-6 col-md-3">
                                             <label><i class="fas fa-road"></i> Drive Type</label>
@@ -147,6 +166,7 @@
                                                     <option value="{{ $item->id }}">{{ $item->name }}</option>
                                                 @endforeach
                                             </select>
+                                            @error('spec.drive_type_id') <span class="text-danger">{{ $message }}</span> @enderror
                                         </div>
                                     </div>
 
@@ -191,7 +211,7 @@
                                         <div class="col-sm-6 col-md-4">
                                             <label>Color</label>
                                             <div x-data="{ color: @entangle('spec.color').live }" class="d-flex align-items-center gap-2">
-                                                <input type="color" x-model="color" class="form-control form-control-color" style="width:50px; height:50px;">
+                                                <input type="color" x-model="color" class="form-control form-control-color">
                                                 <input type="text" x-model="color" class="form-control" placeholder="Pick color (HEX)">
                                             </div>
                                         </div>
