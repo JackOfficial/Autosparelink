@@ -15,7 +15,7 @@
                 <div class="row">
                     {{-- Brand --}}
                     <div class="col-md-4">
-    <label>Brand</label> ({{ $vehicle_model_id }})
+    <label>Brand</label>
     <select wire:model.live="brand_id" class="form-control" @if($vehicle_model_id) disabled @endif>
         <option value="">Select Brand</option>
         @foreach($brands as $brand)
