@@ -105,7 +105,7 @@
                             <td>{{ $spec->fuel_efficiency ?? '-' }}</td>
                             <td>{{ $spec->steering_position ?? '-' }}</td>
                             <td>
-                                 <span class="badge" style="width: 100px; height: auto; background-color: {{ $spec->color ?? 'white' }}">
+                                 <span class="badge" style="width: 25px; height: 25px; background-color: {{ $spec->color ?? 'white' }}">
                                  </span>
                                 </td>
                             <td>
