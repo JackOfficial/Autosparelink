@@ -15,7 +15,7 @@
                     {{-- Vehicle Model --}}
                     <div class="col-md-6">
                         <label>Vehicle Model</label>
-                        <select wire:model="vehicle_model_id" class="form-control">
+                        <select wire:model.live="vehicle_model_id" class="form-control">
                             <option value="">Select Vehicle Model</option>
                             @foreach($vehicleModels as $model)
                                 <option value="{{ $model->id }}">{{ $model->model_name }} — {{ $model->brand->brand_name ?? 'No Brand' }}</option>
@@ -28,7 +28,7 @@
                     @if(!$hideVariantSelect)
     <div class="col-md-6">
         <label>Variant</label>
-        <select wire:model="variant_id" class="form-control">
+        <select wire:model.live="variant_id" class="form-control">
             <option value="">Select Variant (optional)</option>
             @foreach($filteredVariants as $variant)
                 <option value="{{ $variant->id }}">
