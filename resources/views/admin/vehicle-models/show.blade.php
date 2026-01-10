@@ -61,6 +61,9 @@
                             <th>Photo</th>
                             <th>Variant Name</th>
                             <th>Years</th>
+                            <th>Chassis code</th>
+                            <th>Model Code</th>
+                            <th>Trim Level</th>
                             <th>Status</th>
                             <th style="width:150px;">Actions</th>
                         </tr>
@@ -78,6 +81,9 @@
                             </td>
                             <td>{{ $variant->name ?? '-' }}</td>
                             <td>{{ $variant->production_start ?? '?' }} - {{ $variant->production_end ?? 'Present' }}</td>
+                            <td>{{ $variant->chassis_code ?? '-' }}</td>
+                             <td>{{ $variant->model_code ?? '-' }}</td>
+                             <td>{{ $variant->trim_level ?? '-' }}</td>
                             <td>{{ $variant->status ? 'Active' : 'Inactive' }}</td>
                             <td class="d-flex">
                                 <a href="{{ route('admin.variants.show', $variant->id) }}" class="btn btn-info btn-sm me-2">
