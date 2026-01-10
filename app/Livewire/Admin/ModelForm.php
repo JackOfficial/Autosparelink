@@ -62,7 +62,7 @@ class ModelForm extends Component
      // ================= SAVE =================
     public function save()
     {
-        dd($this->name);
+        dd($this->model_name);
         // $this->validate();
 
         // DB::transaction(function () {
