@@ -75,7 +75,7 @@
 
 <td>
     {{-- Variant --}}
-    {{ optional($spec->variant)->name ?? '-' }}
+    {{ optional($spec->variant)->name ?? 'N/A' }}
 </td>
 
 
