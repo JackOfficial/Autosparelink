@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 
 class SpecificationController extends Controller
 {
-    
+
 public function index(Request $request)
 {
     $query = Specification::with([
@@ -34,7 +34,21 @@ public function index(Request $request)
         $query->where('vehicle_model_id', $request->vehicle_model_id);
     }
 
+    // Get all specs
     $specifications = $query->latest()->get();
+
+    // Sort by brand, model, variant
+    $specifications = $specifications->sortBy([
+        function ($spec) {
+            return optional(optional($spec->variant)->vehicleModel->brand ?? $spec->vehicleModel->brand)->brand_name ?? 'N/A';
+        },
+        function ($spec) {
+            return optional(optional($spec->variant)->vehicleModel ?? $spec->vehicleModel)->model_name ?? 'N/A';
+        },
+        function ($spec) {
+            return optional($spec->variant)->name ?? 'N/A';
+        },
+    ]);
 
     // Group by Brand | Model | Variant
     $groupedSpecs = $specifications->groupBy(function ($spec) {
@@ -47,6 +61,7 @@ public function index(Request $request)
 
     return view('admin.specifications.index', compact('groupedSpecs'));
 }
+
 
     public function create()
     {
