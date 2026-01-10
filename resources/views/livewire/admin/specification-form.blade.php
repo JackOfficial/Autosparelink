@@ -9,52 +9,54 @@
         <form wire:submit.prevent="save">
 
             {{-- Brand → Model → Variant --}}
-@if(!$hideBrandModel)
-<fieldset class="border p-3 mb-4">
-    <legend class="w-auto">Vehicle Selection <span class="text-danger">*</span></legend>
-    <div class="row">
+            @if(!$hideBrandModel)
+            <fieldset class="border p-3 mb-4">
+                <legend class="w-auto">Vehicle Selection <span class="text-danger">*</span></legend>
+                <div class="row">
+                    {{-- Brand --}}
+                    <div class="col-md-4">
+    <label>Brand</label> ({{ $vehicle_model_id }})
+    <select wire:model.live="brand_id" class="form-control" @if($vehicle_model_id) disabled @endif>
+        <option value="">Select Brand</option>
+        @foreach($brands as $brand)
+            <option value="{{ $brand->id }}"
+                @if($vehicle_model_id && $brand->id == optional($vehicleModels->firstWhere('id', $vehicle_model_id))->brand_id) selected @endif
+            >
+                {{ $brand->brand_name }}
+            </option>
+        @endforeach
+    </select>
+    @error('brand_id') <span class="text-danger">{{ $message }}</span> @enderror
+</div>
 
-        {{-- Brand --}}
-        <div class="col-md-4">
-            <label>Brand</label>
-            <select wire:model.live="brand_id" class="form-control" @if($vehicle_model_id) disabled @endif>
-                <option value="">Select Brand</option>
-                @foreach($brands as $brand)
-                    <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
-                @endforeach
-            </select>
-            @error('brand_id') <span class="text-danger">{{ $message }}</span> @enderror
-        </div>
 
-        {{-- Vehicle Model --}}
-        <div class="col-md-4">
-            <label>Vehicle Model</label>
-            <select wire:model.live="vehicle_model_id" class="form-control" @if(!$vehicleModels->count()) disabled @endif>
-                <option value="">Select Model</option>
-                @foreach($vehicleModels as $model)
-                    <option value="{{ $model->id }}">{{ $model->model_name }}</option>
-                @endforeach
-            </select>
-            @error('vehicle_model_id') <span class="text-danger">{{ $message }}</span> @enderror
-        </div>
+                    {{-- Vehicle Model --}}
+                    <div class="col-md-4">
+                        <label>Vehicle Model</label>
+                        <select wire:model.live="vehicle_model_id" class="form-control" @if(!$vehicleModels->count()) disabled @endif>
+                            <option value="">Select Model</option>
+                            @foreach($vehicleModels as $model)
+                                <option value="{{ $model->id }}">{{ $model->model_name }}</option>
+                            @endforeach
+                        </select>
+                        @error('vehicle_model_id') <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
 
-        {{-- Variant --}}
-        <div class="col-md-4">
-            <label>Variant</label>
-            <select wire:model.live="variant_id" class="form-control" @if(!$filteredVariants->count()) disabled @endif>
-                <option value="">Select Variant (optional)</option>
-                @foreach($filteredVariants as $variant)
-                    <option value="{{ $variant->id }}">{{ $variant->name ?? 'Unnamed Variant' }}</option>
-                @endforeach
-            </select>
-            @error('variant_id') <span class="text-danger">{{ $message }}</span> @enderror
-        </div>
-
-    </div>
-    <small class="text-muted">Select brand first, then model, then variant. Variant is optional.</small>
-</fieldset>
-@endif
-
+                    {{-- Variant --}}
+                    <div class="col-md-4">
+                        <label>Variant</label>
+                        <select wire:model.live="variant_id" class="form-control" @if(!$filteredVariants->count()) disabled @endif>
+                            <option value="">Select Variant (optional)</option>
+                            @foreach($filteredVariants as $variant)
+                                <option value="{{ $variant->id }}">{{ $variant->name ?? 'Unnamed Variant' }}</option>
+                            @endforeach
+                        </select>
+                        @error('variant_id') <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+                <small class="text-muted">Select brand first, then model, then variant. Variant is optional.</small>
+            </fieldset>
+            @endif
 
             {{-- Core Specs --}}
             <fieldset class="border p-3 mb-4">
