@@ -20,7 +20,7 @@
 {{-- Brand --}}
 <div class="form-group">
     <label>Brand *</label> ({{ $brand_id }})
-    <select wire:model.defer="brand_id" class="form-control">
+    <select wire:model.live="brand_id" class="form-control">
         <option value="">Select Brand</option>
         @foreach($brands as $brand)
             <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
@@ -31,7 +31,7 @@
 {{-- Model Name --}}
 <div class="form-group">
     <label>Model Name *</label> ({{ $model_name }})
-    <input type="text" wire:model="model_name" class="form-control">
+    <input type="text" wire:model.live="model_name" class="form-control">
 </div>
 
 {{-- Has Variants --}}
