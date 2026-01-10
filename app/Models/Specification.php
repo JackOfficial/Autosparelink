@@ -83,14 +83,18 @@ class Specification extends Model
      )->withTimestamps();
     }
 
-     protected static function booted()
+    protected static function booted()
     {
-        static::saving(function ($spec) {
-            // XOR logic: exactly one must be set
-            if (($spec->variant_id && $spec->vehicle_model_id) || (!$spec->variant_id && !$spec->vehicle_model_id)) {
+        static::saving(function ($specification) {
+
+            // Block empty specification
+            if (
+                empty($specification->vehicle_model_id) &&
+                empty($specification->variant_id)
+            ) {
                 throw ValidationException::withMessages([
-                    'variant_id' => ['A specification must belong either to a variant OR a vehicle model, but not both.'],
-                    'vehicle_model_id' => ['A specification must belong either to a variant OR a vehicle model, but not both.'],
+                    'vehicle_model_id' => 'Specification must have at least a Vehicle Model or a Variant.',
+                    'variant_id' => 'Specification must have at least a Vehicle Model or a Variant.',
                 ]);
             }
         });

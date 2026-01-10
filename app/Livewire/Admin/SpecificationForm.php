@@ -128,15 +128,12 @@ class SpecificationForm extends Component
     {
         $this->validate();
 
-        // XOR logic for variant/model only if not preselected
-        if (!$this->hideBrandModel) {
-            if (($this->variant_id && $this->vehicle_model_id) ||
-                (!$this->variant_id && !$this->vehicle_model_id)) {
-                throw ValidationException::withMessages([
-                    'vehicle_model_id' => 'You must select either a Variant OR a Vehicle Model, but not both.',
-                ]);
-            }
-        }
+       if (!$this->vehicle_model_id && !$this->variant_id) {
+    throw ValidationException::withMessages([
+        'vehicle_model_id' => 'You must select at least a Vehicle Model or a Variant.',
+        'variant_id' => 'You must select at least a Vehicle Model or a Variant.',
+    ]);
+}
 
         Specification::create([
             'variant_id' => $this->variant_id,
