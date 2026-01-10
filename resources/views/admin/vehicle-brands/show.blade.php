@@ -26,7 +26,7 @@
         <div class="card-body d-flex align-items-center">
             <div class="me-4">
                 @if($brand->brand_logo)
-                    <img src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }}" class="img-thumbnail" style="width:150px; height:auto; object-fit:contain;">
+                    <img src="{{ asset('storage/' . $brand->photos->brand_logo) }}" alt="{{ $brand->brand_name }}" class="img-thumbnail" style="width:150px; height:auto; object-fit:contain;">
                 @else
                     <img src="{{ asset('images/placeholder.png') }}" alt="Placeholder" class="img-thumbnail" style="width:150px; height:auto; object-fit:contain;">
                 @endif
