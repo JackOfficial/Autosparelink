@@ -83,7 +83,7 @@
                                 {{-- Has Variants --}}
                                 <div class="form-group mt-3">
                                     <label><i class="fas fa-layer-group"></i> Does this model have variants?</label>
-                                    <div class="form-check form-check-inline">
+                                    <div class="form-check form-check-inline mr-2">
                                         <input type="radio" wire:model.live="has_variants" value="1" class="form-check-input" id="has_variants_yes">
                                         <label class="form-check-label" for="has_variants_yes">Yes</label>
                                     </div>
