@@ -424,7 +424,7 @@
       });
     });
   </script>
-  @livewireScripts
   @stack('scripts')
+  @livewireScripts
 </body>
 </html>
