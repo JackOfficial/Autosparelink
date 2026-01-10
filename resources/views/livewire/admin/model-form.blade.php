@@ -38,10 +38,7 @@
                                 </div>
 
                                 {{-- Photos --}}
-                                <fieldset class="border p-3 mb-4 rounded bg-white">
-                                    <legend class="w-auto text-primary fw-bold"><i class="fas fa-images"></i> Photos</legend>
-
-                                    <div x-data="{ photos: [] }" class="form-group">
+                                <div x-data="{ photos: [] }" class="form-group">
                                         <label><i class="fas fa-upload"></i> Upload Photos</label>
                                         <input type="file" multiple
                                                x-on:change="
@@ -71,9 +68,8 @@
                                         </div>
                                     </div>
                                     <small class="text-muted d-block mt-2">You can upload multiple images. Preview appears immediately.</small>
-                                </fieldset>
-
-                                {{-- Has Variants --}}
+                               
+                                    {{-- Has Variants --}}
                                 <div class="form-group mt-2">
                                     <label><i class="fas fa-layer-group"></i> Does this model have variants?</label>
                                     <div class="form-check form-check-inline">
