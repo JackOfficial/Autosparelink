@@ -203,21 +203,26 @@
                         </select>
                         @error('steering_position') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
-                    <div class="col-md-4" x-data="{ color: @entangle('color') }">
-    <label>Color</label>
-    <div class="input-group">
-        <input type="text" x-model="color" class="form-control" placeholder="e.g. #000000 or Black">
-        <div class="input-group-append">
-            <input type="color" x-model="color" class="form-control p-0" style="width: 40px; border:none;">
-        </div>
+                  <div class="col-md-4" x-data="{ color: @entangle('color') }">
+    <label class="form-label">Color</label>
+
+    <div class="d-flex align-items-center gap-2">
+        <!-- Color preview circle -->
+        <div class="rounded-circle border" :style="'background-color: ' + color" style="width: 35px; height: 35px;"></div>
+
+        <!-- Text input -->
+        <input type="text" x-model="color" class="form-control" placeholder="e.g. Black, Pearl White, #ff0000">
+
+        <!-- Color picker button -->
+        <input type="color" x-model="color" class="form-control p-0" style="width: 50px; height: 35px; border:none; padding:0;">
     </div>
-    <div class="mt-2 d-flex align-items-center gap-2">
-        <div class="rounded-circle" :style="'background-color: ' + color" style="width: 25px; height: 25px; border:1px solid #ccc;"></div>
-        <span x-text="color"></span>
-    </div>
-    @error('color') <span class="text-danger">{{ $message }}</span> @enderror
-    <small class="text-muted d-block">Example: Black, Pearl White, Metallic Blue or HEX like #ff0000</small>
+
+    @error('color') 
+        <span class="text-danger d-block mt-1">{{ $message }}</span> 
+    @enderror
+    <small class="text-muted d-block mt-1">Pick a color or type a name/HEX (e.g. Black, #ff0000)</small>
 </div>
+
 
                 </div>
             </fieldset>
