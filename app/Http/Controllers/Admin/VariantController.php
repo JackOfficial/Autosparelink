@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Variant;
 use App\Models\VehicleModel;
 use App\Models\BodyType;
+use App\Models\Brand;
 use App\Models\DriveType;
 use App\Models\EngineType;
 use App\Models\TransmissionType;
@@ -17,14 +18,15 @@ class VariantController extends Controller
     /**
      * Display a listing of variants
      */
-    public function index()
-    {
-        $variants = Variant::with(['vehicleModel.brand'])
-            ->latest()
-            ->get();
+  public function index()
+{
+    // Load all variants with their models and brands, eager loaded
+    $brands = Brand::with(['vehicleModels.variants' => function($q) {
+        $q->orderBy('name'); // Optional: sort variants by name
+    }])->orderBy('brand_name')->get();
 
-        return view('admin.variants.index', compact('variants'));
-    }
+    return view('admin.variants.index', compact('brands'));
+}
 
     /**
      * Show create form
