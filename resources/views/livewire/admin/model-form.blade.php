@@ -15,9 +15,11 @@
                             {{-- ================= VEHICLE MODEL ================= --}}
                             <fieldset class="border p-3 mb-4">
                                 <legend class="w-auto"><i class="fas fa-car-side"></i> Vehicle Model</legend>
-
-                                {{-- Brand --}}
-                                <div class="form-group">
+                               
+                                <div class="row">
+                                    <div class="col-md-6">
+                                         {{-- Brand --}}
+                                        <div class="form-group">
                                     <label><i class="fas fa-industry"></i> Brand *</label>
                                     <select wire:model.live="brand_id" class="form-control">
                                         <option value="">Select Brand</option>
@@ -26,11 +28,15 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                {{-- Model Name --}}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    {{-- Model Name --}}
                                 <div class="form-group">
                                     <label><i class="fas fa-key"></i> Model Name *</label>
                                     <input type="text" wire:model.live="model_name" class="form-control" placeholder="Enter model name">
+                                </div>
                                 </div>
 
                                 {{-- Has Variants --}}
