@@ -99,7 +99,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted">No variants available for this model.</td>
+                            <td colspan="8" class="text-center text-muted">No variants available for this model.</td>
                         </tr>
                         @endforelse
                     </tbody>
