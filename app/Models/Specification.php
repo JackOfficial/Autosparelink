@@ -15,7 +15,7 @@ class Specification extends Model
         'engine_type_id',
         'transmission_type_id',
         'drive_type_id',
-        'production_start',
+        'production_start',   
         'production_end',
         'horsepower',
         'torque',
