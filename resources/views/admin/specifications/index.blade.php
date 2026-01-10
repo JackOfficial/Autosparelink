@@ -54,16 +54,30 @@
                             <td>{{ $loop->iteration }}</td>
 
                             <td>
-                            {{ optional($spec->variant ? $spec->variant->vehicleModel->brand : $spec->vehicleModel->brand)->brand_name ?? '-' }}
-                            </td>
+    {{-- Brand --}}
+    {{
+        optional(
+            optional($spec->variant)->vehicleModel->brand
+            ?? optional($spec->vehicleModel)->brand
+        )->brand_name ?? '-'
+    }}
+</td>
 
-                            <td>
-                               {{ optional($spec->variant ? $spec->variant->vehicleModel : $spec->vehicleModel)->model_name ?? '-' }}
-                            </td>
+<td>
+    {{-- Model --}}
+    {{
+        optional(
+            optional($spec->variant)->vehicleModel
+            ?? $spec->vehicleModel
+        )->model_name ?? '-'
+    }}
+</td>
 
-                            <td>
-                                 {{ optional($spec->variant)->name ?? '-' }}
-                            </td>
+<td>
+    {{-- Variant --}}
+    {{ optional($spec->variant)->name ?? '-' }}
+</td>
+
 
                             <td>
                                 {{ $spec->engineType->name ?? '-' }}
