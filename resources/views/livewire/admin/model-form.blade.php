@@ -19,7 +19,7 @@
 
 {{-- Brand --}}
 <div class="form-group">
-    <label>Brand *</label>
+    <label>Brand *</label> ({{ $brand_id }})
     <select wire:model="brand_id" class="form-control">
         <option value="">Select Brand</option>
         @foreach($brands as $brand)
