@@ -1,7 +1,7 @@
 <div>
 <section class="content-header">
     <div class="container-fluid">
-        <h1>Add Vehicle Model</h1>
+        <h1>Add Vehicle Model ({{ $has_variants }})</h1>
     </div>
 </section>
 
