@@ -81,7 +81,7 @@
                                 @endif
                             </td>
                             <td>{{ $model->model_name }}</td>
-                            <td>{{ $model->year_from ?? '?' }} - {{ $model->year_to ?? 'Present' }}</td>
+                            <td>{{ $model->production_year_start ?? '?' }} - {{ $model->production_year_end ?? 'Present' }}</td>
                             <td class="d-flex">
                                 <a href="{{ route('admin.vehicle-models.show', $model->id) }}" class="btn btn-info btn-sm me-2">
                                     <i class="fa fa-eye"></i>
