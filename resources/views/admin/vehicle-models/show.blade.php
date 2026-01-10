@@ -60,7 +60,6 @@
                             <th>#</th>
                             <th>Photo</th>
                             <th>Variant Name</th>
-                            <th>Years</th>
                             <th>Chassis code</th>
                             <th>Model Code</th>
                             <th>Trim Level</th>
@@ -80,7 +79,6 @@
                                 @endif
                             </td>
                             <td>{{ $variant->name ?? '-' }}</td>
-                            <td>{{ $variant->production_start_year ?? '?' }} - {{ $variant->production_end_year ?? 'Present' }}</td>
                             <td>{{ $variant->chassis_code ?? '-' }}</td>
                              <td>{{ $variant->model_code ?? '-' }}</td>
                              <td>{{ $variant->trim_level ?? '-' }}</td>
