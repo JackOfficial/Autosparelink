@@ -19,9 +19,9 @@ class Brand extends Model
         return $this->belongsTo(Category::class, 'category_id');
     }
 
-    public function brand()
+    public function vehicleModels()
     {
-        return $this->belongsTo(Brand::class, 'brand_id');
+        return $this->hasMany(VehicleModel::class, 'brand_id');
     }
 
       public function parts()
