@@ -114,18 +114,14 @@
                         </td>
 
                         <td>
+                            <a href="{{ route('admin.variants.show', $variant->id) }}" class="btn btn-info btn-sm me-2">
+                                    <i class="fa fa-cogs"></i>
+                                </a>
                             <a href="{{ route('admin.variants.edit', $variant->id) }}"
                                class="btn btn-sm btn-warning"
                                title="Edit">
                                 <i class="fa fa-edit"></i>
                             </a>
-
-                            <a href="{{ route('admin.specifications.index', ['variant_id' => $variant->id]) }}"
-                               class="btn btn-sm btn-info"
-                               title="Specifications">
-                                <i class="fa fa-cogs"></i>
-                            </a>
-
                             <form action="{{ route('admin.variants.destroy', $variant->id) }}"
                                   method="POST"
                                   class="d-inline"
