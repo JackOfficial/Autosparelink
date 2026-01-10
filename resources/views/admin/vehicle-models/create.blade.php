@@ -2,6 +2,6 @@
 @section('title', 'AutoSpareLink - Add Vehicle Model')
 @section('content')
 
-<livewire:admin.test-component />
+<livewire:admin.model-form />
 
 @endsection
