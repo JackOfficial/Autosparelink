@@ -26,4 +26,14 @@
 </div>
 </section>
 
+@push('scripts')
+<script>
+$(function () {
+    $('#colorInput').colorpicker().on('colorpickerChange', function(e) {
+        @this.set('spec.color', e.color.toString()); // manually update Livewire
+    });
+});
+</script>
+@endpush
+
 @endsection
