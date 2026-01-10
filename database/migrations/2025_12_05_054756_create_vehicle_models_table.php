@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('brand_id')->constrained('brands')->cascadeOnDelete();
             $table->string('model_name');
+            $table->tinyInteger('has_variants');
             $table->text('description')->nullable();
             $table->year('production_start_year')->nullable();
             $table->year('production_end_year')->nullable();
