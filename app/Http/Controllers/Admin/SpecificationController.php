@@ -14,20 +14,18 @@ use Illuminate\Http\Request;
 
 class SpecificationController extends Controller
 {
+    
 public function index(Request $request)
 {
-    // Load all specifications with their relations
     $query = Specification::with([
-        'variant.vehicleModel.brand', // for variants
-        'vehicleModel.brand',         // for specs without variants
+        'variant.vehicleModel.brand',
+        'vehicleModel.brand',
         'bodyType',
         'engineType',
         'transmissionType',
         'driveType',
-        'driveType',
     ]);
 
-    // Optional filtering
     if ($request->filled('variant_id')) {
         $query->where('variant_id', $request->variant_id);
     }
@@ -38,22 +36,17 @@ public function index(Request $request)
 
     $specifications = $query->latest()->get();
 
-    // Group by brand → model → variant
+    // Group by Brand | Model | Variant
     $groupedSpecs = $specifications->groupBy(function ($spec) {
-        $brand = $spec->variant->vehicleModel->brand->brand_name 
-                 ?? $spec->vehicleModel->brand->brand_name 
-                 ?? 'No Brand';
-        $model = $spec->variant->vehicleModel->model_name 
-                 ?? $spec->vehicleModel->model_name 
-                 ?? 'No Model';
-        $variant = $spec->variant->name ?? 'No Variant';
+        $brand = optional(optional($spec->variant)->vehicleModel->brand ?? $spec->vehicleModel->brand)->brand_name ?? 'N/A';
+        $model = optional(optional($spec->variant)->vehicleModel ?? $spec->vehicleModel)->model_name ?? 'N/A';
+        $variant = optional($spec->variant)->name ?? 'N/A';
 
         return $brand.'|'.$model.'|'.$variant;
     });
 
     return view('admin.specifications.index', compact('groupedSpecs'));
 }
-
 
     public function create()
     {
