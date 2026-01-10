@@ -78,7 +78,7 @@
                                     <span class="text-muted">No photo</span>
                                 @endif
                             </td>
-                            <td>{{ $variant->name ?? '-' }} ({{ $variant->specifications_count }})</td>
+                            <td>{{ $variant->name ?? '-' }} ({{ $variant->specifications_count }} {{ $variant->specifications_count > 1 ? 'Specifications' : 'Specification' }})</td>
                             <td>{{ $variant->chassis_code ?? '-' }}</td>
                              <td>{{ $variant->model_code ?? '-' }}</td>
                              <td>{{ $variant->trim_level ?? '-' }}</td>
