@@ -13,7 +13,9 @@ class ModelController extends Controller
     // List all vehicle models
     public function index()
     {
-        $vehicleModels = VehicleModel::with('brand')->latest()->get();
+         $brands = Brand::with(['vehicleModels' => function($query) {
+        $query->orderBy('model_name', 'asc');
+        }])->orderBy('brand_name', 'asc')->get();
         return view('admin.vehicle-models.index', compact('vehicleModels'));
     }
 
