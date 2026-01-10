@@ -79,12 +79,6 @@
             {{ $brand->vehicle_models_count }}
         </span>
     </div>
-
-    <small class="text-muted">
-        {{ $brand->vehicle_models_count }}
-        {{ Str::plural('model', $brand->vehicle_models_count) }}
-    </small>
-                                <br>
                                 <small class="text-muted">{{ $brand->created_at->format('Y-m-d') }}</small>
                             </td>
 
