@@ -25,4 +25,13 @@
 </div>
 </div>
 </section>
+
+@push('scripts')
+<script>
+$(function () {
+    $('.my-colorpicker2').colorpicker()
+})
+</script>
+@endpush
+
 @endsection
