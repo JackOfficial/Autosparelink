@@ -2,9 +2,46 @@
     <div class="card-header"><h3 class="card-title">Specification Details</h3></div>
     <div class="card-body">
 
-        {{-- SUCCESS MESSAGE --}}
+       {{-- Dismissable success message --}}
         @if (session()->has('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
+            <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+         {{-- ================= Show Redirected Model/Variant ================= --}}
+        @if($vehicle_model_id || $variant_id)
+            @php
+                $displayModel = $variant_id ? $filteredVariants->firstWhere('id', $variant_id)->vehicleModel : $vehicleModels->firstWhere('id', $vehicle_model_id);
+                $displayVariant = $variant_id ? $filteredVariants->firstWhere('id', $variant_id) : null;
+            @endphp
+
+            <div class="card mb-4">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        @if($displayVariant && $displayVariant->photos->count())
+                            <img src="{{ asset('storage/' . $displayVariant->photos->first()->file_path) }}" class="img-fluid rounded-start" alt="Variant Photo">
+                        @elseif($displayModel && $displayModel->photo)
+                            <img src="{{ asset('storage/' . $displayModel->photo) }}" class="img-fluid rounded-start" alt="Model Photo">
+                        @else
+                            <img src="{{ asset('images/placeholder.png') }}" class="img-fluid rounded-start" alt="Placeholder">
+                        @endif
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ $displayVariant->name ?? $displayModel->model_name }}</h5>
+                            <p class="card-text">
+                                Brand: {{ $displayModel->brand->brand_name ?? 'N/A' }} <br>
+                                Model: {{ $displayModel->model_name ?? 'N/A' }} <br>
+                                Variant: {{ $displayVariant->name ?? 'N/A' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         @endif
 
         <form wire:submit.prevent="save">
