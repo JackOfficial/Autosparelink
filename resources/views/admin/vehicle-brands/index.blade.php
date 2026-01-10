@@ -56,7 +56,7 @@
                     <tbody>
                         @forelse($brands as $brand)
                         <tr>
-                            <td>{{ $brand->id }}</td>
+                            <td>{{ $brand->iteration }}</td>
 
                             <!-- Logo -->
                             <td>
@@ -71,7 +71,19 @@
 
                             <!-- Brand name -->
                             <td>
-                                <strong>{{ $brand->brand_name }}</strong>
+                                <div class="d-flex align-items-center">
+        <strong class="mr-2">{{ $brand->brand_name }}</strong>
+
+        <span class="badge badge-pill badge-info"
+              title="Number of models">
+            {{ $brand->vehicle_models_count }}
+        </span>
+    </div>
+
+    <small class="text-muted">
+        {{ $brand->vehicle_models_count }}
+        {{ Str::plural('model', $brand->vehicle_models_count) }}
+    </small>
                                 <br>
                                 <small class="text-muted">{{ $brand->created_at->format('Y-m-d') }}</small>
                             </td>

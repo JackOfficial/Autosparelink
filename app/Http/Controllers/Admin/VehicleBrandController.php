@@ -14,7 +14,8 @@ class VehicleBrandController extends Controller
      */
     public function index()
     {
-        $brands = Brand::all();
+        $brands = Brand::withCount('vehicleModels')->latest()->get();
+
         return view('admin.vehicle-brands.index', compact('brands'));
     }
 
