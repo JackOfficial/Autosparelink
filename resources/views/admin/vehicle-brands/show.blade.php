@@ -80,7 +80,7 @@
                                     <span class="text-muted">No photo</span>
                                 @endif
                             </td>
-                            <td>{{ $model->model_name }} ({{ $model->variants->count() }})</td>
+                            <td>{{ $model->model_name }} ({{ $model->variants->count() }} {{ $model->variants->count() > 1 ? 'Variants' : 'Variant' }})</td>
                             <td>{{ $model->production_start_year ?? '?' }} - {{ $model->production_end_year ?? 'Present' }}</td>
                             <td class="d-flex">
                                 <a href="{{ route('admin.vehicle-models.show', $model->id) }}" class="btn btn-info btn-sm me-2">
