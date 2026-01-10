@@ -156,6 +156,7 @@
                                             </select>
                                         </div>
                                         <div class="col-md-4">
+                                            <label>Color</label>
                                             <div
     x-data="{ color: @entangle('spec.color').live }"
     class="input-group"
