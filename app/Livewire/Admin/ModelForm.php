@@ -16,7 +16,7 @@ class ModelForm extends Component
 {
       // ================= MODEL FIELDS =================
     public $brand_id;
-    public $model_name;
+    public $model_name = 'Jack';
     public $description;
     public $has_variants = 1;
     public $production_start_year;
