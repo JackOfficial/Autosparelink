@@ -32,7 +32,7 @@
                     </div>
                     <div class="col-md-8">
                         <div class="card-body">
-                            <h5 class="card-title">{{ $displayVariant->name ?? $displayModel->model_name }}</h5>
+                            <h5 class="card-title">{{ $displayVariant->name ?? $displayModel->model_name ?? 'N/A' }}</h5>
                             <p class="card-text">
                                 Brand: {{ $displayModel->brand->brand_name ?? 'N/A' }} <br>
                                 Model: {{ $displayModel->model_name ?? 'N/A' }} <br>
