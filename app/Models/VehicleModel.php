@@ -13,7 +13,6 @@ class VehicleModel extends Model
         'description',
         'production_start_year',
         'production_end_year',
-        'photo',
         'status',
     ];
 
@@ -41,6 +40,10 @@ public function specifications()
     public function variants()
     {
         return $this->hasMany(Variant::class);
+    }
+
+    public function photos() {
+    return $this->morphMany(Photo::class, 'imageable');
     }
 
      public function spec()

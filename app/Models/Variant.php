@@ -12,7 +12,6 @@ class Variant extends Model
         'chassis_code',
         'model_code',
         'trim_level',
-        'photo',
         'is_default',
         'status',
     ];
@@ -59,5 +58,9 @@ class Variant extends Model
     public function fitments()
     {
         return $this->hasMany(PartFitment::class);
+    }
+
+    public function photos() {
+    return $this->morphMany(Photo::class, 'imageable');
     }
 }

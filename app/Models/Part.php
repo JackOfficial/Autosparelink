@@ -49,10 +49,15 @@ public function specifications()
     )->withTimestamps();
 }
 
- public function photos()
-{
-   return $this->hasMany(PartPhoto::class);
+//  public function photos()
+// {
+//    return $this->hasMany(PartPhoto::class);
+// }
+
+public function photos() {
+    return $this->morphMany(Photo::class, 'imageable');
 }
+
 
 public function variants()
     {

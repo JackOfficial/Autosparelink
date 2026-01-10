@@ -9,7 +9,9 @@ use App\Models\BodyType;
 use App\Models\EngineType;
 use App\Models\TransmissionType;
 use App\Models\DriveType;
+use App\Models\Photo;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -20,7 +22,7 @@ class ModelForm extends Component
     // ================= MODEL FIELDS =================
     public $brand_id;
     public $model_name;
-    public $photos = []; // Holds temporary uploaded files
+    public $photos = []; // Temporary uploaded files
     public $description;
     public $has_variants = 1;
     public $production_start_year;
@@ -40,7 +42,9 @@ class ModelForm extends Component
         'seats' => null,
         'doors' => null,
         'steering_position' => null,
-        'color' => null, // <-- Added color
+        'color' => null,
+        'variant_id' => null,         // XOR
+        'vehicle_model_id' => null,   // XOR
     ];
 
     // ================= VALIDATION RULES =================
@@ -55,7 +59,7 @@ class ModelForm extends Component
             'production_end_year' => 'nullable|digits:4|integer|gte:production_start_year',
         ];
 
-        // If model has no variants, specification fields are required
+        // Only validate spec if model has NO variants
         if ($this->has_variants == 0) {
             $rules = array_merge($rules, [
                 'spec.body_type_id' => 'required|exists:body_types,id',
@@ -68,7 +72,7 @@ class ModelForm extends Component
                 'spec.seats' => 'nullable|integer|min:1',
                 'spec.doors' => 'nullable|integer|min:1',
                 'spec.steering_position' => 'nullable|in:LEFT,RIGHT',
-                'spec.color' => 'nullable|string|max:20', // validate HEX or color name
+                'spec.color' => 'nullable|string|max:20',
             ]);
         }
 
@@ -95,22 +99,32 @@ class ModelForm extends Component
 
             // 2️⃣ Create Specification ONLY if model has NO variants
             if ($this->has_variants == 0) {
-                Specification::create(array_merge(
-                    $this->spec,
-                    ['vehicle_model_id' => $model->id]
-                ));
+
+                $this->spec['vehicle_model_id'] = $model->id;
+                $this->spec['variant_id'] = null;
+
+                // XOR enforcement
+                if (($this->spec['variant_id'] && $this->spec['vehicle_model_id']) ||
+                    (!$this->spec['variant_id'] && !$this->spec['vehicle_model_id'])) {
+                    throw ValidationException::withMessages([
+                        'spec' => ['Specification must be linked to either a variant OR a vehicle model, but not both.']
+                    ]);
+                }
+
+                Specification::create($this->spec);
             }
 
-             // Save uploaded photos
-        foreach ($this->photos as $photo) {
-            $photo->store('vehicle_models/'.$model->id, 'public');
-            // Optional: create VehicleModelPhoto model to save paths in DB
-        }
-        
+            // 3️⃣ Save uploaded photos to polymorphic Photo table
+            foreach ($this->photos as $photo) {
+                $path = $photo->store('vehicle_models/' . $model->id, 'public');
+                $model->photos()->create([
+                    'file_path' => $path,
+                    'caption' => null,
+                ]);
+            }
         });
 
         session()->flash('success', 'Vehicle model created successfully.');
-
         return redirect()->route('admin.vehicle-models.index');
     }
 

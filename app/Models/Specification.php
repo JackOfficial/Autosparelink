@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 class Specification extends Model
 {
@@ -10,7 +11,7 @@ class Specification extends Model
 
     protected $fillable = [
         'variant_id',
-        'model_id',
+        'vehicle_model_id', 
         'body_type_id',
         'engine_type_id',
         'transmission_type_id',
@@ -80,5 +81,18 @@ class Specification extends Model
         'specification_id',
         'part_id'
      )->withTimestamps();
+    }
+
+     protected static function booted()
+    {
+        static::saving(function ($spec) {
+            // XOR logic: exactly one must be set
+            if (($spec->variant_id && $spec->vehicle_model_id) || (!$spec->variant_id && !$spec->vehicle_model_id)) {
+                throw ValidationException::withMessages([
+                    'variant_id' => ['A specification must belong either to a variant OR a vehicle model, but not both.'],
+                    'vehicle_model_id' => ['A specification must belong either to a variant OR a vehicle model, but not both.'],
+                ]);
+            }
+        });
     }
 }
