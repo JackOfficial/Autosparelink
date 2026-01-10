@@ -176,15 +176,6 @@
         class="form-control"
         placeholder="Pick color (HEX)"
     >
-
-    <div class="input-group-append">
-        <span
-            class="input-group-text"
-            :style="{ backgroundColor: color || '#ffffff' }"
-        >
-            <i class="fas fa-square"></i>
-        </span>
-    </div>
 </div>
 
                                         </div>
