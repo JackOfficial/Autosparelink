@@ -3,23 +3,24 @@
 @section('title', 'Specification Details')
 
 @section('content')
+
 <section class="content-header">
     <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h1 class="fw-bold mb-0">Specification Details</h1>
+                <small class="text-muted">
                     {{ $specification->variant->name
                         ?? $specification->vehicleModel->model_name
-                        ?? 'Specification Details' }}
-                </h1>
+                        ?? 'Vehicle Specification' }}
+                </small>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.specifications.index') }}">Specifications</a>
-                    </li>
-                    <li class="breadcrumb-item active">Details</li>
-                </ol>
+
+            <div>
+                <a href="{{ route('admin.specifications.edit', $specification->id) }}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="fa fa-edit"></i> Edit
+                </a>
             </div>
         </div>
     </div>
@@ -27,138 +28,140 @@
 
 <section class="content">
 
-    {{-- ================= Specification Overview ================= --}}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h3 class="card-title">Specification Overview</h3>
-        </div>
+    {{-- ================= HERO CARD ================= --}}
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body d-flex align-items-center gap-4">
 
-        <div class="card-body d-flex align-items-center">
-            <div class="me-4">
+            {{-- Image --}}
+            <div>
                 @if($specification->photo)
                     <img src="{{ asset('storage/' . $specification->photo) }}"
-                         class="img-thumbnail"
-                         style="width:180px; object-fit:contain;">
+                         class="rounded"
+                         style="width:200px; height:140px; object-fit:contain;">
                 @else
-                    <img src="{{ asset('images/placeholder.png') }}"
-                         class="img-thumbnail"
-                         style="width:180px; object-fit:contain;">
+                    <div class="d-flex align-items-center justify-content-center bg-light rounded"
+                         style="width:200px; height:140px;">
+                        <i class="fa fa-car fa-3x text-muted"></i>
+                    </div>
                 @endif
             </div>
 
-            <div class="row w-100">
-                <div class="col-md-6">
-                    <p><strong>Brand:</strong>
-                        {{ $specification->variant->vehicleModel->brand->brand_name
-                            ?? $specification->vehicleModel->brand->brand_name
-                            ?? '-' }}
-                    </p>
+            {{-- Identity --}}
+            <div class="flex-grow-1">
+                <h3 class="fw-semibold mb-1">
+                    {{ $specification->variant->name ?? 'Base Specification' }}
+                </h3>
 
-                    <p><strong>Model:</strong>
-                        {{ $specification->variant->vehicleModel->model_name
-                            ?? $specification->vehicleModel->model_name
-                            ?? '-' }}
-                    </p>
+                <p class="mb-2 text-muted">
+                    {{ $specification->variant->vehicleModel->brand->brand_name
+                        ?? $specification->vehicleModel->brand->brand_name
+                        ?? '-' }}
+                    —
+                    {{ $specification->variant->vehicleModel->model_name
+                        ?? $specification->vehicleModel->model_name
+                        ?? '-' }}
+                </p>
 
-                    <p><strong>Variant:</strong>
-                        {{ $specification->variant->name ?? 'N/A' }}
-                    </p>
+                <span class="badge rounded-pill px-3 py-2
+                    {{ $specification->status ? 'bg-success' : 'bg-secondary' }}">
+                    {{ $specification->status ? 'Active Specification' : 'Inactive Specification' }}
+                </span>
+            </div>
+        </div>
+    </div>
 
-                    <p><strong>Body Type:</strong>
-                        {{ $specification->bodyType->name ?? '-' }}
-                    </p>
+    {{-- ================= QUICK FACTS ================= --}}
+    <div class="row mb-4">
 
-                    <p><strong>Engine Type:</strong>
-                        {{ $specification->engineType->name ?? '-' }}
-                    </p>
+        @php
+            $facts = [
+                'Body Type'       => $specification->bodyType->name ?? '-',
+                'Engine'          => $specification->engineType->name ?? '-',
+                'Transmission'    => $specification->transmissionType->name ?? '-',
+                'Drive Type'      => $specification->driveType->name ?? '-',
+                'Production'      => ($specification->production_start ?? '?') . ' - ' . ($specification->production_end ?? 'Present'),
+            ];
+        @endphp
+
+        @foreach($facts as $label => $value)
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <small class="text-muted d-block mb-1">{{ $label }}</small>
+                        <h6 class="fw-semibold mb-0">{{ $value }}</h6>
+                    </div>
                 </div>
+            </div>
+        @endforeach
+    </div>
 
-                <div class="col-md-6">
-                    <p><strong>Transmission:</strong>
-                        {{ $specification->transmissionType->name ?? '-' }}
-                    </p>
+    {{-- ================= PERFORMANCE ================= --}}
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-transparent border-0">
+            <h5 class="fw-semibold mb-0">Performance & Capacity</h5>
+        </div>
 
-                    <p><strong>Drive Type:</strong>
-                        {{ $specification->driveType->name ?? '-' }}
-                    </p>
-
-                    <p><strong>Production Years:</strong>
-                        {{ $specification->production_start ?? '?' }}
-                        -
-                        {{ $specification->production_end ?? 'Present' }}
-                    </p>
-
-                    <p><strong>Status:</strong>
-                        <span class="badge {{ $specification->status ? 'bg-success' : 'bg-secondary' }}">
-                            {{ $specification->status ? 'Active' : 'Inactive' }}
-                        </span>
-                    </p>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-3 mb-3">
+                    <h4 class="fw-bold">{{ $specification->horsepower ?? '-' }}</h4>
+                    <small class="text-muted">Horsepower</small>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h4 class="fw-bold">{{ $specification->torque ?? '-' }}</h4>
+                    <small class="text-muted">Torque</small>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h4 class="fw-bold">{{ $specification->fuel_capacity ?? '-' }}</h4>
+                    <small class="text-muted">Fuel Capacity</small>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h4 class="fw-bold">{{ $specification->fuel_efficiency ?? '-' }}</h4>
+                    <small class="text-muted">Fuel Efficiency</small>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- ================= Technical Details ================= --}}
-    <div class="card">
-        <div class="card-header bg-info text-white">
-            <h3 class="card-title">Technical Specifications</h3>
-            <div class="card-tools">
-                <a href="{{ route('admin.specifications.edit', $specification->id) }}"
-                   class="btn btn-light btn-sm">
-                    <i class="fa fa-edit"></i> Edit Specification
-                </a>
-            </div>
+    {{-- ================= ADDITIONAL DETAILS ================= --}}
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-transparent border-0">
+            <h5 class="fw-semibold mb-0">Additional Details</h5>
         </div>
 
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle">
-                    <tbody>
-                        <tr>
-                            <th width="25%">Horsepower</th>
-                            <td>{{ $specification->horsepower ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Torque</th>
-                            <td>{{ $specification->torque ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Fuel Capacity</th>
-                            <td>{{ $specification->fuel_capacity ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Fuel Efficiency</th>
-                            <td>{{ $specification->fuel_efficiency ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Seats</th>
-                            <td>{{ $specification->seats ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Doors</th>
-                            <td>{{ $specification->doors ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Steering Position</th>
-                            <td>{{ $specification->steering_position ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Color</th>
-                            <td>
-                                @if($specification->color)
-                                    <span class="badge"
-                                          style="width:30px;height:30px;
-                                          background-color:{{ $specification->color }};
-                                          border:1px solid #ccc;">
-                                    </span>
-                                    <span class="ms-2">{{ $specification->color }}</span>
-                                @else
-                                    -
-                                @endif
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Seats</small>
+                    <div class="fw-semibold">{{ $specification->seats ?? '-' }}</div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Doors</small>
+                    <div class="fw-semibold">{{ $specification->doors ?? '-' }}</div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Steering</small>
+                    <div class="fw-semibold">{{ $specification->steering_position ?? '-' }}</div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Color</small>
+                    <div class="d-flex align-items-center gap-2">
+                        @if($specification->color)
+                            <span style="width:22px;height:22px;
+                                border-radius:50%;
+                                background-color:{{ $specification->color }};
+                                border:1px solid #ccc;"></span>
+                            <span>{{ $specification->color }}</span>
+                        @else
+                            -
+                        @endif
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
