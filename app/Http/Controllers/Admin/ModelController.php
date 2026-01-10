@@ -16,7 +16,7 @@ class ModelController extends Controller
          $brands = Brand::with(['vehicleModels' => function($query) {
         $query->orderBy('model_name', 'asc');
         }])->orderBy('brand_name', 'asc')->get();
-        return view('admin.vehicle-models.index', compact('vehicleModels'));
+        return view('admin.vehicle-models.index', compact('brands'));
     }
 
     // Show create form
