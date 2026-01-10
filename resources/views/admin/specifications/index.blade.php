@@ -29,7 +29,7 @@
                 <i class="fa fa-plus"></i> Add Specification
             </a>
             <span class="text-muted">
-                Total: <strong>{{ $specifications->count() }}</strong> specifications
+              Total: <strong>{{ $groupedSpecs->sum(fn($group) => $group->count()) }}</strong> specifications
             </span>
         </div>
 
