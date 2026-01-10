@@ -74,10 +74,7 @@
                                 <div class="d-flex align-items-center">
         <strong class="mr-2">{{ $brand->brand_name }}</strong>
 
-        <span class="badge badge-pill badge-info"
-              title="Number of models">
-            {{ $brand->vehicle_models_count }}
-        </span>
+        <span>({{ $brand->vehicle_models_count }})</span>
     </div>
                                 <small class="text-muted">{{ $brand->created_at->format('Y-m-d') }}</small>
                             </td>
