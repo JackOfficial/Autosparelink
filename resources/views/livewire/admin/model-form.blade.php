@@ -49,7 +49,7 @@
                                 </div>
 
                                 {{-- Photos --}}
-                                <div x-data="{ photos: [] }" class="form-group">
+                                <div x-data="{ photos: [] }" class="form-group mt-3">
                                     <label><i class="fas fa-upload"></i> Upload Photos</label>
                                     <input type="file" multiple
                                            x-on:change="
@@ -81,7 +81,7 @@
                                 <small class="text-muted d-block mt-2">You can upload multiple images. Preview appears immediately.</small>
 
                                 {{-- Has Variants --}}
-                                <div class="form-group mt-2">
+                                <div class="form-group mt-3">
                                     <label><i class="fas fa-layer-group"></i> Does this model have variants?</label>
                                     <div class="form-check form-check-inline">
                                         <input type="radio" wire:model.live="has_variants" value="1" class="form-check-input" id="has_variants_yes">
@@ -115,109 +115,6 @@
                                     </div>
                                 </div>
                             </fieldset>
-
-                            {{-- ================= SPECIFICATIONS ================= --}}
-                            @if($has_variants == 0)
-                                <fieldset class="border p-3 mb-4 rounded bg-light">
-                                    <legend class="w-auto text-primary fw-bold"><i class="fas fa-cogs"></i> Specifications</legend>
-
-                                    {{-- XOR Error Message --}}
-                                    @error('spec')
-                                        <div class="alert alert-danger mb-3">{{ $message }}</div>
-                                    @enderror
-
-                                    {{-- Core Specs --}}
-                                    <div class="row g-3">
-                                        <div class="col-sm-6 col-md-3">
-                                            <label><i class="fas fa-car-side"></i> Body Type *</label>
-                                            <select wire:model.live="spec.body_type_id" class="form-control">
-                                                <option value="">Select</option>
-                                                @foreach($bodyTypes as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('spec.body_type_id') <span class="text-danger">{{ $message }}</span> @enderror
-                                        </div>
-                                        <div class="col-sm-6 col-md-3">
-                                            <label><i class="fas fa-cogs"></i> Engine Type *</label>
-                                            <select wire:model.live="spec.engine_type_id" class="form-control">
-                                                <option value="">Select</option>
-                                                @foreach($engineTypes as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('spec.engine_type_id') <span class="text-danger">{{ $message }}</span> @enderror
-                                        </div>
-                                        <div class="col-sm-6 col-md-3">
-                                            <label><i class="fas fa-exchange-alt"></i> Transmission *</label>
-                                            <select wire:model.live="spec.transmission_type_id" class="form-control">
-                                                <option value="">Select</option>
-                                                @foreach($transmissionTypes as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('spec.transmission_type_id') <span class="text-danger">{{ $message }}</span> @enderror
-                                        </div>
-                                        <div class="col-sm-6 col-md-3">
-                                            <label><i class="fas fa-road"></i> Drive Type</label>
-                                            <select wire:model.live="spec.drive_type_id" class="form-control">
-                                                <option value="">Select</option>
-                                                @foreach($driveTypes as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('spec.drive_type_id') <span class="text-danger">{{ $message }}</span> @enderror
-                                        </div>
-                                    </div>
-
-                                    {{-- Performance --}}
-                                    <div class="row g-3 mt-3">
-                                        <div class="col-sm-6 col-md-3">
-                                            <label><i class="fas fa-tachometer-alt"></i> Horsepower (HP)</label>
-                                            <input type="number" wire:model.live="spec.horsepower" class="form-control" min="0" placeholder="e.g. 150">
-                                        </div>
-                                        <div class="col-sm-6 col-md-3">
-                                            <label><i class="fas fa-torque"></i> Torque (Nm)</label>
-                                            <input type="number" wire:model.live="spec.torque" class="form-control" min="0" placeholder="e.g. 320">
-                                        </div>
-                                        <div class="col-sm-6 col-md-3">
-                                            <label><i class="fas fa-gas-pump"></i> Fuel Capacity (L)</label>
-                                            <input type="number" step="0.1" wire:model.live="spec.fuel_capacity" class="form-control" placeholder="e.g. 55">
-                                        </div>
-                                        <div class="col-sm-6 col-md-3">
-                                            <label><i class="fas fa-road"></i> Fuel Efficiency (km/L)</label>
-                                            <input type="number" step="0.1" wire:model.live="spec.fuel_efficiency" class="form-control" placeholder="e.g. 14.5">
-                                        </div>
-                                    </div>
-
-                                    {{-- Interior --}}
-                                    <div class="row g-3 mt-3">
-                                        <div class="col-sm-6 col-md-2">
-                                            <label><i class="fas fa-chair"></i> Seats</label>
-                                            <input type="number" wire:model.live="spec.seats" class="form-control" min="1" max="20">
-                                        </div>
-                                        <div class="col-sm-6 col-md-2">
-                                            <label><i class="fas fa-door-closed"></i> Doors</label>
-                                            <input type="number" wire:model.live="spec.doors" class="form-control" min="1" max="6">
-                                        </div>
-                                        <div class="col-sm-6 col-md-4">
-                                            <label><i class="fas fa-arrows-alt-h"></i> Steering Position</label>
-                                            <select wire:model.live="spec.steering_position" class="form-control">
-                                                <option value="">Select</option>
-                                                <option value="LEFT">Left</option>
-                                                <option value="RIGHT">Right</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-6 col-md-4">
-                                            <label>Color</label>
-                                            <div x-data="{ color: @entangle('spec.color').live }" class="d-flex align-items-center gap-2">
-                                                <input type="color" x-model="color" class="form-control form-control-color">
-                                                <input type="text" x-model="color" class="form-control" placeholder="Pick color (HEX)">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </fieldset>
-                            @endif
 
                             {{-- ================= SUBMIT ================= --}}
                             <div class="mt-4 text-end">
