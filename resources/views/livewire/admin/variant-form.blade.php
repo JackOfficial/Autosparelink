@@ -19,7 +19,7 @@
                     {{-- Brand --}}
                     <div class="col-md-4">
                         <label>Brand <span class="text-danger">*</span></label>
-                        <select wire:model="brand_id" class="form-control">
+                        <select wire:model.live="brand_id" class="form-control">
                             <option value="">Select Brand</option>
                             @foreach($brands as $brand)
                                 <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
@@ -33,7 +33,7 @@
                     {{-- Vehicle Model --}}
                     <div class="col-md-4">
                         <label>Vehicle Model <span class="text-danger">*</span></label>
-                        <select wire:model="vehicle_model_id"
+                        <select wire:model.live="vehicle_model_id"
                                 class="form-control"
                                 @disabled(empty($vehicleModels))>
                             <option value="">Select Model</option>
