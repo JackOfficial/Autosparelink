@@ -104,7 +104,10 @@
                             <td>{{ $spec->doors ?? '-' }}</td>
                             <td>{{ $spec->fuel_efficiency ?? '-' }}</td>
                             <td>{{ $spec->steering_position ?? '-' }}</td>
-                            <td>{{ $spec->color ?? '-' }}</td>
+                            <td>
+                                 <span class="badge w-50" style="background-color: {{ $spec->color ?? 'white' }}">
+                                 </span>
+                                </td>
                             <td>
                                 <span class="badge {{ $spec->status ? 'bg-success' : 'bg-secondary' }}">
                                     {{ $spec->status ? 'Active' : 'Inactive' }}
