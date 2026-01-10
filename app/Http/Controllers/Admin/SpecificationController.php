@@ -111,21 +111,25 @@ class SpecificationController extends Controller
         ));
     }
 
-    public function show($id)
+   public function show($id)
 {
-    // Load variant with its vehicle model, brand, and specifications
-    $variant = Specification::with([
+    $specification = Specification::with([
+        // When specification belongs to a variant
         'variant.vehicleModel.brand',
-        'variant.vehicleModel',
-        'variant',
+
+        // When specification belongs directly to a model (no variant)
+        'vehicleModel.brand',
+
+        // Specification attributes
+        'bodyType',
         'engineType',
         'transmissionType',
         'driveType',
-        'bodyType',
     ])->findOrFail($id);
 
-    return view('admin.variants.show', compact('variant'));
+    return view('admin.specifications.show', compact('specification'));
 }
+
 
     public function update(Request $request, $id)
     {
