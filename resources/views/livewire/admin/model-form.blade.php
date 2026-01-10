@@ -156,11 +156,11 @@
                                             </select>
                                         </div>
                                         <div class="col-md-4">
-                                            <label><i class="fas fa-palette"></i> Color</label>
-                                           <div
+                                            <div
     x-data="{ color: @entangle('spec.color').live }"
     class="input-group"
 >
+    <!-- TEXT INPUT (same as before) -->
     <input
         type="text"
         x-model="color"
@@ -168,20 +168,21 @@
         placeholder="Pick color (HEX)"
     >
 
+    <!-- COLOR PICKER BUTTON (replacement for plugin UI) -->
     <div class="input-group-append">
-        <span
-            class="input-group-text"
-            :style="{ backgroundColor: color || '#ffffff' }"
-            title="Selected color"
-        >
-            <i class="fas fa-square"></i>
-        </span>
+        <label class="input-group-text mb-0" style="cursor:pointer">
+            <i class="fas fa-square" :style="{ color: color || '#000' }"></i>
+
+            <!-- HIDDEN native color input -->
+            <input
+                type="color"
+                x-model="color"
+                class="d-none"
+            >
+        </label>
     </div>
 </div>
 
-<small class="text-muted">
-    Example: #000000, #ffffff, Metallic Blue
-</small>
 
                                         </div>
                                     </div>
