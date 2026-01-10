@@ -114,12 +114,14 @@ class SpecificationController extends Controller
     public function show($id)
 {
     // Load variant with its vehicle model, brand, and specifications
-    $variant = Variant::with([
-        'vehicleModel.brand',
-        'specifications.engineType',
-        'specifications.transmissionType',
-        'specifications.driveType',
-        'specifications.bodyType',
+    $variant = Specification::with([
+        'variant.vehicleModel.brand',
+        'variant.vehicleModel',
+        'variant',
+        'engineType',
+        'transmissionType',
+        'driveType',
+        'bodyType',
     ])->findOrFail($id);
 
     return view('admin.variants.show', compact('variant'));
