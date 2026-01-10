@@ -102,7 +102,8 @@ class VariantForm extends Component
             /* ===== Save photos ===== */
             foreach ($this->photos as $photo) {
                 $variant->photos()->create([
-                    'path' => $photo->store('variants', 'public'),
+                    'file_path' => $photo->store('variants', 'public'),
+                     'caption' => null,
                 ]);
             }
 

@@ -34,7 +34,6 @@ return new class extends Migration
             $table->string('horsepower')->nullable();
             $table->string('torque')->nullable();
             $table->string('fuel_efficiency')->nullable();
-            $table->string('photo')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
