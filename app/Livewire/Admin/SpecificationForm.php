@@ -49,7 +49,6 @@ class SpecificationForm extends Component
 
     public function mount($vehicle_model_id = null)
     {
-        dd($vehicle_model_id);
         $this->brands = Brand::orderBy('brand_name')->get();
         $this->variants = Variant::with('vehicleModel')->orderBy('name')->get();
         $this->vehicleModels = collect();
