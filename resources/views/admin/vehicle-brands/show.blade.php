@@ -1,22 +1,18 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Variant Details')
+@section('title', 'Brand Details')
 
 @section('content')
 <section class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1>{{ $variant->name ?? $variant->vehicleModel->model_name ?? '' }}</h1>
+                <h1>{{ $brand->brand_name }}</h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.variants.index') }}">Variants</a>
-                    </li>
-                    <li class="breadcrumb-item active">
-                        {{ $variant->name ?? 'Variant Details' }}
-                    </li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.vehicle-brands.index') }}">Brands</a></li>
+                    <li class="breadcrumb-item active">{{ $brand->brand_name }}</li>
                 </ol>
             </div>
         </div>
@@ -25,159 +21,84 @@
 
 <section class="content">
 
-    {{-- ================= Variant Details ================= --}}
+    {{-- ================= Brand Details ================= --}}
     <div class="card card-primary mb-4">
         <div class="card-body d-flex align-items-center">
-
-            {{-- Variant Photo --}}
             <div class="me-4">
-                @if($variant->photo)
-                    <img src="{{ asset('storage/' . $variant->photo) }}"
-                         alt="{{ $variant->name }}"
-                         class="img-thumbnail"
-                         style="width:150px; height:auto; object-fit:contain;">
+                @if($brand->brand_logo)
+                    <img src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }}" class="img-thumbnail" style="width:150px; height:auto; object-fit:contain;">
                 @else
-                    <img src="{{ asset('images/placeholder.png') }}"
-                         alt="Placeholder"
-                         class="img-thumbnail"
-                         style="width:150px; height:auto; object-fit:contain;">
+                    <img src="{{ asset('images/placeholder.png') }}" alt="Placeholder" class="img-thumbnail" style="width:150px; height:auto; object-fit:contain;">
                 @endif
             </div>
-
-            {{-- Variant Info --}}
-            <div class="row w-100">
-                <div class="col-md-6">
-                    <p><strong>Brand:</strong>
-                        {{ $variant->vehicleModel->brand->brand_name ?? '-' }}
-                    </p>
-                    <p><strong>Model:</strong>
-                        {{ $variant->vehicleModel->model_name ?? '-' }}
-                    </p>
-                    <p><strong>Variant Name:</strong>
-                        {{ $variant->name ?? '-' }}
-                    </p>
-                    <p><strong>Chassis Code:</strong>
-                        {{ $variant->chassis_code ?? '-' }}
-                    </p>
-                </div>
-
-                <div class="col-md-6">
-                    <p><strong>Model Code:</strong>
-                        {{ $variant->model_code ?? '-' }}
-                    </p>
-                    <p><strong>Trim Level:</strong>
-                        {{ $variant->trim_level ?? '-' }}
-                    </p>
-                    <p><strong>Status:</strong>
-                        <span class="badge {{ $variant->status ? 'bg-success' : 'bg-secondary' }}">
-                            {{ $variant->status ? 'Active' : 'Inactive' }}
-                        </span>
-                    </p>
-                </div>
+            <div>
+                <p><strong>Brand Name:</strong> {{ $brand->brand_name }}</p>
+                <p><strong>Country:</strong> {{ $brand->country ?? '-' }}</p>
+                <p><strong>Website:</strong> 
+                    @if($brand->website)
+                        <a href="{{ $brand->website }}" target="_blank">{{ $brand->website }}</a>
+                    @else
+                        -
+                    @endif
+                </p>
+                <p><strong>Description:</strong> {{ $brand->description ?? '-' }}</p>
             </div>
-
         </div>
     </div>
 
-    {{-- ================= Specifications Table ================= --}}
+    {{-- ================= Vehicle Models Table ================= --}}
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">
-                {{ $variant->specifications->count() }}
-                {{ $variant->specifications->count() === 1 ? 'Specification' : 'Specifications' }}
-            </h3>
-
+            <h3 class="card-title">{{ $brand->vehicleModels->count() }} {{ $brand->brand_name }} {{ $brand->vehicleModels->count() > 1 ? 'Models' : 'Model' }}</h3>
             <div class="card-tools">
-                <a href="{{ route('admin.specifications.create', ['variant_id' => $variant->id]) }}"
-                   class="btn btn-primary btn-sm">
-                    <i class="fa fa-plus"></i> Add Specification
+                <a href="{{ route('admin.vehicle-models.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fa fa-plus"></i> Add Model
                 </a>
             </div>
         </div>
 
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
-                    <thead class="thead-light text-center">
+                <table class="table table-striped table-hover">
+                    <thead class="thead-light">
                         <tr>
                             <th>#</th>
-                            <th>Body Type</th>
-                            <th>Engine</th>
-                            <th>Transmission</th>
-                            <th>Drive</th>
+                            <th>Photo</th>
+                            <th>Model Name</th>
                             <th>Years</th>
-                            <th>HP</th>
-                            <th>Torque</th>
-                            <th>Fuel Cap.</th>
-                            <th>Seats</th>
-                            <th>Doors</th>
-                            <th>Steering</th>
-                            <th>Color</th>
-                            <th>Status</th>
                             <th style="width:150px;">Actions</th>
                         </tr>
                     </thead>
-
-                    <tbody class="text-center">
-                        @forelse($variant->specifications as $spec)
+                    <tbody>
+                        @forelse($brand->vehicleModels as $model)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $spec->bodyType->name ?? '-' }}</td>
-                            <td>{{ $spec->engineType->name ?? '-' }}</td>
-                            <td>{{ $spec->transmissionType->name ?? '-' }}</td>
-                            <td>{{ $spec->driveType->name ?? '-' }}</td>
                             <td>
-                                {{ $spec->production_start ?? '?' }}
-                                -
-                                {{ $spec->production_end ?? 'Present' }}
-                            </td>
-                            <td>{{ $spec->horsepower ?? '-' }}</td>
-                            <td>{{ $spec->torque ?? '-' }}</td>
-                            <td>{{ $spec->fuel_capacity ?? '-' }}</td>
-                            <td>{{ $spec->seats ?? '-' }}</td>
-                            <td>{{ $spec->doors ?? '-' }}</td>
-                            <td>{{ $spec->steering_position ?? '-' }}</td>
-                            <td>
-                                @if($spec->color)
-                                    <span class="badge"
-                                          style="width:22px;height:22px;
-                                          background-color:{{ $spec->color }};
-                                          border:1px solid #ccc;">
-                                    </span>
+                                @if($model->photo)
+                                    <img src="{{ asset('storage/' . $model->photo) }}" class="img-thumbnail" style="width:80px; height:auto;">
                                 @else
-                                    -
+                                    <span class="text-muted">No photo</span>
                                 @endif
                             </td>
-                            <td>
-                                <span class="badge {{ $spec->status ? 'bg-success' : 'bg-secondary' }}">
-                                    {{ $spec->status ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
-                            <td class="d-flex justify-content-center">
-                                <a href="{{ route('admin.specifications.show', $spec->id) }}"
-                                   class="btn btn-info btn-sm me-2">
+                            <td>{{ $model->model_name }}</td>
+                            <td>{{ $model->production_start_year ?? '?' }} - {{ $model->production_end_year ?? 'Present' }}</td>
+                            <td class="d-flex">
+                                <a href="{{ route('admin.vehicle-models.show', $model->id) }}" class="btn btn-info btn-sm me-2">
                                     <i class="fa fa-eye"></i>
                                 </a>
-                                <a href="{{ route('admin.specifications.edit', $spec->id) }}"
-                                   class="btn btn-warning btn-sm me-2">
+                                <a href="{{ route('admin.vehicle-models.edit', $model->id) }}" class="btn btn-warning btn-sm me-2">
                                     <i class="fa fa-edit"></i>
                                 </a>
-                                <form action="{{ route('admin.specifications.destroy', $spec->id) }}"
-                                      method="POST"
-                                      onsubmit="return confirm('Are you sure?')">
+                                <form action="{{ route('admin.vehicle-models.destroy', $model->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this model?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
+                                    <button class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>
                                 </form>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="15" class="text-center text-muted">
-                                No specifications found for this variant.
-                            </td>
+                            <td colspan="5" class="text-center text-muted">No vehicle models found for this brand.</td>
                         </tr>
                         @endforelse
                     </tbody>
