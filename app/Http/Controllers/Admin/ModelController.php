@@ -55,6 +55,18 @@ class ModelController extends Controller
         return redirect()->route('admin.vehicle-models.index')->with('success', 'Vehicle model created successfully.');
     }
 
+    /**
+ * Display the specified vehicle model and its variants.
+ */
+public function show(VehicleModel $vehicleModel)
+{
+    // Load related brand and variants
+    $vehicleModel->load(['brand', 'variants']);
+
+    return view('admin.vehicle-models.show', compact('vehicleModel'));
+}
+
+
     // Show edit form
     public function edit(VehicleModel $vehicleModel)
     {
