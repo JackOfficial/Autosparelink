@@ -15,7 +15,7 @@ class VariantForm extends Component
     // Selection
     public $brand_id;
     public $vehicle_model_id;
-
+    public $disableModelDropdown = false;
     // Variant fields
     public $name;
     public $chassis_code;
@@ -33,10 +33,26 @@ class VariantForm extends Component
     public $brands;
     public $vehicleModels = [];
 
-    public function mount()
-    {
-        $this->brands = Brand::orderBy('brand_name')->get();
+    public function mount($vehicle_model_id = null)
+{
+    $this->brands = Brand::orderBy('brand_name')->get();
+
+    if ($vehicle_model_id) {
+        $model = VehicleModel::with('brand')->find($vehicle_model_id);
+        if ($model) {
+            $this->vehicle_model_id = $model->id;
+            $this->brand_id = $model->brand_id;
+
+            // Preload models for the brand
+            $this->vehicleModels = VehicleModel::where('brand_id', $this->brand_id)
+                ->orderBy('model_name')
+                ->get();
+
+            // Disable selection
+            $this->disableModelDropdown = true;
+        }
     }
+}
 
     // Dynamic dropdowns
     public function updatedBrandId($value)

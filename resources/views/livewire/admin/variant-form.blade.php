@@ -19,7 +19,7 @@
                     {{-- Brand --}}
                     <div class="col-md-4">
                         <label>Brand <span class="text-danger">*</span></label>
-                        <select wire:model.live="brand_id" class="form-control">
+                        <select wire:model.live="brand_id" class="form-control" @if($disableModelDropdown) disabled @endif>
                             <option value="">Select Brand</option>
                             @foreach($brands as $brand)
                                 <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
