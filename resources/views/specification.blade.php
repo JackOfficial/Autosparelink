@@ -218,7 +218,7 @@
                             <td>{{ $spec->driveType->name ?? '-' }}</td>
                             <td>{{ $spec->steering_position ?? '-' }}</td>
                             <td>{{ $spec->trim_level ?? '-' }}</td>
-                            <td>{{ $spec->production_year_start ?? '-' }} - {{ $spec->production_year_end ?? '-' }}</td>
+                            <td>{{ $spec->variant->production_year_start ?? '-' }} - {{ $spec->production_year_end ?? '-' }}</td>
                             <td>{{ $spec->doors ?? '-' }}</td>
                             <td>{{ $spec->seats ?? '-' }}</td>
                             <td>{{ $spec->horsepower ?? '-' }}</td>
