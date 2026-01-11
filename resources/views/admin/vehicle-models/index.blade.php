@@ -22,7 +22,7 @@
 <!-- Main content -->
 <section class="content">
 <div class="d-flex justify-content-between my-1">
-    <div>{{ $brands->vehicleModels->count() }} {{ $brands->vehicleModels->count() > 1 ? 'Models' : 'Model' }}</div>
+    <div>{{ $brands->sum(fn ($brand) => $brand->vehicleModels->count()) }} Models</div>
          <a href="{{ route('admin.vehicle-models.create') }}" class="btn btn-outline-primary btn-sm">
                     <i class="fa fa-plus"></i> Add Model
                 </a>
