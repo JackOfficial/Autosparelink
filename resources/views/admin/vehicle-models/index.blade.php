@@ -22,7 +22,7 @@
 <!-- Main content -->
 <section class="content">
 <div class="my-1">
-         <a href="{{ route('admin.vehicle-models.create') }}" class="btn btn-light btn-sm">
+         <a href="{{ route('admin.vehicle-models.create') }}" class="btn btn-outline-primary btn-sm">
                     <i class="fa fa-plus"></i> Add Model
                 </a>
     </div>
