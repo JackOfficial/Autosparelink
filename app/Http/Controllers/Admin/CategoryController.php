@@ -14,7 +14,14 @@ class CategoryController extends Controller
      */
     public function index()
     {
-         $categories = Category::with('parent')->latest()->get();
+             // Parent categories only (parent_id IS NULL)
+        $categories = Category::with(['children' => function ($query) {
+                $query->orderBy('category_name', 'asc');
+            }])
+            ->whereNull('parent_id')
+            ->orderBy('category_name', 'asc')
+            ->get();
+
         return view('admin.categories.index', compact('categories'));
     }
 
