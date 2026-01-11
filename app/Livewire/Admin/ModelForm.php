@@ -75,7 +75,7 @@ class ModelForm extends Component
                 redirect()->route('admin.specifications.create', ['vehicle_model_id' => $model->id]);
             } else {
                 session()->flash('success', 'Vehicle model created successfully. Add variant now.');
-                redirect()->route('admin.variants.create', ['model_id' => $model->id]);
+                redirect()->route('admin.variants.create', ['vehicle_model_id' => $model->id]);
             }
 
         });
