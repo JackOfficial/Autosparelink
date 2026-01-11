@@ -60,7 +60,8 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
 
-                                {{-- Photo --}}
+                               <td>
+                                 {{-- Photo --}}
                                @if($model->photos->isNotEmpty())
   @foreach($model->photos as $photo)
     <img src="{{ asset('storage/'.$photo->file_path) }}"
@@ -70,6 +71,7 @@
 @else
     <span class="text-muted">No photo</span>
 @endif
+                               </td>
 
                                 {{-- Model Name --}}
                                 <td>{{ $model->model_name ?? '-' }}</td>
