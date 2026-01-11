@@ -14,12 +14,23 @@ class VehicleModelController extends Controller
     return view('models', compact('models'));
   }
 
-  public function vehicle_model($id){
+  public function vehicle_model(string $id){
+     $models = VehicleModel::with(['brand', 'variants'])
+        ->where('brand_id', $id)
+        ->latest()
+        ->get();
+
+    return view('models', compact('models'));
+  }
+
+
+  public function show(string $id)
+{
     $models = VehicleModel::with(['brand', 'variants'])
-                ->where('brand_id', $id)
-                ->latest()
-                ->get();
-    $brand = Brand::findOrFail($id);            
-    return view('models', compact('models', 'brand'));
+        ->where('brand_id', $id)
+        ->latest()
+        ->get();
+
+    return view('models', compact('models'));
   }
 }
