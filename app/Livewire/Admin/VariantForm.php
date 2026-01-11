@@ -35,7 +35,6 @@ class VariantForm extends Component
 
     public function mount($vehicle_model_id = null)
 {
-    dd($vehicle_model_id);
     $this->brands = Brand::orderBy('brand_name')->get();
 
     if ($vehicle_model_id) {
