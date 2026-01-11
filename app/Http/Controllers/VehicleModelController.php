@@ -22,3 +22,5 @@ class VehicleModelController extends Controller
 
     return view('models', compact('models'));
   }
+  
+}
