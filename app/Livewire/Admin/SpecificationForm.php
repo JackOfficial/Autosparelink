@@ -32,21 +32,23 @@ class SpecificationForm extends Component
     public $doors;
     public $steering_position;
     public $color;
+
+    // ✅ FIXED YEARS
     public $production_start;
     public $production_end;
 
     // ================= INIT =================
     public $brands;
-    public $vehicleModels;      // Filtered by brand
-    public $variants;           // All variants
-    public $filteredVariants;   // Filtered by selected model
+    public $vehicleModels;
+    public $variants;
+    public $filteredVariants;
     public $bodyTypes;
     public $engineTypes;
     public $transmissionTypes;
     public $driveTypes;
 
-    public $hideBrandModel = false; // true if redirected with preselected model
-    public $hideVariant = false;    // true if redirected with preselected variant
+    public $hideBrandModel = false;
+    public $hideVariant = false;
 
     public function mount($vehicle_model_id = null, $variant_id = null)
     {
@@ -60,7 +62,6 @@ class SpecificationForm extends Component
         $this->transmissionTypes = TransmissionType::orderBy('name')->get();
         $this->driveTypes = DriveType::orderBy('name')->get();
 
-        // ====== If redirected from Vehicle Model ======
         if ($vehicle_model_id) {
             $this->vehicle_model_id = $vehicle_model_id;
             $model = VehicleModel::find($vehicle_model_id);
@@ -71,7 +72,6 @@ class SpecificationForm extends Component
             $this->updateVariants();
         }
 
-        // ====== If redirected from Variant ======
         if ($variant_id) {
             $variant = Variant::find($variant_id);
             if ($variant) {
@@ -84,7 +84,7 @@ class SpecificationForm extends Component
         }
     }
 
-    // ================= DYNAMIC DROPDOWNS =================
+    // ================= DROPDOWNS =================
     public function updatedBrandId($value)
     {
         $this->vehicleModels = $value
@@ -96,7 +96,7 @@ class SpecificationForm extends Component
         $this->filteredVariants = collect();
     }
 
-    public function updatedVehicleModelId($value)
+    public function updatedVehicleModelId()
     {
         $this->updateVariants();
         $this->variant_id = null;
@@ -138,11 +138,22 @@ class SpecificationForm extends Component
     {
         $this->validate();
 
-        // At least one of vehicle_model_id or variant_id is required
+        // Require at least model or variant
         if (!$this->vehicle_model_id && !$this->variant_id) {
             throw ValidationException::withMessages([
-                'vehicle_model_id' => 'You must select at least a Vehicle Model or a Variant.',
-                'variant_id' => 'You must select at least a Vehicle Model or a Variant.',
+                'vehicle_model_id' => 'You must select a Vehicle Model or Variant.',
+                'variant_id' => 'You must select a Vehicle Model or Variant.',
+            ]);
+        }
+
+        // ✅ FIX EMPTY STRING → NULL
+        $productionStart = $this->production_start ?: null;
+        $productionEnd   = $this->production_end ?: null;
+
+        // ✅ FIX LOGICAL ORDER
+        if ($productionStart && $productionEnd && $productionEnd < $productionStart) {
+            throw ValidationException::withMessages([
+                'production_end' => 'Production end year must be greater than or equal to start year.',
             ]);
         }
 
@@ -161,8 +172,10 @@ class SpecificationForm extends Component
             'doors' => $this->doors,
             'steering_position' => $this->steering_position,
             'color' => $this->color,
-            'production_start' => $this->production_start,
-            'production_end' => $this->production_end,
+
+            // ✅ FIXED
+            'production_start' => $productionStart,
+            'production_end'   => $productionEnd,
         ]);
 
         session()->flash('success', 'Specification saved successfully.');
