@@ -22,15 +22,3 @@ class VehicleModelController extends Controller
 
     return view('models', compact('models'));
   }
-
-
-  public function show(string $id)
-{
-    $models = VehicleModel::with(['brand', 'variants'])
-        ->where('brand_id', $id)
-        ->latest()
-        ->get();
-
-    return view('models', compact('models'));
-  }
-}
