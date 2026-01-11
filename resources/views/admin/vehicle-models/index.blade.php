@@ -61,13 +61,13 @@
                                 <td>{{ $loop->iteration }}</td>
 
                                 {{-- Photo --}}
-                                <td>
-                                    @if($model->photos->file_path && file_exists(storage_path('app/public/' . $model->photos->file_path)))
-                                        <img src="{{ asset('storage/' . $model->photos->file_path) }}" class="img-thumbnail" style="width:80px; height:auto;">
-                                    @else
-                                        <span class="text-muted">No photo</span>
-                                    @endif
-                                </td>
+                               @if($model->mainPhoto)
+    <img src="{{ asset('storage/'.$model->mainPhoto->file_path) }}"
+         class="img-thumbnail"
+         style="width:80px;">
+@else
+    <span class="text-muted">No photo</span>
+@endif
 
                                 {{-- Model Name --}}
                                 <td>{{ $model->model_name ?? '-' }}</td>

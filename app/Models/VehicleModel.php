@@ -46,6 +46,11 @@ public function specifications()
     return $this->morphMany(Photo::class, 'imageable');
     }
 
+    public function mainPhoto()
+{
+    return $this->morphOne(Photo::class, 'imageable')->latestOfMany();
+}
+
      public function spec()
     {
         return $this->hasMany(Specification::class)
