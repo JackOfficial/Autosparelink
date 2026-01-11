@@ -15,7 +15,6 @@ class VehicleModelController extends Controller
   }
 
   public function vehicle_model(string $id){
-    dd("here");
      $models = VehicleModel::with(['brand', 'variants'])
         ->where('brand_id', $id)
         ->latest()
