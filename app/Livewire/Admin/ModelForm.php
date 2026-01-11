@@ -70,8 +70,10 @@ class ModelForm extends Component
         'vehicle_model_id' => $model->id
     ]);
 } else {
-    session()->flash('success', 'Vehicle model created successfully.');
-    return redirect()->route('admin.vehicle-models.index');
+     session()->flash('success', 'Vehicle model created successfully. Add variant now.');
+            return redirect()->route('admin.variants.create', [
+                'model_id' => $model->id
+            ]);
 }
 
     });
