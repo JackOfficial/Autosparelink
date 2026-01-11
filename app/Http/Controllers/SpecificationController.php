@@ -43,7 +43,17 @@ class SpecificationController extends Controller
             abort(404);
         }
 
-        return view('specification', compact('item', 'specifications', 'type'));
+         $vehicleModels = VehicleModel::all();
+        $bodyTypes = BodyType::all();
+        $engineTypes = EngineType::all();
+        $driveTypes = DriveType::all();
+        $transmissionTypes = TransmissionType::all();
+
+        return view('specification', compact('item', 'specifications', 'type', 'vehicleModels',
+            'bodyTypes',
+            'engineTypes',
+            'driveTypes',
+            'transmissionTypes'));
     }
 
     public function model_specification(Request $request, $model_id)
