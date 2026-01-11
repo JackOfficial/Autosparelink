@@ -21,7 +21,11 @@
 
 <!-- Main content -->
 <section class="content">
-
+<div class="my-1">
+         <a href="{{ route('admin.vehicle-models.create') }}" class="btn btn-light btn-sm">
+                    <i class="fa fa-plus"></i> Add Model
+                </a>
+    </div>
     {{-- Success Message --}}
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show">
@@ -35,10 +39,7 @@
         <div class="card mb-4">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h3 class="card-title">{{ $brand->brand_name }} ({{ $brand->vehicleModels->count() }} {{ Str::plural('Model', $brand->vehicleModels->count()) }})</h3>
-                <a href="{{ route('admin.vehicle-models.create') }}" class="btn btn-light btn-sm">
-                    <i class="fa fa-plus"></i> Add Model
-                </a>
-            </div>
+              </div>
 
             <div class="card-body table-responsive p-0">
                 @if($brand->vehicleModels->isEmpty())
