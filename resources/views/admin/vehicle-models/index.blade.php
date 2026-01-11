@@ -61,10 +61,12 @@
                                 <td>{{ $loop->iteration }}</td>
 
                                 {{-- Photo --}}
-                               @if($model->mainPhoto)
-    <img src="{{ asset('storage/'.$model->mainPhoto->file_path) }}"
-         class="img-thumbnail"
-         style="width:80px;">
+                               @if($model->photos->isNotEmpty())
+  @foreach($model->photos as $photo)
+    <img src="{{ asset('storage/'.$photo->file_path) }}"
+         class="img-thumbnail me-1"
+         style="width:60px;">
+@endforeach
 @else
     <span class="text-muted">No photo</span>
 @endif
