@@ -62,8 +62,8 @@
 
                                 {{-- Photo --}}
                                 <td>
-                                    @if($model->photo && file_exists(storage_path('app/public/' . $model->photo)))
-                                        <img src="{{ asset('storage/' . $model->photo) }}" class="img-thumbnail" style="width:80px; height:auto;">
+                                    @if($model->photos->file_path && file_exists(storage_path('app/public/' . $model->photos->file_path)))
+                                        <img src="{{ asset('storage/' . $model->photos->file_path) }}" class="img-thumbnail" style="width:80px; height:auto;">
                                     @else
                                         <span class="text-muted">No photo</span>
                                     @endif

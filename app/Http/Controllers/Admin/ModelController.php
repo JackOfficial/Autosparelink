@@ -13,10 +13,16 @@ class ModelController extends Controller
     // List all vehicle models
     public function index()
     {
-         $brands = Brand::with(['vehicleModels' => function($query) {
-        $query->orderBy('model_name', 'asc');
-        }])->orderBy('brand_name', 'asc')->get();
-        return view('admin.vehicle-models.index', compact('brands'));
+          $brands = Brand::with([
+        'vehicleModels' => function ($query) {
+            $query->orderBy('model_name', 'asc')
+                  ->with('photos');
+        }
+    ])
+    ->orderBy('brand_name', 'asc')
+    ->get();
+
+    return view('admin.vehicle-models.index', compact('brands'));
     }
 
     // Show create form
@@ -28,34 +34,38 @@ class ModelController extends Controller
 
     // Store new vehicle model
     public function store(Request $request)
-    {
-        $request->validate([
-            'brand_id' => 'required|exists:brands,id',
-            'model_name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'production_start_year' => 'nullable|digits:4|integer',
-            'production_end_year' => 'nullable|digits:4|integer',
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'status' => 'nullable|integer',
-        ]);
+{
+    $request->validate([
+        'brand_id' => 'required|exists:brands,id',
+        'model_name' => 'required|string|max:255',
+        'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ]);
 
-        $data = $request->only([
+    $vehicleModel = VehicleModel::create(
+        $request->only([
             'brand_id',
             'model_name',
             'description',
             'production_start_year',
             'production_end_year',
-            'status'
+            'status',
+        ])
+    );
+
+    // Save photo via morph
+    if ($request->hasFile('photo')) {
+        $path = $request->file('photo')->store('vehicle-models', 'public');
+
+        $vehicleModel->photos()->create([
+            'file_path' => $path,
         ]);
-
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('vehicle-models', 'public');
-        }
-
-        VehicleModel::create($data);
-
-        return redirect()->route('admin.vehicle-models.index')->with('success', 'Vehicle model created successfully.');
     }
+
+    return redirect()
+        ->route('admin.vehicle-models.index')
+        ->with('success', 'Vehicle model created successfully.');
+}
+
 
     /**
  * Display the specified vehicle model and its variants.
@@ -83,50 +93,57 @@ public function show(VehicleModel $vehicleModel)
 
     // Update vehicle model
     public function update(Request $request, VehicleModel $vehicleModel)
-    {
-        $request->validate([
-            'brand_id' => 'required|exists:brands,id',
-            'model_name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'production_start_year' => 'nullable|digits:4|integer',
-            'production_end_year' => 'nullable|digits:4|integer',
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'status' => 'nullable|integer',
-        ]);
+{
+    $request->validate([
+        'brand_id' => 'required|exists:brands,id',
+        'model_name' => 'required|string|max:255',
+        'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ]);
 
-        $data = $request->only([
+    $vehicleModel->update(
+        $request->only([
             'brand_id',
             'model_name',
             'description',
             'production_start_year',
             'production_end_year',
-            'status'
-        ]);
+            'status',
+        ])
+    );
 
-        if ($request->hasFile('photo')) {
-            // Delete old photo if exists
-            if ($vehicleModel->photo) {
-                Storage::disk('public')->delete($vehicleModel->photo);
-            }
-            $data['photo'] = $request->file('photo')->store('vehicle-models', 'public');
+    if ($request->hasFile('photo')) {
+
+        // delete old photo
+        if ($vehicleModel->photos) {
+            Storage::disk('public')->delete($vehicleModel->photos->file_path);
+            $vehicleModel->photos()->delete();
         }
 
-        $vehicleModel->update($data);
+        $path = $request->file('photo')->store('vehicle-models', 'public');
 
-        return redirect()->route('admin.vehicle-models.index')->with('success', 'Vehicle model updated successfully.');
+        $vehicleModel->photos()->create([
+            'file_path' => $path,
+        ]);
     }
+
+    return redirect()
+        ->route('admin.vehicle-models.index')
+        ->with('success', 'Vehicle model updated successfully.');
+}
+
 
     // Delete vehicle model
-    public function destroy(VehicleModel $vehicleModel)
-    {
-        // Delete photo from storage
-        if ($vehicleModel->photo) {
-            Storage::disk('public')->delete($vehicleModel->photo);
-        }
-
-        $vehicleModel->delete();
-
-        return redirect()->route('admin.vehicle-models.index')
-                         ->with('success', 'Vehicle model deleted successfully.');
+   public function destroy(VehicleModel $vehicleModel)
+{
+    foreach ($vehicleModel->photos as $photo) {
+        Storage::disk('public')->delete($photo->file_path);
+        $photo->delete();
     }
+
+    $vehicleModel->delete();
+
+    return redirect()
+        ->route('admin.vehicle-models.index')
+        ->with('success', 'Vehicle model deleted successfully.');
+}
 }
