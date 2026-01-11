@@ -88,7 +88,7 @@
                                         <td>{{ $spec->fuel_efficiency ?? '-' }}</td>
                                         <td>{{ $spec->steering_position ?? '-' }}</td>
                                         <td>
-                                          <div class="border rounded-circle {{ $spec->color == null ? 'd-none' : '' }}" style="width: 25px; height: 25px; background-color: {{ $spec->color }}"></div>
+                                          <div class="border rounded-circle {{ $spec->color == null ? 'd-none' : '' }}" style="width: 25px; height: 25px; background-color: {{ $spec->color ?? '-' }}"></div>
                                         </td>
                                         <td>
                                             <span class="badge {{ $spec->status ? 'bg-success' : 'bg-secondary' }}">
