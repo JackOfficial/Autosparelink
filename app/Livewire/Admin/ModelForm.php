@@ -4,10 +4,10 @@ namespace App\Livewire\Admin;
 
 use App\Models\Brand;
 use App\Models\VehicleModel;
-use App\Models\Photo;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ModelForm extends Component
 {
@@ -29,7 +29,7 @@ class ModelForm extends Component
         return [
             'brand_id' => 'required|exists:brands,id',
             'model_name' => 'required|string|max:255',
-            'photos.*' => 'image|max:5120', // 5MB max per photo
+            'photos.*' => 'image|max:5120', // 5MB per photo
             'has_variants' => 'required|boolean',
             'production_start_year' => 'nullable|digits:4|integer',
             'production_end_year' => 'nullable|digits:4|integer|gte:production_start_year',
@@ -37,48 +37,49 @@ class ModelForm extends Component
     }
 
     // ================= SAVE FUNCTION =================
-   public function save()
-{
-    $this->validate();
+    public function save()
+    {
+        $this->validate();
 
-    DB::transaction(function () {
+        DB::transaction(function () {
 
-        // 1️⃣ Create Vehicle Model
-        $model = VehicleModel::create([
-            'brand_id' => $this->brand_id,
-            'model_name' => $this->model_name,
-            'description' => $this->description,
-            'has_variants' => $this->has_variants,
-            'production_start_year' => $this->production_start_year,
-            'production_end_year' => $this->production_end_year,
-            'status' => $this->status,
-        ]);
+            // 1️⃣ Handle empty years
+            $startYear = $this->production_start_year ?: null;
+            $endYear   = $this->production_end_year ?: null;
 
-        // 2️⃣ Save uploaded photos
-        foreach ($this->photos as $photo) {
-            $path = $photo->store('vehicle_models/' . $model->id, 'public');
-            $model->photos()->create([
-                'file_path' => $path,
-                'caption' => null,
+            // 2️⃣ Create Vehicle Model
+            $model = VehicleModel::create([
+                'brand_id' => $this->brand_id,
+                'model_name' => $this->model_name,
+                'description' => $this->description,
+                'has_variants' => $this->has_variants,
+                'production_start_year' => $startYear,
+                'production_end_year' => $endYear,
+                'status' => $this->status,
             ]);
-        }
 
-        // 3️⃣ Redirect based on variants
-     if ($this->has_variants == 0) {
-    session()->flash('success', 'Vehicle model created. Add specifications now.');
-    return redirect()->route('admin.specifications.create', [
-        'vehicle_model_id' => $model->id
-    ]);
-} else {
-     session()->flash('success', 'Vehicle model created successfully. Add variant now.');
-            return redirect()->route('admin.variants.create', [
-                'model_id' => $model->id
-            ]);
-}
+            // 3️⃣ Save uploaded photos with SEO-friendly filenames
+            foreach ($this->photos as $photo) {
+                $filename = Str::slug($this->model_name) . '-' . time() . '.' . $photo->getClientOriginalExtension();
+                $path = $photo->storeAs('vehicle_models/' . $model->id, $filename, 'public');
 
-    });
-}
+                $model->photos()->create([
+                    'file_path' => $path,
+                    'caption' => null,
+                ]);
+            }
 
+            // 4️⃣ Redirect based on variants
+            if ($this->has_variants == 0) {
+                session()->flash('success', 'Vehicle model created. Add specifications now.');
+                redirect()->route('admin.specifications.create', ['vehicle_model_id' => $model->id]);
+            } else {
+                session()->flash('success', 'Vehicle model created successfully. Add variant now.');
+                redirect()->route('admin.variants.create', ['model_id' => $model->id]);
+            }
+
+        });
+    }
 
     // ================= RENDER =================
     public function render()
