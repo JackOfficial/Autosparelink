@@ -11,7 +11,7 @@
                     <p>Total Brands</p>
                 </div>
                 <div class="icon"><i class="fas fa-car"></i></div>
-                <a href="#" class="small-box-footer">Manage Brands <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="/admin/vehicle-brands" class="small-box-footer">Manage Brands <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
 
@@ -22,7 +22,7 @@
                     <p>Total Models</p>
                 </div>
                 <div class="icon"><i class="fas fa-cogs"></i></div>
-                <a href="#" class="small-box-footer">Manage Models <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="/admin/vehicle-models" class="small-box-footer">Manage Models <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
 
@@ -123,16 +123,16 @@
                     <h3 class="card-title">Quick Access</h3>
                 </div>
                 <div class="card-body">
-                    <a href="#" class="btn btn-app bg-info">
+                    <a href="/admin/vehicle-models" class="btn btn-app bg-info">
                         <i class="fas fa-car"></i> Vehicles
                     </a>
-                    <a href="#" class="btn btn-app bg-warning">
+                    <a href="/admin/spare-parts" class="btn btn-app bg-warning">
                         <i class="fas fa-boxes"></i> Spare Parts
                     </a>
                     <a href="#" class="btn btn-app bg-success">
                         <i class="fas fa-shopping-cart"></i> Orders
                     </a>
-                    <a href="#" class="btn btn-app bg-primary">
+                    <a href="/admin/users" class="btn btn-app bg-primary">
                         <i class="fas fa-users"></i> Users
                     </a>
                     <a href="#" class="btn btn-app bg-danger">
