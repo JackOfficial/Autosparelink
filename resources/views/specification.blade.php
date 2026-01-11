@@ -21,12 +21,10 @@
         <div class="col-12">
             <nav class="breadcrumb bg-light mb-30">
                 <a class="breadcrumb-item text-dark" href="{{ route('home') }}">Home</a>
-                @if(isset($model))
-                    <a class="breadcrumb-item text-dark" href="{{ route('brand.models', $model->brand->id) }}">{{ $model->brand->brand_name }}</a>
-                    <span class="breadcrumb-item active">{{ $model->model_name }}</span>
-                @elseif(isset($variant))
-                    <a class="breadcrumb-item text-dark" href="{{ route('brand.models', $variant->vehicleModel->brand->id) }}">{{ $variant->vehicleModel->brand->brand_name }}</a>
-                    <span class="breadcrumb-item active">{{ $variant->name }}</span>
+                @if($type === 'model')
+                    <span class="breadcrumb-item active">{{ $item->model_name }}</span>
+                @elseif($type === 'variant')
+                    <span class="breadcrumb-item active">{{ $item->name }}</span>
                 @endif
             </nav>
         </div>
@@ -37,141 +35,15 @@
 <div class="container-fluid px-xl-5">
     <div class="bg-white p-4 shadow-sm rounded mb-3">
         <h4 class="text-uppercase mb-1" style="font-weight: 600;">
-            @if(isset($model) && $model->brand->brand_logo)
-                <img src="{{ asset('storage/' . $model->brand->brand_logo) }}" style="width:50px; height:auto;" />
-            @elseif(isset($variant) && $variant->vehicleModel->brand->brand_logo)
-                <img src="{{ asset('storage/' . $variant->vehicleModel->brand->brand_logo) }}" style="width:50px; height:auto;" />
-            @endif
-
-            @if(isset($model))
-                {{ $model->brand->brand_name }} – {{ $model->model_name }}
-            @elseif(isset($variant))
-                {{ $variant->vehicleModel->brand->brand_name }} – {{ $variant->name }}
+            @if($type === 'model' && $item->brand->brand_logo)
+                <img src="{{ asset('storage/' . $item->brand->brand_logo) }}" style="width:50px; height:auto;" />
+                {{ $item->brand->brand_name }} – {{ $item->model_name }}
+            @elseif($type === 'variant' && $item->vehicleModel->brand->brand_logo)
+                <img src="{{ asset('storage/' . $item->vehicleModel->brand->brand_logo) }}" style="width:50px; height:auto;" />
+                {{ $item->vehicleModel->brand->brand_name }} – {{ $item->name }}
             @endif
         </h4>
         <small class="text-muted">Below is the list of specifications. Use filters to narrow down results.</small>
-    </div>
-</div>
-
-<!-- Filters -->
-<div class="container-fluid px-xl-5 mb-3">
-    <div class="card shadow-sm filter-card">
-        <div class="card-body">
-            <form method="GET" action="">
-                <div class="row g-2">
-
-                    <!-- Variant / Model -->
-                    <div class="col-md-2">
-                        <select name="variant_id" class="form-control">
-                            <option value="">Variant / Model</option>
-                            @foreach($vehicleModels as $vm)
-                                <option value="{{ $vm->id }}" {{ request('variant_id') == $vm->id ? 'selected' : '' }}>
-                                    {{ $vm->model_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Body Type -->
-                    <div class="col-md-2">
-                        <select name="body" class="form-control">
-                            <option value="">Body</option>
-                            @foreach($bodyTypes as $body)
-                                <option value="{{ $body->id }}" {{ request('body') == $body->id ? 'selected' : '' }}>
-                                    {{ $body->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Engine Type -->
-                    <div class="col-md-2">
-                        <select name="engine" class="form-control">
-                            <option value="">Engine</option>
-                            @foreach($engineTypes as $engine)
-                                <option value="{{ $engine->id }}" {{ request('engine') == $engine->id ? 'selected' : '' }}>
-                                    {{ $engine->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Transmission Type -->
-                    <div class="col-md-2">
-                        <select name="transmission" class="form-control">
-                            <option value="">Transmission</option>
-                            @foreach($transmissionTypes as $trans)
-                                <option value="{{ $trans->id }}" {{ request('transmission') == $trans->id ? 'selected' : '' }}>
-                                    {{ $trans->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Drive Type -->
-                    <div class="col-md-2">
-                        <select name="drive" class="form-control">
-                            <option value="">Drive Type</option>
-                            @foreach($driveTypes as $drive)
-                                <option value="{{ $drive->id }}" {{ request('drive') == $drive->id ? 'selected' : '' }}>
-                                    {{ $drive->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Year From -->
-                    <div class="col-md-2">
-                        <input type="number" name="production_start" class="form-control" placeholder="Year From" value="{{ request('production_start') }}">
-                    </div>
-
-                    <!-- Year To -->
-                    <div class="col-md-2">
-                        <input type="number" name="production_end" class="form-control" placeholder="Year To" value="{{ request('production_end') }}">
-                    </div>
-
-                    <!-- Seats -->
-                    <div class="col-md-2">
-                        <input type="number" name="seats" class="form-control" placeholder="Seats" value="{{ request('seats') }}">
-                    </div>
-
-                    <!-- Doors -->
-                    <div class="col-md-2">
-                        <input type="number" name="doors" class="form-control" placeholder="Doors" value="{{ request('doors') }}">
-                    </div>
-
-                    <!-- Horsepower -->
-                    <div class="col-md-2">
-                        <input type="number" name="horsepower" class="form-control" placeholder="Horsepower" value="{{ request('horsepower') }}">
-                    </div>
-
-                    <!-- Torque -->
-                    <div class="col-md-2">
-                        <input type="number" name="torque" class="form-control" placeholder="Torque" value="{{ request('torque') }}">
-                    </div>
-
-                    <!-- Steering -->
-                    <div class="col-md-2">
-                        <select name="steering_position" class="form-control">
-                            <option value="">Steering</option>
-                            <option value="Left" {{ request('steering_position') == 'Left' ? 'selected' : '' }}>Left</option>
-                            <option value="Right" {{ request('steering_position') == 'Right' ? 'selected' : '' }}>Right</option>
-                        </select>
-                    </div>
-
-                    <!-- Fuel Efficiency -->
-                    <div class="col-md-2">
-                        <input type="number" name="fuel_efficiency" class="form-control" placeholder="Fuel Efficiency" value="{{ request('fuel_efficiency') }}">
-                    </div>
-
-                    <!-- Submit -->
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">Filter</button>
-                    </div>
-
-                </div>
-            </form>
-        </div>
     </div>
 </div>
 
@@ -201,11 +73,11 @@
                         <tr>
                             <td>
                                 @if($spec->variant)
-                                    <a href="{{ route('variant.parts', $spec->variant->id) }}">
+                                    <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $spec->variant->id]) }}">
                                         {{ $spec->variant->name }}
                                     </a>
                                 @elseif($spec->vehicle_model)
-                                    <a href="{{ route('model.parts', $spec->vehicle_model->id) }}">
+                                    <a href="{{ route('specifications.show', ['type' => 'model', 'id' => $spec->vehicle_model->id]) }}">
                                         {{ $spec->vehicle_model->model_name }}
                                     </a>
                                 @else
@@ -227,7 +99,7 @@
                     @empty
                         <tr>
                             <td colspan="12" class="text-center text-muted">
-                                No specifications found for this {{ isset($model) ? 'model' : 'variant' }}.
+                                No specifications found for this {{ $type }}.
                             </td>
                         </tr>
                     @endforelse
@@ -236,6 +108,5 @@
         </div>
     </div>
 </div>
-
 
 @endsection

@@ -9,6 +9,7 @@ class Variant extends Model
   protected $fillable = [
         'vehicle_model_id',
         'name',
+         'slug',
         'chassis_code',
         'model_code',
         'trim_level',

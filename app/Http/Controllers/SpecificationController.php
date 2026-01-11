@@ -31,6 +31,21 @@ class SpecificationController extends Controller
         return view('admin.specifications.index', compact('specifications'));
     }
 
+    public function show($type, $id)
+    {
+        if ($type === 'model') {
+            $item = VehicleModel::with(['brand', 'variants'])->findOrFail($id);
+            $specifications = Specification::where('vehicle_model_id', $id)->get();
+        } elseif ($type === 'variant') {
+            $item = Variant::with(['vehicleModel', 'vehicleModel.brand'])->findOrFail($id);
+            $specifications = Specification::with(['vehicleModel', 'variant', 'bodyType', 'engineType', 'transmissionType', 'driveType'])->where('variant_id', $id)->get();
+        } else {
+            abort(404);
+        }
+
+        return view('specification', compact('item', 'specifications', 'type'));
+    }
+
     public function model_specification(Request $request, $model_id)
     {
         $model = VehicleModel::with('brand', 'variants')->findOrFail($model_id);

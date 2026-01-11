@@ -103,8 +103,9 @@ Route::get('/export-excel', [ExportsController::class, 'exportAll']);
 Route::get('/export-excel/{id}', [ExportsController::class, 'exportSelected']);
 Route::get('/models', [VehicleModelController::class, 'index']);
 Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
-Route::get('/model-specification/{id}', [SpecificationController::class, 'model_specification']);
-Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
+// Route::get('/model-specification/{id}', [SpecificationController::class, 'model_specification']);
+// Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
+Route::get('/specifications/{type}/{id}', [SpecificationController::class, 'show'])->name('specifications.show');
 Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 // Show all models for a brand
 Route::get('/model/{brand}', [BrandController::class, 'show'])->name('brand.models');

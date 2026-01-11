@@ -136,7 +136,7 @@ body { background: #f5f7fa !important; }
                             @if($model->variants->count())
                                 <span class="model-name-disabled">{{ $model->model_name }}</span>
                             @else
-                                <a href="{{ route('model.specification', $model->id) }}">
+                                <a href="{{ route('specifications.show', ['type' => 'model', 'id' => $model->id]) }}">
                                     {{ $model->model_name }}
                                 </a>
                             @endif
@@ -159,7 +159,7 @@ body { background: #f5f7fa !important; }
                     @if($model->variants->count())
                     <div class="collapse mt-3" id="variants{{ $model->id }}">
                         @foreach($model->variants as $variant)
-                            <a href="{{ route('variant.specification', $variant->id) }}"
+                            <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $variant->id]) }}"
                                class="variant-item list-group-item border-0 bg-transparent">
                                 <span>{{ $variant->name ?? 'Variant' }}</span>
                                 <span>
