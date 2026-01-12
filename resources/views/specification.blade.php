@@ -201,11 +201,11 @@
                         <tr>
                             <td>
     @if($spec->variant)
-        <a href="/specifications/variant/{{ $spec->variant_id }}/parts">
+        <a href="/specifications/variant/{{ $spec->id }}/parts">
             {{ $spec->variant->name }}
         </a>
     @elseif($spec->vehicle_model)
-        <a href="/specifications/model/{{ $spec->vehicle_model_id }}/parts">
+        <a href="/specifications/model/{{ $spec->id }}/parts">
             {{ $spec->vehicle_model->model_name }}
         </a>
     @else
