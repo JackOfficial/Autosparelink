@@ -110,7 +110,8 @@ Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 // Show all models for a brand
 Route::get('/model/{brand}', [BrandController::class, 'show'])->name('brand.models');
 Route::get('/spare-parts/{variant}', [ProductController::class, 'product'])->name('spare-parts');
-
+Route::get('/specifications/{type}/{id}/parts', [SparePartController::class, 'showCompatibleParts'])
+    ->name('specification.parts');
 Route::get('/models/{model_id}/parts', [ModelPartController::class, 'model_parts'])
     ->name('model.parts');
 

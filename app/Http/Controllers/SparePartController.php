@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
 use Illuminate\Http\Request;
 use App\Models\Variant;
 use App\Models\Category;
+use App\Models\Part;
+use App\Models\VehicleModel;
 
 class SparePartController extends Controller
 {
+
+ 
      public function parts($variantId)
     {
         // Load variant with related model, brand, and parts
@@ -27,6 +32,83 @@ class SparePartController extends Controller
             'variant',
             'model',
             'categories'
+        ));
+    }
+
+    public function showCompatibleParts(Request $request, $type, $id)
+    {
+        // Determine the specification type
+        if ($type === 'model') {
+            $specification = VehicleModel::with(['brand', 'variants'])->findOrFail($id);
+            $partsQuery = Part::whereHas('specifications', function($q) use ($id) {
+                $q->where('vehicle_model_id', $id);
+            });
+        } elseif ($type === 'variant') {
+            $specification = Variant::with(['vehicleModel', 'vehicleModel.brand'])->findOrFail($id);
+            $partsQuery = Part::whereHas('specifications', function($q) use ($id) {
+                $q->where('variant_id', $id);
+            });
+        } else {
+            abort(404);
+        }
+
+        // Apply filters
+        if ($request->filled('category')) {
+            $partsQuery->whereIn('category_id', $request->category);
+        }
+
+        if ($request->filled('brand_filter')) {
+            $partsQuery->whereIn('brand_id', $request->brand_filter);
+        }
+
+        if ($request->filled('in_stock')) {
+            $partsQuery->where('in_stock', true);
+        }
+
+        if ($request->filled('min_price')) {
+            $partsQuery->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $partsQuery->where('price', '<=', $request->max_price);
+        }
+
+        // Apply search
+        if ($request->filled('q')) {
+            $query = $request->q;
+            $partsQuery->where('name', 'LIKE', "%{$query}%")
+                       ->orWhere('part_number', 'LIKE', "%{$query}%");
+        }
+
+        // Apply sorting
+        if ($request->filled('sort')) {
+            switch ($request->sort) {
+                case 'price_asc':
+                    $partsQuery->orderBy('price', 'asc');
+                    break;
+                case 'price_desc':
+                    $partsQuery->orderBy('price', 'desc');
+                    break;
+                case 'newest':
+                    $partsQuery->orderBy('created_at', 'desc');
+                    break;
+                case 'popularity':
+                    $partsQuery->orderBy('sales_count', 'desc'); // assuming you track sales
+                    break;
+            }
+        } else {
+            $partsQuery->latest();
+        }
+
+        // Paginate results
+        $parts = $partsQuery->paginate(12)->withQueryString();
+
+        // Filters data
+        $categories = Category::all();
+        $brands = Brand::all();
+
+        return view('parts.compatible', compact(
+            'specification', 'parts', 'categories', 'brands', 'type'
         ));
     }
 

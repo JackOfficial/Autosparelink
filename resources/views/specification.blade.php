@@ -200,18 +200,18 @@
                     @forelse($specifications as $spec)
                         <tr>
                             <td>
-                                @if($spec->variant)
-                                    <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $spec->variant->id]) }}">
-                                        {{ $spec->variant->name }}
-                                    </a>
-                                @elseif($spec->vehicle_model)
-                                    <a href="{{ route('specifications.show', ['type' => 'model', 'id' => $spec->vehicle_model->id]) }}">
-                                        {{ $spec->vehicle_model->model_name }}
-                                    </a>
-                                @else
-                                    N/A
-                                @endif
-                            </td>
+    @if($spec->variant)
+        <a href="/specifications/variant/{{ $spec->variant_id }}/parts">
+            {{ $spec->variant->name }}
+        </a>
+    @elseif($spec->vehicle_model)
+        <a href="/specifications/model/{{ $spec->vehicle_model_id }}/parts">
+            {{ $spec->vehicle_model->model_name }}
+        </a>
+    @else
+        N/A
+    @endif
+</td>
                             <td>{{ $spec->bodyType->name ?? '-' }}</td>
                             <td>{{ $spec->engineType->name ?? '-' }}</td>
                             <td>{{ $spec->transmissionType->name ?? '-' }}</td>
