@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 
 class PartCatalogController extends Controller
 {
+    /**
+     * Display all spare parts compatible with a vehicle model or variant.
+     */
     public function index(Request $request, string $type, int $id)
     {
         /* ----------------------------
@@ -23,7 +26,7 @@ class PartCatalogController extends Controller
                 'category',
                 'partBrand',
                 'photos'
-            ])->whereHas('fitments', function ($q) use ($id) {
+            ])->whereHas('fitment', function ($q) use ($id) {
                 $q->where('vehicle_model_id', $id);
             });
 
@@ -35,7 +38,7 @@ class PartCatalogController extends Controller
                 'category',
                 'partBrand',
                 'photos'
-            ])->whereHas('fitments', function ($q) use ($id) {
+            ])->whereHas('fitment', function ($q) use ($id) {
                 $q->where('variant_id', $id);
             });
 
@@ -52,21 +55,20 @@ class PartCatalogController extends Controller
             $partsQuery->where('category_id', $request->category);
         }
 
-        // Price range
+        // Price range filter
         if ($request->filled('min_price')) {
             $partsQuery->where('price', '>=', $request->min_price);
         }
-
         if ($request->filled('max_price')) {
             $partsQuery->where('price', '<=', $request->max_price);
         }
 
-        // In stock only
+        // In-stock only
         if ($request->boolean('in_stock')) {
             $partsQuery->where('stock_quantity', '>', 0);
         }
 
-        // Search (name / SKU / part number)
+        // Search by name, SKU, or part number
         if ($request->filled('q')) {
             $partsQuery->where(function ($q) use ($request) {
                 $q->where('part_name', 'like', "%{$request->q}%")
@@ -88,12 +90,12 @@ class PartCatalogController extends Controller
         };
 
         /* ----------------------------
-         | Execute query
+         | Execute query with pagination
          |---------------------------- */
         $parts = $partsQuery->paginate(24)->withQueryString();
 
         /* ----------------------------
-         | Categories (sidebar filter)
+         | Categories (for sidebar filter)
          |---------------------------- */
         $categories = Category::withCount('parts')
             ->whereNull('parent_id')
