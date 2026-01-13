@@ -111,6 +111,7 @@ Route::get('/specifications/{type}/{id}/parts', [PartCatalogController::class, '
     
 Route::get('/specifications/{type}/{id}', [SpecificationController::class, 'show'])->name('specifications.show');
 Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
+Route::get('/spare-parts/{part}', [SparePartController::class, 'parts'])->name('parts.show');
 // Show all models for a brand
 Route::get('/model/{brand}', [BrandController::class, 'show'])->name('brand.models');
 Route::get('/spare-parts/{variant}', [ProductController::class, 'product'])->name('spare-parts');
