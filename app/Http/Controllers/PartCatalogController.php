@@ -26,7 +26,7 @@ class PartCatalogController extends Controller
                 'category',
                 'partBrand',
                 'photos'
-            ])->whereHas('fitment', function ($q) use ($id) {
+            ])->whereHas('fitments', function ($q) use ($id) {
                 $q->where('vehicle_model_id', $id);
             });
 
@@ -38,7 +38,7 @@ class PartCatalogController extends Controller
                 'category',
                 'partBrand',
                 'photos'
-            ])->whereHas('fitment', function ($q) use ($id) {
+            ])->whereHas('fitments', function ($q) use ($id) {
                 $q->where('variant_id', $id);
             });
 
