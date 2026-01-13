@@ -9,6 +9,7 @@ use App\Models\BodyType;
 use App\Models\EngineType;
 use App\Models\TransmissionType;
 use App\Models\DriveType;
+use App\Models\Part;
 use App\Models\VehicleModel;
 use Illuminate\Http\Request;
 
@@ -128,6 +129,46 @@ class SpecificationController extends Controller
             'driveTypes',
             'transmissionTypes'
         ));
+    }
+
+    public function parts(string $type, int $id)
+        {
+        if ($type === 'model') {
+
+            $model = VehicleModel::findOrFail($id);
+
+            $parts = Part::whereHas('fitments', function ($q) use ($id) {
+                $q->where('vehicle_model_id', $id);
+            })
+            ->with(['fitments', 'category'])
+            ->paginate(24);
+
+            return view('parts.index', [
+                'type'  => 'model',
+                'item'  => $model,
+                'parts' => $parts
+            ]);
+        }
+
+        if ($type === 'variant') {
+
+            $variant = Variant::with('vehicleModel')->findOrFail($id);
+
+            $parts = Part::whereHas('fitments', function ($q) use ($variant) {
+                $q->where('variant_id', $variant->id)
+                  ->orWhere('vehicle_model_id', $variant->vehicle_model_id);
+            })
+            ->with(['fitments', 'category'])
+            ->paginate(24);
+
+            return view('parts.index', [
+                'type'  => 'variant',
+                'item'  => $variant,
+                'parts' => $parts
+            ]);
+        }
+
+        abort(404);
     }
 
     public function create()
