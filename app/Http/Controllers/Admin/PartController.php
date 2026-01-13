@@ -11,6 +11,7 @@ use App\Models\Specification;
 use App\Models\PartFitment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PartController extends Controller
 {
@@ -28,9 +29,7 @@ class PartController extends Controller
         return view('admin.parts.create', [
             'categories' => Category::orderBy('category_name')->get(),
             'partBrands' => PartBrand::orderBy('name')->get(),
-            'variants'   => Variant::with(['vehicleModel.brand', 'specifications'])
-                ->orderBy('name')
-                ->get(),
+            'variants'   => Variant::with(['vehicleModel.brand', 'specifications'])->get(),
         ]);
     }
 
@@ -57,27 +56,41 @@ class PartController extends Controller
         // Generate SKU
         $brandName = PartBrand::findOrFail($validated['part_brand_id'])->name;
         $categoryName = Category::findOrFail($validated['category_id'])->category_name;
+
         $validated['sku'] = Part::generateSku(
             $brandName,
             $categoryName,
             $validated['part_name']
         );
 
-        // Create the part
         $part = Part::create($validated);
 
-        // Save photos
+        /* ---------------------------
+         | SEO-FRIENDLY PHOTO UPLOAD
+         |--------------------------- */
         if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $index => $photo) {
-                $path = $photo->store('parts', 'public');
+
+            $brandSlug    = Str::slug($part->partBrand->name);
+            $categorySlug = Str::slug($part->category->category_name);
+            $partSlug     = Str::slug($part->part_name);
+
+            $folder = "parts/{$brandSlug}/{$categorySlug}";
+
+            foreach ($request->file('photos') as $photo) {
+
+                $filename = "{$partSlug}-" . uniqid() . '.' . $photo->getClientOriginalExtension();
+                $path = $photo->storeAs($folder, $filename, 'public');
+
                 $part->photos()->create([
-                    'photo_url' => $path,
-                    'type'      => $index === 0 ? 'main' : 'detail',
+                    'file_path' => $path,
+                    'caption'   => "{$part->part_name} spare part",
                 ]);
             }
         }
 
-        // Save fitments from variant specifications
+        /* ---------------------------
+         | Save fitments
+         |--------------------------- */
         if ($request->filled('variant_specifications')) {
             foreach ($request->variant_specifications as $specId) {
                 $spec = Specification::findOrFail($specId);
@@ -101,7 +114,7 @@ class PartController extends Controller
 
     public function edit($id)
     {
-        $part = Part::with(['photos', 'fitment.specification'])->findOrFail($id);
+        $part = Part::with(['photos', 'fitment'])->findOrFail($id);
 
         return view('admin.parts.edit', [
             'part'       => $part,
@@ -113,7 +126,7 @@ class PartController extends Controller
 
     public function update(Request $request, $id)
     {
-        $part = Part::with('photos', 'fitment')->findOrFail($id);
+        $part = Part::with(['photos', 'fitment'])->findOrFail($id);
 
         $validated = $request->validate([
             'part_number'    => 'nullable|string|max:255',
@@ -133,7 +146,9 @@ class PartController extends Controller
             'variant_specifications.*' => 'exists:specifications,id',
         ]);
 
-        // Regenerate SKU if needed
+        /* ---------------------------
+         | Regenerate SKU if changed
+         |--------------------------- */
         if (
             $validated['part_name'] !== $part->part_name ||
             $validated['category_id'] != $part->category_id ||
@@ -141,6 +156,7 @@ class PartController extends Controller
         ) {
             $brandName = PartBrand::findOrFail($validated['part_brand_id'])->name;
             $categoryName = Category::findOrFail($validated['category_id'])->category_name;
+
             $validated['sku'] = Part::generateSku(
                 $brandName,
                 $categoryName,
@@ -150,24 +166,38 @@ class PartController extends Controller
 
         $part->update($validated);
 
-        // Replace photos if new ones uploaded
+        /* ---------------------------
+         | Replace photos (SEO-safe)
+         |--------------------------- */
         if ($request->hasFile('photos')) {
+
             foreach ($part->photos as $photo) {
-                Storage::disk('public')->delete($photo->photo_url);
+                Storage::disk('public')->delete($photo->file_path);
                 $photo->delete();
             }
 
-            foreach ($request->file('photos') as $index => $photo) {
-                $path = $photo->store('parts', 'public');
+            $brandSlug    = Str::slug($part->partBrand->name);
+            $categorySlug = Str::slug($part->category->category_name);
+            $partSlug     = Str::slug($part->part_name);
+
+            $folder = "parts/{$brandSlug}/{$categorySlug}";
+
+            foreach ($request->file('photos') as $photo) {
+
+                $filename = "{$partSlug}-" . uniqid() . '.' . $photo->getClientOriginalExtension();
+                $path = $photo->storeAs($folder, $filename, 'public');
+
                 $part->photos()->create([
-                    'photo_url' => $path,
-                    'type'      => $index === 0 ? 'main' : 'detail',
+                    'file_path' => $path,
+                    'caption'   => "{$part->part_name} spare part",
                 ]);
             }
         }
 
-        // Replace fitments
-        $part->fitment()->delete(); // remove all old fitments
+        /* ---------------------------
+         | Replace fitments
+         |--------------------------- */
+        $part->fitment()->delete();
 
         if ($request->filled('variant_specifications')) {
             foreach ($request->variant_specifications as $specId) {
@@ -192,18 +222,14 @@ class PartController extends Controller
 
     public function destroy($id)
     {
-        $part = Part::with('photos', 'fitment')->findOrFail($id);
+        $part = Part::with(['photos', 'fitment'])->findOrFail($id);
 
-        // Delete photos
         foreach ($part->photos as $photo) {
-            Storage::disk('public')->delete($photo->photo_url);
+            Storage::disk('public')->delete($photo->file_path);
             $photo->delete();
         }
 
-        // Delete all fitments
         $part->fitment()->delete();
-
-        // Delete the part
         $part->delete();
 
         return redirect()
