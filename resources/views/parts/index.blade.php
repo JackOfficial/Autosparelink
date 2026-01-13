@@ -155,7 +155,7 @@
                                 </div>
 
                                 <div class="d-flex justify-content-between">
-                                    <a href="{{ route('parts.show', $part->id) }}"
+                                    <a href="{{ route('spare-parts.show', $part->id) }}"
                                        class="btn btn-outline-secondary btn-sm">
                                         Details
                                     </a>
