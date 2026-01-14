@@ -114,7 +114,7 @@ class PartController extends Controller
 
     public function edit($id)
     {
-        $part = Part::with(['photos', 'fitment'])->findOrFail($id);
+        $part = Part::with(['photos', 'fitments'])->findOrFail($id);
 
         return view('admin.parts.edit', [
             'part'       => $part,
@@ -126,7 +126,7 @@ class PartController extends Controller
 
     public function update(Request $request, $id)
     {
-        $part = Part::with(['photos', 'fitment'])->findOrFail($id);
+        $part = Part::with(['photos', 'fitments'])->findOrFail($id);
 
         $validated = $request->validate([
             'part_number'    => 'nullable|string|max:255',
@@ -222,7 +222,7 @@ class PartController extends Controller
 
     public function destroy($id)
     {
-        $part = Part::with(['photos', 'fitment'])->findOrFail($id);
+        $part = Part::with(['photos', 'fitments'])->findOrFail($id);
 
         foreach ($part->photos as $photo) {
             Storage::disk('public')->delete($photo->file_path);
