@@ -145,8 +145,8 @@
             @foreach($part->fitments->take(3) as $fitment)
                 <li>
                     <strong>
-                        {{ $fitment->vehicleModel->brand->name ?? '' }}
-                        {{ $fitment->vehicleModel->name ?? '' }}
+                        {{ $fitment->vehicleModel->brand->brand_name ?? '' }}
+                        {{ $fitment->vehicleModel->model_name ?? '' }}
                     </strong>
 
                     @if($fitment->variant)
