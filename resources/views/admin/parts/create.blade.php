@@ -83,7 +83,7 @@
 </div>
 </section>
 
-@push('scripts')
+{{-- @push('scripts')
    <script>
 document.addEventListener('livewire:load', () => {
 
@@ -94,8 +94,8 @@ document.addEventListener('livewire:load', () => {
     });
 
 });
-</script>
+</script> --}}
 
-@endpush
+{{-- @endpush --}}
 
 @endsection
