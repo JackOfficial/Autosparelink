@@ -14,9 +14,7 @@ class Create extends Component
 {
     use WithFileUploads;
 
-    /* =======================
-     | FORM FIELDS
-     ======================= */
+    /* FORM FIELDS */
     public $part_number;
     public $part_name;
     public $parentCategoryId;
@@ -25,15 +23,13 @@ class Create extends Component
     public $oem_number;
     public $price;
     public $stock_quantity;
-    public $status = 1;
+    public $status = 'Active';
     public $description;
 
     public $photos = [];
     public $fitment_specifications = [];
 
-    /* =======================
-     | DATA
-     ======================= */
+    /* DATA */
     public $parentCategories = [];
     public $childCategories = [];
     public $partBrands = [];
@@ -43,57 +39,47 @@ class Create extends Component
         'fitmentsUpdated' => 'setFitments'
     ];
 
-    public function setFitments($values)
+    protected function rules()
     {
-        $this->fitment_specifications = $values ?? [];
-    }
-
-    /* =======================
-     | MOUNT
-     ======================= */
-    public function mount()
-    {
-        $this->parentCategories = Category::whereNull('parent_id')->orderBy('category_name')->get();
-        $this->partBrands = PartBrand::orderBy('name')->get();
-
-        // IMPORTANT: same logic that WORKED before
-        $this->vehicleModels = VehicleModel::with([
-            'brand',
-            'variants.specifications',
-            'specifications'
-        ])->orderBy('model_name')->get();
-    }
-
-    /* =======================
-     | CATEGORY DEPENDENCY
-     ======================= */
-    public function updatedParentCategoryId()
-    {
-        $this->category_id = null;
-
-        $this->childCategories = Category::where('parent_id', $this->parentCategoryId)
-            ->orderBy('category_name')
-            ->get();
-    }
-
-    /* =======================
-     | SAVE
-     ======================= */
-    public function save()
-    {
-        $this->validate([
+        return [
             'part_name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'part_brand_id' => 'required|exists:part_brands,id',
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
-            'status' => 'required|integer',
+            'status' => 'required|in:Active,Inactive',
 
-            'photos.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'photos.*' => 'image|max:2048',
+            'fitment_specifications' => 'nullable|array',
             'fitment_specifications.*' => 'exists:specifications,id',
-        ]);
+        ];
+    }
 
-        /* -------- SKU -------- */
+    public function mount()
+    {
+        $this->parentCategories = Category::whereNull('parent_id')->orderBy('category_name')->get();
+        $this->partBrands = PartBrand::orderBy('name')->get();
+        $this->vehicleModels = VehicleModel::with(['brand', 'variants.specifications', 'specifications'])->get();
+    }
+
+    public function updatedParentCategoryId()
+    {
+        $this->childCategories = Category::where('parent_id', $this->parentCategoryId)
+            ->orderBy('category_name')
+            ->get();
+
+        $this->category_id = null;
+    }
+
+    public function setFitments($values)
+    {
+        $this->fitment_specifications = $values ?? [];
+    }
+
+    public function save()
+    {
+        $this->validate();
+
         $sku = Part::generateSku(
             PartBrand::find($this->part_brand_id)->name,
             Category::find($this->category_id)->category_name,
@@ -103,51 +89,48 @@ class Create extends Component
         $part = Part::create([
             'part_number' => $this->part_number,
             'part_name' => $this->part_name,
-            'sku' => $sku,
             'category_id' => $this->category_id,
             'part_brand_id' => $this->part_brand_id,
             'oem_number' => $this->oem_number,
             'price' => $this->price,
             'stock_quantity' => $this->stock_quantity,
-            'status' => $this->status,
+            'status' => $this->status === 'Active' ? 1 : 0,
             'description' => $this->description,
+            'sku' => $sku,
         ]);
 
-        /* -------- PHOTOS -------- */
-        if ($this->photos) {
-            $folder = 'parts/' .
-                Str::slug($part->partBrand->name) . '/' .
-                Str::slug($part->category->category_name);
-
-            foreach ($this->photos as $photo) {
-                $filename = Str::slug($this->part_name) . '-' . uniqid() . '.' . $photo->extension();
-                $path = $photo->storeAs($folder, $filename, 'public');
-
-                $part->photos()->create([
-                    'file_path' => $path,
-                    'caption' => $this->part_name,
-                ]);
-            }
-        }
-
-        /* -------- FITMENTS (EXACT SAME LOGIC) -------- */
+        /* FITMENTS */
         foreach ($this->fitment_specifications as $specId) {
             $spec = Specification::with(['variant', 'vehicleModel'])->find($specId);
 
             PartFitment::create([
                 'part_id' => $part->id,
-                'variant_id' => $spec->variant_id ?? optional($spec->variant)->id,
-                'vehicle_model_id' => $spec->vehicle_model_id ?? optional($spec->variant)->vehicle_model_id,
+                'variant_id' => $spec->variant_id ?? $spec->variant?->id,
+                'vehicle_model_id' => $spec->vehicle_model_id ?? $spec->variant?->vehicle_model_id,
                 'status' => 'active',
                 'year_start' => $spec->production_start,
                 'year_end' => $spec->production_end,
             ]);
         }
 
-        session()->flash('success', 'Part created successfully.');
+        /* PHOTOS */
+        foreach ($this->photos as $photo) {
+            $path = $photo->store(
+                'parts/' . Str::slug($part->partBrand->name),
+                'public'
+            );
+
+            $part->photos()->create([
+                'file_path' => $path,
+                'caption' => $part->part_name,
+            ]);
+        }
+
+        session()->flash('success', 'Spare part created successfully.');
+
         return redirect()->route('admin.spare-parts.index');
     }
-
+    
     public function render()
     {
         return view('livewire.admin.part.create');

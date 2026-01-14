@@ -84,22 +84,18 @@
 </section>
 
 @push('scripts')
-    <script>
-document.addEventListener('livewire:load', function () {
-  alert('Hello world');
-    const select = $('#fitmentSelect');
+   <script>
+document.addEventListener('livewire:load', () => {
 
-    select.select2({
-        placeholder: "Select compatible vehicles",
-        width: '100%'
-    });
+    $('#fitmentSelect').select2({ width:'100%' });
 
-    select.on('change', function () {
+    $('#fitmentSelect').on('change', function () {
         Livewire.emit('fitmentsUpdated', $(this).val());
     });
 
 });
 </script>
+
 @endpush
 
 @endsection
