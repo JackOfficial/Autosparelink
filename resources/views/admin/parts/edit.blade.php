@@ -168,54 +168,52 @@
         <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
 
         {{-- FITMENTS --}}
-        <div class="mb-3">
-            <label class="form-label">Compatible Vehicles</label>
+<div class="mb-3">
+    <label class="form-label">Compatible Vehicles</label>
 
-            <select name="variant_specifications[]"
-                    class="form-control select2-multiple"
-                    multiple>
+    <select name="fitment_specifications[]"
+            class="form-control select2-multiple"
+            multiple>
 
-                @php
-                    $selectedSpecs = old(
-                        'variant_specifications',
-                        $part->fitments->pluck('variant_id')->toArray()
-                    );
-                @endphp
+        @php
+            // Collect both variant_id and null for model-only fitments
+            $selectedSpecs = old('fitment_specifications', $part->fitments->map(function($fit) {
+                return $fit->specification_id ?? null;
+            })->filter()->toArray());
+        @endphp
 
-                {{-- MODELS --}}
-                @foreach($vehicleModels as $model)
+        {{-- LOOP THROUGH VEHICLE MODELS --}}
+        @foreach($vehicleModels as $model)
+            
+            <optgroup label="{{ $model->brand->brand_name }} / {{ $model->model_name }}">
 
-                    {{-- MODEL WITH VARIANTS --}}
-                    @if($model->variants->count())
-                        <optgroup label="{{ $model->brand->brand_name }} / {{ $model->model_name }}">
-                            @foreach($model->variants as $variant)
-                                @foreach($variant->specifications as $spec)
-                                    <option value="{{ $spec->id }}"
-                                        {{ in_array($spec->id, $selectedSpecs) ? 'selected' : '' }}>
-                                        {{ $variant->name }}
-                                        ({{ $spec->production_start }}–{{ $spec->production_end }})
-                                    </option>
-                                @endforeach
-                            @endforeach
-                        </optgroup>
-
-                    {{-- MODEL WITHOUT VARIANTS --}}
-                    @else
-                        <optgroup label="{{ $model->brand->brand_name }} / {{ $model->model_name }}">
-                            @foreach($model->specifications as $spec)
-                                <option value="{{ $spec->id }}"
-                                    {{ in_array($spec->id, $selectedSpecs) ? 'selected' : '' }}>
-                                    {{ $model->model_name }}
-                                    ({{ $spec->production_start }}–{{ $spec->production_end }})
-                                </option>
-                            @endforeach
-                        </optgroup>
-                    @endif
-
+                {{-- MODEL WITH VARIANTS --}}
+                @foreach($model->variants as $variant)
+                    @foreach($variant->specifications as $spec)
+                        <option value="{{ $spec->id }}"
+                            {{ in_array($spec->id, $selectedSpecs) ? 'selected' : '' }}>
+                            {{ $variant->name }}
+                            ({{ $spec->production_start }}–{{ $spec->production_end }})
+                        </option>
+                    @endforeach
                 @endforeach
 
-            </select>
-        </div>
+                {{-- MODEL WITHOUT VARIANTS --}}
+                @foreach($model->specifications as $spec)
+                    <option value="{{ $spec->id }}"
+                        {{ in_array($spec->id, $selectedSpecs) ? 'selected' : '' }}>
+                        {{ $model->model_name }}
+                        ({{ $spec->production_start }}–{{ $spec->production_end }})
+                    </option>
+                @endforeach
+
+            </optgroup>
+
+        @endforeach
+
+    </select>
+</div>
+
 
         {{-- DESCRIPTION --}}
         <div class="mb-3">
