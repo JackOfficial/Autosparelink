@@ -143,20 +143,12 @@
     @if($part->fitments && $part->fitments->count())
         <ul class="list-unstyled mb-0">
             @foreach($part->fitments->take(3) as $fitment)
-                <li>
-                    <strong>
-                        {{ $fitment->vehicleModel->brand->brand_name ?? '' }}
-                        {{ $fitment->vehicleModel->model_name ?? '' }}
-                    </strong>
-
-                    @if($fitment->variant)
-                        – {{ $fitment->variant->name }}
-                    @endif
-
-                    <small class="text-muted">
-                        ({{ $fitment->year_start }}–{{ $fitment->year_end ?? 'Present' }})
-                    </small>
-                </li>
+            <span 
+    data-toggle="tooltip" 
+    data-placement="top" 
+    title="{{ $fitment->vehicleModel->brand->brand_name ?? '' }} {{ $fitment->vehicleModel->model_name ?? '' }} – {{ $fitment->variant->name }}" >
+   {{ $fitment->vehicleModel->brand->brand_name ?? '' }} {{ $fitment->vehicleModel->model_name ?? '' }}
+</span>
             @endforeach
         </ul>
 
