@@ -177,7 +177,7 @@
     <div class="row px-xl-5">
         @forelse ($parts as $part)
             @php
-                $mainPhoto = $part->photos->first()?->photo_url ?? 'frontend/img/placeholder.png';
+                $mainPhoto = $part->photos->first()?->file_path ?? 'frontend/img/placeholder.png';
                 $discount = !empty($part->old_price) && $part->old_price > $part->price ? round((($part->old_price - $part->price)/$part->old_price)*100) : null;
             @endphp
             <a href="shop/products/{{ $part->id }}">
@@ -230,7 +230,7 @@
     </div>
     <div class="row px-xl-5">
         @forelse ($recent_parts as $recent_part)
-            @php $mainPhoto = $recent_part->photos->first()?->photo_url ?? 'frontend/img/placeholder.png'; @endphp
+            @php $mainPhoto = $recent_part->photos->first()?->file_path ?? 'frontend/img/placeholder.png'; @endphp
             <a href="shop/products/{{ $recent_part->id }}">
                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="product-item bg-white">
