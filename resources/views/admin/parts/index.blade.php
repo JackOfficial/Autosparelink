@@ -99,20 +99,30 @@
 
                             <!-- Stacked photos -->
                             <td>
-                                @if($part->photos && $part->photos->count())
-                                    <div class="photo-stack">
-                                        @foreach($part->photos->take(3) as $index => $photo)
-                                            <img src="{{ asset('storage/'.$photo->photo_url) }}"
-                                                 class="stack-img"
-                                                 style="left: {{ $index * 15 }}px; z-index: {{ 10 - $index }};">
-                                        @endforeach
-                                        @if($part->photos->count() > 3)
-                                            <span class="stack-more">+{{ $part->photos->count() - 3 }}</span>
-                                        @endif
-                                    </div>
-                                @else
-                                    <span class="text-muted">No photo</span>
-                                @endif
+                              @if($part->photos && $part->photos->count())
+    <div class="photo-stack position-relative">
+        @foreach($part->photos->take(3) as $index => $photo)
+            <img 
+                src="{{ asset('storage/' . $photo->file_path) }}"
+                class="stack-img"
+                style="left: {{ $index * 15 }}px; z-index: {{ 10 - $index }};"
+                alt="{{ $part->part_name }}"
+            >
+        @endforeach
+
+        @if($part->photos->count() > 3)
+            <span class="stack-more">
+                +{{ $part->photos->count() - 3 }}
+            </span>
+        @endif
+    </div>
+@else
+    <img 
+        src="{{ asset('images/no-image.png') }}"
+        class="img-fluid"
+        alt="No image available"
+    >
+@endif
                             </td>
 
                             <td>{{ $part->part_number }}</td>
