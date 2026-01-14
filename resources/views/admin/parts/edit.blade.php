@@ -176,10 +176,8 @@
             multiple>
 
         @php
-            // Collect both variant_id and null for model-only fitments
-            $selectedSpecs = old('fitment_specifications', $part->fitments->map(function($fit) {
-                return $fit->specification_id ?? null;
-            })->filter()->toArray());
+            // Collect all existing fitment specification_ids
+            $selectedSpecs = old('fitment_specifications', $part->fitments->pluck('specification_id')->filter()->toArray());
         @endphp
 
         {{-- LOOP THROUGH VEHICLE MODELS --}}
@@ -187,7 +185,7 @@
             
             <optgroup label="{{ $model->brand->brand_name }} / {{ $model->model_name }}">
 
-                {{-- MODEL WITH VARIANTS --}}
+                {{-- VARIANT SPECIFICATIONS --}}
                 @foreach($model->variants as $variant)
                     @foreach($variant->specifications as $spec)
                         <option value="{{ $spec->id }}"
@@ -198,7 +196,7 @@
                     @endforeach
                 @endforeach
 
-                {{-- MODEL WITHOUT VARIANTS --}}
+                {{-- MODEL-ONLY SPECIFICATIONS --}}
                 @foreach($model->specifications as $spec)
                     <option value="{{ $spec->id }}"
                         {{ in_array($spec->id, $selectedSpecs) ? 'selected' : '' }}>
@@ -213,6 +211,7 @@
 
     </select>
 </div>
+
 
 
         {{-- DESCRIPTION --}}
