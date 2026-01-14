@@ -83,7 +83,8 @@
 </div>
 </section>
 
-<script>
+@push('scripts')
+    <script>
 document.addEventListener('livewire:load', function () {
   alert('Hello world');
     const select = $('#fitmentSelect');
@@ -99,5 +100,6 @@ document.addEventListener('livewire:load', function () {
 
 });
 </script>
+@endpush
 
 @endsection
