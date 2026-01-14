@@ -60,9 +60,17 @@
 <input type="number" class="form-control" wire:model.defer="price">
 </div>
 
-<div class="col-md-6 mb-3">
+<div class="col-md-3 mb-3">
 <label>Stock Quantity</label>
 <input type="number" class="form-control" wire:model.defer="stock_quantity">
+</div>
+
+<div class="col-md-3 mb-3">
+<label>Status</label>
+<select class="form-control" wire:model.defer="status">
+    <option value="Inactive">Inactive</option>
+    <option value="Active">Active</option>
+</select>
 </div>
 
 </div>
