@@ -170,48 +170,44 @@
         {{-- FITMENTS --}}
 <div class="mb-3">
     <label class="form-label">Compatible Vehicles</label>
-
-    <select name="fitment_specifications[]"
-            class="form-control select2-multiple"
-            multiple>
+    <select name="fitment_specifications[]" class="form-control select2-multiple" multiple>
 
         @php
-            // Collect all existing fitment specification_ids
-            $selectedSpecs = old('fitment_specifications', $part->fitments->pluck('specification_id')->filter()->toArray());
+            // Collect all specification_ids already linked to this part
+            $selectedSpecs = old('fitment_specifications', $part->fitments->pluck('specification_id')->toArray());
         @endphp
 
-        {{-- LOOP THROUGH VEHICLE MODELS --}}
         @foreach($vehicleModels as $model)
-            
-            <optgroup label="{{ $model->brand->brand_name }} / {{ $model->model_name }}">
 
-                {{-- VARIANT SPECIFICATIONS --}}
+            @if($model->variants->isEmpty())
+                {{-- Model-level specs --}}
+                @foreach($model->specifications as $spec)
+                    <option value="{{ $spec->id }}"
+                        {{ in_array($spec->id, $selectedSpecs) ? 'selected' : '' }}>
+                        {{ optional($model->brand)->brand_name }} / {{ $model->model_name }}
+                        ({{ $spec->production_start }}–{{ $spec->production_end }})
+                    </option>
+                @endforeach
+
+            @else
+                {{-- Variant-level specs --}}
                 @foreach($model->variants as $variant)
                     @foreach($variant->specifications as $spec)
                         <option value="{{ $spec->id }}"
                             {{ in_array($spec->id, $selectedSpecs) ? 'selected' : '' }}>
+                            {{ optional($model->brand)->brand_name }} / {{ $model->model_name }} —
                             {{ $variant->name }}
                             ({{ $spec->production_start }}–{{ $spec->production_end }})
                         </option>
                     @endforeach
                 @endforeach
-
-                {{-- MODEL-ONLY SPECIFICATIONS --}}
-                @foreach($model->specifications as $spec)
-                    <option value="{{ $spec->id }}"
-                        {{ in_array($spec->id, $selectedSpecs) ? 'selected' : '' }}>
-                        {{ $model->model_name }}
-                        ({{ $spec->production_start }}–{{ $spec->production_end }})
-                    </option>
-                @endforeach
-
-            </optgroup>
+            @endif
 
         @endforeach
 
     </select>
+    <small class="text-muted">Select all vehicle models or variant specifications this part is compatible with.</small>
 </div>
-
 
 
         {{-- DESCRIPTION --}}
