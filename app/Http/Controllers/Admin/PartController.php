@@ -197,7 +197,7 @@ class PartController extends Controller
         /* ---------------------------
          | Replace fitments
          |--------------------------- */
-        $part->fitment()->delete();
+        $part->fitments()->delete();
 
         if ($request->filled('variant_specifications')) {
             foreach ($request->variant_specifications as $specId) {
@@ -229,7 +229,7 @@ class PartController extends Controller
             $photo->delete();
         }
 
-        $part->fitment()->delete();
+        $part->fitments()->delete();
         $part->delete();
 
         return redirect()
