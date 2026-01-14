@@ -22,7 +22,7 @@
 
 <div class="col-md-6 mb-3">
 <label>Parent Category</label>
-<select class="form-control" wire:model="parentCategoryId">
+<select class="form-control" wire:model.live="parentCategoryId">
 <option value="">-- Select Parent --</option>
 @foreach($parentCategories as $parent)
 <option value="{{ $parent->id }}">{{ $parent->category_name }}</option>
