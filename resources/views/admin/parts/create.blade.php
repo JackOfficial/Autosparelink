@@ -85,7 +85,7 @@
 
 <script>
 document.addEventListener('livewire:load', function () {
-
+  alert('Hello world');
     const select = $('#fitmentSelect');
 
     select.select2({
