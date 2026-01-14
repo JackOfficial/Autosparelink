@@ -143,12 +143,17 @@
     @if($part->fitments && $part->fitments->count())
         <ul class="list-unstyled mb-0">
             @foreach($part->fitments->take(3) as $fitment)
-            <span 
+            <ul>
+                <li>
+  <span 
     data-toggle="tooltip" 
     data-placement="top" 
     title="{{ $fitment->vehicleModel->brand->brand_name ?? '' }} {{ $fitment->vehicleModel->model_name ?? '' }} {{ $fitment->variant->name ?? '' }}" >
    {{ $fitment->vehicleModel->brand->brand_name ?? '' }} {{ $fitment->vehicleModel->model_name ?? '' }}
 </span>
+                </li>
+            </ul>
+          
             @endforeach
         </ul>
 
