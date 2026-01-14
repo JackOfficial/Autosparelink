@@ -163,59 +163,104 @@
                 </div>
 
                 <!-- RIGHT COLUMN -->
-                <div class="col-lg-6">
-                    <fieldset>
-                        <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
+<div class="col-lg-6">
+    <fieldset>
+        <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
 
-                        <div class="mb-3">
-                            <label class="form-label">Compatible Variants</label>
-                            <select name="variants[]" class="form-control select2-multiple" multiple>
-                                @foreach($variants as $variant)
-                                    <option value="{{ $variant->id }}"
-                                        {{ in_array($variant->id, old('variants', $part->variants->pluck('id')->toArray())) ? 'selected' : '' }}>
-                                        {{ optional($variant->vehicleModel->brand)->brand_name }} /
-                                        {{ $variant->vehicleModel->model_name }} — {{ $variant->name }}
+        {{-- FITMENTS --}}
+        <div class="mb-3">
+            <label class="form-label">Compatible Vehicles</label>
+
+            <select name="variant_specifications[]"
+                    class="form-control select2-multiple"
+                    multiple>
+
+                @php
+                    $selectedSpecs = old(
+                        'variant_specifications',
+                        $part->fitments->pluck('variant_id')->toArray()
+                    );
+                @endphp
+
+                {{-- MODELS --}}
+                @foreach($vehicleModels as $model)
+
+                    {{-- MODEL WITH VARIANTS --}}
+                    @if($model->variants->count())
+                        <optgroup label="{{ $model->brand->brand_name }} / {{ $model->model_name }}">
+                            @foreach($model->variants as $variant)
+                                @foreach($variant->specifications as $spec)
+                                    <option value="{{ $spec->id }}"
+                                        {{ in_array($spec->id, $selectedSpecs) ? 'selected' : '' }}>
+                                        {{ $variant->name }}
+                                        ({{ $spec->production_start }}–{{ $spec->production_end }})
                                     </option>
                                 @endforeach
-                            </select>
-                        </div>
+                            @endforeach
+                        </optgroup>
 
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" class="form-control" rows="2">{{ old('description', $part->description) }}</textarea>
-                        </div>
+                    {{-- MODEL WITHOUT VARIANTS --}}
+                    @else
+                        <optgroup label="{{ $model->brand->brand_name }} / {{ $model->model_name }}">
+                            @foreach($model->specifications as $spec)
+                                <option value="{{ $spec->id }}"
+                                    {{ in_array($spec->id, $selectedSpecs) ? 'selected' : '' }}>
+                                    {{ $model->model_name }}
+                                    ({{ $spec->production_start }}–{{ $spec->production_end }})
+                                </option>
+                            @endforeach
+                        </optgroup>
+                    @endif
 
-                        <!-- EXISTING PHOTOS -->
-                        <div class="mb-3">
-                            <label class="form-label">Existing Photos</label>
-                            <div class="d-flex flex-wrap gap-2">
-                                @foreach($part->photos as $photo)
-                                    <img src="{{ asset('storage/'.$photo->photo_url) }}" width="120" class="img-thumbnail">
-                                @endforeach
-                            </div>
-                        </div>
+                @endforeach
 
-                        <!-- NEW PHOTOS -->
-                        <div class="mb-3">
-                            <label class="form-label">Replace Photos</label>
-                            <div x-data="{ previews: [] }">
-                                <input type="file" name="photos[]" multiple class="form-control"
-                                    @change="
-                                        previews = [];
-                                        Array.from($event.target.files).forEach(file => {
-                                            previews.push(URL.createObjectURL(file));
-                                        })
-                                    ">
-                                <div class="mt-2 d-flex flex-wrap gap-2">
-                                    <template x-for="(image, index) in previews" :key="index">
-                                        <img :src="image" class="img-thumbnail" width="120">
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
+            </select>
+        </div>
 
-                    </fieldset>
+        {{-- DESCRIPTION --}}
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description"
+                      class="form-control"
+                      rows="2">{{ old('description', $part->description) }}</textarea>
+        </div>
+
+        {{-- EXISTING PHOTOS --}}
+        <div class="mb-3">
+            <label class="form-label">Existing Photos</label>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach($part->photos as $photo)
+                    <img src="{{ asset('storage/'.$photo->file_path) }}"
+                         width="120"
+                         class="img-thumbnail">
+                @endforeach
+            </div>
+        </div>
+
+        {{-- NEW PHOTOS --}}
+        <div class="mb-3">
+            <label class="form-label">Replace Photos</label>
+            <div x-data="{ previews: [] }">
+                <input type="file"
+                       name="photos[]"
+                       multiple
+                       class="form-control"
+                       @change="
+                           previews = [];
+                           Array.from($event.target.files).forEach(file => {
+                               previews.push(URL.createObjectURL(file));
+                           });
+                       ">
+                <div class="mt-2 d-flex flex-wrap gap-2">
+                    <template x-for="(image, index) in previews" :key="index">
+                        <img :src="image" class="img-thumbnail" width="120">
+                    </template>
                 </div>
+            </div>
+        </div>
+
+    </fieldset>
+</div>
 
             </div>
 

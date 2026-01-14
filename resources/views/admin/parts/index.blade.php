@@ -83,6 +83,7 @@
                             <th>Name</th>
                             <th>Category</th>
                             <th>Brand</th>
+                            <th>Compatible</th>
                             <th>OEM Number</th>
                             <th>Price</th>
                             <th>Stock</th>
@@ -137,6 +138,37 @@
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
+
+                            <td>
+    @if($part->fitments && $part->fitments->count())
+        <ul class="list-unstyled mb-0">
+            @foreach($part->fitments->take(3) as $fitment)
+                <li>
+                    <strong>
+                        {{ $fitment->vehicleModel->brand->name ?? '' }}
+                        {{ $fitment->vehicleModel->name ?? '' }}
+                    </strong>
+
+                    @if($fitment->variant)
+                        – {{ $fitment->variant->name }}
+                    @endif
+
+                    <small class="text-muted">
+                        ({{ $fitment->year_start }}–{{ $fitment->year_end ?? 'Present' }})
+                    </small>
+                </li>
+            @endforeach
+        </ul>
+
+        @if($part->fitments->count() > 3)
+            <span class="badge badge-secondary">
+                +{{ $part->fitments->count() - 3 }} more
+            </span>
+        @endif
+    @else
+        <span class="text-muted">No fitments</span>
+    @endif
+</td>
 
                             <td>{{ $part->oem_number ?? '-' }}</td>
                             <td>{{ number_format($part->price, 2) }} RWF</td>
