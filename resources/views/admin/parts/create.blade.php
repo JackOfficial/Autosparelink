@@ -83,22 +83,18 @@
 </div>
 </section>
 
-
 <script>
-
 document.addEventListener('livewire:load', function () {
 
-    $('#fitmentSelect').select2({
+    const select = $('#fitmentSelect');
+
+    select.select2({
         placeholder: "Select compatible vehicles",
-        allowClear: true,
         width: '100%'
     });
 
-    $('#fitmentSelect').on('change', function () {
-        @this.set(
-            'fitment_specifications',
-            $(this).val()
-        );
+    select.on('change', function () {
+        Livewire.emit('fitmentsUpdated', $(this).val());
     });
 
 });

@@ -39,6 +39,15 @@ class Create extends Component
     public $partBrands = [];
     public $vehicleModels = [];
 
+    protected $listeners = [
+        'fitmentsUpdated' => 'setFitments'
+    ];
+
+    public function setFitments($values)
+    {
+        $this->fitment_specifications = $values ?? [];
+    }
+
     /* =======================
      | MOUNT
      ======================= */
