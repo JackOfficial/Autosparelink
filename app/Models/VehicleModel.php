@@ -22,16 +22,6 @@ class VehicleModel extends Model
     return $this->hasMany(PartFitment::class);
 }
 
-public function specifications()
-{
-    return $this->belongsToMany(
-        Specification::class,
-        'part_fitments',
-        'part_id',
-        'specification_id'
-    )->withTimestamps();
-}
-
     // Relationships
     public function brand()
     {
@@ -51,6 +41,12 @@ public function specifications()
 {
     return $this->morphOne(Photo::class, 'imageable')->latestOfMany();
 }
+
+    public function specifications()
+    {
+        return $this->hasMany(Specification::class)
+                    ->whereNull('variant_id');
+    }
 
      public function spec()
     {

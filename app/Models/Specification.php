@@ -73,15 +73,7 @@ class Specification extends Model
         return $query->where('status', 1);
     }
 
-    public function parts()
-    {
-    return $this->belongsToMany(
-        Part::class,
-        'part_fitments',
-        'specification_id',
-        'part_id'
-     )->withTimestamps();
-    }
+    
 
     protected static function booted()
     {

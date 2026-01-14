@@ -44,7 +44,7 @@ class PartController extends Controller
             'partBrands' => PartBrand::orderBy('name')->get(),
 
             // Models (including those WITHOUT variants)
-            'vehicleModels' => VehicleModel::with(['brand', 'variants', 'specifications'])
+            'vehicleModels' => VehicleModel::with(['brand', 'variants.specifications', 'specifications'])
                 ->orderBy('model_name')
                 ->get(),
 
@@ -160,7 +160,7 @@ class PartController extends Controller
             'part'          => $part,
             'categories'    => Category::all(),
             'partBrands'    => PartBrand::all(),
-            'vehicleModels' => VehicleModel::with(['brand', 'specifications'])->get(),
+            'vehicleModels' => VehicleModel::with(['brand', 'variants.specifications', 'specifications'])->get(),
             'variants'      => Variant::with(['vehicleModel.brand', 'specifications'])->get(),
         ]);
     }
