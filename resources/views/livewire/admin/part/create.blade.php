@@ -132,7 +132,7 @@
                     </div>
 
                     {{-- Photos --}}
-                    <div class="mb-3" wire:ignore x-data="{ previews: [] }">
+                    <div class="mb-3" wire:ignore x-data="photoPreview()">
                         <label>Photos</label>
                         <input type="file" multiple class="form-control"
                                wire:model="photos"
@@ -165,14 +165,46 @@
 
     </form>
 
-    @push('scripts')
-        <script>
-            $(document).ready(function() {
-                let fitmentSelect = $('#fitmentSelect').select2({ width: '100%' });
-                fitmentSelect.on('change', function () {
-                    @this.set('fitment_specifications', $(this).val());
+   @push('scripts')
+<script>
+    function initFitmentSelect() {
+        let el = $('#fitmentSelect');
+
+        if (!el.length) return;
+
+        if (el.hasClass('select2-hidden-accessible')) {
+            el.select2('destroy');
+        }
+
+        el.select2({ width: '100%' });
+
+        el.off('change').on('change', function () {
+            @this.set('fitment_specifications', $(this).val());
+        });
+    }
+
+    document.addEventListener('livewire:load', function () {
+        initFitmentSelect();
+
+        Livewire.hook('message.processed', () => {
+            initFitmentSelect();
+        });
+    });
+
+    function photoPreview() {
+        return {
+            previews: [],
+            handleFiles(event) {
+                this.previews = [];
+                [...event.target.files].forEach(file => {
+                    let reader = new FileReader();
+                    reader.onload = e => this.previews.push(e.target.result);
+                    reader.readAsDataURL(file);
                 });
-            });
-        </script>
-    @endpush
+            }
+        }
+    }
+</script>
+@endpush
+
 </div>
