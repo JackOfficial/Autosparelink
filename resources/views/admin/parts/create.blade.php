@@ -85,9 +85,22 @@
 
 @push('scripts')
 <script>
-$('.select2-multiple').select2({
-    width: '100%',
-    allowClear: true
+    
+document.addEventListener('livewire:load', function () {
+
+    $('#fitmentSelect').select2({
+        placeholder: "Select compatible vehicles",
+        allowClear: true,
+        width: '100%'
+    });
+
+    $('#fitmentSelect').on('change', function () {
+        @this.set(
+            'fitment_specifications',
+            $(this).val()
+        );
+    });
+
 });
 </script>
 @endpush

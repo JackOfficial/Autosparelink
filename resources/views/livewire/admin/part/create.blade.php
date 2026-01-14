@@ -74,31 +74,39 @@
 <fieldset>
 <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
 
-<div class="mb-3">
+<div class="mb-3" wire:ignore>
 <label>Compatible Vehicles</label>
-<select wire:model.defer="fitment_specifications" class="form-control" multiple>
+
+<select id="fitmentSelect"
+        class="form-control select2"
+        multiple
+>
 @foreach($vehicleModels as $model)
-@if($model->variants->isEmpty())
-@foreach($model->specifications as $spec)
-<option value="{{ $spec->id }}">
-{{ optional($model->brand)->brand_name }} /
-{{ $model->model_name }}
-({{ $spec->production_start }}–{{ $spec->production_end }})
-</option>
-@endforeach
-@else
-@foreach($model->variants as $variant)
-@foreach($variant->specifications as $spec)
-<option value="{{ $spec->id }}">
-{{ optional($model->brand)->brand_name }} /
-{{ $model->model_name }} — {{ $variant->name }}
-({{ $spec->production_start }}–{{ $spec->production_end }})
-</option>
-@endforeach
-@endforeach
-@endif
+    @if($model->variants->isEmpty())
+        @foreach($model->specifications as $spec)
+            <option value="{{ $spec->id }}">
+                {{ optional($model->brand)->brand_name }} /
+                {{ $model->model_name }}
+                ({{ $spec->production_start }}–{{ $spec->production_end }})
+            </option>
+        @endforeach
+    @else
+        @foreach($model->variants as $variant)
+            @foreach($variant->specifications as $spec)
+                <option value="{{ $spec->id }}">
+                    {{ optional($model->brand)->brand_name }} /
+                    {{ $model->model_name }} — {{ $variant->name }}
+                    ({{ $spec->production_start }}–{{ $spec->production_end }})
+                </option>
+            @endforeach
+        @endforeach
+    @endif
 @endforeach
 </select>
+
+<small class="text-muted">
+Select all vehicle models or variant specifications this part is compatible with.
+</small>
 </div>
 
 <div class="mb-3">
@@ -106,9 +114,32 @@
 <textarea class="form-control" wire:model.defer="description"></textarea>
 </div>
 
-<div class="mb-3">
-<label>Photos</label>
-<input type="file" wire:model="photos" multiple class="form-control">
+<div class="mb-3" 
+     x-data="{ previews: [] }"
+     wire:ignore
+>
+    <label>Photos</label>
+
+    <input type="file"
+           multiple
+           class="form-control"
+           @change="
+                previews = [];
+                [...$event.target.files].forEach(file => {
+                    let reader = new FileReader();
+                    reader.onload = e => previews.push(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+           "
+           wire:model="photos"
+    >
+
+    <div class="d-flex mt-2 gap-2">
+        <template x-for="img in previews" :key="img">
+            <img :src="img"
+                 style="width:80px;height:80px;object-fit:cover;border-radius:6px;">
+        </template>
+    </div>
 </div>
 
 </fieldset>
