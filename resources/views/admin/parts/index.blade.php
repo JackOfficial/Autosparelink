@@ -148,7 +148,7 @@
   <span 
     data-toggle="tooltip" 
     data-placement="top" 
-    title="{{ $fitment->vehicleModel->brand->brand_name ?? '' }} {{ $fitment->vehicleModel->model_name ?? '' }} {{ $fitment->variant->name ?? '' }}" >
+    title="{{ $fitment->variant->name ?? '' }}" >
    {{ $fitment->vehicleModel->brand->brand_name ?? '' }} {{ $fitment->vehicleModel->model_name ?? '' }}
 </span>
                 </li>
