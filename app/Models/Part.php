@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Part extends Model
 {
@@ -61,5 +62,18 @@ class Part extends Model
     public function photos()
     {
         return $this->morphMany(Photo::class, 'imageable');
+    }
+
+     /**
+     * Generate SKU for a part
+     */
+    public static function generateSku(string $brand, string $category, string $partName): string
+    {
+        return strtoupper(
+            Str::slug(
+                $brand . '-' . $category . '-' . $partName,
+                '-'
+            )
+        );
     }
 }
