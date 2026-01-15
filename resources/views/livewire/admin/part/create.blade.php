@@ -103,26 +103,42 @@
                     <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
 
                     {{-- Fitments --}}
-                    <div class="mb-3" wire:ignore>
-                        <label>Compatible Vehicles</label>
-                        <select id="fitmentSelect" class="form-control select2" multiple>
-                            @foreach($vehicleModels as $model)
-                                @if($model->variants->isEmpty())
-                                    @foreach($model->specifications as $spec)
-                                        <option value="{{ $spec->id }}">{{ optional($model->brand)->brand_name }} / {{ $model->model_name }} ({{ $spec->production_start }}–{{ $spec->production_end }})</option>
-                                    @endforeach
-                                @else
-                                    @foreach($model->variants as $variant)
-                                        @foreach($variant->specifications as $spec)
-                                            <option value="{{ $spec->id }}">{{ optional($model->brand)->brand_name }} / {{ $model->model_name }} — {{ $variant->name }} ({{ $spec->production_start }}–{{ $spec->production_end }})</option>
-                                        @endforeach
-                                    @endforeach
-                                @endif
-                            @endforeach
-                        </select>
-                        @error('fitment_specifications') <span class="text-danger">{{ $message }}</span> @enderror
-                        <small class="text-muted">Select all vehicle models or variant specifications this part is compatible with.</small>
-                    </div>
+                  {{-- Fitments --}}
+<div class="mb-3" wire:ignore>
+    <label>Compatible Vehicles</label>
+
+    <select id="fitmentSelect" class="form-control" multiple>
+        @foreach($vehicleModels as $model)
+            @if($model->variants->isEmpty())
+                @foreach($model->specifications as $spec)
+                    <option value="{{ $spec->id }}">
+                        {{ optional($model->brand)->brand_name }} /
+                        {{ $model->model_name }}
+                        ({{ $spec->production_start }}–{{ $spec->production_end }})
+                    </option>
+                @endforeach
+            @else
+                @foreach($model->variants as $variant)
+                    @foreach($variant->specifications as $spec)
+                        <option value="{{ $spec->id }}">
+                            {{ optional($model->brand)->brand_name }} /
+                            {{ $model->model_name }} — {{ $variant->name }}
+                            ({{ $spec->production_start }}–{{ $spec->production_end }})
+                        </option>
+                    @endforeach
+                @endforeach
+            @endif
+        @endforeach
+    </select>
+
+    {{-- ✅ Livewire anchor --}}
+    <input type="hidden" wire:model="fitment_specifications">
+
+    @error('fitment_specifications')
+        <span class="text-danger">{{ $message }}</span>
+    @enderror
+</div>
+
 
                     {{-- Description --}}
                     <div class="mb-3">
@@ -132,7 +148,7 @@
                     </div>
 
                     {{-- Photos --}}
-                    <div class="mb-3" wire:ignore x-data="photoPreview()">
+                    <div class="mb-3" wire:ignore x-data="{ previews: [] }">
                         <label>Photos</label>
                         <input type="file" multiple class="form-control"
                                wire:model="photos"
@@ -165,45 +181,40 @@
 
     </form>
 
-   @push('scripts')
+
+@push('scripts')
 <script>
     function initFitmentSelect() {
-        let el = $('#fitmentSelect');
-
+        const el = $('#fitmentSelect');
         if (!el.length) return;
 
+        // Destroy safely
         if (el.hasClass('select2-hidden-accessible')) {
             el.select2('destroy');
         }
 
-        el.select2({ width: '100%' });
+        el.select2({
+            width: '100%',
+            placeholder: 'Select compatible vehicles'
+        });
 
         el.off('change').on('change', function () {
-            @this.set('fitment_specifications', $(this).val());
+            const values = $(this).val() || [];
+
+            const componentId = el.closest('[wire\\:id]').attr('wire:id');
+            if (!componentId) return;
+
+            Livewire.find(componentId).set('fitment_specifications', values);
         });
     }
 
-    document.addEventListener('livewire:load', function () {
+    document.addEventListener('livewire:load', () => {
         initFitmentSelect();
 
         Livewire.hook('message.processed', () => {
             initFitmentSelect();
         });
     });
-
-    function photoPreview() {
-        return {
-            previews: [],
-            handleFiles(event) {
-                this.previews = [];
-                [...event.target.files].forEach(file => {
-                    let reader = new FileReader();
-                    reader.onload = e => this.previews.push(e.target.result);
-                    reader.readAsDataURL(file);
-                });
-            }
-        }
-    }
 </script>
 @endpush
 
