@@ -35,10 +35,6 @@ class Create extends Component
     public $partBrands = [];
     public $vehicleModels = [];
 
-    protected $listeners = [
-        'fitmentsUpdated' => 'setFitments'
-    ];
-
     protected function rules()
     {
         return [
@@ -69,11 +65,6 @@ class Create extends Component
             ->get();
 
         $this->category_id = null;
-    }
-
-    public function setFitments($values)
-    {
-        $this->fitment_specifications = $values ?? [];
     }
 
     public function save()

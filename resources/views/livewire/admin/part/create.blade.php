@@ -103,11 +103,10 @@
                     <legend><i class="fas fa-car-side"></i> Fitment & Media</legend>
 
                     {{-- Fitments --}}
-                  {{-- Fitments --}}
-<div class="mb-3" wire:ignore>
+<div class="mb-3">
     <label>Compatible Vehicles</label>
 
-    <select id="fitmentSelect" class="form-control" multiple>
+    <select wire:model.defer='fitment_specifications' class="form-control" multiple>
         @foreach($vehicleModels as $model)
             @if($model->variants->isEmpty())
                 @foreach($model->specifications as $spec)
@@ -130,10 +129,6 @@
             @endif
         @endforeach
     </select>
-
-    {{-- ✅ Livewire anchor --}}
-    <input type="hidden" wire:model="fitment_specifications">
-
     @error('fitment_specifications')
         <span class="text-danger">{{ $message }}</span>
     @enderror
@@ -150,8 +145,7 @@
                     {{-- Photos --}}
                     <div class="mb-3" wire:ignore x-data="{ previews: [] }">
                         <label>Photos</label>
-                        <input type="file" multiple class="form-control"
-                               wire:model="photos"
+                        <input type="file" multiple wire:model="photos" class="form-control"
                                @change="
                                     previews = [];
                                     [...$event.target.files].forEach(file => {
@@ -180,42 +174,5 @@
         </div>
 
     </form>
-
-
-@push('scripts')
-<script>
-    function initFitmentSelect() {
-        const el = $('#fitmentSelect');
-        if (!el.length) return;
-
-        // Destroy safely
-        if (el.hasClass('select2-hidden-accessible')) {
-            el.select2('destroy');
-        }
-
-        el.select2({
-            width: '100%',
-            placeholder: 'Select compatible vehicles'
-        });
-
-        el.off('change').on('change', function () {
-            const values = $(this).val() || [];
-
-            const componentId = el.closest('[wire\\:id]').attr('wire:id');
-            if (!componentId) return;
-
-            Livewire.find(componentId).set('fitment_specifications', values);
-        });
-    }
-
-    document.addEventListener('livewire:load', () => {
-        initFitmentSelect();
-
-        Livewire.hook('message.processed', () => {
-            initFitmentSelect();
-        });
-    });
-</script>
-@endpush
 
 </div>
