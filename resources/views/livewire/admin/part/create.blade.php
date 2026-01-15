@@ -30,7 +30,7 @@
                         {{-- Parent Category --}}
                         <div class="col-md-6 mb-3">
                             <label>Parent Category</label>
-                            <select class="form-control" wire:model="parentCategoryId">
+                            <select class="form-control" wire:model.live="parentCategoryId">
                                 <option value="">-- Select Parent --</option>
                                 @foreach($parentCategories as $parent)
                                     <option value="{{ $parent->id }}">{{ $parent->category_name }}</option>
@@ -42,7 +42,7 @@
                         {{-- Child Category --}}
                         <div class="col-md-6 mb-3">
                             <label>Child Category *</label>
-                            <select class="form-control" wire:model.defer="category_id">
+                            <select class="form-control" wire:model.live="category_id">
                                 <option value="">-- Select Child --</option>
                                 @foreach($childCategories as $child)
                                     <option value="{{ $child->id }}">{{ $child->category_name }}</option>
@@ -54,7 +54,7 @@
                         {{-- Part Brand --}}
                         <div class="col-md-6 mb-3">
                             <label>Part Brand *</label>
-                            <select class="form-control" wire:model.defer="part_brand_id">
+                            <select class="form-control" wire:model.live="part_brand_id">
                                 <option value="">-- Select Brand --</option>
                                 @foreach($partBrands as $brand)
                                     <option value="{{ $brand->id }}">{{ $brand->name }} ({{ $brand->type }})</option>
