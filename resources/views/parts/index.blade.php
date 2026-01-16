@@ -126,48 +126,69 @@
             <div class="row">
 
                 @forelse($parts as $part)
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
+    @php
+        $mainPhoto = $part->photos->first()
+            ? asset('storage/'.$part->photos->first()->file_path)
+            : asset('images/no-part.png');
+    @endphp
 
-                            <!-- Image -->
-                            <img src="{{ $part->photos->first()
-                                    ? asset('storage/'.$part->photos->first()->file_path)
-                                    : asset('images/no-part.png') }}"
-                                 class="card-img-top"
-                                 style="height:180px;object-fit:contain;">
+    <div class="col-md-4 mb-4">
+        <div class="product-item bg-white h-100">
 
-                            <div class="card-body">
+            <!-- IMAGE -->
+            <div class="product-img position-relative">
+                <img src="{{ $mainPhoto }}"
+                     alt="{{ $part->part_name }}"
+                     style="width:100%;height:200px;object-fit:cover;">
 
-                                <h6 class="fw-semibold mb-1">
-                                    {{ $part->part_name }}
-                                </h6>
+                <!-- BADGE -->
+                <span class="badge-custom badge-new">Compatible</span>
 
-                                <small class="text-muted d-block">
-                                    Part No: {{ $part->part_number }}
-                                </small>
+                <!-- ACTIONS -->
+                <div class="product-action">
+                    <a href="{{ route('spare-parts.show', $part->id) }}"
+                       class="btn btn-light btn-square"
+                       title="View details">
+                        <i class="fa fa-search"></i>
+                    </a>
+                    <button class="btn btn-light btn-square"
+                            title="Add to cart">
+                        <i class="fa fa-shopping-cart"></i>
+                    </button>
+                </div>
+            </div>
 
-                                <span class="badge bg-success my-2">
-                                    Compatible
-                                </span>
+            <!-- BODY -->
+            <div class="text-center py-3 px-2">
+                <a href="{{ route('spare-parts.show', $part->id) }}"
+                   class="h6 text-truncate d-block mb-1 text-dark">
+                    {{ Str::limit($part->part_name, 35) }}
+                </a>
 
-                                <div class="fw-bold text-primary mb-2">
-                                    {{ number_format($part->price) }} RWF
-                                </div>
+                <small class="text-muted d-block mb-2">
+                    Part No: {{ $part->part_number }}
+                </small>
 
-                                <div class="d-flex justify-content-between">
-                                    <a href="{{ route('spare-parts.show', $part->id) }}"
-                                       class="btn btn-outline-secondary btn-sm">
-                                        Details
-                                    </a>
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    <h5 class="mb-0 text-primary">
+                        {{ number_format($part->price) }} RWF
+                    </h5>
+                </div>
 
-                                    <button class="btn btn-primary btn-sm">
-                                        Add to Cart
-                                    </button>
-                                </div>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{{ route('spare-parts.show', $part->id) }}"
+                       class="btn btn-outline-primary btn-sm">
+                        Details
+                    </a>
+                    <button class="btn btn-primary btn-sm">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+@empty
 
-                            </div>
-                        </div>
-                    </div>
                 @empty
                     <div class="col-12">
                         <div class="alert alert-info text-center">
