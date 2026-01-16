@@ -22,7 +22,7 @@ class SparePartController extends Controller
         $part = Part::with([
             'partBrand',            // The brand of this part
             'photos',               // All uploaded photos
-            'compatibilities.vehicleModel.brand', // Compatibility table
+            'fitments.vehicleModel.brand', // Compatibility table
             'substitutions.partBrand'             // Substitution parts and their brands
         ])->findOrFail($id);
 
