@@ -42,7 +42,7 @@ public function product($id)
     'variants.specifications.transmissionType',
     'variants.specifications.driveType',
     'variants.vehicleModel'
-])->findOrFail($id);
+ ])->findOrFail($id);
 
     // Main image (safe fallback guaranteed)
     $mainPhoto = $part->photos
