@@ -33,7 +33,7 @@ class SparePartController extends Controller
         $substitutions = $part->substitutions ?? collect();
 
         // Compatibility (pivot table linking parts to vehicle variants)
-        $compatibilities = $part->compatibilities ?? collect();
+        $compatibilities = $part->fitments ?? collect();
 
         return view('parts.show', [
             'part' => $part,
