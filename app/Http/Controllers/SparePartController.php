@@ -16,25 +16,31 @@ class SparePartController extends Controller
 
     }
  
-     public function parts($variantId)
+     public function parts($id)
     {
-        // Load variant with related model, brand, and parts
-        $variant = Variant::with([
-            'vehicleModel.brand',
-            'parts.category'
-        ])->findOrFail($variantId);
+       // Load part with brand, photos, compatibilities, substitutions
+        $part = Part::with([
+            'partBrand',            // The brand of this part
+            'photos',               // All uploaded photos
+            'compatibilities.vehicleModel.brand', // Compatibility table
+            'substitutions.partBrand'             // Substitution parts and their brands
+        ])->findOrFail($id);
 
-        // Get the parent vehicle model
-        $model = $variant->vehicleModel;
+        // Photos for gallery
+        $photos = $part->photos;
 
-        // Get all categories (to display in the Categories tab)
-        $categories = Category::orderBy('name', 'asc')->get();
+        // Substitutions (other parts that can replace this one)
+        $substitutions = $part->substitutions ?? collect();
 
-        return view('spare-parts', compact(
-            'variant',
-            'model',
-            'categories'
-        ));
+        // Compatibility (pivot table linking parts to vehicle variants)
+        $compatibilities = $part->compatibilities ?? collect();
+
+        return view('parts.show', [
+            'part' => $part,
+            'photos' => $photos,
+            'substitutions' => $substitutions,
+            'compatibilities' => $compatibilities
+        ]);
     }
 
     public function showCompatibleParts(Request $request, $type, $id)
