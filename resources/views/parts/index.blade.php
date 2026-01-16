@@ -188,8 +188,6 @@
         </div>
     </div>
 @empty
-
-                @empty
                     <div class="col-12">
                         <div class="alert alert-info text-center">
                             No parts found for this specification.
