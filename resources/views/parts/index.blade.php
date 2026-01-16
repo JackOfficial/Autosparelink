@@ -190,7 +190,8 @@
             <!-- IMAGE -->
             <div class="product-img position-relative">
                 <img src="{{ $mainPhoto }}"
-                     alt="{{ $part->part_name }}">
+                     alt="{{ $part->part_name }}"
+                     style="width:100%;height:200px;object-fit:cover;">
 
                 <!-- BADGE -->
                 <span class="badge-custom badge-new">Compatible</span>
