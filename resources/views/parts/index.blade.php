@@ -1,6 +1,34 @@
 @extends('layouts.app')
+@push('styles')
+<style>
+.product-item{
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.product-img{
+    position: relative;
+}
+
+.product-action{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+
+.product-item:hover .product-action{
+    opacity: 1;
+}
+</style>
+@endpush
 
 @section('content')
+
 
 <div class="container-fluid py-4">
 
@@ -146,16 +174,23 @@
 
                 <!-- ACTIONS -->
                 <div class="product-action">
-                    <a href="{{ route('spare-parts.show', $part->id) }}"
-                       class="btn btn-light btn-square"
-                       title="View details">
-                        <i class="fa fa-search"></i>
-                    </a>
-                    <button class="btn btn-light btn-square"
-                            title="Add to cart">
-                        <i class="fa fa-shopping-cart"></i>
-                    </button>
-                </div>
+    <a href="{{ route('spare-parts.show', $part->id) }}"
+       class="btn btn-light btn-square"
+       title="View details">
+        <i class="fa fa-search"></i>
+    </a>
+
+    <button class="btn btn-light btn-square"
+            title="Add to wishlist">
+        <i class="far fa-heart"></i>
+    </button>
+
+    <button class="btn btn-light btn-square"
+            title="Add to cart">
+        <i class="fa fa-shopping-cart"></i>
+    </button>
+</div>
+
             </div>
 
             <!-- BODY -->

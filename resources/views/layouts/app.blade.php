@@ -25,8 +25,6 @@
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{{ asset('frontend/css/style.css') }}" rel="stylesheet">
 
-    @yield('style')
-
     <style>
         /* Navbar Custom Styles */
         .navbar {
@@ -105,6 +103,8 @@
             padding: 0.5rem 1.5rem;
         }
     </style>
+  {{-- Page-specific scripts --}}
+    @stack('scripts')
 </head>
 
 <body>
@@ -302,6 +302,8 @@
 
     <!-- Template Javascript -->
     <script src="{{ asset('frontend/js/main.js') }}"></script>
+    {{-- Page-specific scripts --}}
+    @stack('scripts')
 </body>
 
 </html>
