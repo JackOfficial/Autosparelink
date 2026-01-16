@@ -19,7 +19,22 @@ class SparePartController extends Controller
      public function parts($variantId)
     {
         // Load variant with related model, brand, and parts
-       dd("hghjghjj");
+        $variant = Variant::with([
+            'vehicleModel.brand',
+            'parts.category'
+        ])->findOrFail($variantId);
+
+        // Get the parent vehicle model
+        $model = $variant->vehicleModel;
+
+        // Get all categories (to display in the Categories tab)
+        $categories = Category::orderBy('name', 'asc')->get();
+
+        return view('spare-parts', compact(
+            'variant',
+            'model',
+            'categories'
+        ));
     }
 
     public function showCompatibleParts(Request $request, $type, $id)
