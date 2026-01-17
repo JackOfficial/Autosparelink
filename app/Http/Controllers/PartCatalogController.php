@@ -21,7 +21,7 @@ class PartCatalogController extends Controller
 
         // CASE 1: Model-based specification
 
-        dd("type is: ". $type . " and specification is: " . $specification);
+        //dd("type is: ". $type . " and specification is: " . $specification);
         if (
             $type === 'model' &&
             $specification->model_id &&
