@@ -23,7 +23,7 @@ class SparePartController extends Controller
             'partBrand',            // The brand of this part
             'photos',               // All uploaded photos
             'fitments.vehicleModel.brand', // Compatibility table
-            'substitutions.partBrand'             // Substitution parts and their brands
+            // 'substitutions.partBrand'             // Substitution parts and their brands
         ])->findOrFail($id);
 
         // Photos for gallery

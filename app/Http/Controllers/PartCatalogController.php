@@ -4,71 +4,76 @@ namespace App\Http\Controllers;
 
 use App\Models\Part;
 use App\Models\Category;
-use App\Models\VehicleModel;
-use App\Models\Variant;
+use App\Models\Specification;
 use Illuminate\Http\Request;
 
 class PartCatalogController extends Controller
 {
     /**
-     * Display all spare parts compatible with a vehicle model or variant.
+     * Display all spare parts compatible with a specification
+     * (model-based or variant-based).
      */
-    public function index(Request $request, string $type, int $id)
+    public function index(Request $request, string $type, Specification $specification)
     {
-        /* ----------------------------
-         | Resolve context (model / variant)
-         |---------------------------- */
-        if ($type === 'model') {
+        /* -------------------------------------------------
+         | Validate route ↔ specification relationship
+         |-------------------------------------------------- */
 
-            $context = VehicleModel::with('brand')->findOrFail($id);
+        // CASE 1: Model-based specification
+        if (
+            $type === 'model' &&
+            $specification->model_id &&
+            is_null($specification->variant_id)
+        ) {
+            $context = $specification->vehicleModel()->with('brand')->first();
 
-            $partsQuery = Part::with([
-                'category',
-                'partBrand',
-                'photos'
-            ])->whereHas('fitments', function ($q) use ($id) {
-                $q->where('vehicle_model_id', $id);
-            });
+            $partsQuery = Part::with(['category', 'partBrand', 'photos'])
+                ->whereHas('fitments', function ($q) use ($specification) {
+                    $q->where('vehicle_model_id', $specification->model_id);
+                });
+        }
 
-        } elseif ($type === 'variant') {
+        // CASE 2: Variant-based specification
+        elseif (
+            $type === 'variant' &&
+            $specification->model_id &&
+            $specification->variant_id
+        ) {
+            $context = $specification->variant()
+                ->with(['vehicleModel.brand'])
+                ->first();
 
-            $context = Variant::with(['vehicleModel.brand'])->findOrFail($id);
+            $partsQuery = Part::with(['category', 'partBrand', 'photos'])
+                ->whereHas('fitments', function ($q) use ($specification) {
+                    $q->where('variant_id', $specification->variant_id);
+                });
+        }
 
-            $partsQuery = Part::with([
-                'category',
-                'partBrand',
-                'photos'
-            ])->whereHas('fitments', function ($q) use ($id) {
-                $q->where('variant_id', $id);
-            });
-
-        } else {
+        // INVALID URL → kill it
+        else {
             abort(404);
         }
 
-        /* ----------------------------
-         | Filters (professional-grade)
-         |---------------------------- */
+        /* -------------------------------------------------
+         | Filters
+         |-------------------------------------------------- */
 
-        // Category filter
         if ($request->filled('category')) {
             $partsQuery->where('category_id', $request->category);
         }
 
-        // Price range filter
         if ($request->filled('min_price')) {
             $partsQuery->where('price', '>=', $request->min_price);
         }
+
         if ($request->filled('max_price')) {
             $partsQuery->where('price', '<=', $request->max_price);
         }
 
-        // In-stock only
         if ($request->boolean('in_stock')) {
             $partsQuery->where('stock_quantity', '>', 0);
         }
 
-        // Search by name, SKU, or part number
         if ($request->filled('q')) {
             $partsQuery->where(function ($q) use ($request) {
                 $q->where('part_name', 'like', "%{$request->q}%")
@@ -77,36 +82,38 @@ class PartCatalogController extends Controller
             });
         }
 
-        /* ----------------------------
+        /* -------------------------------------------------
          | Sorting
-         |---------------------------- */
-        $sort = $request->get('sort', 'latest');
+         |-------------------------------------------------- */
 
-        match ($sort) {
+        match ($request->get('sort', 'latest')) {
             'price_asc'  => $partsQuery->orderBy('price', 'asc'),
             'price_desc' => $partsQuery->orderBy('price', 'desc'),
             'name_asc'   => $partsQuery->orderBy('part_name', 'asc'),
             default      => $partsQuery->latest(),
         };
 
-        /* ----------------------------
-         | Execute query with pagination
-         |---------------------------- */
+        /* -------------------------------------------------
+         | Execute query
+         |-------------------------------------------------- */
+
         $parts = $partsQuery->paginate(24)->withQueryString();
 
-        /* ----------------------------
-         | Categories (for sidebar filter)
-         |---------------------------- */
+        /* -------------------------------------------------
+         | Categories (sidebar)
+         |-------------------------------------------------- */
+
         $categories = Category::withCount('parts')
             ->whereNull('parent_id')
             ->orderBy('category_name')
             ->get();
 
         return view('parts.index', [
-            'type'       => $type,
-            'context'    => $context,   // model or variant
-            'parts'      => $parts,
-            'categories' => $categories,
+            'type'          => $type,
+            'specification' => $specification,
+            'context'       => $context, // model OR variant
+            'parts'         => $parts,
+            'categories'    => $categories,
         ]);
     }
 }
