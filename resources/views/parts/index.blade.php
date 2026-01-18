@@ -219,7 +219,7 @@
 
             <!-- BODY -->
             <div class="text-center py-3 px-2">
-                <a href="{{ route('spare-parts.show', $part->id) }}"
+                <a href="{{ route('spare-parts.show', $part->sku) }}"
                    class="h6 text-truncate d-block mb-1 text-dark">
                     {{ Str::limit($part->part_name, 35) }}
                 </a>
@@ -235,7 +235,7 @@
                 </div>
 
                 <div class="d-flex gap-2 justify-content-center">
-                    <a href="{{ route('spare-parts.show', $part->id) }}"
+                    <a href="{{ route('spare-parts.show', $part->sku) }}"
                        class="btn btn-outline-primary btn-sm">
                         Details
                     </a>
