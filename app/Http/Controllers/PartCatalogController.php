@@ -57,7 +57,7 @@ class PartCatalogController extends Controller
 
         // INVALID URL → kill it
         else {
-            dd("spec is: " . $specification->id . " and type: " . $type);
+            dd("spec id: " . $specification->id . " and type: " . $type);
             abort(404);
         }
 
