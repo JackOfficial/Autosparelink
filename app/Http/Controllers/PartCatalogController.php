@@ -13,7 +13,7 @@ class PartCatalogController extends Controller
      * Display all spare parts compatible with a specification
      * (model-based or variant-based).
      */
-    public function index(Request $request, string $type, string $specification)
+    public function index(Request $request, string $type, Specification $specification)
     {
         /* -------------------------------------------------
          | Validate route ↔ specification relationship
@@ -22,25 +22,25 @@ class PartCatalogController extends Controller
         // CASE 1: Model-based specification
 
         //dd("type is: ". $type . " and specification is: " . $specification);
-       $specification = Specification::findOrFail($specification);
+       //$specification = Specification::findOrFail($specification);
        //dd($specification);
         if (
             $type === 'model' &&
-            $specification->model_id &&
+            $specification->vehicle_model_id &&
             is_null($specification->variant_id)
         ) {
             $context = $specification->vehicleModel()->with('brand')->first();
 
             $partsQuery = Part::with(['category', 'partBrand', 'photos'])
                 ->whereHas('fitments', function ($q) use ($specification) {
-                    $q->where('vehicle_model_id', $specification->model_id);
+                    $q->where('vehicle_model_id', $specification->vehicle_model_id);
                 });
         }
 
         // CASE 2: Variant-based specification
         elseif (
             $type === 'variant' &&
-            $specification->model_id &&
+            $specification->vehicle_model_id &&
             $specification->variant_id
         ) {
             dd("Here We Go!");
