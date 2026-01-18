@@ -164,7 +164,7 @@
     @if($substitutions->count())
     <div class="row px-xl-5 mt-4">
         <div class="col-12">
-            <h4>Substitutions</h4>
+            <h4>Substitutions ({{ $substitutions->count() }})</h4>
             <div class="table-responsive bg-light p-3 rounded shadow-sm">
                 <table class="table table-bordered table-hover">
                     <thead>
@@ -199,7 +199,7 @@
     @if($compatibilities->count())
     <div class="row px-xl-5 mt-4">
         <div class="col-12">
-            <h4>Compatibility</h4>
+            <h4>Compatibility {{ ($compatibilities->count()) }}</h4>
             <div class="table-responsive bg-light p-3 rounded shadow-sm">
                 <table class="table table-bordered table-hover">
                     <thead>
