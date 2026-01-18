@@ -179,7 +179,7 @@
         @endforeach
     </ul>
     @else
-    -
+    Absent
 @endif
 </td>
 
