@@ -70,6 +70,22 @@
                             @error('oem_number') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
 
+                        {{-- Substitutions --}}
+<div class="col-md-12 mb-3">
+    <label>Alternative Parts</label>
+    <select wire:model.defer="substitution_part_ids" class="form-control" multiple>
+        @foreach($allParts as $p)
+            {{-- Exclude the current part in case of edit --}}
+            <option value="{{ $p->id }}">
+                {{ $p->partBrand->name ?? 'No Brand' }} - {{ $p->part_name }}
+            </option>
+        @endforeach
+    </select>
+    @error('substitution_part_ids') 
+        <span class="text-danger">{{ $message }}</span> 
+    @enderror
+</div>
+
                         {{-- Price --}}
                         <div class="col-md-6 mb-3">
                             <label>Price (RWF)</label>

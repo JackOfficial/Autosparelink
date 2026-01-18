@@ -25,7 +25,7 @@ class Create extends Component
     public $stock_quantity;
     public $status = 'Active';
     public $description;
-    public $allParts;
+    public $allParts = []; // All parts for selection
 
     public $photos = [];
     public $fitment_specifications = [];
