@@ -13,7 +13,7 @@ class PartCatalogController extends Controller
      * Display all spare parts compatible with a specification
      * (model-based or variant-based).
      */
-    public function index(Request $request, string $type, Specification $specification)
+    public function index(Request $request, string $type, $specification)
     {
         /* -------------------------------------------------
          | Validate route ↔ specification relationship
@@ -22,6 +22,7 @@ class PartCatalogController extends Controller
         // CASE 1: Model-based specification
 
         //dd("type is: ". $type . " and specification is: " . $specification);
+        $specification = Specification::id($specification);
         if (
             $type === 'model' &&
             $specification->model_id &&
