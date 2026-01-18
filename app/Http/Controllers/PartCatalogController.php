@@ -41,6 +41,7 @@ class PartCatalogController extends Controller
             $specification->model_id &&
             $specification->variant_id
         ) {
+            dd("Here We Go!");
             $context = $specification->variant()
                 ->with(['vehicleModel.brand'])
                 ->first();
