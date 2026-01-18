@@ -120,4 +120,30 @@ class PartCatalogController extends Controller
             'categories'    => $categories,
         ]);
     }
+
+    public function show(string $id){
+      // Load part with brand, photos, compatibilities, substitutions
+        $part = Part::with([
+            'partBrand',            // The brand of this part
+            'photos',               // All uploaded photos
+            'fitments.vehicleModel.brand', // Compatibility table
+            // 'substitutions.partBrand'             // Substitution parts and their brands
+        ])->findOrFail($id);
+
+        // Photos for gallery
+        $photos = $part->photos;
+
+        // Substitutions (other parts that can replace this one)
+        $substitutions = $part->substitutions ?? collect();
+
+        // Compatibility (pivot table linking parts to vehicle variants)
+        $compatibilities = $part->fitments ?? collect();
+
+        return view('parts.show', [
+            'part' => $part,
+            'photos' => $photos,
+            'substitutions' => $substitutions,
+            'compatibilities' => $compatibilities
+        ]);
+    }
 }

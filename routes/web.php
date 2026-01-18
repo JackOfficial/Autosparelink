@@ -109,14 +109,16 @@ Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
 
 Route::get('/{type}/specifications/{specification}/parts', [PartCatalogController::class, 'index'])
 ->whereIn('type', ['model', 'variant'])
-->name('specification.parts');    
+->name('specification.parts');   
+
+Route::get('/spare-parts/{part:slug}', [PartCatalogController::class, 'show'])->name('spare-parts.show'); 
 
 // Route::get('/specifications/{type}/{id}/parts', [PartCatalogController::class, 'index'])
 //     ->name('specification.parts');
     
 Route::get('/specifications/{type}/{id}', [SpecificationController::class, 'show'])->name('specifications.show');
 Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
-Route::get('/spare-parts/{part}', [SparePartController::class, 'parts'])->name('spare-parts.show');
+
 // Show all models for a brand
 Route::get('/model/{brand}', [BrandController::class, 'show'])->name('brand.models');
 Route::get('/spare-parts/{variant}', [ProductController::class, 'product'])->name('spare-parts');
