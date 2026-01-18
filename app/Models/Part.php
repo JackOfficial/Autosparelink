@@ -64,6 +64,26 @@ class Part extends Model
         return $this->morphMany(Photo::class, 'imageable');
     }
 
+    public function substitutions()
+{
+    return $this->belongsToMany(
+         Part::class,               // The related model
+        'part_substitutions',      // Pivot table
+        'part_id',                 // Foreign key on pivot for this part
+        'substitution_part_id'     // Foreign key on pivot for the substitution
+    );
+}
+
+public function substitutedFor()
+{
+    return $this->belongsToMany(
+        Part::class,
+        'part_substitutions',
+        'substitution_part_id',
+        'part_id'
+    );
+}
+
      /**
      * Generate SKU for a part
      */

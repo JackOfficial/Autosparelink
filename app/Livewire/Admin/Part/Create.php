@@ -25,9 +25,11 @@ class Create extends Component
     public $stock_quantity;
     public $status = 'Active';
     public $description;
+    public $allParts;
 
     public $photos = [];
     public $fitment_specifications = [];
+    public $substitution_part_ids = []; // array of alternative part IDs
 
     /* DATA */
     public $parentCategories = [];
@@ -48,6 +50,9 @@ class Create extends Component
             'photos.*' => 'image|max:2048',
             'fitment_specifications' => 'nullable|array',
             'fitment_specifications.*' => 'exists:specifications,id',
+
+            'substitution_part_ids' => 'nullable|array',
+            'substitution_part_ids.*' => 'exists:parts,id',
         ];
     }
 
@@ -56,6 +61,7 @@ class Create extends Component
         $this->parentCategories = Category::whereNull('parent_id')->orderBy('category_name')->get();
         $this->partBrands = PartBrand::orderBy('name')->get();
         $this->vehicleModels = VehicleModel::with(['brand', 'variants.specifications', 'specifications'])->get();
+        $this->allParts = Part::with('partBrand')->orderBy('part_name')->get();
     }
 
     public function updatedParentCategoryId()
@@ -115,6 +121,11 @@ class Create extends Component
                 'file_path' => $path,
                 'caption' => $part->part_name,
             ]);
+        }
+
+        /* SUBSTITUTIONS */
+       if (!empty($this->substitution_part_ids)) {
+          $part->substitutions()->sync($this->substitution_part_ids);
         }
 
         session()->flash('success', 'Spare part created successfully.');

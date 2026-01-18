@@ -25,8 +25,10 @@ class PartController extends Controller
                 'category',
                 'partBrand',
                 'photos',
+                'fitments.vehicleModel.brand',
+                'fitments.vehicleModel',
                 'fitments.variant',
-                'fitments.vehicleModel'
+                'substitutions.partBrand'
             ])
             ->latest()
             ->paginate(20);

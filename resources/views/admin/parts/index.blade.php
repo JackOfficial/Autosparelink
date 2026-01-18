@@ -84,6 +84,7 @@
                             <th>Category</th>
                             <th>Brand</th>
                             <th>Compatible</th>
+                            <th>Substitutions</th>
                             <th>OEM Number</th>
                             <th>Price</th>
                             <th>Stock</th>
@@ -165,6 +166,21 @@
     @else
         <span class="text-muted">No fitments</span>
     @endif
+</td>
+<td>
+    @if($part->substitutions->isNotEmpty())
+    <ul>
+        @foreach($part->substitutions as $sub)
+            <li>
+                <a href="{{ route('spare-parts.show', $sub) }}">
+                    {{ $sub->partBrand->name }} - {{ $sub->part_name }}
+                </a>
+            </li>
+        @endforeach
+    </ul>
+    @else
+    -
+@endif
 </td>
 
                             <td>{{ $part->oem_number ?? '-' }}</td>

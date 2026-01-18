@@ -127,7 +127,7 @@ class PartCatalogController extends Controller
         'partBrand',                         // Brand of this part
         'photos',                            // Uploaded photos
         'fitments.vehicleModel.brand',       // Compatibility chain
-        // 'substitutions.partBrand'          // Optional substitutions
+        'substitutions.partBrand'          // Optional substitutions
     ]);
 
     // Photos for gallery
