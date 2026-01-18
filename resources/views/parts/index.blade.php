@@ -198,7 +198,7 @@
 
                 <!-- ACTIONS -->
                 <div class="product-action">
-    <a href="{{ route('spare-parts.show', $part->id) }}"
+    <a href="{{ route('spare-parts.show', $part->sku) }}"
        class="btn btn-light btn-square"
        title="View details">
         <i class="fa fa-search"></i>
