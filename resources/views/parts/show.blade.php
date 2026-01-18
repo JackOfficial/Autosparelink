@@ -179,16 +179,15 @@
                     </thead>
                     <tbody>
                         @foreach($substitutions as $sub)
-                        <a href="{{ route('spare-parts.show', $sub->sku) }}">
+                        
                         <tr>
-                            <td>{{ optional($sub->partBrand)->name ?? '—' }}</td>
-                            <td>{{ $sub->part_number ?? '—' }}</td>
-                            <td>{{ $sub->part_name }}</td>
+                            <td> {{ optional($sub->partBrand)->name ?? '—' }} </td>
+                            <td><a href="{{ route('spare-parts.show', $sub->sku) }}">{{ $sub->part_number ?? '—' }}</a></td>
+                            <td><a href="{{ route('spare-parts.show', $sub->sku) }}">{{ $sub->part_name }}</a></td>
                             <td>{{ $sub->stock_quantity }}</td>
                             <td>{{ $sub->weight ?? '—' }}</td>
                             <td>{{ number_format($sub->price,2) }}</td>
                         </tr>
-                        </a>
                         @endforeach
                     </tbody>
                 </table>
