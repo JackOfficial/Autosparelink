@@ -29,6 +29,7 @@ class PartCatalogController extends Controller
             $specification->vehicle_model_id &&
             is_null($specification->variant_id)
         ) {
+             dd("Model and specification!");
             $context = $specification->vehicleModel()->with('brand')->first();
 
             $partsQuery = Part::with(['category', 'partBrand', 'photos'])
@@ -43,7 +44,7 @@ class PartCatalogController extends Controller
             $specification->vehicle_model_id &&
             $specification->variant_id
         ) {
-            dd("Here We Go!");
+            dd("Variant and specification!");
             $context = $specification->variant()
                 ->with(['vehicleModel.brand'])
                 ->first();
