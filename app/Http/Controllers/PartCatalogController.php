@@ -23,7 +23,7 @@ class PartCatalogController extends Controller
 
         //dd("type is: ". $type . " and specification is: " . $specification);
        $specification = Specification::findOrFail($specification);
-       dd($specification);
+       //dd($specification);
         if (
             $type === 'model' &&
             $specification->model_id &&
