@@ -179,6 +179,7 @@
                     </thead>
                     <tbody>
                         @foreach($substitutions as $sub)
+                        <a href="{{ route('spare-parts.show', $sub->sku) }}">
                         <tr>
                             <td>{{ optional($sub->partBrand)->name ?? '—' }}</td>
                             <td>{{ $sub->part_number ?? '—' }}</td>
@@ -187,6 +188,7 @@
                             <td>{{ $sub->weight ?? '—' }}</td>
                             <td>{{ number_format($sub->price,2) }}</td>
                         </tr>
+                        </a>
                         @endforeach
                     </tbody>
                 </table>
