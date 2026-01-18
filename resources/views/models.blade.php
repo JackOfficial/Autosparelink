@@ -151,9 +151,9 @@ body { background: #f5f7fa !important; }
                     </div>
 
                     <div class="model-years mt-2">
-                        {{ $model->production_start_year ?? '?' }}
+                        {{ $model->production_start_year ?? 'Present' }}
                         -
-                        {{ $model->production_end_year ?? '?' }}
+                        {{ $model->production_end_year ?? 'Present' }}
                     </div>
 
                     @if($model->variants->count())
