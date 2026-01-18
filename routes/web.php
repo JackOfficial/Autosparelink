@@ -111,7 +111,7 @@ Route::get('/{type}/specifications/{specification}/parts', [PartCatalogControlle
 ->whereIn('type', ['model', 'variant'])
 ->name('specification.parts');   
 
-Route::get('/spare-parts/{part:slug}', [PartCatalogController::class, 'show'])->name('spare-parts.show'); 
+Route::get('/spare-parts/{part:sku}', [PartCatalogController::class, 'show'])->name('spare-parts.show'); 
 
 // Route::get('/specifications/{type}/{id}/parts', [PartCatalogController::class, 'index'])
 //     ->name('specification.parts');
