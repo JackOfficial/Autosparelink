@@ -67,7 +67,7 @@
                             <tr>
                                 <td>{{ $part->partBrand->name ?? '—' }}</td>
                                 <td>
-                                    <a href="{{ url('/shop/products/' . $part->id) }}">
+                                    <a href="{{ route('spare-parts.show', $part->sku) }}">
                                         {{ $part->part_number }}
                                     </a>
                                 </td>
@@ -76,7 +76,7 @@
                                 <td>{{ $part->stock_quantity }}</td>
                                 <td>1</td>
                                 <td>
-                                    <a href="{{ url('/shop/products/' . $part->id) }}"
+                                    <a href="{{ route('spare-parts.show', $part->sku) }}"
                                        class="btn btn-sm btn-primary">
                                         <i class="fa fa-search mr-1"></i> View
                                     </a>
