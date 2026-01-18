@@ -29,7 +29,8 @@ class PartCatalogController extends Controller
             $specification->vehicle_model_id &&
             is_null($specification->variant_id)
         ) {
-             dd("Model and specification!");
+             dd("'Model and specification!' spec id: " . $specification->id . " and type: " . $type . " and mode ID: " . $specification->vehicle_model_id . " and variant ID: " . $specification->variant_id);
+            $context = $specification->variant();
             $context = $specification->vehicleModel()->with('brand')->first();
 
             $partsQuery = Part::with(['category', 'partBrand', 'photos'])
@@ -44,7 +45,7 @@ class PartCatalogController extends Controller
             $specification->vehicle_model_id &&
             $specification->variant_id
         ) {
-            dd("Variant and specification!");
+             dd("'Variant and specification!' spec id: " . $specification->id . " and type: " . $type . " and mode ID: " . $specification->vehicle_model_id . " and variant ID: " . $specification->variant_id);
             $context = $specification->variant()
                 ->with(['vehicleModel.brand'])
                 ->first();
@@ -57,7 +58,7 @@ class PartCatalogController extends Controller
 
         // INVALID URL → kill it
         else {
-            dd("spec id: " . $specification->id . " and type: " . $type);
+            dd("spec id: " . $specification->id . " and type: " . $type . " and mode ID: " . $specification->vehicle_model_id . " and variant ID: " . $specification->variant_id);
             abort(404);
         }
 
