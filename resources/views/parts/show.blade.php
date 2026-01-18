@@ -58,7 +58,7 @@
        <div class="col-lg-5 col-md-6 mb-4">
     <div class="bg-light p-3 rounded shadow-sm"
          x-data="{
-            images: {{ $photos->isNotEmpty() ? $photos->map(fn($p) => json_encode(asset('storage/'.$p->file_url))) : json_encode([asset('frontend/img/parts.jpg')]) }},
+            images: {{ $photos->isNotEmpty() ? $photos->map(fn($p) => json_encode(asset('storage/'.$p->file_path))) : json_encode([asset('frontend/img/parts.jpg')]) }},
             index: 0,
          }"
     >
