@@ -104,7 +104,7 @@
 
                 <p><strong>Make:</strong> {{ optional($part->partBrand)->name ?? '—' }}</p>
                 <p><strong>Part Number:</strong> {{ $part->part_number ?? '—' }}</p>
-                <p><strong>Weight:</strong> {{ $part->weight ?? '—' }} kg</p>
+                <p class="{{ $part->weight ?? 'd-none' }}"><strong>Weight:</strong> {{ $part->weight ?? '—' }} kg</p>
 
                 <h3 class="text-primary mb-3">{{ number_format($part->price,2) }} RWF</h3>
 
