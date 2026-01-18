@@ -121,29 +121,29 @@ class PartCatalogController extends Controller
         ]);
     }
 
-    public function show(string $id){
-      // Load part with brand, photos, compatibilities, substitutions
-        $part = Part::with([
-            'partBrand',            // The brand of this part
-            'photos',               // All uploaded photos
-            'fitments.vehicleModel.brand', // Compatibility table
-            // 'substitutions.partBrand'             // Substitution parts and their brands
-        ])->findOrFail($id);
+    public function show(Part $part){
+          // Load relationships (eager loading)
+    $part->load([
+        'partBrand',                         // Brand of this part
+        'photos',                            // Uploaded photos
+        'fitments.vehicleModel.brand',       // Compatibility chain
+        // 'substitutions.partBrand'          // Optional substitutions
+    ]);
 
-        // Photos for gallery
-        $photos = $part->photos;
+    // Photos for gallery
+    $photos = $part->photos;
 
-        // Substitutions (other parts that can replace this one)
-        $substitutions = $part->substitutions ?? collect();
+    // Substitutions (fallback to empty collection)
+    $substitutions = $part->substitutions ?? collect();
 
-        // Compatibility (pivot table linking parts to vehicle variants)
-        $compatibilities = $part->fitments ?? collect();
+    // Compatibility / fitments
+    $compatibilities = $part->fitments ?? collect();
 
-        return view('parts.show', [
-            'part' => $part,
-            'photos' => $photos,
-            'substitutions' => $substitutions,
-            'compatibilities' => $compatibilities
-        ]);
+    return view('parts.show', compact(
+        'part',
+        'photos',
+        'substitutions',
+        'compatibilities'
+    ));
     }
 }
