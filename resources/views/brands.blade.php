@@ -107,10 +107,12 @@
 
     <div class="brands-grid">
         @foreach($vehicle_brands as $brand)
-            <div class="brand-card">
+        <a href="{{ url('models/'.$brand->id) }}">
+             <div class="brand-card">
                 <img src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }}">
                 <div class="brand-name">{{ strtoupper($brand->brand_name) }}</div>
             </div>
+        </a>
         @endforeach
     </div>
 </div>
