@@ -215,7 +215,7 @@
                         <tr> 
                             <td>{{ optional($variant->vehicleModel->brand)->brand_name ?? '—' }}</td>
                             <td>
-                                @if($variants->count())
+                                @if($variant->variant->count())
                                     <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $variant->variant_id]) }}">{{ $variant->vehicleModel->model_name ?? '—' }}</a>
                                 @else
                                     <a href="{{ route('specifications.show', ['type' => 'model', 'id' => $variant->vehicle_model_id]) }}">{{ $variant->vehicleModel->model_name ?? '—' }}</a>
