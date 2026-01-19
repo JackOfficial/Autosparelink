@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/fantnsmp/autosparelink.fanterasafaris.com/
+    - export DEPLOYPATH=/home/automown/public_html
     - /bin/cp -R * $DEPLOYPATH
