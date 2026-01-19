@@ -105,21 +105,30 @@ body { background: #f5f7fa !important; }
 
 <!-- Brand Header -->
 @if($brand)
+<!-- Brand Models Header -->
 <div class="container-fluid px-xl-5">
-    <div class="bg-white p-4 shadow-sm rounded mb-3 d-flex justify-content-between">
+    <div class="bg-white p-4 shadow-sm rounded mb-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
         <div>
-            <h4 class="fw-bold text-uppercase mb-1">
-                @if($brand->brand_logo)
-                    <img src="{{ asset('storage/'.$brand->brand_logo) }}"
-                         style="width:45px;margin-top:-5px;">
+            <h4 class="text-uppercase mb-1 fw-bold">
+                @if($brand && $brand->brand_logo)
+                    <img src="{{ asset('storage/' . $brand->brand_logo) }}" 
+                         style="width: 45px; margin-top:-5px;" />
                 @endif
-                {{ $brand->brand_name }} Models
+                @if($brand)
+                    {{ $brand->brand_name }} Models
+                @else
+                    Vehicle Models
+                @endif
             </h4>
-            <small class="text-muted">Select your vehicle model</small>
+            <small class="text-muted">
+                Select your vehicle model to browse the parts catalog
+            </small>
         </div>
-        <span class="text-muted small">
-            Showing <strong>{{ $models->count() }}</strong> models
-        </span>
+        <div class="mt-3 mt-md-0">
+            <span class="text-muted small">
+                Showing <strong>{{ count($models) }}</strong> models
+            </span>
+        </div>
     </div>
 </div>
 @endif
@@ -199,33 +208,6 @@ body { background: #f5f7fa !important; }
 @php
     $brand = $models->first()?->brand;
 @endphp
-
-<!-- Brand Models Header -->
-<div class="container-fluid px-xl-5">
-    <div class="bg-white p-4 shadow-sm rounded mb-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-        <div>
-            <h4 class="text-uppercase mb-1 fw-bold">
-                @if($brand && $brand->brand_logo)
-                    <img src="{{ asset('storage/' . $brand->brand_logo) }}" 
-                         style="width: 45px; margin-top:-5px;" />
-                @endif
-                @if($brand)
-                    {{ $brand->brand_name }} Models
-                @else
-                    Vehicle Models
-                @endif
-            </h4>
-            <small class="text-muted">
-                Select your vehicle model to browse the parts catalog
-            </small>
-        </div>
-        <div class="mt-3 mt-md-0">
-            <span class="text-muted small">
-                Showing <strong>{{ count($models) }}</strong> models
-            </span>
-        </div>
-    </div>
-</div>
 
 <!-- Brand Description -->
 @if($brand?->description)
