@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use Cart; // Darryldecode\Cart
 use App\Models\Part;
+use Darryldecode\Cart\Cart as DarryldecodeCart;
+use Darryldecode\Cart\CartCollection;
 use Illuminate\Support\Facades\Auth;
 
 class PartCard extends Component
@@ -22,7 +24,7 @@ class PartCard extends Component
 {
     $sessionId = Auth::check() ? Auth::id() : session()->getId();
 
-    Cart::session($sessionId)->add([
+    DarryldecodeCart::session($sessionId)->add([
         'id' => $this->part->id,
         'name' => $this->part->part_name,
         'price' => $this->part->price,
@@ -44,7 +46,7 @@ public function addToWishlist()
 {
     $sessionId = Auth::check() ? Auth::id() : session()->getId();
 
-    Cart::session($sessionId)->instance('wishlist')->add([
+    DarryldecodeCart::session($sessionId)->instance('wishlist')->add([
         'id' => $this->part->id,
         'name' => $this->part->part_name,
         'price' => $this->part->price,
