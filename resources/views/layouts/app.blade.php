@@ -104,7 +104,7 @@
         }
     </style>
   {{-- Page-specific scripts --}}
-    @stack('scripts')
+    @stack('styles')
 </head>
 
 <body>
