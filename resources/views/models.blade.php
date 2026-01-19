@@ -194,16 +194,6 @@ body { background: #f5f7fa !important; }
     </div>
 </div>
 
-<!-- Brand Description -->
-@if($brand && $brand->description)
-<div class="container-fluid px-xl-5 mt-4 mb-5">
-    <div class="bg-white p-4 shadow-sm rounded">
-        <h4 class="fw-bold text-uppercase">About {{ $brand->brand_name }}</h4>
-        <p class="mb-0">{{ $brand->description }}</p>
-    </div>
-</div>
-@endif
-
 <!-- FAQ Section -->
 @php
     $brand = $models->first()?->brand;
