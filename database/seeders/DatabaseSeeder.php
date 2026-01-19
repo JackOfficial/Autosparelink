@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
         BrandsTableSeeder::class,
         BodyTypeSeeder::class,
+        CategorySeeder::class,
+        CountriesSeeder::class,
         EngineTypeSeeder::class,
         TransmissionTypesTableSeeder::class,
         DriveTypesSeeder::class,
@@ -24,6 +26,7 @@ class DatabaseSeeder extends Seeder
         VariantsSeeder::class,
         PartSeeder::class,
         PartBrandsSeeder::class,
+        RolesAndPermissionsSeeder::class,
         ]);
     }
 }
