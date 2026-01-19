@@ -212,10 +212,16 @@
                     </thead>
                     <tbody>
                         @foreach($compatibilities as $variant)
-                        <tr>
+                        <tr> 
                             <td>{{ optional($variant->vehicleModel->brand)->brand_name ?? '—' }}</td>
-                            <td><a href="{{ url('models/'.$variant->vehicleModel->id) }}">{{ $variant->vehicleModel->model_name ?? '—' }}</a></td>
-                            <td>{{ $variant->name ?? '—' }}</td>
+                            <td>
+                                @if($variants->count())
+                                    <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $variant->variant_id]) }}">{{ $variant->vehicleModel->model_name ?? '—' }}</a>
+                                @else
+                                    <a href="{{ route('specifications.show', ['type' => 'model', 'id' => $variant->vehicle_model_id]) }}">{{ $variant->vehicleModel->model_name ?? '—' }}</a>
+                                @endif
+                                </td>
+                            <td>{{ $variant->variant->name ?? '—' }}</td>
                             <td>{{ $variant->vehicleModel->production_start_year ?? 'Present' }}</td>
                             <td>{{ $variant->vehicleModel->production_end_year ?? 'Present' }}</td>
                         </tr>
