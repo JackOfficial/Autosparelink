@@ -145,7 +145,7 @@
 <div class="container-fluid pt-4">
     <div class="section-header px-xl-5">
         <h2>Genuine Parts Online Catalogs</h2>
-        <a href="" class="text-decoration-none">View all brands →</a>
+        <a href="/brands" class="text-decoration-none">View all brands →</a>
     </div>
     <div class="row px-xl-5 pb-3">
         @forelse ($brands as $brand)
