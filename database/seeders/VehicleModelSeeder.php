@@ -176,7 +176,7 @@ class VehicleModelSeeder extends Seeder
 
         // Volkswagen
         [
-            'brand_id' => 6,
+            'brand_id' => 3,
             'model_name' => 'Golf',
             'description' => 'Compact car, one of the most popular VW models.',
             'production_start_year' => 1974,
@@ -186,7 +186,7 @@ class VehicleModelSeeder extends Seeder
             'updated_at' => now(),
         ],
         [
-            'brand_id' => 6,
+            'brand_id' => 3,
             'model_name' => 'Passat',
             'description' => 'Mid-size sedan with German engineering and comfort.',
             'production_start_year' => 1973,
@@ -198,7 +198,7 @@ class VehicleModelSeeder extends Seeder
 
         // BYD
         [
-            'brand_id' => 7,
+            'brand_id' => 4,
             'model_name' => 'Han',
             'description' => 'Electric sedan with long range and modern design.',
             'production_start_year' => 2020,
@@ -208,7 +208,7 @@ class VehicleModelSeeder extends Seeder
             'updated_at' => now(),
         ],
         [
-            'brand_id' => 7,
+            'brand_id' => 4,
             'model_name' => 'Tang',
             'description' => 'Electric SUV with spacious interior and strong performance.',
             'production_start_year' => 2015,
@@ -220,7 +220,7 @@ class VehicleModelSeeder extends Seeder
 
         // Honda
         [
-            'brand_id' => 8,
+            'brand_id' => 2,
             'model_name' => 'Civic',
             'description' => 'Compact car known for reliability and fuel efficiency.',
             'production_start_year' => 1972,
@@ -230,7 +230,7 @@ class VehicleModelSeeder extends Seeder
             'updated_at' => now(),
         ],
         [
-            'brand_id' => 8,
+            'brand_id' => 2,
             'model_name' => 'CR-V',
             'description' => 'Compact SUV with practicality and reliability.',
             'production_start_year' => 1995,
@@ -242,7 +242,7 @@ class VehicleModelSeeder extends Seeder
 
         // Mitsubishi
         [
-            'brand_id' => 9,
+            'brand_id' => 3,
             'model_name' => 'Lancer',
             'description' => 'Compact car known for performance and affordability.',
             'production_start_year' => 1973,
@@ -252,7 +252,7 @@ class VehicleModelSeeder extends Seeder
             'updated_at' => now(),
         ],
         [
-            'brand_id' => 9,
+            'brand_id' => 3,
             'model_name' => 'Outlander',
             'description' => 'Mid-size SUV with family-friendly features.',
             'production_start_year' => 2001,
