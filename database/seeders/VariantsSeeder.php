@@ -111,7 +111,7 @@ class VariantsSeeder extends Seeder
             [
                 'vehicle_model_id' => 5,
                 'body_type_id' => 2,
-                'engine_type_id' => 6, // 2.5L Gasoline
+                'engine_type_id' => 5, // 2.5L Gasoline
                 'transmission_type_id' => 1,
                 'fuel_capacity' => '71L',
                 'seats' => 7,
@@ -130,7 +130,7 @@ class VariantsSeeder extends Seeder
             [
                 'vehicle_model_id' => 6,
                 'body_type_id' => 1, // Sedan
-                'engine_type_id' => 7, // 1.8L Gasoline
+                'engine_type_id' => 4, // 1.8L Gasoline
                 'transmission_type_id' => 1,
                 'fuel_capacity' => '50L',
                 'seats' => 5,
@@ -147,9 +147,9 @@ class VariantsSeeder extends Seeder
 
             // Toyota Camry (vehicle_model_id = 8)
             [
-                'vehicle_model_id' => 8,
+                'vehicle_model_id' => 2,
                 'body_type_id' => 1,
-                'engine_type_id' => 8, // 2.5L Gasoline
+                'engine_type_id' => 2, // 2.5L Gasoline
                 'transmission_type_id' => 1,
                 'fuel_capacity' => '60L',
                 'seats' => 5,
@@ -166,9 +166,9 @@ class VariantsSeeder extends Seeder
 
             // BMW 3 Series (vehicle_model_id = 13)
             [
-                'vehicle_model_id' => 13,
+                'vehicle_model_id' => 2,
                 'body_type_id' => 1, // Sedan
-                'engine_type_id' => 9, // 2.0L Gasoline
+                'engine_type_id' => 3, // 2.0L Gasoline
                 'transmission_type_id' => 1,
                 'fuel_capacity' => '60L',
                 'seats' => 5,
@@ -187,7 +187,7 @@ class VariantsSeeder extends Seeder
             [
                 'vehicle_model_id' => 14,
                 'body_type_id' => 2, // SUV
-                'engine_type_id' => 10, // 3.0L Gasoline
+                'engine_type_id' => 3, // 3.0L Gasoline
                 'transmission_type_id' => 1,
                 'fuel_capacity' => '85L',
                 'seats' => 5,

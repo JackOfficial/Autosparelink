@@ -112,7 +112,7 @@ class VehicleModelSeeder extends Seeder
 
         // Mercedes-Benz
         [
-            'brand_id' => 4,
+            'brand_id' => 3,
             'model_name' => 'C-Class',
             'description' => 'Compact executive car with luxury features.',
             'production_start_year' => 1993,
@@ -122,7 +122,7 @@ class VehicleModelSeeder extends Seeder
             'updated_at' => now(),
         ],
         [
-            'brand_id' => 4,
+            'brand_id' => 3,
             'model_name' => 'GLE',
             'description' => 'Mid-size luxury SUV with premium amenities.',
             'production_start_year' => 1997,
@@ -144,7 +144,7 @@ class VehicleModelSeeder extends Seeder
 
         // BMW
         [
-            'brand_id' => 5,
+            'brand_id' => 4,
             'model_name' => '3 Series',
             'description' => 'Compact luxury sedan with sporty performance.',
             'production_start_year' => 1975,
@@ -154,7 +154,7 @@ class VehicleModelSeeder extends Seeder
             'updated_at' => now(),
         ],
         [
-            'brand_id' => 5,
+            'brand_id' => 4,
             'model_name' => 'X5',
             'description' => 'Mid-size luxury SUV with advanced tech and comfort.',
             'production_start_year' => 1999,
@@ -164,7 +164,7 @@ class VehicleModelSeeder extends Seeder
             'updated_at' => now(),
         ],
         [
-            'brand_id' => 5,
+            'brand_id' => 4,
             'model_name' => '5 Series',
             'description' => 'Executive sedan with a balance of luxury and performance.',
             'production_start_year' => 1972,
@@ -264,7 +264,7 @@ class VehicleModelSeeder extends Seeder
 
         // Nissan
         [
-            'brand_id' => 10,
+            'brand_id' => 5,
             'model_name' => 'Altima',
             'description' => 'Mid-size sedan with comfort and efficiency.',
             'production_start_year' => 1992,
@@ -274,7 +274,7 @@ class VehicleModelSeeder extends Seeder
             'updated_at' => now(),
         ],
         [
-            'brand_id' => 10,
+            'brand_id' => 5,
             'model_name' => 'Rogue',
             'description' => 'Compact SUV with safety and technology features.',
             'production_start_year' => 2007,

@@ -15,18 +15,18 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-        BrandsTableSeeder::class,
-        BodyTypeSeeder::class,
-        CategorySeeder::class,
-        CountriesSeeder::class,
-        EngineTypeSeeder::class,
-        TransmissionTypesTableSeeder::class,
-        DriveTypesSeeder::class,
-        VehicleModelSeeder::class,
-        VariantsSeeder::class,
-        PartSeeder::class,
-        PartBrandsSeeder::class,
-        RolesAndPermissionsSeeder::class,
+            RolesAndPermissionsSeeder::class,
+            BodyTypeSeeder::class,
+            EngineTypeSeeder::class,
+            TransmissionTypesTableSeeder::class,
+            DriveTypesSeeder::class,
+            BrandsTableSeeder::class,
+            VehicleModelSeeder::class,
+            VariantsSeeder::class,
+            CategorySeeder::class,
+            PartBrandsSeeder::class,
+            PartSeeder::class,
+            CountriesSeeder::class,
         ]);
     }
 }
