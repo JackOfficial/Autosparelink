@@ -205,9 +205,9 @@ body { background: #f5f7fa !important; }
     <div class="bg-white p-4 shadow-sm rounded brand-description-box">
         <div class="d-flex align-items-center mb-2">
             @if($brand->brand_logo)
-                <img src="{{ asset('storage/'.$brand->brand_logo) }}" style="width:50px" class="me-3">
+                <img src="{{ asset('storage/'.$brand->brand_logo) }}" style="width:50px" class="me-3 ml-2">
             @endif
-            <h4 class="mb-0 font-weight-bold text-uppercase">About {{ $brand->brand_name }}</h4>
+            <h4 class="mb-0 font-weight-bold text-uppercase"> About {{ $brand->brand_name }}</h4>
         </div>
         <p class="brand-description-text mb-0">{{ $brand->description }}</p>
     </div>
