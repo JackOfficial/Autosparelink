@@ -89,10 +89,12 @@
                 <div class="d-flex align-items-center justify-content-between hero-popular mt-2">
                     <div>
                         <small class="me-3">Popular searches:</small>
-                        <a class="text-white fw-bold me-2" href="">Toyota</a>
-                        <a class="text-white fw-bold me-2" href="">Nissan</a>
-                        <a class="text-white fw-bold me-2" href="">Honda</a>
-                        <a class="text-white fw-bold" href="">Advanced search</a>
+                          @foreach($brands->take(4) as $brand)
+                    <a href="{{ url('models/'.$brand->id) }}" class="text-white fw-bold me-2">
+                    {{ $brand->brand_name }}
+                    </a>
+                    @endforeach
+                        <a class="text-white fw-bold" href="/brands">Advanced search</a>
                     </div>
                 </div>
 
