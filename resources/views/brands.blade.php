@@ -2,7 +2,7 @@
 
 @section('title', 'Brands | AutoSpareLink')
 
-@section('style')
+@push('styles')
 <style>
     .page-header {
         background: url('{{ asset('frontend/img/banners/brands-banner.jpg') }}') center/cover no-repeat;
@@ -90,7 +90,7 @@
         gap: 22px;
     }
 </style>
-@endsection
+@endpush
 
 @section('content')
 
