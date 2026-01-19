@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Cart;
+//use Cart;
 use Darryldecode\Cart\Cart as DarryldecodeCart;
 use Illuminate\Support\Facades\Auth;
 

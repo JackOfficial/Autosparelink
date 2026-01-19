@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
        Schema::defaultStringLength(191);
-       $loader = AliasLoader::getInstance();
-      $loader->alias('Cart', \Darryldecode\Cart\Facades\CartFacade::class);
+    //    $loader = AliasLoader::getInstance();
+    //   $loader->alias('Cart', \Darryldecode\Cart\Facades\CartFacade::class);
     }
 }
