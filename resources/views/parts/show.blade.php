@@ -214,7 +214,7 @@
                         @foreach($compatibilities as $variant)
                         <tr>
                             <td>{{ optional($variant->vehicleModel->brand)->brand_name ?? '—' }}</td>
-                            <td>{{ $variant->vehicleModel->model_name ?? '—' }}</td>
+                            <td><a href="{{ url('models/'.$variant->vehicleModel->id) }}">{{ $variant->vehicleModel->model_name ?? '—' }}</a></td>
                             <td>{{ $variant->name ?? '—' }}</td>
                             <td>{{ $variant->vehicleModel->production_start_year ?? 'Present' }}</td>
                             <td>{{ $variant->vehicleModel->production_end_year ?? 'Present' }}</td>
