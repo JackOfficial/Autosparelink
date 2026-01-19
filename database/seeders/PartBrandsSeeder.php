@@ -46,7 +46,7 @@ class PartBrandsSeeder extends Seeder
         // AFTERMARKET / REPLACEMENT BRANDS
         // -------------------------------
         $aftermarketBrands = [
-            "Replacement OEM", "555", "888", "Acura", "Ac Delco", "Aisin", "Allied Nippon",
+            "Replacement OEM", "555", "888", "Acura", "Ac Delco", "Allied Nippon",
             "Anchor", "Aquil Star", "Asimco", "Asso", "Ate", "Atek", "Bando", "Bbt", "Behr",
             "Bendu", "Bentley", "Beral", "Beru", "Besf1Ts", "Blackbelt", "Bock",
             "Bomag", "Bosal", "Boss", "Bremi", "Bw", "Camellia", "Century", "Clifford",
