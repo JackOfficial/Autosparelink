@@ -71,6 +71,18 @@ body { background: #f5f7fa !important; }
     </nav>
 </div>
 
+<!-- Page Header -->
+@if($brand)
+<div class="container-fluid px-xl-5">
+    <div class="bg-white p-4 shadow-sm rounded genuine-search-box mb-4">
+        <h3 class="text-uppercase mb-1 fw-bold">Genuine Parts Locator</h3>
+        <small class="text-muted">
+            Enter VIN or Frame Number to search genuine {{ $brand->brand_name }} parts
+        </small>
+    </div>
+</div>
+@endif
+
 <!-- Search Box -->
 @if($brand)
 <div class="container-fluid px-xl-5 mb-4">
@@ -187,22 +199,6 @@ body { background: #f5f7fa !important; }
 @php
     $brand = $models->first()?->brand;
 @endphp
-
-<!-- Page Header -->
-<div class="container-fluid px-xl-5">
-    <div class="bg-white p-4 shadow-sm rounded genuine-search-box mb-4">
-        <h3 class="text-uppercase mb-1 fw-bold">
-            Genuine Parts Locator
-        </h3>
-        <small class="text-muted">
-            @if($brand)
-                Enter VIN or Frame Number to search genuine {{ $brand->brand_name }} parts
-            @else
-                Enter VIN or Frame Number to search genuine parts
-            @endif
-        </small>
-    </div>
-</div>
 
 <!-- Brand Models Header -->
 <div class="container-fluid px-xl-5">
