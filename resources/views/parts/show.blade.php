@@ -95,7 +95,7 @@
     </div>
 </div>
         <!-- PRODUCT INFO -->
-     {{-- <livewire:part-card :part="$part" /> --}}
+     <livewire:part-card :part="$part" />
     </div>
 
     <!-- SUBSTITUTIONS -->
