@@ -174,7 +174,7 @@
 <div class="container-fluid pt-4 pb-3">
     <div class="section-header px-xl-5">
         <h2>Featured Spare Parts</h2>
-        <a href="/products" class="text-decoration-none">See all featured →</a>
+        <a href="/shop/products" class="text-decoration-none">See all featured →</a>
     </div>
     <div class="row px-xl-5">
         @forelse ($parts as $part)
@@ -228,7 +228,7 @@
 <div class="container-fluid pt-4 pb-3">
     <div class="section-header px-xl-5">
         <h2>Recent Spare Parts</h2>
-        <a href="/products" class="text-decoration-none">See all recent →</a>
+        <a href="/shop/products" class="text-decoration-none">See all recent →</a>
     </div>
     <div class="row px-xl-5">
         @forelse ($recent_parts as $recent_part)
