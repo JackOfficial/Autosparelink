@@ -44,7 +44,16 @@ class VinController extends Controller
     $trans     = $vinData['Transmission Style'] ?? null;
     $drive     = $vinData['Drive Type'] ?? null;
 
-    dd($vinData);
+    dd([
+    'vin'   => $vin,
+    'make'  => $makeName,
+    'model' => $modelName,
+    'year'  => $year,
+    'engine'=> $engine,
+    'body'  => $body,
+    'trans' => $trans,
+    'drive' => $drive,
+]);
 
     if (!$makeName || !$modelName) {
         return back()->withErrors([
