@@ -37,12 +37,13 @@
               <span class="fas fa-envelope"></span>
             </div>
           </div>
+        
+        </div>
           @error('email')
         <div class="text-primary" role="alert">
             <strong>{{ $message }}</strong>
         </div>
         @enderror
-        </div>
 
         <div class="input-group mb-3" x-data="{ show: false }">
           <input :type="show ? 'text' : 'password'" id="psd" name="password" value="{{old('password')}}" class="form-control @error('password') is-invalid @enderror" placeholder="Password" />
@@ -51,12 +52,13 @@
               <i :class="show ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
             </div>
           </div>
-          @error('password')
+        </div>
+         @error('password')
             <div class="invalid-feedback" role="alert">
                 <strong>{{ $message }}</strong>
             </div>
         @enderror
-        </div>
+        
          <div><a href="/forgot-password">Forgot your password?</a></div>
            <div class="icheck-primary">
               <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }} id="remember">

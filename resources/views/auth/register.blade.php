@@ -39,12 +39,12 @@
               <span class="fas fa-user"></span>
             </div>
           </div>
-          @error('name')
+      </div>
+      @error('name')
         <div class="text-primary" role="alert">
             <strong>{{ $message }}</strong>
         </div>
         @enderror
-      </div>
 
       <div class="input-group mb-3">
           <input type="email" name="email" value="{{old('email')}}" class="form-control @error('email') is-invalid @enderror" placeholder="Email" required />
@@ -53,12 +53,12 @@
               <span class="fas fa-envelope"></span>
             </div>
           </div>
-          @error('email')
+      </div>
+       @error('email')
         <div class="text-primary" role="alert">
             <strong>{{ $message }}</strong>
         </div>
         @enderror
-      </div>
 
       <div class="input-group mb-3" x-data="{ show: false }">
           <input :type="show ? 'text' : 'password'" id="psd" name="password" value="{{old('password')}}" class="form-control @error('password') is-invalid @enderror" placeholder="Password" />
@@ -67,12 +67,12 @@
               <i :class="show ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
             </div>
           </div>
-          @error('password')
+        </div>
+           @error('password')
             <div class="invalid-feedback" role="alert">
                 <strong>{{ $message }}</strong>
             </div>
           @enderror
-        </div>
 
         <div class="input-group mb-3" x-data="{ show: false }">
           <input :type="show ? 'text' : 'password'" id="password_confirmation" name="password_confirmation" value="{{old('password_confirmation')}}" class="form-control @error('password_confirmation') is-invalid @enderror" placeholder="Re-type your password" />
@@ -81,12 +81,12 @@
               <i :class="show ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
             </div>
           </div>
-          @error('password_confirmation')
+        </div>
+        @error('password_confirmation')
             <span class="invalid-feedback" role="alert">
                 <strong>{{ $message }}</strong>
             </span>
           @enderror
-        </div>
       <hr>
       <button type="submit" class="btn btn-primary w-100">Register</button>
       <div>Already have account? <a href="/login">Login</a></div>
