@@ -52,6 +52,7 @@ use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
 use App\Http\Controllers\ModelPartController;
 use App\Http\Controllers\PartCatalogController;
+use App\Http\Controllers\VinController;
 
 //Guest routes
 // Route::get('/', function() {
@@ -104,6 +105,7 @@ Route::get('/export-excel', [ExportsController::class, 'exportAll']);
 Route::get('/export-excel/{id}', [ExportsController::class, 'exportSelected']);
 Route::get('/models', [VehicleModelController::class, 'index']);
 Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
+Route::get('/vin-search', [VinController::class, 'search']);
 // Route::get('/model-specification/{id}', [SpecificationController::class, 'model_specification']);
 // Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
 

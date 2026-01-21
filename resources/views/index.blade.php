@@ -80,7 +80,7 @@
             <p class="hero-sub mb-3 animate__animated animate__fadeInUp">Use your VIN or Frame number to instantly find parts that fit your exact vehicle model.</p>
 
             <!-- VIN Search Box -->
-            <form action="#" method="GET" class="animate__animated animate__fadeInUp" role="search" aria-label="Search by VIN">
+            <form action="/vin-search" method="GET" class="animate__animated animate__fadeInUp" role="search" aria-label="Search by VIN">
                 <div class="search-wrapper">
                     <input aria-label="Search by VIN" type="text" name="vin" placeholder="Enter VIN / Frame Number (e.g. JTDBE32K220123456)" required>
                     <button class="btn btn-primary" type="submit">Search</button>
