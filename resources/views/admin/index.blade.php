@@ -110,7 +110,7 @@
                                 <td>{{ $order->created_at->format('d M Y') }}</td>
                             </tr>
                             @empty
-                            <td colspan="5" class="text-center py-2">No Order made at this moment</td>
+                            <td colspan="5" class="text-center py-2">No order made at this moment</td>
                             @endforelse
                         </tbody>
                     </table>
