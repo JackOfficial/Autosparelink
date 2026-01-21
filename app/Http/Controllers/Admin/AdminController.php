@@ -21,10 +21,11 @@ class AdminController extends Controller
         $recentOrders = Order::where('status', 'Pending')->count();
         $salesMonths = ["Jan", "Feb", "Mar", "Apr", "May"];
         $salesData = [120, 190, 300, 500, 200];
-        $inventoryData = [300, 50, 20]; // In Stock, Low Stock, Out of Stock
+        $lowStockParts = Part::where('stock_quantity', '<', 5)->count();
+        $inventoryData = [$parts, $lowStockParts, 5]; // In Stock, Low Stock, Out of Stock
 
         $pendingOrders = Order::where('status', 'Pending')->count();
-        $lowStockParts = Part::where('stock_quantity', '<', 5)->count();
+        
         $recentOrders = Order::latest()->take(5)->get();
 
 
