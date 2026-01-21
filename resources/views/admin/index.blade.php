@@ -94,7 +94,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($recentOrders as $order)
+                            @forelse ($recentOrders as $order)
                             <tr>
                                 <td>{{ $order->id }}</td>
                                 <td>{{ $order->customer_name }}</td>
@@ -109,7 +109,9 @@
                                 <td>${{ number_format($order->total, 2) }}</td>
                                 <td>{{ $order->created_at->format('d M Y') }}</td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <td colspan="5" class="text-center py-2">No Order made at this moment</td>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
