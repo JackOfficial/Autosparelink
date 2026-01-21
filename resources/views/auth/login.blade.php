@@ -38,9 +38,9 @@
             </div>
           </div>
           @error('email')
-        <span class="text-primary" role="alert">
+        <div class="text-primary" role="alert">
             <strong>{{ $message }}</strong>
-        </span>
+        </div>
         @enderror
         </div>
 
@@ -52,9 +52,9 @@
             </div>
           </div>
           @error('password')
-            <span class="invalid-feedback" role="alert">
+            <div class="invalid-feedback" role="alert">
                 <strong>{{ $message }}</strong>
-            </span>
+            </div>
         @enderror
         </div>
          <div><a href="/forgot-password">Forgot your password?</a></div>
