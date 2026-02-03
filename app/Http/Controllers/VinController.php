@@ -22,23 +22,39 @@ public function search(Request $request)
     $vin = strtoupper(trim($request->vin));
 
     ///
-    $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "https://api.vehicledatabases.com/advanced-vin-decode/v2/$vin");
-curl_setopt($ch, CURLOPT_HTTPHEADER, array("x-authkey:b92486fcf74b11f0b1c80242ac120002"));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$response = curl_exec($ch);
+    $advancedVINDecode = curl_init();
+curl_setopt($advancedVINDecode, CURLOPT_URL, "https://api.vehicledatabases.com/advanced-vin-decode/v2/$vin");
+curl_setopt($advancedVINDecode, CURLOPT_HTTPHEADER, array("x-authkey: b92486fcf74b11f0b1c80242ac120002"));
+curl_setopt($advancedVINDecode, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($advancedVINDecode);
 
  if ($response === false) {
-        $error = curl_error($ch);
-        curl_close($ch);
-        dd('cURL Error:', $error);
+        // $error = curl_error($advancedVINDecode);
+        // curl_close($advancedVINDecode);
+        // dd('cURL Error:', $error);
+
+        $europeVINDecode = curl_init();
+curl_setopt($europeVINDecode, CURLOPT_URL, "https://api.vehicledatabases.com/europe-vin-decode/v2/$vin");
+curl_setopt($europeVINDecode, CURLOPT_HTTPHEADER, array("x-authkey: b92486fcf74b11f0b1c80242ac120002"));
+curl_setopt($europeVINDecode, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($europeVINDecode);
+
+if ($response === false){
+   $error = curl_error($europeVINDecode);
+        curl_close($europeVINDecode);
+        dd('Europe VIN Decode Error: ', $error); 
+}
+ curl_close($europeVINDecode);
+ $result = json_decode($response, true);
+ dd("Europe VIN Decode: " . $result);
+
     }
 
-    curl_close($ch);
+    curl_close($advancedVINDecode);
 
     $result = json_decode($response, true);
 
-    dd($result);
+    dd("Advanced VIN Decode: " . $result);
     ////
 }
 
