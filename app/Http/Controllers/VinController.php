@@ -2,223 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Brand;
-use App\Models\Part;
-use App\Models\Specification;
-use App\Models\VehicleModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class VinController extends Controller
 {
+    public function search(Request $request)
+    {
+        $request->validate([
+            'vin' => ['required', 'string', 'size:17'], // VINs are strictly 17 chars
+        ]);
 
-public function search(Request $request)
-{
-    $request->validate([
-        'vin' => ['required', 'string', 'min:8', 'max:17'],
-    ]);
+        $vin = strtoupper(trim($request->vin));
+        $apiKey = config('services.vehicle_api.key', env('VEHICLE_API_KEY'));
 
-    $vin = strtoupper(trim($request->vin));
+        // 1. Try Advanced VIN Decode First
+        $response = Http::withHeaders(['x-authkey' => $apiKey])
+            ->get("https://api.vehicledatabases.com/advanced-vin-decode/v2/$vin");
 
-    ///
-    $advancedVINDecode = curl_init();
-curl_setopt($advancedVINDecode, CURLOPT_URL, "https://api.vehicledatabases.com/advanced-vin-decode/v2/$vin");
-curl_setopt($advancedVINDecode, CURLOPT_HTTPHEADER, array("x-authkey: b92486fcf74b11f0b1c80242ac120002"));
-curl_setopt($advancedVINDecode, CURLOPT_RETURNTRANSFER, true);
-$response = curl_exec($advancedVINDecode);
+        // 2. If it fails or finds nothing, try Europe Decode
+        if ($response->failed() || empty($response->json()['data'])) {
+            $response = Http::withHeaders(['x-authkey' => $apiKey])
+                ->get("https://api.vehicledatabases.com/europe-vin-decode/v2/$vin");
+        }
 
- if ($response === false) {
-        // $error = curl_error($advancedVINDecode);
-        // curl_close($advancedVINDecode);
-        // dd('cURL Error:', $error);
-
-        $europeVINDecode = curl_init();
-curl_setopt($europeVINDecode, CURLOPT_URL, "https://api.vehicledatabases.com/europe-vin-decode/v2/$vin");
-curl_setopt($europeVINDecode, CURLOPT_HTTPHEADER, array("x-authkey: b92486fcf74b11f0b1c80242ac120002"));
-curl_setopt($europeVINDecode, CURLOPT_RETURNTRANSFER, true);
-$response = curl_exec($europeVINDecode);
-
-if ($response === false){
-   $error = curl_error($europeVINDecode);
-        curl_close($europeVINDecode);
-        dd('Europe VIN Decode Error: ', $error); 
-}
- curl_close($europeVINDecode);
- $result = json_decode($response, true);
- dd("Europe VIN Decode: " . $result);
-
+        // 3. Check if we finally got data
+        if ($response->successful() && !empty($response->json()['data'])) {
+            $vehicle = $response->json()['data'];
+            
+            // Logic to search your local database
+            // $parts = Part::where('model', $vehicle['model'])->get();
+            dd($vehicle);
+            //return view('vin.results', compact('vehicle'));
+        }
+        dd("Vehicle records not found in Global or European databases.");
+        //return back()->withErrors(['vin' => 'Vehicle records not found in Global or European databases.']);
     }
-
-    curl_close($advancedVINDecode);
-
-    $result = json_decode($response, true);
-
-    dd("Advanced VIN Decode: " . $result);
-    ////
-}
-
-//     public function search(Request $request)
-// {
-//     // 1️⃣ Validate input (VIN / Frame Number)
-//     $request->validate([
-//         'vin' => ['required', 'string', 'min:8', 'max:17'],
-//     ]);
-
-//     $vin = strtoupper(trim($request->vin));
-
-//     // 2️⃣ Decode VIN using NHTSA (FREE)
-//     $response = Http::get(
-//         "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/$vin",
-//         ['format' => 'json']
-//     );
-
-//     if (!$response->ok()) {
-//         return back()->withErrors(['vin' => 'Unable to decode VIN at the moment.']);
-//     }
-
-//     // Convert API response to key => value array
-//     $vinData = collect($response->json('Results'))
-//         ->pluck('Value', 'Variable');
-
-//     // 3️⃣ Extract useful vehicle info
-//     $makeName  = $vinData['Make'] ?? null;
-//     $modelName = $vinData['Model'] ?? null;
-//     $year      = $vinData['Model Year'] ?? null;
-//     $engine    = $vinData['Engine Model'] ?? $vinData['Displacement (L)'] ?? null;
-//     $body      = $vinData['Body Class'] ?? null;
-//     $trans     = $vinData['Transmission Style'] ?? null;
-//     $drive     = $vinData['Drive Type'] ?? null;
-
-//     dd([
-//     'vin'   => $vin,
-//     'make'  => $makeName,
-//     'model' => $modelName,
-//     'year'  => $year,
-//     'engine'=> $engine,
-//     'body'  => $body,
-//     'trans' => $trans,
-//     'drive' => $drive,
-// ]);
-
-//     if (!$makeName || !$modelName) {
-//         return back()->withErrors([
-//             'vin' => 'VIN decoded, but vehicle make or model could not be identified.',
-//         ]);
-//     }
-
-//     // 4️⃣ Match Brand
-//     $brand = Brand::where('brand_name', 'LIKE', "%$makeName%")->first();
-
-//     if (!$brand) {
-//         return back()->withErrors([
-//             'vin' => 'Vehicle brand not supported yet.',
-//         ]);
-//     }
-
-//     // 5️⃣ Match Model
-//     $model = VehicleModel::where('vehicle_brand_id', $brand->id)
-//         ->where('name', 'LIKE', "%$modelName%")
-//         ->first();
-
-//     if (!$model) {
-//         return back()->withErrors([
-//             'vin' => 'Vehicle model not found in our catalog.',
-//         ]);
-//     }
-
-//     // 6️⃣ Try to match SPECIFICATION (model OR variant)
-//     $specQuery = Specification::query()
-//         ->where(function ($q) use ($model) {
-//             $q->where('vehicle_model_id', $model->id)
-//               ->orWhereNotNull('variant_id');
-//         });
-
-//     if ($engine) {
-//         $specQuery->whereHas('engineType', fn ($q) =>
-//             $q->where('name', 'LIKE', "%$engine%")
-//         );
-//     }
-
-//     if ($body) {
-//         $specQuery->whereHas('bodyType', fn ($q) =>
-//             $q->where('name', 'LIKE', "%$body%")
-//         );
-//     }
-
-//     if ($trans) {
-//         $specQuery->whereHas('transmissionType', fn ($q) =>
-//             $q->where('name', 'LIKE', "%$trans%")
-//         );
-//     }
-
-//     if ($drive) {
-//         $specQuery->whereHas('driveType', fn ($q) =>
-//             $q->where('name', 'LIKE', "%$drive%")
-//         );
-//     }
-
-//     $specification = $specQuery->first();
-
-//     // 7️⃣ Fetch compatible parts (priority-based)
-//     $parts = Part::query()
-//         ->when($specification, function ($q) use ($specification) {
-//             $q->whereHas('specifications', fn ($sq) =>
-//                 $sq->where('specification_id', $specification->id)
-//             );
-//         })
-//         ->orWhereHas('vehicle_models', fn ($q) =>
-//             $q->where('model_id', $model->id)
-//         )
-//         ->distinct()
-//         ->paginate(20);
-
-//     // 8️⃣ Return results
-//     return view('parts.vin-results', [
-//         'vin'           => $vin,
-//         'brand'         => $brand,
-//         'model'         => $model,
-//         'year'          => $year,
-//         'specification' => $specification,
-//         'parts'         => $parts,
-//     ]);
-// }
-
-/* https://vindecoder.pl/en/api#example-api-request [VNKKD3D320A094001]
-
-<?php
-    // API data
-    $api_uid = "USERID"; // Enter your API UID
-    $api_key = "APIKEY"; // Enter your API Key
-    // VIN to be entered
-    $vin = "VINNUMBER"; // Enter the VIN number
-    // Preferred language for API response
-    $lang = "en"; // Set the preferred language, e.g., 'en' for English etc.
-    // Generating checksum as MD5
-    $checksum = md5($api_uid . $api_key . $vin);
-    // API URL with language parameter
-    $url = "https://bp.autoiso.pl/api/v3/getDecoderFree/apiuid:$api_uid/checksum:$checksum/vin:$vin/lang:$lang";
-    // Initializing cURL session
-    $ch = curl_init();
-    // cURL settings
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Get the response as a variable
-    curl_setopt($ch, CURLOPT_HTTPGET, true);
-    // Execute the request
-    $response = curl_exec($ch);
-    // Check if an error occurred
-    if (curl_errno($ch)) {
-        echo 'cURL error: ' . curl_error($ch);
-    } else {
-        echo "API response:\n";
-        echo $response;
-        $responseData = json_decode($response, true);
-        print_r($responseData);
-    }
-    // Close the cURL session
-    curl_close($ch);
-    ?> 
-
-*/
-
 }
