@@ -21,31 +21,25 @@ public function search(Request $request)
 
     $vin = strtoupper(trim($request->vin));
 
-    $curl = curl_init();
+    ///
+    $ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "https://api.vehicledatabases.com/advanced-vin-decode/v2/$vin");
+curl_setopt($ch, CURLOPT_HTTPHEADER, array("x-authkey:b92486fcf74b11f0b1c80242ac120002"));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($ch);
 
-    curl_setopt_array($curl, [
-        CURLOPT_URL => "https://api.auto.dev/vin/$vin",
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 15,
-        CURLOPT_HTTPHEADER => [
-            'Authorization: Bearer sk_ad_twBrVYnIbDeXfkbH2uYxGHHI',
-            'Accept: application/json',
-        ],
-    ]);
-
-    $response = curl_exec($curl);
-
-    if ($response === false) {
-        $error = curl_error($curl);
-        curl_close($curl);
+ if ($response === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
         dd('cURL Error:', $error);
     }
 
-    curl_close($curl);
+    curl_close($ch);
 
     $result = json_decode($response, true);
 
     dd($result);
+    ////
 }
 
 //     public function search(Request $request)
@@ -207,9 +201,7 @@ public function search(Request $request)
     }
     // Close the cURL session
     curl_close($ch);
-    ?>
-
-    
+    ?> 
 
 */
 
