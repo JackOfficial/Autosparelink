@@ -14,6 +14,8 @@ return new class extends Migration
             $table->foreignId('part_id')->constrained()->onDelete('cascade');
             $table->foreignId('variant_id')->constrained()->onDelete('cascade');
 
+            $table->foreignId('vehicle_model_id')->constrained()->onDelete('cascade');
+
             $table->year('start_year')->nullable();
             $table->year('end_year')->nullable();
 

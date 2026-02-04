@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->year('production_start_year')->nullable();
             $table->year('production_end_year')->nullable();
+            $table->year('year')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });

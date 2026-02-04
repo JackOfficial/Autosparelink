@@ -14,6 +14,7 @@ class VehicleModel extends Model
         'description',
         'production_start_year',
         'production_end_year',
+        'year',
         'status',
     ];
 

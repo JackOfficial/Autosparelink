@@ -53,6 +53,7 @@
                                 <th>Photo</th>
                                 <th>Model Name</th>
                                 <th>Production Years</th>
+                                <th>Model Year</th>
                                 <th>Status</th>
                                 <th style="width:150px;">Actions</th>
                             </tr>
@@ -80,7 +81,8 @@
 
                                 {{-- Production Years --}}
                                 <td>{{ $model->production_start_year ?? '-' }} - {{ $model->production_end_year ?? 'Present' }}</td>
-
+  
+                                <td>{{ $model->year ?? '-' }}</td>
                                 {{-- Status --}}
                                 <td>
                                     @if($model->status)
