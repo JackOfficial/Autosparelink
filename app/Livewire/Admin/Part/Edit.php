@@ -38,7 +38,7 @@ class Edit extends Component
 
     public function mount(Part $part)
     {
-        dd($part->id);
+        dd($part);
         $this->part = $part;
 
         // Pre-fill form fields
