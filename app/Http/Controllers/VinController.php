@@ -109,10 +109,10 @@ public function search(Request $request)
                     ->orWhereIn('variant_id', $specifications->pluck('variant_id')->filter());
             })
             ->where(function ($yearQ) use ($year) {
-                $yearQ->whereNull('year_start')->orWhere('year_start', '<=', $year);
+                $yearQ->whereNull('production_start_year')->orWhere('production_start_year', '<=', $year);
             })
             ->where(function ($yearQ) use ($year) {
-                $yearQ->whereNull('year_end')->orWhere('year_end', '>=', $year);
+                $yearQ->whereNull('production_year_end')->orWhere('production_year_end', '>=', $year);
             });
         })
         ->paginate(12);
