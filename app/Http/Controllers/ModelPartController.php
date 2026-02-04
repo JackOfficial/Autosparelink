@@ -18,6 +18,7 @@ class ModelPartController extends Controller
     public function model_parts(Request $request, $model_id)
     {
         $model = VehicleModel::with('brand', 'variants')->findOrFail($model_id);
+        $type = 'model';
 
         $variantIds = $model->variants->pluck('id')->toArray();
 

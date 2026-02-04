@@ -26,13 +26,10 @@ class PartCatalogController extends Controller
             is_null($specification->variant_id)
         ) {
              //dd("'Model and specification!' spec id: " . $specification->id . " and type: " . $type . " and mode ID: " . $specification->vehicle_model_id . " and variant ID: " . $specification->variant_id);
-            $context = $specification->variant();
             $context = $specification->vehicleModel()->with('brand')->first();
 
             $partsQuery = Part::with(['category', 'partBrand', 'photos'])
-                ->whereHas('fitments', function ($q) use ($specification) {
-                    $q->where('vehicle_model_id', $specification->vehicle_model_id);
-                });
+                ->forSpecification($specification, $type);
         }
 
         // CASE 2: Variant-based specification

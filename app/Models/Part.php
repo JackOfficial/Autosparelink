@@ -96,4 +96,16 @@ public function substitutedFor()
             )
         );
     }
+
+    public function scopeForSpecification($query, Specification $spec, string $type)
+{
+    return $query->whereHas('fitments', function ($q) use ($spec, $type) {
+        if ($type === 'model') {
+            $q->where('vehicle_model_id', $spec->vehicle_model_id);
+        } else {
+            $q->where('variant_id', $spec->variant_id);
+        }
+    });
+}
+
 }
