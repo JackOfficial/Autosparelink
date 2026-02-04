@@ -37,7 +37,7 @@ class Edit extends Component
     public $allParts = [];
     public $partId;
 
-    public function mount($partId = null)
+    public function mount($partId)
     {
         $this->partId = $partId;
         dd($partId);
