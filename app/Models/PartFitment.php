@@ -11,8 +11,8 @@ class PartFitment extends Model
         'variant_id',
         'vehicle_model_id',
         'status',
-        'year_start',
-        'year_end',
+        'start_year',
+        'end_year',
     ];
 
     public function part()

@@ -105,8 +105,8 @@ class Create extends Component
                 'variant_id' => $spec->variant_id ?? $spec->variant?->id,
                 'vehicle_model_id' => $spec->vehicle_model_id ?? $spec->variant?->vehicle_model_id,
                 'status' => 'active',
-                'year_start' => $spec->production_start,
-                'year_end' => $spec->production_end,
+                'start_year' => $spec->production_start,
+                'end_year' => $spec->production_end,
             ]);
         }
 
