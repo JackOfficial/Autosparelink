@@ -193,9 +193,6 @@
                      alt="{{ $part->part_name }}"
                      style="width:100%;height:200px;object-fit:cover;">
 
-                <!-- BADGE -->
-                <span class="badge-custom badge-new">Compatible</span>
-
                 <!-- ACTIONS -->
                 <div class="product-action">
     <a href="{{ route('spare-parts.show', $part->sku) }}"
