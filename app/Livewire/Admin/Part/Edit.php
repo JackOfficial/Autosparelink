@@ -35,10 +35,12 @@ class Edit extends Component
     public $partBrands = [];
     public $vehicleModels = [];
     public $allParts = [];
+    public $partId;
 
-    public function mount(Part $part)
+    public function mount($partId = null)
     {
-        dd($part);
+        $this->partId = $partId;
+        dd($partId);
         $this->part = $part;
 
         // Pre-fill form fields
