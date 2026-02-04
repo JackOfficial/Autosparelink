@@ -186,8 +186,17 @@
 
         {{-- Submit --}}
         <div class="text-end mt-3">
-            <button class="btn btn-success"><i class="fas fa-save"></i> Save Part</button>
-        </div>
+    <button class="btn btn-success" type="submit" wire:loading.attr="disabled">
+        <span wire:loading.remove wire:target="save">
+            <i class="fas fa-save"></i> Save Part
+        </span>
+
+        <span wire:loading wire:target="save">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Saving...
+        </span>
+    </button>
+</div>
 
     </form>
 
