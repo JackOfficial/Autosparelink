@@ -116,11 +116,11 @@ public function search(Request $request)
             });
         })
         ->paginate(12);
-
+        
     // 6. SERVE parts.index
     return view('parts.index', [
         'parts' => $parts,
-        'categories' => Category::withCount('parts')->get(),
+        'categories' => Category::whereNull('parent_id')->orderBy('category_name')->withCount('parts')->get(),
         'type' => 'model',
         'context' => $vehicleModel,
     ]);
