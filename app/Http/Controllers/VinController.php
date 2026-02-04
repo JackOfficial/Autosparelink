@@ -44,7 +44,7 @@ public function search(Request $request)
 
     // 2. CORE IDENTIFIERS
     $make  = strtoupper(trim($vehicle['General Information']['Make']));
-    $model = strtoupper(trim($vehicle['General Information']['Model']));
+    $model = strtoupper($vehicle['General Information']['Model']);
     $year  = (int) $vehicle['General Information']['Year'];
 
     $trimLevel = trim($vehicle['General Information']['Trim level'] ?? '');
