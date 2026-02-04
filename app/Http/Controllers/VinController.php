@@ -76,7 +76,7 @@ public function search(Request $request)
             $q->whereNull('production_start')
               ->orWhere('production_start', '<=', $year);
         })
-        ->where(function ($q) use ($year) {
+        ->orWhere(function ($q) use ($year) {
             $q->whereNull('production_end')
               ->orWhere('production_end', '>=', $year);
         })
