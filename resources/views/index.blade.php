@@ -85,7 +85,7 @@
                     <input aria-label="Search by VIN" type="text" name="vin" placeholder="Enter VIN / Frame Number (e.g. JTDBE32K220123456)" required>
                     <button class="btn btn-primary" type="submit">Search</button>
                 </div>
-                 @error('vin')<div class="text-danger">{{ $message }}</div>@enderror
+                 @error('vin')<div class="text-danger text-center">{{ $message }}</div>@enderror
                 <div class="d-flex align-items-center justify-content-between hero-popular mt-2">
                     <div>
                         <small class="me-3">Popular searches:</small>
