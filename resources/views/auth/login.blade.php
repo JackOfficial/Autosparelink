@@ -25,7 +25,7 @@
 @endif
 
 <div>
-  <a class="btn btn-primary mb-2 d-block" href="{{ url('auth/redirect/google') }}">Login with Google</a>
+  <a class="btn btn-primary mb-0 d-block" href="{{ url('auth/redirect/google') }}">Login with Google</a>
 </div>
 <div class="text-center my-1">Or</div>
     <form method="post" action="/login">
