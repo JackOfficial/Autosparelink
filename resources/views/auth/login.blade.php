@@ -30,7 +30,7 @@
 <div class="text-center mb-1">Or</div>
     <form method="post" action="/login">
       @csrf
-      <div class="input-group mb-3">
+      <div class="input-group mb-2">
           <input type="email" name="email" value="{{old('email')}}" class="form-control @error('email') is-invalid @enderror" placeholder="Email" required />
           <div class="input-group-append">
             <div class="input-group-text h-100">
