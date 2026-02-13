@@ -97,8 +97,8 @@ class PartsCatalog extends Component
         // Year filter via fitments pivot
         if ($this->year) {
             $query->whereHas('fitments', function ($q) {
-                $q->where('year_start', '<=', $this->year)
-                  ->where('year_end', '>=', $this->year);
+                $q->where('start_year', '<=', $this->year)
+                  ->where('end_year', '>=', $this->year);
             });
         }
 
