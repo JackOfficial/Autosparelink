@@ -106,7 +106,7 @@ Route::get('/export-excel/{id}', [ExportsController::class, 'exportSelected']);
 Route::get('/models', [VehicleModelController::class, 'index']);
 Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
 Route::get('/vin-search', [VinController::class, 'search']);
-Route::get('/spare-parts', PartsCatalog::class)->name('spare-parts.index');
+Route::get('/spare-parts', [[PartCatalogController::class, 'parts']]);
 // Route::get('/model-specification/{id}', [SpecificationController::class, 'model_specification']);
 // Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
 // Route::get('/spare-parts/', [SparePartController::class, 'parts']);

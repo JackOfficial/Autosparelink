@@ -72,6 +72,6 @@ class PartsCatalog extends Component
         return view('livewire.parts.parts-catalog', [
             'parts' => $query->paginate(12),
             'categories' => Category::withCount('parts')->get()
-        ])->layout('layouts.app');
+        ]);
     }
 }

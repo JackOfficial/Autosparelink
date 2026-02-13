@@ -13,6 +13,11 @@ class PartCatalogController extends Controller
      * Display all spare parts compatible with a specification
      * (model-based or variant-based).
      */
+
+    public function parts(){
+        return view('parts.index');
+    }
+
     public function index(Request $request, string $type, Specification $specification)
     {
         /* -------------------------------------------------
