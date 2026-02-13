@@ -14,21 +14,21 @@
                 <!-- VEHICLE FILTERS -->
                 <h6 class="fw-bold mt-3 mb-2">Vehicle Compatibility</h6>
 
-                <select class="form-select mb-2" wire:model="brand">
+                <select class="form-select mb-2" wire:model.live="brand">
                     <option value="">Select Brand</option>
                     @foreach($brands as $b)
                         <option value="{{ $b->id }}">{{ $b->brand_name }}</option>
                     @endforeach
                 </select>
 
-                <select class="form-select mb-2" wire:model="model" @if(!$models) disabled @endif>
+                <select class="form-select mb-2" wire:model.live="model" @if(!$models) disabled @endif>
                     <option value="">Select Model</option>
                     @foreach($models as $m)
                         <option value="{{ $m->id }}">{{ $m->model_name }}</option>
                     @endforeach
                 </select>
 
-                <select class="form-select mb-2" wire:model="variant" @if(!$variants) disabled @endif>
+                <select class="form-select mb-2" wire:model.live="variant" @if(!$variants) disabled @endif>
                     <option value="">Select Variant</option>
                     @foreach($variants as $v)
                         <option value="{{ $v->id }}">{{ $v->name }}</option>
