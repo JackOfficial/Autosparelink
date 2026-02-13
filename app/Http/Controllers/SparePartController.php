@@ -12,6 +12,10 @@ use App\Models\VehicleModel;
 
 class SparePartController extends Controller
 {
+    public function index(){
+       return view('parts.index');
+    }
+
     public function show($id){
 
     }
