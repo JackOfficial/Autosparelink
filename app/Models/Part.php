@@ -43,7 +43,7 @@ class Part extends Model
             'part_id',
             'variant_id'
         )
-        ->withPivot(['vehicle_model_id', 'year_start', 'year_end'])
+        ->withPivot(['vehicle_model_id', 'start_year', 'end_year'])
         ->withTimestamps();
     }
 
@@ -55,7 +55,7 @@ class Part extends Model
             'part_id',
             'vehicle_model_id'
         )
-        ->withPivot(['variant_id', 'year_start', 'year_end'])
+        ->withPivot(['variant_id', 'start_year', 'end_year'])
         ->withTimestamps();
     }
 
