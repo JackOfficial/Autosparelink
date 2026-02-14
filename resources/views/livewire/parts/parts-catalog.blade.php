@@ -31,13 +31,9 @@
                 <select class="form-select mb-2" wire:model.live="variant" @if(!$variants) disabled @endif>
                     <option value="">Select Variant</option>
                     @foreach($variants as $v)
-                        <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->full_name }})</option>
+                        <option value="{{ $v->id }}">{{ $v->full_name }}</option>
                     @endforeach
                 </select>
-                
-                @foreach($variants as $v)
-                <div>{{ $v->name }} ({{ $v->full_name }})</div>
-                 @endforeach
 
                 <input type="number" class="form-control mb-2" placeholder="Year" wire:model.lazy="year">
 
