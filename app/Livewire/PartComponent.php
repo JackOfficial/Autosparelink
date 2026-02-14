@@ -3,14 +3,17 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\Cart;
+use App\Models\Part;
+use Gloudemans\Shoppingcart\Facades\Cart; // The correct Facade for the package
+use Illuminate\Support\Facades\Auth;
 
 class PartComponent extends Component
 {
-    public $part;
+    public Part $part; // Type-hinting the Model enables Route Model Binding/Auto-serialization
+    public $quantity = 1;
     public $currencySymbol;
 
-    public function mount($part, $currencySymbol = 'RWF')
+    public function mount(Part $part, $currencySymbol = 'RWF')
     {
         $this->part = $part;
         $this->currencySymbol = $currencySymbol;
@@ -18,17 +21,46 @@ class PartComponent extends Component
 
     public function addToCart()
     {
-        // Replace with your cart logic
-      Cart::add($this->part->id, $this->part->part_name, 1, $this->part->price);
+        // 1. Add to the 'default' shopping cart instance
+        Cart::instance('default')->add([
+            'id'      => $this->part->id,
+            'name'    => $this->part->part_name,
+            'qty'     => $this->quantity,
+            'price'   => $this->part->price,
+            'weight'  => 0, // Package requires weight, even if 0
+            'options' => [
+                'brand' => $this->part->partBrand?->name,
+                'image' => $this->part->image_path, // Useful for the Cart Page later
+            ]
+        ]);
 
-        $this->dispatchBrowserEvent('notify', ['message' => 'Added to cart!']);
+        // 2. If logged in, persist the cart session to the database
+        if (Auth::check()) {
+            Cart::instance('default')->store(Auth::id());
+        }
+
+        // 3. Notify the system (Livewire 3 syntax)
+        $this->dispatch('cartUpdated'); 
+        $this->dispatch('notify', message: 'Added to cart!');
     }
 
     public function addToWishlist()
     {
-        auth()->user()?->wishlist()->syncWithoutDetaching([$this->part->id]);
+        // Use the 'wishlist' instance to keep it separate from the checkout cart
+        Cart::instance('wishlist')->add([
+            'id'    => $this->part->id,
+            'name'  => $this->part->part_name,
+            'qty'   => 1,
+            'price' => $this->part->price,
+            'weight'=> 0,
+        ]);
 
-        $this->dispatchBrowserEvent('notify', ['message' => 'Added to wishlist!']);
+        if (Auth::check()) {
+            Cart::instance('wishlist')->store(Auth::id() . '_wishlist');
+        }
+
+        $this->dispatch('wishlistUpdated');
+        $this->dispatch('notify', message: 'Added to wishlist!');
     }
 
     public function render()
