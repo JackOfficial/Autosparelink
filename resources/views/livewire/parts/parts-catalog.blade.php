@@ -34,6 +34,10 @@
                         <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->full_name }})</option>
                     @endforeach
                 </select>
+                
+                @foreach($variants as $v)
+                <div>{{ $v->name }} ({{ $v->full_name }})</div>
+                 @endforeach
 
                 <input type="number" class="form-control mb-2" placeholder="Year" wire:model.lazy="year">
 
