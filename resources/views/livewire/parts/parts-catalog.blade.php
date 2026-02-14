@@ -31,7 +31,7 @@
                 <select class="form-select mb-2" wire:model.live="variant" @if(!$variants) disabled @endif>
                     <option value="">Select Variant</option>
                     @foreach($variants as $v)
-                        <option value="{{ $v->id }}">{{ $v->name }}</option>
+                        <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->full_name }})</option>
                     @endforeach
                 </select>
 

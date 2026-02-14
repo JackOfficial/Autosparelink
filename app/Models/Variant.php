@@ -9,7 +9,7 @@ class Variant extends Model
   protected $fillable = [
         'vehicle_model_id',
         'name',
-         'slug',
+        'slug',
         'chassis_code',
         'model_code',
         'trim_level',
@@ -64,4 +64,28 @@ class Variant extends Model
     public function photos() {
     return $this->morphMany(Photo::class, 'imageable');
     }
+
+    public function getFullNameAttribute()
+{
+    $parts = [];
+
+    // Variant trim / name
+    if ($this->trim_level) {
+        $parts[] = $this->trim_level; // e.g., LS, SE, XLE
+    } elseif ($this->name) {
+        $parts[] = $this->name;
+    }
+
+    // Pull first active specification
+    $spec = $this->activeSpecifications()->with(['engineType', 'transmissionType', 'driveType'])->first();
+
+    if ($spec) {
+        if ($spec->engineType) $parts[] = $spec->engineType->name;      // 1.8L, 2.0L
+        if ($spec->fuel_type) $parts[] = $spec->fuel_type ?? '';        // Hybrid, Gasoline
+        if ($spec->transmissionType) $parts[] = $spec->transmissionType->name; // Automatic, Manual
+    }
+
+    return implode(' ', array_filter($parts));
+}
+
 }
