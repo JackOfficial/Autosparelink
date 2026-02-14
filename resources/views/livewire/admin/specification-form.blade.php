@@ -110,7 +110,7 @@
             <fieldset class="border p-3 mb-4">
                 <legend class="w-auto">Core Specifications</legend>
                 <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label>Body Type</label>
                         <select wire:model="body_type_id" class="form-control" required>
                             <option value="">Select</option>
@@ -120,7 +120,7 @@
                         </select>
                         @error('body_type_id') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label>Fuel Type</label>
                         <select wire:model="engine_type_id" class="form-control" required>
                             <option value="">Select</option>
