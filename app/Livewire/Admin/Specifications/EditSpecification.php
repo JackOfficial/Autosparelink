@@ -44,6 +44,7 @@ class EditSpecification extends Component
     // Production
     public $production_start;
     public $production_end;
+    public $production_year;
 
     // Optional UI
     public $hideBrandModel = false;
@@ -150,6 +151,7 @@ class EditSpecification extends Component
             'color' => 'nullable|string|max:50',
             'production_start' => 'nullable|integer|min:1950|max:' . date('Y'),
             'production_end' => 'nullable|integer|min:1950|max:' . (date('Y') + 2),
+            'production_year' => 'nullable|integer|min:1950|max:' . date('Y'),
         ];
     }
 
@@ -186,6 +188,7 @@ class EditSpecification extends Component
             'color' => $this->color,
             'production_start' => $this->production_start,
             'production_end' => $this->production_end,
+            'production_year' => $this->production_year,
         ]);
 
         session()->flash('success', 'Specification updated successfully!');
