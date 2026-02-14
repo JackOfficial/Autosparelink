@@ -9,40 +9,15 @@ use Illuminate\Support\Facades\DB;
 
 class CartPage extends Component
 {
-    public $cartItems = [];
-    public $subTotal = 0;
-
-    public function mount()
-    {
-        $this->loadCart();
-    }
-
-    public function loadCart()
-    {
-        $instance = Cart::instance('default');
-        
-        // If logged in, sync with DB
-        if (Auth::check()) {
-            $instance->restore(Auth::id());
-            // We store it back immediately to maintain the "restore-store" cycle
-            DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
-            $instance->store(Auth::id());
-        }
-
-        $this->cartItems = $instance->getContent()->toArray();
-        $this->subTotal = $instance->getSubTotal();
-    }
+    // Removing $cartItems from public property to avoid serialization issues with objects
+    // We will fetch them directly in the render method for better reliability.
 
     public function updateQuantity($rowId, $qty)
     {
         if ($qty < 1) return;
 
-        Cart::instance('default')->update($rowId, [
-            'quantity' => [
-                'relative' => false,
-                'value' => $qty
-            ]
-        ]);
+        // Gloudemans syntax is simple: update(rowId, qty)
+        Cart::instance('default')->update($rowId, $qty);
 
         $this->refreshCart();
     }
@@ -50,8 +25,9 @@ class CartPage extends Component
     public function removeItem($rowId)
     {
         Cart::instance('default')->remove($rowId);
+        
         $this->refreshCart();
-        $this->dispatch('cartUpdated'); // Update the Navbar count
+        $this->dispatch('cartUpdated'); 
         $this->dispatch('notify', message: 'Item removed from cart.');
     }
 
@@ -65,14 +41,23 @@ class CartPage extends Component
     private function refreshCart()
     {
         if (Auth::check()) {
-            DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
+            // Restore-Store cycle to keep DB in sync
+            // Note: restore() handles the deletion of the old row automatically
+            Cart::instance('default')->restore(Auth::id());
             Cart::instance('default')->store(Auth::id());
         }
-        $this->loadCart();
+        
+        // No need to call loadCart(), Livewire will re-render with fresh data
     }
 
     public function render()
     {
-        return view('livewire.cart-page');
+        $cartInstance = Cart::instance('default');
+
+        return view('livewire.cart-page', [
+            'cartContent' => $cartInstance->content(),
+            'subTotal'    => $cartInstance->subtotal(),
+            'total'       => $cartInstance->total(),
+        ]);
     }
 }
