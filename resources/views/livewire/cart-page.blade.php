@@ -87,7 +87,7 @@
                         <i class="fas fa-shopping-cart fa-4x text-light mb-3"></i>
                         <h4>Your cart is empty</h4>
                         <p class="text-muted">Looks like you haven't added anything yet.</p>
-                        <a href="{{ url('/') }}" class="btn btn-primary px-5 shadow-sm mt-3">Browse Products</a>
+                        <a href="{{ url('/spare-parts') }}" class="btn btn-primary px-5 shadow-sm mt-3">Browse Products</a>
                     </div>
                 </div>
             @endif
