@@ -41,21 +41,27 @@
     @error('vehicle_model_id') <small class="text-danger">{{ $message }}</small> @enderror
 </div>
 
-<div class="col-md-4 position-relative">
+<div class="col-md-4" x-data="{ showTooltip: false }" class="position-relative">
     <label>
         Variant Name <span class="text-danger">*</span>
-        <!-- Tooltip icon -->
-        <span class="ml-1" data-toggle="tooltip" title="Enter only the trim or version name (e.g., XLE, Adventure, Limited). Do NOT include year, engine, or body type. Year, engine, transmission, and other details go in the Specifications section.">
-            <i class="fa fa-question-circle text-info"></i>
-        </span>
+        <i class="fa fa-question-circle text-info"
+           @mouseenter="showTooltip = true"
+           @mouseleave="showTooltip = false"
+           class="ml-1"></i>
     </label>
+
     <input type="text" wire:model="name" class="form-control">
+
+    <!-- Tooltip -->
+    <div x-show="showTooltip" 
+         class="position-absolute bg-dark text-white p-2 rounded"
+         style="z-index: 1000; top: -5px; left: 110%; width: 220px;">
+        Enter only the trim/variant designation (e.g., S, XLE, Adventure). Do NOT include model name, year, or body type.
+    </div>
+
     @error('name')
         <small class="text-danger">{{ $message }}</small>
     @enderror
-    <small class="text-muted d-block mt-1">
-        Example: <strong>XLE</strong>
-    </small>
 </div>
                 </div>
             </fieldset>
