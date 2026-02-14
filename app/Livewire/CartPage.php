@@ -15,7 +15,7 @@ class CartPage extends Component
 
         Cart::instance('default')->update($rowId, $qty);
         $this->refreshCart();
-        $this->dispatch('cartUpdated'); 
+        $this->dispatch('cartUpdated');
     }
 
     public function removeItem($rowId)
