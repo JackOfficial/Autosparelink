@@ -19,6 +19,7 @@ class Specification extends Model
         'engine_displacement_id',
         'production_start',   
         'production_end',
+        'production_year',
         'horsepower',
         'torque',
         'fuel_capacity',

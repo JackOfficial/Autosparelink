@@ -136,6 +136,7 @@ class SpecificationForm extends Component
             'color' => 'nullable|string|max:20',
             'production_start' => 'nullable|integer|min:1950|max:' . date('Y'),
             'production_end' => 'nullable|integer|min:1950|max:' . (date('Y') + 2),
+            'production_year' => 'nullable|integer|min:1950|max:' . date('Y'),
         ];
     }
 
@@ -155,6 +156,7 @@ class SpecificationForm extends Component
         // ✅ FIX EMPTY STRING → NULL
         $productionStart = $this->production_start ?: null;
         $productionEnd   = $this->production_end ?: null;
+        $productionYear   = $this->production_year ?: null;
 
         // ✅ FIX LOGICAL ORDER
         if ($productionStart && $productionEnd && $productionEnd < $productionStart) {
@@ -183,6 +185,7 @@ class SpecificationForm extends Component
             // ✅ FIXED
             'production_start' => $productionStart,
             'production_end'   => $productionEnd,
+            'production_year'   => $productionYear,
         ]);
 
         session()->flash('success', 'Specification saved successfully.');
