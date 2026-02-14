@@ -65,21 +65,36 @@ class Variant extends Model
     return $this->morphMany(Photo::class, 'imageable');
     }
 
-    public function getFullNameAttribute()
+public function getFullNameAttribute()
 {
-     $spec = $this->activeSpecifications()->first(); // pick the first active spec
+    $spec = $this->activeSpecifications()->first();
 
-        if (!$spec) {
-            return $this->name; // fallback to variant name only
-        }
+    if (!$spec) {
+        return $this->name;
+    }
 
-        $parts = [];   
-        if ($spec->bodyType) $parts[] = $this->name;  
-        if ($spec->engineDisplacement) $parts[] = $spec->engineDisplacement->name;  // 1.8L, 2.0L
-        if ($spec->engineType) $parts[] = $spec->engineType->name;  // Petrol, Diesel, Hybrid
-        if ($spec->transmissionType) $parts[] = $spec->transmissionType->name; // Automatic, Manual
+    $parts = [];
 
-        return implode(' ', $parts);
+    // Variant name first
+    $parts[] = $this->name;
+
+    if ($spec->bodyType) {
+        $parts[] = $spec->bodyType->name;
+    }
+
+    if ($spec->engineDisplacement) {
+        $parts[] = $spec->engineDisplacement->name;
+    }
+
+    if ($spec->engineType) {
+        $parts[] = $spec->engineType->name;
+    }
+
+    if ($spec->transmissionType) {
+        $parts[] = $spec->transmissionType->name;
+    }
+
+    return implode(' ', $parts);
 }
 
 }
