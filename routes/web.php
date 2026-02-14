@@ -53,6 +53,7 @@ use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationCont
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ModelPartController;
 use App\Http\Controllers\PartCatalogController;
+use App\Http\Controllers\ShopController;
 use App\Http\Controllers\VinController;
 use App\Http\Controllers\WishlistController;
 
@@ -111,6 +112,7 @@ Route::get('/vin-search', [VinController::class, 'search']);
 Route::get('/spare-parts', [PartCatalogController::class, 'parts']);
 Route::resource('wishlist', WishlistController::class);
 Route::resource('cart', CartController::class);
+Route::resource('shop', ShopController::class);
 
 // Route::get('/model-specification/{id}', [SpecificationController::class, 'model_specification']);
 // Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
