@@ -23,7 +23,6 @@ class VariantForm extends Component
     public $name;
     public $chassis_code;
     public $model_code;
-    public $trim_level;
     public $status = 1;
 
     // Media
@@ -74,7 +73,6 @@ class VariantForm extends Component
             'name' => 'required|string|max:255',
             'chassis_code' => 'nullable|string|max:100',
             'model_code' => 'nullable|string|max:100',
-            'trim_level' => 'nullable|string|max:100',
             'status' => 'required|boolean',
             'photos.*' => 'nullable|image|max:2048',
             'has_specifications' => 'required|boolean',
@@ -94,7 +92,6 @@ class VariantForm extends Component
                 'name' => $this->name,
                 'chassis_code' => $this->chassis_code ?: null,
                 'model_code' => $this->model_code ?: null,
-                'trim_level' => $this->trim_level ?: null,
                 'status' => $this->status,
             ]);
 
