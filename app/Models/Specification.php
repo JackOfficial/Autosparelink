@@ -64,6 +64,11 @@ class Specification extends Model
         return $this->belongsTo(DriveType::class);
     }
 
+    public function engineDisplacement()
+{
+    return $this->belongsTo(EngineDisplacement::class, 'engine_displacement_id');
+}
+
     /* =======================
      | Scopes (Optional)
      ======================= */
