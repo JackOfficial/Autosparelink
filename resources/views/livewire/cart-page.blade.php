@@ -3,7 +3,18 @@
         <div class="col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="font-weight-bold">Shopping Cart</h2>
-                <span class="text-muted">{{ $cartContent->count() }} Items</span>
+                <div class="d-flex align-items-center">
+                    <span class="text-muted mr-3">{{ $cartContent->count() }} Items</span>
+                    
+                    {{-- Clear Cart Button --}}
+                    @if($cartContent->count() > 0)
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3" 
+                                wire:click="clearCart" 
+                                wire:confirm="Are you sure you want to empty your entire cart?">
+                            <i class="fas fa-trash-sweep mr-1"></i> Clear Cart
+                        </button>
+                    @endif
+                </div>
             </div>
 
             @if($cartContent->count() > 0)
@@ -24,7 +35,6 @@
                                 <tr class="border-bottom">
                                     <td class="py-4 px-4">
                                         <div class="d-flex align-items-center">
-                                            {{-- Accessing options via object property --}}
                                             <img src="{{ asset($item->options->image) }}" 
                                                  class="rounded mr-3" style="width: 70px; height: 70px; object-fit: cover;">
                                             <div>
@@ -37,7 +47,6 @@
                                     <td class="py-4">
                                         <div class="input-group input-group-sm" style="width: 110px;">
                                             <div class="input-group-prepend">
-                                                {{-- Using $item->rowId and $item->qty --}}
                                                 <button class="btn btn-outline-secondary border-right-0" 
                                                         wire:click="updateQuantity('{{ $item->rowId }}', {{ $item->qty - 1 }})">-</button>
                                             </div>
@@ -91,7 +100,6 @@
                     
                     <div class="d-flex justify-content-between mb-2">
                         <span>Subtotal</span>
-                        {{-- In Gloudemans, subtotal() and total() return formatted strings --}}
                         <span>{{ $subTotal }} RWF</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
