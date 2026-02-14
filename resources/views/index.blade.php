@@ -46,7 +46,10 @@
     .product-item { border-radius: 12px; overflow: hidden; transition: transform .18s ease, box-shadow .18s ease; }
     .product-item:hover { transform: translateY(-8px); box-shadow: 0 28px 60px rgba(2,6,23,0.08); }
     .product-img { position: relative; background: #fff; }
-    .product-img img { width:100%; height:200px; object-fit:cover; }
+    .product-img img {  height: 200px;
+    object-fit: contain;
+    background: #f8f9fa;
+    padding: 10px;}
     .product-action { position:absolute; top:10px; right:10px; display:flex; gap:8px; opacity:0; transition:opacity .15s ease; }
     .product-item:hover .product-action{ opacity:1; }
     .btn-square{ width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
@@ -182,13 +185,15 @@
                 $mainPhoto = $part->photos->first()?->file_path ?? 'frontend/img/placeholder.png';
                 $discount = !empty($part->old_price) && $part->old_price > $part->price ? round((($part->old_price - $part->price)/$part->old_price)*100) : null;
             @endphp
-            <a href="{{ route('spare-parts.show', $part->sku) }}"> 
+            
                  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="product-item bg-white">
                     <div class="product-img position-relative">
                         @if(!empty($part->is_new)) <div class="badge-custom badge-new">NEW</div> @endif
                         @if($discount) <div class="badge-custom badge-discount" style="top:50px;">-{{ $discount }}%</div> @endif
-                        <img loading="lazy" src="{{ asset('storage/'.$mainPhoto) }}" alt="{{ $part->part_name }}">
+                        <a href="{{ route('spare-parts.show', $part->sku) }}"> 
+                            <img loading="lazy" src="{{ asset('storage/'.$mainPhoto) }}" alt="{{ $part->part_name }}">
+                        </a>
                         <div class="product-action">
                             <a class="btn btn-light btn-square" href="#" title="Add to cart"><i class="fa fa-shopping-cart"></i></a>
                             <a class="btn btn-light btn-square" href="#" title="Add to wishlist"><i class="far fa-heart"></i></a>
@@ -198,6 +203,12 @@
                     </div>
                     <div class="text-center py-3 px-2">
                         <a class="h6 text-truncate d-block mb-1 text-dark" href="{{ route('spare-parts.show', $part->sku) }}">{{ Str::limit($part->part_name, 30) }}</a>
+                        <small class="text-muted d-block">Fits: {{ $part->specification->full_name ?? 'Multiple vehicles' }}</small>
+                        @if($part->stock > 0)
+                          <small class="text-success">In Stock</small>
+                              @else
+                                 <small class="text-danger">Out of Stock</small>
+                              @endif
                         <div class="d-flex align-items-center justify-content-center mb-2">
                             <h5 class="mb-0">{{ number_format($part->price, 2) }} {{ $currencySymbol ?? 'RWF' }}</h5>
                             @if(!empty($part->old_price)) <h6 class="price-old mb-0">{{ number_format($part->old_price, 2) }}</h6> @endif
@@ -217,7 +228,6 @@
                     </div>
                 </div>
             </div>
-            </a>
         @empty
             <div class="col-12 text-center py-3">No spare parts found.</div>
         @endforelse
