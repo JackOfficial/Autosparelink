@@ -56,7 +56,7 @@ class PartsCatalog extends Component
     public function updatedModel($value)
     {
         $this->variant = '';
-        $this->variants = Variant::where('model_id', $value)->orderBy('name')->get();
+        $this->variants = Variant::where('vehicle_model_id', $value)->orderBy('name')->get();
     }
 
     public function render()
