@@ -1,4 +1,4 @@
-<div class="container py-5">
+<div class="py-3">
     <div class="row">
         <div class="col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
