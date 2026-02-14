@@ -73,9 +73,8 @@ class Variant extends Model
             return $this->name; // fallback to variant name only
         }
 
-        $parts = [];
-        if ($this->name) $parts[] = $this->name;   
-        if ($spec->bodyType) $parts[] = $this->name;                   // LS, SE, XLE
+        $parts = [];   
+        if ($spec->bodyType) $parts[] = $this->name;  
         if ($spec->engineDisplacement) $parts[] = $spec->engineDisplacement->name;  // 1.8L, 2.0L
         if ($spec->engineType) $parts[] = $spec->engineType->name;  // Petrol, Diesel, Hybrid
         if ($spec->transmissionType) $parts[] = $spec->transmissionType->name; // Automatic, Manual
