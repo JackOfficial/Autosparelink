@@ -74,7 +74,8 @@ class Variant extends Model
         }
 
         $parts = [];
-        if ($this->name) $parts[] = $this->name;                    // LS, SE, XLE
+        if ($this->name) $parts[] = $this->name;   
+        if ($spec->bodyType) $parts[] = $this->name;                   // LS, SE, XLE
         if ($spec->engineDisplacement) $parts[] = $spec->engineDisplacement->name;  // 1.8L, 2.0L
         if ($spec->engineType) $parts[] = $spec->engineType->name;  // Petrol, Diesel, Hybrid
         if ($spec->transmissionType) $parts[] = $spec->transmissionType->name; // Automatic, Manual
