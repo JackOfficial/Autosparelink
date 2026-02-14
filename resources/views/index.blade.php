@@ -255,6 +255,12 @@
                     </div>
                     <div class="text-center py-3 px-2">
                         <a href="{{ route('spare-parts.show', $recent_part->sku) }}" class="h6 text-truncate d-block mb-1 text-dark" href="#">{{ Str::limit($recent_part->part_name, 30) }}</a>
+                          <small class="text-muted d-block">Fits: {{ $recent_part->specification->full_name ?? 'Multiple vehicles' }}</small>
+                        @if($recent_part->stock > 0)
+                          <small class="text-success">In Stock</small>
+                              @else
+                                 <small class="text-danger">Out of Stock</small>
+                              @endif
                         <div class="d-flex align-items-center justify-content-center">
                             <h5 class="mb-0">{{ number_format($recent_part->price, 2) }} {{ $currencySymbol ?? 'RWF' }}</h5>
                             @if(!empty($recent_part->old_price)) <h6 class="price-old mb-0">{{ number_format($recent_part->old_price, 2) }}</h6> @endif
