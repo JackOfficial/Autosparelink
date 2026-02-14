@@ -169,16 +169,10 @@
                 <!-- Right Side Icons and Login/User Info -->
                 <div class="ml-auto d-flex align-items-center">
                     <!-- Wishlist Icon -->
-                    <a href="#" class="text-white mr-3 position-relative" title="Wishlist">
-                        <i class="fas fa-heart fa-lg"></i>
-                        <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
-                    </a>
-
+                    <livewire:wishlist-icon />
+                    
                     <!-- Cart Icon -->
-                    <a href="#" class="text-white mr-3 position-relative" title="Cart">
-                        <i class="fas fa-shopping-cart fa-lg"></i>
-                        <span class="badge badge-primary position-absolute" style="top:-5px; right:-10px;">0</span>
-                    </a>
+                    <livewire:cart-icon />
 
                     <!-- Authentication Links -->
                     @guest

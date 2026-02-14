@@ -3,67 +3,56 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-//use Cart; // Darryldecode\Cart
 use App\Models\Part;
-use Darryldecode\Cart\Cart as DarryldecodeCart;
-use Darryldecode\Cart\CartCollection;
 use Illuminate\Support\Facades\Auth;
+use Gloudemans\Shoppingcart\Facades\Cart; // Ensure this is the correct namespace
 
 class PartCard extends Component
 {
     public Part $part;
     public $quantity = 1;
 
-    // Livewire will call this automatically when using <livewire:part-card :part="$part" />
+    // In Livewire 3, mount is still fine, but usually, we type-hint the property
     public function mount(Part $part)
     {
         $this->part = $part;
     }
 
-   public function addToCart()
-{
-    $sessionId = Auth::check() ? Auth::id() : session()->getId();
-
-    DarryldecodeCart::session($sessionId)->add([
-        'id' => $this->part->id,
-        'name' => $this->part->part_name,
+    public function addToCart()
+    {
+       Cart::instance('default')->add([
+        'id'    => $this->part->id,
+        'name'  => $this->part->part_name,
+        'qty'   => $this->quantity,
         'price' => $this->part->price,
-        'quantity' => $this->quantity,
-        'attributes' => [
-            'brand' => optional($this->part->partBrand)->name,
-            'part_number' => $this->part->part_number,
-        ]
+        'weight'=> 0,
     ]);
 
-    $this->dispatchBrowserEvent('notify', [
-        'message' => 'Added to cart!'
-    ]);
+    // If the user IS logged in, save to DB immediately
+    if (auth()->check()) {
+        Cart::instance('default')->store(auth()->id());
+    }
 
-    $this->emit('cartUpdated'); // <-- notify navbar
-}
+    $this->dispatch('cartUpdated');
+    }
 
-public function addToWishlist()
-{
-    $sessionId = Auth::check() ? Auth::id() : session()->getId();
+    public function addToWishlist()
+    {
+        Cart::instance('wishlist')->add([
+            'id'      => $this->part->id,
+            'name'    => $this->part->part_name,
+            'qty'     => 1,
+            'price'   => $this->part->price,
+            'weight'  => 0,
+            'options' => [
+                'brand'       => $this->part->partBrand?->name,
+                'part_number' => $this->part->part_number,
+            ]
+        ]);
 
-    DarryldecodeCart::session($sessionId)->instance('wishlist')->add([
-        'id' => $this->part->id,
-        'name' => $this->part->part_name,
-        'price' => $this->part->price,
-        'quantity' => 1,
-        'attributes' => [
-            'brand' => optional($this->part->partBrand)->name,
-            'part_number' => $this->part->part_number,
-        ]
-    ]);
-
-    $this->dispatchBrowserEvent('notify', [
-        'message' => 'Added to wishlist!'
-    ]);
-
-    $this->emit('wishlistUpdated'); // <-- notify navbar
-}
-
+        $this->dispatch('notify', message: 'Added to wishlist!');
+        $this->dispatch('wishlistUpdated');
+    }
 
     public function render()
     {
