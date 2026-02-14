@@ -202,7 +202,7 @@
                         <a class="h6 text-truncate d-block mb-1 text-dark" href="{{ route('spare-parts.show', $part->sku) }}">{{ Str::limit($part->part_name, 30) }}</a>
                         <small class="text-muted d-block">Fits: {{ $part->specification->full_name ?? 'Multiple vehicles' }}</small>
                         @if($part->stock_quantity > 0)
-                          <small class="text-success">In Stock</small>
+                          <small class="{{ $part->stock_quantity < 5 ? 'text-warning' : 'text-success' }}">In Stock</small>
                               @else
                                  <small class="text-danger">Out of Stock</small>
                               @endif
@@ -257,7 +257,7 @@
                         <a href="{{ route('spare-parts.show', $recent_part->sku) }}" class="h6 text-truncate d-block mb-1 text-dark" href="#">{{ Str::limit($recent_part->part_name, 30) }}</a>
                           <small class="text-muted d-block">Fits: {{ $recent_part->specification->full_name ?? 'Multiple vehicles' }}</small>
                         @if($recent_part->stock_quantity > 0)
-                          <small class="text-success">In Stock</small>
+                          <small class="{{ $recent_part->stock_quantity < 5 ? 'text-warning' : 'text-success' }}">In Stock</small>
                               @else
                                  <small class="text-danger">Out of Stock</small>
                               @endif
