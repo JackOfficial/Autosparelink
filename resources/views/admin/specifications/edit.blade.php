@@ -19,8 +19,8 @@
 <section class="content">
 <div class="row">
 <div class="col-md-11">
-     <livewire:admin.specifications.edit-specification
-    :specificationId="request()->query('specification_id')"
+     <livewire:admin.specifications.edit-specification 
+    :specificationId="$specification->id"
 />
 </div>
 </div>

@@ -121,19 +121,11 @@ public function index(Request $request)
         $specification = Specification::findOrFail($id);
         $variants = Variant::with('vehicleModel')->orderBy('name')->get();
         $vehicleModels = VehicleModel::orderBy('model_name')->get();
-        $bodyTypes = BodyType::orderBy('name')->get();
-        $engineTypes = EngineType::orderBy('name')->get();
-        $transmissionTypes = TransmissionType::orderBy('name')->get();
-        $driveTypes = DriveType::orderBy('name')->get();
 
         return view('admin.specifications.edit', compact(
             'specification',
             'variants',
             'vehicleModels',
-            'bodyTypes',
-            'engineTypes',
-            'transmissionTypes',
-            'driveTypes'
         ));
     }
 
