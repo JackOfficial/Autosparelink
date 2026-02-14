@@ -57,8 +57,9 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Body Type</th>
-                                    <th>Engine</th>
                                     <th>Transmission</th>
+                                    <th>Fuel</th>
+                                    <th>Engine</th>
                                     <th>Drive</th>
                                     <th>Horsepower</th>
                                     <th>Torque</th>
@@ -77,8 +78,9 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $spec->bodyType->name ?? '-' }}</td>
+                                         <td>{{ $spec->transmissionType->name ?? '-' }}</td>
                                         <td>{{ $spec->engineType->name ?? '-' }}</td>
-                                        <td>{{ $spec->transmissionType->name ?? '-' }}</td>
+                                        <td>{{ $spec->engineDisplacement->name ?? '-' }}</td>
                                         <td>{{ $spec->driveType->name ?? '-' }}</td>
                                         <td>{{ $spec->horsepower ?? '-' }}</td>
                                         <td>{{ $spec->torque ?? '-' }}</td>

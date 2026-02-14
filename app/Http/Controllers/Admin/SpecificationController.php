@@ -21,6 +21,7 @@ public function index(Request $request)
         'variant.vehicleModel.brand',
         'vehicleModel.brand',
         'bodyType',
+        'engineDisplacement',
         'engineType',
         'transmissionType',
         'driveType',
