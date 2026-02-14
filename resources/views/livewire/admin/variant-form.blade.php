@@ -41,7 +41,7 @@
     @error('vehicle_model_id') <small class="text-danger">{{ $message }}</small> @enderror
 </div>
 
-<div class="col-md-6">
+<div class="col-md-4">
                         <label>Variant Name <span class="text-danger">*</span></label>
                         <input type="text" wire:model="name" class="form-control">
                         @error('name')
