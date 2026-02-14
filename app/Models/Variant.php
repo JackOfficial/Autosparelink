@@ -75,20 +75,29 @@ public function getFullNameAttribute()
 
     $parts = [$this->name];
 
-    // Append body type if it's not already in the variant name
-    if ($spec->bodyType && !str_contains($this->name, $spec->bodyType->name)) {
+    // Production Year
+    if ($spec->production_year && 
+        !str_contains($this->name, $spec->production_year)) {
+        $parts[] = '(' . $spec->production_year . ')';
+    }
+
+    if ($spec->bodyType && 
+        !str_contains($this->name, $spec->bodyType->name)) {
         $parts[] = $spec->bodyType->name;
     }
 
-    if ($spec->engineDisplacement && !str_contains($this->name, $spec->engineDisplacement->name)) {
+    if ($spec->engineDisplacement && 
+        !str_contains($this->name, $spec->engineDisplacement->name)) {
         $parts[] = $spec->engineDisplacement->name;
     }
 
-    if ($spec->engineType && !str_contains($this->name, $spec->engineType->name)) {
+    if ($spec->engineType && 
+        !str_contains($this->name, $spec->engineType->name)) {
         $parts[] = $spec->engineType->name;
     }
 
-    if ($spec->transmissionType && !str_contains($this->name, $spec->transmissionType->name)) {
+    if ($spec->transmissionType && 
+        !str_contains($this->name, $spec->transmissionType->name)) {
         $parts[] = $spec->transmissionType->name;
     }
 
