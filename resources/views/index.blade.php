@@ -46,10 +46,7 @@
     .product-item { border-radius: 12px; overflow: hidden; transition: transform .18s ease, box-shadow .18s ease; }
     .product-item:hover { transform: translateY(-8px); box-shadow: 0 28px 60px rgba(2,6,23,0.08); }
     .product-img { position: relative; background: #fff; }
-    .product-img img {  height: 200px;
-    object-fit: contain;
-    background: #f8f9fa;
-    padding: 10px;}
+    .product-img img { width:100%; height:200px; object-fit:cover; }
     .product-action { position:absolute; top:10px; right:10px; display:flex; gap:8px; opacity:0; transition:opacity .15s ease; }
     .product-item:hover .product-action{ opacity:1; }
     .btn-square{ width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
