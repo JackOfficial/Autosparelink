@@ -129,6 +129,7 @@ class PartsCatalog extends Component
         return view('livewire.parts.parts-catalog', [
             'parts' => $query->paginate(12),
             'categories' => Category::whereNull('parent_id')->orderBy('category_name')->withCount('parts')->get(),
+            dd(Category::whereNull('parent_id')->orderBy('category_name')->withCount('parts')->get()),
             'brands' => PartBrand::orderBy('name')->get(),
         ]);
     }
