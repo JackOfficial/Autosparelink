@@ -10,6 +10,7 @@ use App\Models\BodyType;
 use App\Models\EngineType;
 use App\Models\TransmissionType;
 use App\Models\DriveType;
+use App\Models\EngineDisplacement;
 use App\Models\Specification;
 use Illuminate\Validation\ValidationException;
 
@@ -22,6 +23,7 @@ class SpecificationForm extends Component
 
     public $body_type_id;
     public $engine_type_id;
+    public $engine_displacement_id;
     public $transmission_type_id;
     public $drive_type_id;
     public $horsepower;
@@ -44,6 +46,7 @@ class SpecificationForm extends Component
     public $filteredVariants;
     public $bodyTypes;
     public $engineTypes;
+    public $engineDisplacements;
     public $transmissionTypes;
     public $driveTypes;
 
@@ -59,6 +62,7 @@ class SpecificationForm extends Component
 
         $this->bodyTypes = BodyType::orderBy('name')->get();
         $this->engineTypes = EngineType::orderBy('name')->get();
+        $this->engineDisplacements = EngineDisplacement::orderBy('name')->get();
         $this->transmissionTypes = TransmissionType::orderBy('name')->get();
         $this->driveTypes = DriveType::orderBy('name')->get();
 
@@ -120,6 +124,7 @@ class SpecificationForm extends Component
             'engine_type_id' => 'required|exists:engine_types,id',
             'transmission_type_id' => 'required|exists:transmission_types,id',
             'drive_type_id' => 'nullable|exists:drive_types,id',
+            'engine_displacement_id' => 'nullable|exists:engine_displacements,id',
             'horsepower' => 'nullable|numeric|min:0',
             'torque' => 'nullable|numeric|min:0',
             'fuel_capacity' => 'nullable|numeric|min:0',
@@ -164,6 +169,7 @@ class SpecificationForm extends Component
             'engine_type_id' => $this->engine_type_id,
             'transmission_type_id' => $this->transmission_type_id,
             'drive_type_id' => $this->drive_type_id,
+            'engine_displacement_id' => $this->engine_displacement_id,
             'horsepower' => $this->horsepower,
             'torque' => $this->torque,
             'fuel_capacity' => $this->fuel_capacity,

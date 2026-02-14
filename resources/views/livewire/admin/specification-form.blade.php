@@ -110,7 +110,7 @@
             <fieldset class="border p-3 mb-4">
                 <legend class="w-auto">Core Specifications</legend>
                 <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label>Body Type</label>
                         <select wire:model="body_type_id" class="form-control" required>
                             <option value="">Select</option>
@@ -120,8 +120,8 @@
                         </select>
                         @error('body_type_id') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
-                    <div class="col-md-3">
-                        <label>Engine Type</label>
+                    <div class="col-md-4">
+                        <label>Fuel Type</label>
                         <select wire:model="engine_type_id" class="form-control" required>
                             <option value="">Select</option>
                             @foreach($engineTypes as $item)
@@ -130,7 +130,7 @@
                         </select>
                         @error('engine_type_id') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label>Transmission</label>
                         <select wire:model="transmission_type_id" class="form-control" required>
                             <option value="">Select</option>
@@ -140,7 +140,7 @@
                         </select>
                         @error('transmission_type_id') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label>Drive Type</label>
                         <select wire:model="drive_type_id" class="form-control">
                             <option value="">Select</option>
@@ -150,6 +150,18 @@
                         </select>
                         @error('drive_type_id') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
+
+                    <div class="col-md-4">
+                        <label>Engine Displacement</label>
+                        <select wire:model="engine_displacement_id" class="form-control">
+                            <option value="">Select</option>
+                            @foreach($engine_displacement as $ed)
+                                <option value="{{ $ed->id }}">{{ $ed->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('engine_displacement_id') <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
+
                 </div>
             </fieldset>
 
