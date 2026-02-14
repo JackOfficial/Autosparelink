@@ -14,21 +14,21 @@
                 <!-- VEHICLE FILTERS -->
                 <h6 class="fw-bold mt-3 mb-2">Vehicle Compatibility</h6>
 
-                <select class="form-select mb-2" wire:model.live="brand">
+                <select class="form-control mb-2" wire:model.live="brand">
                     <option value="">Select Brand</option>
                     @foreach($brands as $b)
                         <option value="{{ $b->id }}">{{ $b->brand_name }}</option>
                     @endforeach
                 </select>
 
-                <select class="form-select mb-2" wire:model.live="model" @if(!$models) disabled @endif>
+                <select class="form-control mb-2" wire:model.live="model" @if(!$models) disabled @endif>
                     <option value="">Select Model</option>
                     @foreach($models as $m)
                         <option value="{{ $m->id }}">{{ $m->model_name }}</option>
                     @endforeach
                 </select>
 
-                <select class="form-select mb-2" wire:model.live="variant" @if(!$variants) disabled @endif>
+                <select class="form-control mb-2" wire:model.live="variant" @if(!$variants) disabled @endif>
                     <option value="">Select Variant</option>
                     @foreach($variants as $v)
                         <option value="{{ $v->id }}">{{ $v->full_name }}</option>
@@ -37,7 +37,7 @@
 
                 <!-- CATEGORY -->
                 <h6 class="fw-bold mt-3 mb-2">Category</h6>
-                <select class="form-select mb-3" wire:model="category">
+                <select class="form-control mb-3" wire:model="category">
                     <option value="">All Categories</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat->id }}">{{ $cat->category_name }} ({{ $cat->spare_parts_count }})</option>
@@ -70,7 +70,7 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                    <select class="form-select" wire:model="sort">
+                    <select class="form-control" wire:model="sort">
                         <option value="latest">Latest</option>
                         <option value="price_asc">Price ↑</option>
                         <option value="price_desc">Price ↓</option>
