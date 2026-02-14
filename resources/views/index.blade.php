@@ -178,53 +178,7 @@
     </div>
     <div class="row px-xl-5">
         @forelse ($parts as $part)
-            @php
-                $mainPhoto = $part->photos->first()?->file_path ?? 'frontend/img/placeholder.png';
-                $discount = !empty($part->old_price) && $part->old_price > $part->price ? round((($part->old_price - $part->price)/$part->old_price)*100) : null;
-            @endphp
-            
-                 <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div class="product-item bg-white">
-                    <div class="product-img position-relative">
-                        @if(!empty($part->is_new)) <div class="badge-custom badge-new">NEW</div> @endif
-                        @if($discount) <div class="badge-custom badge-discount" style="top:50px;">-{{ $discount }}%</div> @endif
-                        <a href="{{ route('spare-parts.show', $part->sku) }}"> 
-                            <img loading="lazy" src="{{ asset('storage/'.$mainPhoto) }}" alt="{{ $part->part_name }}">
-                        </a>
-                        <div class="product-action">
-                            <a class="btn btn-light btn-square" href="#" title="Add to cart"><i class="fa fa-shopping-cart"></i></a>
-                            <a class="btn btn-light btn-square" href="#" title="Add to wishlist"><i class="far fa-heart"></i></a>
-                            <a class="btn btn-light btn-square" href="#" title="Compare"><i class="fa fa-sync-alt"></i></a>
-                            <a class="btn btn-light btn-square" href="#" title="View"><i class="fa fa-search"></i></a>
-                        </div>
-                    </div>
-                    <div class="text-center py-3 px-2">
-                        <a class="h6 text-truncate d-block mb-1 text-dark" href="{{ route('spare-parts.show', $part->sku) }}">{{ Str::limit($part->part_name, 30) }}</a>
-                        <small class="text-muted d-block">Fits: {{ $part->specification->full_name ?? 'Multiple vehicles' }}</small>
-                        @if($part->stock_quantity > 0)
-                          <small class="{{ $part->stock_quantity < 5 ? 'text-warning' : 'text-success' }}">In Stock</small>
-                              @else
-                                 <small class="text-danger">Out of Stock</small>
-                              @endif
-                        <div class="d-flex align-items-center justify-content-center mb-2">
-                            <h5 class="mb-0">{{ number_format($part->price, 2) }} {{ $currencySymbol ?? 'RWF' }}</h5>
-                            @if(!empty($part->old_price)) <h6 class="price-old mb-0">{{ number_format($part->old_price, 2) }}</h6> @endif
-                        </div>
-                        <div class="d-flex align-items-center justify-content-center mb-2">
-                            <small class="text-primary me-2">
-                                @for($i=1;$i<=5;$i++)
-                                    <i class="fa fa-star {{ $i <= ($part->rating ?? 0) ? 'text-warning' : '' }}"></i>
-                                @endfor
-                            </small>
-                            <small class="text-muted">({{ $part->reviews_count ?? 0 }})</small>
-                        </div>
-                        <div class="d-flex gap-2 justify-content-center">
-                            <a href="shop/products/{{ $part->id }}" class="btn btn-outline-primary btn-sm">View details</a>
-                            <a href="#" class="btn btn-primary btn-sm">Add to cart</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @livewire('part-component', ['part' => $part], key($part->id))
         @empty
             <div class="col-12 text-center py-3">No spare parts found.</div>
         @endforelse
@@ -239,36 +193,7 @@
     </div>
     <div class="row px-xl-5">
         @forelse ($recent_parts as $recent_part)
-            @php $mainPhoto = $recent_part->photos->first()?->file_path ?? 'frontend/img/placeholder.png'; @endphp
-            <a href="{{ route('spare-parts.show', $recent_part->sku) }}">
-               <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div class="product-item bg-white">
-                    <div class="product-img position-relative">
-                        @if(!empty($recent_part->is_new)) <div class="badge-custom badge-new">NEW</div> @endif
-                        <img loading="lazy" src="{{ asset('storage/'.$mainPhoto) }}" alt="{{ $recent_part->part_name }}">
-                        <div class="product-action">
-                            <a class="btn btn-light btn-square" href="#" title="Add to cart"><i class="fa fa-shopping-cart"></i></a>
-                            <a class="btn btn-light btn-square" href="#" title="Add to wishlist"><i class="far fa-heart"></i></a>
-                            <a class="btn btn-light btn-square" href="#" title="Compare"><i class="fa fa-sync-alt"></i></a>
-                            <a class="btn btn-light btn-square" href="#" title="View"><i class="fa fa-search"></i></a>
-                        </div>
-                    </div>
-                    <div class="text-center py-3 px-2">
-                        <a href="{{ route('spare-parts.show', $recent_part->sku) }}" class="h6 text-truncate d-block mb-1 text-dark" href="#">{{ Str::limit($recent_part->part_name, 30) }}</a>
-                          <small class="text-muted d-block">Fits: {{ $recent_part->specification->full_name ?? 'Multiple vehicles' }}</small>
-                        @if($recent_part->stock_quantity > 0)
-                          <small class="{{ $recent_part->stock_quantity < 5 ? 'text-warning' : 'text-success' }}">In Stock</small>
-                              @else
-                                 <small class="text-danger">Out of Stock</small>
-                              @endif
-                        <div class="d-flex align-items-center justify-content-center">
-                            <h5 class="mb-0">{{ number_format($recent_part->price, 2) }} {{ $currencySymbol ?? 'RWF' }}</h5>
-                            @if(!empty($recent_part->old_price)) <h6 class="price-old mb-0">{{ number_format($recent_part->old_price, 2) }}</h6> @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-            </a>
+            @livewire('part-component', ['part' => $recent_part], key($recent_part->id))
         @empty
             <div class="col-12 text-center py-3">No recent spare parts available.</div>
         @endforelse
