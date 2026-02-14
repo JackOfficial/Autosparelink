@@ -42,12 +42,18 @@
 </div>
 
 <div class="col-md-4">
-                        <label>Variant Name <span class="text-danger">*</span></label>
-                        <input type="text" wire:model="name" class="form-control">
-                        @error('name')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
+    <label>Variant Name <span class="text-danger">*</span></label>
+    <input type="text" wire:model="name" class="form-control">
+    @error('name')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+    <small class="text-muted d-block mt-1">
+        Enter only the **trim or version name** of the vehicle, not the year, engine, or body type. <br>
+        Example: For "Toyota RAV4 XLE 2023 2.5L AWD", the Variant Name should be "<strong>XLE</strong>" only.
+        <br>
+        Year, engine, transmission, and other technical details will be added in the Specifications section.
+    </small>
+</div>
                 </div>
             </fieldset>
 
