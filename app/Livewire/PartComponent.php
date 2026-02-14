@@ -19,48 +19,63 @@ class PartComponent extends Component
         $this->currencySymbol = $currencySymbol;
     }
 
-    public function addToCart()
-    {
-        // 1. Add to the 'default' shopping cart instance
-        Cart::instance('default')->add([
-            'id'      => $this->part->id,
-            'name'    => $this->part->part_name,
-            'qty'     => $this->quantity,
-            'price'   => $this->part->price,
-            'weight'  => 0, // Package requires weight, even if 0
-            'options' => [
-                'brand' => $this->part->partBrand?->name,
-                'image' => $this->part->image_path, // Useful for the Cart Page later
-            ]
-        ]);
+   public function addToCart()
+{
+    $identifier = Auth::id();
+    $instance = 'default';
 
-        // 2. If logged in, persist the cart session to the database
-        if (Auth::check()) {
-            Cart::instance('default')->store(Auth::id());
-        }
-
-        // 3. Notify the system (Livewire 3 syntax)
-        $this->dispatch('cartUpdated'); 
-        $this->dispatch('notify', message: 'Added to cart!');
+    // 1. If logged in, restore existing DB cart first to avoid overwriting data
+    if (Auth::check()) {
+        // 'restore' pulls DB items into the current session and deletes the DB row
+        Cart::instance($instance)->restore($identifier);
     }
+
+    // 2. Add the new item (to the now merged cart)
+    Cart::instance($instance)->add([
+        'id'      => $this->part->id,
+        'name'    => $this->part->part_name,
+        'qty'     => $this->quantity,
+        'price'   => $this->part->price,
+        'weight'  => 0,
+        'options' => [
+            'brand' => $this->part->partBrand?->name,
+            'image' => $this->part->image_path,
+        ]
+    ]);
+
+    // 3. Persist back to DB
+    if (Auth::check()) {
+        // Since 'restore' deleted the old row, 'store' will now succeed without errors
+        Cart::instance($instance)->store($identifier);
+    }
+
+    // 4. Notify UI
+    $this->dispatch('cartUpdated'); 
+    $this->dispatch('notify', message: 'Added to cart!');
+}
 
     public function addToWishlist()
     {
-        // Use the 'wishlist' instance to keep it separate from the checkout cart
-        Cart::instance('wishlist')->add([
-            'id'    => $this->part->id,
-            'name'  => $this->part->part_name,
-            'qty'   => 1,
-            'price' => $this->part->price,
-            'weight'=> 0,
-        ]);
+       Cart::instance('wishlist')->add([
+        'id'    => $this->part->id,
+        'name'  => $this->part->part_name,
+        'qty'   => 1,
+        'price' => $this->part->price,
+        'weight'=> 0,
+    ]);
 
-        if (Auth::check()) {
-            Cart::instance('wishlist')->store(Auth::id() . '_wishlist');
-        }
+    if (Auth::check()) {
+        $identifier = Auth::id() . '_wishlist';
+        
+        // 1. Remove the old entry to avoid the "Already Stored" exception
+        DB::table('shoppingcart')->where('identifier', $identifier)->delete();
+        
+        // 2. Store the fresh state
+        Cart::instance('wishlist')->store($identifier);
+    }
 
-        $this->dispatch('wishlistUpdated');
-        $this->dispatch('notify', message: 'Added to wishlist!');
+    $this->dispatch('wishlistUpdated');
+    $this->dispatch('notify', message: 'Added to wishlist!');
     }
 
     public function render()
