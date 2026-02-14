@@ -10,12 +10,10 @@
         <div class="product-img position-relative">
 
             {{-- Badge: NEW / OEM / Aftermarket --}}
-            @if(!empty($part->is_new))
-                <div class="badge-custom badge-new">NEW</div>
-            @elseif(!empty($part->is_oem))
-                <div class="badge-custom badge-oem">OEM</div>
+            @if(!empty($part->partBrand->type) && $part->partBrand->type == "OEM")
+                <div class="badge-custom badge-new">{{ $part->partBrand->type }}</div>
             @else
-                <div class="badge-custom badge-aftermarket">Aftermarket</div>
+                <div class="badge-custom badge-aftermarket">{{ $part->partBrand->type }}</div>
             @endif
 
             {{-- Discount Badge --}}
