@@ -24,6 +24,7 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{{ asset('frontend/css/style.css') }}" rel="stylesheet">
+     <link href="{{ asset('frontend/css/parts.css') }}" rel="stylesheet">
 
     <style>
         /* Navbar Custom Styles */

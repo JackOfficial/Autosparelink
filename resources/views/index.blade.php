@@ -10,65 +10,166 @@
     }
 
     /* HERO */
-    .hero-banner { height: 500px; background: url('{{ asset('frontend/img/part.png') }}') center/cover no-repeat; position: relative; overflow: hidden; }
-    .hero-overlay { background: linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 60%); position: absolute; inset: 0; }
-    .hero-content { position: relative; z-index: 3; max-width: 760px; }
-    .hero-title { font-size: 2.6rem; line-height: 1.05; letter-spacing: -0.5px; }
-    .hero-sub { font-size: 1.05rem; color: rgba(255,255,255,0.9); }
+    .hero-banner { 
+        height: 500px; 
+        background: url('{{ asset('frontend/img/part.png') }}') center/cover no-repeat; 
+        position: relative; 
+        overflow: hidden; 
+    }
+    .hero-overlay { 
+        background: linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 60%); 
+        position: absolute; inset: 0; 
+    }
+    .hero-content { 
+        position: relative; 
+        z-index: 3; 
+        max-width: 760px; 
+    }
+    .hero-title { 
+        font-size: 2.6rem; 
+        line-height: 1.05; 
+        letter-spacing: -0.5px; 
+    }
+    .hero-sub { 
+        font-size: 1.05rem; 
+        color: rgba(255,255,255,0.9); 
+    }
 
-    /* search */
-    .search-wrapper { background: #fff; border-radius: 999px; padding: 6px; display:flex; gap:10px; align-items:center; box-shadow: 0 12px 30px rgba(2,6,23,0.28); }
-    .search-wrapper input { border: none; border-radius: 999px; padding-left: 18px; height:56px; font-size:16px; width:100%; }
-    .search-wrapper input:focus { outline:none; box-shadow:none; }
-    .search-wrapper .btn { height: 46px; padding: 0 28px; border-radius: 999px; }
+    /* SEARCH */
+    .search-wrapper { 
+        background: #fff; 
+        border-radius: 999px; 
+        padding: 6px; 
+        display:flex; 
+        gap:10px; 
+        align-items:center; 
+        box-shadow: 0 12px 30px rgba(2,6,23,0.28); 
+    }
+    .search-wrapper input { 
+        border: none; 
+        border-radius: 999px; 
+        padding-left: 18px; 
+        height:56px; 
+        font-size:16px; 
+        width:100%; 
+    }
+    .search-wrapper input:focus { 
+        outline:none; 
+        box-shadow:none; 
+    }
+    .search-wrapper .btn { 
+        height: 46px; 
+        padding: 0 28px; 
+        border-radius: 999px; 
+    }
 
-    /* popular searches / brands under hero */
-    .hero-popular { margin-top: 12px; font-size: 0.95rem; color: rgba(255,255,255,0.85); }
-    .hero-brands { margin-top: 18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-    .brand-pill { background: rgba(255,255,255,0.08); border-radius: 999px; padding:6px 10px; display:flex; gap:8px; align-items:center; color: #fff; font-weight:600; font-size:0.9rem; }
-    .brand-pill img { width:28px; height:20px; object-fit:contain; filter: brightness(1.1); }
+    /* POPULAR SEARCHES / BRANDS */
+    .hero-popular { 
+        margin-top: 12px; 
+        font-size: 0.95rem; 
+        color: rgba(255,255,255,0.85); 
+    }
+    .hero-brands { 
+        margin-top: 18px; 
+        display:flex; 
+        gap:12px; 
+        align-items:center; 
+        flex-wrap:wrap; 
+    }
+    .brand-pill { 
+        background: rgba(255,255,255,0.08); 
+        border-radius: 999px; 
+        padding:6px 10px; 
+        display:flex; 
+        gap:8px; 
+        align-items:center; 
+        color: #fff; 
+        font-weight:600; 
+        font-size:0.9rem; 
+    }
+    .brand-pill img { 
+        width:28px; 
+        height:20px; 
+        object-fit:contain; 
+        filter: brightness(1.1); 
+    }
 
     /* SECTION TITLES */
-    .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 18px; }
-    .section-header h2 { font-size:1.125rem; font-weight:700; margin:0; }
+    .section-header { 
+        display:flex; 
+        justify-content:space-between; 
+        align-items:center; 
+        margin-bottom: 18px; 
+    }
+    .section-header h2 { 
+        font-size:1.125rem; 
+        font-weight:700; 
+        margin:0; 
+    }
 
     /* FEATURE CARDS */
-    .feature-card { transition: transform .22s ease, box-shadow .22s ease; border-radius: var(--card-radius); }
-    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(2,6,23,0.08); }
-    .feature-icon { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(13,110,253,0.08); color: var(--primary); }
+    .feature-card { 
+        transition: transform .22s ease, box-shadow .22s ease; 
+        border-radius: var(--card-radius); 
+    }
+    .feature-card:hover { 
+        transform: translateY(-6px); 
+        box-shadow: 0 18px 40px rgba(2,6,23,0.08); 
+    }
+    .feature-icon { 
+        width:64px; 
+        height:64px; 
+        border-radius:50%; 
+        display:flex; 
+        align-items:center; 
+        justify-content:center; 
+        background: rgba(13,110,253,0.08); 
+        color: var(--primary); 
+    }
 
     /* CATEGORIES / BRAND CARDS */
-    .cat-item { background: #fff; border-radius: 10px; padding:12px; box-shadow: 0 8px 20px rgba(2,6,23,0.04); transition: transform .18s ease, box-shadow .18s ease; }
-    .cat-item:hover { transform: translateY(-6px); box-shadow: 0 22px 50px rgba(2,6,23,0.06); }
-    .cat-item img { width:80px; height:80px; object-fit:contain; }
-
-    /* PRODUCT CARD */
-    .product-item { border-radius: 12px; overflow: hidden; transition: transform .18s ease, box-shadow .18s ease; }
-    .product-item:hover { transform: translateY(-8px); box-shadow: 0 28px 60px rgba(2,6,23,0.08); }
-    .product-img { position: relative; background: #fff; }
-    .product-img img { width:100%; height:200px; object-fit:cover; }
-    .product-action { position:absolute; top:10px; right:10px; display:flex; gap:8px; opacity:0; transition:opacity .15s ease; }
-    .product-item:hover .product-action{ opacity:1; }
-    .btn-square{ width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
-
-    .badge-custom { position:absolute; left:10px; top:10px; padding:6px 10px; border-radius:8px; font-weight:700; font-size:0.8rem; color:#fff; }
-    .badge-new{ background: linear-gradient(90deg,#28a745,#20c997); }
-    .badge-discount{ background: linear-gradient(90deg,#ff7b00,#ff4d4d); }
-    .price-old { color: var(--muted); font-size:0.95rem; margin-left:8px; text-decoration:line-through; }
-
-    /* OFFERS */
-    .product-offer { position:relative; overflow:hidden; border-radius:12px; }
-    .product-offer img{ width:100%; height:300px; object-fit:cover; transition:transform .6s ease; }
-    .product-offer:hover img{ transform: scale(1.06); }
-    .product-offer .offer-text { position:absolute; left:24px; bottom:24px; color:#fff; z-index:4; }
-    .product-offer::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.55)); z-index:2; }
+    .cat-item { 
+        background: #fff; 
+        border-radius: 10px; 
+        padding:12px; 
+        box-shadow: 0 8px 20px rgba(2,6,23,0.04); 
+        transition: transform .18s ease, box-shadow .18s ease; 
+    }
+    .cat-item:hover { 
+        transform: translateY(-6px); 
+        box-shadow: 0 22px 50px rgba(2,6,23,0.06); 
+    }
+    .cat-item img { 
+        width:80px; 
+        height:80px; 
+        object-fit:contain; 
+    }
 
     /* VENDOR CAROUSEL */
-    .vendor-carousel .bg-light{ display:flex; align-items:center; justify-content:center; border-radius:8px; padding:18px; min-height:80px; }
-    .vendor-carousel img{ max-width:140px; max-height:60px; object-fit:contain; }
+    .vendor-carousel .bg-light{ 
+        display:flex; 
+        align-items:center; 
+        justify-content:center; 
+        border-radius:8px; 
+        padding:18px; 
+        min-height:80px; 
+    }
+    .vendor-carousel img{ 
+        max-width:140px; 
+        max-height:60px; 
+        object-fit:contain; 
+    }
 
-    @media (max-width: 991px){ .hero-banner{ height: 420px; } .hero-title{ font-size:1.6rem; } .product-img img{ height:180px; } }
-    @media (max-width: 576px){ .hero-banner{ height:360px; } .hero-content{ padding:0 16px; } .brand-pill img{ display:none; } }
+    /* RESPONSIVE */
+    @media (max-width: 991px){ 
+        .hero-banner{ height: 420px; } 
+        .hero-title{ font-size:1.6rem; } 
+    }
+    @media (max-width: 576px){ 
+        .hero-banner{ height:360px; } 
+        .hero-content{ padding:0 16px; } 
+        .brand-pill img{ display:none; } 
+    }
 </style>
 
 <!-- =================== HERO =================== -->
