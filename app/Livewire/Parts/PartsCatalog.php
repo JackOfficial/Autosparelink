@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Parts;
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Part;
 use App\Models\PartBrand;
@@ -129,7 +130,7 @@ class PartsCatalog extends Component
         return view('livewire.parts.parts-catalog', [
             'parts' => $query->paginate(12),
             'categories' => Category::whereNull('parent_id')->orderBy('category_name')->withCount('parts')->get(),
-            'brands' => PartBrand::orderBy('name')->get(),
+            'brands' => Brand::orderBy('brand_name')->get(),
         ]);
     }
 }
