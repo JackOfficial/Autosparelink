@@ -114,7 +114,7 @@
 
         {{-- FOOTER --}}
         <div class="card-footer d-flex gap-2">
-            <button class="btn btn-primary">
+            <button class="btn btn-primary mr-1">
                 <i class="fa fa-save"></i> Save Variant
             </button>
             <a href="{{ route('admin.variants.index') }}" class="btn btn-secondary">Cancel</a>
