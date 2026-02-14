@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Livewire\Admin\Specifications;
+namespace App\Livewire\Admin\Specifications;
 
 use Livewire\Component;
 use Illuminate\Validation\ValidationException;
