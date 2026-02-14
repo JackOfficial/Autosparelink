@@ -40,25 +40,13 @@
     </select>
     @error('vehicle_model_id') <small class="text-danger">{{ $message }}</small> @enderror
 </div>
-                </div>
-            </fieldset>
 
-            {{-- GENERAL INFORMATION --}}
-            <fieldset class="border p-3 mb-4">
-                <legend class="w-auto px-2">General Information</legend>
-
-                <div class="row">
-                    <div class="col-md-6">
+<div class="col-md-6">
                         <label>Variant Name <span class="text-danger">*</span></label>
                         <input type="text" wire:model="name" class="form-control">
                         @error('name')
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
-                    </div>
-
-                    <div class="col-md-6">
-                        <label>Trim Level</label>
-                        <input type="text" wire:model="trim_level" class="form-control">
                     </div>
                 </div>
             </fieldset>
