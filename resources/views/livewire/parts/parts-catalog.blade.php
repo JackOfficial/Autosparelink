@@ -44,14 +44,6 @@
                     @endforeach
                 </select>
 
-                <!-- OEM / AFTERMARKET -->
-                <h6 class="fw-bold mt-3 mb-2">Manufacturer Type</h6>
-                <select class="form-select mb-3" wire:model="oem">
-                    <option value="">Any</option>
-                    <option value="OEM">OEM</option>
-                    <option value="Aftermarket">Aftermarket</option>
-                </select>
-
                 <!-- PRICE -->
                 <h6 class="fw-bold mt-3 mb-2">Price Range</h6>
                 <input type="number" class="form-control mb-2" placeholder="Min" wire:model.lazy="min_price">
