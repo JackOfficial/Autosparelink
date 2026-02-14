@@ -67,25 +67,19 @@ class Variant extends Model
 
     public function getFullNameAttribute()
 {
-       $parts = [];
+     $spec = $this->activeSpecifications()->first(); // pick the first active spec
 
-    // Trim / variant name
-    if ($this->trim_level) {
-        $parts[] = $this->trim_level; // LS, SE, XLE
-    } elseif ($this->name) {
-        $parts[] = $this->name;
-    }
+        if (!$spec) {
+            return $this->name; // fallback to variant name only
+        }
 
-    // Get first active specification
-    $spec = $this->activeSpecifications()->with(['engineDisplacement', 'engineType', 'transmissionType'])->first();
+        $parts = [];
+        if ($this->name) $parts[] = $this->name;                    // LS, SE, XLE
+        if ($spec->engineDisplacement) $parts[] = $spec->engineDisplacement->name;  // 1.8L, 2.0L
+        if ($spec->engineType) $parts[] = $spec->engineType->name;  // Petrol, Diesel, Hybrid
+        if ($spec->transmissionType) $parts[] = $spec->transmissionType->name; // Automatic, Manual
 
-    if ($spec) {
-        if ($spec->engineDisplacement) $parts[] = $spec->engineDisplacement->name; // 1.8L
-        if ($spec->engineType) $parts[] = $spec->engineType->name; // Petrol / Hybrid
-        if ($spec->transmissionType) $parts[] = $spec->transmissionType->name; // Automatic / Manual
-    }
-
-    return implode(' ', array_filter($parts));
+        return implode(' ', $parts);
 }
 
 }

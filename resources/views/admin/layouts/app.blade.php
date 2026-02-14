@@ -241,10 +241,10 @@
             <li class="nav-item"><a href="/admin/vehicle-models" class="nav-link"><i class="fas fa-car-side nav-icon"></i><p>Models</p></a></li>
             <li class="nav-item"><a href="/admin/variants" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Variants</p></a></li>
             <li class="nav-item"><a href="/admin/specifications" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Variant Specification</p></a></li>
-            <li class="nav-item"><a href="/admin/body-types" class="nav-link"><i class="fas fa-car nav-icon"></i><p>Body Types</p></a></li>
-            <li class="nav-item"><a href="/admin/engine-types" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>Engine Types</p></a></li>
-            <li class="nav-item"><a href="/admin/transmission-types" class="nav-link"><i class="fas fa-exchange-alt nav-icon"></i><p>Transmission Types</p></a></li>
-            <li class="nav-item"><a href="/admin/drive-types" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Drive Types</p></a></li>
+            <li class="nav-item d-none"><a href="/admin/body-types" class="nav-link"><i class="fas fa-car nav-icon"></i><p>Body Types</p></a></li>
+            <li class="nav-item d-none"><a href="/admin/engine-types" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>Engine Types</p></a></li>
+            <li class="nav-item d-none"><a href="/admin/transmission-types" class="nav-link"><i class="fas fa-exchange-alt nav-icon"></i><p>Transmission Types</p></a></li>
+            <li class="nav-item d-none"><a href="/admin/drive-types" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Drive Types</p></a></li>
            </ul>
           </li>
 
