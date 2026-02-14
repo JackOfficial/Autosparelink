@@ -69,8 +69,7 @@ public function getFullNameAttribute()
 {
     $spec = $this->activeSpecifications()->first();
 
-    // Variant name first
-    $parts[] = $this->name;
+    $parts = [];
 
     if ($spec->bodyType) {
         $parts[] = $spec->bodyType->name;
