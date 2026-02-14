@@ -3,10 +3,10 @@
         <div class="col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="font-weight-bold">Shopping Cart</h2>
-                <span class="text-muted">{{ count($cartItems) }} Items</span>
+                <span class="text-muted">{{ $cartContent->count() }} Items</span>
             </div>
 
-            @if(count($cartItems) > 0)
+            @if($cartContent->count() > 0)
                 <div class="card shadow-sm border-0 rounded-lg">
                     <div class="table-responsive">
                         <table class="table table-borderless align-middle mb-0">
@@ -20,39 +20,41 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($cartItems as $item)
+                                @foreach($cartContent as $item)
                                 <tr class="border-bottom">
                                     <td class="py-4 px-4">
                                         <div class="d-flex align-items-center">
-                                            <img src="{{ asset('storage/' . ($item['attributes']['image'] ?? 'defaults/no-image.png')) }}" 
+                                            {{-- Accessing options via object property --}}
+                                            <img src="{{ asset('storage/' . ($item->options->image ?? 'defaults/no-image.png')) }}" 
                                                  class="rounded mr-3" style="width: 70px; height: 70px; object-fit: cover;">
                                             <div>
-                                                <h6 class="mb-0 font-weight-bold">{{ $item['name'] }}</h6>
-                                                <small class="text-muted">{{ $item['attributes']['brand'] ?? '' }}</small>
+                                                <h6 class="mb-0 font-weight-bold">{{ $item->name }}</h6>
+                                                <small class="text-muted">{{ $item->options->brand ?? '' }}</small>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-4">{{ number_format($item['price'], 0) }} RWF</td>
+                                    <td class="py-4">{{ number_format($item->price, 0) }} RWF</td>
                                     <td class="py-4">
                                         <div class="input-group input-group-sm" style="width: 110px;">
                                             <div class="input-group-prepend">
+                                                {{-- Using $item->rowId and $item->qty --}}
                                                 <button class="btn btn-outline-secondary border-right-0" 
-                                                        wire:click="updateQuantity('{{ $item['id'] }}', {{ $item['quantity'] - 1 }})">-</button>
+                                                        wire:click="updateQuantity('{{ $item->rowId }}', {{ $item->qty - 1 }})">-</button>
                                             </div>
                                             <input type="text" class="form-control text-center border-left-0 border-right-0 bg-white" 
-                                                   value="{{ $item['quantity'] }}" readonly>
+                                                   value="{{ $item->qty }}" readonly>
                                             <div class="input-group-append">
                                                 <button class="btn btn-outline-secondary border-left-0" 
-                                                        wire:click="updateQuantity('{{ $item['id'] }}', {{ $item['quantity'] + 1 }})">+</button>
+                                                        wire:click="updateQuantity('{{ $item->rowId }}', {{ $item->qty + 1 }})">+</button>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="py-4 font-weight-bold">
-                                        {{ number_format($item['price'] * $item['quantity'], 0) }} RWF
+                                        {{ number_format($item->subtotal, 0) }} RWF
                                     </td>
                                     <td class="py-4 text-right px-4">
                                         <button class="btn btn-link text-danger p-0" title="Remove Item"
-                                                wire:click="removeItem('{{ $item['id'] }}')" 
+                                                wire:click="removeItem('{{ $item->rowId }}')" 
                                                 wire:loading.attr="disabled">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
@@ -89,7 +91,8 @@
                     
                     <div class="d-flex justify-content-between mb-2">
                         <span>Subtotal</span>
-                        <span>{{ number_format($subTotal, 0) }} RWF</span>
+                        {{-- In Gloudemans, subtotal() and total() return formatted strings --}}
+                        <span>{{ $subTotal }} RWF</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Shipping</span>
@@ -98,11 +101,11 @@
                     <hr>
                     <div class="d-flex justify-content-between mb-4">
                         <h5 class="font-weight-bold">Total</h5>
-                        <h5 class="font-weight-bold text-primary">{{ number_format($subTotal, 0) }} RWF</h5>
+                        <h5 class="font-weight-bold text-primary">{{ $total }} RWF</h5>
                     </div>
 
                     <button class="btn btn-primary btn-lg btn-block shadow-sm py-3 font-weight-bold rounded-pill" 
-                            @if(count($cartItems) == 0) disabled @endif>
+                            @if($cartContent->count() == 0) disabled @endif>
                         PROCEED TO CHECKOUT
                     </button>
 
