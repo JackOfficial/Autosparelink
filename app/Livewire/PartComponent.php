@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Part;
 use Gloudemans\Shoppingcart\Facades\Cart; // The correct Facade for the package
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PartComponent extends Component
 {
