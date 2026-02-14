@@ -41,19 +41,31 @@
     @error('vehicle_model_id') <small class="text-danger">{{ $message }}</small> @enderror
 </div>
 
-<div class="col-md-4">
+<div class="col-md-4" x-data="{ showTooltip: false }" style="position: relative;">
     <label>
         Variant Name <span class="text-danger">*</span>
-        <!-- Question icon with tooltip -->
-        <i class="fa fa-question-circle text-info" 
-           data-toggle="tooltip" 
-           data-placement="right" 
-           title="Enter only the trim/variant designation (e.g., S, XLE, Adventure). Do NOT include model name, year, or body type."
-           style="cursor: pointer;">
+
+        <!-- Question icon -->
+        <i class="fa fa-question-circle text-info"
+           @mouseenter="showTooltip = true"
+           @mouseleave="showTooltip = false"
+           @focus="showTooltip = true"
+           @blur="showTooltip = false"
+           tabindex="0"
+           style="cursor: pointer; margin-left: 5px;">
         </i>
+
+        <!-- Tooltip -->
+        <div x-show="showTooltip"
+             x-transition
+             x-cloak
+             class="bg-dark text-white p-2 rounded shadow"
+             style="position: absolute; top: 50%; left: 105%; transform: translateY(-50%); white-space: nowrap; z-index: 1000;">
+            Enter only the trim/variant designation (e.g., S, XLE, Adventure).
+        </div>
     </label>
 
-    <input type="text" wire:model="name" class="form-control">
+    <input type="text" wire:model="name" class="form-control mt-2">
     @error('name')
         <small class="text-danger">{{ $message }}</small>
     @enderror
@@ -109,11 +121,5 @@
             <a href="{{ route('admin.variants.index') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
-
-    <script>
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
-</script>
 
 </div>
