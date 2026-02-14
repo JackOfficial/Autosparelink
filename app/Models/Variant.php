@@ -76,29 +76,33 @@ public function getFullNameAttribute()
     $parts = [$this->name];
 
     // Production Year
-    if ($spec->production_year && 
-        !str_contains($this->name, $spec->production_year)) {
+    if ($spec->production_year) {
         $parts[] = '(' . $spec->production_year . ')';
     }
 
-    if ($spec->bodyType && 
-        !str_contains($this->name, $spec->bodyType->name)) {
+    // Body Type
+    if ($spec->bodyType && !str_contains($this->name, $spec->bodyType->name)) {
         $parts[] = $spec->bodyType->name;
     }
 
-    if ($spec->engineDisplacement && 
-        !str_contains($this->name, $spec->engineDisplacement->name)) {
+    // Engine Displacement
+    if ($spec->engineDisplacement && !str_contains($this->name, $spec->engineDisplacement->name)) {
         $parts[] = $spec->engineDisplacement->name;
     }
 
-    if ($spec->engineType && 
-        !str_contains($this->name, $spec->engineType->name)) {
+    // Engine Type
+    if ($spec->engineType && !str_contains($this->name, $spec->engineType->name)) {
         $parts[] = $spec->engineType->name;
     }
 
-    if ($spec->transmissionType && 
-        !str_contains($this->name, $spec->transmissionType->name)) {
+    // Transmission
+    if ($spec->transmissionType && !str_contains($this->name, $spec->transmissionType->name)) {
         $parts[] = $spec->transmissionType->name;
+    }
+
+    // Drive Type (NEW)
+    if ($spec->driveType && !str_contains($this->name, $spec->driveType->name)) {
+        $parts[] = $spec->driveType->name; // FWD / AWD / RWD
     }
 
     return implode(' ', $parts);

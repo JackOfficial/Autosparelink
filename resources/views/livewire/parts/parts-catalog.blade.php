@@ -35,8 +35,6 @@
                     @endforeach
                 </select>
 
-                <input type="number" class="form-control mb-2" placeholder="Year" wire:model.lazy="year">
-
                 <!-- CATEGORY -->
                 <h6 class="fw-bold mt-3 mb-2">Category</h6>
                 <select class="form-select mb-3" wire:model="category">
