@@ -67,7 +67,7 @@
                         </div>
                         <h4>Your wishlist is empty</h4>
                         <p class="text-muted">Save items you like to buy them later.</p>
-                        <a href="{{ url('/') }}" class="btn btn-primary px-5 mt-2 shadow-sm">Start Shopping</a>
+                        <a href="{{ url('/spare-parts') }}" class="btn btn-primary px-5 mt-2 shadow-sm">Start Shopping</a>
                     </div>
                 </div>
             @endif
