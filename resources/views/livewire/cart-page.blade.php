@@ -25,7 +25,7 @@
                                     <td class="py-4 px-4">
                                         <div class="d-flex align-items-center">
                                             {{-- Accessing options via object property --}}
-                                            <img src="{{ asset('storage/' . ($item->options->image ?? 'defaults/no-image.png')) }}" 
+                                            <img src="{{ asset($item->options->image)) }}" 
                                                  class="rounded mr-3" style="width: 70px; height: 70px; object-fit: cover;">
                                             <div>
                                                 <h6 class="mb-0 font-weight-bold">{{ $item->name }}</h6>

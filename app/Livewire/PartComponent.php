@@ -25,6 +25,7 @@ class PartComponent extends Component
     $identifier = Auth::id();
     $instance = 'default';
 
+     $mainPhoto = $this->part->photos->first()?->file_path ?? 'frontend/img/placeholder.png';
     // 1. Sync with DB if logged in
     if (Auth::check()) {
         Cart::instance($instance)->restore($identifier);
@@ -51,7 +52,7 @@ class PartComponent extends Component
             'weight'  => 0,
             'options' => [
                 'brand' => $this->part->partBrand?->name,
-                'image' => $this->part->image_path,
+                'image' => $mainPhoto,
             ]
         ]);
         $message = 'Added to cart!';
