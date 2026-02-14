@@ -19,9 +19,6 @@ class ModelForm extends Component
     public $photos = []; // Temporary uploaded files
     public $description;
     public $has_variants = 1;
-    public $production_start_year;
-    public $production_end_year;
-    public $year;
     public $status = 1;
 
     // ================= VALIDATION RULES =================
@@ -32,9 +29,6 @@ class ModelForm extends Component
             'model_name' => 'required|string|max:255',
             'photos.*' => 'image|max:5120', // 5MB per photo
             'has_variants' => 'required|boolean',
-            'production_start_year' => 'nullable|digits:4|integer',
-            'production_end_year' => 'nullable|digits:4|integer|gte:production_start_year',
-            'year' => 'nullable|digits:4|integer'
         ];
     }
 
@@ -45,20 +39,12 @@ class ModelForm extends Component
 
         DB::transaction(function () {
 
-            // 1️⃣ Handle empty years
-            $startYear = $this->production_start_year ?: null;
-            $endYear   = $this->production_end_year ?: null;
-            $year      = $this->year ?: null;
-
             // 2️⃣ Create Vehicle Model
             $model = VehicleModel::create([
                 'brand_id' => $this->brand_id,
                 'model_name' => $this->model_name,
                 'description' => $this->description,
                 'has_variants' => $this->has_variants,
-                'production_start_year' => $startYear,
-                'production_end_year' => $endYear,
-                'year' => $year,
                 'status' => $this->status,
             ]);
 

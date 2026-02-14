@@ -38,6 +38,7 @@ class SpecificationForm extends Component
     // ✅ FIXED YEARS
     public $production_start;
     public $production_end;
+    public $production_year;
 
     // ================= INIT =================
     public $brands;

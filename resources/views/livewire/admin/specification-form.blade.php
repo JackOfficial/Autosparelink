@@ -244,6 +244,11 @@
                 <legend class="w-auto">Production</legend>
                 <div class="row">
                     <div class="col-md-3">
+                        <label>Production Year</label>
+                        <input type="number" wire:model="production_year" class="form-control" min="1950" max="{{ date('Y') }}">
+                        @error('production_year') <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="col-md-3">
                         <label>Production Start Year</label>
                         <input type="number" wire:model="production_start" class="form-control" min="1950" max="{{ date('Y') }}">
                         @error('production_start') <span class="text-danger">{{ $message }}</span> @enderror

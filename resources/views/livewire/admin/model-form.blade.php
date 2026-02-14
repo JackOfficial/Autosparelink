@@ -98,32 +98,6 @@
                                     <label><i class="fas fa-align-left"></i> Description</label>
                                     <textarea wire:model.live="description" class="form-control" rows="3" placeholder="Optional description"></textarea>
                                 </div>
-
-                                {{-- Production Years --}}
-                                <div class="row g-3 mt-3">
-                                    <div class="col-md-6">
-                                         <div class="form-group">
-                                            <label><i class="fas fa-calendar-check"></i> Model Year</label>
-                                            <input type="number" wire:model.live="year" class="form-control" min="1900" max="{{ date('Y')+2 }}" placeholder="e.g. 2023">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                            <label><i class="fas fa-calendar-alt"></i> Production Start Year</label>
-                                            <input type="number" wire:model.live="production_start_year" class="form-control" min="1900" max="{{ date('Y') }}" placeholder="e.g. 2018">
-                                        </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                            <label><i class="fas fa-calendar-check"></i> Production End Year</label>
-                                            <input type="number" wire:model.live="production_end_year" class="form-control" min="1900" max="{{ date('Y')+2 }}" placeholder="e.g. 2023">
-                                        </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </fieldset>
 
                             {{-- ================= SUBMIT ================= --}}
