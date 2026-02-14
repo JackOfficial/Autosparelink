@@ -155,7 +155,7 @@
                         <label>Engine Displacement</label>
                         <select wire:model="engine_displacement_id" class="form-control">
                             <option value="">Select</option>
-                            @foreach($engineDisplacement as $ed)
+                            @foreach($engineDisplacements as $ed)
                                 <option value="{{ $ed->id }}">{{ $ed->name }}</option>
                             @endforeach
                         </select>
