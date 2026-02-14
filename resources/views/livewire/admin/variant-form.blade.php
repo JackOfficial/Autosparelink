@@ -41,21 +41,22 @@
     @error('vehicle_model_id') <small class="text-danger">{{ $message }}</small> @enderror
 </div>
 
-<div class="col-md-4" x-data="{ showTooltip: false }" class="position-relative">
+<div class="col-md-4" x-data="{ showTooltip: false }" style="position: relative;">
     <label>
         Variant Name <span class="text-danger">*</span>
         <i class="fa fa-question-circle text-info"
            @mouseenter="showTooltip = true"
            @mouseleave="showTooltip = false"
-           class="ml-1"></i>
+           class="ml-1" style="cursor: pointer;"></i>
     </label>
 
     <input type="text" wire:model="name" class="form-control">
 
     <!-- Tooltip -->
-    <div x-show="showTooltip" 
-         class="position-absolute bg-dark text-white p-2 rounded"
-         style="z-index: 1000; top: -5px; left: 110%; width: 220px;">
+    <div x-show="showTooltip"
+         x-cloak
+         class="bg-dark text-white p-2 rounded"
+         style="position: absolute; top: 50%; left: 105%; transform: translateY(-50%); white-space: nowrap; z-index: 1000;">
         Enter only the trim/variant designation (e.g., S, XLE, Adventure). Do NOT include model name, year, or body type.
     </div>
 
