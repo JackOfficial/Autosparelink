@@ -55,7 +55,7 @@
             <div x-show="showTooltip"
                  x-cloak
                  class="bg-dark text-white p-2 rounded"
-                 style="position: absolute; top: 50%; left: 110%; transform: translateY(-50%); white-space: nowrap; z-index: 1000;">
+                 style="position: absolute; top: 50%; left: 110%; width:25%; transform: translateY(-50%); white-space: nowrap; z-index: 1000;">
                 Enter only the trim/variant designation (e.g., S, XLE, Adventure). Do NOT include model name, year, or body type.
             </div>
         </span>
