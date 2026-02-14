@@ -69,12 +69,6 @@ public function getFullNameAttribute()
 {
     $spec = $this->activeSpecifications()->first();
 
-    if (!$spec) {
-        return $this->name;
-    }
-
-    $parts = [];
-
     // Variant name first
     $parts[] = $this->name;
 
