@@ -50,9 +50,11 @@ use App\Http\Controllers\Admin\PartFitmentController;
 use App\Http\Controllers\Admin\TransmissionTypeController;
 use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ModelPartController;
 use App\Http\Controllers\PartCatalogController;
 use App\Http\Controllers\VinController;
+use App\Http\Controllers\WishlistController;
 
 //Guest routes
 // Route::get('/', function() {
@@ -107,6 +109,9 @@ Route::get('/models', [VehicleModelController::class, 'index']);
 Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
 Route::get('/vin-search', [VinController::class, 'search']);
 Route::get('/spare-parts', [PartCatalogController::class, 'parts']);
+Route::resource('wishlist', WishlistController::class);
+Route::resource('cart', CartController::class);
+
 // Route::get('/model-specification/{id}', [SpecificationController::class, 'model_specification']);
 // Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
 // Route::get('/spare-parts/', [SparePartController::class, 'parts']);
