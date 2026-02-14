@@ -29,7 +29,7 @@ class VariantForm extends Component
     public $photos = [];
 
     // Does this variant have specifications?
-    public $has_specifications = 0;
+    public $has_specifications = 1;
 
     // Data
     public $brands;
