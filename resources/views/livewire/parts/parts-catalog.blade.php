@@ -89,28 +89,8 @@
 
             <div class="row" wire:loading.remove>
                 @forelse($parts as $part)
-                    @php
-                        $photo = $part->photos->first() ? asset('storage/'.$part->photos->first()->file_path) : asset('images/no-part.png');
-                    @endphp
-
-                    <div class="col-md-4 mb-4" x-show="grid">
-                        <div class="card h-100 shadow-sm border-0 product-item">
-                            <div class="position-relative text-center p-3">
-                                <img src="{{ $photo }}" style="height:200px;object-fit:contain">
-                                @if($part->stock_quantity > 0)
-                                    <span class="badge bg-success position-absolute top-0 start-0 m-2">In Stock</span>
-                                @else
-                                    <span class="badge bg-danger position-absolute top-0 start-0 m-2">Out</span>
-                                @endif
-                            </div>
-                            <div class="card-body d-flex flex-column">
-                                <h6 class="fw-semibold">{{ Str::limit($part->part_name, 40) }}</h6>
-                                <small class="text-muted mb-2">SKU: {{ $part->sku }}</small>
-                                <h5 class="text-primary fw-bold mt-auto">{{ number_format($part->price) }} RWF</h5>
-                                <button class="btn btn-primary btn-sm mt-3">Add to Cart</button>
-                            </div>
-                        </div>
-                    </div>
+                    
+                   @livewire('part-component', ['part' => $part], key($part->id)) 
 
                 @empty
                     <div class="col-12">
