@@ -94,7 +94,7 @@
         </div>
 
         <div class="col-lg-4 mt-lg-0 mt-5">
-            <div class="card border-0 shadow-sm rounded-lg sticky-top" style="top: 20px;">
+            <div class="card border-0 shadow-sm rounded-lg sticky-top" style="top: 40px;">
                 <div class="card-body p-4">
                     <h4 class="font-weight-bold mb-4">Order Summary</h4>
                     
