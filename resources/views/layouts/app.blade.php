@@ -128,7 +128,7 @@
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="/about">About Us</a></li>
                     <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/shop/products">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/spare-parts">Shop</a></li>
 
                     <!-- Mega Menu for Categories -->
                     <li class="nav-item dropdown position-static">
@@ -170,7 +170,7 @@
                 <div class="ml-auto d-flex align-items-center">
                     <!-- Wishlist Icon -->
                     <livewire:wishlist-icon />
-                    
+
                     <!-- Cart Icon -->
                     <livewire:cart-icon />
 
