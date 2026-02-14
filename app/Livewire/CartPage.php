@@ -9,16 +9,11 @@ use Illuminate\Support\Facades\DB;
 
 class CartPage extends Component
 {
-    // Removing $cartItems from public property to avoid serialization issues with objects
-    // We will fetch them directly in the render method for better reliability.
-
     public function updateQuantity($rowId, $qty)
     {
         if ($qty < 1) return;
 
-        // Gloudemans syntax is simple: update(rowId, qty)
         Cart::instance('default')->update($rowId, $qty);
-
         $this->refreshCart();
     }
 
@@ -33,21 +28,27 @@ class CartPage extends Component
 
     public function clearCart()
     {
-        Cart::instance('default')->clear();
-        $this->refreshCart();
+        // Use destroy() for Gloudemans to wipe the current session instance
+        Cart::instance('default')->destroy();
+
+        if (Auth::check()) {
+            // Manually wipe the DB record so it doesn't come back on next login
+            DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
+        }
+
         $this->dispatch('cartUpdated');
+        $this->dispatch('notify', message: 'Cart cleared!');
     }
 
     private function refreshCart()
     {
         if (Auth::check()) {
-            // Restore-Store cycle to keep DB in sync
-            // Note: restore() handles the deletion of the old row automatically
-            Cart::instance('default')->restore(Auth::id());
-            Cart::instance('default')->store(Auth::id());
+            $identifier = Auth::id();
+            // We use the Delete-then-Store pattern here. 
+            // restore() isn't needed during a refresh because the session is already active.
+            DB::table('shoppingcart')->where('identifier', $identifier)->delete();
+            Cart::instance('default')->store($identifier);
         }
-        
-        // No need to call loadCart(), Livewire will re-render with fresh data
     }
 
     public function render()
