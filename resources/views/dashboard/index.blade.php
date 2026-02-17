@@ -30,7 +30,7 @@
                                     <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#orderCollapse{{ $order->id }}" aria-expanded="true" aria-controls="orderCollapse{{ $order->id }}">
                                         Order #{{ $order->id }} - {{ ucfirst($order->status) }}
                                     </button>
-                                    <span>{{ number_format($order->total_amount, 2) }} RWF</span>
+                                    <span>{{ $order->total_amount }} RWF</span>
                                 </h5>
                             </div>
 
