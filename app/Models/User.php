@@ -51,9 +51,9 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
     
-    public function stories() {
-        return $this->hasMany(Stories::class);
-    }
+    // public function stories() {
+    //     return $this->hasMany(Stories::class);
+    // }
     
     public function blogs(){
         return $this->hasMany(Blog::class);
@@ -74,5 +74,9 @@ class User extends Authenticatable implements MustVerifyEmail
     return $this->hasMany(Comment::class);
 }
 
+public function addresses()
+{
+    return $this->hasMany(Address::class);
+}
 
 }
