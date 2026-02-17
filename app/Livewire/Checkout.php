@@ -14,27 +14,53 @@ use Illuminate\Support\Facades\DB;
 
 class Checkout extends Component
 {
-    public $address_id; // select existing address
-    public $new_address = []; // array for new address
-    public $use_new_address = false; // toggle
+    public $addresses;           // User addresses
+    public $address_id;          // Selected existing address
+    public $new_address = [];    // Array for new address
+    public $use_new_address = false; // Toggle for using new address
+
+    public $cartItems;
+    public $total;
 
     public function mount()
     {
-        if (Auth::check()) {
-            $this->new_address = [
-                'full_name' => Auth::user()->name,
-                'phone' => Auth::user()->phone ?? '',
-                'street_address' => '',
-                'city' => '',
-                'state' => '',
-                'postal_code' => '',
-                'country' => 'Rwanda',
-            ];
-        }
+        if (!Auth::check()) return;
+
+        // Load user's addresses
+        $this->addresses = Auth::user()->addresses ?? collect();
+
+        // Auto toggle new address if none exist
+        $this->use_new_address = $this->addresses->isEmpty();
+
+        // Default new address fields
+        $this->new_address = [
+            'full_name' => Auth::user()->name,
+            'phone' => Auth::user()->phone ?? '',
+            'street_address' => '',
+            'city' => '',
+            'state' => '',
+            'postal_code' => '',
+            'country' => 'Rwanda',
+        ];
+
+        // Load cart items
+        $this->cartItems = Cart::instance('default')->content();
+        $this->total = (float) Cart::instance('default')->subtotal();
+    }
+
+    public function updatedCart()
+    {
+        $this->cartItems = Cart::instance('default')->content();
+        $this->total = (float) Cart::instance('default')->subtotal();
     }
 
     public function placeOrder()
     {
+        if (!Auth::check()) {
+            $this->dispatch('notify', message: 'Please log in to place an order.');
+            return;
+        }
+
         $cartItems = Cart::instance('default')->content();
 
         if ($cartItems->isEmpty()) {
@@ -42,7 +68,7 @@ class Checkout extends Component
             return;
         }
 
-        // Validate either new address or selected address
+        // Validate new address if selected
         if ($this->use_new_address) {
             $this->validate([
                 'new_address.full_name' => 'required|string|max:255',
@@ -65,7 +91,7 @@ class Checkout extends Component
         try {
             // 1️⃣ Save new address if needed
             $address_id = $this->address_id;
-            if ($this->use_new_address && Auth::check()) {
+            if ($this->use_new_address) {
                 $address = Address::create(array_merge($this->new_address, [
                     'user_id' => Auth::id(),
                 ]));
@@ -76,7 +102,7 @@ class Checkout extends Component
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'address_id' => $address_id,
-                'total_amount' => Cart::instance('default')->total(),
+                'total_amount' => $this->total,
                 'status' => 'pending',
             ]);
 
@@ -93,8 +119,8 @@ class Checkout extends Component
             // 4️⃣ Create payment placeholder
             Payment::create([
                 'order_id' => $order->id,
-                'amount' => Cart::instance('default')->total(),
-                'method' => 'pending',
+                'amount' => $this->total,
+                'method' => 'pending', // will be updated during actual payment
                 'status' => 'pending',
             ]);
 
@@ -106,9 +132,7 @@ class Checkout extends Component
 
             // 6️⃣ Clear cart
             Cart::instance('default')->destroy();
-            if (Auth::check()) {
-                Cart::instance('default')->erase(Auth::id());
-            }
+            Cart::instance('default')->erase(Auth::id());
 
             DB::commit();
 
@@ -123,11 +147,23 @@ class Checkout extends Component
 
     public function render()
     {
-        $cartItems = Cart::instance('default')->content();
-        $total = Cart::instance('default')->subtotal();
+        if (!Auth::check()) {
+            return view('livewire.checkout', [
+                'cartItems' => collect(),
+                'total' => 0,
+                'addresses' => collect(),
+            ]);
+        }
 
-        $addresses = Auth::check() ? Auth::user()->addresses : collect();
+        // Refresh cart and addresses
+        $this->cartItems = Cart::instance('default')->content();
+        $this->total = (float) Cart::instance('default')->subtotal();
+        $this->addresses = Auth::user()->addresses ?? collect();
 
-        return view('livewire.checkout', compact('cartItems', 'total', 'addresses'));
+        return view('livewire.checkout', [
+            'cartItems' => $this->cartItems,
+            'total' => $this->total,
+            'addresses' => $this->addresses,
+        ]);
     }
 }
