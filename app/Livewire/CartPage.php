@@ -58,8 +58,8 @@ class CartPage extends Component
 
         return view('livewire.cart-page', [
             'cartContent' => $cartInstance->content(),
-            'subTotal'    => $cartInstance->subtotal(),
-            'total'       => $cartInstance->total(),
+            'subTotal'    => (float) $cartInstance->subtotal(),
+            'total'       => (float) $cartInstance->subtotal(), //(float) $cartInstance->total(),
         ]);
     }
 }
