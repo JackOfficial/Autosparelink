@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Livewire;
+
 use Livewire\Component;
 use Gloudemans\Shoppingcart\Facades\Cart;
 
