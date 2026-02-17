@@ -23,7 +23,7 @@
                 @endif
 
                 <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" wire:model="use_new_address">
+                    <input type="checkbox" class="form-check-input" wire:model.live="use_new_address">
                     <label class="form-check-label">Use new address</label>
                 </div>
 
