@@ -56,6 +56,7 @@ use App\Http\Controllers\ModelPartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PartCatalogController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\VinController;
 use App\Http\Controllers\WishlistController;
 
@@ -146,6 +147,9 @@ Route::get('/variants/{variant_id}/parts', [ModelPartController::class, 'variant
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::resource('orders', OrderController::class)->middleware('auth');
+
+Route::get('/user-dashboard', [UserDashboardController::class, 'index'])->name('dashboard.index');
+
 /////////////////
 //Route::get('/brand/{brand}/models', [BrandController::class, 'models'])->name('brand.models');
 
