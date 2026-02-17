@@ -112,10 +112,10 @@
                         <h5 class="font-weight-bold text-primary">{{ $total }} RWF</h5>
                     </div>
 
-                    <button class="btn btn-primary btn-lg btn-block shadow-sm py-3 font-weight-bold rounded-pill" 
+                    <a href="{{ route('checkout.index'') }}" class="btn btn-primary btn-lg btn-block shadow-sm py-3 font-weight-bold rounded-pill" 
                             @if($cartContent->count() == 0) disabled @endif>
                         PROCEED TO CHECKOUT
-                    </button>
+                    </a>
 
                     <div class="text-center mt-4">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" height="20" class="mr-2 op-5">

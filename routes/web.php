@@ -51,6 +51,7 @@ use App\Http\Controllers\Admin\TransmissionTypeController;
 use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ModelPartController;
 use App\Http\Controllers\PartCatalogController;
 use App\Http\Controllers\ShopController;
@@ -140,6 +141,10 @@ Route::get('/models/{model_id}/parts', [ModelPartController::class, 'model_parts
 // Parts for a specific variant
 Route::get('/variants/{variant_id}/parts', [ModelPartController::class, 'variant_parts'])
     ->name('variant.parts');
+
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
 /////////////////
 //Route::get('/brand/{brand}/models', [BrandController::class, 'models'])->name('brand.models');
 
