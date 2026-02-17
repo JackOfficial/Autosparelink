@@ -112,7 +112,7 @@
                         <h5 class="font-weight-bold text-primary">{{ $total }} RWF</h5>
                     </div>
 
-                    <a href="{{ route('checkout.index'') }}" class="btn btn-primary btn-lg btn-block shadow-sm py-3 font-weight-bold rounded-pill" 
+                    <a href="{{ route('checkout.index') }}" class="btn btn-primary btn-lg btn-block shadow-sm py-3 font-weight-bold rounded-pill" 
                             @if($cartContent->count() == 0) disabled @endif>
                         PROCEED TO CHECKOUT
                     </a>
