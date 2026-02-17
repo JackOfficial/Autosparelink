@@ -157,7 +157,7 @@ class Checkout extends Component
             ];
         })->toArray();
 
-        $total = (float) Cart::instance('default')->subtotal();
+        $total = Cart::instance('default')->subtotal();
         $addresses = Auth::user()->addresses ?? collect();
 
         return view('livewire.checkout', compact('cartItems', 'total', 'addresses'));

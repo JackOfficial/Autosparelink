@@ -20,7 +20,7 @@ class UserDashboardController extends Controller
 
         // Cart summary
         $cartItems = Cart::instance('default')->content();
-        $cartTotal = (float) Cart::instance('default')->subtotal();
+        $cartTotal = Cart::instance('default')->subtotal();
 
         return view('dashboard.index', compact('user', 'orders', 'wishlistItems', 'cartItems', 'cartTotal'));
     }
