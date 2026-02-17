@@ -59,11 +59,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Blog::class);
     }
     
-    public function volunteer()
-{
-    return $this->hasOne(Volunteer::class);
-}
-    
     public function likes()
 {
     return $this->hasMany(Like::class);
@@ -78,5 +73,28 @@ public function addresses()
 {
     return $this->hasMany(Address::class);
 }
+
+public function orders()
+{
+    return $this->hasMany(Order::class);
+}
+
+// Items in the order
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    // Payment for the order
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
+
+    // Shipping details
+    public function shipping()
+    {
+        return $this->hasOne(Shipping::class);
+    }
 
 }

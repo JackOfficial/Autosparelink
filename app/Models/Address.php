@@ -21,4 +21,11 @@ public function user()
 {
     return $this->belongsTo(User::class);
 }
+
+// Orders shipped to this address
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+    
 }
