@@ -1,7 +1,7 @@
 <div class="container py-5">
     <h2>Checkout</h2>
 
-    @if($cartItems->isEmpty())
+    @if(empty($cartItems))
         <p>Your cart is empty!</p>
     @else
         <div class="row">
@@ -11,7 +11,7 @@
 
                 @if(Auth::check())
                     {{-- Existing addresses dropdown --}}
-                    @if($addresses->isNotEmpty())
+                    @if(!empty($addresses))
                         <div class="mb-3">
                             <label>Select Address</label>
                             <select class="form-control" wire:model="address_id">
@@ -32,7 +32,7 @@
                     </div>
 
                     {{-- New address form: always show if checkbox checked or no addresses --}}
-                    @if($use_new_address || $addresses->isEmpty())
+                    @if($use_new_address || empty($addresses))
                         <div class="mb-3">
                             <input type="text" class="form-control mb-2" placeholder="Full Name" wire:model="new_address.full_name">
                             <input type="text" class="form-control mb-2" placeholder="Phone" wire:model="new_address.phone">
@@ -60,9 +60,9 @@
                     @foreach($cartItems as $item)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
-                                {{ $item->name }} x {{ $item->qty }}
+                                {{ $item['name'] }} x {{ $item['qty'] }}
                             </div>
-                            <span>{{ number_format($item->price * $item->qty, 2) }} RWF</span>
+                            <span>{{ number_format((float)$item['price'] * $item['qty'], 2) }} RWF</span>
                         </li>
                     @endforeach
                     <li class="list-group-item d-flex justify-content-between font-weight-bold">
