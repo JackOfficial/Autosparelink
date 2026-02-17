@@ -19,7 +19,7 @@ class PartCard extends Component
     }
 
     public function addToCart()
-    {
+{
     if ($this->quantity > $this->part->stock_quantity) {
         $this->dispatch('notify', message: 'Not enough stock available!');
         return;
@@ -37,14 +37,19 @@ class PartCard extends Component
         ]
     ]);
 
-    // Store cart if logged in
-    if (auth()->check()) {
-        Cart::instance('default')->store(auth()->id());
+      if (auth()->check()) {
+        try {
+            Cart::instance('default')->store(auth()->id());
+        } catch (\Gloudemans\Shoppingcart\Exceptions\CartAlreadyStoredException $e) {
+            // erase existing stored cart and store fresh
+            Cart::instance('default')->erase(auth()->id());
+            Cart::instance('default')->store(auth()->id());
+        }
     }
 
     $this->dispatch('cartUpdated');
     $this->dispatch('notify', message: 'Item added to cart!');
-    }
+}
 
      public function addToWishlist()
 {
@@ -68,6 +73,16 @@ class PartCard extends Component
             'part_number' => $this->part->part_number,
         ]
     ]);
+
+     if (auth()->check()) {
+        try {
+            Cart::instance('wishlist')->store(auth()->id());
+        } catch (\Gloudemans\Shoppingcart\Exceptions\CartAlreadyStoredException $e) {
+            // erase previous stored wishlist and store fresh
+            Cart::instance('wishlist')->erase(auth()->id());
+            Cart::instance('wishlist')->store(auth()->id());
+        }
+    }
 
     $this->dispatch('wishlistUpdated');
     $this->dispatch('notify', message: 'Added to wishlist!');

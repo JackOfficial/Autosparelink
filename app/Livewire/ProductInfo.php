@@ -38,34 +38,41 @@ class ProductInfo extends Component
         }
     }
 
-    public function addToCart()
-    {
-        // Prevent adding more than available stock
-        if ($this->quantity > $this->part->stock_quantity) {
-            $this->dispatch('notify', message: 'Not enough stock available.');
-            return;
-        }
+ public function addToCart()
+{
+    // 1. Check stock
+    if ($this->quantity > $this->part->stock_quantity) {
+        $this->dispatch('notify', message: 'Not enough stock available!');
+        return;
+    }
 
-        Cart::instance('default')->add([
-            'id'    => $this->part->id,
-            'name'  => $this->part->part_name,
-            'qty'   => $this->quantity,
-            'price' => $this->part->price,
-            'weight'=> 0,
-            'options' => [
-                'brand'       => $this->part->partBrand?->name,
-                'part_number' => $this->part->part_number,
-            ]
-        ]);
+    // 2. Add item to session cart
+    Cart::instance('default')->add([
+        'id'    => $this->part->id,
+        'name'  => $this->part->part_name,
+        'qty'   => $this->quantity,
+        'price' => $this->part->price,
+        'weight'=> 0,
+        'options' => [
+            'brand'       => $this->part->partBrand?->name,
+            'part_number' => $this->part->part_number,
+        ]
+    ]);
 
-        // Store cart in database if logged in
-        if (auth()->check()) {
+     if (auth()->check()) {
+        try {
+            Cart::instance('default')->store(auth()->id());
+        } catch (\Gloudemans\Shoppingcart\Exceptions\CartAlreadyStoredException $e) {
+            // erase existing stored cart and store fresh
+            Cart::instance('default')->erase(auth()->id());
             Cart::instance('default')->store(auth()->id());
         }
-
-        $this->dispatch('cartUpdated');
-        $this->dispatch('notify', message: 'Item added to cart!');
     }
+
+    // 3. Notify frontend / Livewire
+    $this->dispatch('cartUpdated');
+    $this->dispatch('notify', message: 'Item added to cart!');
+}
 
     public function addToWishlist()
     {
@@ -90,6 +97,16 @@ class ProductInfo extends Component
                 'part_number' => $this->part->part_number,
             ]
         ]);
+
+        if (auth()->check()) {
+        try {
+            Cart::instance('default')->store(auth()->id());
+        } catch (\Gloudemans\Shoppingcart\Exceptions\CartAlreadyStoredException $e) {
+            // erase existing stored cart and store fresh
+            Cart::instance('default')->erase(auth()->id());
+            Cart::instance('default')->store(auth()->id());
+        }
+        }
 
         $this->dispatch('wishlistUpdated');
         $this->dispatch('notify', message: 'Added to wishlist!');
