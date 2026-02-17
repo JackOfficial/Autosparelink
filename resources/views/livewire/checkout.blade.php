@@ -53,7 +53,7 @@
                     @endforeach
                     <li class="list-group-item d-flex justify-content-between font-weight-bold">
                         Total
-                        <span>{{ number_format($total, 2) }} RWF</span>
+                        <span>{{ $total }} RWF</span>
                     </li>
                 </ul>
             </div>
