@@ -39,6 +39,11 @@ class Order extends Model
         return $this->hasOne(Shipping::class);
     }
 
+    public function orderItems()
+{
+    return $this->hasMany(OrderItem::class);
+}
+
     // Helper
     public function isPending()
     {
