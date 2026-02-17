@@ -124,7 +124,7 @@ class Checkout extends Component
     public function render()
     {
         $cartItems = Cart::instance('default')->content();
-        $total = Cart::instance('default')->total();
+        $total = (float) Cart::instance('default')->total();
 
         $addresses = Auth::check() ? Auth::user()->addresses : collect();
 
