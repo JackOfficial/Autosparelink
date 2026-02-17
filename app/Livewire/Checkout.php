@@ -19,9 +19,6 @@ class Checkout extends Component
     public $new_address = [];    // Array for new address
     public $use_new_address = false; // Toggle for using new address
 
-    public $cartItems;
-    public $total;
-
     public function mount()
     {
         if (!Auth::check()) return;
@@ -42,16 +39,6 @@ class Checkout extends Component
             'postal_code' => '',
             'country' => 'Rwanda',
         ];
-
-        // Load cart items
-        $this->cartItems = Cart::instance('default')->content();
-        $this->total = (float) Cart::instance('default')->subtotal();
-    }
-
-    public function updatedCart()
-    {
-        $this->cartItems = Cart::instance('default')->content();
-        $this->total = (float) Cart::instance('default')->subtotal();
     }
 
     public function placeOrder()
@@ -102,7 +89,7 @@ class Checkout extends Component
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'address_id' => $address_id,
-                'total_amount' => $this->total,
+                'total_amount' => (float) Cart::instance('default')->subtotal(),
                 'status' => 'pending',
             ]);
 
@@ -119,8 +106,8 @@ class Checkout extends Component
             // 4️⃣ Create payment placeholder
             Payment::create([
                 'order_id' => $order->id,
-                'amount' => $this->total,
-                'method' => 'pending', // will be updated during actual payment
+                'amount' => (float) Cart::instance('default')->subtotal(),
+                'method' => 'pending',
                 'status' => 'pending',
             ]);
 
@@ -132,7 +119,9 @@ class Checkout extends Component
 
             // 6️⃣ Clear cart
             Cart::instance('default')->destroy();
-            Cart::instance('default')->erase(Auth::id());
+            if (Auth::check()) {
+                Cart::instance('default')->erase(Auth::id());
+            }
 
             DB::commit();
 
@@ -149,21 +138,28 @@ class Checkout extends Component
     {
         if (!Auth::check()) {
             return view('livewire.checkout', [
-                'cartItems' => collect(),
+                'cartItems' => [],
                 'total' => 0,
                 'addresses' => collect(),
             ]);
         }
 
-        // Refresh cart and addresses
-        $this->cartItems = Cart::instance('default')->content();
-        $this->total = (float) Cart::instance('default')->subtotal();
-        $this->addresses = Auth::user()->addresses ?? collect();
+        // Convert cart items to plain array for Livewire
+        $cartItems = Cart::instance('default')->content()->map(function ($item) {
+            return [
+                'rowId' => $item->rowId,
+                'id' => $item->id,
+                'name' => $item->name,
+                'qty' => $item->qty,
+                'price' => $item->price,
+                'weight' => $item->weight,
+                'options' => $item->options,
+            ];
+        })->toArray();
 
-        return view('livewire.checkout', [
-            'cartItems' => $this->cartItems,
-            'total' => $this->total,
-            'addresses' => $this->addresses,
-        ]);
+        $total = (float) Cart::instance('default')->subtotal();
+        $addresses = Auth::user()->addresses ?? collect();
+
+        return view('livewire.checkout', compact('cartItems', 'total', 'addresses'));
     }
 }
