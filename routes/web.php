@@ -53,6 +53,7 @@ use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationCont
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ModelPartController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PartCatalogController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\VinController;
@@ -144,7 +145,7 @@ Route::get('/variants/{variant_id}/parts', [ModelPartController::class, 'variant
 
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-
+Route::resource('orders', OrderController::class)->middleware('auth');
 /////////////////
 //Route::get('/brand/{brand}/models', [BrandController::class, 'models'])->name('brand.models');
 
