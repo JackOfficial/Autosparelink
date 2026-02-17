@@ -148,7 +148,7 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::resource('orders', OrderController::class)->middleware('auth');
 
-Route::get('/user-dashboard', [UserDashboardController::class, 'index'])->name('dashboard.index');
+Route::get('/user-dashboard', [UserDashboardController::class, 'index'])->name('dashboard.index')->middleware('auth');
 
 /////////////////
 //Route::get('/brand/{brand}/models', [BrandController::class, 'models'])->name('brand.models');
