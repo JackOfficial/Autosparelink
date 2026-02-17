@@ -8,7 +8,7 @@
             <div class="col-md-6">
                 <h4>Shipping Information</h4>
                 
-                @if(Auth::check() && $addresses->isNotEmpty())
+                @if(Auth::check() && $addresses?->isNotEmpty())
                     <div class="mb-3">
                         <label>Select Address</label>
                         <select class="form-control" wire:model="address_id">
