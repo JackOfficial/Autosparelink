@@ -19,7 +19,9 @@
         <div class="input-group w-50">
             <div class="input-group-prepend">
                 <button class="btn btn-outline-secondary" type="button" 
-                        wire:click="{{ $quantity > 1 ? '$set(\'quantity\', ' . ($quantity - 1) . ')' : '' }}">
+                        wire:click="{{ $quantity > 1 ? '$set(\'quantity\', ' . ($quantity - 1) . ')' : '' }}"
+                        @if($part->stock_quantity <= 0 || $quantity > $part->stock_quantity) disabled @endif
+                        >
                     <i class="fa fa-minus"></i>
                 </button>
             </div>

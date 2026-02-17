@@ -124,7 +124,6 @@ class PartCatalogController extends Controller
     }
 
     public function show(Part $part){
-        dd("here");
           // Load relationships (eager loading)
     $part->load([
         'partBrand',                         // Brand of this part

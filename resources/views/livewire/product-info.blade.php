@@ -1,61 +1,99 @@
- <div class="col-lg-7 col-md-6 mb-4">
-            <div class="bg-light p-4 rounded shadow-sm product-card">
+<div class="col-lg-7 col-md-6 mb-4">
+    <div class="bg-light p-4 rounded shadow-sm product-card">
 
-                <h2 class="mb-3">{{ $part->part_name }}</h2>
+        <h2 class="mb-3">{{ $part->part_name }}</h2>
 
-                <p><strong>Make:</strong> {{ optional($part->partBrand)->name ?? '—' }}</p>
-                <p><strong>Part Number:</strong> {{ $part->part_number ?? '—' }}</p>
-                <p class="{{ $part->weight ?? 'd-none' }}"><strong>Weight:</strong> {{ $part->weight ?? '—' }} kg</p>
+        <p><strong>Make:</strong> {{ optional($part->partBrand)->name ?? '—' }}</p>
+        <p><strong>Part Number:</strong> {{ $part->part_number ?? '—' }}</p>
 
-                <h3 class="text-primary mb-3">{{ number_format($part->price,2) }} RWF</h3>
+        @if($part->weight)
+            <p><strong>Weight:</strong> {{ $part->weight }} kg</p>
+        @endif
 
-                <p>
-                    <strong>Availability:</strong>
-                    <span class="badge badge-{{ $part->stock_quantity > 0 ? 'success' : 'warning' }}">
-                        {{ $part->stock_quantity }}
-                    </span>
-                </p>
+        <h3 class="text-primary mb-3">
+            {{ number_format($part->price, 2) }} RWF
+        </h3>
 
-                <!-- Quantity Selector -->
-                <div class="quantity-wrapper mb-3" x-data="{ qty: 1 }">
-                    <label class="mb-2">Quantity:</label>
-                    <div class="input-group w-50">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-outline-secondary" type="button" @click="if(qty>1) qty--">
-                                <i class="fa fa-minus"></i>
-                            </button>
-                        </div>
-                        <input type="number" class="form-control text-center" x-model="qty" min="1">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button" @click="qty++">
-                                <i class="fa fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <p>
+            <strong>Availability:</strong>
+            <span class="badge badge-{{ $part->stock_quantity > 0 ? 'success' : 'warning' }}">
+                {{ $part->stock_quantity }}
+            </span>
+        </p>
 
-                <!-- Add to Cart / Wishlist -->
-                <div class="mb-3 d-flex align-items-center">
-                    <button class="btn btn-primary btn-lg mr-2">
-                        <i class="fa fa-shopping-cart mr-1"></i> Add to Cart
-                    </button>
-                    <button class="btn btn-outline-primary btn-lg wishlist-btn">
-                        <i class="fa fa-heart mr-1"></i> Add to Wishlist
+        <!-- Quantity Selector -->
+        <div class="quantity-wrapper mb-3">
+            <label class="mb-2">Quantity:</label>
+
+            <div class="input-group w-50">
+                <div class="input-group-prepend">
+                    <button class="btn btn-outline-secondary"
+                            type="button"
+                            wire:click="decrementQty">
+                        <i class="fa fa-minus"></i>
                     </button>
                 </div>
 
-                <!-- Share Buttons -->
-                <div class="mb-4">
-                    <strong class="mr-2">Share:</strong>
-                    <a href="#" class="btn btn-sm btn-success mr-1"><i class="fab fa-whatsapp"></i></a>
-                    <a href="#" class="btn btn-sm btn-dark mr-1"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="btn btn-sm btn-primary"><i class="fab fa-facebook-f"></i></a>
-                </div>
+                <input type="number"
+                       class="form-control text-center"
+                       wire:model="quantity"
+                       min="1">
 
-                <div class="border-top pt-3">
-                    <h5>Product Description</h5>
-                    <p>{{ $part->description ?? 'No description available.' }}</p>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary"
+                            type="button"
+                            wire:click="incrementQty">
+                        <i class="fa fa-plus"></i>
+                    </button>
                 </div>
-
             </div>
         </div>
+
+        <!-- Add to Cart / Wishlist -->
+        <div class="mb-3 d-flex align-items-center">
+            <button class="btn btn-primary btn-lg mr-2"
+                    wire:click="addToCart">
+                <i class="fa fa-shopping-cart mr-1"></i>
+                Add to Cart
+            </button>
+
+            <button class="btn btn-outline-primary btn-lg"
+                    wire:click="addToWishlist">
+                <i class="fa fa-heart mr-1"></i>
+                Add to Wishlist
+            </button>
+        </div>
+
+        <!-- Share Buttons -->
+        <div class="mb-4">
+    <strong class="mr-2">Share:</strong>
+
+    <!-- WhatsApp -->
+    <a href="https://wa.me/?text={{ $shareText }}%20{{ $shareUrl }}"
+       target="_blank" rel="noopener"
+       class="btn btn-sm btn-success mr-1">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Twitter / X -->
+    <a href="https://twitter.com/intent/tweet?text={{ $shareText }}&url={{ $shareUrl }}"
+       target="_blank" rel="noopener"
+       class="btn btn-sm btn-dark mr-1">
+        <i class="fab fa-twitter"></i>
+    </a>
+
+    <!-- Facebook -->
+    <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}"
+       target="_blank" rel="noopener"
+       class="btn btn-sm btn-primary">
+        <i class="fab fa-facebook-f"></i>
+    </a>
+</div>
+
+        <div class="border-top pt-3">
+            <h5>Product Description</h5>
+            <p>{{ $part->description ?? 'No description available.' }}</p>
+        </div>
+
+    </div>
+</div>

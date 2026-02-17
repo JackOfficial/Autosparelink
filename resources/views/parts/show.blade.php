@@ -95,7 +95,7 @@
     </div>
 </div>
         <!-- PRODUCT INFO -->
-       <livewire:product-info />
+         @livewire('product-info', ['part' => $part])
     </div>
 
     <!-- SUBSTITUTIONS -->
