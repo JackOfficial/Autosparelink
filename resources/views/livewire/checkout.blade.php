@@ -27,7 +27,7 @@
                     <label class="form-check-label">Use new address</label>
                 </div>
 
-                @if($use_new_address || !Auth::check())
+                @if(Auth::check() && $addresses?->isNotEmpty())
                     <div>
                         <input type="text" class="form-control mb-2" placeholder="Full Name" wire:model="new_address.full_name">
                         <input type="text" class="form-control mb-2" placeholder="Phone" wire:model="new_address.phone">
