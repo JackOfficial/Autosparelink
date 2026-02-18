@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('content')
 <div class="container py-4">
@@ -41,13 +41,13 @@
                             </td>
                             <td>{{ $payment->created_at->format('d M Y') }}</td>
                             <td>
-                                <a href="{{ route('payments.show', $payment->id) }}"
+                                <a href="{{ route('admin.payments.show', $payment->id) }}"
                                    class="btn btn-sm btn-info">View</a>
 
-                                <a href="{{ route('payments.edit', $payment->id) }}"
+                                <a href="{{ route('admin.payments.edit', $payment->id) }}"
                                    class="btn btn-sm btn-warning">Edit</a>
 
-                                <form action="{{ route('payments.destroy', $payment->id) }}"
+                                <form action="{{ route('admin.payments.destroy', $payment->id) }}"
                                       method="POST"
                                       class="d-inline">
                                     @csrf

@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('content')
 <div class="container py-4">
     <h2>Create Shipping</h2>
 
-    <form method="POST" action="{{ route('shippings.store') }}">
+    <form method="POST" action="{{ route('admin.shippings.store') }}">
         @csrf
 
         <div class="mb-3">

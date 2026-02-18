@@ -1,15 +1,15 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('content')
 <div class="container py-4">
     <h2>Edit Address</h2>
 
     <form method="POST"
-          action="{{ route('addresses.update', $address->id) }}">
+          action="{{ route('admin.addresses.update', $address->id) }}">
         @csrf
         @method('PUT')
 
-        @include('addresses.form')
+        @include('admin.addresses.form')
 
         <button class="btn btn-primary">Update Address</button>
     </form>

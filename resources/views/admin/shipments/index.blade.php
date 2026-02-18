@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('content')
 <div class="container py-4">
     <h2>All Shippings</h2>
 
-    <a href="{{ route('shippings.create') }}" class="btn btn-primary mb-3">
+    <a href="{{ route('admin.shippings.create') }}" class="btn btn-primary mb-3">
         Create Shipping
     </a>
 
@@ -36,13 +36,13 @@
                             <td>{{ ucfirst($shipping->status) }}</td>
                             <td>{{ $shipping->tracking_number ?? '-' }}</td>
                             <td>
-                                <a href="{{ route('shippings.show', $shipping->id) }}"
+                                <a href="{{ route('admin.shippings.show', $shipping->id) }}"
                                    class="btn btn-sm btn-info">View</a>
 
-                                <a href="{{ route('shippings.edit', $shipping->id) }}"
+                                <a href="{{ route('admin.shippings.edit', $shipping->id) }}"
                                    class="btn btn-sm btn-warning">Edit</a>
 
-                                <form action="{{ route('shippings.destroy', $shipping->id) }}"
+                                <form action="{{ route('admin.shippings.destroy', $shipping->id) }}"
                                       method="POST"
                                       class="d-inline">
                                     @csrf

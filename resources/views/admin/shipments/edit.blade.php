@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('content')
 <div class="container py-4">
     <h2>Edit Shipping</h2>
 
-    <form method="POST" action="{{ route('shippings.update', $shipping->id) }}">
+    <form method="POST" action="{{ route('admin.shippings.update', $shipping->id) }}">
         @csrf
         @method('PUT')
 

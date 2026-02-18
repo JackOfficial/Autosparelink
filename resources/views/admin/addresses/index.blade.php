@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('content')
 <div class="container py-4">
     <h2>My Addresses</h2>
 
-    <a href="{{ route('addresses.create') }}"
+    <a href="{{ route('admin.addresses.create') }}"
        class="btn btn-primary mb-3">Add New Address</a>
 
     @if(session('success'))
@@ -21,13 +21,13 @@
                         <p>{{ $address->city }}, {{ $address->country }}</p>
                         <p>{{ $address->phone }}</p>
 
-                        <a href="{{ route('addresses.show', $address->id) }}"
+                        <a href="{{ route('admin.addresses.show', $address->id) }}"
                            class="btn btn-sm btn-info">View</a>
 
-                        <a href="{{ route('addresses.edit', $address->id) }}"
+                        <a href="{{ route('admin.addresses.edit', $address->id) }}"
                            class="btn btn-sm btn-warning">Edit</a>
 
-                        <form action="{{ route('addresses.destroy', $address->id) }}"
+                        <form action="{{ route('admin.addresses.destroy', $address->id) }}"
                               method="POST"
                               class="d-inline">
                             @csrf

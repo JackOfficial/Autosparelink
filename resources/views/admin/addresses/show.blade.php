@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('content')
 <div class="container py-4">
     <h2>Address Details</h2>
 
-    <a href="{{ route('addresses.index') }}"
+    <a href="{{ route('admin.addresses.index') }}"
        class="btn btn-secondary mb-3">Back</a>
 
     <div class="card">

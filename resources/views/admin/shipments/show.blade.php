@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('content')
 <div class="container py-4">
     <h2>Shipping #{{ $shipping->id }}</h2>
 
-    <a href="{{ route('shippings.index') }}" class="btn btn-secondary mb-3">
+    <a href="{{ route('admin.shippings.index') }}" class="btn btn-secondary mb-3">
         Back
     </a>
 
