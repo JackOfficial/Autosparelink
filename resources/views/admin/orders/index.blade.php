@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container py-4">
-    <h2>Order #{{ $order->id }}</h2>
+    <h2>Order #{{ $orders->count() }}</h2>
 
     <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary mb-3">
         Back to Orders
