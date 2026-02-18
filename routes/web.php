@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AddressController;
 use Illuminate\Support\Facades\Route;
 
 //Oauth Controllers
@@ -38,15 +39,19 @@ use App\Http\Controllers\Admin\StoryController;
 use App\Http\Controllers\Admin\WebpagesController;
 use App\Http\Controllers\Admin\ApplicationsController;
 use App\Http\Controllers\Admin\BodyTypeController;
+use App\Http\Controllers\Admin\CartController as AdminCartController;
 use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\Admin\VehicleBrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DriveTypeController;
 use App\Http\Controllers\Admin\EngineTypeController;
 use App\Http\Controllers\Admin\ModelController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PartBrandController;
 use App\Http\Controllers\Admin\PartController;
 use App\Http\Controllers\Admin\PartFitmentController;
+use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\ShippingController;
 use App\Http\Controllers\Admin\TransmissionTypeController;
 use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
@@ -202,6 +207,13 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('users', UsersController::class);
     Route::resource('partners', PartnerController::class);
     Route::resource('organization', OrganizationController::class);
+    
+    //E-commerce route
+    Route::resource('carts', AdminCartController::class);
+    Route::resource('orders', AdminOrderController::class);
+    Route::resource('payments', PaymentController::class);
+    Route::resource('shippings', ShippingController::class);
+    Route::resource('addresses', AddressController::class);
     //////////////////////////////////
 
     Route::resource('vehicle-brands', VehicleBrandController::class);

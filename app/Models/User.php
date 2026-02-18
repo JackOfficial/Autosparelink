@@ -97,4 +97,9 @@ public function orders()
         return $this->hasOne(Shipping::class);
     }
 
+    public function cartItems()
+{
+    return $this->hasMany(CartItem::class);
+}
+
 }
