@@ -72,9 +72,6 @@ public function search(Request $request)
 
     // 4. FIND MATCHING SPECIFICATIONS
     $specifications = Specification::where('vehicle_model_id', $vehicleModel->id)
-    ->where(function ($q) use ($year) {
-            $q->where('production_year', '==', $year);
-        })
         ->where(function ($q) use ($year) {
             $q->whereNull('production_start')
               ->orWhere('production_start', '<=', $year);
@@ -92,6 +89,9 @@ public function search(Request $request)
             $q->whereHas('bodyType', function ($b) use ($bodyType) {
                 $b->whereRaw('UPPER(name) LIKE ?', ["%".strtoupper($bodyType)."%"]);
             });
+        })
+        ->when($engineHP, function ($q) use ($engineHP) {
+            $q->where('horsepower', $engineHP);
         })
         ->get();
 
