@@ -63,8 +63,8 @@ public function search(Request $request)
     }
 
     $vehicleModel = VehicleModel::where('brand_id', $brand->id)
-    ->whereRaw('UPPER(TRIM(model_name)) LIKE ?', ["%".trim(strtoupper($model))."%"])
-    ->first();
+        ->whereRaw('model_name LIKE ?', ["%$model%"])
+        ->first();
 
     if (!$vehicleModel) {
         return back()->withErrors(['vin' => "$make $model not found."]);
