@@ -62,15 +62,17 @@ public function search(Request $request)
         return back()->withErrors(['vin' => "Brand ($make) not found."]);
     }
 
-     dd($brand);
-
     $vehicleModel = VehicleModel::where('brand_id', $brand->id)
-        ->whereRaw('UPPER(model_name) LIKE ?', ["%$model%"])
+        ->whereRaw('model_name LIKE ?', ["%$model%"])
         ->first();
 
     if (!$vehicleModel) {
         return back()->withErrors(['vin' => "$make $model not found."]);
     }
+
+    dd($vehicleModel);
+
+    
 
    
 
