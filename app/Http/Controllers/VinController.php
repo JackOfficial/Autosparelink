@@ -19,7 +19,7 @@ public function search(Request $request)
     $vehicle = [
         'General Information' => [
             'Make' => 'TOYOTA',
-            'Model' => 'VERSO',
+            'Model' => 'VERSO S',
             'Year'  => '2011',
             'Trim level' => '', // optional
             'Body style' => 'MPV',
@@ -58,7 +58,6 @@ public function search(Request $request)
 
     // 3. BRAND & VEHICLE MODEL
     $brand = Brand::whereRaw('UPPER(brand_name) = ?', [$make])->first();
- 
     if (!$brand) {
         return back()->withErrors(['vin' => "Brand ($make) not found."]);
     }
@@ -71,18 +70,23 @@ public function search(Request $request)
         return back()->withErrors(['vin' => "$make $model not found."]);
     }
 
+    dd($vehicleModel);
+
+    // 4. FIND MATCHING SPECIFICATIONS
     $specifications = Specification::where('vehicle_model_id', $vehicleModel->id)
     ->where(function ($q) use ($year) {
-        // Exact production_year match
         $q->where('production_year', $year)
-          // OR within a production_start - production_end range
           ->orWhere(function ($range) use ($year) {
-              $range->whereNotNull('production_start')
-                    ->whereNotNull('production_end')
-                    ->where('production_start', '<=', $year)
-                    ->where('production_end', '>=', $year);
+              $range->where(function($r){
+                  $r->whereNull('production_start')->orWhereNotNull('production_start');
+              })
+              ->where(function($r) use ($year){
+                  $r->whereNull('production_start')->orWhere('production_start', '<=', $year);
+              })
+              ->where(function($r) use ($year){
+                  $r->whereNull('production_end')->orWhere('production_end', '>=', $year);
+              });
           })
-          // OR specs with no year info at all (treat as compatible)
           ->orWhere(function ($nulls) {
               $nulls->whereNull('production_year')
                     ->whereNull('production_start')
@@ -90,35 +94,6 @@ public function search(Request $request)
           });
     })
     ->get();
-
-    dd($specifications);
-
-    // 4. FIND MATCHING SPECIFICATIONS
-//    $specifications = Specification::where('vehicle_model_id', $vehicleModel->id)
-//     ->where(function ($q) use ($year) {
-//         $q->where(function ($start) use ($year) {
-//             $start->whereNull('production_start')
-//                   ->orWhere('production_start', '<=', $year);
-//         })
-//         ->where(function ($end) use ($year) {
-//             $end->whereNull('production_end')
-//                 ->orWhere('production_end', '>=', $year);
-//         });
-//     })
-//     ->when($engineType, function ($q) use ($engineType) {
-//         $q->whereHas('engineType', function ($e) use ($engineType) {
-//             $e->whereRaw('UPPER(name) LIKE ?', ["%".strtoupper($engineType)."%"]);
-//         });
-//     })
-//     ->when($bodyType, function ($q) use ($bodyType) {
-//         $q->whereHas('bodyType', function ($b) use ($bodyType) {
-//             $b->whereRaw('UPPER(name) LIKE ?', ["%".strtoupper($bodyType)."%"]);
-//         });
-//     })
-//     ->when($engineHP, function ($q) use ($engineHP) {
-//         $q->where('horsepower', $engineHP);
-//     })
-//     ->get();
 
     if ($specifications->isEmpty()) {
         return back()->withErrors([
