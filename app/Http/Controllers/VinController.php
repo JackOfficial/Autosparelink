@@ -62,6 +62,8 @@ public function search(Request $request)
         return back()->withErrors(['vin' => "Brand ($make) not found."]);
     }
 
+     dd($brand);
+
     $vehicleModel = VehicleModel::where('brand_id', $brand->id)
         ->whereRaw('UPPER(model_name) LIKE ?', ["%$model%"])
         ->first();
@@ -70,7 +72,7 @@ public function search(Request $request)
         return back()->withErrors(['vin' => "$make $model not found."]);
     }
 
-    dd($vehicleModel);
+   
 
     // 4. FIND MATCHING SPECIFICATIONS
     $specifications = Specification::where('vehicle_model_id', $vehicleModel->id)
