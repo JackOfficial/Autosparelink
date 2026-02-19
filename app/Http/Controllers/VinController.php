@@ -73,7 +73,7 @@ public function search(Request $request)
 
     $specifications = Specification::where('vehicle_model_id', $vehicleModel->id)
     ->where(function ($q) use ($year) {
-        $q->where('production_year', $year) // Exact year
+        $q->whereNotNull('production_year', $year) // Exact year
           ->orWhere(function ($range) use ($year) {
               $range->whereNotNull('production_start')
                     ->whereNotNull('production_end')
