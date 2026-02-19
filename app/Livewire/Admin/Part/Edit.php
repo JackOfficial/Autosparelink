@@ -3,13 +3,20 @@
 namespace App\Livewire\Admin\Part;
 
 use Livewire\Component;
-use App\Models\{Part, Category, PartBrand, VehicleModel, Specification, PartFitment};
-use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
+use Livewire\WithFileUploads;
+use App\Models\{
+    Part,
+    Category,
+    PartBrand,
+    VehicleModel,
+    Specification,
+    PartFitment
+};
 
 class Edit extends Component
 {
-        use WithFileUploads;
+   use WithFileUploads;
 
     public Part $part;
 
@@ -24,10 +31,12 @@ class Edit extends Component
     public $stock_quantity;
     public $status;
     public $description;
+
+    public $photos = [];
+    public $existingPhotos = [];
+
     public $fitment_specifications = [];
     public $substitution_part_ids = [];
-    public $photos = []; // new uploads
-    public $existingPhotos = []; // already uploaded
 
     /* DATA */
     public $parentCategories = [];
@@ -35,49 +44,6 @@ class Edit extends Component
     public $partBrands = [];
     public $vehicleModels = [];
     public $allParts = [];
-    public $partId;
-
-    public function mount($partId)
-    {
-        $this->partId = $partId;
-        // dd($partId);
-        $this->part = $part;
-
-        // Pre-fill form fields
-        $this->part_number = $part->part_number;
-        $this->part_name = $part->part_name;
-        $this->category_id = $part->category_id;
-        $this->parentCategoryId = optional($part->category->parent)->id;
-        $this->part_brand_id = $part->part_brand_id;
-        $this->oem_number = $part->oem_number;
-        $this->price = $part->price;
-        $this->stock_quantity = $part->stock_quantity;
-        $this->status = $part->status ? 'Active' : 'Inactive';
-        $this->description = $part->description;
-
-        // Preload relationships
-        $this->fitment_specifications = $part->fitments->pluck('id')->toArray();
-        $this->substitution_part_ids = $part->substitutions->pluck('id')->toArray();
-        $this->existingPhotos = $part->photos;
-
-        // Load selection lists
-        $this->parentCategories = Category::whereNull('parent_id')->orderBy('category_name')->get();
-        $this->childCategories = $this->parentCategoryId
-            ? Category::where('parent_id', $this->parentCategoryId)->orderBy('category_name')->get()
-            : [];
-        $this->partBrands = PartBrand::orderBy('name')->get();
-        $this->vehicleModels = VehicleModel::with(['brand', 'variants.specifications', 'specifications'])->get();
-        $this->allParts = Part::with('partBrand')->orderBy('part_name')->get()
-            ->where('id', '!=', $part->id); // exclude current part from substitutions
-    }
-
-    public function updatedParentCategoryId()
-    {
-        $this->childCategories = Category::where('parent_id', $this->parentCategoryId)
-            ->orderBy('category_name')
-            ->get();
-        $this->category_id = null;
-    }
 
     protected function rules()
     {
@@ -89,18 +55,68 @@ class Edit extends Component
             'stock_quantity' => 'required|integer|min:0',
             'status' => 'required|in:Active,Inactive',
             'photos.*' => 'image|max:2048',
-            'fitment_specifications' => 'nullable|array',
-            'fitment_specifications.*' => 'exists:specifications,id',
-            'substitution_part_ids' => 'nullable|array',
-            'substitution_part_ids.*' => 'exists:parts,id',
         ];
+    }
+
+    public function mount(Part $part)
+    {
+        $this->part = $part->load(['photos', 'fitments', 'substitutions']);
+
+        /* Load dropdown data */
+        $this->parentCategories = Category::whereNull('parent_id')->orderBy('category_name')->get();
+        $this->partBrands = PartBrand::orderBy('name')->get();
+        $this->vehicleModels = VehicleModel::with(['brand', 'variants.specifications', 'specifications'])->get();
+        $this->allParts = Part::where('id', '!=', $part->id)->orderBy('part_name')->get();
+
+        /* Fill form fields */
+        $this->part_number = $part->part_number;
+        $this->part_name = $part->part_name;
+        $this->category_id = $part->category_id;
+        $this->parentCategoryId = optional($part->category)->parent_id;
+        $this->part_brand_id = $part->part_brand_id;
+        $this->oem_number = $part->oem_number;
+        $this->price = $part->price;
+        $this->stock_quantity = $part->stock_quantity;
+        $this->status = $part->status ? 'Active' : 'Inactive';
+        $this->description = $part->description;
+
+        /* Existing photos */
+        $this->existingPhotos = $part->photos;
+
+        /* Fitments */
+        $this->fitment_specifications = $part->fitments
+            ->pluck('specification_id')
+            ->filter()
+            ->toArray();
+
+        /* Substitutions */
+        $this->substitution_part_ids = $part->substitutions
+            ->pluck('id')
+            ->toArray();
+
+        $this->updatedParentCategoryId();
+    }
+
+    public function updatedParentCategoryId()
+    {
+        $this->childCategories = Category::where('parent_id', $this->parentCategoryId)->get();
+    }
+
+    public function deletePhoto($photoId)
+    {
+        $photo = $this->part->photos()->find($photoId);
+        if ($photo) {
+            \Storage::disk('public')->delete($photo->file_path);
+            $photo->delete();
+        }
+
+        $this->existingPhotos = $this->part->fresh()->photos;
     }
 
     public function update()
     {
         $this->validate();
 
-        // Update part
         $this->part->update([
             'part_number' => $this->part_number,
             'part_name' => $this->part_name,
@@ -113,27 +129,32 @@ class Edit extends Component
             'description' => $this->description,
         ]);
 
-        // Sync fitments
-        PartFitment::where('part_id', $this->part->id)->delete(); // remove old
+        /* Sync Substitutions */
+        $this->part->substitutions()->sync($this->substitution_part_ids);
+
+        /* Sync Fitments */
+        PartFitment::where('part_id', $this->part->id)->delete();
+
         foreach ($this->fitment_specifications as $specId) {
-            $spec = Specification::with(['variant', 'vehicleModel'])->find($specId);
+            $spec = Specification::find($specId);
 
             PartFitment::create([
                 'part_id' => $this->part->id,
-                'variant_id' => $spec->variant_id ?? $spec->variant?->id,
-                'vehicle_model_id' => $spec->vehicle_model_id ?? $spec->variant?->vehicle_model_id,
+                'variant_id' => $spec->variant_id,
+                'vehicle_model_id' => $spec->vehicle_model_id,
+                'specification_id' => $spec->id,
                 'status' => 'active',
                 'start_year' => $spec->production_start,
                 'end_year' => $spec->production_end,
             ]);
         }
 
-        // Sync substitutions
-        $this->part->substitutions()->sync($this->substitution_part_ids);
-
-        // Upload new photos
+        /* Upload New Photos */
         foreach ($this->photos as $photo) {
-            $path = $photo->store('parts/' . Str::slug($this->part->partBrand->name), 'public');
+            $path = $photo->store(
+                'parts/' . Str::slug($this->part->partBrand->name),
+                'public'
+            );
 
             $this->part->photos()->create([
                 'file_path' => $path,
@@ -141,7 +162,8 @@ class Edit extends Component
             ]);
         }
 
-        session()->flash('success', 'Part updated successfully!');
+        session()->flash('success', 'Spare part updated successfully.');
+
         return redirect()->route('admin.spare-parts.index');
     }
 
