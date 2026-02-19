@@ -84,7 +84,7 @@
     </div>
 
     <div class="card-body">
-        <livewire:admin.part.edit :part-id="request()->query('part_id')" />
+            <livewire:admin.part.edit :part="$spare_part" />
     </div>
 </div>
 </section>
