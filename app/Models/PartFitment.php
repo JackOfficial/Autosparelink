@@ -25,6 +25,11 @@ class PartFitment extends Model
     return $this->belongsTo(VehicleModel::class, 'vehicle_model_id');
 }
 
+public function specification()
+    {
+        return $this->belongsTo(Specification::class);
+    }
+
     // The variant specification this fitment belongs to
     public function variant()
     {

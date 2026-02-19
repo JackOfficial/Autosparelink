@@ -60,7 +60,7 @@ class Edit extends Component
 
     public function mount(Part $part)
     {
-        $this->part = $part->load(['photos', 'fitments', 'substitutions']);
+        $this->part = $part->load(['photos', 'fitments.specification', 'substitutions']);
 
         /* Load dropdown data */
         $this->parentCategories = Category::whereNull('parent_id')->orderBy('category_name')->get();
