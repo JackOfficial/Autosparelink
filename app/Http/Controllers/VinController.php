@@ -19,7 +19,7 @@ public function search(Request $request)
     $vehicle = [
         'General Information' => [
             'Make' => 'TOYOTA',
-            'Model' => 'VERSO S',
+            'Model' => 'VERSO',
             'Year'  => '2011',
             'Trim level' => '', // optional
             'Body style' => 'MPV',
