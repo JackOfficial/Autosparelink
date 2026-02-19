@@ -67,22 +67,29 @@ public function search(Request $request)
         ->whereRaw('UPPER(model_name) LIKE ?', ["%$model%"])
         ->first();
 
-       dd($vehicleModel);    
-
     if (!$vehicleModel) {
         return back()->withErrors(['vin' => "$make $model not found."]);
     }
 
-     $specifications = Specification::where('vehicle_model_id', $vehicleModel->id)
+    $specifications = Specification::where('vehicle_model_id', $vehicleModel->id)
     ->where(function ($q) use ($year) {
-        $q->whereNull('production_start')
-          ->orWhere('production_start', '<=', $year);
-    })
-    ->where(function ($q) use ($year) {
-        $q->whereNull('production_end')
-          ->orWhere('production_end', '>=', $year);
+        $q->where('production_year', $year) // Exact year
+          ->orWhere(function ($range) use ($year) {
+              $range->whereNotNull('production_start')
+                    ->whereNotNull('production_end')
+                    ->where('production_start', '<=', $year)
+                    ->where('production_end', '>=', $year);
+          })
+          ->orWhere(function ($nulls) {
+              // Specs with no year info at all, treat as compatible
+              $nulls->whereNull('production_year')
+                    ->whereNull('production_start')
+                    ->whereNull('production_end');
+          });
     })
     ->get();
+
+    dd($specifications);
 
     // 4. FIND MATCHING SPECIFICATIONS
 //    $specifications = Specification::where('vehicle_model_id', $vehicleModel->id)
