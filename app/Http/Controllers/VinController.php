@@ -58,6 +58,7 @@ public function search(Request $request)
 
     // 3. BRAND & VEHICLE MODEL
     $brand = Brand::whereRaw('UPPER(brand_name) = ?', [$make])->first();
+    dd($brand);
     if (!$brand) {
         return back()->withErrors(['vin' => "Brand ($make) not found."]);
     }
