@@ -73,15 +73,17 @@ public function search(Request $request)
 
     $specifications = Specification::where('vehicle_model_id', $vehicleModel->id)
     ->where(function ($q) use ($year) {
-        $q->whereNotNull('production_year', $year) // Exact year
+        // Exact production_year match
+        $q->where('production_year', $year)
+          // OR within a production_start - production_end range
           ->orWhere(function ($range) use ($year) {
               $range->whereNotNull('production_start')
                     ->whereNotNull('production_end')
                     ->where('production_start', '<=', $year)
                     ->where('production_end', '>=', $year);
           })
+          // OR specs with no year info at all (treat as compatible)
           ->orWhere(function ($nulls) {
-              // Specs with no year info at all, treat as compatible
               $nulls->whereNull('production_year')
                     ->whereNull('production_start')
                     ->whereNull('production_end');
