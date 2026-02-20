@@ -181,51 +181,40 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Right Column: Preview (AdminLTE Sidebar style) --}}
-            <div class="col-md-4">
-                <div class="sticky-top" style="top: 20px; z-index: 1020;">
-                    <div class="card card-dark shadow">
-                        <div class="card-header">
-                            <h3 class="card-title font-weight-bold small text-uppercase">Live Preview</h3>
-                        </div>
-                        <div class="card-body text-center py-4">
-                            <div class="rounded-circle mx-auto mb-3 border border-secondary shadow-sm" 
-                                 style="width: 70px; height: 70px; background-color: {{ $color ?: '#555' }}; transition: background-color 0.3s;">
-                            </div>
-                            <h5 class="font-weight-bold mb-1">
-                                {{ $brand_id ? $brands->firstWhere('id', $brand_id)->brand_name : 'Brand' }}
-                            </h5>
-                            <h6 class="text-primary">
-                                {{ $vehicle_model_id ? (\App\Models\VehicleModel::find($vehicle_model_id)?->model_name) : 'Model' }}
-                            </h6>
-                            <div class="badge badge-secondary px-3">
-                                {{ $trim_level ?: 'Base Trim' }}
-                            </div>
-                            
-                            <div class="row mt-4 px-2">
-                                <div class="col-6 p-1">
-                                    <div class="bg-light p-2 rounded border">
-                                        <small class="text-muted d-block">Power</small>
-                                        <span class="font-weight-bold">{{ $horsepower ?: '--' }} HP</span>
-                                    </div>
-                                </div>
-                                <div class="col-6 p-1">
-                                    <div class="bg-light p-2 rounded border">
-                                        <small class="text-muted d-block">Seats</small>
-                                        <span class="font-weight-bold">{{ $seats ?: '--' }}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mt-4 custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" id="statusSwitch" wire:model="status">
-                                <label class="custom-control-label font-weight-bold" for="statusSwitch">Active</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            
+          {{-- Right Column: Preview --}}
+<div class="col-md-4">
+    <div class="sticky-top" style="top: 20px; z-index: 1020;">
+        <div class="card card-dark shadow">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold small text-uppercase">Live Preview</h3>
             </div>
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle mx-auto mb-3 border border-secondary shadow-sm" 
+                     style="width: 70px; height: 70px; background-color: {{ $color ?: '#555' }}; transition: background-color 0.3s;">
+                </div>
+                
+                <h5 class="font-weight-bold mb-1">
+                    {{-- Safely find brand name --}}
+                    @php $currentBrand = $brands->where('id', $brand_id)->first(); @endphp
+                    {{ $currentBrand ? $currentBrand->brand_name : 'Select Brand' }}
+                </h5>
+                
+                <h6 class="text-primary">
+                    {{-- Safely find model name from the already loaded collection --}}
+                    @php $currentModel = collect($vehicleModels)->where('id', $vehicle_model_id)->first(); @endphp
+                    {{ $currentModel ? $currentModel['model_name'] : 'Select Model' }}
+                </h6>
+
+                <div class="badge badge-secondary px-3">
+                    {{ $trim_level ?: 'Base Trim' }}
+                </div>
+                
+                {{-- ... rest of your preview code ... --}}
+            </div>
+        </div>
+    </div>
+</div>
         </div>
     </form>
 </div>

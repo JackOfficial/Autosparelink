@@ -33,8 +33,6 @@ class EditSpecification extends Component
             $this->brand_id = $spec->vehicleModel->brand_id;
             $this->vehicleModels = VehicleModel::where('brand_id', $this->brand_id)->get();
         }
-        
-        $this->trim_level = $spec->trim_level;
     }
 
     public function updatedBrandId($value)
@@ -67,43 +65,46 @@ class EditSpecification extends Component
     {
         $this->validate();
         
-        DB::transaction(function () {
-            $spec = Specification::findOrFail($this->specificationId);
-            
-            // 1. Update Specification
-            $spec->update([
-                'vehicle_model_id' => $this->vehicle_model_id,
-                'trim_level' => $this->trim_level,
-                'body_type_id' => $this->body_type_id,
-                'engine_type_id' => $this->engine_type_id,
-                'transmission_type_id' => $this->transmission_type_id,
-                'drive_type_id' => $this->drive_type_id,
-                'engine_displacement_id' => $this->engine_displacement_id,
-                'horsepower' => $this->horsepower,
-                'torque' => $this->torque,
-                'fuel_capacity' => $this->fuel_capacity,
-                'fuel_efficiency' => $this->fuel_efficiency,
-                'seats' => $this->seats,
-                'doors' => $this->doors,
-                'steering_position' => $this->steering_position,
-                'color' => $this->color,
-                'production_start' => $this->production_start,
-                'production_end' => $this->production_end,
-                'production_year' => $this->production_year,
-                'status' => $this->status,
-            ]);
+        try {
+            DB::transaction(function () {
+                $spec = Specification::findOrFail($this->specificationId);
+                
+                $spec->update([
+                    'vehicle_model_id' => $this->vehicle_model_id,
+                    'trim_level' => $this->trim_level,
+                    'body_type_id' => $this->body_type_id,
+                    'engine_type_id' => $this->engine_type_id,
+                    'transmission_type_id' => $this->transmission_type_id,
+                    'drive_type_id' => $this->drive_type_id,
+                    'engine_displacement_id' => $this->engine_displacement_id,
+                    'horsepower' => $this->horsepower,
+                    'torque' => $this->torque,
+                    'fuel_capacity' => $this->fuel_capacity,
+                    'fuel_efficiency' => $this->fuel_efficiency,
+                    'seats' => $this->seats,
+                    'doors' => $this->doors,
+                    'steering_position' => $this->steering_position,
+                    'color' => $this->color,
+                    'production_start' => $this->production_start,
+                    'production_end' => $this->production_end,
+                    'production_year' => $this->production_year,
+                    'status' => $this->status,
+                ]);
 
-            // 2. Trigger Sync for Variant Name
-            // Note: This assumes Specification has a 'variant' relationship
-            if ($spec->variant) {
-                $spec->variant->update(['vehicle_model_id' => $this->vehicle_model_id]);
-                $spec->variant->refresh();
-                $spec->variant->syncNameFromSpec();
-            }
-        });
+                // Sync Variant Name
+                if ($spec->variant) {
+                    $spec->variant->update(['vehicle_model_id' => $this->vehicle_model_id]);
+                    $spec->variant->refresh();
+                    $spec->variant->syncNameFromSpec();
+                }
+            });
 
-        session()->flash('success', 'Specification updated and Variant name synced!');
-        return redirect()->route('admin.specifications.index');
+            session()->flash('success', 'Specification and Variant name updated!');
+            return redirect()->route('admin.specifications.index');
+
+        } catch (\Exception $e) {
+            session()->flash('error', 'Something went wrong: ' . $e->getMessage());
+        }
     }
 
     public function render()
