@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\VehicleModel;
 use App\Models\Brand;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ModelController extends Controller
 {
@@ -33,12 +34,24 @@ class ModelController extends Controller
     }
 
     // Store new vehicle model
-    public function store(Request $request)
+public function store(Request $request)
 {
     $request->validate([
         'brand_id' => 'required|exists:brands,id',
-        'model_name' => 'required|string|max:255',
+        'model_name' => [
+            'required',
+            'string',
+            'max:255',
+            // This rule checks the vehicle_models table where model_name exists 
+            // AND brand_id matches the one currently being submitted.
+            Rule::unique('vehicle_models')->where(fn ($query) => 
+                $query->where('brand_id', $request->brand_id)
+            ),
+        ],
         'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ], [
+        // Custom error message for the unique constraint
+        'model_name.unique' => 'This model name already exists for the selected brand.',
     ]);
 
     $vehicleModel = VehicleModel::create(
@@ -52,7 +65,6 @@ class ModelController extends Controller
         ])
     );
 
-    // Save photo via morph
     if ($request->hasFile('photo')) {
         $path = $request->file('photo')->store('vehicle-models', 'public');
 
@@ -92,12 +104,21 @@ public function show(VehicleModel $vehicleModel)
     }
 
     // Update vehicle model
-    public function update(Request $request, VehicleModel $vehicleModel)
+public function update(Request $request, VehicleModel $vehicleModel)
 {
     $request->validate([
         'brand_id' => 'required|exists:brands,id',
-        'model_name' => 'required|string|max:255',
+        'model_name' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('vehicle_models')
+                ->where(fn ($query) => $query->where('brand_id', $request->brand_id))
+                ->ignore($vehicleModel->id), // Essential: Don't count the current record as a duplicate
+        ],
         'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ], [
+        'model_name.unique' => 'This model name is already assigned to this brand.',
     ]);
 
     $vehicleModel->update(
@@ -112,11 +133,12 @@ public function show(VehicleModel $vehicleModel)
     );
 
     if ($request->hasFile('photo')) {
-
-        // delete old photo
-        if ($vehicleModel->photos) {
-            Storage::disk('public')->delete($vehicleModel->photos->file_path);
-            $vehicleModel->photos()->delete();
+        // Handle photo update for morph relationship
+        if ($vehicleModel->photos()->exists()) {
+            foreach ($vehicleModel->photos as $oldPhoto) {
+                Storage::disk('public')->delete($oldPhoto->file_path);
+                $oldPhoto->delete();
+            }
         }
 
         $path = $request->file('photo')->store('vehicle-models', 'public');

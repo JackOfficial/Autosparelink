@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class VehicleBrandController extends Controller
 {
@@ -32,21 +33,22 @@ class VehicleBrandController extends Controller
      */
 public function store(Request $request)
 {
-    $rules = [
-        'brand_name' => 'required|string|max:255|unique:brands,brand_name',
+    $request->validate([
+        'brand_name' => [
+            'required',
+            'string',
+            'max:255',
+            // Using the Rule class for consistency with your update method
+            Rule::unique('brands', 'brand_name'),
+        ],
         'brand_logo' => 'nullable|image|mimes:jpg,png,jpeg,webp|max:2048',
         'description' => 'nullable|string',
         'country' => 'nullable|string|max:255',
         'website' => 'nullable|url|max:255',
-    ];
-
-    // Custom error messages
-    $messages = [
+    ], [
         'brand_name.unique' => 'This brand is already registered in the system.',
         'brand_name.required' => 'Please provide the name of the vehicle brand.',
-    ];
-
-    $request->validate($rules, $messages);
+    ]);
 
     $logoPath = null;
     if ($request->hasFile('brand_logo')) {
@@ -54,14 +56,16 @@ public function store(Request $request)
     }
 
     Brand::create([
-        'brand_name' => $request->brand_name,
-        'brand_logo' => $logoPath,
+        'brand_name'  => $request->brand_name,
+        'brand_logo'  => $logoPath,
         'description' => $request->description,
-        'country' => $request->country,
-        'website' => $request->website,
+        'country'     => $request->country,
+        'website'     => $request->website,
     ]);
 
-    return redirect()->route('admin.vehicle-brands.index')->with('success', 'Brand created successfully');
+    return redirect()
+        ->route('admin.vehicle-brands.index')
+        ->with('success', 'Brand created successfully');
 }
 
     /**
@@ -91,23 +95,30 @@ public function show(string $id)
     /**
      * Update the specified resource in storage.
      */
-   public function update(Request $request, string $id)
+  public function update(Request $request, string $id)
 {
     $brand = Brand::findOrFail($id);
 
     $request->validate([
-        'brand_name' => 'required|string|max:255',
+        'brand_name' => [
+            'required',
+            'string',
+            'max:255',
+            // Check uniqueness but ignore this brand's current ID
+            Rule::unique('brands')->ignore($brand->id),
+        ],
         'brand_logo' => 'nullable|image|mimes:jpg,png,jpeg,webp|max:2048',
         'description' => 'nullable|string',
         'country' => 'nullable|string|max:255',
         'website' => 'nullable|url|max:255',
+    ], [
+        'brand_name.unique' => 'A brand with this name already exists.',
     ]);
 
     $logoPath = $brand->brand_logo; // keep old image by default
 
     // If a new image is uploaded
     if ($request->hasFile('brand_logo')) {
-
         // Delete old image if it exists
         if ($logoPath && Storage::disk('public')->exists($logoPath)) {
             Storage::disk('public')->delete($logoPath);
@@ -126,9 +137,10 @@ public function show(string $id)
         'website' => $request->website,
     ]);
 
-    return redirect()->route('admin.vehicle-brands.index')->with('success', 'Brand updated successfully');
+    return redirect()
+        ->route('admin.vehicle-brands.index')
+        ->with('success', 'Brand updated successfully');
 }
-
 
     /**
      * Remove the specified resource from storage.
