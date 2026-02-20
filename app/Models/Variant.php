@@ -113,7 +113,7 @@ public function getFullNameAttribute()
 
 public function syncNameFromSpec()
 {
-    // FIX: Changed specification() to specifications()
+    // 1. Fetch technical data from the specifications relationship
     $spec = $this->specifications()->with([
         'bodyType', 
         'engineType', 
@@ -121,18 +121,17 @@ public function syncNameFromSpec()
         'engineDisplacement'
     ])->first();
 
+    // If no specs exist yet, we can't build the full name
     if (!$spec) return;
 
     $model = $this->vehicleModel;
-    // Safety: ensure model and brand exist before grabbing names
-    $brandName = $model?->brand?->brand_name;
-    $modelName = $model?->model_name;
-
-    // The "Gold Standard" Assembly
+    
+    // 2. Build the name components
+    // Notice: We use $this->trim_level (from Variant) instead of $spec->trim_level
     $pieces = [
-        $brandName,                               // Toyota
-        $modelName,                               // Verso
-        $spec->trim_level,                        // S
+        $model?->brand?->brand_name,              // Toyota
+        $model?->model_name,                      // Verso
+        $this->trim_level,                        // S (Now from this table!)
         $spec->bodyType?->name,                   // Hatchback
         $spec->production_year,                   // 2011
         $spec->engineDisplacement?->name,         // 1.4
@@ -140,11 +139,15 @@ public function syncNameFromSpec()
         $spec->transmissionType?->name,           // Manual
     ];
 
-    // array_filter removes nulls/empty strings
+    // 3. Filter empty values and join with spaces
     $generatedName = implode(' ', array_filter($pieces));
-    
-    // Use update to avoid triggering infinite loops if you have observers
-    $this->update(['name' => $generatedName]);
+
+    // 4. Update Variant identity
+    $this->update([
+        'name' => $generatedName,
+        // Generate a URL-friendly slug (e.g., toyota-verso-s-hatchback-2011)
+        'slug' => \Illuminate\Support\Str::slug($generatedName . '-' . ($this->chassis_code ?? '')),
+    ]);
 }
 
 }

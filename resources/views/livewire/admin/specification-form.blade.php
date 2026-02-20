@@ -14,7 +14,7 @@
             </div>
         @endif
 
-        {{-- Contextual Info Header (Visible when model is pre-selected) --}}
+        {{-- Contextual Info Header --}}
         @if($vehicle_model_id && $hideBrandModel)
             @php
                 $displayModel = \App\Models\VehicleModel::with('brand')->find($vehicle_model_id);
@@ -42,11 +42,10 @@
 
             {{-- ================= Identity Section ================= --}}
             <fieldset class="border p-3 mb-4 rounded shadow-sm">
-                <legend class="w-auto px-2 font-weight-bold text-primary">Identity</legend>
+                <legend class="w-auto px-2 font-weight-bold text-primary">Identity & Codes</legend>
                 <div class="row">
                     @if(!$hideBrandModel)
-                        {{-- Brand Selection --}}
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label>Brand <span class="text-danger">*</span></label>
                             <select wire:model.live="brand_id" class="form-control">
                                 <option value="">Select Brand</option>
@@ -57,8 +56,7 @@
                             @error('brand_id') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
 
-                        {{-- Model Selection --}}
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label>Vehicle Model <span class="text-danger">*</span></label>
                             <select wire:model.live="vehicle_model_id" class="form-control" @disabled(!$brand_id)>
                                 <option value="">Select Model</option>
@@ -70,12 +68,29 @@
                         </div>
                     @endif
 
-                    {{-- Trim Level - MOVED OUTSIDE so it's always visible --}}
-                    <div class="{{ $hideBrandModel ? 'col-md-12' : 'col-md-4' }}">
+                    <div class="{{ $hideBrandModel ? 'col-md-4' : 'col-md-3' }}">
                         <label>Trim Level <span class="text-danger">*</span></label>
-                        <input type="text" wire:model.live="trim_level" class="form-control" placeholder="e.g. S, XLE, AMG Line, Premium">
+                        <input type="text" wire:model.live="trim_level" class="form-control" placeholder="e.g. S, XLE, Premium">
                         @error('trim_level') <span class="text-danger small">{{ $message }}</span> @enderror
-                        <small class="text-muted">The marketing name for this specific version.</small>
+                    </div>
+
+                    <div class="{{ $hideBrandModel ? 'col-md-4' : 'col-md-3' }}">
+                        <label>Chassis Code</label>
+                        <input type="text" wire:model.live="chassis_code" class="form-control" placeholder="e.g. ZVW30, W213">
+                        @error('chassis_code') <span class="text-danger small">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="col-md-3 mt-md-0 mt-3">
+                        <label>Model Code</label>
+                        <input type="text" wire:model.live="model_code" class="form-control" placeholder="e.g. NHW20R">
+                        @error('model_code') <span class="text-danger small">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="col-md-1 mt-4">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="isDefaultSwitch" wire:model="is_default">
+                            <label class="custom-control-label" for="isDefaultSwitch">Default</label>
+                        </div>
                     </div>
                 </div>
             </fieldset>
@@ -97,7 +112,7 @@
                     
                     <div class="col-md-3">
                         <label>Prod. Year <span class="text-danger">*</span></label>
-                        <input type="number" wire:model.live="production_year" class="form-control" min="1950" max="{{ date('Y') + 1 }}">
+                        <input type="number" wire:model.live="production_year" class="form-control">
                         @error('production_year') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
@@ -138,24 +153,27 @@
 
             {{-- Live Preview Area --}}
             <div class="alert alert-primary border-dashed mb-4 text-center py-3">
-                <label class="small text-uppercase text-muted d-block mb-1">Generated System Name Preview:</label>
+                <label class="small text-uppercase text-muted d-block mb-1">Generated Variant Name Preview:</label>
                 <h4 class="mb-0 font-weight-bold">
                     <i class="fa fa-tag me-2"></i>
                     {{ $brand_id ? ($brands->firstWhere('id', $brand_id)->brand_name ?? '') : 'Brand' }}
                     {{ $vehicle_model_id ? ($vehicleModels->firstWhere('id', $vehicle_model_id)->model_name ?? '') : 'Model' }}
-                    {{ $trim_level ?: '[Trim]' }}
-                    {{ $body_type_id ? ($bodyTypes->firstWhere('id', $body_type_id)->name ?? '') : '[Body]' }}
-                    {{ $production_year ?: '[Year]' }}
-                    {{ $engine_displacement_id ? ($engineDisplacements->firstWhere('id', $engine_displacement_id)->name ?? '') : '[Displ]' }}
-                    {{ $engine_type_id ? ($engineTypes->firstWhere('id', $engine_type_id)->name ?? '') : '[Fuel]' }}
-                    {{ $transmission_type_id ? ($transmissionTypes->firstWhere('id', $transmission_type_id)->name ?? '') : '[Gearbox]' }}
+                    {{ $trim_level ?: '' }}
+                    {{ $body_type_id ? ($bodyTypes->firstWhere('id', $body_type_id)->name ?? '') : '' }}
+                    {{ $production_year ?: '' }}
+                    {{ $engine_displacement_id ? ($engineDisplacements->firstWhere('id', $engine_displacement_id)->name ?? '') : '' }}
+                    {{ $engine_type_id ? ($engineTypes->firstWhere('id', $engine_type_id)->name ?? '') : '' }}
+                    {{ $transmission_type_id ? ($transmissionTypes->firstWhere('id', $transmission_type_id)->name ?? '') : '' }}
                 </h4>
+                @if($chassis_code)
+                    <small class="text-muted mt-2 d-block">Slug Identifier: {{ \Illuminate\Support\Str::slug(($trim_level ?? 'name') . '-' . $chassis_code) }}</small>
+                @endif
             </div>
 
             {{-- ================= Technical Details ================= --}}
             <div class="row">
                 <div class="col-md-6">
-                    <fieldset class="border p-3 mb-4 rounded">
+                    <fieldset class="border p-3 mb-4 rounded h-100">
                         <legend class="w-auto px-2 font-weight-bold text-primary">Performance</legend>
                         <div class="row">
                             <div class="col-md-6 mb-2">
@@ -184,7 +202,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <fieldset class="border p-3 mb-4 rounded">
+                    <fieldset class="border p-3 mb-4 rounded h-100">
                         <legend class="w-auto px-2 font-weight-bold text-primary">Interior & Exterior</legend>
                         <div class="row">
                             <div class="col-md-4 mb-2">
