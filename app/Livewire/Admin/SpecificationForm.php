@@ -130,7 +130,6 @@ class SpecificationForm extends Component
         return redirect()->route('admin.specifications.index');
 
     } catch (\Exception $e) {
-        dd($e->getMessage());
         // This will show you exactly what is wrong (e.g., "Column not found" or "Integrity constraint violation")
         session()->flash('error', 'Error: ' . $e->getMessage());
         return;

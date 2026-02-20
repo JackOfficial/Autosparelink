@@ -33,7 +33,8 @@ class VehicleBrandController extends Controller
 public function store(Request $request)
 {
     $request->validate([
-        'brand_name' => 'required|string|max:255',
+        // Added 'unique:brands,brand_name' to prevent duplicates
+        'brand_name' => 'required|string|max:255|unique:brands,brand_name',
         'brand_logo' => 'nullable|image|mimes:jpg,png,jpeg,webp|max:2048',
         'description' => 'nullable|string',
         'country' => 'nullable|string|max:255',
@@ -43,7 +44,6 @@ public function store(Request $request)
     $logoPath = null;
 
     if ($request->hasFile('brand_logo')) {
-        // Store in "public/brands" folder, filename auto-generated
         $logoPath = $request->file('brand_logo')->store('brands', 'public');
     }
 
