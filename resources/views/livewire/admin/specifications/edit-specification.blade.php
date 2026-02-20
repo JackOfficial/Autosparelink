@@ -5,39 +5,43 @@
             <div class="col-md-8">
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header">
-                        <h3 class="card-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Specification</h3>
+                        <h3 class="card-title fw-bold">
+                            <i class="fas fa-edit mr-2"></i>Edit Technical Specification
+                        </h3>
                     </div>
                     <div class="card-body">
 
                         {{-- ================= Vehicle Selection ================= --}}
                         <fieldset class="border p-3 mb-4 rounded">
-                            <legend class="w-auto px-2 small fw-bold text-primary text-uppercase">Vehicle Selection</legend>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">Brand <span class="text-danger">*</span></label>
-                                    <select wire:model.live="brand_id" class="form-select @error('brand_id') is-invalid @enderror">
+                            <legend class="w-auto px-2 text-primary font-weight-bold text-uppercase" style="font-size: 0.9rem;">
+                                Vehicle Selection
+                            </legend>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>Brand <span class="text-danger">*</span></label>
+                                    <select wire:model.live="brand_id" class="form-control @error('brand_id') is-invalid @enderror">
                                         <option value="">Select Brand</option>
                                         @foreach($brands as $brand)
                                             <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
                                         @endforeach
                                     </select>
-                                    @error('brand_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    @error('brand_id') <span class="error invalid-feedback">{{ $message }}</span> @enderror
                                 </div>
 
-                                <div class="col-md-4">
-                                    <label class="form-label">Vehicle Model <span class="text-danger">*</span></label>
-                                    <select wire:model.live="vehicle_model_id" class="form-select @error('vehicle_model_id') is-invalid @enderror">
+                                <div class="form-group col-md-4">
+                                    <label>Vehicle Model <span class="text-danger">*</span></label>
+                                    <select wire:model.live="vehicle_model_id" class="form-control @error('vehicle_model_id') is-invalid @enderror">
                                         <option value="">Select Model</option>
                                         @foreach($vehicleModels as $model)
                                             <option value="{{ $model->id }}">{{ $model->model_name }}</option>
                                         @endforeach
                                     </select>
-                                    @error('vehicle_model_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    @error('vehicle_model_id') <span class="error invalid-feedback">{{ $message }}</span> @enderror
                                 </div>
 
-                                <div class="col-md-4">
-                                    <label class="form-label">Variant</label>
-                                    <select wire:model.live="variant_id" class="form-select">
+                                <div class="form-group col-md-4">
+                                    <label>Variant</label>
+                                    <select wire:model.live="variant_id" class="form-control">
                                         <option value="">Select Variant (optional)</option>
                                         @foreach($filteredVariants as $variant)
                                             <option value="{{ $variant->id }}">{{ $variant->name }}</option>
@@ -49,47 +53,49 @@
 
                         {{-- ================= Core Specifications ================= --}}
                         <fieldset class="border p-3 mb-4 rounded">
-                            <legend class="w-auto px-2 small fw-bold text-primary text-uppercase">Core Specifications</legend>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">Body Type</label>
-                                    <select wire:model="body_type_id" class="form-select @error('body_type_id') is-invalid @enderror">
+                            <legend class="w-auto px-2 text-primary font-weight-bold text-uppercase" style="font-size: 0.9rem;">
+                                Core Specifications
+                            </legend>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>Body Type</label>
+                                    <select wire:model="body_type_id" class="form-control">
                                         <option value="">Select</option>
                                         @foreach($bodyTypes as $item)
                                             <option value="{{ $item->id }}">{{ $item->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Fuel Type</label>
-                                    <select wire:model="engine_type_id" class="form-select @error('engine_type_id') is-invalid @enderror">
+                                <div class="form-group col-md-4">
+                                    <label>Fuel Type</label>
+                                    <select wire:model="engine_type_id" class="form-control">
                                         <option value="">Select</option>
                                         @foreach($engineTypes as $item)
                                             <option value="{{ $item->id }}">{{ $item->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Transmission</label>
-                                    <select wire:model="transmission_type_id" class="form-select">
+                                <div class="form-group col-md-4">
+                                    <label>Transmission</label>
+                                    <select wire:model="transmission_type_id" class="form-control">
                                         <option value="">Select</option>
                                         @foreach($transmissionTypes as $item)
                                             <option value="{{ $item->id }}">{{ $item->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Drive Type</label>
-                                    <select wire:model="drive_type_id" class="form-select">
+                                <div class="form-group col-md-6">
+                                    <label>Drive Type</label>
+                                    <select wire:model="drive_type_id" class="form-control">
                                         <option value="">Select</option>
                                         @foreach($driveTypes as $item)
                                             <option value="{{ $item->id }}">{{ $item->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Engine Displacement</label>
-                                    <select wire:model="engine_displacement_id" class="form-select">
+                                <div class="form-group col-md-6">
+                                    <label>Engine Displacement</label>
+                                    <select wire:model="engine_displacement_id" class="form-control">
                                         <option value="">Select</option>
                                         @foreach($engineDisplacements as $ed)
                                             <option value="{{ $ed->id }}">{{ $ed->name }}</option>
@@ -101,103 +107,124 @@
 
                         {{-- ================= Performance & Capacity ================= --}}
                         <fieldset class="border p-3 mb-4 rounded">
-                            <legend class="w-auto px-2 small fw-bold text-primary text-uppercase">Performance & Capacity</legend>
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <label class="form-label">Horsepower (HP)</label>
-                                    <input type="number" wire:model="horsepower" class="form-control" placeholder="e.g. 150">
+                            <legend class="w-auto px-2 text-primary font-weight-bold text-uppercase" style="font-size: 0.9rem;">
+                                Performance & Capacity
+                            </legend>
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label>Horsepower (HP)</label>
+                                    <input type="number" wire:model="horsepower" class="form-control">
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Torque (Nm)</label>
-                                    <input type="number" wire:model="torque" class="form-control" placeholder="e.g. 320">
+                                <div class="form-group col-md-3">
+                                    <label>Torque (Nm)</label>
+                                    <input type="number" wire:model="torque" class="form-control">
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Fuel Capacity (L)</label>
+                                <div class="form-group col-md-3">
+                                    <label>Fuel Capacity (L)</label>
                                     <input type="number" wire:model="fuel_capacity" step="0.1" class="form-control">
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Efficiency (km/L)</label>
+                                <div class="form-group col-md-3">
+                                    <label>Efficiency (km/L)</label>
                                     <input type="number" wire:model="fuel_efficiency" step="0.1" class="form-control">
                                 </div>
                             </div>
                         </fieldset>
 
                         {{-- ================= Interior & Production ================= --}}
-                        <fieldset class="border p-3 rounded">
-                            <legend class="w-auto px-2 small fw-bold text-primary text-uppercase">Interior & Production</legend>
-                            <div class="row g-3">
-                                <div class="col-md-2">
-                                    <label class="form-label">Seats</label>
+                        <fieldset class="border p-3 rounded shadow-sm">
+                            <legend class="w-auto px-2 text-primary font-weight-bold text-uppercase" style="font-size: 0.9rem;">
+                                Interior & Production
+                            </legend>
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <label>Seats</label>
                                     <input type="number" wire:model="seats" class="form-control">
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Doors</label>
+                                <div class="form-group col-md-2">
+                                    <label>Doors</label>
                                     <input type="number" wire:model="doors" class="form-control">
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Steering Position</label>
-                                    <select wire:model="steering_position" class="form-select">
+                                <div class="form-group col-md-4">
+                                    <label>Steering</label>
+                                    <select wire:model="steering_position" class="form-control">
                                         <option value="LEFT">Left-Hand Drive</option>
                                         <option value="RIGHT">Right-Hand Drive</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Color</label>
+                                <div class="form-group col-md-4">
+                                    <label>Color</label>
                                     <div class="input-group">
-                                        <input type="color" wire:model.live="color" class="form-control form-control-color" style="width: 20%;">
-                                        <input type="text" wire:model="color" class="form-control" style="width: 80%;">
+                                        <div class="input-group-prepend">
+                                            <input type="color" wire:model.live="color" class="form-control p-1" style="width: 45px; height: 38px;">
+                                        </div>
+                                        <input type="text" wire:model="color" class="form-control" placeholder="#000000">
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Production Year</label>
+                            </div>
+                            <div class="form-row mt-2">
+                                <div class="form-group col-md-4">
+                                    <label>Prod. Year</label>
                                     <input type="number" wire:model="production_year" class="form-control">
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Start Year</label>
+                                <div class="form-group col-md-4">
+                                    <label>Start Year</label>
                                     <input type="number" wire:model="production_start" class="form-control">
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">End Year</label>
+                                <div class="form-group col-md-4">
+                                    <label>End Year</label>
                                     <input type="number" wire:model="production_end" class="form-control">
                                 </div>
                             </div>
                         </fieldset>
                     </div>
-                    <div class="card-footer bg-light">
-                        <button type="submit" class="btn btn-primary shadow-sm">
-                            <i class="fas fa-save me-1"></i> Update Specification
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                            <i class="fas fa-save mr-1"></i> Update Specification
                         </button>
+                        <a href="{{ route('admin.specifications.index') }}" class="btn btn-default ml-2">Cancel</a>
                     </div>
                 </div>
             </div>
 
-            {{-- Right Column: Preview --}}
+            {{-- Right Column: Preview (AdminLTE Sidebar style) --}}
             <div class="col-md-4">
-                <div class="sticky-top" style="top: 20px;">
-                    <div class="card shadow-sm border-0 bg-dark text-white">
+                <div class="sticky-top" style="top: 20px; z-index: 1020;">
+                    <div class="card card-dark shadow">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold small text-uppercase">Live Preview</h3>
+                        </div>
                         <div class="card-body text-center py-4">
-                            <div class="rounded-circle mx-auto mb-3 border border-4 border-secondary shadow" 
-                                 style="width: 70px; height: 70px; background-color: {{ $color ?: '#555' }};">
+                            <div class="rounded-circle mx-auto mb-3 border border-secondary shadow-sm" 
+                                 style="width: 70px; height: 70px; background-color: {{ $color ?: '#555' }}; transition: background-color 0.3s;">
                             </div>
-                            <h5 class="fw-bold text-uppercase mb-1">
-                                {{ $brand_id ? $brands->firstWhere('id', $brand_id)->brand_name : 'Select Brand' }}
+                            <h5 class="font-weight-bold mb-1">
+                                {{ $brand_id ? $brands->firstWhere('id', $brand_id)->brand_name : 'Brand' }}
                             </h5>
-                            <h6 class="text-info">
+                            <h6 class="text-primary">
                                 {{ $vehicle_model_id ? (\App\Models\VehicleModel::find($vehicle_model_id)?->model_name) : 'Model' }}
                             </h6>
-                            <p class="small text-muted mb-3">
-                                {{ $variant_id ? (\App\Models\Variant::find($variant_id)?->name) : 'Base' }}
-                            </p>
-                            <hr class="bg-secondary">
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <small class="text-muted d-block">Power</small>
-                                    <span class="fw-bold">{{ $horsepower ?: '--' }} HP</span>
+                            <div class="badge badge-secondary px-3">
+                                {{ $variant_id ? (\App\Models\Variant::find($variant_id)?->name) : 'Base Variant' }}
+                            </div>
+                            
+                            <div class="row mt-4 px-2">
+                                <div class="col-6 p-1">
+                                    <div class="bg-light p-2 rounded border">
+                                        <small class="text-muted d-block">Power</small>
+                                        <span class="font-weight-bold">{{ $horsepower ?: '--' }} HP</span>
+                                    </div>
                                 </div>
-                                <div class="col-6">
-                                    <small class="text-muted d-block">Seats</small>
-                                    <span class="fw-bold">{{ $seats ?: '--' }}</span>
+                                <div class="col-6 p-1">
+                                    <div class="bg-light p-2 rounded border">
+                                        <small class="text-muted d-block">Seats</small>
+                                        <span class="font-weight-bold">{{ $seats ?: '--' }}</span>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div class="mt-4 custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="statusSwitch" wire:model="status">
+                                <label class="custom-control-label font-weight-bold" for="statusSwitch">Active</label>
                             </div>
                         </div>
                     </div>
