@@ -17,9 +17,9 @@ class SpecificationController extends Controller
 
 public function index(Request $request)
 {
+    // 1. Efficient Eager Loading
     $query = Specification::with([
         'variant.vehicleModel.brand',
-        'vehicleModel.brand',
         'bodyType',
         'engineDisplacement',
         'engineType',
@@ -27,6 +27,7 @@ public function index(Request $request)
         'driveType',
     ]);
 
+    // 2. Database Level Filtering
     if ($request->filled('variant_id')) {
         $query->where('variant_id', $request->variant_id);
     }
@@ -35,29 +36,18 @@ public function index(Request $request)
         $query->where('vehicle_model_id', $request->vehicle_model_id);
     }
 
-    // Get all specs
+    // 3. Sorting & Retrieval 
+    // Note: In a large DB, move these sorts to 'join' statements for speed
     $specifications = $query->latest()->get();
 
-    // Sort by brand, model, variant
-    $specifications = $specifications->sortBy([
-        function ($spec) {
-            return optional(optional($spec->variant)->vehicleModel->brand ?? $spec->vehicleModel->brand)->brand_name ?? 'N/A';
-        },
-        function ($spec) {
-            return optional(optional($spec->variant)->vehicleModel ?? $spec->vehicleModel)->model_name ?? 'N/A';
-        },
-        function ($spec) {
-            return optional($spec->variant)->name ?? 'N/A';
-        },
-    ]);
-
-    // Group by Brand | Model | Variant
+    // 4. Grouping by the unique Variant identity
     $groupedSpecs = $specifications->groupBy(function ($spec) {
-        $brand = optional(optional($spec->variant)->vehicleModel->brand ?? $spec->vehicleModel->brand)->brand_name ?? 'N/A';
-        $model = optional(optional($spec->variant)->vehicleModel ?? $spec->vehicleModel)->model_name ?? 'N/A';
-        $variant = optional($spec->variant)->name ?? 'N/A';
+        // Fallback logic if a variant isn't assigned yet
+        $brand = $spec->variant?->vehicleModel?->brand?->brand_name ?? 'Unknown Brand';
+        $model = $spec->variant?->vehicleModel?->model_name ?? 'Unknown Model';
+        $variant = $spec->variant?->name ?? 'Unassigned Variant';
 
-        return $brand.'|'.$model.'|'.$variant;
+        return "{$brand}|{$model}|{$variant}";
     });
 
     return view('admin.specifications.index', compact('groupedSpecs'));

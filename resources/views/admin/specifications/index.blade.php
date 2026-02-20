@@ -34,92 +34,95 @@
         </div>
 
         {{-- GROUPED SPECIFICATIONS --}}
-        @forelse($groupedSpecs as $key => $specGroup)
-            @php
-                [$brand, $model, $variant] = explode('|', $key);
-                $collapseId = 'collapse-'.Str::slug($brand.'-'.$model.'-'.$variant);
-            @endphp
+@forelse($groupedSpecs as $key => $specGroup)
+    @php
+        [$brand, $model, $variantName] = explode('|', $key);
+        // Use the first spec's ID to ensure a unique collapse target
+        $collapseId = 'variant-group-' . $specGroup->first()->id;
+    @endphp
 
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white" data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}" style="cursor:pointer;">
-                    <h5 class="card-title mb-0">
-                        {{ $brand }} 
-                        <small class="text-light">/ {{ $model }} / {{ $variant }}</small>
-                        <span class="badge bg-light text-dark ms-2">{{ $specGroup->count() }} Spec{{ $specGroup->count() > 1 ? 's' : '' }}</span>
-                        <i class="fa fa-chevron-down float-end"></i>
-                    </h5>
-                </div>
+    <div class="card mb-4 shadow-sm border-left-primary">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center" 
+             data-bs-toggle="collapse" 
+             data-bs-target="#{{ $collapseId }}" 
+             style="cursor:pointer;">
+            <div>
+                <span class="text-muted small text-uppercase fw-bold">{{ $brand }}</span>
+                <h5 class="mb-0 text-dark">
+                    {{ $model }} <i class="fa fa-angle-right mx-2 text-muted small"></i> {{ $variantName }}
+                </h5>
+            </div>
+            <div>
+                <span class="badge badge-pill bg-primary me-3">{{ $specGroup->count() }} Specs</span>
+                <i class="fa fa-chevron-down text-muted"></i>
+            </div>
+        </div>
 
-                <div id="{{ $collapseId }}" class="collapse show">
-                    <div class="card-body p-0 table-responsive">
-                        <table class="table table-striped table-hover text-nowrap align-middle mb-0">
-                            <thead>
+        <div id="{{ $collapseId }}" class="collapse show">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3">Body</th>
+                                <th>Trans.</th>
+                                <th>Fuel</th>
+                                <th>Eng.</th>
+                                <th>Power/Torque</th>
+                                <th>Interior</th>
+                                <th>Color</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-end pe-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($specGroup as $spec)
                                 <tr>
-                                    <th>#</th>
-                                    <th>Body Type</th>
-                                    <th>Transmission</th>
-                                    <th>Fuel</th>
-                                    <th>Engine</th>
-                                    <th>Drive</th>
-                                    <th>Horsepower</th>
-                                    <th>Torque</th>
-                                    <th>Fuel Cap.</th>
-                                    <th>Seats</th>
-                                    <th>Doors</th>
-                                    <th>Fuel Eff.</th>
-                                    <th>Steering</th>
-                                    <th>Color</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($specGroup as $spec)
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $spec->bodyType->name ?? '-' }}</td>
-                                         <td>{{ $spec->transmissionType->name ?? '-' }}</td>
-                                        <td>{{ $spec->engineType->name ?? '-' }}</td>
-                                        <td>{{ $spec->engineDisplacement->name ?? '-' }}</td>
-                                        <td>{{ $spec->driveType->name ?? '-' }}</td>
-                                        <td>{{ $spec->horsepower ?? '-' }}</td>
-                                        <td>{{ $spec->torque ?? '-' }}</td>
-                                        <td>{{ $spec->fuel_capacity ?? '-' }}</td>
-                                        <td>{{ $spec->seats ?? '-' }}</td>
-                                        <td>{{ $spec->doors ?? '-' }}</td>
-                                        <td>{{ $spec->fuel_efficiency ?? '-' }}</td>
-                                        <td>{{ $spec->steering_position ?? '-' }}</td>
-                                        <td>
-                                          <div class="border rounded-circle {{ $spec->color == null ? 'd-none' : '' }}" style="width: 25px; height: 25px; background-color: {{ $spec->color ?? '-' }}"></div>
-                                        </td>
-                                        <td>
-                                            <span class="badge {{ $spec->status ? 'bg-success' : 'bg-secondary' }}">
-                                                {{ $spec->status ? 'Active' : 'Inactive' }}
-                                            </span>
-                                        </td>
-                                        <td class="d-flex gap-1">
-                                            <a href="{{ route('admin.specifications.show', $spec->id) }}" class="btn btn-xs btn-info">
-                                                <i class="fa fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-xs btn-warning">
-                                                <i class="fa fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('admin.specifications.destroy', $spec->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this specification?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>
+                                    <td class="ps-3"><strong>{{ $spec->bodyType->name ?? '-' }}</strong></td>
+                                    <td>{{ $spec->transmissionType->name ?? '-' }}</td>
+                                    <td>{{ $spec->engineType->name ?? '-' }}</td>
+                                    <td>{{ $spec->engineDisplacement->name ?? '-' }}</td>
+                                    <td>
+                                        <small class="d-block">{{ $spec->horsepower ?? '0' }} HP</small>
+                                        <small class="text-muted">{{ $spec->torque ?? '0' }} Nm</small>
+                                    </td>
+                                    <td>
+                                        <small title="Seats/Doors"><i class="fa fa-chair"></i> {{ $spec->seats }} | <i class="fa fa-door-open"></i> {{ $spec->doors }}</small>
+                                    </td>
+                                    <td>
+                                        @if($spec->color)
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-circle border me-1" style="width: 15px; height: 15px; background-color: {{ $spec->color }}"></div>
+                                                <small class="text-muted">{{ $spec->color }}</small>
+                                            </div>
+                                        @else - @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <i class="fa fa-circle {{ $spec->status ? 'text-success' : 'text-danger' }} small"></i>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <div class="btn-group">
+                                            <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-sm btn-outline-warning border-0"><i class="fa fa-edit"></i></a>
+                                            <form action="{{ route('admin.specifications.destroy', $spec->id) }}" method="POST" class="d-inline">
+                                                @csrf @method('DELETE')
+                                                <button class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Delete?')"><i class="fa fa-trash"></i></button>
                                             </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        @empty
-            <p class="text-center text-muted py-4">No specifications found.</p>
-        @endforelse
+        </div>
+    </div>
+@empty
+    <div class="text-center py-5">
+        <i class="fa fa-folder-open fa-3x text-muted mb-3"></i>
+        <p class="text-muted">No specifications found matching your criteria.</p>
+    </div>
+@endforelse
 
     </div>
 </section>
