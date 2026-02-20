@@ -26,8 +26,15 @@
     {{-- GROUPED SPECIFICATIONS --}}
     @forelse($groupedSpecs as $key => $specGroup)
         @php
-            [$brand, $model, $variantName] = explode('|', $key);
-            $collapseId = 'variant-group-' . $specGroup->first()->id;
+            // Robust explode handling
+            $parts = explode('|', $key);
+            $brand = $parts[0] ?? 'N/A';
+            $model = $parts[1] ?? 'N/A';
+            $variantName = $parts[2] ?? 'Standard';
+            
+            // Generate unique ID for collapse based on the first item in group
+            $firstSpec = $specGroup->first();
+            $collapseId = 'variant-group-' . ($firstSpec->id ?? loop->index);
         @endphp
 
         <div class="box box-solid box-default shadow-sm" style="border-radius: 4px; border-left: 3px solid #3c8dbc; margin-bottom: 15px;">

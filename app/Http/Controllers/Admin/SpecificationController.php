@@ -19,7 +19,7 @@ public function index(Request $request)
 {
     // 1. Efficient Eager Loading
     $query = Specification::with([
-        'variant.vehicleModel.brand',
+        'vehicleModel.brand', // Direct link to model and brand
         'bodyType',
         'engineDisplacement',
         'engineType',
@@ -28,26 +28,21 @@ public function index(Request $request)
     ]);
 
     // 2. Database Level Filtering
-    if ($request->filled('variant_id')) {
-        $query->where('variant_id', $request->variant_id);
-    }
-
     if ($request->filled('vehicle_model_id')) {
         $query->where('vehicle_model_id', $request->vehicle_model_id);
     }
 
-    // 3. Sorting & Retrieval 
-    // Note: In a large DB, move these sorts to 'join' statements for speed
     $specifications = $query->latest()->get();
 
-    // 4. Grouping by the unique Variant identity
+    // 3. Grouping by the unique Brand | Model | Trim
     $groupedSpecs = $specifications->groupBy(function ($spec) {
-        // Fallback logic if a variant isn't assigned yet
-        $brand = $spec->variant?->vehicleModel?->brand?->brand_name ?? 'Unknown Brand';
-        $model = $spec->variant?->vehicleModel?->model_name ?? 'Unknown Model';
-        $variant = $spec->variant?->name ?? 'Unassigned Variant';
+        $brand = $spec->vehicleModel?->brand?->brand_name ?? 'Unknown Brand';
+        $model = $spec->vehicleModel?->model_name ?? 'Unknown Model';
+        
+        // Use trim_level as the variant name
+        $trim = $spec->trim_level ?? 'Standard Trim'; 
 
-        return "{$brand}|{$model}|{$variant}";
+        return "{$brand}|{$model}|{$trim}";
     });
 
     return view('admin.specifications.index', compact('groupedSpecs'));
