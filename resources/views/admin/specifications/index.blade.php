@@ -3,32 +3,6 @@
 @section('title', 'Specifications')
 
 @section('content')
-
-<style>
-    /* Rotates chevron to 'up' position when section is expanded (default) */
-    [data-toggle="collapse"] .fa-chevron-down {
-        transition: transform 0.3s ease;
-        transform: rotate(180deg);
-    }
-    /* Rotates chevron back to 'down' position when section is collapsed */
-    [data-toggle="collapse"].collapsed .fa-chevron-down {
-        transform: rotate(0deg);
-    }
-    .spec-pill {
-        background-color: #ebf5ff; 
-        color: #3c8dbc; 
-        padding: 2px 12px; 
-        border-radius: 20px; 
-        font-size: 12px; 
-        font-weight: 600;
-        border: 1px solid #d1e9ff;
-        display: inline-block;
-    }
-    .table > tbody > tr > td {
-        vertical-align: middle;
-    }
-</style>
-
 <section class="content-header">
     <h1>Vehicle Specifications</h1>
     <ol class="breadcrumb">
@@ -37,14 +11,37 @@
     </ol>
 </section>
 
-<section class="content">
-    {{-- ACTION BAR --}}
-    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <a href="{{ route('admin.specifications.create') }}" class="btn btn-primary shadow-sm">
-            <i class="fa fa-plus"></i> Add New Specification
-        </a>
-        <div class="text-muted">
-            <i class="fa fa-info-circle"></i> Total: <strong>{{ $groupedSpecs->sum(fn($group) => $group->count()) }}</strong> items
+<section class="content" x-data="{ 
+    search: '',
+    {{-- Helper to check if a group has any visible children --}}
+    checkGroup(el) {
+        let rows = el.querySelectorAll('tbody tr');
+        let visibleRows = Array.from(rows).filter(r => r.style.display !== 'none');
+        return visibleRows.length > 0;
+    }
+}">
+    
+    {{-- TOP ACTION BAR --}}
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-6">
+            <a href="{{ route('admin.specifications.create') }}" class="btn btn-primary shadow-sm">
+                <i class="fa fa-plus"></i> Add New Specification
+            </a>
+        </div>
+        
+        {{-- ADVANCED SEARCH BOX --}}
+        <div class="col-md-6">
+            <div class="input-group shadow-sm">
+                <span class="input-group-addon" style="background: #fff;"><i class="fa fa-search text-primary"></i></span>
+                <input type="text" 
+                       x-model="search" 
+                       class="form-control" 
+                       placeholder="Search by Model, Variant, Engine (e.g. 'RAV4 Hybrid')..."
+                       style="height: 40px; border-left: none;">
+                <span class="input-group-addon" style="background: #fff; cursor: pointer;" x-show="search" @click="search = ''">
+                    <i class="fa fa-times text-red"></i>
+                </span>
+            </div>
         </div>
     </div>
 
@@ -52,102 +49,82 @@
     @forelse($groupedSpecs as $key => $specGroup)
         @php
             $parts = explode('|', $key);
-            $brand = $parts[0] ?? 'N/A';
-            $model = $parts[1] ?? 'N/A';
-            $variantGroupName = $parts[2] ?? 'Standard';
+            $brand = $parts[0] ?? '';
+            $model = $parts[1] ?? '';
+            $variantGroupName = $parts[2] ?? '';
+            $collapseId = 'group-' . $loop->index;
             
-            $firstSpec = $specGroup->first();
-            $collapseId = 'variant-group-' . ($firstSpec->id ?? $loop->index);
+            // Pre-calculate search string for the group header
+            $groupSearchTag = strtolower("$brand $model $variantGroupName");
         @endphp
 
-        <div class="box box-solid box-default shadow-sm" style="border-radius: 4px; border-left: 3px solid #3c8dbc; margin-bottom: 20px;">
+        <div class="box box-solid box-default shadow-sm spec-group-wrapper" 
+             x-show="search === '' || $el.innerText.toLowerCase().includes(search.toLowerCase())"
+             style="border-radius: 4px; border-left: 3px solid #3c8dbc; margin-bottom: 20px;">
+            
             <div class="box-header with-border" 
                  data-toggle="collapse" 
                  data-target="#{{ $collapseId }}" 
                  style="cursor:pointer; padding: 12px 15px;">
-                
                 <div class="row">
                     <div class="col-xs-9">
-                        <span class="text-uppercase" style="font-size: 10px; font-weight: 700; color: #999; letter-spacing: 1.2px; display: block; margin-bottom: 2px;">
+                        <span class="text-uppercase" style="font-size: 10px; font-weight: 700; color: #999; letter-spacing: 1.2px; display: block;">
                             {{ $brand }}
                         </span>
-                        <span style="font-size: 16px; font-weight: 600; color: #333;">
+                        <span style="font-size: 16px; font-weight: 600;">
                             {{ $model }} 
                             @if($variantGroupName)
                                 <small style="color: #ccc; margin: 0 8px;">|</small> 
-                                <span style="color: #3c8dbc;">{{ $variantGroupName }}</span>
+                                <span class="text-primary">{{ $variantGroupName }}</span>
                             @endif
                         </span>
                     </div>
                     <div class="col-xs-3 text-right">
-                        <div style="display: inline-flex; align-items: center; gap: 10px; margin-top: 5px;">
-                            <span class="spec-pill">
-                                {{ $specGroup->count() }} {{ Str::plural('Spec', $specGroup->count()) }}
-                            </span>
-                            <i class="fa fa-chevron-down text-muted" style="font-size: 12px;"></i>
-                        </div>
+                        <span class="spec-pill">{{ $specGroup->count() }} Items</span>
+                        <i class="fa fa-chevron-down text-muted" style="margin-left:10px;"></i>
                     </div>
                 </div>
             </div>
 
-            {{-- 'in' class ensures it is visible on load --}}
             <div id="{{ $collapseId }}" class="panel-collapse collapse in">
                 <div class="box-body no-padding">
                     <div class="table-responsive">
-                        <table class="table table-hover table-striped" style="margin-bottom: 0;">
+                        <table class="table table-hover">
                             <thead>
-                                <tr style="background-color: #fcfcfc; color: #777; font-size: 11px; text-transform: uppercase;">
-                                    <th style="padding-left: 15px;">Body Type</th>
-                                    <th>Variant Name</th>
+                                <tr style="background: #f9f9f9; font-size: 11px; text-transform: uppercase; color: #777;">
+                                    <th style="padding-left: 15px;">Body</th>
+                                    <th>Variant</th>
                                     <th>Trans.</th>
-                                    <th>Fuel</th>
                                     <th>Engine</th>
                                     <th>Output</th>
-                                    <th class="text-center">Color</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-right" style="padding-right: 15px;">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody style="font-size: 13px;">
+                            <tbody>
                                 @foreach($specGroup as $spec)
-                                    <tr>
-                                        <td style="padding-left: 15px;">
-                                            <span class="text-bold" style="color: #444;">{{ $spec->bodyType->name ?? '-' }}</span>
-                                        </td>
+                                    @php
+                                        // Pre-calculate searchable text for this row
+                                        $rowSearch = strtolower($spec->variant->name . ' ' . $spec->bodyType->name . ' ' . $spec->engineType->name);
+                                    @endphp
+                                    <tr x-show="search === '' || '{{ $rowSearch }}'.includes(search.toLowerCase()) || '{{ $groupSearchTag }}'.includes(search.toLowerCase())">
+                                        <td style="padding-left: 15px;"><b>{{ $spec->bodyType->name }}</b></td>
+                                        <td><span class="text-primary" style="font-weight:600">{{ $spec->variant->name }}</span></td>
+                                        <td><span class="label label-default">{{ $spec->transmissionType->name }}</span></td>
+                                        <td>{{ $spec->engineType->name }}</td>
                                         <td>
-                                            {{-- Accessing the name through the variant relationship --}}
-                                            <span class="text-primary" style="font-weight: 600;">
-                                                {{ $spec->variant->name ?? 'N/A' }}
-                                            </span>
-                                        </td>
-                                        <td><span class="label label-default" style="font-weight: 400; background-color: #f0f0f0; color: #555; border: 1px solid #ddd;">{{ $spec->transmissionType->name ?? '-' }}</span></td>
-                                        <td>{{ $spec->engineType->name ?? '-' }}</td>
-                                        <td><code style="background: #f8f8f8; border: 1px solid #eee; color: #e83e8c;">{{ $spec->engineDisplacement->name ?? '-' }}</code></td>
-                                        <td>
-                                            <span style="font-weight: 600;">{{ $spec->horsepower ?? '0' }} <small>HP</small></span>
-                                            <div class="text-muted" style="font-size: 11px;">{{ $spec->torque ?? '0' }} Nm</div>
+                                            <strong>{{ $spec->horsepower }} HP</strong><br>
+                                            <small class="text-muted">{{ $spec->torque }} Nm</small>
                                         </td>
                                         <td class="text-center">
-                                            @if($spec->color)
-                                                <div class="img-circle border" style="width: 16px; height: 16px; display: inline-block; background-color: {{ $spec->color }}; vertical-align: middle; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" title="{{ $spec->color }}"></div>
-                                            @else - @endif
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="label {{ $spec->status ? 'label-success' : 'label-danger' }}" style="font-size: 9px; padding: 2px 6px; text-transform: uppercase;">
+                                            <span class="label {{ $spec->status ? 'label-success' : 'label-danger' }}">
                                                 {{ $spec->status ? 'Active' : 'Inactive' }}
                                             </span>
                                         </td>
                                         <td class="text-right" style="padding-right: 15px;">
                                             <div class="btn-group">
-                                                <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-default btn-sm" style="border-radius: 3px 0 0 3px;" title="Edit">
-                                                    <i class="fa fa-edit text-blue"></i>
-                                                </a>
-                                                <form action="{{ route('admin.specifications.destroy', $spec->id) }}" method="POST" style="display: inline;">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-default btn-sm" style="border-radius: 0 3px 3px 0;" title="Delete" onclick="return confirm('Delete this specification?')">
-                                                        <i class="fa fa-trash text-red"></i>
-                                                    </button>
-                                                </form>
+                                                <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+                                                <button class="btn btn-default btn-sm text-red"><i class="fa fa-trash"></i></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -159,12 +136,22 @@
             </div>
         </div>
     @empty
-        <div class="text-center" style="padding: 100px 0; background: #fff; border: 1px dashed #ddd; border-radius: 8px;">
-            <i class="fa fa-file-text-o fa-4x text-muted" style="margin-bottom: 15px;"></i>
-            <h4 class="text-muted">No specifications recorded yet</h4>
-            <a href="{{ route('admin.specifications.create') }}" class="btn btn-primary mt-3">Add First Specification</a>
-        </div>
+        {{-- Empty State --}}
     @endforelse
+
+    {{-- "No Results" State for Search --}}
+    <div x-show="search !== '' && !document.querySelectorAll('.spec-group-wrapper[style*=\'display: block\']').length" 
+         class="text-center text-muted" style="padding: 40px;">
+        <i class="fa fa-search fa-3x" style="margin-bottom: 10px;"></i>
+        <p>No specifications match your search "<strong><span x-text="search"></span></strong>"</p>
+    </div>
 </section>
 
+<style>
+    .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .spec-pill { background: #e7f3ff; color: #3c8dbc; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 11px; }
+    .table > tbody > tr > td { vertical-align: middle; border-top: 1px solid #f4f4f4; }
+    [data-toggle="collapse"] .fa-chevron-down { transition: 0.3s; transform: rotate(180deg); }
+    [data-toggle="collapse"].collapsed .fa-chevron-down { transform: rotate(0deg); }
+</style>
 @endsection
