@@ -14,7 +14,7 @@
             </div>
         @endif
 
-        {{-- Contextual Info Header --}}
+        {{-- Contextual Info Header (Visible when model is pre-selected) --}}
         @if($vehicle_model_id && $hideBrandModel)
             @php
                 $displayModel = \App\Models\VehicleModel::with('brand')->find($vehicle_model_id);
@@ -31,7 +31,7 @@
                     </div>
                     <div class="col-md-10">
                         <h5 class="mb-1">{{ $displayModel->brand->brand_name ?? 'N/A' }} {{ $displayModel->model_name ?? 'N/A' }}</h5>
-                        <p class="text-muted small mb-0">You are creating a new specification. The system will automatically generate the searchable variant based on the data below.</p>
+                        <p class="text-muted small mb-0">Adding specification for this specific model. The trim and technical data below will define the variant.</p>
                     </div>
                 </div>
             </div>
@@ -40,43 +40,47 @@
 
         <form wire:submit.prevent="save">
 
-            {{-- Identity & Selection --}}
-            @if(!$hideBrandModel)
+            {{-- ================= Identity Section ================= --}}
             <fieldset class="border p-3 mb-4 rounded shadow-sm">
                 <legend class="w-auto px-2 font-weight-bold text-primary">Identity</legend>
                 <div class="row">
-                    <div class="col-md-4">
-                        <label>Brand <span class="text-danger">*</span></label>
-                        <select wire:model.live="brand_id" class="form-control">
-                            <option value="">Select Brand</option>
-                            @foreach($brands as $brand)
-                                <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
-                            @endforeach
-                        </select>
-                        @error('brand_id') <span class="text-danger small">{{ $message }}</span> @enderror
-                    </div>
+                    @if(!$hideBrandModel)
+                        {{-- Brand Selection --}}
+                        <div class="col-md-4">
+                            <label>Brand <span class="text-danger">*</span></label>
+                            <select wire:model.live="brand_id" class="form-control">
+                                <option value="">Select Brand</option>
+                                @foreach($brands as $brand)
+                                    <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
+                                @endforeach
+                            </select>
+                            @error('brand_id') <span class="text-danger small">{{ $message }}</span> @enderror
+                        </div>
 
-                    <div class="col-md-4">
-                        <label>Vehicle Model <span class="text-danger">*</span></label>
-                        <select wire:model.live="vehicle_model_id" class="form-control" @disabled(!$brand_id)>
-                            <option value="">Select Model</option>
-                            @foreach($vehicleModels as $model)
-                                <option value="{{ $model->id }}">{{ $model->model_name }}</option>
-                            @endforeach
-                        </select>
-                        @error('vehicle_model_id') <span class="text-danger small">{{ $message }}</span> @enderror
-                    </div>
+                        {{-- Model Selection --}}
+                        <div class="col-md-4">
+                            <label>Vehicle Model <span class="text-danger">*</span></label>
+                            <select wire:model.live="vehicle_model_id" class="form-control" @disabled(!$brand_id)>
+                                <option value="">Select Model</option>
+                                @foreach($vehicleModels as $model)
+                                    <option value="{{ $model->id }}">{{ $model->model_name }}</option>
+                                @endforeach
+                            </select>
+                            @error('vehicle_model_id') <span class="text-danger small">{{ $message }}</span> @enderror
+                        </div>
+                    @endif
 
-                    <div class="col-md-4">
+                    {{-- Trim Level - MOVED OUTSIDE so it's always visible --}}
+                    <div class="{{ $hideBrandModel ? 'col-md-12' : 'col-md-4' }}">
                         <label>Trim Level <span class="text-danger">*</span></label>
-                        <input type="text" wire:model.live="trim_level" class="form-control" placeholder="e.g. S, XLE, AMG Line">
+                        <input type="text" wire:model.live="trim_level" class="form-control" placeholder="e.g. S, XLE, AMG Line, Premium">
                         @error('trim_level') <span class="text-danger small">{{ $message }}</span> @enderror
+                        <small class="text-muted">The marketing name for this specific version.</small>
                     </div>
                 </div>
             </fieldset>
-            @endif
 
-            {{-- Core Specs --}}
+            {{-- ================= Core Specs ================= --}}
             <fieldset class="border p-3 mb-4 rounded shadow-sm bg-light">
                 <legend class="w-auto px-2 font-weight-bold text-primary">Core Configuration</legend>
                 <div class="row">
@@ -92,13 +96,13 @@
                     </div>
                     
                     <div class="col-md-3">
-                        <label>Production Year <span class="text-danger">*</span></label>
+                        <label>Prod. Year <span class="text-danger">*</span></label>
                         <input type="number" wire:model.live="production_year" class="form-control" min="1950" max="{{ date('Y') + 1 }}">
                         @error('production_year') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="col-md-2">
-                        <label>Engine Displ. <span class="text-danger">*</span></label>
+                        <label>Displacement <span class="text-danger">*</span></label>
                         <select wire:model.live="engine_displacement_id" class="form-control">
                             <option value="">Select</option>
                             @foreach($engineDisplacements as $ed)
@@ -148,7 +152,7 @@
                 </h4>
             </div>
 
-            {{-- Technical Details --}}
+            {{-- ================= Technical Details ================= --}}
             <div class="row">
                 <div class="col-md-6">
                     <fieldset class="border p-3 mb-4 rounded">
@@ -167,23 +171,42 @@
                                 <label>Horsepower (HP)</label>
                                 <input type="number" wire:model="horsepower" class="form-control">
                             </div>
+                            <div class="col-md-6">
+                                <label>Torque (Nm)</label>
+                                <input type="number" wire:model="torque" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Fuel Capacity (L)</label>
+                                <input type="number" wire:model="fuel_capacity" class="form-control" step="0.1">
+                            </div>
                         </div>
                     </fieldset>
                 </div>
 
                 <div class="col-md-6">
                     <fieldset class="border p-3 mb-4 rounded">
-                        <legend class="w-auto px-2 font-weight-bold text-primary">Interior</legend>
+                        <legend class="w-auto px-2 font-weight-bold text-primary">Interior & Exterior</legend>
                         <div class="row">
                             <div class="col-md-4 mb-2">
                                 <label>Seats</label>
                                 <input type="number" wire:model="seats" class="form-control">
                             </div>
-                            <div class="col-md-8" x-data="{ color: @entangle('color') }">
+                            <div class="col-md-4 mb-2">
+                                <label>Doors</label>
+                                <input type="number" wire:model="doors" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label>Steering</label>
+                                <select wire:model="steering_position" class="form-control">
+                                    <option value="LEFT">LHD</option>
+                                    <option value="RIGHT">RHD</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12" x-data="{ color: @entangle('color') }">
                                 <label>Color</label>
                                 <div class="d-flex gap-2">
                                     <div class="rounded-circle border" :style="'background-color: ' + color" style="width: 38px; height: 38px; flex-shrink: 0;"></div>
-                                    <input type="text" x-model="color" class="form-control" placeholder="Pearl White">
+                                    <input type="text" x-model="color" class="form-control" placeholder="e.g. Pearl White">
                                     <input type="color" x-model="color" class="form-control p-0 border-0" style="width: 40px;">
                                 </div>
                             </div>
