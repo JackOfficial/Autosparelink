@@ -105,8 +105,6 @@ class EditSpecification extends Component
             $spec->variant->syncNameFromSpec();
         }
     });
-
-    dd("If you see this, the transaction FINISHED successfully.");
     
     session()->flash('success', 'Updated!');
     return redirect()->route('admin.specifications.index');
