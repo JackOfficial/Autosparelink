@@ -101,23 +101,39 @@ public function search(Request $request)
         strtok($gen['Transmission'], ' '), // Changed from '-' to ' ' to get "6" from "6-Speed"
     ])->filter()->unique();
 
-    $matchedVariant = Variant::where('vehicle_model_id', $model->id)
-        ->where(function ($query) use ($searchTokens, $gen) {
-            // Anchor search with the Year
-            $query->where('name', 'LIKE', "%{$gen['Year']}%");
+    // 3. SMART VARIANT SEARCH (Fixed Logic)
+$matchedVariant = Variant::where('vehicle_model_id', $model->id)
+    ->where(function ($query) use ($searchTokens, $gen) {
+        // MANDATORY: The Year must be in the name
+        $query->where('name', 'LIKE', "%{$gen['Year']}%");
 
+        // OPTIONAL: But any of these will help narrow it down
+        $query->where(function($sub) use ($searchTokens) {
             foreach ($searchTokens as $token) {
-                    $query->where('name', 'LIKE', "%{$token}%");
+                if (strlen($token) > 1) {
+                    $sub->orWhere('name', 'LIKE', "%{$token}%");
+                }
             }
-        })->first();
+        });
+    })
+    // Add an order by to get the most descriptive name first 
+    // (This helps pick "Toyota Verso S 2011" over a generic "Verso 2011")
+    ->orderByRaw('LENGTH(name) DESC') 
+    ->first();
 
     // 4. ULTIMATE FALLBACK
-    if (!$matchedVariant) {
-        $matchedVariant = Variant::where('vehicle_model_id', $model->id)
-            ->where('name', 'LIKE', "%{$gen['Year']}%")
-            ->where('name', 'LIKE', "%{$gen['Fuel type']}%")
-            ->first();
-    }
+if (!$matchedVariant) {
+    $matchedVariant = Variant::where('vehicle_model_id', $model->id)
+        ->where('name', 'LIKE', "%{$gen['Year']}%") // Only require the Year
+        ->first();
+}
+
+// 5. THE "DESPERATION" FALLBACK 
+// If there isn't even a variant with that year, just grab the first variant 
+// for that model so the Livewire component doesn't break.
+if (!$matchedVariant) {
+    $matchedVariant = Variant::where('vehicle_model_id', $model->id)->first();
+}
 
     dd($matchedVariant); // Use this to verify the final match!
 
