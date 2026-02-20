@@ -14,14 +14,21 @@ class VehicleModelController extends Controller
     return view('models', compact('models'));
   }
 
-  public function vehicle_model(string $id){
-    dd("here");
-     $models = VehicleModel::with(['brand', 'variants'])
+public function vehicle_model(string $id)
+{
+    $brand = Brand::find($id);
+
+    // If brand doesn't exist, show a friendly fallback instead of a 500/404
+    if (!$brand) {
+        return view('errors.brand-not-found');
+    }
+
+    $models = VehicleModel::with(['variants.engine_type', 'variants.transmission_type'])
         ->where('brand_id', $id)
         ->latest()
         ->get();
 
-    return view('models', compact('models'));
-  }
+    return view('models', compact('models', 'brand'));
+}
   
 }
