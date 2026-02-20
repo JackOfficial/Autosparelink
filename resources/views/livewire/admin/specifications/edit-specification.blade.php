@@ -1,4 +1,15 @@
 <div>
+
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    
     <form wire:submit.prevent="save">
         <div class="row">
             {{-- Left Column: Organized Form --}}
@@ -181,7 +192,7 @@
                     </div>
                 </div>
             </div>
-            
+
           {{-- Right Column: Preview --}}
 <div class="col-md-4">
     <div class="sticky-top" style="top: 20px; z-index: 1020;">
