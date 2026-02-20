@@ -5,7 +5,7 @@
 @section('content')
 
 <section class="content-header">
-    <h1>Specifications</h1>
+    <h1>Vehicle Specifications</h1>
     <ol class="breadcrumb">
         <li><a href="/admin"><i class="fa fa-dashboard"></i> Home</a></li>
         <li class="active">Specifications</li>
@@ -14,13 +14,13 @@
 
 <section class="content">
     {{-- ACTION BAR --}}
-    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
-        <a href="{{ route('admin.specifications.create') }}" class="btn btn-primary">
-            <i class="fa fa-plus"></i> Add Specification
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <a href="{{ route('admin.specifications.create') }}" class="btn btn-primary shadow-sm">
+            <i class="fa fa-plus"></i> Add New Specification
         </a>
-        <span class="text-muted">
-            Total: <strong>{{ $groupedSpecs->sum(fn($group) => $group->count()) }}</strong> specifications
-        </span>
+        <div class="text-muted">
+            <i class="fa fa-info-circle"></i> Total: <strong>{{ $groupedSpecs->sum(fn($group) => $group->count()) }}</strong> items
+        </div>
     </div>
 
     {{-- GROUPED SPECIFICATIONS --}}
@@ -30,80 +30,89 @@
             $collapseId = 'variant-group-' . $specGroup->first()->id;
         @endphp
 
-        <div class="box box-primary direct-chat"> {{-- Using 'box' instead of 'card' for AdminLTE 2 --}}
+        <div class="box box-solid box-default shadow-sm" style="border-radius: 4px; border-left: 3px solid #3c8dbc; margin-bottom: 15px;">
             <div class="box-header with-border" 
-     data-toggle="collapse" 
-     data-target="#{{ $collapseId }}" 
-     style="cursor:pointer; padding: 10px 15px;">
-    <div class="row">
-        <div class="col-xs-8">
-            <span class="text-uppercase text-muted" style="font-size: 10px; letter-spacing: 1px; display: block; margin-bottom: 2px;">
-                {{ $brand }}
-            </span>
-            <span style="font-size: 16px; font-weight: 600; color: #333;">
-                {{ $model }} 
-                <small style="color: #999; margin: 0 5px;">|</small> 
-                <span class="text-primary">{{ $variantName }}</span>
-            </span>
-        </div>
-        <div class="col-xs-4 text-right">
-            <span class="label label-default" style="font-weight: 500; padding: 5px 10px;">
-                {{ $specGroup->count() }} Variations
-            </span>
-            <i class="fa fa-chevron-down text-muted" style="margin-left: 10px; font-size: 12px;"></i>
-        </div>
-    </div>
-</div>
+                 data-toggle="collapse" 
+                 data-target="#{{ $collapseId }}" 
+                 style="cursor:pointer; padding: 12px 15px;">
+                
+                <div class="row">
+                    <div class="col-xs-9">
+                        {{-- Small Eyebrow for Brand --}}
+                        <span class="text-uppercase" style="font-size: 10px; font-weight: 700; color: #999; letter-spacing: 1.2px; display: block; margin-bottom: 2px;">
+                            {{ $brand }}
+                        </span>
+                        {{-- Main Header --}}
+                        <span style="font-size: 16px; font-weight: 600; color: #333;">
+                            {{ $model }} 
+                            @if($variantName)
+                                <small style="color: #ccc; margin: 0 8px;">|</small> 
+                                <span style="color: #3c8dbc;">{{ $variantName }}</span>
+                            @endif
+                        </span>
+                    </div>
+                    <div class="col-xs-3 text-right">
+                        <span class="label label-default" style="font-weight: 500; padding: 4px 8px; border: 1px solid #ddd; color: #666;">
+                            {{ $specGroup->count() }} {{ Str::plural('Spec', $specGroup->count()) }}
+                        </span>
+                        <i class="fa fa-chevron-down text-muted" style="margin-left: 10px; font-size: 11px;"></i>
+                    </div>
+                </div>
+            </div>
 
-            <div id="{{ $collapseId }}" class="panel-collapse collapse in"> {{-- Bootstrap 3 collapse --}}
+            <div id="{{ $collapseId }}" class="panel-collapse collapse in">
                 <div class="box-body no-padding">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover" style="margin-bottom: 0;">
+                        <table class="table table-hover table-striped" style="margin-bottom: 0;">
                             <thead>
-                                <tr style="background-color: #f9f9f9;">
-                                    <th style="padding-left: 15px;">Body</th>
+                                <tr style="background-color: #fcfcfc; color: #777; font-size: 12px;">
+                                    <th style="padding-left: 15px; width: 15%;">Body Type</th>
                                     <th>Trans.</th>
                                     <th>Fuel</th>
-                                    <th>Eng.</th>
-                                    <th>Power/Torque</th>
+                                    <th>Displacement</th>
+                                    <th>Power / Torque</th>
                                     <th>Interior</th>
-                                    <th>Color</th>
+                                    <th class="text-center">Color</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-right" style="padding-right: 15px;">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="font-size: 13px;">
                                 @foreach($specGroup as $spec)
                                     <tr>
-                                        <td style="padding-left: 15px;"><strong>{{ $spec->bodyType->name ?? '-' }}</strong></td>
-                                        <td>{{ $spec->transmissionType->name ?? '-' }}</td>
+                                        <td style="padding-left: 15px;">
+                                            <span class="text-bold">{{ $spec->bodyType->name ?? '-' }}</span>
+                                        </td>
+                                        <td><span class="label label-default" style="font-weight: normal;">{{ $spec->transmissionType->name ?? '-' }}</span></td>
                                         <td>{{ $spec->engineType->name ?? '-' }}</td>
-                                        <td>{{ $spec->engineDisplacement->name ?? '-' }}</td>
+                                        <td><code style="background: #f4f4f4; color: #555;">{{ $spec->engineDisplacement->name ?? '-' }}</code></td>
                                         <td>
-                                            <span style="display: block; font-size: 0.9em;">{{ $spec->horsepower ?? '0' }} HP</span>
-                                            <small class="text-muted">{{ $spec->torque ?? '0' }} Nm</small>
+                                            <span style="font-weight: 600;">{{ $spec->horsepower ?? '0' }} <small>HP</small></span>
+                                            <div class="text-muted" style="font-size: 11px;">{{ $spec->torque ?? '0' }} Nm</div>
                                         </td>
                                         <td>
-                                            <small title="Seats/Doors"><i class="fa fa-user"></i> {{ $spec->seats }} | <i class="fa fa-columns"></i> {{ $spec->doors }}</small>
+                                            <i class="fa fa-user-circle-o text-muted"></i> {{ $spec->seats }} 
+                                            <span style="margin: 0 4px; color: #eee;">|</span> 
+                                            <i class="fa fa-columns text-muted"></i> {{ $spec->doors }}
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             @if($spec->color)
-                                                <div style="display: flex; align-items: center;">
-                                                    <div class="img-circle" style="width: 15px; height: 15px; border: 1px solid #ddd; margin-right: 5px; background-color: {{ $spec->color }}"></div>
-                                                    <small class="text-muted">{{ $spec->color }}</small>
-                                                </div>
+                                                <div class="img-circle border shadow-sm" style="width: 18px; height: 18px; display: inline-block; background-color: {{ $spec->color }}; vertical-align: middle;" title="{{ $spec->color }}"></div>
                                             @else - @endif
                                         </td>
                                         <td class="text-center">
-                                            <i class="fa fa-circle {{ $spec->status ? 'text-success' : 'text-danger' }}" style="font-size: 10px;"></i>
+                                            <span class="label {{ $spec->status ? 'label-success' : 'label-danger' }}" style="font-size: 9px; padding: 2px 5px;">
+                                                {{ $spec->status ? 'ACTIVE' : 'INACTIVE' }}
+                                            </span>
                                         </td>
                                         <td class="text-right" style="padding-right: 15px;">
                                             <div class="btn-group">
-                                                <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-xs btn-default" title="Edit"><i class="fa fa-edit text-yellow"></i></a>
-                                                
+                                                <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-default btn-sm" title="Edit">
+                                                    <i class="fa fa-edit text-blue"></i>
+                                                </a>
                                                 <form action="{{ route('admin.specifications.destroy', $spec->id) }}" method="POST" style="display: inline;">
                                                     @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-xs btn-default" title="Delete" onclick="return confirm('Delete this specification?')">
+                                                    <button type="submit" class="btn btn-default btn-sm" title="Delete" onclick="return confirm('Delete this record?')">
                                                         <i class="fa fa-trash text-red"></i>
                                                     </button>
                                                 </form>
@@ -118,9 +127,10 @@
             </div>
         </div>
     @empty
-        <div class="well text-center" style="margin-top: 20px;">
-            <i class="fa fa-folder-open fa-3x text-muted" style="margin-bottom: 10px; display: block;"></i>
-            <p class="text-muted">No specifications found matching your criteria.</p>
+        <div class="text-center" style="padding: 100px 0; background: #fff; border: 1px dashed #ddd; border-radius: 8px;">
+            <i class="fa fa-file-text-o fa-4x text-muted" style="margin-bottom: 15px;"></i>
+            <h4 class="text-muted">No specifications recorded yet</h4>
+            <a href="{{ route('admin.specifications.create') }}" class="btn btn-primary mt-3">Add First Specification</a>
         </div>
     @endforelse
 </section>
