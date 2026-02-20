@@ -164,7 +164,6 @@
                      @click="{{ $hasVariants ? "activeModel = (activeModel === $model->id ? null : $model->id)" : "window.location.href='".route('specifications.show', ['type' => 'model', 'id' => $model->id])."'" }}">
                     
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted font-weight-bold small">{{ $model->production_start_year ?? 'All' }} — {{ $model->production_end_year ?? 'Now' }}</span>
                         @if($hasVariants)
                             <i class="fas fa-chevron-down text-muted transition" :class="activeModel === {{ $model->id }} ? 'rotate-180' : ''"></i>
                         @else
