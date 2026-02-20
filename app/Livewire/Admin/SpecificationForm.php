@@ -97,6 +97,8 @@ class SpecificationForm extends Component
                 'slug'             => Str::uuid(), // Temporary slug until sync
             ]);
 
+            dd("variant saved");
+
             // 2. Create the Specification (Technical Snapshot)
             Specification::create([
                 'variant_id'             => $variant->id,
