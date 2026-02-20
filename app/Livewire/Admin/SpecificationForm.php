@@ -12,7 +12,8 @@ class SpecificationForm extends Component
     public $brand_id;
     public $vehicle_model_id;
     public $trim_level; 
-    public $vehicleModels = [];
+    public $vehicleModels;
+    public $hideBrandModel = false; // Added to fix the "Undefined variable" error
 
     // Form Fields
     public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
@@ -22,9 +23,13 @@ class SpecificationForm extends Component
 
     public function mount($vehicle_model_id = null)
     {
-        // 1. Pre-select Brand and Model if coming from ModelForm redirect
+        // Initialize as a collection so Blade loops don't crash
+        $this->vehicleModels = collect();
+
         if ($vehicle_model_id) {
             $this->vehicle_model_id = $vehicle_model_id;
+            $this->hideBrandModel = true; // Hide fields if ID is provided
+            
             $model = VehicleModel::find($vehicle_model_id);
             if ($model) {
                 $this->brand_id = $model->brand_id;
@@ -54,7 +59,6 @@ class SpecificationForm extends Component
             'engine_displacement_id' => 'required|exists:engine_displacements,id',
             'engine_type_id' => 'required|exists:engine_types,id',
             'transmission_type_id' => 'required|exists:transmission_types,id',
-            
             'drive_type_id' => 'nullable|exists:drive_types,id',
             'horsepower' => 'nullable|numeric|min:0',
             'torque' => 'nullable|numeric|min:0',
@@ -70,13 +74,11 @@ class SpecificationForm extends Component
         $this->validate();
         
         DB::transaction(function () {
-            // 1. Create the Headless Variant first
             $variant = Variant::create([
                 'vehicle_model_id' => $this->vehicle_model_id,
-                'name' => 'Pending Sync...', // Your Specification Observer will fix this name
+                'name' => 'Pending Sync...', 
             ]);
 
-            // 2. Create Specification linked to that Variant
             Specification::create([
                 'variant_id' => $variant->id,
                 'vehicle_model_id' => $this->vehicle_model_id,

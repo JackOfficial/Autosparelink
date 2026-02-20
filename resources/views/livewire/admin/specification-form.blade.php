@@ -14,15 +14,16 @@
             </div>
         @endif
 
-        {{-- ================= Contextual Info Header ================= --}}
-        @if($vehicle_model_id)
+        {{-- Contextual Info Header --}}
+        @if($vehicle_model_id && $hideBrandModel)
             @php
                 $displayModel = \App\Models\VehicleModel::with('brand')->find($vehicle_model_id);
             @endphp
+            @if($displayModel)
             <div class="alert alert-light border shadow-sm mb-4">
                 <div class="row align-items-center">
                     <div class="col-md-2 text-center">
-                        @if($displayModel && $displayModel->photo)
+                        @if($displayModel->photo)
                             <img src="{{ asset('storage/' . $displayModel->photo) }}" class="img-fluid rounded border" style="max-height: 80px;" alt="Model Photo">
                         @else
                             <i class="fa fa-car fa-3x text-muted"></i>
@@ -34,19 +35,19 @@
                     </div>
                 </div>
             </div>
+            @endif
         @endif
 
         <form wire:submit.prevent="save">
 
-            {{-- ================= Identity & Selection ================= --}}
+            {{-- Identity & Selection --}}
             @if(!$hideBrandModel)
             <fieldset class="border p-3 mb-4 rounded shadow-sm">
                 <legend class="w-auto px-2 font-weight-bold text-primary">Identity</legend>
                 <div class="row">
-                    {{-- Brand --}}
                     <div class="col-md-4">
                         <label>Brand <span class="text-danger">*</span></label>
-                        <select wire:model.live="brand_id" class="form-control" @disabled($hideBrandModel)>
+                        <select wire:model.live="brand_id" class="form-control">
                             <option value="">Select Brand</option>
                             @foreach($brands as $brand)
                                 <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
@@ -55,10 +56,9 @@
                         @error('brand_id') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Vehicle Model --}}
                     <div class="col-md-4">
                         <label>Vehicle Model <span class="text-danger">*</span></label>
-                        <select wire:model.live="vehicle_model_id" class="form-control" @disabled(!$brand_id || $hideBrandModel)>
+                        <select wire:model.live="vehicle_model_id" class="form-control" @disabled(!$brand_id)>
                             <option value="">Select Model</option>
                             @foreach($vehicleModels as $model)
                                 <option value="{{ $model->id }}">{{ $model->model_name }}</option>
@@ -67,18 +67,16 @@
                         @error('vehicle_model_id') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Trim Level (REPLACES VARIANT DROPDOWN) --}}
                     <div class="col-md-4">
                         <label>Trim Level <span class="text-danger">*</span></label>
                         <input type="text" wire:model.live="trim_level" class="form-control" placeholder="e.g. S, XLE, AMG Line">
                         @error('trim_level') <span class="text-danger small">{{ $message }}</span> @enderror
-                        <small class="text-muted">Marketing name for this version.</small>
                     </div>
                 </div>
             </fieldset>
             @endif
 
-            {{-- ================= Core Specs (REQUIRED FOR NAME) ================= --}}
+            {{-- Core Specs --}}
             <fieldset class="border p-3 mb-4 rounded shadow-sm bg-light">
                 <legend class="w-auto px-2 font-weight-bold text-primary">Core Configuration</legend>
                 <div class="row">
@@ -95,7 +93,7 @@
                     
                     <div class="col-md-3">
                         <label>Production Year <span class="text-danger">*</span></label>
-                        <input type="number" wire:model.live="production_year" class="form-control" min="1950" max="{{ date('Y') }}">
+                        <input type="number" wire:model.live="production_year" class="form-control" min="1950" max="{{ date('Y') + 1 }}">
                         @error('production_year') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
@@ -134,27 +132,27 @@
                 </div>
             </fieldset>
 
-            {{-- ================= Live Preview Area ================= --}}
+            {{-- Live Preview Area --}}
             <div class="alert alert-primary border-dashed mb-4 text-center py-3">
                 <label class="small text-uppercase text-muted d-block mb-1">Generated System Name Preview:</label>
                 <h4 class="mb-0 font-weight-bold">
                     <i class="fa fa-tag me-2"></i>
-                    {{ $brand_id ? $brands->find($brand_id)->brand_name : 'Brand' }}
-                    {{ $vehicle_model_id && $vehicleModels->find($vehicle_model_id) ? $vehicleModels->find($vehicle_model_id)->model_name : 'Model' }}
+                    {{ $brand_id ? ($brands->firstWhere('id', $brand_id)->brand_name ?? '') : 'Brand' }}
+                    {{ $vehicle_model_id ? ($vehicleModels->firstWhere('id', $vehicle_model_id)->model_name ?? '') : 'Model' }}
                     {{ $trim_level ?: '[Trim]' }}
-                    {{ $body_type_id ? $bodyTypes->find($body_type_id)->name : '[Body]' }}
+                    {{ $body_type_id ? ($bodyTypes->firstWhere('id', $body_type_id)->name ?? '') : '[Body]' }}
                     {{ $production_year ?: '[Year]' }}
-                    {{ $engine_displacement_id ? $engineDisplacements->find($engine_displacement_id)->name : '[Displ]' }}
-                    {{ $engine_type_id ? $engineTypes->find($engine_type_id)->name : '[Fuel]' }}
-                    {{ $transmission_type_id ? $transmissionTypes->find($transmission_type_id)->name : '[Gearbox]' }}
+                    {{ $engine_displacement_id ? ($engineDisplacements->firstWhere('id', $engine_displacement_id)->name ?? '') : '[Displ]' }}
+                    {{ $engine_type_id ? ($engineTypes->firstWhere('id', $engine_type_id)->name ?? '') : '[Fuel]' }}
+                    {{ $transmission_type_id ? ($transmissionTypes->firstWhere('id', $transmission_type_id)->name ?? '') : '[Gearbox]' }}
                 </h4>
             </div>
 
-            {{-- ================= Optional Technical Details ================= --}}
+            {{-- Technical Details --}}
             <div class="row">
                 <div class="col-md-6">
                     <fieldset class="border p-3 mb-4 rounded">
-                        <legend class="w-auto px-2 font-weight-bold text-primary">Performance & Drivetrain</legend>
+                        <legend class="w-auto px-2 font-weight-bold text-primary">Performance</legend>
                         <div class="row">
                             <div class="col-md-6 mb-2">
                                 <label>Drive Type</label>
@@ -169,43 +167,23 @@
                                 <label>Horsepower (HP)</label>
                                 <input type="number" wire:model="horsepower" class="form-control">
                             </div>
-                            <div class="col-md-6">
-                                <label>Torque (Nm)</label>
-                                <input type="number" wire:model="torque" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>Fuel Capacity (L)</label>
-                                <input type="number" wire:model="fuel_capacity" class="form-control" step="0.1">
-                            </div>
                         </div>
                     </fieldset>
                 </div>
 
                 <div class="col-md-6">
                     <fieldset class="border p-3 mb-4 rounded">
-                        <legend class="w-auto px-2 small font-weight-bold">Interior & Exterior</legend>
+                        <legend class="w-auto px-2 font-weight-bold text-primary">Interior</legend>
                         <div class="row">
                             <div class="col-md-4 mb-2">
                                 <label>Seats</label>
                                 <input type="number" wire:model="seats" class="form-control">
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <label>Doors</label>
-                                <input type="number" wire:model="doors" class="form-control">
-                            </div>
-                            <div class="col-md-4 mb-2">
-                                <label>Steering</label>
-                                <select wire:model="steering_position" class="form-control">
-                                    <option value="">Select</option>
-                                    <option value="LEFT">LHD</option>
-                                    <option value="RIGHT">RHD</option>
-                                </select>
-                            </div>
-                            <div class="col-md-12" x-data="{ color: @entangle('color') }">
+                            <div class="col-md-8" x-data="{ color: @entangle('color') }">
                                 <label>Color</label>
                                 <div class="d-flex gap-2">
-                                    <div class="rounded-circle border" :style="'background-color: ' + color" style="width: 38px; height: 38px;"></div>
-                                    <input type="text" x-model="color" class="form-control" placeholder="e.g. Pearl White">
+                                    <div class="rounded-circle border" :style="'background-color: ' + color" style="width: 38px; height: 38px; flex-shrink: 0;"></div>
+                                    <input type="text" x-model="color" class="form-control" placeholder="Pearl White">
                                     <input type="color" x-model="color" class="form-control p-0 border-0" style="width: 40px;">
                                 </div>
                             </div>
