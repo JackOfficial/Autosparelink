@@ -67,43 +67,53 @@ public function search(Request $request)
     $gen = $vehicle['General Information'];
     $spec = $vehicle['Vehicle Specification'];
 
-    // 1. Identify the Core (Brand & Model)
+    // 1. BRAND MATCH
     $brand = Brand::whereRaw('UPPER(brand_name) = ?', [strtoupper($gen['Make'])])->first();
-    if (!$brand) return back()->with('error', 'Brand not found');
+    if (!$brand) return back()->with('vin', 'Brand not found');
 
+    // 2. SMART MODEL MATCH
+    $apiModelRaw = strtoupper($gen['Model']);
     $model = VehicleModel::where('brand_id', $brand->id)
-        ->whereRaw('UPPER(model_name) LIKE ?', ["%" . strtoupper($gen['Model']) . "%"])
+        ->where(function($q) use ($apiModelRaw) {
+            $q->whereRaw('? LIKE UPPER(CONCAT("%", model_name, "%"))', [$apiModelRaw])
+              ->orWhereRaw('UPPER(model_name) LIKE ?', ["%$apiModelRaw%"]);
+        })
         ->first();
-    if (!$model) return back()->with('error', 'Model not found');
 
-    // 2. SMART VARIANT SEARCH
-    // We create an array of "must-have" and "nice-to-have" tokens from the API
+    // Fallback to first word (e.g., "VERSO")
+    if (!$model) {
+        $firstWord = strtoupper(strtok($apiModelRaw, ' '));
+        $model = VehicleModel::where('brand_id', $brand->id)
+            ->whereRaw('UPPER(model_name) LIKE ?', ["%$firstWord%"])
+            ->first();
+    }
+
+    if (!$model) return back()->with('vin', 'Model not found');
+
+    // 3. SMART VARIANT SEARCH (Tokens)
     $searchTokens = collect([
         $gen['Year'],
-        $gen['Trim level'], // Might be null
+        $gen['Trim level'],
         $gen['Body style'],
         $spec['Body type'],
         $gen['Fuel type'],
-        strtok($gen['Engine type'], ' '), // Get "1.4" from "1.4 D4-D"
-        strtok($gen['Transmission'], '-'), // Get "6" from "6-Speed"
+        strtok($gen['Engine type'], ' '),
+        strtok($gen['Transmission'], ' '), // Changed from '-' to ' ' to get "6" from "6-Speed"
     ])->filter()->unique();
 
     $matchedVariant = Variant::where('vehicle_model_id', $model->id)
         ->where(function ($query) use ($searchTokens, $gen) {
-            // Priority 1: The Year (Strongest Anchor)
+            // Anchor search with the Year
             $query->where('name', 'LIKE', "%{$gen['Year']}%");
 
-            // Priority 2: Use the tokens to narrow down
             foreach ($searchTokens as $token) {
-                if (strlen($token) > 1) { // Ignore single characters
+                if (strlen($token) > 1) { 
                     $query->where('name', 'LIKE', "%{$token}%");
                 }
             }
         })->first();
 
-    // 3. ULTIMATE FALLBACK
-    // If we still didn't find it, try searching for ANY variant of this model 
-    // that contains at least the YEAR and the FUEL TYPE.
+    // 4. ULTIMATE FALLBACK
     if (!$matchedVariant) {
         $matchedVariant = Variant::where('vehicle_model_id', $model->id)
             ->where('name', 'LIKE', "%{$gen['Year']}%")
@@ -111,7 +121,9 @@ public function search(Request $request)
             ->first();
     }
 
-    dd($model);
+    dd($matchedVariant);
+
+    // dd($matchedVariant); // Use this to verify the final match!
 
     return view('parts.index', [
         'brandId' => $brand->id,
@@ -125,7 +137,7 @@ public function searchByVin(Request $request, VinDecoderService $decoder)
 {
     $data = $decoder->decode($request->vin);
     
-    if (!$data) return back()->with('error', 'VIN not recognized.');
+    if (!$data) return back()->with('vin', 'VIN not recognized.');
 
     // Match Brand
     $brand = Brand::where('brand_name', 'LIKE', $data['make'])->first();
@@ -156,7 +168,7 @@ public function vinSearch(Request $request, VinDecoderService $decoder)
         $vehicleData = $decoder->decode($vin);
 
         if (!$vehicleData) {
-            return back()->with('error', 'Vehicle not found or invalid VIN.');
+            return back()->with('vin', 'Vehicle not found or invalid VIN.');
         }
 
         // Logic to match $vehicleData['make'] to your Brand model...
