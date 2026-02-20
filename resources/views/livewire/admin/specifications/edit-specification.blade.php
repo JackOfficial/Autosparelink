@@ -40,13 +40,9 @@
                                 </div>
 
                                 <div class="form-group col-md-4">
-                                    <label>Variant</label>
-                                    <select wire:model.live="variant_id" class="form-control">
-                                        <option value="">Select Variant (optional)</option>
-                                        @foreach($filteredVariants as $variant)
-                                            <option value="{{ $variant->id }}">{{ $variant->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label>Trim Level</label>
+                                    <input type="text" wire:model="trim_level" class="form-control" placeholder="e.g. XL, Premium, Sport">
+                                    <small class="form-text text-muted">Example: <strong>Lariat, Premium, or SE</strong></small>
                                 </div>
                             </div>
                         </fieldset>
@@ -204,7 +200,7 @@
                                 {{ $vehicle_model_id ? (\App\Models\VehicleModel::find($vehicle_model_id)?->model_name) : 'Model' }}
                             </h6>
                             <div class="badge badge-secondary px-3">
-                                {{ $variant_id ? (\App\Models\Variant::find($variant_id)?->name) : 'Base Variant' }}
+                                {{ $trim_level ?: 'Base Trim' }}
                             </div>
                             
                             <div class="row mt-4 px-2">
