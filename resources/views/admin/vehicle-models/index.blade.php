@@ -109,7 +109,12 @@
                                 </td>
                                 <td>
                                     <strong>{{ $model->model_name }}</strong>
-                                    <div class="small text-muted">Year: {{ Str::limit($model->description, 50) ?? 'N/A' }}</div>
+                                    <div class="small text-muted">Year: {{ $model->year ?? 'N/A' }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-light border">
+                                        {{ Str::limit($model->description, 200) ?? 'No description'}}
+                                    </span>
                                 </td>
                                 <td>
                                     <span class="badge badge-{{ $model->status ? 'success' : 'secondary' }}">
