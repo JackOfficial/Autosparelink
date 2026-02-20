@@ -87,7 +87,7 @@
                         <tr>
                             <th style="width: 80px">Photo</th>
                             <th>Model Identity</th>
-                            <th>Production Range</th>
+                            <th>Description</th>
                             <th>Status</th>
                             <th class="text-right">Actions</th>
                         </tr>
@@ -109,7 +109,7 @@
                                 </td>
                                 <td>
                                     <strong>{{ $model->model_name }}</strong>
-                                    <div class="small text-muted">Year: {{ $model->year ?? 'N/A' }}</div>
+                                    <div class="small text-muted">Year: {{ Str::limit($model->description, 50) ?? 'N/A' }}</div>
                                 </td>
                                 <td>
                                     <span class="badge badge-light border">
