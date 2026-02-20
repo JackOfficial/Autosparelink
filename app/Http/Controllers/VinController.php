@@ -95,6 +95,7 @@ public function search(Request $request)
             }
         })->first();
 
+        dd($matchedVariant);
     // 4. HAND-OFF TO VIEW
     return view('parts.index', [
         'brandId'     => $brand->id,
