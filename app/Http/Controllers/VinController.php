@@ -30,7 +30,7 @@ public function search(Request $request)
         'Make' => 'TOYOTA',
         'Model' => 'VERSO',
         'Year' => '2011',
-        'Trim level' => '',
+        'Trim level' => 'S',
         'Body style' => 'MPV',
         'Engine type' => '1.4 D4-D (NLP121_)',
         'Fuel type' => 'Diesel',
