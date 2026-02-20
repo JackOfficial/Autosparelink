@@ -112,7 +112,7 @@
                                     <div class="small text-muted">Year: {{ $model->year ?? 'N/A' }}</div>
                                 </td>
                                 <td>
-                                    <span class="badge badge-light border">
+                                    <span class="">
                                         {{ Str::limit($model->description, 200) ?? 'No description'}}
                                     </span>
                                 </td>
