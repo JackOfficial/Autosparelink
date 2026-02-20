@@ -123,7 +123,7 @@
 @endpush
 
 @section('content')
-<div class="container-fluid py-5" x-data="{ modelSearch: '', activeModel: null }">
+<div class="container py-5" x-data="{ modelSearch: '', activeModel: null }">
     
     <div class="brand-hero">
         @if($brand->brand_logo)
