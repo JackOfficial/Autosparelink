@@ -23,7 +23,7 @@ public function vehicle_model(string $id)
         return view('errors.brand-not-found');
     }
 
-    $models = VehicleModel::with(['variants.engine_type', 'variants.transmission_type'])
+    $models = VehicleModel::with(['specifications.engineType', 'specifications.transmissionType'])
         ->where('brand_id', $id)
         ->latest()
         ->get();
