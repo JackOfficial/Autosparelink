@@ -4,6 +4,28 @@
 
 @section('content')
 
+<style>
+    /* Rotates chevron to 'up' position when section is expanded (default) */
+    [data-toggle="collapse"] .fa-chevron-down {
+        transition: transform 0.3s ease;
+        transform: rotate(180deg);
+    }
+    /* Rotates chevron back to 'down' position when section is collapsed */
+    [data-toggle="collapse"].collapsed .fa-chevron-down {
+        transform: rotate(0deg);
+    }
+    .spec-pill {
+        background-color: #ebf5ff; 
+        color: #3c8dbc; 
+        padding: 2px 12px; 
+        border-radius: 20px; 
+        font-size: 12px; 
+        font-weight: 600;
+        border: 1px solid #d1e9ff;
+        display: inline-block;
+    }
+</style>
+
 <section class="content-header">
     <h1>Vehicle Specifications</h1>
     <ol class="breadcrumb">
@@ -26,18 +48,16 @@
     {{-- GROUPED SPECIFICATIONS --}}
     @forelse($groupedSpecs as $key => $specGroup)
         @php
-            // Robust explode handling
             $parts = explode('|', $key);
             $brand = $parts[0] ?? 'N/A';
             $model = $parts[1] ?? 'N/A';
             $variantName = $parts[2] ?? 'Standard';
             
-            // Generate unique ID for collapse based on the first item in group
             $firstSpec = $specGroup->first();
-            $collapseId = 'variant-group-' . ($firstSpec->id ?? loop->index);
+            $collapseId = 'variant-group-' . ($firstSpec->id ?? $loop->index);
         @endphp
 
-        <div class="box box-solid box-default shadow-sm" style="border-radius: 4px; border-left: 3px solid #3c8dbc; margin-bottom: 15px;">
+        <div class="box box-solid box-default shadow-sm" style="border-radius: 4px; border-left: 3px solid #3c8dbc; margin-bottom: 20px;">
             <div class="box-header with-border" 
                  data-toggle="collapse" 
                  data-target="#{{ $collapseId }}" 
@@ -45,11 +65,9 @@
                 
                 <div class="row">
                     <div class="col-xs-9">
-                        {{-- Small Eyebrow for Brand --}}
                         <span class="text-uppercase" style="font-size: 10px; font-weight: 700; color: #999; letter-spacing: 1.2px; display: block; margin-bottom: 2px;">
                             {{ $brand }}
                         </span>
-                        {{-- Main Header --}}
                         <span style="font-size: 16px; font-weight: 600; color: #333;">
                             {{ $model }} 
                             @if($variantName)
@@ -59,35 +77,29 @@
                         </span>
                     </div>
                     <div class="col-xs-3 text-right">
-    <div style="display: inline-flex; align-items: center; gap: 10px;">
-        <span style="
-            background-color: #ebf5ff; 
-            color: #3c8dbc; 
-            padding: 2px 12px; 
-            border-radius: 20px; 
-            font-size: 12px; 
-            font-weight: 600;
-            border: 1px solid #d1e9ff;">
-            {{ $specGroup->count() }} {{ Str::plural('Spec', $specGroup->count()) }}
-        </span>
-        <i class="fa fa-chevron-down text-muted" style="font-size: 12px; transition: transform 0.3s;"></i>
-    </div>
-</div>
+                        <div style="display: inline-flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <span class="spec-pill">
+                                {{ $specGroup->count() }} {{ Str::plural('Spec', $specGroup->count()) }}
+                            </span>
+                            <i class="fa fa-chevron-down text-muted" style="font-size: 12px;"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            {{-- 'in' class ensures it is visible on load --}}
             <div id="{{ $collapseId }}" class="panel-collapse collapse in">
                 <div class="box-body no-padding">
                     <div class="table-responsive">
                         <table class="table table-hover table-striped" style="margin-bottom: 0;">
                             <thead>
-                                <tr style="background-color: #fcfcfc; color: #777; font-size: 12px;">
-                                    <th style="padding-left: 15px; width: 15%;">Body Type</th>
+                                <tr style="background-color: #fcfcfc; color: #777; font-size: 11px; text-transform: uppercase;">
+                                    <th style="padding-left: 15px;">Body Type</th>
                                     <th>Trans.</th>
                                     <th>Fuel</th>
-                                    <th>Displacement</th>
-                                    <th>Power / Torque</th>
-                                    <th>Interior</th>
+                                    <th>Engine</th>
+                                    <th>Output</th>
+                                    <th>Config.</th>
                                     <th class="text-center">Color</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-right" style="padding-right: 15px;">Actions</th>
@@ -97,38 +109,38 @@
                                 @foreach($specGroup as $spec)
                                     <tr>
                                         <td style="padding-left: 15px;">
-                                            <span class="text-bold">{{ $spec->bodyType->name ?? '-' }}</span>
+                                            <span class="text-bold" style="color: #444;">{{ $spec->bodyType->name ?? '-' }}</span>
                                         </td>
-                                        <td><span class="label label-default" style="font-weight: normal;">{{ $spec->transmissionType->name ?? '-' }}</span></td>
+                                        <td><span class="label label-default" style="font-weight: 400; background-color: #f0f0f0; color: #555; border: 1px solid #ddd;">{{ $spec->transmissionType->name ?? '-' }}</span></td>
                                         <td>{{ $spec->engineType->name ?? '-' }}</td>
-                                        <td><code style="background: #f4f4f4; color: #555;">{{ $spec->engineDisplacement->name ?? '-' }}</code></td>
+                                        <td><code style="background: #f8f8f8; border: 1px solid #eee; color: #e83e8c;">{{ $spec->engineDisplacement->name ?? '-' }}</code></td>
                                         <td>
                                             <span style="font-weight: 600;">{{ $spec->horsepower ?? '0' }} <small>HP</small></span>
                                             <div class="text-muted" style="font-size: 11px;">{{ $spec->torque ?? '0' }} Nm</div>
                                         </td>
-                                        <td>
-                                            <i class="fa fa-user-circle-o text-muted"></i> {{ $spec->seats }} 
+                                        <td class="text-muted">
+                                            <i class="fa fa-user-circle-o"></i> {{ $spec->seats }} 
                                             <span style="margin: 0 4px; color: #eee;">|</span> 
-                                            <i class="fa fa-columns text-muted"></i> {{ $spec->doors }}
+                                            <i class="fa fa-columns"></i> {{ $spec->doors }}
                                         </td>
                                         <td class="text-center">
                                             @if($spec->color)
-                                                <div class="img-circle border shadow-sm" style="width: 18px; height: 18px; display: inline-block; background-color: {{ $spec->color }}; vertical-align: middle;" title="{{ $spec->color }}"></div>
+                                                <div class="img-circle border" style="width: 16px; height: 16px; display: inline-block; background-color: {{ $spec->color }}; vertical-align: middle; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" title="{{ $spec->color }}"></div>
                                             @else - @endif
                                         </td>
                                         <td class="text-center">
-                                            <span class="label {{ $spec->status ? 'label-success' : 'label-danger' }}" style="font-size: 9px; padding: 2px 5px;">
-                                                {{ $spec->status ? 'ACTIVE' : 'INACTIVE' }}
+                                            <span class="label {{ $spec->status ? 'label-success' : 'label-danger' }}" style="font-size: 9px; padding: 2px 6px; text-transform: uppercase;">
+                                                {{ $spec->status ? 'Active' : 'Inactive' }}
                                             </span>
                                         </td>
                                         <td class="text-right" style="padding-right: 15px;">
                                             <div class="btn-group">
-                                                <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-default btn-sm" title="Edit">
+                                                <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-default btn-sm" style="border-radius: 3px 0 0 3px;">
                                                     <i class="fa fa-edit text-blue"></i>
                                                 </a>
                                                 <form action="{{ route('admin.specifications.destroy', $spec->id) }}" method="POST" style="display: inline;">
                                                     @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-default btn-sm" title="Delete" onclick="return confirm('Delete this record?')">
+                                                    <button type="submit" class="btn btn-default btn-sm" style="border-radius: 0 3px 3px 0;" onclick="return confirm('Delete this specification?')">
                                                         <i class="fa fa-trash text-red"></i>
                                                     </button>
                                                 </form>
