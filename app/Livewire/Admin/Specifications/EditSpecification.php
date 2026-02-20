@@ -91,6 +91,8 @@ class EditSpecification extends Component
                     'status' => $this->status,
                 ]);
 
+                dd("here");
+
                 // Sync Variant Name
                 if ($spec->variant) {
                     $spec->variant->update(['vehicle_model_id' => $this->vehicle_model_id]);
