@@ -10,12 +10,12 @@ use Illuminate\Http\Request;
 class VehicleModelController extends Controller
 {
   public function index(){
-    dd("here");
     $models = VehicleModel::with(['brand', 'variants'])->latest()->get();
     return view('models', compact('models'));
   }
 
   public function vehicle_model(string $id){
+    dd("here");
      $models = VehicleModel::with(['brand', 'variants'])
         ->where('brand_id', $id)
         ->latest()
