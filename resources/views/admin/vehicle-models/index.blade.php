@@ -112,11 +112,6 @@
                                     <div class="small text-muted">Year: {{ Str::limit($model->description, 50) ?? 'N/A' }}</div>
                                 </td>
                                 <td>
-                                    <span class="badge badge-light border">
-                                        {{ $model->production_start_year }} - {{ $model->production_end_year ?? 'Present' }}
-                                    </span>
-                                </td>
-                                <td>
                                     <span class="badge badge-{{ $model->status ? 'success' : 'secondary' }}">
                                         {{ $model->status ? 'Active' : 'Inactive' }}
                                     </span>
