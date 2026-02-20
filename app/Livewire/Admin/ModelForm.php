@@ -8,65 +8,75 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ModelForm extends Component
 {
     use WithFileUploads;
 
     // ================= MODEL FIELDS =================
-    public $brand_id;
+  public $brand_id;
     public $model_name;
-    public $photos = []; // Temporary uploaded files
+    public $photos = [];
     public $description;
     public $status = 1;
 
-    // ================= VALIDATION RULES =================
     protected function rules()
     {
         return [
             'brand_id' => 'required|exists:brands,id',
-            'model_name' => 'required|string|max:255',
-            'photos.*' => 'image|max:5120', // 5MB per photo
+            // This ensures the model_name is unique in the vehicle_models table
+            'model_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('vehicle_models', 'model_name')
+                    ->where('brand_id', $this->brand_id) // Only blocks if same brand has same name
+            ],
+            'photos.*' => 'image|max:5120',
         ];
     }
 
-    // ================= SAVE FUNCTION =================
     public function save()
     {
+        // 1. This will now stop the process and show a red error if a duplicate exists
         $this->validate();
 
-        DB::transaction(function () {
+        $newModelId = null;
 
-            // 1. Create Vehicle Model
-            $model = VehicleModel::create([
-                'brand_id' => $this->brand_id,
-                'model_name' => $this->model_name,
-                'description' => $this->description,
-                'status' => $this->status,
-                // If your DB column still exists, we default it to 1 or remove it from here
-                'has_variants' => 1, 
+        try {
+            DB::transaction(function () use (&$newModelId) {
+                $model = VehicleModel::create([
+                    'brand_id' => $this->brand_id,
+                    'model_name' => $this->model_name,
+                    'description' => $this->description,
+                    'status' => $this->status,
+                    'has_variants' => 1, 
+                ]);
+
+                $newModelId = $model->id;
+
+                foreach ($this->photos as $photo) {
+                    $filename = Str::slug($this->model_name) . '-' . time() . '.' . $photo->getClientOriginalExtension();
+                    $path = $photo->storeAs('vehicle_models/' . $model->id, $filename, 'public');
+
+                    $model->photos()->create([
+                        'file_path' => $path,
+                        'caption' => null,
+                    ]);
+                }
+            });
+
+            session()->flash('success', 'Vehicle model created successfully.');
+            
+            return redirect()->route('admin.specifications.create', [
+                'vehicle_model_id' => $newModelId
             ]);
 
-            // 2. Save uploaded photos with SEO-friendly filenames
-            foreach ($this->photos as $photo) {
-                $filename = Str::slug($this->model_name) . '-' . time() . '.' . $photo->getClientOriginalExtension();
-                $path = $photo->storeAs('vehicle_models/' . $model->id, $filename, 'public');
-
-                $model->photos()->create([
-                    'file_path' => $path,
-                    'caption' => null,
-                ]);
-            }
-
-            // 3. Redirect to Specification Form
-            // Since variants are now "headless" and managed via Specs, 
-            // we always go straight to the spec builder.
-            session()->flash('success', 'Vehicle model created. Now, let\'s add its first specification.');
-            
-            // return redirect()->route('admin.specifications.create', [
-            //     'vehicle_model_id' => $model->id
-            // ]);
-        });
+        } catch (\Exception $e) {
+            logger($e->getMessage());
+            $this->addError('model_name', 'A database error occurred while saving.');
+        }
     }
 
     // ================= RENDER =================
