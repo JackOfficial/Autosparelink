@@ -121,6 +121,7 @@ class SpecificationForm extends Component
             ]);
 
             // 3. Trigger the sync to update name & slug
+            dd("Here");
             $variant->refresh(); 
             // $variant->syncNameFromSpec(); 
         });
