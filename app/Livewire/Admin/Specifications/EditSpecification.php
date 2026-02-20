@@ -96,9 +96,10 @@ class EditSpecification extends Component
                     $spec->variant->update(['vehicle_model_id' => $this->vehicle_model_id]);
                     $spec->variant->refresh();
                     $spec->variant->syncNameFromSpec();
+                    dd("here");
                 }
 
-                 dd("here");
+                 
             });
 
             session()->flash('success', 'Specification and Variant name updated!');
