@@ -149,7 +149,7 @@
 
     <div class="row mb-5 mt-5">
         <div class="col-12 d-flex justify-content-between align-items-end mb-4 px-4">
-            <h2 class="font-weight-bold m-0">Available Series</h2>
+            <h2 class="font-weight-bold m-0">Available Models</h2>
             <input type="text" x-model="modelSearch" class="form-control border-0 shadow-sm bg-white" 
                    style="max-width: 250px; border-radius: 12px;" placeholder="Filter models...">
         </div>
