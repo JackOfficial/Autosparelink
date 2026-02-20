@@ -101,6 +101,7 @@ class EditSpecification extends Component
                 // Ensure variant has the same model ID (in case you changed the brand/model)
                 $spec->variant->update(['vehicle_model_id' => $this->vehicle_model_id]);
                 
+                
                 // Refresh relationship and sync name
                 $spec->variant->refresh();
                 $spec->variant->syncNameFromSpec();
