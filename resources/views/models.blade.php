@@ -6,255 +6,193 @@
 
 @section('style')
 <style>
-body { background: #f5f7fa !important; }
-.breadcrumb { background: #ffffff !important; border-radius: 6px; }
-.genuine-search-box { border-left: 4px solid #007bff; }
+    :root { --brand-primary: #007bff; --bg-soft: #f8f9fa; }
+    body { background: var(--bg-soft) !important; font-family: 'Inter', sans-serif; }
+    
+    /* Modern Glass Effect */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-.model-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 18px;
-    transition: all .25s ease-in-out;
-    border: 1px solid #e6e6e6;
-}
-.model-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0px 8px 18px rgba(0,0,0,0.08);
-}
+    .hero-search {
+        background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+        color: white;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+    }
 
-.model-card h6 a { font-weight: 600; color: #222; }
-.model-card h6 a:hover { color: #007bff !important; }
+    .model-card {
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 20px;
+        background: #fff;
+        height: 100%;
+        transition: 0.3s;
+    }
+    .model-card:hover {
+        border-color: var(--brand-primary);
+        box-shadow: 0 10px 25px rgba(0,123,255,0.1);
+        transform: translateY(-5px);
+    }
 
-.model-years { font-size: 13px; color: #888; }
+    .variant-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #444;
+        margin-bottom: 5px;
+        background: #f8f9fb;
+        transition: 0.2s;
+    }
+    .variant-link:hover { background: #eef4ff; color: var(--brand-primary); }
 
-.toggle-btn { border: none; background: transparent; padding: 4px; }
-.toggle-btn i { transition: 0.3s ease; font-size: 14px; }
-
-.variant-item {
-    font-size: 13px;
-    padding: 6px 0;
-    color: #444;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.variant-item:hover { background: #f1f5ff; }
-
-.variant-badge {
-    font-size: 10px;
-    padding: 2px 5px;
-    margin-left: 3px;
-    border-radius: 4px;
-}
-
-.model-name-disabled {
-    cursor: default;
-    opacity: 0.85;
-}
-
-.model-container { margin-bottom: 25px; }
-
-#faqAccordion i { transition: transform .3s ease; }
-#faqAccordion i.rotate { transform: rotate(180deg); }
+    .rotate-180 { transform: rotate(180deg); }
+    [x-cloak] { display: none !important; }
 </style>
 @endsection
 
 @section('content')
+<div x-data="{ 
+    modelSearch: '', 
+    activeModel: null,
+    itemsCount: {{ $models->count() }}
+}">
 
-<!-- Breadcrumb -->
-<div class="container-fluid px-xl-5 mt-3">
-    <nav class="breadcrumb mb-3">
-        <a class="breadcrumb-item text-dark" href="{{ route('home') }}">Home</a>
-        @if($brand)
-            <span class="breadcrumb-item active">{{ $brand->brand_name }}</span>
-        @endif
-    </nav>
-</div>
-
-<!-- Page Header -->
-@if($brand)
-<div class="container-fluid px-xl-5">
-    <div class="bg-white p-4 shadow-sm rounded genuine-search-box mb-4">
-        <h3 class="text-uppercase mb-1 fw-bold">Genuine Parts Locator</h3>
-        <small class="text-muted">
-            Enter VIN or Frame Number to search genuine {{ $brand->brand_name }} parts
-        </small>
-    </div>
-</div>
-@endif
-
-<!-- Search Box -->
-@if($brand)
-<div class="container-fluid px-xl-5 mb-4">
-    <div class="bg-white p-4 shadow-sm rounded">
-        <form class="row g-3 align-items-center" method="GET"
-              action="{{ route('brand.models', $brand->id) }}">
-            <div class="col-lg-10 col-md-9 col-sm-12 mb-2">
-                <input type="text" name="query"
-                       class="form-control form-control-lg"
-                       placeholder="Enter VIN or Frame Number"
-                       value="{{ request('query') }}">
+    <div class="container-fluid px-xl-5 mt-4">
+        <div class="hero-search p-5 shadow-lg mb-5">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="display-5 fw-bold mb-2">Find Genuine {{ $brand?->brand_name }} Parts</h1>
+                    <p class="opacity-75">Access the official technical catalog by entering your vehicle identification.</p>
+                    
+                    <form class="mt-4" method="GET" action="{{ route('brand.models', $brand?->id) }}">
+                        <div class="input-group input-group-lg shadow">
+                            <input type="text" name="query" class="form-control border-0" 
+                                   placeholder="Enter 17-digit VIN or Frame Number..." value="{{ request('query') }}">
+                            <button class="btn btn-primary px-4">Identify Vehicle</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-lg-5 d-none d-lg-block text-center">
+                    <i class="fas fa-microchip fa-10x opacity-25"></i>
+                </div>
             </div>
-            <div class="col-lg-2 col-md-3 col-sm-12 mb-2">
-                <button class="btn btn-primary btn-lg w-100">Search</button>
-            </div>
-        </form>
-    </div>
-</div>
-@endif
-
-<!-- Brand Header -->
-@if($brand)
-<!-- Brand Models Header -->
-<div class="container-fluid px-xl-5">
-    <div class="bg-white p-4 shadow-sm rounded mb-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-        <div>
-            <h4 class="text-uppercase mb-1 fw-bold">
-                @if($brand && $brand->brand_logo)
-                    <img src="{{ asset('storage/' . $brand->brand_logo) }}" 
-                         style="width: 45px; margin-top:-5px;" />
-                @endif
-                @if($brand)
-                    {{ $brand->brand_name }} Models
-                @else
-                    Vehicle Models
-                @endif
-            </h4>
-            <small class="text-muted">
-                Select your vehicle model to browse the parts catalog
-            </small>
-        </div>
-        <div class="mt-3 mt-md-0">
-            <span class="text-muted small">
-                Showing <strong>{{ count($models) }}</strong> models
-            </span>
         </div>
     </div>
-</div>
-@endif
 
-<!-- Models Grid -->
-<div class="container-fluid px-xl-5">
-    <div class="row">
-        @forelse($models as $model)
-            <div class="col-md-3 col-sm-6 model-container">
-                <div class="model-card h-100">
+    <div class="container-fluid px-xl-5">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-end mb-4 gap-3">
+            <div>
+                <h2 class="fw-bold mb-0">Browse by Model</h2>
+                <p class="text-muted">Select a model series to see specific variants.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="position-relative">
+                    <i class="fas fa-filter position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" x-model="modelSearch" class="form-control ps-5 rounded-pill" 
+                           placeholder="Filter models (e.g. RAV4, Camry)...">
+                </div>
+            </div>
+        </div>
 
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">
-                            @if($model->variants->count())
-                                <span class="model-name-disabled">{{ $model->model_name }}</span>
-                            @else
-                                <a href="{{ route('specifications.show', ['type' => 'model', 'id' => $model->id]) }}">
-                                    {{ $model->model_name }}
-                                </a>
+        <div class="row g-4">
+            @forelse($models as $model)
+                <div class="col-xl-3 col-lg-4 col-md-6" 
+                     x-show="modelSearch === '' || '{{ strtolower($model->model_name) }}'.includes(modelSearch.toLowerCase())"
+                     x-transition>
+                    
+                    <div class="model-card shadow-sm">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="fw-bold mb-1">{{ $model->model_name }}</h5>
+                                <span class="badge bg-light text-muted border">
+                                    {{ $model->production_start_year ?? '?' }} - {{ $model->production_end_year ?? 'Present' }}
+                                </span>
+                            </div>
+                            @if($brand->brand_logo)
+                                <img src="{{ asset('storage/' . $brand->brand_logo) }}" width="30" class="opacity-50">
                             @endif
-                        </h6>
+                        </div>
+
+                        <hr class="my-3 opacity-50">
 
                         @if($model->variants->count())
-                        <button class="toggle-btn" data-toggle="collapse"
-                                data-target="#variants{{ $model->id }}">
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
+                            <button @click="activeModel = (activeModel === {{ $model->id }} ? null : {{ $model->id }})" 
+                                    class="btn btn-outline-primary btn-sm w-100 d-flex justify-content-between align-items-center">
+                                <span>{{ $model->variants->count() }} Variants Found</span>
+                                <i class="fas fa-chevron-down transition" :class="activeModel === {{ $model->id }} ? 'rotate-180' : ''"></i>
+                            </button>
+
+                            <div x-show="activeModel === {{ $model->id }}" 
+                                 x-collapse x-cloak class="mt-3">
+                                @foreach($model->variants as $variant)
+                                    <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $variant->id]) }}" 
+                                       class="variant-link">
+                                        <div>
+                                            <span class="fw-semibold">{{ $variant->name }}</span>
+                                            <div class="small text-muted">{{ $variant->engine_type?->name }}</div>
+                                        </div>
+                                        <i class="fas fa-arrow-right fa-xs opacity-50"></i>
+                                    </a>
+                                @endforeach
+                            </div>
+                        @else
+                            <a href="{{ route('specifications.show', ['type' => 'model', 'id' => $model->id]) }}" 
+                               class="btn btn-primary btn-sm w-100">View Catalog</a>
                         @endif
                     </div>
+                </div>
+            @empty
+                <div class="col-12 text-center py-5">
+                    <img src="https://illustrations.popsy.co/gray/box.svg" width="200" class="mb-3">
+                    <h4 class="text-muted">No models found in this category.</h4>
+                </div>
+            @endforelse
+        </div>
+    </div>
 
-                    <div class="model-years mt-2">
-                        {{ $model->production_start_year ?? 'Present' }}
-                        -
-                        {{ $model->production_end_year ?? 'Present' }}
+    <div class="container-fluid px-xl-5 mt-5 pb-5">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="bg-white p-4 rounded-4 shadow-sm h-100">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                            <i class="fas fa-info-circle text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-0">About {{ $brand?->brand_name }}</h4>
                     </div>
+                    <p class="text-muted" style="line-height: 1.7;">{{ $brand?->description }}</p>
+                </div>
+            </div>
 
-                    @if($model->variants->count())
-                    <div class="collapse mt-3" id="variants{{ $model->id }}">
-                        @foreach($model->variants as $variant)
-                            <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $variant->id]) }}"
-                               class="variant-item list-group-item border-0 bg-transparent">
-                                <span>{{ $variant->name ?? 'Variant' }}</span>
-                                <span>
-                                    @if($variant->engine_type)
-                                        <span class="badge bg-info variant-badge">{{ $variant->engine_type->name }}</span>
-                                    @endif
-                                    @if($variant->transmission_type)
-                                        <span class="badge bg-secondary variant-badge">{{ $variant->transmission_type->name }}</span>
-                                    @endif
-                                </span>
-                            </a>
+            <div class="col-lg-7">
+                <div class="bg-white p-4 rounded-4 shadow-sm">
+                    <h4 class="fw-bold mb-4">Common Questions</h4>
+                    <div class="accordion accordion-flush" id="faqGrid">
+                        @foreach($faqs as $key => $faq)
+                            <div class="accordion-item border-0 mb-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button rounded-3 collapsed bg-light mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#f{{ $key }}">
+                                        {{ $faq['question'] }}
+                                    </button>
+                                </h2>
+                                <div id="f{{ $key }}" class="accordion-collapse collapse" data-bs-parent="#faqGrid">
+                                    <div class="accordion-body text-muted">{{ $faq['answer'] }}</div>
+                                </div>
+                            </div>
                         @endforeach
                     </div>
-                    @endif
-
                 </div>
             </div>
-        @empty
-            <div class="col-12 text-center text-muted py-4">
-                No models found.
-            </div>
-        @endforelse
-    </div>
-</div>
-
-<!-- FAQ Section -->
-@php
-    $brand = $models->first()?->brand;
-@endphp
-
-<!-- Brand Description -->
-@if($brand?->description)
-<div class="container-fluid px-xl-5 mt-4 mb-5">
-    <div class="bg-white p-4 shadow-sm rounded brand-description-box">
-        <div class="d-flex align-items-center mb-2">
-            @if($brand->brand_logo)
-                <img src="{{ asset('storage/'.$brand->brand_logo) }}" style="width:50px" class="me-3 mr-2">
-            @endif
-            <h4 class="mb-0 font-weight-bold text-uppercase"> About {{ $brand->brand_name }}</h4>
-        </div>
-        <p class="brand-description-text mb-0">{{ $brand->description }}</p>
-    </div>
-</div>
-@endif
-
-<!-- FAQ Section -->
-@if($brand)
-<div class="container-fluid px-xl-5 mt-4 mb-5">
-    <div class="bg-white p-4 shadow-sm rounded">
-        <h4 class="font-weight-bold text-uppercase mb-4">FAQ</h4>
-        <div id="faqAccordion">
-            @php
-                $faqs = [
-                    ['question' => "How do I order {$brand->brand_name} parts online?", 'answer' => "Select your brand, then the specification and part. Click Add, then Checkout."],
-                    ['question' => "Are {$brand->brand_name} parts expensive?", 'answer' => "Parts are affordable thanks to trusted suppliers."],
-                    ['question' => "Can I buy genuine {$brand->brand_name} parts here?", 'answer' => "Yes, all catalog parts are genuine."],
-                    ['question' => "How long does it take to get {$brand->brand_name} parts?", 'answer' => "Orders are shipped the next business day. Delivery typically takes 3–7 business days."]
-                ];
-            @endphp
-            @foreach($faqs as $key => $faq)
-            <div class="mb-3">
-                <a class="d-flex justify-content-between align-items-center text-dark font-weight-bold {{ $key !== 0 ? 'collapsed' : '' }}" data-toggle="collapse" href="#faq{{ $key }}">
-                    {{ $faq['question'] }}
-                    <i class="fas fa-chevron-down"></i>
-                </a>
-                <div id="faq{{ $key }}" class="collapse {{ $key === 0 ? 'show' : '' }}" data-parent="#faqAccordion">
-                    <div class="pt-3 text-muted" style="line-height:1.8">{{ $faq['answer'] }}</div>
-                </div>
-            </div>
-            @if(!$loop->last) <hr> @endif
-            @endforeach
         </div>
     </div>
 </div>
-
-<script>
-$(document).ready(function() {
-    $('#faqAccordion .collapse').on('show.bs.collapse', function () {
-        $(this).siblings('a').find('i').addClass('rotate');
-    });
-    $('#faqAccordion .collapse').on('hide.bs.collapse', function () {
-        $(this).siblings('a').find('i').removeClass('rotate');
-    });
-});
-</script>
-
-@endif
-
 @endsection
