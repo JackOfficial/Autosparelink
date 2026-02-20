@@ -52,6 +52,8 @@ class EditSpecification extends Component
             'drive_type_id' => 'nullable|exists:drive_types,id',
             'engine_displacement_id' => 'nullable|exists:engine_displacements,id',
             'horsepower' => 'nullable|numeric',
+            'production_start' => 'nullable|integer',
+            'production_end' => 'nullable|integer',
             'torque' => 'nullable|numeric',
             'seats' => 'nullable|integer|max:20',
             'doors' => 'nullable|integer|max:10',
@@ -93,15 +95,15 @@ class EditSpecification extends Component
         ]);
 
         // If it reaches here, the update worked.
-        // $spec->load('variant');
+        $spec->load('variant');
 
-        // if ($spec->variant) {
-        //     $spec->variant->update([
-        //         'vehicle_model_id' => $this->vehicle_model_id
-        //     ]);
-        //     $spec->variant->refresh();
-        //     $spec->variant->syncNameFromSpec();
-        // }
+        if ($spec->variant) {
+            $spec->variant->update([
+                'vehicle_model_id' => $this->vehicle_model_id
+            ]);
+            $spec->variant->refresh();
+            $spec->variant->syncNameFromSpec();
+        }
     });
 
     dd("If you see this, the transaction FINISHED successfully.");
