@@ -59,11 +59,20 @@
                         </span>
                     </div>
                     <div class="col-xs-3 text-right">
-                        <span class="label label-default" style="font-weight: 500; padding: 4px 8px; border: 1px solid #ddd; color: #666;">
-                            {{ $specGroup->count() }} {{ Str::plural('Spec', $specGroup->count()) }}
-                        </span>
-                        <i class="fa fa-chevron-down text-muted" style="margin-left: 10px; font-size: 11px;"></i>
-                    </div>
+    <div style="display: inline-flex; align-items: center; gap: 10px;">
+        <span style="
+            background-color: #ebf5ff; 
+            color: #3c8dbc; 
+            padding: 2px 12px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: 600;
+            border: 1px solid #d1e9ff;">
+            {{ $specGroup->count() }} {{ Str::plural('Spec', $specGroup->count()) }}
+        </span>
+        <i class="fa fa-chevron-down text-muted" style="font-size: 12px; transition: transform 0.3s;"></i>
+    </div>
+</div>
                 </div>
             </div>
 
