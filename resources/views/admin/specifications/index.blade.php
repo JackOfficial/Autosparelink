@@ -32,22 +32,28 @@
 
         <div class="box box-primary direct-chat"> {{-- Using 'box' instead of 'card' for AdminLTE 2 --}}
             <div class="box-header with-border" 
-                 data-toggle="collapse" 
-                 data-target="#{{ $collapseId }}" 
-                 style="cursor:pointer;">
-                <h3 class="box-title" style="display: block; width: 100%;">
-                    <small class="text-uppercase" style="font-weight: bold; color: #777;">{{ $brand }}</small>
-                    <div style="margin-top: 5px; display: flex; justify-content: space-between; align-items: center;">
-                        <span>
-                            {{ $model }} <i class="fa fa-angle-right" style="margin: 0 10px; color: #ccc;"></i> {{ $variantName }}
-                        </span>
-                        <div>
-                            <span class="label label-primary" style="margin-right: 10px;">{{ $specGroup->count() }} Specs</span>
-                            <i class="fa fa-chevron-down text-muted"></i>
-                        </div>
-                    </div>
-                </h3>
-            </div>
+     data-toggle="collapse" 
+     data-target="#{{ $collapseId }}" 
+     style="cursor:pointer; padding: 10px 15px;">
+    <div class="row">
+        <div class="col-xs-8">
+            <span class="text-uppercase text-muted" style="font-size: 10px; letter-spacing: 1px; display: block; margin-bottom: 2px;">
+                {{ $brand }}
+            </span>
+            <span style="font-size: 16px; font-weight: 600; color: #333;">
+                {{ $model }} 
+                <small style="color: #999; margin: 0 5px;">|</small> 
+                <span class="text-primary">{{ $variantName }}</span>
+            </span>
+        </div>
+        <div class="col-xs-4 text-right">
+            <span class="label label-default" style="font-weight: 500; padding: 5px 10px;">
+                {{ $specGroup->count() }} Variations
+            </span>
+            <i class="fa fa-chevron-down text-muted" style="margin-left: 10px; font-size: 12px;"></i>
+        </div>
+    </div>
+</div>
 
             <div id="{{ $collapseId }}" class="panel-collapse collapse in"> {{-- Bootstrap 3 collapse --}}
                 <div class="box-body no-padding">
