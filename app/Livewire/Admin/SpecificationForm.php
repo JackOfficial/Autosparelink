@@ -1,126 +1,85 @@
 <?php
 
-namespace App\Livewire\Admin;
+namespace App\Livewire\Admin\Specifications;
 
 use Livewire\Component;
-use App\Models\Brand;
-use App\Models\Variant;
-use App\Models\VehicleModel;
-use App\Models\BodyType;
-use App\Models\EngineType;
-use App\Models\TransmissionType;
-use App\Models\DriveType;
-use App\Models\EngineDisplacement;
-use App\Models\Specification;
-use Illuminate\Validation\ValidationException;
+use App\Models\{Specification, Brand, VehicleModel, Variant, BodyType, EngineType, TransmissionType, DriveType, EngineDisplacement};
 use Illuminate\Support\Facades\DB;
 
-class SpecificationForm extends Component
+class EditSpecification extends Component
 {
-    // ================= FIELDS =================
-    public $brand_id;
-    public $vehicle_model_id;
-    public $trim_level; // Changed: No longer variant_id, now trim_level input
+    public $specificationId;
+    
+    // Vehicle Selection
+    public $brand_id, $vehicle_model_id;
+    public $trim_level; // Text input to match your Create form
+    public $vehicleModels = [];
 
-    public $body_type_id;
-    public $engine_type_id;
-    public $engine_displacement_id;
-    public $transmission_type_id;
-    public $drive_type_id;
-    public $horsepower;
-    public $torque;
-    public $fuel_capacity;
-    public $fuel_efficiency;
-    public $seats;
-    public $doors;
-    public $steering_position;
-    public $color;
+    // Form Fields (Matching your Create form Schema/Rules)
+    public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
+    public $horsepower, $torque, $fuel_capacity, $fuel_efficiency;
+    public $seats, $doors, $steering_position = 'LEFT', $color = '#000000';
+    public $production_start, $production_end, $production_year, $status = 1;
 
-    public $production_start;
-    public $production_end;
-    public $production_year;
-
-    // ================= INIT =================
-    public $brands;
-    public $vehicleModels;
-    public $bodyTypes;
-    public $engineTypes;
-    public $engineDisplacements;
-    public $transmissionTypes;
-    public $driveTypes;
-
-    public $hideBrandModel = false;
-
-    public function mount($vehicle_model_id = null)
+    public function mount($specificationId)
     {
-        $this->brands = Brand::orderBy('brand_name')->get();
-        $this->vehicleModels = collect();
+        $spec = Specification::findOrFail($specificationId);
+        $this->specificationId = $specificationId;
 
-        $this->bodyTypes = BodyType::orderBy('name')->get();
-        $this->engineTypes = EngineType::orderBy('name')->get();
-        $this->engineDisplacements = EngineDisplacement::orderBy('name')->get();
-        $this->transmissionTypes = TransmissionType::orderBy('name')->get();
-        $this->driveTypes = DriveType::orderBy('name')->get();
+        // 1. Map existing data (this fills $trim_level, $body_type_id, etc.)
+        $this->fill($spec->toArray());
 
-        if ($vehicle_model_id) {
-            $this->vehicle_model_id = $vehicle_model_id;
-            $model = VehicleModel::find($vehicle_model_id);
-            if ($model) {
-                $this->brand_id = $model->brand_id;
-                $this->updatedBrandId($this->brand_id);
-            }
-            $this->hideBrandModel = true;
+        // 2. Reconstruct Brand/Model dropdowns
+        if ($spec->vehicle_model_id) {
+            $this->vehicle_model_id = $spec->vehicle_model_id;
+            $this->brand_id = $spec->vehicleModel->brand_id;
+            $this->vehicleModels = VehicleModel::where('brand_id', $this->brand_id)->orderBy('model_name')->get();
         }
     }
 
+    // Reactive Dropdown for Brand -> Model
     public function updatedBrandId($value)
     {
-        $this->vehicleModels = $value
-            ? VehicleModel::where('brand_id', $value)->orderBy('model_name')->get()
+        $this->vehicleModels = $value 
+            ? VehicleModel::where('brand_id', $value)->orderBy('model_name')->get() 
             : collect();
         $this->vehicle_model_id = null;
     }
 
-   protected function rules()
-{
-    return [
-        'brand_id' => 'required|exists:brands,id',
-        'vehicle_model_id' => 'required|exists:vehicle_models,id',
-        'trim_level' => 'required|string|max:50', // Now Required (e.g., "S")
-        'body_type_id' => 'required|exists:body_types,id', // Required (e.g., "Hatchback")
-        'production_year' => 'required|integer|min:1950', // Required (e.g., "2011")
-        'engine_displacement_id' => 'required|exists:engine_displacements,id', // Required (e.g., "1.4")
-        'engine_type_id' => 'required|exists:engine_types,id', // Required (e.g., "Diesel")
-        'transmission_type_id' => 'required|exists:transmission_types,id', // Required (e.g., "Manual")
-        
-        // Performance/Optional fields remain nullable
-        'drive_type_id' => 'nullable|exists:drive_types,id',
-        'horsepower' => 'nullable|numeric|min:0',
-        'torque' => 'nullable|numeric|min:0',
-        'fuel_capacity' => 'nullable|numeric|min:0',
-        'seats' => 'nullable|integer',
-        'doors' => 'nullable|integer',
-        'color' => 'nullable|string',
-    ];
-}
+    protected function rules()
+    {
+        // Matching your Create form rules exactly
+        return [
+            'brand_id' => 'required|exists:brands,id',
+            'vehicle_model_id' => 'required|exists:vehicle_models,id',
+            'trim_level' => 'required|string|max:50',
+            'body_type_id' => 'required|exists:body_types,id',
+            'production_year' => 'required|integer|min:1950',
+            'engine_displacement_id' => 'required|exists:engine_displacements,id',
+            'engine_type_id' => 'required|exists:engine_types,id',
+            'transmission_type_id' => 'required|exists:transmission_types,id',
+            
+            'drive_type_id' => 'nullable|exists:drive_types,id',
+            'horsepower' => 'nullable|numeric|min:0',
+            'torque' => 'nullable|numeric|min:0',
+            'fuel_capacity' => 'nullable|numeric|min:0',
+            'seats' => 'nullable|integer',
+            'doors' => 'nullable|integer',
+            'color' => 'nullable|string',
+        ];
+    }
 
     public function save()
     {
         $this->validate();
-
+        
         DB::transaction(function () {
-            // 1. HEADLESS VARIANT MANAGEMENT
-            // We create a "Shell" variant that the Specification will point to
-            $variant = Variant::create([
-                'vehicle_model_id' => $this->vehicle_model_id,
-                'name' => 'Pending Sync...', // Will be updated by Specification Observer
-            ]);
+            $spec = Specification::findOrFail($this->specificationId);
 
-            // 2. CREATE SPECIFICATION
-            Specification::create([
-                'variant_id' => $variant->id,
+            // 1. Update Specification
+            $spec->update([
                 'vehicle_model_id' => $this->vehicle_model_id,
-                'trim_level' => $this->trim_level, // Saved here now
+                'trim_level' => $this->trim_level,
                 'body_type_id' => $this->body_type_id,
                 'engine_type_id' => $this->engine_type_id,
                 'transmission_type_id' => $this->transmission_type_id,
@@ -137,18 +96,32 @@ class SpecificationForm extends Component
                 'production_start' => $this->production_start ?: null,
                 'production_end' => $this->production_end ?: null,
                 'production_year' => $this->production_year ?: null,
+                'status' => $this->status,
             ]);
-            
-            // Note: Your Specification Model's 'saved' boot method 
-            // should now call $variant->syncNameFromSpec()
+
+            // 2. Headless Variant Sync
+            // Since this is EDIT, we update the existing variant name to trigger the observer
+            if ($spec->variant) {
+                $spec->variant->update([
+                    'vehicle_model_id' => $this->vehicle_model_id,
+                    'name' => 'Syncing...', // Observer handles the rest
+                ]);
+            }
         });
 
-        session()->flash('success', 'Specification and Variant generated successfully.');
+        session()->flash('success', 'Specification updated successfully!');
         return redirect()->route('admin.specifications.index');
     }
 
     public function render()
     {
-        return view('livewire.admin.specification-form');
+        return view('livewire.admin.specifications.edit-specification', [
+            'brands' => Brand::orderBy('brand_name')->get(),
+            'bodyTypes' => BodyType::orderBy('name')->get(),
+            'engineTypes' => EngineType::orderBy('name')->get(),
+            'transmissionTypes' => TransmissionType::orderBy('name')->get(),
+            'driveTypes' => DriveType::orderBy('name')->get(),
+            'engineDisplacements' => EngineDisplacement::orderBy('name')->get(),
+        ]);
     }
 }
