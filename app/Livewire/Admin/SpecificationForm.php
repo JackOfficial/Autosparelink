@@ -106,7 +106,7 @@ class SpecificationForm extends Component
 
         // 3. NOW trigger the sync because the Specification now exists!
         // We refresh the variant instance to make sure it knows the spec is there
-        // $variant->refresh(); 
+        $variant->refresh(); 
         // $variant->syncNameFromSpec(); 
     });
 
