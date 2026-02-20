@@ -18,7 +18,6 @@ class ModelForm extends Component
     public $model_name;
     public $photos = []; // Temporary uploaded files
     public $description;
-    public $has_variants = 1;
     public $status = 1;
 
     // ================= VALIDATION RULES =================
@@ -28,7 +27,6 @@ class ModelForm extends Component
             'brand_id' => 'required|exists:brands,id',
             'model_name' => 'required|string|max:255',
             'photos.*' => 'image|max:5120', // 5MB per photo
-            'has_variants' => 'required|boolean',
         ];
     }
 
@@ -39,16 +37,17 @@ class ModelForm extends Component
 
         DB::transaction(function () {
 
-            // 2️⃣ Create Vehicle Model
+            // 1. Create Vehicle Model
             $model = VehicleModel::create([
                 'brand_id' => $this->brand_id,
                 'model_name' => $this->model_name,
                 'description' => $this->description,
-                'has_variants' => $this->has_variants,
                 'status' => $this->status,
+                // If your DB column still exists, we default it to 1 or remove it from here
+                'has_variants' => 1, 
             ]);
 
-            // 3️⃣ Save uploaded photos with SEO-friendly filenames
+            // 2. Save uploaded photos with SEO-friendly filenames
             foreach ($this->photos as $photo) {
                 $filename = Str::slug($this->model_name) . '-' . time() . '.' . $photo->getClientOriginalExtension();
                 $path = $photo->storeAs('vehicle_models/' . $model->id, $filename, 'public');
@@ -59,15 +58,14 @@ class ModelForm extends Component
                 ]);
             }
 
-            // 4️⃣ Redirect based on variants
-            if ($this->has_variants == 0) {
-                session()->flash('success', 'Vehicle model created. Add specifications now.');
-                redirect()->route('admin.specifications.create', ['vehicle_model_id' => $model->id]);
-            } else {
-                session()->flash('success', 'Vehicle model created successfully. Add variant now.');
-                redirect()->route('admin.variants.create', ['vehicle_model_id' => $model->id]);
-            }
-
+            // 3. Redirect to Specification Form
+            // Since variants are now "headless" and managed via Specs, 
+            // we always go straight to the spec builder.
+            session()->flash('success', 'Vehicle model created. Now, let\'s add its first specification.');
+            
+            return redirect()->route('admin.specifications.create', [
+                'vehicle_model_id' => $model->id
+            ]);
         });
     }
 
