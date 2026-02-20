@@ -63,9 +63,9 @@ class ModelForm extends Component
             // we always go straight to the spec builder.
             session()->flash('success', 'Vehicle model created. Now, let\'s add its first specification.');
             
-            return redirect()->route('admin.specifications.create', [
-                'vehicle_model_id' => $model->id
-            ]);
+            // return redirect()->route('admin.specifications.create', [
+            //     'vehicle_model_id' => $model->id
+            // ]);
         });
     }
 
