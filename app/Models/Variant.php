@@ -139,7 +139,6 @@ public function syncNameFromSpec()
     ];
 
     $generatedName = implode(' ', array_filter($pieces));
-    dd($generatedName);
     $this->name = $generatedName;
     $this->save();
 }
