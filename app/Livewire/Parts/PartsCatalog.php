@@ -37,25 +37,25 @@ class PartsCatalog extends Component
 
     public function mount($brand = null, $model = null, $variant = null, $vinData = [])
     {
-        dd("hello there");
+        dd("Livewire");
         // Use the values passed from the Controller/Blade
-        $this->brand = $brand ?? '';
-        $this->model = $model ?? '';
-        $this->variant = $variant ?? '';
-        $this->vinData = $vinData;
+        // $this->brand = $brand ?? '';
+        // $this->model = $model ?? '';
+        // $this->variant = $variant ?? '';
+        // $this->vinData = $vinData;
 
-        // Populate dropdowns - Use toArray() to avoid 500 serialization errors
-        if ($this->brand) {
-            $this->models = VehicleModel::where('brand_id', $this->brand)
-                ->orderBy('model_name')
-                ->get();
-        }
+        // // Populate dropdowns - Use toArray() to avoid 500 serialization errors
+        // if ($this->brand) {
+        //     $this->models = VehicleModel::where('brand_id', $this->brand)
+        //         ->orderBy('model_name')
+        //         ->get();
+        // }
 
-        if ($this->model) {
-            $this->variants = Variant::where('vehicle_model_id', $this->model)
-                ->orderBy('name')
-                ->get();
-        }
+        // if ($this->model) {
+        //     $this->variants = Variant::where('vehicle_model_id', $this->model)
+        //         ->orderBy('name')
+        //         ->get();
+        // }
     }
 
     // ... updatedBrand and updatedModel methods ...
