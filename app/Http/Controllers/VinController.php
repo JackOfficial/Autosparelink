@@ -107,9 +107,7 @@ public function search(Request $request)
             $query->where('name', 'LIKE', "%{$gen['Year']}%");
 
             foreach ($searchTokens as $token) {
-                if (strlen($token) > 1) { 
                     $query->where('name', 'LIKE', "%{$token}%");
-                }
             }
         })->first();
 
@@ -120,7 +118,7 @@ public function search(Request $request)
             ->where('name', 'LIKE', "%{$gen['Fuel type']}%")
             ->first();
     }
-    
+
     dd($matchedVariant); // Use this to verify the final match!
 
     return view('parts.index', [
