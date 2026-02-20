@@ -3,7 +3,8 @@
 namespace App\Livewire\Admin\Specifications;
 
 use Livewire\Component;
-use App\Models\{Specification, Brand, VehicleModel, BodyType, EngineType, TransmissionType, DriveType, EngineDisplacement};
+use App\Models\{Specification, Brand, VehicleModel, BodyType, EngineType, TransmissionType, DriveType, EngineDisplacement, Variant};
+use Illuminate\Support\Facades\DB;
 
 class EditSpecification extends Component
 {
@@ -11,7 +12,7 @@ class EditSpecification extends Component
     
     // Vehicle Selection
     public $brand_id, $vehicle_model_id;
-    public $trim_level; // Changed from variant_id to a simple string
+    public $trim_level; 
     public $vehicleModels = [];
 
     // Form Fields
@@ -35,7 +36,6 @@ class EditSpecification extends Component
             $this->vehicleModels = VehicleModel::where('brand_id', $this->brand_id)->get();
         }
         
-        // 3. Ensure trim_level is loaded (Assuming your DB column is named trim_level)
         $this->trim_level = $spec->trim_level;
     }
 
@@ -50,7 +50,7 @@ class EditSpecification extends Component
     {
         return [
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'trim_level' => 'nullable|string|max:255', // Validation for text input
+            'trim_level' => 'nullable|string|max:255',
             'body_type_id' => 'required|exists:body_types,id',
             'engine_type_id' => 'required|exists:engine_types,id',
             'transmission_type_id' => 'required|exists:transmission_types,id',
@@ -70,30 +70,44 @@ class EditSpecification extends Component
     {
         $this->validate();
         
-        $spec = Specification::findOrFail($this->specificationId);
-        $spec->update([
-            'vehicle_model_id' => $this->vehicle_model_id,
-            'trim_level' => $this->trim_level, // Saving the text string
-            'body_type_id' => $this->body_type_id,
-            'engine_type_id' => $this->engine_type_id,
-            'transmission_type_id' => $this->transmission_type_id,
-            'drive_type_id' => $this->drive_type_id,
-            'engine_displacement_id' => $this->engine_displacement_id,
-            'horsepower' => $this->horsepower,
-            'torque' => $this->torque,
-            'fuel_capacity' => $this->fuel_capacity,
-            'fuel_efficiency' => $this->fuel_efficiency,
-            'seats' => $this->seats,
-            'doors' => $this->doors,
-            'steering_position' => $this->steering_position,
-            'color' => $this->color,
-            'production_start' => $this->production_start,
-            'production_end' => $this->production_end,
-            'production_year' => $this->production_year,
-            'status' => $this->status,
-        ]);
+        DB::transaction(function () {
+            $spec = Specification::findOrFail($this->specificationId);
 
-        session()->flash('success', 'Specification updated successfully!');
+            // Update the Spec
+            $spec->update([
+                'vehicle_model_id' => $this->vehicle_model_id,
+                'trim_level' => $this->trim_level,
+                'body_type_id' => $this->body_type_id,
+                'engine_type_id' => $this->engine_type_id,
+                'transmission_type_id' => $this->transmission_type_id,
+                'drive_type_id' => $this->drive_type_id,
+                'engine_displacement_id' => $this->engine_displacement_id,
+                'horsepower' => $this->horsepower,
+                'torque' => $this->torque,
+                'fuel_capacity' => $this->fuel_capacity,
+                'fuel_efficiency' => $this->fuel_efficiency,
+                'seats' => $this->seats,
+                'doors' => $this->doors,
+                'steering_position' => $this->steering_position,
+                'color' => $this->color,
+                'production_start' => $this->production_start,
+                'production_end' => $this->production_end,
+                'production_year' => $this->production_year,
+                'status' => $this->status,
+            ]);
+
+            // TRIGGER SYNC: Update Variant name automatically
+            if ($spec->variant) {
+                // Ensure variant has the same model ID (in case you changed the brand/model)
+                $spec->variant->update(['vehicle_model_id' => $this->vehicle_model_id]);
+                
+                // Refresh relationship and sync name
+                $spec->variant->refresh();
+                $spec->variant->syncNameFromSpec();
+            }
+        });
+
+        session()->flash('success', 'Specification updated and Variant name synced!');
         return redirect()->route('admin.specifications.index');
     }
 
