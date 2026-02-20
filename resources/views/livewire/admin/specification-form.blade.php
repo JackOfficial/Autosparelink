@@ -154,7 +154,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <fieldset class="border p-3 mb-4 rounded">
-                        <legend class="w-auto px-2 small font-weight-bold">Performance & Drivetrain</legend>
+                        <legend class="w-auto px-2 font-weight-bold text-primary">Performance & Drivetrain</legend>
                         <div class="row">
                             <div class="col-md-6 mb-2">
                                 <label>Drive Type</label>
