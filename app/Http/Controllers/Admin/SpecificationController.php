@@ -20,6 +20,7 @@ public function index(Request $request)
     // 1. Efficient Eager Loading
     $query = Specification::with([
         'vehicleModel.brand', // Direct link to model and brand
+        'variant',
         'bodyType',
         'engineDisplacement',
         'engineType',
@@ -40,7 +41,7 @@ public function index(Request $request)
         $model = $spec->vehicleModel?->model_name ?? 'Unknown Model';
         
         // Use trim_level as the variant name
-        $trim = $spec->trim_level ?? 'Standard Trim'; 
+        $trim = $spec->variant->trim_level ?? 'Standard Trim'; 
 
         return "{$brand}|{$model}|{$trim}";
     });
