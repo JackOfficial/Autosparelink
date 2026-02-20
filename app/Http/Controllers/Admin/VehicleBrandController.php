@@ -32,17 +32,23 @@ class VehicleBrandController extends Controller
      */
 public function store(Request $request)
 {
-    $request->validate([
-        // Added 'unique:brands,brand_name' to prevent duplicates
+    $rules = [
         'brand_name' => 'required|string|max:255|unique:brands,brand_name',
         'brand_logo' => 'nullable|image|mimes:jpg,png,jpeg,webp|max:2048',
         'description' => 'nullable|string',
         'country' => 'nullable|string|max:255',
         'website' => 'nullable|url|max:255',
-    ]);
+    ];
+
+    // Custom error messages
+    $messages = [
+        'brand_name.unique' => 'This brand is already registered in the system.',
+        'brand_name.required' => 'Please provide the name of the vehicle brand.',
+    ];
+
+    $request->validate($rules, $messages);
 
     $logoPath = null;
-
     if ($request->hasFile('brand_logo')) {
         $logoPath = $request->file('brand_logo')->store('brands', 'public');
     }
