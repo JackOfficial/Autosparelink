@@ -1,43 +1,40 @@
 <?php
 
-namespace App\Livewire\Admin\Specifications;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use App\Models\{Specification, Brand, VehicleModel, Variant, BodyType, EngineType, TransmissionType, DriveType, EngineDisplacement};
 use Illuminate\Support\Facades\DB;
 
-class EditSpecification extends Component
+class SpecificationForm extends Component
 {
-    public $specificationId;
-    
     // Vehicle Selection
-    public $brand_id, $vehicle_model_id;
-    public $trim_level; // Text input to match your Create form
+    public $brand_id;
+    public $vehicle_model_id;
+    public $trim_level; 
     public $vehicleModels = [];
 
-    // Form Fields (Matching your Create form Schema/Rules)
+    // Form Fields
     public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
     public $horsepower, $torque, $fuel_capacity, $fuel_efficiency;
     public $seats, $doors, $steering_position = 'LEFT', $color = '#000000';
     public $production_start, $production_end, $production_year, $status = 1;
 
-    public function mount($specificationId)
+    public function mount($vehicle_model_id = null)
     {
-        $spec = Specification::findOrFail($specificationId);
-        $this->specificationId = $specificationId;
-
-        // 1. Map existing data (this fills $trim_level, $body_type_id, etc.)
-        $this->fill($spec->toArray());
-
-        // 2. Reconstruct Brand/Model dropdowns
-        if ($spec->vehicle_model_id) {
-            $this->vehicle_model_id = $spec->vehicle_model_id;
-            $this->brand_id = $spec->vehicleModel->brand_id;
-            $this->vehicleModels = VehicleModel::where('brand_id', $this->brand_id)->orderBy('model_name')->get();
+        // 1. Pre-select Brand and Model if coming from ModelForm redirect
+        if ($vehicle_model_id) {
+            $this->vehicle_model_id = $vehicle_model_id;
+            $model = VehicleModel::find($vehicle_model_id);
+            if ($model) {
+                $this->brand_id = $model->brand_id;
+                $this->vehicleModels = VehicleModel::where('brand_id', $this->brand_id)
+                    ->orderBy('model_name')
+                    ->get();
+            }
         }
     }
 
-    // Reactive Dropdown for Brand -> Model
     public function updatedBrandId($value)
     {
         $this->vehicleModels = $value 
@@ -48,7 +45,6 @@ class EditSpecification extends Component
 
     protected function rules()
     {
-        // Matching your Create form rules exactly
         return [
             'brand_id' => 'required|exists:brands,id',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
@@ -74,10 +70,15 @@ class EditSpecification extends Component
         $this->validate();
         
         DB::transaction(function () {
-            $spec = Specification::findOrFail($this->specificationId);
+            // 1. Create the Headless Variant first
+            $variant = Variant::create([
+                'vehicle_model_id' => $this->vehicle_model_id,
+                'name' => 'Pending Sync...', // Your Specification Observer will fix this name
+            ]);
 
-            // 1. Update Specification
-            $spec->update([
+            // 2. Create Specification linked to that Variant
+            Specification::create([
+                'variant_id' => $variant->id,
                 'vehicle_model_id' => $this->vehicle_model_id,
                 'trim_level' => $this->trim_level,
                 'body_type_id' => $this->body_type_id,
@@ -98,24 +99,15 @@ class EditSpecification extends Component
                 'production_year' => $this->production_year ?: null,
                 'status' => $this->status,
             ]);
-
-            // 2. Headless Variant Sync
-            // Since this is EDIT, we update the existing variant name to trigger the observer
-            if ($spec->variant) {
-                $spec->variant->update([
-                    'vehicle_model_id' => $this->vehicle_model_id,
-                    'name' => 'Syncing...', // Observer handles the rest
-                ]);
-            }
         });
 
-        session()->flash('success', 'Specification updated successfully!');
+        session()->flash('success', 'Specification and Variant created successfully.');
         return redirect()->route('admin.specifications.index');
     }
 
     public function render()
     {
-        return view('livewire.admin.specifications.edit-specification', [
+        return view('livewire.admin.specification-form', [
             'brands' => Brand::orderBy('brand_name')->get(),
             'bodyTypes' => BodyType::orderBy('name')->get(),
             'engineTypes' => EngineType::orderBy('name')->get(),

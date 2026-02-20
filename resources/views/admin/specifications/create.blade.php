@@ -19,11 +19,7 @@
 <section class="content">
 <div class="row">
 <div class="col-md-11">
-    <livewire:admin.specification-form 
-    :vehicle_model_id="request()->query('vehicle_model_id')" 
-    :variant_id="request()->query('variant_id')" 
-/>
-
+   @livewire('admin.specification-form', ['vehicle_model_id' => $vehicle_model_id])
 </div>
 </div>
 </section>

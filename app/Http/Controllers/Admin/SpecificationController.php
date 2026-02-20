@@ -54,24 +54,14 @@ public function index(Request $request)
 }
 
 
-    public function create()
-    {
-        $variants = Variant::with('vehicleModel')->orderBy('name')->get();
-        $vehicleModels = VehicleModel::orderBy('model_name')->get();
-        $bodyTypes = BodyType::orderBy('name')->get();
-        $engineTypes = EngineType::orderBy('name')->get();
-        $transmissionTypes = TransmissionType::orderBy('name')->get();
-        $driveTypes = DriveType::orderBy('name')->get();
+   public function create(Request $request)
+{
+    // Capture the ID from the redirect: 
+    // redirect()->route('admin.specifications.create', ['vehicle_model_id' => $model->id])
+    $vehicle_model_id = $request->query('vehicle_model_id');
 
-        return view('admin.specifications.create', compact(
-            'variants',
-            'vehicleModels',
-            'bodyTypes',
-            'engineTypes',
-            'transmissionTypes',
-            'driveTypes'
-        ));
-    }
+    return view('admin.specifications.create', compact('vehicle_model_id'));
+}
 
     public function store(Request $request)
     {
