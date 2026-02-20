@@ -12,97 +12,79 @@
 @push('styles')
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    body { background-color: #fcfcfd !important; font-family: 'Inter', sans-serif; color: #1a1a1a; }
+    body { background-color: #fbfbfb !important; font-family: 'Inter', sans-serif; color: #1a1a1a; }
     
-    /* Luxury Brand Header */
+    /* Elegant Hero */
     .brand-hero {
         background: #ffffff;
-        border-radius: 40px;
-        padding: 80px 60px;
-        margin-bottom: 60px;
+        border-radius: 30px;
+        padding: 50px;
+        margin-bottom: 40px;
         position: relative;
         overflow: hidden;
         border: 1px solid #f0f0f0;
-        box-shadow: 0 10px 50px rgba(0,0,0,0.02);
     }
 
-    .brand-logo-hero { height: 90px; width: auto; margin-bottom: 30px; position: relative; z-index: 2; }
+    .brand-logo-hero { height: 60px; width: auto; margin-bottom: 20px; }
 
-    .hero-watermark {
-        position: absolute;
-        right: -5%;
-        top: 10%;
+    /* Description Box */
+    .description-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 25px;
+        border: 1px solid #f0f0f0;
         height: 100%;
-        opacity: 0.03;
-        pointer-events: none;
     }
 
-    /* Description Section - Editorial Style */
-    .description-section { margin-bottom: 80px; }
-    .description-text { 
-        font-size: 1.15rem; 
-        line-height: 1.8; 
-        color: #4a4a4f; 
-        font-weight: 400;
-        border-left: 3px solid #000;
-        padding-left: 30px;
-    }
-
-    /* Model Cards */
+    /* Compact Model Cards */
     .model-card {
         background: #fff;
-        border-radius: 24px;
-        padding: 35px;
-        height: 100%;
-        border: 1px solid #f0f0f0;
-        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border-radius: 16px;
+        padding: 20px 24px;
+        border: 1px solid #eee;
+        transition: all 0.3s ease;
         cursor: pointer;
+        position: relative;
     }
 
     .model-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 30px 60px rgba(0,0,0,0.06);
-        border-color: #e2e2e2;
+        border-color: #000;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
     }
 
     .variant-link {
         display: flex;
         justify-content: space-between;
-        padding: 15px 18px;
+        padding: 10px 15px;
         background: #f8f9fa;
-        border-radius: 12px;
-        margin-top: 10px;
+        border-radius: 8px;
+        margin-top: 8px;
         color: #1a1a1a !important;
         text-decoration: none !important;
+        font-size: 0.9rem;
         font-weight: 500;
-        transition: 0.2s;
     }
     .variant-link:hover { background: #000; color: #fff !important; }
 
-    /* Modern Collapsible FAQ */
-    .faq-wrapper { max-width: 800px; margin: 0 auto; }
+    /* Collapsible FAQ */
     .faq-item {
         background: #fff;
-        border-radius: 16px;
-        margin-bottom: 12px;
-        border: 1px solid #f0f0f0;
-        overflow: hidden;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        border: 1px solid #eee;
     }
     .faq-trigger {
         width: 100%;
-        padding: 22px 30px;
+        padding: 18px 25px;
         display: flex;
         justify-content: space-between;
-        align-items: center;
         background: none;
         border: none;
         font-weight: 600;
-        font-size: 1.05rem;
-        text-align: left;
         cursor: pointer;
     }
 
-    .rotate-180 { transform: rotate(180deg); }
+    .rotate-180 { transform: rotate(180deg); transition: 0.3s; }
     [x-cloak] { display: none !important; }
 </style>
 @endpush
@@ -110,25 +92,21 @@
 @section('content')
 <div class="container py-5" x-data="{ modelSearch: '', activeModel: null, activeFaq: null }">
     
-    <div class="brand-hero text-center text-lg-left">
-        @if($brand->brand_logo)
-            <img src="{{ asset('storage/' . $brand->brand_logo) }}" class="hero-watermark d-none d-lg-block">
-        @endif
-        
+    <div class="brand-hero shadow-sm">
         <div class="row align-items-center">
             <div class="col-lg-7">
                 @if($brand->brand_logo)
                     <img src="{{ asset('storage/' . $brand->brand_logo) }}" class="brand-logo-hero" alt="{{ $brandName }}">
                 @endif
-                <h1 class="display-3 font-weight-bold" style="letter-spacing: -3px;">{{ $brandName }}</h1>
-                <p class="lead text-muted mb-5">Access the complete technical parts assembly for your vehicle.</p>
+                <h1 class="font-weight-bold mb-2">{{ $brandName }} <span class="text-muted font-weight-light">Catalog</span></h1>
+                <p class="text-muted mb-4">Enter a VIN or browse by series to find parts diagrams.</p>
                 
-                <form method="GET" action="{{ route('brand.models', $brand?->id) }}" class="d-inline-block w-100">
-                    <div class="input-group bg-light p-2 shadow-sm" style="border-radius: 20px; border: 1px solid #eee;">
-                        <input type="text" name="query" class="form-control border-0 bg-transparent px-4" 
-                               style="height: 50px;" placeholder="Identify by VIN...">
+                <form method="GET" action="{{ route('brand.models', $brand?->id) }}">
+                    <div class="input-group" style="max-width: 450px;">
+                        <input type="text" name="query" class="form-control border shadow-none" 
+                               style="height: 50px; border-radius: 12px 0 0 12px;" placeholder="Identify by VIN...">
                         <div class="input-group-append">
-                            <button class="btn btn-dark px-5 font-weight-bold" style="border-radius: 15px;">Identify</button>
+                            <button class="btn btn-dark px-4 font-weight-bold" style="border-radius: 0 12px 12px 0;">Search</button>
                         </div>
                     </div>
                 </form>
@@ -136,78 +114,87 @@
         </div>
     </div>
 
-    @if($brand->description)
-    <div class="description-section row align-items-center px-3">
+    <div class="row mb-5">
+        <div class="col-lg-4 mb-4">
+            <div class="description-card shadow-sm">
+                <h6 class="text-uppercase font-weight-bold text-muted small mb-3"><i class="fas fa-info-circle mr-2"></i>About the Brand</h6>
+                <p class="text-muted" style="line-height: 1.6; font-size: 0.95rem;">
+                    {{ $brand->description ?? "Explore comprehensive technical data and exploded parts views for the $brandName lineup." }}
+                </p>
+            </div>
+        </div>
+
         <div class="col-lg-8">
-            <h6 class="text-uppercase font-weight-bold text-primary mb-3" style="letter-spacing: 2px; font-size: 0.8rem;">Brand Legacy</h6>
-            <div class="description-text">
-                {{ $brand->description }}
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="font-weight-bold m-0">Models</h4>
+                <input type="text" x-model="modelSearch" class="form-control form-control-sm border-0 shadow-sm" 
+                       style="max-width: 200px; border-radius: 8px;" placeholder="Filter list...">
             </div>
-        </div>
-    </div>
-    @endif
 
-    <div class="row mb-5 mt-5">
-        <div class="col-12 d-flex justify-content-between align-items-end mb-4 px-4">
-            <h2 class="font-weight-bold m-0">Available Models</h2>
-            <input type="text" x-model="modelSearch" class="form-control border-0 shadow-sm bg-white" 
-                   style="max-width: 250px; border-radius: 12px;" placeholder="Filter models...">
-        </div>
-
-        @forelse($models as $model)
-            @php $hasVariants = $model->variants->count() > 0; @endphp
-            
-            <div class="col-lg-4 col-md-6 mb-4" 
-                 x-show="modelSearch === '' || '{{ strtolower($model->model_name) }}'.includes(modelSearch.toLowerCase())">
-                
-                <div class="model-card shadow-sm" 
-                     @click="{{ $hasVariants ? "activeModel = (activeModel === $model->id ? null : $model->id)" : "window.location.href='".route('specifications.show', ['type' => 'model', 'id' => $model->id])."'" }}">
+            <div class="row">
+                @forelse($models as $model)
+                    @php $hasVariants = $model->variants->count() > 0; @endphp
                     
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        @if($hasVariants)
-                            <i class="fas fa-chevron-down text-muted transition" :class="activeModel === {{ $model->id }} ? 'rotate-180' : ''"></i>
-                        @else
-                            <i class="fas fa-arrow-right text-muted small"></i>
-                        @endif
-                    </div>
-                    
-                    <h3 class="font-weight-bold h4">{{ $model->model_name }}</h3>
+                    <div class="col-md-6 mb-3" x-show="modelSearch === '' || '{{ strtolower($model->model_name) }}'.includes(modelSearch.toLowerCase())">
+                        <div class="model-card shadow-sm" 
+                             @click="{{ $hasVariants ? "activeModel = (activeModel === $model->id ? null : $model->id)" : "window.location.href='".route('specifications.show', ['type' => 'model', 'id' => $model->id])."'" }}">
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="font-weight-bold mb-0" style="font-size: 1.1rem;">{{ $model->model_name }}</h5>
+                                    @if($model->production_start_year)
+                                        <span class="text-muted small">{{ $model->production_start_year }} — {{ $model->production_end_year ?? 'Present' }}</span>
+                                    @endif
+                                </div>
+                                
+                                {{-- Icon on the right end --}}
+                                @if($hasVariants)
+                                    <i class="fas fa-chevron-down text-muted opacity-50 transition" :class="activeModel === {{ $model->id }} ? 'rotate-180' : ''"></i>
+                                @else
+                                    <i class="fas fa-arrow-right text-muted opacity-50 small"></i>
+                                @endif
+                            </div>
 
-                    @if($hasVariants)
-                        <div x-show="activeModel === {{ $model->id }}" x-cloak x-collapse class="mt-4 pt-3 border-top" @click.stop>
-                            @foreach($model->variants as $variant)
-                                <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $variant->id]) }}" class="variant-link">
-                                    {{ $variant->name }}
-                                    <i class="fas fa-plus small opacity-50"></i>
-                                </a>
-                            @endforeach
+                            @if($hasVariants)
+                                <div x-show="activeModel === {{ $model->id }}" x-cloak x-collapse class="mt-3 pt-3 border-top" @click.stop>
+                                    @foreach($model->variants as $variant)
+                                        <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $variant->id]) }}" class="variant-link">
+                                            {{ $variant->name }}
+                                            <i class="fas fa-chevron-right small opacity-25"></i>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
-                    @endif
-                </div>
+                    </div>
+                @empty
+                    <div class="col-12 text-center py-4">
+                        <p class="text-muted">No series found.</p>
+                    </div>
+                @endforelse
             </div>
-        @empty
-            <div class="col-12 text-center py-5">
-                <p class="text-muted">No model series found for this selection.</p>
-            </div>
-        @endforelse
+        </div>
     </div>
 
-    <div class="faq-wrapper py-5">
-        <h3 class="text-center font-weight-bold mb-5">Frequently Asked Questions</h3>
-        
-        @foreach($faqs as $index => $faq)
-            <div class="faq-item shadow-sm">
-                <button class="faq-trigger" @click="activeFaq = (activeFaq === {{ $index }} ? null : {{ $index }})">
-                    <span>{{ $faq['question'] }}</span>
-                    <i class="fas fa-chevron-down transition" :class="activeFaq === {{ $index }} ? 'rotate-180' : ''"></i>
-                </button>
-                <div x-show="activeFaq === {{ $index }}" x-cloak x-collapse>
-                    <div class="px-4 pb-4 text-muted">
-                        {{ $faq['answer'] }}
+    <div class="faq-wrapper mt-5">
+        <h4 class="font-weight-bold mb-4"><i class="fas fa-question-circle mr-2"></i>Common Questions</h4>
+        <div class="row">
+            <div class="col-lg-8">
+                @foreach($faqs as $index => $faq)
+                    <div class="faq-item shadow-sm">
+                        <button class="faq-trigger" @click="activeFaq = (activeFaq === {{ $index }} ? null : {{ $index }})">
+                            <span class="font-weight-bold" style="font-size: 0.95rem;">{{ $faq['question'] }}</span>
+                            <i class="fas fa-plus small text-muted transition" :class="activeFaq === {{ $index }} ? 'rotate-45' : ''"></i>
+                        </button>
+                        <div x-show="activeFaq === {{ $index }}" x-cloak x-collapse>
+                            <div class="px-4 pb-4 text-muted small">
+                                {{ $faq['answer'] }}
+                            </div>
+                        </div>
                     </div>
-                </div>
+                @endforeach
             </div>
-        @endforeach
+        </div>
     </div>
 </div>
 @endsection
