@@ -24,6 +24,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['part_id', 'variant_id']);
+            $table->index(['vehicle_model_id', 'start_year', 'end_year'], 'fitment_search_index');
         });
     }
 

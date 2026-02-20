@@ -43,6 +43,7 @@ return [
 
     'vehicle_api' => [
         'key' => env('VEHICLE_API_KEY'),
+        'base_url' => 'https://api.vehicledatabases.com/vin-decode/'
     ],
 
 ];

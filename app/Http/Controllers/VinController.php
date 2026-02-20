@@ -69,25 +69,27 @@ public function search(Request $request)
         return back()->withErrors(['vin' => "$make $model not found."]);
     }
 
-    dd($vehicleModel);
-
-    
-
-   
-
     // 4. FIND MATCHING SPECIFICATIONS
-    $specifications = Specification::where('vehicle_model_id', $vehicleModel->id)
+   $specifications = Specification::with('variant')
+    ->where('vehicle_model_id', $vehicleModel->id)
+    ->where(function($q) use ($vehicleVariant) {
+        // If specification has a variant, match the API variant name
+        // OR if variant_id is null (generic), include it
+        $q->whereHas('variant', function($v) use ($vehicleVariant) {
+            $v->whereRaw('UPPER(name) = ?', [strtoupper($vehicleVariant)]);
+        })
+        ->orWhereNull('variant_id');
+    })
     ->where(function ($q) use ($year) {
         $q->where('production_year', $year)
           ->orWhere(function ($range) use ($year) {
-              $range->where(function($r){
-                  $r->whereNull('production_start')->orWhereNotNull('production_start');
+              $range->where(function($r) use ($year){
+                  $r->whereNull('production_start')
+                    ->orWhere('production_start', '<=', $year);
               })
               ->where(function($r) use ($year){
-                  $r->whereNull('production_start')->orWhere('production_start', '<=', $year);
-              })
-              ->where(function($r) use ($year){
-                  $r->whereNull('production_end')->orWhere('production_end', '>=', $year);
+                  $r->whereNull('production_end')
+                    ->orWhere('production_end', '>=', $year);
               });
           })
           ->orWhere(function ($nulls) {
@@ -96,6 +98,7 @@ public function search(Request $request)
                     ->whereNull('production_end');
           });
     })
+    
     ->get();
 
     if ($specifications->isEmpty()) {
