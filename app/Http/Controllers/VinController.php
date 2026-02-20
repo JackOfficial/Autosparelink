@@ -111,7 +111,7 @@ public function search(Request $request)
             ->first();
     }
 
-    dd($brand);
+    dd($model);
 
     return view('parts.index', [
         'brandId' => $brand->id,
