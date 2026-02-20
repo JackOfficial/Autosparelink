@@ -113,8 +113,8 @@ public function getFullNameAttribute()
 
 public function syncNameFromSpec()
 {
-    // Eager load everything needed for the name
-    $spec = $this->specification()->with([
+    // FIX: Changed specification() to specifications()
+    $spec = $this->specifications()->with([
         'bodyType', 
         'engineType', 
         'transmissionType', 
@@ -124,12 +124,14 @@ public function syncNameFromSpec()
     if (!$spec) return;
 
     $model = $this->vehicleModel;
-    $brand = $model->brand;
+    // Safety: ensure model and brand exist before grabbing names
+    $brandName = $model?->brand?->brand_name;
+    $modelName = $model?->model_name;
 
     // The "Gold Standard" Assembly
     $pieces = [
-        $brand->brand_name,                       // Toyota
-        $model->model_name,                       // Verso
+        $brandName,                               // Toyota
+        $modelName,                               // Verso
         $spec->trim_level,                        // S
         $spec->bodyType?->name,                   // Hatchback
         $spec->production_year,                   // 2011
@@ -138,9 +140,11 @@ public function syncNameFromSpec()
         $spec->transmissionType?->name,           // Manual
     ];
 
+    // array_filter removes nulls/empty strings
     $generatedName = implode(' ', array_filter($pieces));
-    $this->name = $generatedName;
-    $this->save();
+    
+    // Use update to avoid triggering infinite loops if you have observers
+    $this->update(['name' => $generatedName]);
 }
 
 }
