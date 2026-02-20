@@ -239,7 +239,7 @@
           <ul class="nav nav-treeview">
             <li class="nav-item"><a href="/admin/vehicle-brands" class="nav-link"><i class="fas fa-tags nav-icon"></i><p>Vehicle Brands</p></a></li>
             <li class="nav-item"><a href="/admin/vehicle-models" class="nav-link"><i class="fas fa-car-side nav-icon"></i><p>Models</p></a></li>
-            <li class="nav-item d-none"><a href="/admin/variants" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Variants</p></a></li>
+            <li class="nav-item"><a href="/admin/variants" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Variants</p></a></li>
             <li class="nav-item"><a href="/admin/specifications" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Specification</p></a></li>
             <li class="nav-item d-none"><a href="/admin/body-types" class="nav-link"><i class="fas fa-car nav-icon"></i><p>Body Types</p></a></li>
             <li class="nav-item d-none"><a href="/admin/engine-types" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>Engine Types</p></a></li>
