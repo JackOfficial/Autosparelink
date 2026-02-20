@@ -109,4 +109,37 @@ public function getFullNameAttribute()
     // return implode(' ', $parts);
 }
 
+// app/Models/Variant.php
+
+public function syncNameFromSpec()
+{
+    // Eager load everything needed for the name
+    $spec = $this->specification()->with([
+        'bodyType', 
+        'engineType', 
+        'transmissionType', 
+        'engineDisplacement'
+    ])->first();
+
+    if (!$spec) return;
+
+    $model = $this->vehicleModel;
+    $brand = $model->brand;
+
+    // The "Gold Standard" Assembly
+    $pieces = [
+        $brand->brand_name,                       // Toyota
+        $model->model_name,                       // Verso
+        $spec->trim_level,                        // S
+        $spec->bodyType?->name,                   // Hatchback
+        $spec->production_year,                   // 2011
+        $spec->engineDisplacement?->name,         // 1.4
+        $spec->engineType?->name,                 // Diesel
+        $spec->transmissionType?->name,           // Manual
+    ];
+
+    $this->name = implode(' ', array_filter($pieces));
+    $this->save();
+}
+
 }

@@ -122,7 +122,7 @@ $matchedVariant = Variant::where('vehicle_model_id', $model->id)
     ->first();
 
     // 4. ULTIMATE FALLBACK
-if (!$matchedVariant) {
+if (!$matchedVariant) { 
     $matchedVariant = Variant::where('vehicle_model_id', $model->id)
         ->where('name', 'LIKE', "%{$gen['Year']}%") // Only require the Year
         ->first();
