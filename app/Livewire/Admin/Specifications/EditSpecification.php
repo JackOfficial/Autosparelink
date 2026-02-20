@@ -26,10 +26,8 @@ class EditSpecification extends Component
         $spec = Specification::findOrFail($specificationId);
         $this->specificationId = $specificationId;
 
-        // 1. Map existing data
         $this->fill($spec->toArray());
 
-        // 2. Set the brand based on the model
         if ($spec->vehicle_model_id) {
             $this->vehicle_model_id = $spec->vehicle_model_id;
             $this->brand_id = $spec->vehicleModel->brand_id;
@@ -39,7 +37,6 @@ class EditSpecification extends Component
         $this->trim_level = $spec->trim_level;
     }
 
-    // Reactive Dropdown for Brand -> Model
     public function updatedBrandId($value)
     {
         $this->vehicleModels = $value ? VehicleModel::where('brand_id', $value)->get() : [];
@@ -72,8 +69,8 @@ class EditSpecification extends Component
         
         DB::transaction(function () {
             $spec = Specification::findOrFail($this->specificationId);
-
-            // Update the Spec
+            
+            // 1. Update Specification
             $spec->update([
                 'vehicle_model_id' => $this->vehicle_model_id,
                 'trim_level' => $this->trim_level,
@@ -96,13 +93,10 @@ class EditSpecification extends Component
                 'status' => $this->status,
             ]);
 
-            // TRIGGER SYNC: Update Variant name automatically
+            // 2. Trigger Sync for Variant Name
+            // Note: This assumes Specification has a 'variant' relationship
             if ($spec->variant) {
-                // Ensure variant has the same model ID (in case you changed the brand/model)
                 $spec->variant->update(['vehicle_model_id' => $this->vehicle_model_id]);
-                
-                
-                // Refresh relationship and sync name
                 $spec->variant->refresh();
                 $spec->variant->syncNameFromSpec();
             }
