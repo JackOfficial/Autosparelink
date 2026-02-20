@@ -26,7 +26,7 @@
     {{-- ACTION BAR --}}
     <div class="row mb-3">
         <div class="col-md-6">
-            <a href="{{ route('admin.variants.create') }}" class="btn btn-primary">
+            <a href="{{ route('admin.variants.create') }}" class="btn btn-primary d-none">
                 <i class="fa fa-plus"></i> Add Variant
             </a>
         </div>
@@ -107,7 +107,7 @@
                                                 <a href="{{ route('admin.variants.show', $variant->id) }}" class="btn btn-info btn-sm">
                                                     <i class="fa fa-cogs"></i>
                                                 </a>
-                                                <a href="{{ route('admin.variants.edit', $variant->id) }}" class="btn btn-warning btn-sm">
+                                                <a href="{{ route('admin.variants.edit', $variant->id) }}" class="btn btn-warning btn-sm d-none">
                                                     <i class="fa fa-edit"></i>
                                                 </a>
                                                 <form action="{{ route('admin.variants.destroy', $variant->id) }}" method="POST"
