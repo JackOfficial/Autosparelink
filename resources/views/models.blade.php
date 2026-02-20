@@ -3,119 +3,104 @@
 @php
     $brandName = $brand->brand_name ?? 'Vehicle';
     $faqs = [
-        ['question' => "Genuine Parts Guarantee", 'answer' => "Every component listed in the $brandName catalog is verified for fitment and quality."],
-        ['question' => "Technical Support", 'answer' => "Our diagrams are sourced directly from technical specifications to ensure 100% accuracy."],
-        ['question' => "Global Availability", 'answer' => "We provide part numbers that are recognized by $brandName dealers worldwide."]
+        ['question' => "How do I ensure part compatibility?", 'answer' => "The most accurate way is using the VIN search above. Our catalog matches specific production dates and region codes for $brandName."],
+        ['question' => "Are these official technical diagrams?", 'answer' => "Yes, the exploded views and part numbers are sourced from official technical databases."],
+        ['question' => "What if my model isn't listed?", 'answer' => "Some classic or niche regional models may require a manual VIN identification. Contact support if the series is missing."]
     ];
 @endphp
 
 @push('styles')
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    body { background-color: #f8f9fa !important; font-family: 'Inter', sans-serif; color: #1a1a1a; }
+    body { background-color: #fcfcfd !important; font-family: 'Inter', sans-serif; color: #1a1a1a; }
     
-    /* Brand Showcase Hero */
+    /* Luxury Brand Header */
     .brand-hero {
         background: #ffffff;
-        border-radius: 30px;
-        padding: 60px;
-        margin-bottom: 50px;
+        border-radius: 40px;
+        padding: 80px 60px;
+        margin-bottom: 60px;
         position: relative;
         overflow: hidden;
-        border: 1px solid #eaeaea;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.03);
+        border: 1px solid #f0f0f0;
+        box-shadow: 0 10px 50px rgba(0,0,0,0.02);
     }
 
-    .brand-logo-main {
-        height: 80px;
-        width: auto;
-        margin-bottom: 25px;
-        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-    }
+    .brand-logo-hero { height: 90px; width: auto; margin-bottom: 30px; position: relative; z-index: 2; }
 
     .hero-watermark {
         position: absolute;
         right: -5%;
-        top: 50%;
-        transform: translateY(-50%);
-        height: 120%;
-        opacity: 0.04;
+        top: 10%;
+        height: 100%;
+        opacity: 0.03;
         pointer-events: none;
     }
 
-    /* Modern Search Input */
-    .search-container {
-        max-width: 550px;
-        position: relative;
-        z-index: 2;
+    /* Description Section - Editorial Style */
+    .description-section { margin-bottom: 80px; }
+    .description-text { 
+        font-size: 1.15rem; 
+        line-height: 1.8; 
+        color: #4a4a4f; 
+        font-weight: 400;
+        border-left: 3px solid #000;
+        padding-left: 30px;
     }
 
-    .search-input-premium {
-        height: 60px;
-        border-radius: 15px;
-        border: 2px solid #f0f0f0;
-        padding-left: 25px;
-        font-size: 1.05rem;
-        transition: all 0.3s;
-        background: #fdfdfd;
-    }
-
-    .search-input-premium:focus {
-        border-color: #000;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        outline: none;
-    }
-
-    /* Elegant Grid */
+    /* Model Cards */
     .model-card {
         background: #fff;
-        border-radius: 20px;
-        padding: 32px;
+        border-radius: 24px;
+        padding: 35px;
         height: 100%;
-        border: 1px solid transparent;
+        border: 1px solid #f0f0f0;
         transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        position: relative;
+        cursor: pointer;
     }
 
     .model-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 30px 60px rgba(0,0,0,0.1);
-        border-color: #eee;
+        transform: translateY(-8px);
+        box-shadow: 0 30px 60px rgba(0,0,0,0.06);
+        border-color: #e2e2e2;
     }
 
-    .model-badge {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 700;
-        color: #888;
-        margin-bottom: 8px;
-        display: block;
+    .variant-link {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 18px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-top: 10px;
+        color: #1a1a1a !important;
+        text-decoration: none !important;
+        font-weight: 500;
+        transition: 0.2s;
     }
+    .variant-link:hover { background: #000; color: #fff !important; }
 
-    .variant-item {
+    /* Modern Collapsible FAQ */
+    .faq-wrapper { max-width: 800px; margin: 0 auto; }
+    .faq-item {
+        background: #fff;
+        border-radius: 16px;
+        margin-bottom: 12px;
+        border: 1px solid #f0f0f0;
+        overflow: hidden;
+    }
+    .faq-trigger {
+        width: 100%;
+        padding: 22px 30px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 14px 0;
-        border-bottom: 1px solid #f5f5f5;
-        color: #333 !important;
-        font-weight: 500;
-        text-decoration: none !important;
+        background: none;
+        border: none;
+        font-weight: 600;
+        font-size: 1.05rem;
+        text-align: left;
+        cursor: pointer;
     }
-
-    .variant-item:last-child { border-bottom: none; }
-    .variant-item:hover { color: #007bff !important; }
-
-    /* Non-Collapsible FAQ */
-    .faq-section { margin-top: 100px; padding-bottom: 80px; }
-    .faq-card {
-        padding: 30px;
-        border-radius: 20px;
-        background: transparent;
-    }
-    .faq-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; color: #000; }
-    .faq-text { color: #666; line-height: 1.6; font-size: 0.95rem; }
 
     .rotate-180 { transform: rotate(180deg); }
     [x-cloak] { display: none !important; }
@@ -123,24 +108,27 @@
 @endpush
 
 @section('content')
-<div class="container py-5" x-data="{ modelSearch: '', activeModel: null }">
+<div class="container py-5" x-data="{ modelSearch: '', activeModel: null, activeFaq: null }">
     
-    <div class="brand-hero">
+    <div class="brand-hero text-center text-lg-left">
         @if($brand->brand_logo)
             <img src="{{ asset('storage/' . $brand->brand_logo) }}" class="hero-watermark d-none d-lg-block">
-            <img src="{{ asset('storage/' . $brand->brand_logo) }}" class="brand-logo-main" alt="{{ $brandName }}">
         @endif
         
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-lg-7">
-                <h1 class="font-weight-bold display-4 mb-3" style="letter-spacing: -2px;">{{ $brandName }}</h1>
-                <p class="lead text-muted mb-4">Select your series to explore genuine technical components and parts diagrams.</p>
+                @if($brand->brand_logo)
+                    <img src="{{ asset('storage/' . $brand->brand_logo) }}" class="brand-logo-hero" alt="{{ $brandName }}">
+                @endif
+                <h1 class="display-3 font-weight-bold" style="letter-spacing: -3px;">{{ $brandName }}</h1>
+                <p class="lead text-muted mb-5">Access the complete technical parts assembly for your vehicle.</p>
                 
-                <form class="search-container" method="GET" action="{{ route('brand.models', $brand?->id) }}">
-                    <div class="input-group">
-                        <input type="text" name="query" class="form-control search-input-premium shadow-none" placeholder="Enter your 17-digit VIN...">
+                <form method="GET" action="{{ route('brand.models', $brand?->id) }}" class="d-inline-block w-100">
+                    <div class="input-group bg-light p-2 shadow-sm" style="border-radius: 20px; border: 1px solid #eee;">
+                        <input type="text" name="query" class="form-control border-0 bg-transparent px-4" 
+                               style="height: 50px;" placeholder="Identify by VIN...">
                         <div class="input-group-append">
-                            <button class="btn btn-dark px-4 ml-2 rounded-lg" style="border-radius: 12px;">Identify</button>
+                            <button class="btn btn-dark px-5 font-weight-bold" style="border-radius: 15px;">Identify</button>
                         </div>
                     </div>
                 </form>
@@ -148,62 +136,79 @@
         </div>
     </div>
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 px-3">
-        <h3 class="font-weight-bold m-0">Model Series</h3>
-        <input type="text" x-model="modelSearch" class="form-control border-0 bg-white shadow-sm mt-3 mt-md-0" 
-               style="max-width: 300px; border-radius: 10px;" placeholder="Search model...">
+    @if($brand->description)
+    <div class="description-section row align-items-center px-3">
+        <div class="col-lg-8">
+            <h6 class="text-uppercase font-weight-bold text-primary mb-3" style="letter-spacing: 2px; font-size: 0.8rem;">Brand Legacy</h6>
+            <div class="description-text">
+                {{ $brand->description }}
+            </div>
+        </div>
     </div>
+    @endif
 
-    <div class="row">
+    <div class="row mb-5 mt-5">
+        <div class="col-12 d-flex justify-content-between align-items-end mb-4 px-4">
+            <h2 class="font-weight-bold m-0">Available Series</h2>
+            <input type="text" x-model="modelSearch" class="form-control border-0 shadow-sm bg-white" 
+                   style="max-width: 250px; border-radius: 12px;" placeholder="Filter models...">
+        </div>
+
         @forelse($models as $model)
+            @php $hasVariants = $model->variants->count() > 0; @endphp
+            
             <div class="col-lg-4 col-md-6 mb-4" 
                  x-show="modelSearch === '' || '{{ strtolower($model->model_name) }}'.includes(modelSearch.toLowerCase())">
                 
-                <div class="model-card shadow-sm" @click="activeModel = (activeModel === {{ $model->id }} ? null : {{ $model->id }})">
-                    <span class="model-badge">{{ $model->production_start_year ?? 'Production' }} — {{ $model->production_end_year ?? 'Present' }}</span>
-                    <h4 class="font-weight-bold mb-3">{{ $model->model_name }}</h4>
+                <div class="model-card shadow-sm" 
+                     @click="{{ $hasVariants ? "activeModel = (activeModel === $model->id ? null : $model->id)" : "window.location.href='".route('specifications.show', ['type' => 'model', 'id' => $model->id])."'" }}">
                     
-                    <div class="d-flex align-items-center text-primary font-weight-bold" style="cursor: pointer;">
-                        <span>{{ $model->variants->count() }} Variants Found</span>
-                        <i class="fas fa-chevron-down ml-2 transition" :class="activeModel === {{ $model->id }} ? 'rotate-180' : ''"></i>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted font-weight-bold small">{{ $model->production_start_year ?? 'All' }} — {{ $model->production_end_year ?? 'Now' }}</span>
+                        @if($hasVariants)
+                            <i class="fas fa-chevron-down text-muted transition" :class="activeModel === {{ $model->id }} ? 'rotate-180' : ''"></i>
+                        @else
+                            <i class="fas fa-arrow-right text-muted small"></i>
+                        @endif
                     </div>
+                    
+                    <h3 class="font-weight-bold h4">{{ $model->model_name }}</h3>
 
-                    <div x-show="activeModel === {{ $model->id }}" x-cloak x-collapse class="mt-4 pt-3 border-top" @click.stop>
-                        @foreach($model->variants as $variant)
-                            <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $variant->id]) }}" class="variant-item">
-                                {{ $variant->name }}
-                                <i class="fas fa-chevron-right small opacity-25"></i>
-                            </a>
-                        @endforeach
-                    </div>
+                    @if($hasVariants)
+                        <div x-show="activeModel === {{ $model->id }}" x-cloak x-collapse class="mt-4 pt-3 border-top" @click.stop>
+                            @foreach($model->variants as $variant)
+                                <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $variant->id]) }}" class="variant-link">
+                                    {{ $variant->name }}
+                                    <i class="fas fa-plus small opacity-50"></i>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
         @empty
             <div class="col-12 text-center py-5">
-                <p class="text-muted">No models found for this brand.</p>
+                <p class="text-muted">No model series found for this selection.</p>
             </div>
         @endforelse
     </div>
 
-    <div class="faq-section px-3">
-        <div class="row">
-            <div class="col-lg-4">
-                <h2 class="font-weight-bold mb-4">Technical<br>Information</h2>
-                <p class="text-muted">Quick reference guide for the {{ $brandName }} catalog system.</p>
-            </div>
-            <div class="col-lg-8">
-                <div class="row">
-                    @foreach($faqs as $faq)
-                        <div class="col-md-6 mb-4">
-                            <div class="faq-card h-100">
-                                <div class="faq-title">{{ $faq['question'] }}</div>
-                                <div class="faq-text">{{ $faq['answer'] }}</div>
-                            </div>
-                        </div>
-                    @endforeach
+    <div class="faq-wrapper py-5">
+        <h3 class="text-center font-weight-bold mb-5">Frequently Asked Questions</h3>
+        
+        @foreach($faqs as $index => $faq)
+            <div class="faq-item shadow-sm">
+                <button class="faq-trigger" @click="activeFaq = (activeFaq === {{ $index }} ? null : {{ $index }})">
+                    <span>{{ $faq['question'] }}</span>
+                    <i class="fas fa-chevron-down transition" :class="activeFaq === {{ $index }} ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="activeFaq === {{ $index }}" x-cloak x-collapse>
+                    <div class="px-4 pb-4 text-muted">
+                        {{ $faq['answer'] }}
+                    </div>
                 </div>
             </div>
-        </div>
+        @endforeach
     </div>
 </div>
 @endsection
