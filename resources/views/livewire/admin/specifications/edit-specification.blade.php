@@ -1,7 +1,7 @@
 <div>
     <form wire:submit.prevent="save">
         <div class="row">
-            {{-- Left Column: Modern Card Design --}}
+            {{-- Left Column: Organized Form --}}
             <div class="col-md-8">
                 <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header">
@@ -40,9 +40,9 @@
                                 </div>
 
                                 <div class="form-group col-md-4">
-                                    <label>Trim Level</label> {{-- Formerly Variant --}}
+                                    <label>Variant</label>
                                     <select wire:model.live="variant_id" class="form-control">
-                                        <option value="">Select Trim (optional)</option>
+                                        <option value="">Select Variant (optional)</option>
                                         @foreach($filteredVariants as $variant)
                                             <option value="{{ $variant->id }}">{{ $variant->name }}</option>
                                         @endforeach
@@ -81,6 +81,24 @@
                                         <option value="">Select</option>
                                         @foreach($transmissionTypes as $item)
                                             <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Drive Type</label>
+                                    <select wire:model="drive_type_id" class="form-control">
+                                        <option value="">Select</option>
+                                        @foreach($driveTypes as $item)
+                                            <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Engine Displacement</label>
+                                    <select wire:model="engine_displacement_id" class="form-control">
+                                        <option value="">Select</option>
+                                        @foreach($engineDisplacements as $ed)
+                                            <option value="{{ $ed->id }}">{{ $ed->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -143,9 +161,23 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="form-row mt-2">
+                                <div class="form-group col-md-4">
+                                    <label>Prod. Year</label>
+                                    <input type="number" wire:model="production_year" class="form-control">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Start Year</label>
+                                    <input type="number" wire:model="production_start" class="form-control">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>End Year</label>
+                                    <input type="number" wire:model="production_end" class="form-control">
+                                </div>
+                            </div>
                         </fieldset>
                     </div>
-                    <div class="card-footer bg-light">
+                    <div class="card-footer">
                         <button type="submit" class="btn btn-primary px-4 shadow-sm">
                             <i class="fas fa-save mr-1"></i> Update Specification
                         </button>
@@ -154,11 +186,11 @@
                 </div>
             </div>
 
-            {{-- Right Column: Modern Live Preview --}}
+            {{-- Right Column: Preview (AdminLTE Sidebar style) --}}
             <div class="col-md-4">
                 <div class="sticky-top" style="top: 20px; z-index: 1020;">
                     <div class="card card-dark shadow">
-                        <div class="card-header bg-dark">
+                        <div class="card-header">
                             <h3 class="card-title font-weight-bold small text-uppercase">Live Preview</h3>
                         </div>
                         <div class="card-body text-center py-4">
@@ -168,23 +200,23 @@
                             <h5 class="font-weight-bold mb-1">
                                 {{ $brand_id ? $brands->firstWhere('id', $brand_id)->brand_name : 'Brand' }}
                             </h5>
-                            <h6 class="text-primary font-weight-bold">
+                            <h6 class="text-primary">
                                 {{ $vehicle_model_id ? (\App\Models\VehicleModel::find($vehicle_model_id)?->model_name) : 'Model' }}
                             </h6>
-                            <div class="badge badge-secondary px-3 py-2">
-                                {{ $variant_id ? (\App\Models\Variant::find($variant_id)?->name) : 'Base Trim' }}
-                            </h6>
+                            <div class="badge badge-secondary px-3">
+                                {{ $variant_id ? (\App\Models\Variant::find($variant_id)?->name) : 'Base Variant' }}
+                            </div>
                             
                             <div class="row mt-4 px-2">
                                 <div class="col-6 p-1">
                                     <div class="bg-light p-2 rounded border">
-                                        <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Power</small>
+                                        <small class="text-muted d-block">Power</small>
                                         <span class="font-weight-bold">{{ $horsepower ?: '--' }} HP</span>
                                     </div>
                                 </div>
                                 <div class="col-6 p-1">
                                     <div class="bg-light p-2 rounded border">
-                                        <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem;">Seats</small>
+                                        <small class="text-muted d-block">Seats</small>
                                         <span class="font-weight-bold">{{ $seats ?: '--' }}</span>
                                     </div>
                                 </div>
@@ -192,7 +224,7 @@
 
                             <div class="mt-4 custom-control custom-switch">
                                 <input type="checkbox" class="custom-control-input" id="statusSwitch" wire:model="status">
-                                <label class="custom-control-label font-weight-bold" for="statusSwitch" style="cursor: pointer;">Active Status</label>
+                                <label class="custom-control-label font-weight-bold" for="statusSwitch">Active</label>
                             </div>
                         </div>
                     </div>
