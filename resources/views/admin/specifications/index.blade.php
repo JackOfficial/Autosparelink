@@ -24,6 +24,9 @@
         border: 1px solid #d1e9ff;
         display: inline-block;
     }
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
 </style>
 
 <section class="content-header">
@@ -51,7 +54,7 @@
             $parts = explode('|', $key);
             $brand = $parts[0] ?? 'N/A';
             $model = $parts[1] ?? 'N/A';
-            $variantName = $parts[2] ?? 'Standard';
+            $variantGroupName = $parts[2] ?? 'Standard';
             
             $firstSpec = $specGroup->first();
             $collapseId = 'variant-group-' . ($firstSpec->id ?? $loop->index);
@@ -70,9 +73,9 @@
                         </span>
                         <span style="font-size: 16px; font-weight: 600; color: #333;">
                             {{ $model }} 
-                            @if($variantName)
+                            @if($variantGroupName)
                                 <small style="color: #ccc; margin: 0 8px;">|</small> 
-                                <span style="color: #3c8dbc;">{{ $variantName }}</span>
+                                <span style="color: #3c8dbc;">{{ $variantGroupName }}</span>
                             @endif
                         </span>
                     </div>
@@ -95,11 +98,11 @@
                             <thead>
                                 <tr style="background-color: #fcfcfc; color: #777; font-size: 11px; text-transform: uppercase;">
                                     <th style="padding-left: 15px;">Body Type</th>
+                                    <th>Variant Name</th>
                                     <th>Trans.</th>
                                     <th>Fuel</th>
                                     <th>Engine</th>
                                     <th>Output</th>
-                                    <th>Config.</th>
                                     <th class="text-center">Color</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-right" style="padding-right: 15px;">Actions</th>
@@ -111,17 +114,18 @@
                                         <td style="padding-left: 15px;">
                                             <span class="text-bold" style="color: #444;">{{ $spec->bodyType->name ?? '-' }}</span>
                                         </td>
+                                        <td>
+                                            {{-- Accessing the name through the variant relationship --}}
+                                            <span class="text-primary" style="font-weight: 600;">
+                                                {{ $spec->variant->name ?? 'N/A' }}
+                                            </span>
+                                        </td>
                                         <td><span class="label label-default" style="font-weight: 400; background-color: #f0f0f0; color: #555; border: 1px solid #ddd;">{{ $spec->transmissionType->name ?? '-' }}</span></td>
                                         <td>{{ $spec->engineType->name ?? '-' }}</td>
                                         <td><code style="background: #f8f8f8; border: 1px solid #eee; color: #e83e8c;">{{ $spec->engineDisplacement->name ?? '-' }}</code></td>
                                         <td>
                                             <span style="font-weight: 600;">{{ $spec->horsepower ?? '0' }} <small>HP</small></span>
                                             <div class="text-muted" style="font-size: 11px;">{{ $spec->torque ?? '0' }} Nm</div>
-                                        </td>
-                                        <td class="text-muted">
-                                            <i class="fa fa-user-circle-o"></i> {{ $spec->seats }} 
-                                            <span style="margin: 0 4px; color: #eee;">|</span> 
-                                            <i class="fa fa-columns"></i> {{ $spec->doors }}
                                         </td>
                                         <td class="text-center">
                                             @if($spec->color)
@@ -135,12 +139,12 @@
                                         </td>
                                         <td class="text-right" style="padding-right: 15px;">
                                             <div class="btn-group">
-                                                <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-default btn-sm" style="border-radius: 3px 0 0 3px;">
+                                                <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-default btn-sm" style="border-radius: 3px 0 0 3px;" title="Edit">
                                                     <i class="fa fa-edit text-blue"></i>
                                                 </a>
                                                 <form action="{{ route('admin.specifications.destroy', $spec->id) }}" method="POST" style="display: inline;">
                                                     @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-default btn-sm" style="border-radius: 0 3px 3px 0;" onclick="return confirm('Delete this specification?')">
+                                                    <button type="submit" class="btn btn-default btn-sm" style="border-radius: 0 3px 3px 0;" title="Delete" onclick="return confirm('Delete this specification?')">
                                                         <i class="fa fa-trash text-red"></i>
                                                     </button>
                                                 </form>
