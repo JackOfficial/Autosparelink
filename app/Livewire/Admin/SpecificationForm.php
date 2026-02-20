@@ -122,7 +122,7 @@ class SpecificationForm extends Component
 
             // 3. Trigger the sync to update name & slug
             $variant->refresh(); 
-            $variant->syncNameFromSpec(); 
+            // $variant->syncNameFromSpec(); 
         });
 
         session()->flash('success', 'Specification and Variant created successfully.');
