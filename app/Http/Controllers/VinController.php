@@ -17,33 +17,90 @@ class VinController extends Controller
 
 public function search(Request $request)
 {
-    // 1. MOCKED VIN DATA (Keep all of it!)
-    $vehicle = [
-        'General Information' => [
-            'Make' => 'TOYOTA',
-            'Model' => 'VERSO',
-            'Year'  => '2011',
-            'Trim level' => '',
-            'Engine type' => '1.4 D4-D (NLP121_)',
-            'Fuel type' => 'Diesel',
-            'Transmission' => '6-Speed Manual',
-        ],
-        'Vehicle Specification' => [
-            'Engine horsepower' => 90,
-            'Driveline' => 'FWD',
-        ],
-        // ... include Manufacturer etc.
-    ];
+    // $vehicle = [ /* ... your mocked data ... */ ];
+    $data = [
+    'VIN' => 'JTDKC3C3801008749',
 
-    // 2. Perform your ID matching here to help Livewire
-    $brand = Brand::whereRaw('UPPER(brand_name) = ?', [strtoupper($vehicle['General Information']['Make'])])->first();
-    $model = $brand ? VehicleModel::where('brand_id', $brand->id)->where('model_name', 'LIKE', '%'.strtoupper($vehicle['General Information']['Model']).'%')->first() : null;
-   
-    // 3. Pass everything to the blade
+    'VIN Analytics' => [
+        'Squish VIN' => 'JTDKC3C3801',
+        'Serial number' => '008749',
+    ],
+
+    'General Information' => [
+        'Make' => 'TOYOTA',
+        'Model' => 'VERSO',
+        'Year' => '2011',
+        'Trim level' => '',
+        'Body style' => 'MPV',
+        'Engine type' => '1.4 D4-D (NLP121_)',
+        'Fuel type' => 'Diesel',
+        'Transmission' => '6-Speed Manual',
+        'Vehicle class' => 'Compact MPV',
+        'Vehicle type' => 'MPV',
+        'Manufactured in' => 'Japan',
+    ],
+
+    'Manufacturer' => [
+        'Manufacturer' => 'Toyota Motor Corp',
+        'City' => '1 Toyota-cho Toyota -Shi',
+        'Region' => 'Asia',
+        'Country' => 'Japan',
+    ],
+
+    'Vehicle Specification' => [
+        'Body type' => 'Hatchback',
+        'Number of doors' => '5',
+        'Number of seats' => '5-7',
+        'Displacement SI' => 1364,
+        'Displacement CID' => '83',
+        'Displacement nominal' => '1.40',
+        'Engine valves' => 2,
+        'Engine cylinders' => '4',
+        'Engine horsepower' => 90,
+        'Engine kilowatts' => 66,
+        'Driveline' => 'FWD',
+        'Anti-lock braking system' => '',
+    ],
+    ];
+     $vehicle = $data;
+
+    $makeName  = strtoupper($vehicle['General Information']['Make']);
+    $modelName = strtoupper($vehicle['General Information']['Model']);
+    $apiTrim   = trim($vehicle['General Information']['Trim level'] ?? '');
+    $apiEngine = trim($vehicle['General Information']['Engine type'] ?? '');
+
+    // 2. PRIMARY MATCHING (Brand & Model)
+    $brand = Brand::whereRaw('UPPER(brand_name) = ?', [$makeName])->first();
+    if (!$brand) return back()->with('error', 'Brand not recognized.');
+
+    $model = VehicleModel::where('brand_id', $brand->id)
+        ->whereRaw('UPPER(model_name) LIKE ?', ["%$modelName%"])
+        ->first();
+    if (!$model) return back()->with('error', 'Model not recognized.');
+
+    // 3. VARIANT (TRIM) MATCHING
+    // Since you defined Variant = Trim (S, XLE, etc.), we search accordingly.
+    $matchedVariant = Variant::where('vehicle_model_id', $model->id)
+        ->where(function($q) use ($apiTrim, $apiEngine) {
+            // Priority 1: Match the actual Trim Level if provided
+            if (!empty($apiTrim)) {
+                $q->whereRaw('UPPER(name) = ?', [strtoupper($apiTrim)])
+                  ->orWhereRaw('UPPER(trim_level) = ?', [strtoupper($apiTrim)]);
+            } 
+            // Priority 2: If Trim is empty, try to see if the Engine string contains a Variant name
+            // (Only if your database Variant names might be engine-related like '1.4 D4-D')
+            elseif (!empty($apiEngine)) {
+                $cleanEngine = strtoupper(strtok($apiEngine, ' ')); // Gets '1.4'
+                $q->whereRaw('UPPER(name) LIKE ?', ["%$cleanEngine%"]);
+            }
+        })->first();
+
+    // 4. HAND-OFF TO VIEW
     return view('parts.index', [
-        'brandId' => $brand?->id,
-        'modelId' => $model?->id,
-        'vehicleData' => $vehicle // The full API array
+        'brandId'     => $brand->id,
+        'modelId'     => $model->id,
+        'variantId'   => $matchedVariant?->id, // If null, the Catalog shows all model parts
+        'vehicleData' => $vehicle
     ]);
 }
 

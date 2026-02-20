@@ -56,6 +56,7 @@
 @livewire('parts.parts-category', [
         'brand' => $brandId,
         'model' => $modelId,
+        'variant' => $variantId,
         'vinData' => $vehicleData // Passing the full array into Livewire
     ])
 
