@@ -37,6 +37,7 @@ class PartsCatalog extends Component
 
     public function mount($brand = null, $model = null, $variant = null, $vinData = [])
     {
+        dd("hello there");
         // Use the values passed from the Controller/Blade
         $this->brand = $brand ?? '';
         $this->model = $model ?? '';
