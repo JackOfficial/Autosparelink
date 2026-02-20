@@ -93,15 +93,15 @@ class EditSpecification extends Component
         ]);
 
         // If it reaches here, the update worked.
-        $spec->load('variant');
+        // $spec->load('variant');
 
-        if ($spec->variant) {
-            $spec->variant->update([
-                'vehicle_model_id' => $this->vehicle_model_id
-            ]);
-            $spec->variant->refresh();
-            $spec->variant->syncNameFromSpec();
-        }
+        // if ($spec->variant) {
+        //     $spec->variant->update([
+        //         'vehicle_model_id' => $this->vehicle_model_id
+        //     ]);
+        //     $spec->variant->refresh();
+        //     $spec->variant->syncNameFromSpec();
+        // }
     });
 
     dd("If you see this, the transaction FINISHED successfully.");
