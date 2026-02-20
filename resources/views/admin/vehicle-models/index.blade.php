@@ -21,104 +21,94 @@
 
 <!-- Main content -->
 <section class="content">
-<div class="d-flex justify-content-between my-1">
-    <div>{{ $brands->sum(fn ($brand) => $brand->vehicleModels->count()) }} Models</div>
-         <a href="{{ route('admin.vehicle-models.create') }}" class="btn btn-outline-primary btn-sm">
-                    <i class="fa fa-plus"></i> Add Model
-                </a>
+    <div class="row mb-3 align-items-center">
+        <div class="col-6">
+            <span class="badge badge-info shadow-sm p-2">
+                Total Models: {{ $brands->sum(fn ($b) => $b->vehicle_models_count ?? $b->vehicleModels->count()) }}
+            </span>
+        </div>
+        <div class="col-6 text-right">
+            <a href="{{ route('admin.vehicle-models.create') }}" class="btn btn-primary shadow-sm">
+                <i class="fa fa-plus-circle mr-1"></i> Add New Model
+            </a>
+        </div>
     </div>
-    {{-- Success Message --}}
-    @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-    </div>
-    @endif
 
-    {{-- Loop through brands --}}
     @forelse($brands as $brand)
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h3 class="card-title">{{ $brand->brand_name }} ({{ $brand->vehicleModels->count() }} {{ Str::plural('Model', $brand->vehicleModels->count()) }})</h3>
-              </div>
+        <div class="card card-outline card-primary mb-4 shadow-sm">
+            <div class="card-header border-0">
+                <h3 class="card-title font-weight-bold">
+                    <i class="fas fa-industry mr-2 text-muted"></i>
+                    {{ $brand->brand_name }} 
+                    <span class="text-muted small ml-2">({{ $brand->vehicleModels->count() }} variants)</span>
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
 
-            <div class="card-body table-responsive p-0">
-                @if($brand->vehicleModels->isEmpty())
-                    <p class="text-center text-muted py-3">No models for this brand.</p>
-                @else
-                    <table class="table table-striped table-hover text-nowrap">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Photo</th>
-                                <th>Model Name</th>
-                                <th>Production Years</th>
-                                <th>Model Year</th>
-                                <th>Status</th>
-                                <th style="width:150px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($brand->vehicleModels as $model)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-
-                               <td>
-                                 {{-- Photo --}}
-                               @if($model->photos->isNotEmpty())
-  @foreach($model->photos as $photo)
-    <img src="{{ asset('storage/'.$photo->file_path) }}"
-         class="img-thumbnail me-1"
-         style="width:60px;">
-@endforeach
-@else
-    <span class="text-muted">No photo</span>
-@endif
-                               </td>
-
-                                {{-- Model Name --}}
-                                <td>{{ $model->model_name ?? '-' }}</td>
-
-                                {{-- Production Years --}}
-                                <td>{{ $model->production_start_year ?? '-' }} - {{ $model->production_end_year ?? 'Present' }}</td>
-  
-                                <td>{{ $model->year ?? '-' }}</td>
-                                {{-- Status --}}
-                                <td>
-                                    @if($model->status)
-                                        <span class="badge badge-success">Active</span>
-                                    @else
-                                        <span class="badge badge-warning">Inactive</span>
-                                    @endif
-                                </td>
-
-                                {{-- Actions --}}
-                                <td class="d-flex">
-                                    <a href="{{ route('admin.vehicle-models.show', $model->id) }}" class="btn btn-info btn-sm mr-2">
-                                        <i class="fa fa-eye"></i>
+            <div class="card-body p-0">
+                <table class="table table-valign-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th style="width: 80px">Photo</th>
+                            <th>Model Identity</th>
+                            <th>Production Range</th>
+                            <th>Status</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($brand->vehicleModels as $model)
+                        <tr>
+                            <td>
+                                @if($model->photos->isNotEmpty())
+                                    <img src="{{ asset('storage/'.$model->photos->first()->file_path) }}" 
+                                         class="img-size-50 rounded shadow-sm border">
+                                @else
+                                    <div class="bg-light text-center rounded border" style="width:50px; height:50px; line-height:50px;">
+                                        <i class="fa fa-car text-muted"></i>
+                                    </div>
+                                @endif
+                            </td>
+                            <td>
+                                <strong>{{ $model->model_name }}</strong>
+                                <div class="small text-muted">Year: {{ $model->year ?? 'N/A' }}</div>
+                            </td>
+                            <td>
+                                <span class="badge badge-light border">
+                                    {{ $model->production_start_year }} - {{ $model->production_end_year ?? 'Present' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ $model->status ? 'success' : 'secondary' }}">
+                                    {{ $model->status ? 'Active' : 'Inactive' }}
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <div class="btn-group">
+                                    <a href="{{ route('admin.vehicle-models.show', $model->id) }}" class="btn btn-default btn-sm shadow-sm">
+                                        <i class="fa fa-eye text-info"></i>
                                     </a>
-                                    <a href="{{ route('admin.vehicle-models.edit', $model->id) }}" class="btn btn-warning btn-sm mr-2">
-                                        <i class="fas fa-edit"></i>
+                                    <a href="{{ route('admin.vehicle-models.edit', $model->id) }}" class="btn btn-default btn-sm shadow-sm">
+                                        <i class="fas fa-edit text-warning"></i>
                                     </a>
-                                    <form action="{{ route('admin.vehicle-models.destroy', $model->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vehicle model?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                @endif
+                                    {{-- Delete Form here --}}
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="5" class="text-center py-4 text-muted">No models found for this brand.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     @empty
-        <p class="text-center text-muted">No brands or vehicle models available.</p>
+        {{-- Empty state --}}
     @endforelse
-
 </section>
 
 @endsection
