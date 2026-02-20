@@ -90,8 +90,6 @@ public function search(Request $request)
 
     if (!$model) return back()->with('vin', 'Model not found');
 
-    dd($model);
-
     // 3. SMART VARIANT SEARCH (Tokens)
     $searchTokens = collect([
         $gen['Year'],
@@ -122,10 +120,8 @@ public function search(Request $request)
             ->where('name', 'LIKE', "%{$gen['Fuel type']}%")
             ->first();
     }
-
     
-
-    // dd($matchedVariant); // Use this to verify the final match!
+    dd($matchedVariant); // Use this to verify the final match!
 
     return view('parts.index', [
         'brandId' => $brand->id,
