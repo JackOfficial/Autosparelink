@@ -138,7 +138,9 @@ public function syncNameFromSpec()
         $spec->transmissionType?->name,           // Manual
     ];
 
-    $this->name = implode(' ', array_filter($pieces));
+    $generatedName = implode(' ', array_filter($pieces));
+    dd($generatedName);
+    $this->name = $generatedName;
     $this->save();
 }
 
