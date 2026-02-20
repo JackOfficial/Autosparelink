@@ -81,11 +81,12 @@ class SpecificationForm extends Component
     }
 
     public function save()
-    {
-        $this->validate();
-        
+{
+    $this->validate();
+    
+    try {
         DB::transaction(function () {
-            // 1. Create the Variant with identity fields
+            // 1. Create the Variant
             $variant = Variant::create([
                 'vehicle_model_id' => $this->vehicle_model_id,
                 'trim_level'       => $this->trim_level,
@@ -94,12 +95,10 @@ class SpecificationForm extends Component
                 'is_default'       => $this->is_default,
                 'status'           => $this->status,
                 'name'             => 'Pending Sync...', 
-                'slug'             => Str::uuid(), // Temporary slug until sync
+                'slug'             => Str::uuid(),
             ]);
 
-            dd("variant saved");
-
-            // 2. Create the Specification (Technical Snapshot)
+            // 2. Create the Specification 
             Specification::create([
                 'variant_id'             => $variant->id,
                 'vehicle_model_id'       => $this->vehicle_model_id,
@@ -111,7 +110,7 @@ class SpecificationForm extends Component
                 'horsepower'             => $this->horsepower,
                 'torque'                 => $this->torque,
                 'fuel_capacity'          => $this->fuel_capacity,
-                'fuel_efficiency'        => $this->fuel_efficiency,
+                'fuel_efficiency'        => $this->fuel_efficiency, // Ensure this exists in DB
                 'seats'                  => $this->seats,
                 'doors'                  => $this->doors,
                 'steering_position'      => $this->steering_position,
@@ -122,15 +121,20 @@ class SpecificationForm extends Component
                 'status'                 => $this->status,
             ]);
 
-            // 3. Trigger the sync to update name & slug
-            dd("Here");
+            // 3. Sync
             $variant->refresh(); 
-            // $variant->syncNameFromSpec(); 
+            $variant->syncNameFromSpec(); 
         });
 
         session()->flash('success', 'Specification and Variant created successfully.');
         return redirect()->route('admin.specifications.index');
+
+    } catch (\Exception $e) {
+        // This will show you exactly what is wrong (e.g., "Column not found" or "Integrity constraint violation")
+        session()->flash('error', 'Error: ' . $e->getMessage());
+        return;
     }
+}
 
     public function render()
     {
