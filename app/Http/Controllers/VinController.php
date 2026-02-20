@@ -38,7 +38,8 @@ public function search(Request $request)
     // 2. Perform your ID matching here to help Livewire
     $brand = Brand::whereRaw('UPPER(brand_name) = ?', [strtoupper($vehicle['General Information']['Make'])])->first();
     $model = $brand ? VehicleModel::where('brand_id', $brand->id)->where('model_name', 'LIKE', '%'.strtoupper($vehicle['General Information']['Model']).'%')->first() : null;
-   // 3. Pass everything to the blade
+   dd("Controller");
+    // 3. Pass everything to the blade
     return view('parts.index', [
         'brandId' => $brand?->id,
         'modelId' => $model?->id,
