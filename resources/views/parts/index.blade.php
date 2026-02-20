@@ -53,6 +53,10 @@
 
 @section('content')
 
-<livewire:parts.parts-catalog />
+@livewire('parts.parts-category', [
+        'brand' => $brandId,
+        'model' => $modelId,
+        'vinData' => $vehicleData // Passing the full array into Livewire
+    ])
 
 @endsection

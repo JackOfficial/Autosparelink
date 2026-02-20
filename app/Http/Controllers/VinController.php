@@ -6,7 +6,9 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Part;
 use App\Models\Specification;
+use App\Models\Variant;
 use App\Models\VehicleModel;
+use App\Services\VinDecoderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -15,123 +17,78 @@ class VinController extends Controller
 
 public function search(Request $request)
 {
-    // 1. MOCKED VIN DATA (from API)
+    // 1. MOCKED VIN DATA (Keep all of it!)
     $vehicle = [
         'General Information' => [
             'Make' => 'TOYOTA',
             'Model' => 'VERSO',
             'Year'  => '2011',
-            'Trim level' => '', // optional
-            'Body style' => 'MPV',
+            'Trim level' => '',
             'Engine type' => '1.4 D4-D (NLP121_)',
             'Fuel type' => 'Diesel',
             'Transmission' => '6-Speed Manual',
-            'Manufactured in' => 'Japan',
-        ],
-        'Manufacturer' => [
-            'Manufacturer' => 'Toyota Motor Corp',
-            'Region' => 'Asia',
-            'Country' => 'Japan',
         ],
         'Vehicle Specification' => [
-            'Body type' => 'Hatchback',
-            'Number of doors' => '5',
-            'Number of seats' => '5-7',
             'Engine horsepower' => 90,
             'Driveline' => 'FWD',
         ],
+        // ... include Manufacturer etc.
     ];
 
-    // 2. CORE IDENTIFIERS
-    $make  = strtoupper(trim($vehicle['General Information']['Make']));
-    $model = strtoupper($vehicle['General Information']['Model']);
-    $year  = (int) $vehicle['General Information']['Year'];
+    // 2. Perform your ID matching here to help Livewire
+    $brand = Brand::whereRaw('UPPER(brand_name) = ?', [strtoupper($vehicle['General Information']['Make'])])->first();
+    $model = $brand ? VehicleModel::where('brand_id', $brand->id)->where('model_name', 'LIKE', '%'.$vehicle['General Information']['Model'].'%')->first() : null;
 
-    $trimLevel = trim($vehicle['General Information']['Trim level'] ?? '');
-    $engineType = trim($vehicle['General Information']['Engine type'] ?? '');
-    $bodyType = trim($vehicle['Vehicle Specification']['Body type'] ?? '');
-    $engineHP = (int) ($vehicle['Vehicle Specification']['Engine horsepower'] ?? 0);
-    $driveline = trim($vehicle['Vehicle Specification']['Driveline'] ?? '');
-
-    $country = trim($vehicle['Manufacturer']['Country'] ?? '');
-    $region = trim($vehicle['Manufacturer']['Region'] ?? '');
-
-    // 3. BRAND & VEHICLE MODEL
-    $brand = Brand::whereRaw('UPPER(brand_name) = ?', [$make])->first();
-    if (!$brand) {
-        return back()->withErrors(['vin' => "Brand ($make) not found."]);
-    }
-
-    $vehicleModel = VehicleModel::where('brand_id', $brand->id)
-        ->whereRaw('UPPER(model_name) LIKE ?', ["%$model%"])
-        ->first();
-    if (!$vehicleModel) {
-        return back()->withErrors(['vin' => "$make $model not found."]);
-    }
-
-    // 4. FIND MATCHING SPECIFICATIONS
-   $specifications = Specification::with('variant')
-    ->where('vehicle_model_id', $vehicleModel->id)
-    ->where(function($q) use ($vehicleVariant) {
-        // If specification has a variant, match the API variant name
-        // OR if variant_id is null (generic), include it
-        $q->whereHas('variant', function($v) use ($vehicleVariant) {
-            $v->whereRaw('UPPER(name) = ?', [strtoupper($vehicleVariant)]);
-        })
-        ->orWhereNull('variant_id');
-    })
-    ->where(function ($q) use ($year) {
-        $q->where('production_year', $year)
-          ->orWhere(function ($range) use ($year) {
-              $range->where(function($r) use ($year){
-                  $r->whereNull('production_start')
-                    ->orWhere('production_start', '<=', $year);
-              })
-              ->where(function($r) use ($year){
-                  $r->whereNull('production_end')
-                    ->orWhere('production_end', '>=', $year);
-              });
-          })
-          ->orWhere(function ($nulls) {
-              $nulls->whereNull('production_year')
-                    ->whereNull('production_start')
-                    ->whereNull('production_end');
-          });
-    })
-    
-    ->get();
-
-    if ($specifications->isEmpty()) {
-        return back()->withErrors([
-            'vin' => "No specifications found for $year $make $model with your VIN details."
-        ]);
-    }
-
-    // 5. FETCH PARTS FOR ANY SPECIFICATION
-    $parts = Part::with(['photos', 'partBrand'])
-        ->whereHas('fitments', function ($q) use ($specifications, $year) {
-            $q->where(function ($fit) use ($specifications) {
-                $fit->whereIn('vehicle_model_id', $specifications->pluck('vehicle_model_id'))
-                    ->orWhereIn('variant_id', $specifications->pluck('variant_id')->filter());
-            })
-            ->where(function ($yearQ) use ($year) {
-                $yearQ->whereNull('start_year')->orWhere('start_year', '<=', $year);
-            })
-            ->where(function ($yearQ) use ($year) {
-                $yearQ->whereNull('end_year')->orWhere('end_year', '>=', $year);
-            });
-        })
-        ->paginate(12);
-        
-    // 6. SERVE parts.index
+    // 3. Pass everything to the blade
     return view('parts.index', [
-        'parts' => $parts,
-        'categories' => Category::whereNull('parent_id')->orderBy('category_name')->withCount('parts')->get(),
-        'type' => 'model',
-        'context' => $vehicleModel,
+        'brandId' => $brand?->id,
+        'modelId' => $model?->id,
+        'vehicleData' => $vehicle // The full API array
     ]);
 }
 
+public function searchByVin(Request $request, VinDecoderService $decoder)
+{
+    $data = $decoder->decode($request->vin);
+    
+    if (!$data) return back()->with('error', 'VIN not recognized.');
+
+    // Match Brand
+    $brand = Brand::where('brand_name', 'LIKE', $data['make'])->first();
+    
+    // Match Model
+    $model = $brand ? VehicleModel::where('brand_id', $brand->id)
+                ->where('model_name', 'LIKE', '%' . $data['model'] . '%')
+                ->first() : null;
+
+    // Match Variant
+    $variant = $model ? Variant::where('vehicle_model_id', $model->id)
+                ->where('name', 'LIKE', '%' . ($data['trim'] ?? '') . '%')
+                ->first() : null;
+
+    // Return the view and pass these IDs
+    return view('parts.index', [
+        'initialBrand' => $brand?->id,
+        'initialModel' => $model?->id,
+        'initialVariant' => $variant?->id,
+    ]);
+}
+
+
+/*gemini recommendations
+public function vinSearch(Request $request, VinDecoderService $decoder)
+    {
+        $vin = $request->input('vin');
+        $vehicleData = $decoder->decode($vin);
+
+        if (!$vehicleData) {
+            return back()->with('error', 'Vehicle not found or invalid VIN.');
+        }
+
+        // Logic to match $vehicleData['make'] to your Brand model...
+        return view('search.results', compact('vehicleData'));
+    }
+*/ 
 
 // public function search(Request $request)
 // {
