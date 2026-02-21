@@ -94,50 +94,76 @@
 
                 <div class="row">
                     {{-- ENGINE SECTION --}}
-                    <div class="col-md-6 mb-4">
-                        <div class="bg-white p-4 rounded shadow-sm h-100">
-                            <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
-                                <i class="fas fa-microchip mr-2"></i> Engine & Power
-                            </h5>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="small font-weight-bold text-muted">Fuel Type *</label>
-                                    <select wire:model.live="engine_type_id" class="form-control shadow-none">
-                                        <option value="">Select Fuel</option>
-                                        @foreach($engineTypes as $et) <option value="{{ $et->id }}">{{ $et->name }}</option> @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="small font-weight-bold text-muted">Displacement *</label>
-                                    <select wire:model.live="engine_displacement_id" class="form-control shadow-none">
-                                        <option value="">Select CC</option>
-                                        @foreach($engineDisplacements as $ed) <option value="{{ $ed->id }}">{{ $ed->name }}</option> @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="small font-weight-bold text-muted">Horse Power (HP)</label>
-                                    <input type="number" wire:model="horsepower" class="form-control shadow-none">
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="small font-weight-bold text-muted">Torque (Nm)</label>
-                                    <input type="number" wire:model="torque" class="form-control shadow-none">
-                                </div>
-                                <div class="col-md-4 mb-3">
-                              <label class="small font-weight-bold text-muted">Efficiency</label>
-                  <div class="input-group">
-        <input type="number" step="0.1" wire:model="fuel_efficiency" class="form-control shadow-none" placeholder="0.0">
-        <div class="input-group-append">
-            <span class="input-group-text bg-light small">L/100km</span>
-        </div>
-                 </div>
-           </div>
-                                <div class="col-md-12">
-                                    <label class="small font-weight-bold text-muted">Fuel Tank Capacity (L)</label>
-                                    <input type="number" wire:model="fuel_capacity" class="form-control shadow-none">
-                                </div>
-                            </div>
-                        </div>
+                   <div class="col-md-6 mb-4">
+    <div class="bg-white p-4 rounded shadow-sm h-100">
+        <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
+            <i class="fas fa-microchip mr-2"></i> Engine & Power
+        </h5>
+        <div class="row">
+            {{-- Fuel Type --}}
+            <div class="col-md-6 mb-3">
+                <label class="small font-weight-bold text-muted">Fuel Type *</label>
+                <select wire:model.live="engine_type_id" class="form-control shadow-none">
+                    <option value="">Select Fuel</option>
+                    @foreach($engineTypes as $et) <option value="{{ $et->id }}">{{ $et->name }}</option> @endforeach
+                </select>
+            </div>
+
+            {{-- Displacement --}}
+            <div class="col-md-6 mb-3">
+                <label class="small font-weight-bold text-muted">Displacement *</label>
+                <select wire:model.live="engine_displacement_id" class="form-control shadow-none">
+                    <option value="">Select CC</option>
+                    @foreach($engineDisplacements as $ed) <option value="{{ $ed->id }}">{{ $ed->name }}</option> @endforeach
+                </select>
+            </div>
+
+            {{-- Horse Power --}}
+            <div class="col-md-4 mb-3">
+                <label class="small font-weight-bold text-muted">Power</label>
+                <div class="input-group">
+                    <input type="number" wire:model="horsepower" class="form-control shadow-none">
+                    <div class="input-group-append">
+                        <span class="input-group-text bg-light small text-muted">HP</span>
                     </div>
+                </div>
+            </div>
+
+            {{-- Torque --}}
+            <div class="col-md-4 mb-3">
+                <label class="small font-weight-bold text-muted">Torque</label>
+                <div class="input-group">
+                    <input type="number" wire:model="torque" class="form-control shadow-none">
+                    <div class="input-group-append">
+                        <span class="input-group-text bg-light small text-muted">Nm</span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Efficiency --}}
+            <div class="col-md-4 mb-3">
+                <label class="small font-weight-bold text-muted">Efficiency</label>
+                <div class="input-group">
+                    <input type="number" step="0.1" wire:model="fuel_efficiency" class="form-control shadow-none" placeholder="0.0">
+                    <div class="input-group-append">
+                        <span class="input-group-text bg-light small text-muted">L/100k</span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Fuel Tank --}}
+            <div class="col-md-12">
+                <label class="small font-weight-bold text-muted">Fuel Tank Capacity</label>
+                <div class="input-group">
+                    <input type="number" wire:model="fuel_capacity" class="form-control shadow-none">
+                    <div class="input-group-append">
+                        <span class="input-group-text bg-light small text-muted">Liters</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                     {{-- DRIVETRAIN & INTERIOR --}}
                     <div class="col-md-6 mb-4">
