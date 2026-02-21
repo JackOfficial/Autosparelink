@@ -82,19 +82,26 @@
                     <div class="card-header bg-primary py-2">
                         <h3 class="card-title text-sm">Vehicle Compatibility</h3>
                     </div>
-                    <div class="card-body p-0">
-                        <select wire:model.defer='fitment_specifications' class="form-control border-0" multiple style="height: 320px; border-radius: 0;">
-                            @foreach($vehicleModels as $model)
-                                <optgroup label="{{ strtoupper($model->brand->brand_name ?? 'BRAND') }} - {{ $model->model_name }}">
-                                    @foreach($model->specifications as $spec)
-                                        <option value="{{ $spec->id }}">
-                                            {{ $spec->variant->name ?? 'Standard' }} ({{ $spec->production_start }}-{{ $spec->production_end }})
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
-                        </select>
-                    </div>
+                   {{-- Compatibility Section --}}
+<div class="card-body p-0" wire:key="compatibility-select-container">
+    <select 
+        wire:model="fitment_specifications" 
+        id="fitment_specifications"
+        class="form-control border-0" 
+        multiple 
+        style="height: 320px; border-radius: 0; cursor: pointer;"
+    >
+        @foreach($vehicleModels as $model)
+            <optgroup label="{{ strtoupper($model->brand->brand_name ?? 'BRAND') }} - {{ $model->model_name }}">
+                @foreach($model->specifications as $spec)
+                    <option value="{{ (string)$spec->id }}">
+                        {{ $spec->variant->name ?? 'Standard' }} ({{ $spec->production_start }}-{{ $spec->production_end }})
+                    </option>
+                @endforeach
+            </optgroup>
+        @endforeach
+    </select>
+</div>
                     <div class="card-footer py-1 bg-light text-center">
                         <small class="text-muted text-xs">Hold Ctrl/Cmd to select multiple</small>
                     </div>
