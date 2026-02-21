@@ -135,7 +135,7 @@
                                                 wire:click="toggleVehicle({{ $spec->id }})">
                                             <i class="fas {{ in_array($spec->id, $selectedSpecs) ? 'fa-check-circle text-success' : 'fa-plus text-muted' }} mr-2"></i>
                                             <strong>{{ $spec->vehicleModel->brand->brand_name }} {{ $spec->vehicleModel->model_name }}</strong>
-                                            <span class="text-muted ml-1">({{ $spec->variant->name ?? 'Std' }} {{ $spec->production_start }})</span>
+                                            <span class="text-muted ml-1">({{ $spec->variant->name ?? 'Std' }})</span>
                                         </button>
                                     @endforeach
                                 </div>
