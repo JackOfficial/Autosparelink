@@ -2,103 +2,132 @@
     <section class="content">
         <div class="row">
             <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="card-title"><i class="fas fa-car"></i> Model Information</h3>
+                <div class="card shadow-sm border-0">
+                    {{-- Header with a softer color palette --}}
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h3 class="card-title font-weight-bold text-primary">
+                            <i class="fas fa-car-side mr-2"></i> Model Details
+                        </h3>
                     </div>
 
                     <div class="card-body">
                         <form wire:submit.prevent="save">
 
-                            {{-- Error Messages --}}
+                            {{-- Refined Error Alert --}}
                             @if ($errors->any())
-                                <div class="alert alert-danger mb-3">
-                                    <ul class="mb-0">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
+                                <div class="alert alert-custom bg-danger-light text-danger border-0 mb-4 shadow-sm">
+                                    <div class="d-flex">
+                                        <i class="fas fa-exclamation-circle mt-1 mr-3"></i>
+                                        <div>
+                                            <span class="font-weight-bold">Validation Errors:</span>
+                                            <ul class="mb-0 small ml-n3">
+                                                @foreach ($errors->all() as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
 
-                            <fieldset class="border p-3 mb-4 rounded bg-light">
-                                <legend class="w-auto fw-bold text-primary"><i class="fas fa-car-side"></i> Vehicle Model Details</legend>
-
-                                <div class="row g-3">
+                            {{-- Details Section --}}
+                            <div class="bg-light p-4 rounded mb-4 shadow-none border">
+                                <h6 class="text-uppercase text-muted font-weight-bold small mb-4">Core Information</h6>
+                                
+                                <div class="row">
                                     {{-- Brand Selection --}}
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-industry"></i> Brand *</label>
-                                            <select wire:model.live="brand_id" class="form-control @error('brand_id') is-invalid @enderror">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="small font-weight-bold text-muted">Brand <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-white border-right-0"><i class="fas fa-industry text-muted"></i></span>
+                                            </div>
+                                            <select wire:model.live="brand_id" class="form-control border-left-0 shadow-none @error('brand_id') is-invalid @enderror">
                                                 <option value="">Select Brand</option>
                                                 @foreach($brands as $brand)
                                                     <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
                                                 @endforeach
                                             </select>
-                                            @error('brand_id') <span class="text-danger small">{{ $message }}</span> @enderror
                                         </div>
+                                        @error('brand_id') <span class="text-danger extra-small mt-1">{{ $message }}</span> @enderror
                                     </div>
 
-                                    {{-- Model Name Input --}}
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-key"></i> Model Name *</label>
-                                            <input type="text" wire:model.live="model_name" class="form-control @error('model_name') is-invalid @enderror" placeholder="e.g. Civic, Corolla, Golf">
-                                            @error('model_name') <span class="text-danger small">{{ $message }}</span> @enderror
-                                        </div>
-                                    </div>
-
-                                    {{-- Production Start Year --}}
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-calendar-plus"></i> Production Start Year</label>
-                                            <input type="number" wire:model.live="production_start_year" class="form-control @error('production_start_year') is-invalid @enderror" placeholder="e.g. 2015">
-                                            @error('production_start_year') <span class="text-danger small">{{ $message }}</span> @enderror
-                                        </div>
-                                    </div>
-
-                                    {{-- Production End Year --}}
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-calendar-minus"></i> Production End Year</label>
-                                            <input type="number" wire:model.live="production_end_year" class="form-control @error('production_end_year') is-invalid @enderror" placeholder="e.g. 2022 (Leave blank if current)">
-                                            @error('production_end_year') <span class="text-danger small">{{ $message }}</span> @enderror
-                                        </div>
+                                    {{-- Model Name --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="small font-weight-bold text-muted">Model Name <span class="text-danger">*</span></label>
+                                        <input type="text" wire:model.live.debounce.500ms="model_name" class="form-control shadow-none @error('model_name') is-invalid @enderror" placeholder="e.g. Corolla">
+                                        @error('model_name') <span class="text-danger extra-small mt-1">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
 
-                                {{-- Description --}}
-                                <div class="form-group mt-3">
-                                    <label><i class="fas fa-align-left"></i> Description (Optional)</label>
-                                    <textarea wire:model.live="description" class="form-control" rows="3" placeholder="General info about this model series..."></textarea>
+                                <div class="row">
+                                    {{-- Start Year --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="small font-weight-bold text-muted">Production Start Year</label>
+                                        <input type="number" wire:model.live="production_start_year" class="form-control shadow-none @error('production_start_year') is-invalid @enderror" placeholder="YYYY">
+                                        @error('production_start_year') <span class="text-danger extra-small mt-1">{{ $message }}</span> @enderror
+                                    </div>
+
+                                    {{-- End Year --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="small font-weight-bold text-muted">Production End Year</label>
+                                        <input type="number" wire:model.live="production_end_year" class="form-control shadow-none @error('production_end_year') is-invalid @enderror" placeholder="YYYY (Leave blank if active)">
+                                        @error('production_end_year') <span class="text-danger extra-small mt-1">{{ $message }}</span> @enderror
+                                    </div>
                                 </div>
 
-                                {{-- Photos --}}
-                                <div x-data="{ photos: [] }" class="form-group mt-3">
-                                    <label><i class="fas fa-upload"></i> Model Photos</label>
-                                    <input type="file" multiple
-                                           x-on:change="photos = Array.from($event.target.files).map(file => URL.createObjectURL(file)); @this.uploadMultiple('photos', $event.target.files);"
-                                           class="form-control">
+                                <div class="form-group mb-0">
+                                    <label class="small font-weight-bold text-muted">Description</label>
+                                    <textarea wire:model.live="description" class="form-control shadow-none border-0 shadow-sm" rows="3" placeholder="Enter general information about this series..."></textarea>
+                                </div>
+                            </div>
 
-                                    <div class="row mt-3" x-show="photos.length > 0">
-                                        <template x-for="(photo, index) in photos" :key="index">
-                                            <div class="col-sm-6 col-md-3 mb-3">
-                                                <div class="card shadow-sm position-relative">
-                                                    <img :src="photo" class="card-img-top rounded" style="height:120px; object-fit:cover;">
-                                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle"
-                                                            x-on:click="photos.splice(index, 1); @this.removeUpload('photos', index);">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
+                            {{-- Media Upload Section --}}
+                            <div class="p-4 rounded border mb-4 bg-white shadow-sm">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="text-uppercase text-muted font-weight-bold small mb-0">Vehicle Gallery</h6>
+                                    <span wire:loading wire:target="photos" class="badge badge-info animate-pulse">
+                                        <i class="fas fa-spinner fa-spin mr-1"></i> Uploading...
+                                    </span>
+                                </div>
+
+                                <div class="custom-file-upload border-dashed p-5 text-center rounded bg-light position-relative" 
+                                     style="border: 2px dashed #dee2e6;">
+                                    <input type="file" multiple wire:model="photos" class="position-absolute h-100 w-100 opacity-0 cursor-pointer" style="top:0; left:0; z-index:2;">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                    <p class="mb-1 font-weight-bold text-dark">Click or drag photos here to upload</p>
+                                    <p class="text-muted small">Max 5MB per image. Multi-select allowed.</p>
+                                </div>
+
+                                {{-- Photo Previews --}}
+                                @if($photos)
+                                    <div class="row mt-4">
+                                        @foreach($photos as $index => $photo)
+                                            <div class="col-6 col-md-3 mb-3">
+                                                <div class="card h-100 border shadow-none position-relative group">
+                                                    <img src="{{ $photo->temporaryUrl() }}" class="card-img-top rounded shadow-sm" style="height:120px; object-fit:cover;">
+                                                    <div class="card-footer p-1 bg-white text-center">
+                                                        <button type="button" wire:click="removeUpload('photos', {{ $index }})" class="btn btn-link text-danger btn-sm p-0">
+                                                            <i class="fas fa-trash-alt mr-1"></i> Remove
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </template>
+                                        @endforeach
                                     </div>
-                                </div>
-                            </fieldset>
+                                @endif
+                            </div>
 
-                            <div class="mt-4 text-end">
-                                <button type="submit" class="btn btn-success btn-lg px-5">
-                                    <i class="fas fa-save"></i> Save Model
+                            {{-- Action Bar --}}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small"><span class="text-danger">*</span> Required fields</span>
+                                <button type="submit" class="btn btn-primary btn-lg shadow-sm px-5" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="save">
+                                        <i class="fas fa-save mr-2"></i> Save Vehicle Model
+                                    </span>
+                                    <span wire:loading wire:target="save">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i> Processing...
+                                    </span>
                                 </button>
                             </div>
 
