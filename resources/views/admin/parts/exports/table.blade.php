@@ -3,31 +3,50 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style>
-        body { font-family: 'Helvetica', sans-serif; color: #333; font-size: 10px; } /* Slightly smaller for more data */
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #444; padding-bottom: 10px; }
-        .report-title { font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .report-meta { color: #666; font-size: 9px; }
+        /* PDF base styling */
+        body { font-family: 'Helvetica', sans-serif; color: #333; font-size: 10px; margin: 0; padding: 0; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
-        th { background-color: #f2f2f2; color: #000; font-weight: bold; text-align: left; border: 1px solid #ccc; padding: 6px; }
-        td { border: 1px solid #ccc; padding: 6px; vertical-align: top; word-wrap: break-word; }
+        /* Header Layout */
+        .header-container { width: 100%; border-bottom: 2px solid #444; margin-bottom: 20px; padding-bottom: 10px; }
+        .header-table { width: 100%; border: none; }
+        .header-table td { border: none; padding: 0; vertical-align: middle; }
         
+        .logo { width: 140px; height: auto; }
+        .report-info { text-align: right; }
+        .report-title { font-size: 16px; font-weight: bold; text-transform: uppercase; color: #1a202c; }
+        .report-meta { color: #718096; font-size: 9px; margin-top: 4px; }
+        
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { background-color: #f7fafc; color: #2d3748; font-weight: bold; text-align: left; border: 1px solid #e2e8f0; padding: 8px; text-transform: uppercase; font-size: 8px; }
+        td { border: 1px solid #e2e8f0; padding: 6px; vertical-align: top; word-wrap: break-word; }
+        
+        /* Helpers */
         .text-right { text-align: right; }
         .stock-low { color: #e53e3e; font-weight: bold; }
-        .substitute-label { font-size: 8px; color: #4c51bf; font-weight: bold; text-transform: uppercase; margin-top: 4px; display: block; }
-        .substitute-item { font-size: 9px; color: #555; background: #f0f4ff; padding: 1px 3px; border-radius: 2px; }
-        .footer { margin-top: 20px; font-size: 8px; color: #999; text-align: center; }
+        .substitute-label { font-size: 7px; color: #4c51bf; font-weight: bold; text-transform: uppercase; margin-top: 5px; display: block; }
+        .substitute-item { font-size: 8px; color: #555; background-color: #edf2f7; padding: 1px 2px; }
+        
+        .footer { position: fixed; bottom: -30px; left: 0; right: 0; height: 30px; text-align: center; font-size: 8px; color: #a0aec0; border-top: 1px solid #edf2f7; padding-top: 5px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="report-title">Spare Parts Inventory Report</div>
-        <div class="report-meta">
-            Generated on: {{ now()->format('d M Y, H:i A') }} | 
-            Total Items: {{ $parts->count() }} | 
-            Total Valuation: {{ number_format($parts->sum(fn($p) => $p->price * $p->stock_quantity)) }} RWF
-        </div>
+    <div class="header-container">
+        <table class="header-table">
+            <tr>
+                <td>
+                     <img src="{{ asset('frontend/img/logo.png') }}" class="logo">
+                </td>
+                <td class="report-info">
+                    <div class="report-title">Spare Parts Inventory</div>
+                    <div class="report-meta">
+                        Date: {{ now()->format('d M Y, H:i A') }}<br>
+                        Items: {{ $parts->count() }} | Valuation: {{ number_format($parts->sum(fn($p) => $p->price * $p->stock_quantity)) }} RWF
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <table>
@@ -39,7 +58,7 @@
                 <th width="10%">Brand</th>
                 <th width="12%">Price (RWF)</th>
                 <th width="7%">Stock</th>
-                <th width="24%">Vehicle Compatibility</th>
+                <th width="24%">Compatibility</th>
             </tr>
         </thead>
         <tbody>
@@ -47,12 +66,12 @@
             <tr>
                 <td>
                     <strong>{{ $part->part_name }}</strong><br>
-                    <small style="color: #777;">OEM: {{ $part->oem_number ?? 'N/A' }}</small>
+                    <small style="color: #718096;">OEM: {{ $part->oem_number ?? 'N/A' }}</small>
                 </td>
                 <td>
                     <div>{{ $part->sku }}</div>
                     @if($part->substitutions && $part->substitutions->count() > 0)
-                        <span class="substitute-label">Substitutes:</span>
+                        <span class="substitute-label">Alt:</span>
                         @foreach($part->substitutions as $sub)
                             <span class="substitute-item">{{ $sub->sku }}</span>{{ !$loop->last ? ',' : '' }}
                         @endforeach
@@ -70,7 +89,7 @@
                             {{ $f->specification->variant->name ?? 'N/A' }}{{ !$loop->last ? ', ' : '' }}
                         @endforeach
                     @else
-                        <span style="color: #999;">Universal Fit</span>
+                        <span style="color: #cbd5e0;">Universal</span>
                     @endif
                 </td>
             </tr>
@@ -79,7 +98,7 @@
     </table>
 
     <div class="footer">
-        End of Report - Generated by Laravel Inventory System
+        Inventory Report — Page 1 of 1 — Generated by {{ config('app.name') }}
     </div>
 
 </body>
