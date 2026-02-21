@@ -16,20 +16,21 @@ class EditSpecification extends Component
     public $vehicle_model_id;
     public $trim_level; 
 
-    // Identity Fields
+    // Identity Fields (Stored in Variants Table)
     public $chassis_code, $model_code, $is_default;
-    public $production_year;       // Variant level
-    public $production_year_start; // Spec level
-    public $production_year_end;   // Spec level
+    public $production_year;       // Variant level (Single Year)
     public $destination_id; 
 
-    // Technical Fields
+    // Technical Fields (Stored in Specifications Table)
+    public $production_year_start; // Spec level (Range Start)
+    public $production_year_end;   // Spec level (Range End)
     public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
     public $horsepower, $torque, $fuel_capacity, $fuel_efficiency;
     public $seats, $doors, $steering_position, $color, $status;
 
     /**
-     * Computed Property: Re-fetch models when brand changes
+     * Computed Property: Re-fetch models when brand changes.
+     * Prevents 500 errors by not storing model collections in properties.
      */
     public function getVehicleModelsProperty()
     {
@@ -39,7 +40,7 @@ class EditSpecification extends Component
     }
 
     /**
-     * Computed Property: For the Live Preview title
+     * Computed Property: For the Live Preview title (matches Create logic)
      */
     public function getGeneratedNameProperty()
     {
@@ -69,16 +70,14 @@ class EditSpecification extends Component
         $spec = Specification::with('variant.destinations', 'vehicleModel')->findOrFail($specificationId);
         $this->specificationId = $specificationId;
 
-        // Map Spec fields to properties (matching Create logic names)
+        // 1. Fill Specification Table Data
         $this->vehicle_model_id = $spec->vehicle_model_id;
         $this->brand_id = $spec->vehicleModel->brand_id;
-        
         $this->body_type_id = $spec->body_type_id;
         $this->engine_type_id = $spec->engine_type_id;
         $this->transmission_type_id = $spec->transmission_type_id;
         $this->drive_type_id = $spec->drive_type_id;
         $this->engine_displacement_id = $spec->engine_displacement_id;
-        
         $this->horsepower = $spec->horsepower;
         $this->torque = $spec->torque;
         $this->fuel_capacity = $spec->fuel_capacity;
@@ -88,19 +87,16 @@ class EditSpecification extends Component
         $this->steering_position = $spec->steering_position;
         $this->color = $spec->color;
         $this->status = $spec->status;
-        
         $this->production_year_start = $spec->production_start;
         $this->production_year_end = $spec->production_end;
 
-        // Map Variant fields
+        // 2. Fill Variant Table Data
         if ($spec->variant) {
             $this->trim_level = $spec->variant->trim_level;
             $this->production_year = $spec->variant->production_year;
             $this->chassis_code = $spec->variant->chassis_code;
             $this->model_code = $spec->variant->model_code;
-            $this->is_default = $spec->variant->is_default;
-            
-            // Get the first destination if it exists
+            $this->is_default = (bool)$spec->variant->is_default;
             $this->destination_id = $spec->variant->destinations->first()?->id;
         }
     }
@@ -135,7 +131,7 @@ class EditSpecification extends Component
             DB::transaction(function () {
                 $spec = Specification::findOrFail($this->specificationId);
                 
-                // 1. Update the Specification
+                // 1. Update Specification Table
                 $spec->update([
                     'vehicle_model_id'       => $this->vehicle_model_id,
                     'body_type_id'           => $this->body_type_id,
@@ -156,7 +152,7 @@ class EditSpecification extends Component
                     'status'                 => $this->status,
                 ]);
 
-                // 2. Update the parent Variant
+                // 2. Update Variant Table
                 if ($spec->variant) {
                     $spec->variant->update([
                         'vehicle_model_id' => $this->vehicle_model_id,
@@ -168,12 +164,12 @@ class EditSpecification extends Component
                         'status'           => $this->status,
                     ]);
 
-                    // Update Destination
+                    // Update Relationships
                     if ($this->destination_id) {
                         $spec->variant->destinations()->sync([$this->destination_id]);
                     }
 
-                    // 3. Refresh and Sync Name
+                    // 3. Trigger Auto-naming Sync
                     $spec->variant->refresh();
                     if (method_exists($spec->variant, 'syncNameFromSpec')) { 
                         $spec->variant->syncNameFromSpec(); 
@@ -181,7 +177,7 @@ class EditSpecification extends Component
                 }
             });
 
-            session()->flash('success', 'Specification and Variant updated successfully!');
+            session()->flash('success', 'Update successful!');
             return redirect()->route('admin.specifications.index');
 
         } catch (\Exception $e) {
@@ -192,7 +188,7 @@ class EditSpecification extends Component
     public function render()
     {
         return view('livewire.admin.specifications.edit-specification', [
-            'vehicleModels'        => VehicleModel::orderBy('model_name')->get(),
+            'vehicleModels'       => VehicleModel::orderBy('model_name')->get(),
             'brands'              => Brand::orderBy('brand_name')->get(),
             'bodyTypes'           => BodyType::orderBy('name')->get(),
             'engineTypes'         => EngineType::orderBy('name')->get(),
