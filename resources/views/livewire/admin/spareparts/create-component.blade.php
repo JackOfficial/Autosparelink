@@ -55,7 +55,7 @@
                                 @error('category_id') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
 
-                            <div class="col-md-12 form-group">
+                            <div class="col-md-6 form-group">
                                 <label>Part Brand <span class="text-danger">*</span></label>
                                 <select class="form-control" wire:model="part_brand_id">
                                     <option value="">-- Select Brand --</option>
@@ -64,6 +64,15 @@
                                     @endforeach
                                 </select>
                                 @error('part_brand_id') <small class="text-danger">{{ $message }}</small> @enderror
+                            </div>
+
+                            <div class="col-md-3 form-group">
+                                <label>Price (RWF)</label>
+                                <input type="number" class="form-control" wire:model="price">
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label>Stock Quantity</label>
+                                <input type="number" class="form-control" wire:model="stock_quantity">
                             </div>
 
                             {{-- Added: Description Field --}}
@@ -76,21 +85,15 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="card border shadow-none">
-                    <div class="card-header bg-light"><h3 class="card-title text-sm font-weight-bold">Inventory & Substitutions</h3></div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 form-group">
-                                <label>Price (RWF)</label>
-                                <input type="number" class="form-control" wire:model="price">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>Stock Quantity</label>
-                                <input type="number" class="form-control" wire:model="stock_quantity">
-                            </div>
-                            
-                            <div class="col-md-12 form-group">
+            {{-- Right Column: Compatibility & Photos --}}
+            <div class="col-md-5">
+                <div class="card border-primary shadow-none">
+                    <div class="card-header bg-primary py-2"><h3 class="card-title text-sm text-white">Vehicle Compatibility</h3></div>
+                    <div class="card-body p-3">
+
+                        <div class="form-group">
                                 <label class="font-weight-bold text-sm">Alternative Parts (Substitutions)</label>
                                 
                                 <div class="position-relative" x-data="{ showParts: true }" @click.away="showParts = false">
@@ -142,16 +145,7 @@
                                     @endforelse
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            {{-- Right Column: Compatibility & Photos --}}
-            <div class="col-md-5">
-                <div class="card border-primary shadow-none">
-                    <div class="card-header bg-primary py-2"><h3 class="card-title text-sm text-white">Vehicle Compatibility</h3></div>
-                    <div class="card-body p-3">
                         <div class="form-group position-relative" x-data="{ showVehicles: true }" @click.away="showVehicles = false">
                             <label class="text-xs">Search Brand or Model</label>
                             <input type="text" 
