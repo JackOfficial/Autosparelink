@@ -62,12 +62,12 @@
                     <div class="col-md-3 mb-3">
                         <div class="row">
                         <div class="col-md-6">
-                            <label class="small font-weight-bold">Prod. Start (Technical)</label>
+                            <label class="small font-weight-bold">Prod. Start</label>
                         <input type="number" wire:model="production_year_start" class="form-control shadow-sm" placeholder="YYYY">
                         @error('production_year_start') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                        <label class="small font-weight-bold">Prod. End (Technical)</label>
+                        <label class="small font-weight-bold">Prod. End</label>
                         <input type="number" wire:model="production_year_end" class="form-control shadow-sm" placeholder="Leave blank if active">
                     </div>
                        </div>
@@ -107,7 +107,7 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="small font-weight-bold">HP</label>
+                                <label class="small font-weight-bold">Horse Power (HP)</label>
                                 <input type="number" wire:model="horsepower" class="form-control">
                             </div>
                             <div class="col-md-6 mb-3">
