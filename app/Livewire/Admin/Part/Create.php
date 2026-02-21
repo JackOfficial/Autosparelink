@@ -124,6 +124,7 @@ class Create extends Component
     {
         $searchResults = [];
         if (strlen($this->searchVehicle) > 2) {
+            dd("hjghjjgjhjhgjh");
             $searchResults = VehicleModel::with(['brand', 'specifications.variant'])
                 ->where('model_name', 'like', '%' . $this->searchVehicle . '%')
                 ->orWhereHas('brand', fn($q) => $q->where('brand_name', 'like', '%' . $this->searchVehicle . '%'))
