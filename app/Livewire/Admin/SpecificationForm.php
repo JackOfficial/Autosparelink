@@ -137,7 +137,7 @@ class SpecificationForm extends Component
             'transmissionTypes'   => TransmissionType::orderBy('name')->get(),
             'driveTypes'          => DriveType::orderBy('name')->get(),
             'engineDisplacements' => EngineDisplacement::orderBy('name')->get(),
-            'destinations'        => Destination::orderBy('name')->get(),
+            'destinations'        => Destination::orderBy('region_name')->get(),
         ]);
     }
 }
