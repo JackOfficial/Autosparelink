@@ -104,9 +104,13 @@
                             <tbody>
                                 @foreach($specGroup as $spec)
                                     @php
-                                        // Pre-calculate searchable text for this row
-                                        $rowSearch = strtolower($spec->variant->name . ' ' . $spec->bodyType->name . ' ' . $spec->engineType->name);
-                                    @endphp
+    // We use optional() or ?? to ensure that if the relationship is null, it doesn't crash
+    $variantName = $spec->variant->name ?? '';
+    $bodyName    = $spec->bodyType->name ?? '';
+    $engineName  = $spec->engineType->name ?? '';
+
+    $rowSearch = strtolower($variantName . ' ' . $bodyName . ' ' . $engineName);
+@endphp
                                     <tr x-show="search === '' || '{{ $rowSearch }}'.includes(search.toLowerCase()) || '{{ $groupSearchTag }}'.includes(search.toLowerCase())">
                                       <td style="padding-left: 15px;"><b>{{ $spec->bodyType->name ?? 'N/A' }}</b></td>
                                         <td><span class="text-primary" style="font-weight:600">{{ $spec->variant->name ?? 'Standard' }}</span></td>
