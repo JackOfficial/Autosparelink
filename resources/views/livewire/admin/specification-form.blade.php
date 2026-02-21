@@ -60,7 +60,7 @@
 
                      <div class="col-md-3 mb-3">
                         <label class="small font-weight-bold">Model Code</label>
-                        <input type="text" wire:model="chassis_code" class="form-control shadow-sm">
+                        <input type="text" wire:model="model_code" class="form-control shadow-sm">
                     </div>
                     
                     <div class="col-md-3 mb-3">

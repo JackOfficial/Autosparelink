@@ -21,6 +21,7 @@ class SpecificationForm extends Component
     public $production_year_start; // For Spec Table
     public $production_year_end;   // For Spec Table
     public $destination_id; 
+    
 
     // Technical Fields
     public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
@@ -53,6 +54,16 @@ class SpecificationForm extends Component
     public function updatedBrandId()
     {
         $this->vehicle_model_id = null;
+    }
+
+    // This "computed property" creates the name on the fly for the UI
+    public function getGeneratedNameProperty()
+    {
+    $model = $this->vehicle_model_id ? VehicleModel::find($this->vehicle_model_id)?->model_name : 'Model';
+    $year = $this->production_year ?: 'YYYY';
+    $trim = $this->trim_level ?: 'Trim';
+    
+    return "{$year} {$model} {$trim}";
     }
 
     protected function rules()
