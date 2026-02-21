@@ -70,7 +70,7 @@
                         </div>
 
                         <div class="col-md-3 mb-3">
-                            <label class="small font-weight-bold text-muted">Region</label>
+                            <label class="small font-weight-bold text-muted">Regional Market</label>
                             <select wire:model="destination_id" class="form-control shadow-none">
                                 <option value="">Select Market</option>
                                 @foreach($destinations as $dest) <option value="{{ $dest->id }}">{{ $dest->region_name ?? $dest->name }}</option> @endforeach
