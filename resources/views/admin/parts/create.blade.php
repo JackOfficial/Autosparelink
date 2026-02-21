@@ -1,10 +1,6 @@
 @extends('admin.layouts.app')
 @section('title', 'Add Spare Part')
 
-@push('styles')
-
-@endpush
-
 @section('content')
 
 <section class="content-header">
@@ -31,7 +27,7 @@
 </div>
 
 <div class="card-body">
- <livewire:admin.part.create />
+ <livewire:admin.spareparts.create-component />
 </div>
 </div>
 </section>
