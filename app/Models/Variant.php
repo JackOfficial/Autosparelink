@@ -121,7 +121,6 @@ public function getFullNameAttribute()
 
 public function syncNameFromSpec()
 {
-    // 1. Fetch technical data from the specifications relationship
     $spec = $this->specifications()->with([
         'bodyType', 
         'engineType', 
@@ -129,32 +128,26 @@ public function syncNameFromSpec()
         'engineDisplacement'
     ])->first();
 
-    // If no specs exist yet, we can't build the full name
     if (!$spec) return;
 
     $model = $this->vehicleModel;
     
-    // 2. Build the name components
-    // Notice: We use $this->trim_level (from Variant) instead of $spec->trim_level
     $pieces = [
-        $model?->brand?->brand_name,              // Toyota
-        $model?->model_name,                      // Verso
-        $this->trim_level,                        // S (Now from this table!)
-        $spec->bodyType?->name,                   // Hatchback
-        $spec->production_year,                   // 2011
-        $spec->engineDisplacement?->name,         // 1.4
-        $spec->engineType?->name,                 // Diesel
-        $spec->transmissionType?->name,           // Manual
+        $model?->brand?->brand_name,
+        $model?->model_name,
+        $this->trim_level,
+        $spec->bodyType?->name,
+        $this->production_year, // CHANGED: now pulls from the Variant itself
+        $spec->engineDisplacement ? $spec->engineDisplacement->name : null,
+        $spec->engineType?->name,
+        $spec->transmissionType?->name,
     ];
 
-    // 3. Filter empty values and join with spaces
     $generatedName = implode(' ', array_filter($pieces));
 
-    // 4. Update Variant identity
     $this->update([
         'name' => $generatedName,
-        // Generate a URL-friendly slug (e.g., toyota-verso-s-hatchback-2011)
-        'slug' => Str::slug($generatedName . '-' . ($this->chassis_code ?? '')),
+        'slug' => Str::slug($generatedName . '-' . ($this->chassis_code ?? Str::random(4))),
     ]);
 }
 
