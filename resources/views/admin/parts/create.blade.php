@@ -31,24 +31,9 @@
 </div>
 
 <div class="card-body">
- {{-- <livewire:admin.part.create /> --}}
+ <livewire:admin.part.create />
 </div>
 </div>
 </section>
-
-{{-- @push('scripts')
-   <script>
-document.addEventListener('livewire:load', () => {
-
-    $('#fitmentSelect').select2({ width:'100%' });
-
-    $('#fitmentSelect').on('change', function () {
-        Livewire.emit('fitmentsUpdated', $(this).val());
-    });
-
-});
-</script> --}}
-
-{{-- @endpush --}}
 
 @endsection
