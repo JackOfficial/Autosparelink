@@ -16,95 +16,99 @@
     
     /* Table Enhancements */
     .table thead th { border-top: none; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #8898aa; }
-    .part-row { transition: background 0.15s; }
+    .part-row { transition: all 0.2s; }
     .part-row:hover { background-color: #fcfdfe !important; }
     
     /* Custom Badges */
     .badge-soft-success { background: #e6fffa; color: #38b2ac; border: 1px solid #b2f5ea; }
     .badge-soft-danger { background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; }
     .badge-soft-warning { background: #fffaf0; color: #dd6b20; border: 1px solid #fbd38d; }
+    .badge-soft-info { background: #ebf8ff; color: #3182ce; border: 1px solid #bee3f8; }
 
-    .sku-copy { cursor: pointer; border-style: dashed !important; }
-    .sku-copy:hover { background: #f1f5f9; color: #3b82f6; }
+    .sku-copy { cursor: pointer; border-style: dashed !important; transition: 0.2s; }
+    .sku-copy:hover { background: #f1f5f9; color: #3b82f6; border-color: #3b82f6 !important; }
+    
+    [x-cloak] { display: none !important; }
 </style>
 @endpush
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" 
+     x-data="{ 
+        search: '',
+        copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+            alert('SKU Copied: ' + text);
+        },
+        {{-- Logic to check if row matches search --}}
+        filterRow(el) {
+            if (this.search === '') return true;
+            return el.innerText.toLowerCase().includes(this.search.toLowerCase());
+        }
+     }">
+    
     {{-- Header & Stats --}}
     <div class="row mb-4 align-items-end">
         <div class="col-md-6">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-transparent p-0 mb-1">
-                    <li class="breadcrumb-item"><a href="#">Admin</a></li>
-                    <li class="breadcrumb-item active">Inventory</li>
-                </ol>
-            </nav>
-            <h2 class="fw-bold mb-0">Spare Parts Management</h2>
+            <h2 class="fw-bold mb-0">Spare Parts Inventory</h2>
+            <p class="text-muted small mb-0">Manage catalog, stock levels, and part substitutions.</p>
         </div>
         <div class="col-md-6 text-right">
-            <button class="btn btn-outline-secondary btn-sm mr-2"><i class="fas fa-file-export mr-1"></i> Export</button>
-            <a href="{{ route('admin.spare-parts.create') }}" class="btn btn-primary px-4">
+            <a href="{{ route('admin.spare-parts.create') }}" class="btn btn-primary px-4 shadow-sm">
                 <i class="fa fa-plus-circle mr-2"></i>New Part
             </a>
         </div>
     </div>
 
-    {{-- Quick Stats Cards --}}
+    {{-- Quick Stats --}}
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-3 d-flex align-items-center">
                     <div class="bg-primary-subtle p-3 rounded mr-3"><i class="fas fa-boxes text-primary"></i></div>
-                    <div><small class="text-muted d-block text-uppercase">Total Items</small><span class="h5 mb-0 font-weight-bold">{{ $parts->total() }}</span></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3 d-flex align-items-center">
-                    <div class="bg-danger-subtle p-3 rounded mr-3"><i class="fas fa-exclamation-triangle text-danger"></i></div>
-                    <div><small class="text-muted d-block text-uppercase">Out of Stock</small><span class="h5 mb-0 font-weight-bold">{{ \App\Models\Part::where('stock_quantity', '<=', 0)->count() }}</span></div>
+                    <div><small class="text-muted d-block text-uppercase">Total</small><span class="h5 mb-0 font-weight-bold">{{ $parts->total() }}</span></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-lg" x-data="{ search: '' }">
+    <div class="card border-0 shadow-sm rounded-lg">
+        {{-- Real-time Search Bar --}}
         <div class="card-header bg-white border-0 py-3">
-            <form action="{{ route('admin.spare-parts.index') }}" method="GET" class="row align-items-center">
+            <div class="row align-items-center">
                 <div class="col-md-5">
-                    <div class="input-group border rounded-pill px-3 py-1">
-                        <input type="text" name="search" class="form-control border-0 bg-transparent" placeholder="Search by name, SKU or number..." value="{{ request('search') }}">
-                        <div class="input-group-append">
-                            <button class="btn btn-transparent p-0 text-muted"><i class="fa fa-search"></i></button>
+                    <div class="input-group border rounded-pill px-3 py-1 bg-light">
+                        <div class="input-group-prepend border-0">
+                            <span class="btn btn-transparent p-0 text-muted"><i class="fa fa-search"></i></span>
                         </div>
+                        <input type="text" 
+                               x-model="search" 
+                               class="form-control border-0 bg-transparent shadow-none" 
+                               placeholder="Real-time filter by Name, SKU, Brand...">
                     </div>
                 </div>
                 <div class="col-md-7 text-right">
-                    <div class="btn-group btn-group-toggle shadow-none" data-toggle="buttons">
-                        <label class="btn btn-light btn-sm active"><input type="radio" name="filter" checked> All</label>
-                        <label class="btn btn-light btn-sm"><input type="radio" name="filter"> Active</label>
-                        <label class="btn btn-light btn-sm"><input type="radio" name="filter"> Out of Stock</label>
-                    </div>
+                    <span class="text-muted small" x-show="search.length > 0">
+                        Filtering active... <a href="#" @click.prevent="search = ''" class="text-primary ml-2">Clear</a>
+                    </span>
                 </div>
-            </form>
+            </div>
         </div>
 
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light-subtle">
                     <tr>
-                        <th class="pl-4">Item Details</th>
+                        <th class="pl-4">Item & SKU</th>
+                        <th>Substitutes</th>
                         <th>Compatibility</th>
                         <th>Inventory</th>
-                        <th>Pricing</th>
                         <th>Status</th>
                         <th class="text-right pr-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($parts as $part)
-                    <tr class="part-row">
+                    <tr class="part-row" x-show="filterRow($el)" x-transition.opacity>
                         <td class="pl-4">
                             <div class="d-flex align-items-center">
                                 <div class="photo-stack mr-4">
@@ -121,51 +125,70 @@
                                 <div>
                                     <div class="font-weight-bold text-dark mb-0" style="font-size: 0.95rem;">{{ $part->part_name }}</div>
                                     <div class="d-flex align-items-center mt-1">
-                                        <span class="badge badge-light border sku-copy text-muted mr-2" title="Click to copy SKU">{{ $part->sku }}</span>
+                                        <span class="badge badge-light border sku-copy text-muted mr-2" 
+                                              @click="copyToClipboard('{{ $part->sku }}')"
+                                              title="Click to copy SKU">
+                                              <i class="far fa-copy mr-1 small"></i>{{ $part->sku }}
+                                        </span>
                                         <small class="text-muted border-left pl-2">PN: {{ $part->part_number }}</small>
                                     </div>
                                 </div>
                             </div>
                         </td>
+                        
+                        {{-- SUBSTITUTES COLUMN --}}
+                        <td>
+                            @if($part->substitutions && $part->substitutions->count() > 0)
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach($part->substitutions->take(2) as $sub)
+                                        <span class="badge badge-soft-info mb-1 mr-1" title="{{ $sub->part_name }}">
+                                            <i class="fas fa-exchange-alt mr-1 small"></i> {{ $sub->partBrand->name ?? 'Alt' }}
+                                        </span>
+                                    @endforeach
+                                    @if($part->substitutions->count() > 2)
+                                        <span class="text-muted small mt-1">+{{ $part->substitutions->count() - 2 }} more</span>
+                                    @endif
+                                </div>
+                            @else
+                                <span class="text-muted small italic">No alternatives</span>
+                            @endif
+                        </td>
+
                         <td>
                             <div class="small text-dark fw-500">{{ $part->category->category_name ?? 'General' }}</div>
                             <div class="small text-muted">{{ $part->partBrand->name ?? 'Unbranded' }}</div>
                         </td>
+
                         <td>
-                            <div class="d-flex align-items-center">
-                                @php
-                                    $stockClass = $part->stock_quantity <= 0 ? 'badge-soft-danger' : ($part->stock_quantity < 10 ? 'badge-soft-warning' : 'badge-soft-success');
-                                @endphp
-                                <span class="badge {{ $stockClass }} px-2 py-1">
-                                    {{ $part->stock_quantity }} units
-                                </span>
-                            </div>
+                            <div class="font-weight-bold text-dark mb-0">{{ number_format($part->price, 0) }} RWF</div>
+                            @php
+                                $stockClass = $part->stock_quantity <= 0 ? 'badge-soft-danger' : ($part->stock_quantity < 10 ? 'badge-soft-warning' : 'badge-soft-success');
+                            @endphp
+                            <span class="badge {{ $stockClass }} small">
+                                {{ $part->stock_quantity }} in stock
+                            </span>
                         </td>
-                        <td>
-                            <div class="font-weight-bold text-dark">{{ number_format($part->price, 0) }} RWF</div>
-                            <small class="text-muted">Unit Price</small>
-                        </td>
+
                         <td>
                             @if($part->status)
-                                <span class="text-success small font-weight-bold"><i class="fas fa-check-circle mr-1"></i> Published</span>
+                                <span class="text-success small font-weight-bold"><i class="fas fa-check-circle"></i> Active</span>
                             @else
-                                <span class="text-muted small font-weight-bold"><i class="fas fa-eye-slash mr-1"></i> Draft</span>
+                                <span class="text-muted small font-weight-bold"><i class="fas fa-eye-slash"></i> Draft</span>
                             @endif
                         </td>
+
                         <td class="text-right pr-4">
                             <div class="dropdown">
-                                <button class="btn btn-sm btn-light border dropdown-toggle no-caret px-2" data-toggle="dropdown">
-                                    <i class="fas fa-ellipsis-v text-muted"></i>
+                                <button class="btn btn-sm btn-light border dropdown-toggle no-caret" data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-h text-muted"></i>
                                 </button>
-                                <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2">
+                                <div class="dropdown-menu dropdown-menu-right shadow border-0">
                                     <a class="dropdown-item" href="{{ route('admin.spare-parts.edit', $part->id) }}">
-                                        <i class="fas fa-pencil-alt mr-2 text-warning"></i> Edit Details
+                                        <i class="fas fa-pencil-alt mr-2 text-warning"></i> Edit
                                     </a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-eye mr-2 text-primary"></i> View Stock History</a>
-                                    <div class="dropdown-divider"></div>
                                     <form action="{{ route('admin.spare-parts.destroy', $part->id) }}" method="POST" onsubmit="return confirm('Archive this part?');">
                                         @csrf @method('DELETE')
-                                        <button class="dropdown-item text-danger"><i class="fas fa-trash-alt mr-2"></i> Delete Part</button>
+                                        <button class="dropdown-item text-danger"><i class="fas fa-trash-alt mr-2"></i> Delete</button>
                                     </form>
                                 </div>
                             </div>
@@ -174,8 +197,7 @@
                     @empty
                     <tr>
                         <td colspan="6" class="text-center py-5">
-                            <img src="https://illustrations.popsy.co/gray/box.svg" style="height: 120px;" class="mb-3">
-                            <p class="text-muted">No spare parts found matching your criteria.</p>
+                            <p class="text-muted">No records found.</p>
                         </td>
                     </tr>
                     @endforelse
@@ -185,10 +207,13 @@
         
         <div class="card-footer bg-white border-0 py-3">
             <div class="row align-items-center">
-                <div class="col-sm-6 text-muted small">
+                <div class="col-sm-6 text-muted small" x-show="search === ''">
                     Showing <b>{{ $parts->firstItem() }}</b> to <b>{{ $parts->lastItem() }}</b> of {{ $parts->total() }} results
                 </div>
-                <div class="col-sm-6 d-flex justify-content-end">
+                <div class="col-sm-6 text-muted small" x-show="search !== ''" x-cloak>
+                    Filtering local results...
+                </div>
+                <div class="col-sm-6 d-flex justify-content-end" x-show="search === ''">
                     {{ $parts->links('pagination::bootstrap-4') }}
                 </div>
             </div>
