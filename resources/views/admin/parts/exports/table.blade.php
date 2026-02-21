@@ -3,20 +3,20 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style>
-        /* PDF specific styling */
-        body { font-family: 'Helvetica', sans-serif; color: #333; font-size: 11px; }
+        body { font-family: 'Helvetica', sans-serif; color: #333; font-size: 10px; } /* Slightly smaller for more data */
         .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #444; padding-bottom: 10px; }
-        .report-title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .report-meta { color: #666; font-size: 10px; }
+        .report-title { font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .report-meta { color: #666; font-size: 9px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background-color: #f2f2f2; color: #000; font-weight: bold; text-align: left; border: 1px solid #ccc; padding: 8px; }
-        td { border: 1px solid #ccc; padding: 6px; vertical-align: top; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        th { background-color: #f2f2f2; color: #000; font-weight: bold; text-align: left; border: 1px solid #ccc; padding: 6px; }
+        td { border: 1px solid #ccc; padding: 6px; vertical-align: top; word-wrap: break-word; }
         
-        /* Excel logic: This class helps Maatwebsite auto-format numbers if needed */
         .text-right { text-align: right; }
         .stock-low { color: #e53e3e; font-weight: bold; }
-        .footer { margin-top: 20px; font-size: 9px; color: #999; text-align: center; }
+        .substitute-label { font-size: 8px; color: #4c51bf; font-weight: bold; text-transform: uppercase; margin-top: 4px; display: block; }
+        .substitute-item { font-size: 9px; color: #555; background: #f0f4ff; padding: 1px 3px; border-radius: 2px; }
+        .footer { margin-top: 20px; font-size: 8px; color: #999; text-align: center; }
     </style>
 </head>
 <body>
@@ -33,13 +33,13 @@
     <table>
         <thead>
             <tr>
-                <th width="20%">Part Name</th>
-                <th width="15%">SKU / PN</th>
+                <th width="18%">Part Name</th>
+                <th width="17%">SKU / Substitutes</th>
                 <th width="12%">Category</th>
                 <th width="10%">Brand</th>
                 <th width="12%">Price (RWF)</th>
-                <th width="8%">Stock</th>
-                <th width="23%">Vehicle Compatibility</th>
+                <th width="7%">Stock</th>
+                <th width="24%">Vehicle Compatibility</th>
             </tr>
         </thead>
         <tbody>
@@ -49,7 +49,15 @@
                     <strong>{{ $part->part_name }}</strong><br>
                     <small style="color: #777;">OEM: {{ $part->oem_number ?? 'N/A' }}</small>
                 </td>
-                <td>{{ $part->sku }}</td>
+                <td>
+                    <div>{{ $part->sku }}</div>
+                    @if($part->substitutions && $part->substitutions->count() > 0)
+                        <span class="substitute-label">Substitutes:</span>
+                        @foreach($part->substitutions as $sub)
+                            <span class="substitute-item">{{ $sub->sku }}</span>{{ !$loop->last ? ',' : '' }}
+                        @endforeach
+                    @endif
+                </td>
                 <td>{{ $part->category->category_name ?? 'N/A' }}</td>
                 <td>{{ $part->partBrand->name ?? 'N/A' }}</td>
                 <td class="text-right">{{ number_format($part->price) }}</td>
@@ -57,9 +65,9 @@
                     {{ $part->stock_quantity }}
                 </td>
                 <td>
-                    @if($part->fitments->count() > 0)
+                    @if($part->fitments && $part->fitments->count() > 0)
                         @foreach($part->fitments as $f)
-                            {{ $f->specification->vehicleModel->name ?? '' }} ({{ $f->start_year }}){{ !$loop->last ? ', ' : '' }}
+                            {{ $f->specification->variant->name ?? 'N/A' }}{{ !$loop->last ? ', ' : '' }}
                         @endforeach
                     @else
                         <span style="color: #999;">Universal Fit</span>
