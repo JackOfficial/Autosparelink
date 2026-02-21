@@ -78,7 +78,7 @@ public function exportPdf(Request $request)
 
     $parts = $query->get();
 
-    $pdf = Pdf::loadView('admin.spare-parts.exports.table', compact('parts'))
+    $pdf = Pdf::loadView('admin.parts.exports.table', compact('parts'))
               ->setPaper('a4', 'landscape'); 
               
     return $pdf->download('inventory_report_' . now()->format('Y-m-d') . '.pdf');
