@@ -33,8 +33,8 @@ class DestinationSeeder extends Seeder
 
         foreach ($destinations as $dest) {
             Destination::updateOrCreate(
-                ['code' => $dest['code']], // Unique identifier
-                ['name' => $dest['name']]
+                ['region_name' => $dest['name']],
+                ['region_code' => $dest['code']] // Unique identifier
             );
         }
     }
