@@ -15,8 +15,10 @@ class ModelForm extends Component
     use WithFileUploads;
 
     // ================= MODEL FIELDS =================
-  public $brand_id;
+    public $brand_id;
     public $model_name;
+    public $production_start_year; // New Field
+    public $production_end_year;   // New Field
     public $photos = [];
     public $description;
     public $status = 1;
@@ -25,13 +27,19 @@ class ModelForm extends Component
     {
         return [
             'brand_id' => 'required|exists:brands,id',
-            // This ensures the model_name is unique in the vehicle_models table
             'model_name' => [
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('vehicle_models', 'model_name')
-                    ->where('brand_id', $this->brand_id) // Only blocks if same brand has same name
+                    ->where('brand_id', $this->brand_id) 
+            ],
+            'production_start_year' => 'nullable|integer|min:1886|max:' . (date('Y') + 2),
+            'production_end_year'   => [
+                'nullable',
+                'integer',
+                'max:' . (date('Y') + 10),
+                'gte:production_start_year' // End year must be Greater Than or Equal to Start Year
             ],
             'photos.*' => 'image|max:5120',
         ];
@@ -39,7 +47,6 @@ class ModelForm extends Component
 
     public function save()
     {
-        // 1. This will now stop the process and show a red error if a duplicate exists
         $this->validate();
 
         $newModelId = null;
@@ -47,11 +54,13 @@ class ModelForm extends Component
         try {
             DB::transaction(function () use (&$newModelId) {
                 $model = VehicleModel::create([
-                    'brand_id' => $this->brand_id,
-                    'model_name' => $this->model_name,
-                    'description' => $this->description,
-                    'status' => $this->status,
-                    'has_variants' => 1, 
+                    'brand_id'              => $this->brand_id,
+                    'model_name'            => $this->model_name,
+                    'production_start_year' => $this->production_start_year,
+                    'production_end_year'   => $this->production_end_year,
+                    'description'           => $this->description,
+                    'status'                => $this->status,
+                    'has_variants'          => 1, 
                 ]);
 
                 $newModelId = $model->id;
@@ -62,7 +71,7 @@ class ModelForm extends Component
 
                     $model->photos()->create([
                         'file_path' => $path,
-                        'caption' => null,
+                        'caption'   => null,
                     ]);
                 }
             });
@@ -75,7 +84,7 @@ class ModelForm extends Component
 
         } catch (\Exception $e) {
             logger($e->getMessage());
-            $this->addError('model_name', 'A database error occurred while saving.');
+            $this->addError('model_name', 'A database error occurred while saving: ' . $e->getMessage());
         }
     }
 

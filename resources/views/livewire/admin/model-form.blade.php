@@ -47,6 +47,24 @@
                                             @error('model_name') <span class="text-danger small">{{ $message }}</span> @enderror
                                         </div>
                                     </div>
+
+                                    {{-- Production Start Year --}}
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-calendar-plus"></i> Production Start Year</label>
+                                            <input type="number" wire:model.live="production_start_year" class="form-control @error('production_start_year') is-invalid @enderror" placeholder="e.g. 2015">
+                                            @error('production_start_year') <span class="text-danger small">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+
+                                    {{-- Production End Year --}}
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-calendar-minus"></i> Production End Year</label>
+                                            <input type="number" wire:model.live="production_end_year" class="form-control @error('production_end_year') is-invalid @enderror" placeholder="e.g. 2022 (Leave blank if current)">
+                                            @error('production_end_year') <span class="text-danger small">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {{-- Description --}}
@@ -55,7 +73,7 @@
                                     <textarea wire:model.live="description" class="form-control" rows="3" placeholder="General info about this model series..."></textarea>
                                 </div>
 
-                                {{-- Photos (Keeping your Alpine.js logic) --}}
+                                {{-- Photos --}}
                                 <div x-data="{ photos: [] }" class="form-group mt-3">
                                     <label><i class="fas fa-upload"></i> Model Photos</label>
                                     <input type="file" multiple

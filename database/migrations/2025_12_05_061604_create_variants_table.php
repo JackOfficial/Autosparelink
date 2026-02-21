@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('chassis_code')->nullable();
             $table->string('model_code')->nullable();
             $table->string('trim_level')->nullable();
-            $table->boolean('is_default')->default(false); // for models without real variants
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
