@@ -68,57 +68,60 @@
                                 <label>Stock Quantity</label>
                                 <input type="number" class="form-control" wire:model="stock_quantity">
                             </div>
+                            
+                            {{-- Updated Alternative Parts Section --}}
                             <div class="col-md-12 form-group">
-    <label class="font-weight-bold text-sm">Alternative Parts (Substitutions)</label>
-    
-    <div class="position-relative">
-        <div class="input-group input-group-sm">
-            <div class="input-group-prepend">
-                <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
-            </div>
-            <input type="text" 
-                   class="form-control" 
-                   placeholder="Search by part name or number..." 
-                   wire:model.live.debounce.300ms="searchPart">
-        </div>
+                                <label class="font-weight-bold text-sm">Alternative Parts (Substitutions)</label>
+                                
+                                <div class="position-relative" x-data="{ showParts: true }" @click.away="showParts = false">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                                        </div>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               placeholder="Search by part name or number..." 
+                                               wire:model.live.debounce.300ms="searchPart"
+                                               @focus="showParts = true">
+                                    </div>
 
-        {{-- Part Search Results Dropdown --}}
-        @if(count($partResults) > 0)
-            <div class="list-group position-absolute shadow-lg w-100 search-results-overlay" style="z-index: 1050;">
-                @foreach($partResults as $p)
-                    <button type="button" 
-                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2"
-                            wire:click="toggleSubstitution({{ $p->id }})">
-                        <div>
-                            <span class="font-weight-bold text-xs">{{ $p->part_name }}</span>
-                            <small class="text-muted d-block">{{ $p->partBrand->name ?? 'No Brand' }} | {{ $p->part_number }}</small>
-                        </div>
-                        @if(in_array($p->id, $substitution_part_ids))
-                            <i class="fas fa-check-circle text-success"></i>
-                        @else
-                            <i class="fas fa-plus-circle text-primary"></i>
-                        @endif
-                    </button>
-                @endforeach
-            </div>
-        @endif
-    </div>
+                                    @if(count($partResults) > 0)
+                                        <div class="list-group position-absolute shadow-lg w-100 search-results-overlay" 
+                                             style="z-index: 1050;" 
+                                             x-show="showParts">
+                                            @foreach($partResults as $p)
+                                                <button type="button" 
+                                                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2"
+                                                        wire:click="toggleSubstitution({{ $p->id }})">
+                                                    <div>
+                                                        <span class="font-weight-bold text-xs">{{ $p->part_name }}</span>
+                                                        <small class="text-muted d-block">{{ $p->partBrand->name ?? 'No Brand' }} | {{ $p->part_number }}</small>
+                                                    </div>
+                                                    @if(in_array($p->id, $substitution_part_ids))
+                                                        <i class="fas fa-check-circle text-success"></i>
+                                                    @else
+                                                        <i class="fas fa-plus-circle text-primary"></i>
+                                                    @endif
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
 
-    {{-- Selected Substitutions Display --}}
-    <div class="mt-2 d-flex flex-wrap border rounded p-2 bg-light shadow-sm" style="min-height: 50px;">
-        @forelse($selectedSubstitutions as $sub)
-            <span class="badge badge-secondary p-2 m-1 d-flex align-items-center" style="font-size: 0.75rem;">
-                <i class="fas fa-exchange-alt mr-2 opacity-50"></i>
-                {{ $sub->part_name }}
-                <i class="fas fa-times-circle ml-2 cursor-pointer text-hover-danger" 
-                   wire:click="toggleSubstitution({{ $sub->id }})"
-                   title="Remove"></i>
-            </span>
-        @empty
-            <span class="text-muted text-xs italic m-auto">No substitutions selected. Search above to add.</span>
-        @endforelse
-    </div>
-</div>
+                                <div class="mt-2 d-flex flex-wrap border rounded p-2 bg-light shadow-sm" style="min-height: 50px;">
+                                    @forelse($selectedSubstitutions as $sub)
+                                        <span class="badge badge-secondary p-2 m-1 d-flex align-items-center" style="font-size: 0.75rem;">
+                                            <i class="fas fa-exchange-alt mr-2 opacity-50"></i>
+                                            {{ $sub->part_name }}
+                                            <i class="fas fa-times-circle ml-2 cursor-pointer text-hover-danger" 
+                                               wire:click="toggleSubstitution({{ $sub->id }})"
+                                               title="Remove"></i>
+                                        </span>
+                                    @empty
+                                        <span class="text-muted text-xs italic m-auto">No substitutions selected. Search above to add.</span>
+                                    @endforelse
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -129,26 +132,28 @@
                 <div class="card border-primary shadow-none">
                     <div class="card-header bg-primary py-2"><h3 class="card-title text-sm text-white">Vehicle Compatibility</h3></div>
                     <div class="card-body p-3">
-                        <div class="form-group position-relative" x-data="{ open: true }" @click.away="open = false">
-    <label class="text-xs">Search Brand or Model</label>
-    <input type="text" 
-           class="form-control form-control-sm" 
-           placeholder="e.g. Toyota Hilux..." 
-           wire:model.live.debounce.300ms="searchVehicle"
-           @input="open = true"> {{-- Only show if search has results AND Alpine 'open' is true --}}
-    @if(count($searchResults) > 0)
-        <div class="list-group position-absolute shadow-lg search-results-overlay" x-show="open">
-            @foreach($searchResults as $spec)
-                <button type="button" class="list-group-item list-group-item-action py-2 text-xs" 
-                        wire:click="toggleVehicle({{ $spec->id }})">
-                    <i class="fas {{ in_array($spec->id, $selectedSpecs) ? 'fa-check-circle text-success' : 'fa-plus text-muted' }} mr-2"></i>
-                    <strong>{{ $spec->vehicleModel->brand->brand_name }} {{ $spec->vehicleModel->model_name }}</strong>
-                    <span class="text-muted ml-1">({{ $spec->variant->name ?? 'Std' }} {{ $spec->production_start }})</span>
-                </button>
-            @endforeach
-        </div>
-    @endif
-</div>
+                        {{-- Updated Vehicle Search Section --}}
+                        <div class="form-group position-relative" x-data="{ showVehicles: true }" @click.away="showVehicles = false">
+                            <label class="text-xs">Search Brand or Model</label>
+                            <input type="text" 
+                                   class="form-control form-control-sm" 
+                                   placeholder="e.g. Toyota Hilux..." 
+                                   wire:model.live.debounce.300ms="searchVehicle"
+                                   @focus="showVehicles = true">
+                            
+                            @if(count($searchResults) > 0)
+                                <div class="list-group position-absolute shadow-lg search-results-overlay" x-show="showVehicles">
+                                    @foreach($searchResults as $spec)
+                                        <button type="button" class="list-group-item list-group-item-action py-2 text-xs" 
+                                                wire:click="toggleVehicle({{ $spec->id }})">
+                                            <i class="fas {{ in_array($spec->id, $selectedSpecs) ? 'fa-check-circle text-success' : 'fa-plus text-muted' }} mr-2"></i>
+                                            <strong>{{ $spec->vehicleModel->brand->brand_name }} {{ $spec->vehicleModel->model_name }}</strong>
+                                            <span class="text-muted ml-1">({{ $spec->variant->name ?? 'Std' }} {{ $spec->production_start }})</span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
 
                         <div class="mt-3 bg-light border rounded p-2" style="min-height: 100px; max-height: 200px; overflow-y: auto;">
                             <label class="text-xs font-weight-bold">Selected Vehicles ({{ count($selectedSpecs) }})</label>
