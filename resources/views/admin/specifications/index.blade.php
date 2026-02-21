@@ -3,7 +3,7 @@
 @section('title', 'Specifications')
 
 @section('content')
-<section class="content-header">
+<section class="container-fluid">
     <h1>Vehicle Specifications</h1>
     <ol class="breadcrumb">
         <li><a href="/admin"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -11,7 +11,7 @@
     </ol>
 </section>
 
-<section class="container" x-data="{ 
+<section class="container-fluid" x-data="{ 
     search: '',
     checkGroup(el) {
         let rows = el.querySelectorAll('tbody tr');
