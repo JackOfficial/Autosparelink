@@ -83,22 +83,25 @@
                         <h3 class="card-title text-sm">Vehicle Compatibility</h3>
                     </div>
                    {{-- Compatibility Section --}}
-<div class="card-body p-0" wire:key="compatibility-select-container">
+<div class="card-body p-0" style="position: relative; z-index: 999; overflow: visible;">
     <select 
         wire:model="fitment_specifications" 
         id="fitment_specifications"
-        class="form-control border-0" 
+        class="form-control" 
         multiple 
-        style="height: 320px; border-radius: 0; cursor: pointer;"
+        style="height: 320px; border: 0; cursor: pointer; display: block !important; opacity: 1 !important; pointer-events: auto !important;"
     >
         @foreach($vehicleModels as $model)
-            <optgroup label="{{ strtoupper($model->brand->brand_name ?? 'BRAND') }} - {{ $model->model_name }}">
-                @foreach($model->specifications as $spec)
-                    <option value="{{ (string)$spec->id }}">
-                        {{ $spec->variant->name ?? 'Standard' }} ({{ $spec->production_start }}-{{ $spec->production_end }})
-                    </option>
-                @endforeach
-            </optgroup>
+            {{-- Using a manual separator instead of optgroup to test clickability --}}
+            <option disabled class="bg-dark text-white font-weight-bold">
+                == {{ strtoupper($model->brand->brand_name ?? 'BRAND') }} {{ $model->model_name }} ==
+            </option>
+            
+            @foreach($model->specifications as $spec)
+                <option value="{{ (string)$spec->id }}" style="padding: 8px;">
+                    &nbsp;&nbsp;• {{ $spec->variant->name ?? 'Standard' }} ({{ $spec->production_start }}-{{ $spec->production_end }})
+                </option>
+            @endforeach
         @endforeach
     </select>
 </div>
