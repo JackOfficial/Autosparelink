@@ -79,63 +79,89 @@
 
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th width="50">#</th>
-                                                <th width="80">Photo</th>
-                                                <th>Variant Info</th>
-                                                <th>Chassis</th>
-                                                <th>Status</th>
-                                                <th class="text-end">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($model->variants as $variant)
-                                                @php 
-                                                    $searchData = strtolower($brand->brand_name . ' ' . $model->model_name . ' ' . $variant->name . ' ' . $variant->trim_level . ' ' . $variant->chassis_code);
-                                                @endphp
-                                                <tr class="variant-row" x-show="search === '' || '{{ $searchData }}'.includes(search.toLowerCase())">
-                                                    <td>{{ $loop->iteration }}</td>
-                                                    <td>
-                                                        @if($variant->photo)
-                                                            <img src="{{ asset('storage/'.$variant->photo) }}" 
-                                                                 class="rounded shadow-sm" 
-                                                                 style="width:50px; height:50px; object-fit:cover;">
-                                                        @else
-                                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                                                                <i class="fa fa-image text-muted"></i>
-                                                            </div>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        <div class="fw-bold">{{ $variant->name }}</div>
-                                                        <div class="small text-muted">{{ $variant->trim_level ?? 'Standard Trim' }}</div>
-                                                    </td>
-                                                    <td><code class="text-dark">{{ $variant->chassis_code ?? 'N/A' }}</code></td>
-                                                    <td>
-                                                        <span class="badge rounded-pill {{ $variant->status ? 'bg-success' : 'bg-light text-dark border' }}">
-                                                            {{ $variant->status ? 'Active' : 'Inactive' }}
-                                                        </span>
-                                                    </td>
-                                                    <td class="text-end">
-                                                        <div class="btn-group shadow-sm">
-                                                            <a href="{{ route('admin.variants.show', $variant->id) }}" class="btn btn-white btn-sm border" title="Details">
-                                                                <i class="fa fa-eye text-info"></i>
-                                                            </a>
-                                                            <a href="{{ route('admin.variants.edit', $variant->id) }}" class="btn btn-white btn-sm border" title="Edit">
-                                                                <i class="fa fa-edit text-warning"></i>
-                                                            </a>
-                                                            <form action="{{ route('admin.variants.destroy', $variant->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this variant?');">
-                                                                @csrf @method('DELETE')
-                                                                <button class="btn btn-white btn-sm border" title="Delete">
-                                                                    <i class="fa fa-trash text-danger"></i>
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
+                                        {{-- ... inside the table ... --}}
+<thead class="table-light">
+    <tr>
+        <th width="50">#</th>
+        <th width="80">Photo</th>
+        <th>Year & Trim</th> {{-- Merged for better flow --}}
+        <th>Identification</th> {{-- Chassis & Model Code --}}
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+    </tr>
+</thead>
+<tbody>
+    @foreach($model->variants as $variant)
+        @php 
+            $searchData = strtolower($brand->brand_name . ' ' . $model->model_name . ' ' . $variant->name . ' ' . $variant->trim_level . ' ' . $variant->chassis_code . ' ' . $variant->model_code . ' ' . $variant->production_year);
+        @endphp
+        <tr class="variant-row" x-show="search === '' || '{{ $searchData }}'.includes(search.toLowerCase())">
+            <td>{{ $loop->iteration }}</td>
+            <td>
+                @if($variant->photo)
+                    <img src="{{ asset('storage/'.$variant->photo) }}" class="rounded border shadow-sm" style="width:50px; height:50px; object-fit:cover;">
+                @else
+                    <div class="bg-light rounded border d-flex align-items-center justify-content-center text-muted" style="width:50px; height:50px;">
+                        <i class="fa fa-car fa-xs"></i>
+                    </div>
+                @endif
+            </td>
+            <td>
+                {{-- 1. PRODUCTION YEAR & TRIM LEVEL --}}
+                <div class="d-flex align-items-center mb-1">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-2">
+                        {{ $variant->production_year }}
+                    </span>
+                    <span class="fw-bold text-dark">{{ $variant->trim_level }}</span>
+                </div>
+                {{-- Full auto-generated name in small text --}}
+                <div class="small text-muted text-truncate" style="max-width: 250px;">
+                    {{ $variant->name }}
+                </div>
+            </td>
+            <td>
+                {{-- 2. CHASSIS & MODEL CODES --}}
+                <div class="d-flex flex-column">
+                    <div class="small mb-1">
+                        <span class="text-muted small text-uppercase fw-bold">Chassis:</span>
+                        <code class="text-danger fw-bold bg-light px-1 rounded">{{ $variant->chassis_code ?? 'N/A' }}</code>
+                    </div>
+                    <div class="small">
+                        <span class="text-muted small text-uppercase fw-bold">Code:</span>
+                        <span class="text-dark font-monospace">{{ $variant->model_code ?? 'N/A' }}</span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                @if($variant->status)
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                        <i class="fa fa-check-circle me-1"></i> Active
+                    </span>
+                @else
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                        <i class="fa fa-times-circle me-1"></i> Inactive
+                    </span>
+                @endif
+            </td>
+            <td class="text-end">
+                <div class="btn-group shadow-sm border rounded">
+                    <a href="{{ route('admin.variants.show', $variant->id) }}" class="btn btn-white btn-sm" title="View Technical Specs">
+                        <i class="fa fa-microchip text-primary"></i>
+                    </a>
+                    <a href="{{ route('admin.variants.edit', $variant->id) }}" class="btn btn-white btn-sm border-start" title="Edit Variant">
+                        <i class="fa fa-edit text-warning"></i>
+                    </a>
+                    <form action="{{ route('admin.variants.destroy', $variant->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Permanently delete this variant?');">
+                        @csrf @method('DELETE')
+                        <button class="btn btn-white btn-sm border-start" title="Delete">
+                            <i class="fa fa-trash text-danger"></i>
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    @endforeach
+</tbody>
                                     </table>
                                 </div>
                             </div>
