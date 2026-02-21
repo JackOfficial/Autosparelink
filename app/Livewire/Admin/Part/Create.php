@@ -74,64 +74,63 @@ class Create extends Component
     }
 
     public function save()
-    {
-        $this->validate();
+{
+    $this->validate();
 
-        $sku = Part::generateSku(
-            PartBrand::find($this->part_brand_id)->name,
-            Category::find($this->category_id)->category_name,
-            $this->part_name
-        );
+    // 1. Generate SKU
+    $brandName = PartBrand::find($this->part_brand_id)->name;
+    $categoryName = Category::find($this->category_id)->category_name;
+    $sku = Part::generateSku($brandName, $categoryName, $this->part_name);
 
-        $part = Part::create([
-            'part_number' => $this->part_number,
-            'part_name' => $this->part_name,
-            'category_id' => $this->category_id,
-            'part_brand_id' => $this->part_brand_id,
-            'oem_number' => $this->oem_number,
-            'price' => $this->price,
-            'stock_quantity' => $this->stock_quantity,
-            'status' => $this->status === 'Active' ? 1 : 0,
-            'description' => $this->description,
-            'sku' => $sku,
-        ]);
+    // 2. Create Part
+    $part = Part::create([
+        'part_number'    => $this->part_number,
+        'part_name'      => $this->part_name,
+        'category_id'    => $this->category_id,
+        'part_brand_id'  => $this->part_brand_id,
+        'oem_number'     => $this->oem_number,
+        'price'          => $this->price,
+        'stock_quantity' => $this->stock_quantity,
+        'status'         => $this->status === 'Active' ? 1 : 0,
+        'description'    => $this->description,
+        'sku'            => $sku,
+    ]);
 
-        /* FITMENTS */
+    // 3. Save Fitments (Specifications)
+    if (!empty($this->fitment_specifications)) {
         foreach ($this->fitment_specifications as $specId) {
-            $spec = Specification::with(['variant', 'vehicleModel'])->find($specId);
-
+            $spec = Specification::find($specId);
+            
+            // This matches your PartFitment model fillables exactly
             PartFitment::create([
-                'part_id' => $part->id,
-                'variant_id' => $spec->variant_id ?? $spec->variant?->id,
-                'vehicle_model_id' => $spec->vehicle_model_id ?? $spec->variant?->vehicle_model_id,
-                'status' => 'active',
-                'start_year' => $spec->production_start,
-                'end_year' => $spec->production_end,
+                'part_id'          => $part->id,
+                'specification_id' => $spec->id, // Ensure this exists in your DB
+                'variant_id'       => $spec->variant_id,
+                'vehicle_model_id' => $spec->vehicle_model_id,
+                'start_year'       => $spec->production_start,
+                'end_year'         => $spec->production_end,
+                'status'           => 'active',
             ]);
         }
-
-        /* PHOTOS */
-        foreach ($this->photos as $photo) {
-            $path = $photo->store(
-                'parts/' . Str::slug($part->partBrand->name),
-                'public'
-            );
-
-            $part->photos()->create([
-                'file_path' => $path,
-                'caption' => $part->part_name,
-            ]);
-        }
-
-        /* SUBSTITUTIONS */
-       if (!empty($this->substitution_part_ids)) {
-          $part->substitutions()->sync($this->substitution_part_ids);
-        }
-
-        session()->flash('success', 'Spare part created successfully.');
-
-        return redirect()->route('admin.spare-parts.index');
     }
+
+    // 4. Handle Photos
+    foreach ($this->photos as $photo) {
+        $path = $photo->store('parts/' . Str::slug($brandName), 'public');
+        $part->photos()->create([
+            'file_path' => $path,
+            'caption'   => $this->part_name,
+        ]);
+    }
+
+    // 5. Substitutions
+    if (!empty($this->substitution_part_ids)) {
+        $part->substitutions()->sync($this->substitution_part_ids);
+    }
+
+    session()->flash('success', 'Spare part created successfully.');
+    return redirect()->route('admin.spare-parts.index');
+}
     
     public function render()
     {

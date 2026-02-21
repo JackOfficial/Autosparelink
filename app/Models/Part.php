@@ -35,6 +35,16 @@ class Part extends Model
         return $this->hasMany(PartFitment::class);
     }
 
+    public function specifications()
+{
+    return $this->belongsToMany(
+        Specification::class,
+        'part_fitments',
+        'part_id',
+        'specification_id'
+    )->withTimestamps();
+}
+
     public function variants()
     {
         return $this->belongsToMany(
