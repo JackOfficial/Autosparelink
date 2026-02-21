@@ -166,7 +166,7 @@
                                 @forelse($part->fitments->take(3) as $fitment)
                                     <span class="compat-pill">
                                         {{-- Adjust these property names if your Specification model uses different ones --}}
-                                        {{ $fitment->specification->vehicleModel->name ?? 'Model' }} 
+                                        {{ $fitment->specification->variant->name ?? 'Model' }} 
                                         ({{ $fitment->start_year }})
                                     </span>
                                 @empty
@@ -189,7 +189,7 @@
                         <td>
                             <div class="font-weight-bold text-dark">{{ number_format($part->price, 0) }} RWF</div>
                             <div class="mt-1">
-                                @forelse($part->substitutions->take(2) as $sub)
+                                @forelse($part->substitutions->take(3) as $sub)
                                     <span class="sub-item" title="Alternative Part SKU">
                                         <i class="fas fa-sync-alt mr-1" style="font-size: 0.6rem;"></i>{{ $sub->sku }}
                                     </span>
