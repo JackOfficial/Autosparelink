@@ -4,6 +4,8 @@
         .selected-badge { font-size: 0.8rem; padding: 0.5rem; margin: 2px; }
         .cursor-pointer { cursor: pointer; }
         .text-hover-danger:hover { color: #dc3545 !important; }
+        /* Added for better UX on description */
+        .form-control:focus { border-color: #80bdff; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
     </style>
 
     <form wire:submit.prevent="save">
@@ -14,15 +16,24 @@
                     <div class="card-header bg-light"><h3 class="card-title text-sm font-weight-bold">Basic Information</h3></div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-12 form-group">
                                 <label>Part Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" wire:model="part_name">
+                                <input type="text" class="form-control" wire:model="part_name" placeholder="e.g. Front Brake Pad Set">
                                 @error('part_name') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
+                            
                             <div class="col-md-6 form-group">
                                 <label>Part Number</label>
-                                <input type="text" class="form-control" wire:model="part_number">
+                                <input type="text" class="form-control" wire:model="part_number" placeholder="Internal SKU">
                             </div>
+
+                            {{-- Added: OEM Number --}}
+                            <div class="col-md-6 form-group">
+                                <label>OEM Number</label>
+                                <input type="text" class="form-control" wire:model="oem_number" placeholder="Original Equipment Manufacturer No.">
+                                @error('oem_number') <small class="text-danger">{{ $message }}</small> @enderror
+                            </div>
+
                             <div class="col-md-6 form-group">
                                 <label>Parent Category</label>
                                 <select class="form-control" wire:model.live="parentCategoryId">
@@ -32,6 +43,7 @@
                                     @endforeach
                                 </select>
                             </div>
+
                             <div class="col-md-6 form-group">
                                 <label>Child Category <span class="text-danger">*</span></label>
                                 <select class="form-control" wire:model="category_id">
@@ -42,6 +54,7 @@
                                 </select>
                                 @error('category_id') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
+
                             <div class="col-md-12 form-group">
                                 <label>Part Brand <span class="text-danger">*</span></label>
                                 <select class="form-control" wire:model="part_brand_id">
@@ -51,6 +64,14 @@
                                     @endforeach
                                 </select>
                                 @error('part_brand_id') <small class="text-danger">{{ $message }}</small> @enderror
+                            </div>
+
+                            {{-- Added: Description Field --}}
+                            <div class="col-md-12 form-group">
+                                <label>Description / Technical Notes</label>
+                                <textarea class="form-control" wire:model="description" rows="3" 
+                                    placeholder="Add technical specifications, material info, or usage notes..."></textarea>
+                                @error('description') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
                         </div>
                     </div>
@@ -69,7 +90,6 @@
                                 <input type="number" class="form-control" wire:model="stock_quantity">
                             </div>
                             
-                            {{-- Updated Alternative Parts Section --}}
                             <div class="col-md-12 form-group">
                                 <label class="font-weight-bold text-sm">Alternative Parts (Substitutions)</label>
                                 
@@ -132,7 +152,6 @@
                 <div class="card border-primary shadow-none">
                     <div class="card-header bg-primary py-2"><h3 class="card-title text-sm text-white">Vehicle Compatibility</h3></div>
                     <div class="card-body p-3">
-                        {{-- Updated Vehicle Search Section --}}
                         <div class="form-group position-relative" x-data="{ showVehicles: true }" @click.away="showVehicles = false">
                             <label class="text-xs">Search Brand or Model</label>
                             <input type="text" 
@@ -171,7 +190,6 @@
                     </div>
                 </div>
 
-                {{-- Photo Upload --}}
                 <div class="card border shadow-none mt-3">
                     <div class="card-body" x-data="{ previews: [] }">
                         <label class="font-weight-bold">Photos</label>
