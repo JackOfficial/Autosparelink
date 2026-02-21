@@ -1,5 +1,17 @@
 <div> {{-- THE ONLY ROOT ELEMENT --}}
-    
+    <style>
+    /* Force checkboxes to stay interactive */
+    .form-check-input {
+        position: relative !important;
+        z-index: 10 !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+    .list-group-item {
+        position: relative;
+        z-index: 5;
+    }
+</style>
     @if (session()->has('success'))
         <div class="alert alert-success alert-dismissible shadow-sm">
             <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
