@@ -1,12 +1,6 @@
 @extends('admin.layouts.app')
 @section('title', 'Edit Spare Part')
 
-@push('styles')
-<style>
-
-</style>
-@endpush
-
 @section('content')
 
 <section class="content-header">
@@ -33,18 +27,9 @@
     </div>
 
     <div class="card-body">
-            <livewire:admin.part.edit :part="$part" />
+            <livewire:admin.spareparts.edit-component :part="$part" />
     </div>
 </div>
 </section>
-
-@push('scripts')
-<script>
-$('.select2-multiple').select2({
-    width: '100%',
-    allowClear: true
-});
-</script>
-@endpush
 
 @endsection

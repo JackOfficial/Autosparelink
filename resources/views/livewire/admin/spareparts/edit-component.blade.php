@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <style>
-        /* standardized Search Styles */
+        /* Standardized Search Styles */
         .search-container { position: relative; }
         .search-results-overlay { 
             z-index: 1100; 
@@ -27,6 +27,15 @@
         .text-hover-danger:hover { color: #dc3545 !important; }
         .form-control:focus { border-color: #80bdff; box-shadow: 0 0 0 0.1rem rgba(0,123,255,.15); }
         .card-title { letter-spacing: 0.5px; }
+
+        /* Photo Management */
+        .existing-photo-wrapper { position: relative; display: inline-block; }
+        .delete-photo-btn { 
+            position: absolute; top: -5px; right: -2px; 
+            background: #dc3545; color: white; border-radius: 50%; 
+            width: 18px; height: 18px; line-height: 18px; 
+            text-align: center; font-size: 10px; cursor: pointer; border: 1px solid white;
+        }
     </style>
 
     <form wire:submit.prevent="save">
@@ -36,7 +45,7 @@
                 <div class="card border shadow-none mb-4">
                     <div class="card-header bg-light py-2">
                         <h3 class="card-title text-sm font-weight-bold mb-0">
-                            <i class="fas fa-info-circle mr-1"></i> Basic Information
+                            <i class="fas fa-edit mr-1"></i> Edit Basic Information
                         </h3>
                     </div>
                     <div class="card-body">
@@ -48,12 +57,12 @@
                             </div>
 
                             <div class="col-md-6 form-group">
-                                        <label class="font-weight-bold">Part Number (SKU)</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend"><span class="input-group-text">#</span></div>
-                                            <input type="text" class="form-control @error('part_number') is-invalid @enderror" placeholder="Internal Code" wire:model="part_number">
-                                        </div>
-                                        @error('part_number') <small class="text-danger">{{ $message }}</small> @enderror
+                                <label class="font-weight-bold">Part Number (SKU)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">#</span></div>
+                                    <input type="text" class="form-control @error('part_number') is-invalid @enderror" placeholder="Internal Code" wire:model="part_number">
+                                </div>
+                                @error('part_number') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
 
                             <div class="col-md-6 form-group">
@@ -114,7 +123,7 @@
                 </div>
             </div>
 
-            {{-- Right Column: Compatibility, Substitutions & Photos --}}
+            {{-- Right Column --}}
             <div class="col-md-5">
                 
                 {{-- Vehicle Compatibility Card --}}
@@ -209,17 +218,39 @@
 
                 {{-- Photos Card --}}
                 <div class="card border shadow-none mb-0">
-                    <div class="card-body p-3" x-data="{ previews: [] }">
+                    <div class="card-body p-3">
                         <label class="text-xs font-weight-bold mb-2">Part Images</label>
-                        <div class="custom-file custom-file-sm">
-                            <input type="file" multiple wire:model="photos" class="custom-file-input" id="partPhotos"
-                                   @change="previews = []; [...$event.target.files].forEach(file => { let reader = new FileReader(); reader.onload = e => previews.push(e.target.result); reader.readAsDataURL(file); })">
-                            <label class="custom-file-label" for="partPhotos">Upload photos</label>
-                        </div>
-                        <div class="d-flex flex-wrap mt-2">
-                            <template x-for="img in previews" :key="img">
-                                <img :src="img" class="rounded border mr-1 mb-1 shadow-sm" style="width:55px; height:55px; object-fit:cover;">
-                            </template>
+                        
+                        {{-- Section: Already Uploaded Photos --}}
+                        @if(count($existingPhotos) > 0)
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">Current Photos (Click x to delete):</small>
+                                <div class="d-flex flex-wrap">
+                                    @foreach($existingPhotos as $photo)
+                                        <div class="existing-photo-wrapper mr-2 mb-2">
+                                            <img src="{{ Storage::url($photo->file_path) }}" class="rounded border shadow-sm" style="width:55px; height:55px; object-fit:cover;">
+                                            <span class="delete-photo-btn" wire:click="deletePhoto({{ $photo->id }})" wire:confirm="Are you sure you want to delete this photo?">
+                                                <i class="fas fa-times"></i>
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- Section: New Uploads --}}
+                        <div x-data="{ previews: [] }">
+                            <small class="text-muted d-block mb-1">Upload New Photos:</small>
+                            <div class="custom-file custom-file-sm">
+                                <input type="file" multiple wire:model="photos" class="custom-file-input" id="partPhotos"
+                                       @change="previews = []; [...$event.target.files].forEach(file => { let reader = new FileReader(); reader.onload = e => previews.push(e.target.result); reader.readAsDataURL(file); })">
+                                <label class="custom-file-label" for="partPhotos">Choose new files</label>
+                            </div>
+                            <div class="d-flex flex-wrap mt-2">
+                                <template x-for="img in previews" :key="img">
+                                    <img :src="img" class="rounded border mr-1 mb-1 shadow-sm" style="width:55px; height:55px; object-fit:cover;">
+                                </template>
+                            </div>
                         </div>
                         @error('photos.*') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                     </div>
@@ -233,8 +264,8 @@
         <div class="d-flex justify-content-between align-items-center mb-5">
             <a href="{{ route('admin.spare-parts.index') }}" class="btn btn-link text-muted"><i class="fas fa-arrow-left mr-1"></i> Back to List</a>
             <button type="submit" class="btn btn-primary px-5 py-2 shadow-sm font-weight-bold" wire:loading.attr="disabled">
-                <span wire:loading.remove wire:target="save">Create Spare Part</span>
-                <span wire:loading wire:target="save"><i class="fas fa-circle-notch fa-spin mr-2"></i>Processing...</span>
+                <span wire:loading.remove wire:target="save">Update Spare Part</span>
+                <span wire:loading wire:target="save"><i class="fas fa-circle-notch fa-spin mr-2"></i>Saving Changes...</span>
             </button>
         </div>
     </form>
