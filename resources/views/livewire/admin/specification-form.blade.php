@@ -115,7 +115,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="small font-weight-bold text-muted">HP</label>
+                                    <label class="small font-weight-bold text-muted">Horse Power (HP)</label>
                                     <input type="number" wire:model="horsepower" class="form-control shadow-none">
                                 </div>
                                 <div class="col-md-4 mb-3">
