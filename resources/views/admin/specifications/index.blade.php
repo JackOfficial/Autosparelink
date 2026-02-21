@@ -108,10 +108,10 @@
                                         $rowSearch = strtolower($spec->variant->name . ' ' . $spec->bodyType->name . ' ' . $spec->engineType->name);
                                     @endphp
                                     <tr x-show="search === '' || '{{ $rowSearch }}'.includes(search.toLowerCase()) || '{{ $groupSearchTag }}'.includes(search.toLowerCase())">
-                                        <td style="padding-left: 15px;"><b>{{ $spec->bodyType->name }}</b></td>
-                                        <td><span class="text-primary" style="font-weight:600">{{ $spec->variant->name }}</span></td>
-                                        <td><span class="label label-default">{{ $spec->transmissionType->name }}</span></td>
-                                        <td>{{ $spec->engineType->name }}</td>
+                                      <td style="padding-left: 15px;"><b>{{ $spec->bodyType->name ?? 'N/A' }}</b></td>
+                                        <td><span class="text-primary" style="font-weight:600">{{ $spec->variant->name ?? 'Standard' }}</span></td>
+                                          <td><span class="label label-default">{{ $spec->transmissionType->name ?? 'Unknown' }}</span></td>
+                                         <td>{{ $spec->engineType->name ?? 'N/A' }}</td>
                                         <td>
                                             <strong>{{ $spec->horsepower }} HP</strong><br>
                                             <small class="text-muted">{{ $spec->torque }} Nm</small>
