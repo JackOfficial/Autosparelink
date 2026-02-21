@@ -87,7 +87,7 @@
                             <input type="text" wire:model="model_code" class="form-control shadow-none" placeholder="e.g. W213">
                         </div>
 
-                        <div class="col-md-2 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="small font-weight-bold text-muted">Tech. Timeline (Start / End)</label>
                             <div class="d-flex">
                                 <input type="number" wire:model="production_year_start" class="form-control shadow-none mr-1" placeholder="Start">
