@@ -48,15 +48,21 @@ public function exportExcel()
     return Excel::download(new PartsExport, 'inventory_report_' . now()->format('Y-m-d') . '.xlsx');
 }
 
-public function exportPdf() 
+public function exportPdf(Request $request) 
 {
-    $parts = Part::with(['category', 'partBrand', 'fitments.specification.vehicleModel'])->get();
-    
-    // Using the same view as Excel for consistency!
-    $pdf = Pdf::loadView('admin.spare-parts.exports.table', compact('parts'))
-              ->setPaper('a4', 'landscape'); // Landscape is better for inventory tables
-              
-    return $pdf->download('inventory_report_' . now()->format('Y-m-d') . '.pdf');
+    $query = Part::query()->with(['category', 'partBrand', 'fitments.specification.vehicleModel']);
+
+    if ($request->filled('search')) {
+        $query->where('part_name', 'like', '%' . $request->search . '%')
+              ->orWhere('sku', 'like', '%' . $request->search . '%');
+    }
+
+    if ($request->filter === 'out_of_stock') {
+        $query->where('stock_quantity', '<=', 0);
+    }
+
+    $parts = $query->get();
+    // ... generate PDF
 }
 
     /* ============================

@@ -67,7 +67,9 @@
         <div class="col-md-6 text-right">
             <button class="btn btn-outline-secondary btn-sm mr-2"><i class="fas fa-file-export mr-1"></i> Export</button>
             <a href="{{ route('admin.export.excel') }}">Excel</a>
-            <a href="{{ route('admin.export.pdf') }}">PDF</a>
+            <a :href="'{{ route('admin.export.pdf') }}?search=' + search + '&filter=' + filterType" class="dropdown-item">
+    <i class="fas fa-file-pdf mr-2 text-danger"></i> PDF (.pdf)
+</a>
             <a href="{{ route('admin.spare-parts.create') }}" class="btn btn-primary px-4 shadow-sm">
                 <i class="fa fa-plus-circle mr-2"></i>New Part
             </a>
