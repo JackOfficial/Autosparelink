@@ -166,8 +166,7 @@
                                 @forelse($part->fitments->take(3) as $fitment)
                                     <span class="compat-pill">
                                         {{-- Adjust these property names if your Specification model uses different ones --}}
-                                        {{ $fitment->specification->variant->name ?? 'Model' }} 
-                                        ({{ $fitment->start_year }})
+                                        {{ $fitment->specification->variant->name ?? 'Model' }}
                                     </span>
                                 @empty
                                     <span class="text-muted small">No specific fitments</span>
