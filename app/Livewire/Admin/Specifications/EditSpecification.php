@@ -3,69 +3,127 @@
 namespace App\Livewire\Admin\Specifications;
 
 use Livewire\Component;
-use App\Models\{Specification, Brand, VehicleModel, BodyType, EngineType, TransmissionType, DriveType, EngineDisplacement, Variant};
+use App\Models\{Specification, Brand, VehicleModel, BodyType, EngineType, TransmissionType, DriveType, EngineDisplacement, Variant, Destination};
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class EditSpecification extends Component
 {
     public $specificationId;
     
     // Vehicle Selection
-    public $brand_id, $vehicle_model_id;
-    public $trim_level; // Now represents Variant table data
-    public $vehicleModels = [];
+    public $brand_id;
+    public $vehicle_model_id;
+    public $trim_level; 
 
-    // Form Fields
+    // Identity Fields
+    public $chassis_code, $model_code, $is_default;
+    public $production_year;       // Variant level
+    public $production_year_start; // Spec level
+    public $production_year_end;   // Spec level
+    public $destination_id; 
+
+    // Technical Fields
     public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
     public $horsepower, $torque, $fuel_capacity, $fuel_efficiency;
-    public $seats, $doors, $steering_position = 'LEFT', $color = '#000000';
-    public $production_start, $production_end, $production_year, $status = 1;
+    public $seats, $doors, $steering_position, $color, $status;
+
+    /**
+     * Computed Property: Re-fetch models when brand changes
+     */
+    public function getVehicleModelsProperty()
+    {
+        return $this->brand_id 
+            ? VehicleModel::where('brand_id', $this->brand_id)->orderBy('model_name')->get() 
+            : collect();
+    }
+
+    /**
+     * Computed Property: For the Live Preview title
+     */
+    public function getGeneratedNameProperty()
+    {
+        $brandModel = VehicleModel::with('brand')->find($this->vehicle_model_id);
+        
+        $body = $this->body_type_id ? BodyType::find($this->body_type_id)?->name : null;
+        $displacement = $this->engine_displacement_id ? EngineDisplacement::find($this->engine_displacement_id)?->name : null;
+        $engine = $this->engine_type_id ? EngineType::find($this->engine_type_id)?->name : null;
+        $trans = $this->transmission_type_id ? TransmissionType::find($this->transmission_type_id)?->name : null;
+
+        $pieces = [
+            $brandModel?->brand?->brand_name,
+            $brandModel?->model_name,
+            $this->trim_level,
+            $body,
+            $this->production_year,
+            $displacement ? ($displacement . 'L') : null,
+            $engine,
+            $trans,
+        ];
+
+        return implode(' ', array_filter($pieces)) ?: 'Editing Specification';
+    }
 
     public function mount($specificationId)
     {
-        $spec = Specification::with('variant', 'vehicleModel')->findOrFail($specificationId);
+        $spec = Specification::with('variant.destinations', 'vehicleModel')->findOrFail($specificationId);
         $this->specificationId = $specificationId;
 
-        // Fill standard technical fields
-        $this->fill($spec->toArray());
+        // Map Spec fields to properties (matching Create logic names)
+        $this->vehicle_model_id = $spec->vehicle_model_id;
+        $this->brand_id = $spec->vehicleModel->brand_id;
+        
+        $this->body_type_id = $spec->body_type_id;
+        $this->engine_type_id = $spec->engine_type_id;
+        $this->transmission_type_id = $spec->transmission_type_id;
+        $this->drive_type_id = $spec->drive_type_id;
+        $this->engine_displacement_id = $spec->engine_displacement_id;
+        
+        $this->horsepower = $spec->horsepower;
+        $this->torque = $spec->torque;
+        $this->fuel_capacity = $spec->fuel_capacity;
+        $this->fuel_efficiency = $spec->fuel_efficiency;
+        $this->seats = $spec->seats;
+        $this->doors = $spec->doors;
+        $this->steering_position = $spec->steering_position;
+        $this->color = $spec->color;
+        $this->status = $spec->status;
+        
+        $this->production_year_start = $spec->production_start;
+        $this->production_year_end = $spec->production_end;
 
-        // FIX: Pull trim_level from the parent Variant
+        // Map Variant fields
         if ($spec->variant) {
             $this->trim_level = $spec->variant->trim_level;
-        }
-
-        if ($spec->vehicle_model_id) {
-            $this->vehicle_model_id = $spec->vehicle_model_id;
-            $this->brand_id = $spec->vehicleModel->brand_id;
-            $this->vehicleModels = VehicleModel::where('brand_id', $this->brand_id)->get();
+            $this->production_year = $spec->variant->production_year;
+            $this->chassis_code = $spec->variant->chassis_code;
+            $this->model_code = $spec->variant->model_code;
+            $this->is_default = $spec->variant->is_default;
+            
+            // Get the first destination if it exists
+            $this->destination_id = $spec->variant->destinations->first()?->id;
         }
     }
 
-    public function updatedBrandId($value)
+    public function updatedBrandId()
     {
-        $this->vehicleModels = $value ? VehicleModel::where('brand_id', $value)->get() : [];
         $this->vehicle_model_id = null;
     }
 
     protected function rules()
     {
         return [
+            'brand_id' => 'required|exists:brands,id',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'trim_level' => 'required|string|max:255', // Required for Variant identity
+            'trim_level' => 'required|string|max:50',
+            'production_year' => 'required|integer|min:1950|max:' . (date('Y') + 2),
+            'production_year_start' => 'required|integer|min:1950',
+            'production_year_end' => 'nullable|integer|gte:production_year_start',
             'body_type_id' => 'required|exists:body_types,id',
             'engine_type_id' => 'required|exists:engine_types,id',
+            'engine_displacement_id' => 'required|exists:engine_displacements,id',
             'transmission_type_id' => 'required|exists:transmission_types,id',
-            'drive_type_id' => 'nullable|exists:drive_types,id',
-            'engine_displacement_id' => 'nullable|exists:engine_displacements,id',
-            'horsepower' => 'nullable|numeric',
-            'production_start' => 'nullable|integer',
-            'production_end' => 'nullable|integer',
-            'torque' => 'nullable|numeric',
-            'seats' => 'nullable|integer|max:20',
-            'doors' => 'nullable|integer|max:10',
-            'color' => 'nullable|string',
-            'status' => 'boolean',
-            'production_year' => 'nullable|integer',
+            'steering_position' => 'required|in:LEFT,RIGHT',
         ];
     }
 
@@ -73,57 +131,74 @@ class EditSpecification extends Component
     {
         $this->validate();
         
-        DB::transaction(function () {
-            $spec = Specification::findOrFail($this->specificationId);
-            
-            // 1. Update Specification (trim_level column removed from here)
-            $spec->update([
-                'vehicle_model_id' => $this->vehicle_model_id,
-                'body_type_id' => $this->body_type_id,
-                'engine_type_id' => $this->engine_type_id,
-                'transmission_type_id' => $this->transmission_type_id,
-                'drive_type_id' => $this->drive_type_id,
-                'engine_displacement_id' => $this->engine_displacement_id,
-                'horsepower' => $this->horsepower,
-                'torque' => $this->torque,
-                'fuel_capacity' => $this->fuel_capacity,
-                'fuel_efficiency' => $this->fuel_efficiency,
-                'seats' => $this->seats,
-                'doors' => $this->doors,
-                'steering_position' => $this->steering_position,
-                'color' => $this->color,
-                'production_start' => $this->production_start,
-                'production_end' => $this->production_end,
-                'production_year' => $this->production_year,
-                'status' => $this->status,
-            ]);
-
-            // 2. Update the parent Variant
-            if ($spec->variant) {
-                $spec->variant->update([
-                    'vehicle_model_id' => $this->vehicle_model_id,
-                    'trim_level' => $this->trim_level, // Saved to variants table
-                ]);
+        try {
+            DB::transaction(function () {
+                $spec = Specification::findOrFail($this->specificationId);
                 
-                // 3. Refresh and Sync Name
-                $spec->variant->refresh();
-                $spec->variant->syncNameFromSpec();
-            }
-        });
-        
-        session()->flash('success', 'Specification and Variant updated successfully!');
-        return redirect()->route('admin.specifications.index');
+                // 1. Update the Specification
+                $spec->update([
+                    'vehicle_model_id'       => $this->vehicle_model_id,
+                    'body_type_id'           => $this->body_type_id,
+                    'engine_type_id'         => $this->engine_type_id,
+                    'transmission_type_id'   => $this->transmission_type_id,
+                    'drive_type_id'          => $this->drive_type_id,
+                    'engine_displacement_id' => $this->engine_displacement_id,
+                    'horsepower'             => $this->horsepower,
+                    'torque'                 => $this->torque,
+                    'fuel_capacity'          => $this->fuel_capacity,
+                    'fuel_efficiency'        => $this->fuel_efficiency,
+                    'seats'                  => $this->seats,
+                    'doors'                  => $this->doors,
+                    'steering_position'      => $this->steering_position,
+                    'color'                  => $this->color,
+                    'production_start'       => $this->production_year_start,
+                    'production_end'         => $this->production_year_end,
+                    'status'                 => $this->status,
+                ]);
+
+                // 2. Update the parent Variant
+                if ($spec->variant) {
+                    $spec->variant->update([
+                        'vehicle_model_id' => $this->vehicle_model_id,
+                        'production_year'  => $this->production_year,
+                        'trim_level'       => $this->trim_level,
+                        'chassis_code'     => $this->chassis_code,
+                        'model_code'       => $this->model_code,
+                        'is_default'       => $this->is_default,
+                        'status'           => $this->status,
+                    ]);
+
+                    // Update Destination
+                    if ($this->destination_id) {
+                        $spec->variant->destinations()->sync([$this->destination_id]);
+                    }
+
+                    // 3. Refresh and Sync Name
+                    $spec->variant->refresh();
+                    if (method_exists($spec->variant, 'syncNameFromSpec')) { 
+                        $spec->variant->syncNameFromSpec(); 
+                    }
+                }
+            });
+
+            session()->flash('success', 'Specification and Variant updated successfully!');
+            return redirect()->route('admin.specifications.index');
+
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error: ' . $e->getMessage());
+        }
     }
 
     public function render()
     {
         return view('livewire.admin.specifications.edit-specification', [
-            'brands' => Brand::orderBy('brand_name')->get(),
-            'bodyTypes' => BodyType::all(),
-            'engineTypes' => EngineType::all(),
-            'transmissionTypes' => TransmissionType::all(),
-            'driveTypes' => DriveType::all(),
-            'engineDisplacements' => EngineDisplacement::all(),
+            'brands'              => Brand::orderBy('brand_name')->get(),
+            'bodyTypes'           => BodyType::orderBy('name')->get(),
+            'engineTypes'         => EngineType::orderBy('name')->get(),
+            'transmissionTypes'   => TransmissionType::orderBy('name')->get(),
+            'driveTypes'          => DriveType::orderBy('name')->get(),
+            'engineDisplacements' => EngineDisplacement::orderBy('name')->get(),
+            'destinations'        => Destination::orderBy('region_name')->get(),
         ]);
     }
 }
