@@ -14,7 +14,6 @@ return new class extends Migration
       Schema::table('part_fitments', function (Blueprint $table) {
             // 1. Remove the old unique constraint and index first
             $table->dropUnique(['part_id', 'variant_id']);
-            $table->dropIndex('fitment_search_index');
 
             // 2. Drop the unnecessary columns
             $table->dropColumn(['variant_id', 'vehicle_model_id', 'start_year', 'end_year']);
