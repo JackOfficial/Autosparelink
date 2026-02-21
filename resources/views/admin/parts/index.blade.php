@@ -139,7 +139,7 @@
                                 @if($part->fitments->count())
                                     <div class="small text-truncate" style="max-width: 150px;">
                                         @foreach($part->fitments->take(2) as $fitment)
-                                            <span class="d-block">• {{ $fitment->vehicleModel->brand->brand_name }} {{ $fitment->vehicleModel->model_name }}</span>
+                                            <span class="d-block">• {{ $fitment->vehicleModel->brand->brand_name ?? '' }} {{ $fitment->vehicleModel->model_name ?? '' }}</span>
                                         @endforeach
                                     </div>
                                     @if($part->fitments->count() > 2)
