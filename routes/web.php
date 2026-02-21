@@ -228,6 +228,10 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('spare-parts', PartController::class);
     Route::resource('fitments', PartFitmentController::class);
     Route::delete('fitments/photos/{id}', [PartFitmentController::class, 'deletePhoto'])->name('fitments.deletePhoto');
+
+    //pdf and excel
+    Route::get('/export/excel', [PartController::class, 'exportExcel'])->name('export.excel');
+    Route::get('/export/pdf', [PartController::class, 'exportPdf'])->name('export.pdf');
 });
 
 //Testing routes

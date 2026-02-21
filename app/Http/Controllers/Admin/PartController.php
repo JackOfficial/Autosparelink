@@ -14,6 +14,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+use App\Exports\PartsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 class PartController extends Controller
 {
     /* ============================
@@ -37,6 +41,22 @@ class PartController extends Controller
         ->withQueryString(); // Keeps search parameters in pagination links
 
     return view('admin.parts.index', compact('parts'));
+}
+
+public function exportExcel() 
+{
+    return Excel::download(new PartsExport, 'inventory_report_' . now()->format('Y-m-d') . '.xlsx');
+}
+
+public function exportPdf() 
+{
+    $parts = Part::with(['category', 'partBrand', 'fitments.specification.vehicleModel'])->get();
+    
+    // Using the same view as Excel for consistency!
+    $pdf = Pdf::loadView('admin.spare-parts.exports.table', compact('parts'))
+              ->setPaper('a4', 'landscape'); // Landscape is better for inventory tables
+              
+    return $pdf->download('inventory_report_' . now()->format('Y-m-d') . '.pdf');
 }
 
     /* ============================
