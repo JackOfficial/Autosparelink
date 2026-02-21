@@ -192,6 +192,7 @@ class EditSpecification extends Component
     public function render()
     {
         return view('livewire.admin.specifications.edit-specification', [
+            'vehicleModels'        => VehicleModel::orderBy('model_name')->get(),
             'brands'              => Brand::orderBy('brand_name')->get(),
             'bodyTypes'           => BodyType::orderBy('name')->get(),
             'engineTypes'         => EngineType::orderBy('name')->get(),
