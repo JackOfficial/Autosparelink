@@ -160,7 +160,6 @@ class EditSpecification extends Component
                         'trim_level'       => $this->trim_level,
                         'chassis_code'     => $this->chassis_code,
                         'model_code'       => $this->model_code,
-                        'is_default'       => $this->is_default,
                         'status'           => $this->status,
                     ]);
 
