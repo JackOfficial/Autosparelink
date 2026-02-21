@@ -20,7 +20,7 @@
                     <a href="{{ route('admin.vehicle-models.edit', $vehicleModel->id) }}" class="btn btn-outline-primary">
                         <i class="fas fa-edit me-1"></i> Edit Model
                     </a>
-                    <a href="{{ route('admin.variants.create', ['vehicle_model_id' => $vehicleModel->id]) }}" class="btn btn-primary">
+                    <a href="{{ route('admin.specifications.create', ['vehicle_model_id' => $vehicleModel->id]) }}" class="btn btn-primary">
                         <i class="fa fa-plus me-1"></i> Add Variant
                     </a>
                 </div>
