@@ -77,12 +77,12 @@
                             </select>
                         </div>
 
-                        <div class="col-md-2 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="small font-weight-bold text-muted">Chassis Code</label>
                             <input type="text" wire:model="chassis_code" class="form-control shadow-none" placeholder="e.g. W213">
                         </div>
 
-                        <div class="col-md-2 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="small font-weight-bold text-muted">Model Code</label>
                             <input type="text" wire:model="model_code" class="form-control shadow-none" placeholder="e.g. W213">
                         </div>
