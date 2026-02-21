@@ -54,15 +54,24 @@
                         <input type="text" wire:model="chassis_code" class="form-control shadow-sm">
                     </div>
 
+                     <div class="col-md-3 mb-3">
+                        <label class="small font-weight-bold">Model Code</label>
+                        <input type="text" wire:model="chassis_code" class="form-control shadow-sm">
+                    </div>
+                    
                     <div class="col-md-3 mb-3">
-                        <label class="small font-weight-bold">Prod. Start (Technical)</label>
+                        <div class="row">
+                        <div class="col-md-6">
+                            <label class="small font-weight-bold">Prod. Start (Technical)</label>
                         <input type="number" wire:model="production_year_start" class="form-control shadow-sm" placeholder="YYYY">
                         @error('production_year_start') <span class="text-danger small">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="col-md-3 mb-3">
+                        </div>
+                        <div class="col-md-6 mb-3">
                         <label class="small font-weight-bold">Prod. End (Technical)</label>
                         <input type="number" wire:model="production_year_end" class="form-control shadow-sm" placeholder="Leave blank if active">
+                    </div>
+                       </div>
+                        
                     </div>
 
                     <div class="col-md-3 mb-3">
@@ -70,7 +79,7 @@
                         <select wire:model="destination_id" class="form-control shadow-sm">
                             <option value="">Select Region</option>
                             @foreach($destinations as $dest)
-                                <option value="{{ $dest->id }}">{{ $dest->name }}</option>
+                                <option value="{{ $dest->id }}">{{ $dest->region_name }}</option>
                             @endforeach
                         </select>
                     </div>
