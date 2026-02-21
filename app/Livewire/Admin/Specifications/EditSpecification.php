@@ -57,7 +57,7 @@ class EditSpecification extends Component
             $this->trim_level,
             $body,
             $this->production_year,
-            $displacement ? ($displacement . 'L') : null,
+            $displacement ? ($displacement) : null,
             $engine,
             $trans,
         ];
