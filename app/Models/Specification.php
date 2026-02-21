@@ -9,6 +9,11 @@ class Specification extends Model
 {
     protected $table = 'specifications';
 
+    protected $casts = [
+    'production_start' => 'integer', // Storing as YYYYMM (e.g., 202401) is common in EPCs
+    'production_end' => 'integer',
+    ];
+
     protected $fillable = [
         'variant_id',
         'vehicle_model_id', 
@@ -81,6 +86,7 @@ class Specification extends Model
         return $query->where('status', 1);
     }
 
+ 
     
 
     protected static function booted()

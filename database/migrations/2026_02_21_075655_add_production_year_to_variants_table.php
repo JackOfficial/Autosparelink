@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('specifications', function (Blueprint $table) {
-           $table->integer('production_year')->nullable()->after('production_end')->comment('Year the car model/variant was produced');
+        Schema::table('variants', function (Blueprint $table) {
+            $table->unsignedSmallInteger('production_year')->nullable()->after('vehicle_model_id')->index(); // Indexed for fast filtering by year
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('specifications', function (Blueprint $table) {
-           $table->dropColumn('production_year');
+        Schema::table('variants', function (Blueprint $table) {
+            $table->dropColumn('production_year');
         });
     }
 };

@@ -11,6 +11,7 @@ class Variant extends Model
         'vehicle_model_id',
         'name',
         'slug',
+        'production_year',
         'chassis_code',
         'model_code',
         'trim_level',
