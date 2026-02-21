@@ -14,7 +14,7 @@ class CreateComponent extends Component
     // Basic Info
     public $part_name, $part_number, $oem_number, $description;
     public $parentCategoryId, $category_id, $part_brand_id;
-    
+    public $searchPart = '';
     // Inventory & Subs
     public $price, $stock_quantity;
     public $substitution_part_ids = []; // For the multiple select
@@ -39,6 +39,16 @@ class CreateComponent extends Component
             $this->selectedSpecs[] = $specId;
         }
     }
+
+    public function toggleSubstitution($partId)
+{
+    if (in_array($partId, $this->substitution_part_ids)) {
+        $this->substitution_part_ids = array_diff($this->substitution_part_ids, [$partId]);
+    } else {
+        $this->substitution_part_ids[] = $partId;
+    }
+    $this->searchPart = ''; // Clear search after selection
+}
 
     public function save()
     {
@@ -99,6 +109,7 @@ class CreateComponent extends Component
     public function render()
     {
         $searchResults = [];
+        $partResults = [];
         if (strlen($this->searchVehicle) >= 2) {
             $searchResults = Specification::with(['vehicleModel.brand', 'variant'])
                 ->whereHas('vehicleModel', function($q) {
@@ -107,6 +118,15 @@ class CreateComponent extends Component
                 })->limit(15)->get();
         }
 
+        
+    if (strlen($this->searchPart) >= 2) {
+        $partResults = Part::with('partBrand')
+            ->where('part_name', 'like', "%{$this->searchPart}%")
+            ->orWhere('part_number', 'like', "%{$this->searchPart}%")
+            ->limit(10)
+            ->get();
+    }
+
         return view('livewire.admin.spareparts.create-component', [
             'searchResults'    => $searchResults,
             'displaySpecs'     => Specification::whereIn('id', $this->selectedSpecs)->with('vehicleModel.brand')->get(),
@@ -114,6 +134,8 @@ class CreateComponent extends Component
             'childCategories'  => Category::where('parent_id', $this->parentCategoryId)->orderBy('category_name')->get(),
             'brands'           => PartBrand::orderBy('name')->get(),
             'allParts'         => Part::with('partBrand')->orderBy('part_name')->get(),
+            'partResults' => $partResults,
+            'selectedSubstitutions' => Part::whereIn('id', $this->substitution_part_ids)->with('partBrand')->get(),
         ]);
     }
 }

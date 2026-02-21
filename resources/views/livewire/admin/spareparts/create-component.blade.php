@@ -3,6 +3,7 @@
         .search-results-overlay { z-index: 1100; max-height: 300px; overflow-y: auto; background: white; border: 1px solid #ddd; width: 100%; top: 100%; }
         .selected-badge { font-size: 0.8rem; padding: 0.5rem; margin: 2px; }
         .cursor-pointer { cursor: pointer; }
+        .text-hover-danger:hover { color: #dc3545 !important; }
     </style>
 
     <form wire:submit.prevent="save">
@@ -68,13 +69,56 @@
                                 <input type="number" class="form-control" wire:model="stock_quantity">
                             </div>
                             <div class="col-md-12 form-group">
-                                <label>Alternative Parts (Substitutions)</label>
-                                <select wire:model="substitution_part_ids" class="form-control" multiple style="height: 120px;">
-                                    @foreach($allParts as $p)
-                                        <option value="{{ $p->id }}">{{ $p->part_name }} ({{ $p->partBrand->name ?? 'N/A' }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
+    <label class="font-weight-bold text-sm">Alternative Parts (Substitutions)</label>
+    
+    <div class="position-relative">
+        <div class="input-group input-group-sm">
+            <div class="input-group-prepend">
+                <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+            </div>
+            <input type="text" 
+                   class="form-control" 
+                   placeholder="Search by part name or number..." 
+                   wire:model.live.debounce.300ms="searchPart">
+        </div>
+
+        {{-- Part Search Results Dropdown --}}
+        @if(count($partResults) > 0)
+            <div class="list-group position-absolute shadow-lg w-100 search-results-overlay" style="z-index: 1050;">
+                @foreach($partResults as $p)
+                    <button type="button" 
+                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2"
+                            wire:click="toggleSubstitution({{ $p->id }})">
+                        <div>
+                            <span class="font-weight-bold text-xs">{{ $p->part_name }}</span>
+                            <small class="text-muted d-block">{{ $p->partBrand->name ?? 'No Brand' }} | {{ $p->part_number }}</small>
+                        </div>
+                        @if(in_array($p->id, $substitution_part_ids))
+                            <i class="fas fa-check-circle text-success"></i>
+                        @else
+                            <i class="fas fa-plus-circle text-primary"></i>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
+        @endif
+    </div>
+
+    {{-- Selected Substitutions Display --}}
+    <div class="mt-2 d-flex flex-wrap border rounded p-2 bg-light shadow-sm" style="min-height: 50px;">
+        @forelse($selectedSubstitutions as $sub)
+            <span class="badge badge-secondary p-2 m-1 d-flex align-items-center" style="font-size: 0.75rem;">
+                <i class="fas fa-exchange-alt mr-2 opacity-50"></i>
+                {{ $sub->part_name }}
+                <i class="fas fa-times-circle ml-2 cursor-pointer text-hover-danger" 
+                   wire:click="toggleSubstitution({{ $sub->id }})"
+                   title="Remove"></i>
+            </span>
+        @empty
+            <span class="text-muted text-xs italic m-auto">No substitutions selected. Search above to add.</span>
+        @endforelse
+    </div>
+</div>
                         </div>
                     </div>
                 </div>
