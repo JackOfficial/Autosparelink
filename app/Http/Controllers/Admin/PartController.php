@@ -50,6 +50,7 @@ public function exportExcel()
 
 public function exportPdf(Request $request) 
 {
+    dd("hello");
     $query = Part::query()->with(['category', 'partBrand', 'fitments.specification.vehicleModel']);
 
     if ($request->filled('search')) {
