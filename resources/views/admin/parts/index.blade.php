@@ -14,12 +14,10 @@
     }
     .photo-stack:hover .stack-img { transform: translateX(10px) rotate(5deg); }
     
-    /* Table Enhancements */
     .table thead th { border-top: none; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #8898aa; }
     .part-row { transition: opacity 0.2s ease-in-out; }
     .part-row:hover { background-color: #fcfdfe !important; }
     
-    /* Custom Badges */
     .badge-soft-success { background: #e6fffa; color: #38b2ac; border: 1px solid #b2f5ea; }
     .badge-soft-danger { background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; }
     .badge-soft-warning { background: #fffaf0; color: #dd6b20; border: 1px solid #fbd38d; }
@@ -27,6 +25,9 @@
     .sku-copy { cursor: pointer; border-style: dashed !important; transition: 0.2s; }
     .sku-copy:hover { background: #f1f5f9; color: #3b82f6; border-color: #3b82f6 !important; }
 
+    /* Compatibility pill styling */
+    .compat-pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; background: #f8f9fe; color: #525f7f; border: 1px solid #e9ecef; margin-right: 4px; margin-bottom: 4px; display: inline-block; }
+    
     [x-cloak] { display: none !important; }
 </style>
 @endpush
@@ -37,9 +38,7 @@
         filterType: 'all',
         copyToClipboard(text) {
             navigator.clipboard.writeText(text);
-            {{-- Simple toast logic could go here --}}
         },
-        {{-- Unified Filter Logic --}}
         shouldShow(el, stock, status) {
             const searchTerm = this.search.toLowerCase();
             const textContent = el.innerText.toLowerCase();
@@ -72,7 +71,7 @@
         </div>
     </div>
 
-    {{-- Quick Stats Cards --}}
+    {{-- Quick Stats --}}
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card border-0 shadow-sm">
@@ -97,10 +96,7 @@
             <div class="row align-items-center">
                 <div class="col-md-5">
                     <div class="input-group border rounded-pill px-3 py-1 bg-light">
-                        <input type="text" 
-                               x-model="search" 
-                               class="form-control border-0 bg-transparent shadow-none" 
-                               placeholder="Real-time search by name, SKU or number...">
+                        <input type="text" x-model="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Search name, SKU, vehicle or substitutions...">
                         <div class="input-group-append">
                             <span class="btn btn-transparent p-0 text-muted d-flex align-items-center">
                                 <i class="fa fa-search" x-show="search === ''"></i>
@@ -132,7 +128,7 @@
                         <th class="pl-4">Item Details</th>
                         <th>Compatibility</th>
                         <th>Inventory</th>
-                        <th>Pricing</th>
+                        <th>Pricing & Subs</th>
                         <th>Status</th>
                         <th class="text-right pr-4">Actions</th>
                     </tr>
@@ -146,9 +142,7 @@
                             <div class="d-flex align-items-center">
                                 <div class="photo-stack mr-4">
                                     @forelse($part->photos->take(3) as $index => $photo)
-                                        <img src="{{ asset('storage/' . $photo->file_path) }}" 
-                                             class="stack-img shadow-sm" 
-                                             style="left: {{ $index * 10 }}px; z-index: {{ 10 - $index }};">
+                                        <img src="{{ asset('storage/' . $photo->file_path) }}" class="stack-img shadow-sm" style="left: {{ $index * 10 }}px; z-index: {{ 10 - $index }};">
                                     @empty
                                         <div class="bg-light rounded border d-flex align-items-center justify-content-center" style="width:40px; height:40px">
                                             <i class="fa fa-image text-muted small"></i>
@@ -158,9 +152,7 @@
                                 <div>
                                     <div class="font-weight-bold text-dark mb-0" style="font-size: 0.95rem;">{{ $part->part_name }}</div>
                                     <div class="d-flex align-items-center mt-1">
-                                        <span class="badge badge-light border sku-copy text-muted mr-2" 
-                                              @click="copyToClipboard('{{ $part->sku }}')"
-                                              title="Click to copy SKU">
+                                        <span class="badge badge-light border sku-copy text-muted mr-2" @click="copyToClipboard('{{ $part->sku }}')" title="Click to copy SKU">
                                             <i class="far fa-copy mr-1 small"></i>{{ $part->sku }}
                                         </span>
                                         <small class="text-muted border-left pl-2">PN: {{ $part->part_number }}</small>
@@ -169,8 +161,18 @@
                             </div>
                         </td>
                         <td>
-                            <div class="small text-dark fw-500">{{ $part->category->category_name ?? 'General' }}</div>
-                            <div class="small text-muted">{{ $part->partBrand->name ?? 'Unbranded' }}</div>
+                            <div class="small text-dark fw-500 mb-1">{{ $part->category->category_name ?? 'General' }}</div>
+                            <div class="d-flex flex-wrap" style="max-width: 250px;">
+                                {{-- Assuming a vehicles relationship exists --}}
+                                @forelse($part->vehicles->take(3) as $vehicle)
+                                    <span class="compat-pill">{{ $vehicle->make }} {{ $vehicle->model }}</span>
+                                @empty
+                                    <span class="text-muted small">Universal Fit</span>
+                                @endforelse
+                                @if($part->vehicles->count() > 3)
+                                    <span class="text-primary small mt-1">+{{ $part->vehicles->count() - 3 }} more</span>
+                                @endif
+                            </div>
                         </td>
                         <td>
                             @php
@@ -179,10 +181,21 @@
                             <span class="badge {{ $stockClass }} px-2 py-1">
                                 {{ $part->stock_quantity }} units
                             </span>
+                            <div class="small text-muted mt-1">{{ $part->partBrand->name ?? 'Unbranded' }}</div>
                         </td>
                         <td>
                             <div class="font-weight-bold text-dark">{{ number_format($part->price, 0) }} RWF</div>
-                            <small class="text-muted">Unit Price</small>
+                            {{-- Substitutions logic --}}
+                            <div class="mt-1">
+                                <small class="text-muted d-block">Substitutes:</small>
+                                @forelse($part->substitutions->take(2) as $sub)
+                                    <small class="text-info d-block" style="font-size: 0.75rem;">
+                                        <i class="fas fa-exchange-alt mr-1"></i>{{ $sub->sku }}
+                                    </small>
+                                @empty
+                                    <small class="text-muted italic" style="font-size: 0.75rem;">None</small>
+                                @endforelse
+                            </div>
                         </td>
                         <td>
                             @if($part->status)
@@ -227,7 +240,7 @@
                         Showing <b>{{ $parts->firstItem() }}</b> to <b>{{ $parts->lastItem() }}</b> of {{ $parts->total() }} results
                     </span>
                     <span x-show="search !== '' || filterType !== 'all'" x-cloak>
-                        Filtering local page results...
+                        Filtering current view...
                     </span>
                 </div>
                 <div class="col-sm-6 d-flex justify-content-end" x-show="search === '' && filterType === 'all'">
