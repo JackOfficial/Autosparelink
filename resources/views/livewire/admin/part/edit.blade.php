@@ -224,14 +224,4 @@
             </div>
         </div>
     </form>
-
-   <style>
-    .border-dashed { border: 2px dashed #dee2e6; }
-    .form-control:focus, .form-select:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1); }
-    .card-title { font-size: 1rem; letter-spacing: 0.02rem; }
-    .group:hover .btn-danger { display: block !important; }
-    .sticky-bottom { margin-bottom: -1.5rem; } /* Ties to the footer better */
-    .shadow-hover:hover { transform: translateY(-2px); transition: 0.3s; }
-</style>
-
 </div>
