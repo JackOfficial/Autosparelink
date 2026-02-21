@@ -11,13 +11,25 @@ class CreateComponent extends Component
 {
     use WithFileUploads;
 
-    // Form fields
-    public $part_name, $part_number, $price, $stock_quantity, $category_id, $part_brand_id;
-    public $description, $oem_number;
+    // Basic Info
+    public $part_name, $part_number, $oem_number, $description;
+    public $parentCategoryId, $category_id, $part_brand_id;
     
-    // Selection & Search
+    // Inventory & Subs
+    public $price, $stock_quantity;
+    public $substitution_part_ids = []; // For the multiple select
+    
+    // Photos
+    public $photos = [];
+    
+    // Search & Fitment
     public $selectedSpecs = []; 
     public $searchVehicle = '';
+
+    public function updatedParentCategoryId($value)
+    {
+        $this->category_id = null; // Reset child when parent changes
+    }
 
     public function toggleVehicle($specId)
     {
@@ -42,19 +54,19 @@ class CreateComponent extends Component
         $category = Category::find($this->category_id);
 
         $part = Part::create([
-            'part_name' => $this->part_name,
-            'part_number' => $this->part_number,
-            'oem_number' => $this->oem_number,
-            'category_id' => $this->category_id,
-            'part_brand_id' => $this->part_brand_id,
-            'price' => $this->price,
+            'part_name'      => $this->part_name,
+            'part_number'    => $this->part_number,
+            'oem_number'     => $this->oem_number,
+            'category_id'    => $this->category_id,
+            'part_brand_id'  => $this->part_brand_id,
+            'price'          => $this->price,
             'stock_quantity' => $this->stock_quantity,
-            'description' => $this->description,
-            'status' => 1,
-            'sku' => Part::generateSku($brand->name, $category->category_name, $this->part_name),
+            'description'    => $this->description,
+            'status'         => 1,
+            'sku'            => Part::generateSku($brand->name, $category->category_name, $this->part_name),
         ]);
 
-        // Save Fitments
+        // 1. Save Fitments
         foreach ($this->selectedSpecs as $id) {
             $spec = Specification::find($id);
             if ($spec) {
@@ -69,7 +81,18 @@ class CreateComponent extends Component
             }
         }
 
-        session()->flash('success', 'Spare part created successfully!');
+        // 2. Save Photos
+        foreach ($this->photos as $photo) {
+            $path = $photo->store('parts/' . Str::slug($brand->name), 'public');
+            $part->photos()->create(['file_path' => $path]);
+        }
+
+        // 3. Save Substitutions
+        if (!empty($this->substitution_part_ids)) {
+            $part->substitutions()->sync($this->substitution_part_ids);
+        }
+
+        session()->flash('success', 'Part Created!');
         return redirect()->route('admin.spare-parts.index');
     }
 
@@ -81,16 +104,16 @@ class CreateComponent extends Component
                 ->whereHas('vehicleModel', function($q) {
                     $q->where('model_name', 'like', "%{$this->searchVehicle}%")
                       ->orWhereHas('brand', fn($b) => $b->where('brand_name', 'like', "%{$this->searchVehicle}%"));
-                })
-                ->limit(10)
-                ->get();
+                })->limit(15)->get();
         }
 
         return view('livewire.admin.spareparts.create-component', [
-            'searchResults' => $searchResults,
-            'displaySpecs' => Specification::whereIn('id', $this->selectedSpecs)->with('vehicleModel.brand')->get(),
-            'brands' => PartBrand::orderBy('name')->get(),
-            'categories' => Category::whereNotNull('parent_id')->get(),
+            'searchResults'    => $searchResults,
+            'displaySpecs'     => Specification::whereIn('id', $this->selectedSpecs)->with('vehicleModel.brand')->get(),
+            'parentCategories' => Category::whereNull('parent_id')->orderBy('category_name')->get(),
+            'childCategories'  => Category::where('parent_id', $this->parentCategoryId)->orderBy('category_name')->get(),
+            'brands'           => PartBrand::orderBy('name')->get(),
+            'allParts'         => Part::with('partBrand')->orderBy('part_name')->get(),
         ]);
     }
 }
