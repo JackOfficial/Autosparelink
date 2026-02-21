@@ -50,20 +50,38 @@ public function exportExcel()
 
 public function exportPdf(Request $request) 
 {
-    dd("hello");
+    // 1. Handle potential large data memory issues
+    ini_set('memory_limit', '512M');
+    set_time_limit(300);
+
     $query = Part::query()->with(['category', 'partBrand', 'fitments.specification.vehicleModel']);
 
+    // 2. Grouped Search (Safest approach)
     if ($request->filled('search')) {
-        $query->where('part_name', 'like', '%' . $request->search . '%')
-              ->orWhere('sku', 'like', '%' . $request->search . '%');
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('part_name', 'like', '%' . $search . '%')
+              ->orWhere('sku', 'like', '%' . $search . '%')
+              ->orWhere('part_number', 'like', '%' . $search . '%');
+        });
     }
 
+    // 3. Apply status filter if active
+    if ($request->filter === 'active') {
+        $query->where('status', 1);
+    }
+
+    // 4. Apply stock filter
     if ($request->filter === 'out_of_stock') {
         $query->where('stock_quantity', '<=', 0);
     }
 
     $parts = $query->get();
-    // ... generate PDF
+
+    $pdf = Pdf::loadView('admin.spare-parts.exports.table', compact('parts'))
+              ->setPaper('a4', 'landscape'); 
+              
+    return $pdf->download('inventory_report_' . now()->format('Y-m-d') . '.pdf');
 }
 
     /* ============================
