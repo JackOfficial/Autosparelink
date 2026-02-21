@@ -43,10 +43,14 @@
                         @error('trim_level') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="col-md-3 mb-3">
-                        <label class="small font-weight-bold">Marketing Year *</label>
-                        <input type="number" wire:model="production_year" class="form-control shadow-sm" placeholder="e.g. 2024">
-                        @error('production_year') <span class="text-danger small">{{ $message }}</span> @enderror
+                     <div class="col-md-3 mb-3">
+                        <label class="small font-weight-bold">Market</label>
+                        <select wire:model="destination_id" class="form-control shadow-sm">
+                            <option value="">Select Region</option>
+                            @foreach($destinations as $dest)
+                                <option value="{{ $dest->id }}">{{ $dest->region_name }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="col-md-3 mb-3">
@@ -75,14 +79,11 @@
                     </div>
 
                     <div class="col-md-3 mb-3">
-                        <label class="small font-weight-bold">Market</label>
-                        <select wire:model="destination_id" class="form-control shadow-sm">
-                            <option value="">Select Region</option>
-                            @foreach($destinations as $dest)
-                                <option value="{{ $dest->id }}">{{ $dest->region_name }}</option>
-                            @endforeach
-                        </select>
+                        <label class="small font-weight-bold">Marketing Year *</label>
+                        <input type="number" wire:model="production_year" class="form-control shadow-sm" placeholder="e.g. 2024">
+                        @error('production_year') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
+                   
                 </div>
             </fieldset>
 
