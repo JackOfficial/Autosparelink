@@ -16,7 +16,7 @@ class SpecificationForm extends Component
     public $hideBrandModel = false;
 
     // Identity Fields
-    public $chassis_code, $model_code, $is_default = false;
+    public $chassis_code, $model_code;
     public $production_year;       // For Variant Table
     public $production_year_start; // For Spec Table
     public $production_year_end;   // For Spec Table
@@ -115,7 +115,6 @@ class SpecificationForm extends Component
                     'trim_level'       => $this->trim_level,
                     'chassis_code'     => $this->chassis_code,
                     'model_code'       => $this->model_code,
-                    'is_default'       => $this->is_default,
                     'status'           => $this->status,
                     'name'             => 'Syncing...', 
                     'slug'             => Str::slug($this->trim_level . '-' . ($this->chassis_code ?? rand(1000,9999)) . '-' . Str::random(4)),
