@@ -182,154 +182,117 @@
   </nav>
   <!-- /.navbar -->
 
-  <!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-pink elevation-4">
-  <!-- Brand Logo -->
-  <a href="/admin" class="brand-link">
-    <img src="{{ asset('frontend/img/logo.png') }}" alt="AutoSpaceLink" class="brand-image img-circle elevation-3" style="opacity: .8">
-    <span class="brand-text font-weight-light">AutoSpareLink</span>
-  </a>
+<aside class="main-sidebar sidebar-dark-pink elevation-4" 
+       x-data="{ 
+            search: '',
+            {{-- This function checks if a parent menu has any visible children --}}
+            shouldShowParent(el) {
+                if (this.search === '') return true;
+                {{-- Check if parent text matches OR any child text matches --}}
+                return el.innerText.toLowerCase().includes(this.search.toLowerCase());
+            }
+       }">
+    
+    <a href="/admin" class="brand-link">
+        <img src="{{ asset('frontend/img/logo.png') }}" alt="AutoSpaceLink" class="brand-image img-circle elevation-3" style="opacity: .8">
+        <span class="brand-text font-weight-light">AutoSpareLink</span>
+    </a>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <!-- User Panel -->
-    <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
-      <div class="image">
-        <img src="{{ Auth::user()->avatar ?? 'https://www.gravatar.com/avatar/?d=mp&s=200' }}" class="img-circle elevation-2" alt="Avatar">
-      </div>
-      <div class="info">
-        <a href="#" class="d-block text-light fw-bold">
-          {{ Auth::user()->name }}
-          <small class="d-block text-muted">{{ Auth::user()->getRoleNames()->first() }}</small>
-        </a>
-      </div>
-    </div>
-
-    <!-- Search -->
-    <div class="form-inline">
-      <div class="input-group" data-widget="sidebar-search">
-        <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
-        <div class="input-group-append">
-          <button class="btn btn-sidebar"><i class="fas fa-search fa-fw"></i></button>
+    <div class="sidebar">
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
+            <div class="image">
+                <img src="{{ Auth::user()->avatar ?? 'https://www.gravatar.com/avatar/?d=mp&s=200' }}" class="img-circle elevation-2" alt="Avatar">
+            </div>
+            <div class="info">
+                <a href="#" class="d-block text-light fw-bold">
+                    {{ Auth::user()->name }}
+                    <small class="d-block text-muted">{{ Auth::user()->getRoleNames()->first() }}</small>
+                </a>
+            </div>
         </div>
-      </div>
+
+        <div class="form-inline">
+            <div class="input-group">
+                {{-- Added x-model for real-time tracking --}}
+                <input class="form-control form-control-sidebar" 
+                       type="search" 
+                       placeholder="Search menu..." 
+                       x-model="search"
+                       aria-label="Search">
+                <div class="input-group-append">
+                    <button class="btn btn-sidebar" @click="search = ''">
+                        <i class="fas" :class="search ? 'fa-times' : 'fa-search'"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+                <li class="nav-item" x-show="shouldShowParent($el)">
+                    <a href="/admin" class="nav-link">
+                        <i class="nav-icon fas fa-gauge"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+
+                <li class="nav-header" x-show="search === ''">CONTENT MANAGEMENT</li>
+
+                <li class="nav-item has-treeview" 
+                    :class="search !== '' ? 'menu-open' : ''" 
+                    x-show="shouldShowParent($el)">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-car"></i>
+                        <p>Vehicle Management <i class="right fas fa-angle-left"></i></p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" x-show="shouldShowParent($el)"><a href="/admin/vehicle-brands" class="nav-link"><i class="fas fa-tags nav-icon"></i><p>Vehicle Brands</p></a></li>
+                        <li class="nav-item" x-show="shouldShowParent($el)"><a href="/admin/vehicle-models" class="nav-link"><i class="fas fa-car-side nav-icon"></i><p>Models</p></a></li>
+                        <li class="nav-item" x-show="shouldShowParent($el)"><a href="/admin/variants" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Variants</p></a></li>
+                        <li class="nav-item" x-show="shouldShowParent($el)"><a href="/admin/specifications" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Specification</p></a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item has-treeview" 
+                    :class="search !== '' ? 'menu-open' : ''" 
+                    x-show="shouldShowParent($el)">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <p>Spare Parts <i class="right fas fa-angle-left"></i></p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" x-show="shouldShowParent($el)"><a href="/admin/spare-parts" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Parts</p></a></li>
+                        <li class="nav-item" x-show="shouldShowParent($el)"><a href="/admin/part-brands" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Part Brands</p></a></li>
+                        <li class="nav-item" x-show="shouldShowParent($el)"><a href="/admin/categories" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Categories</p></a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item has-treeview" 
+                    :class="search !== '' ? 'menu-open' : ''" 
+                    x-show="shouldShowParent($el)">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+                        <p>E-Commerce <i class="right fas fa-angle-left"></i></p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" x-show="shouldShowParent($el)"><a href="/admin/carts" class="nav-link"><i class="fas fa-shopping-cart nav-icon"></i><p>Carts</p></a></li>
+                        <li class="nav-item" x-show="shouldShowParent($el)"><a href="/admin/orders" class="nav-link"><i class="fas fa-receipt nav-icon"></i><p>Orders</p></a></li>
+                        <li class="nav-item" x-show="shouldShowParent($el)"><a href="/admin/payments" class="nav-link"><i class="fas fa-credit-card nav-icon"></i><p>Payments</p></a></li>
+                    </ul>
+                </li>
+
+                @if(Auth::check())
+                <li class="nav-item mt-3 border-top border-secondary">
+                    <a href="#" class="nav-link text-danger" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="nav-icon fas fa-right-from-bracket"></i>
+                        <p>Logout</p>
+                    </a>
+                </li>
+                @endif
+            </ul>
+        </nav>
     </div>
-
-    <!-- Sidebar Menu -->
-    <nav class="mt-2">
-      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-
-        <!-- Dashboard -->
-        <li class="nav-item">
-          <a href="/admin" class="nav-link">
-            <i class="nav-icon fas fa-gauge"></i>
-            <p>Dashboard</p>
-          </a>
-        </li>
-
-        <!-- Content Management -->
-        <li class="nav-header">CONTENT MANAGEMENT</li>
-
-        <!-- Blogs -->
-        <li class="nav-item has-treeview">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-car"></i>
-            <p>Vehicle Management <i class="right fas fa-angle-left"></i></p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="/admin/vehicle-brands" class="nav-link"><i class="fas fa-tags nav-icon"></i><p>Vehicle Brands</p></a></li>
-            <li class="nav-item"><a href="/admin/vehicle-models" class="nav-link"><i class="fas fa-car-side nav-icon"></i><p>Models</p></a></li>
-            <li class="nav-item"><a href="/admin/variants" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Variants</p></a></li>
-            <li class="nav-item"><a href="/admin/specifications" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Specification</p></a></li>
-            <li class="nav-item d-none"><a href="/admin/body-types" class="nav-link"><i class="fas fa-car nav-icon"></i><p>Body Types</p></a></li>
-            <li class="nav-item d-none"><a href="/admin/engine-types" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>Engine Types</p></a></li>
-            <li class="nav-item d-none"><a href="/admin/transmission-types" class="nav-link"><i class="fas fa-exchange-alt nav-icon"></i><p>Transmission Types</p></a></li>
-            <li class="nav-item d-none"><a href="/admin/drive-types" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Drive Types</p></a></li>
-           </ul>
-          </li>
-
-          <li class="nav-item has-treeview">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-boxes"></i>
-            <p>Spare Parts <i class="right fas fa-angle-left"></i></p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="/admin/spare-parts" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Parts</p></a></li>
-            <li class="nav-item"><a href="/admin/part-brands" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Part Brands</p></a></li>
-            <li class="nav-item"><a href="/admin/categories" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Categories</p></a></li>
-          </ul>
-          </li>
-
-           <li class="nav-item has-treeview">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-shopping-cart"></i>
-            <p>E-Commerce <i class="right fas fa-angle-left"></i></p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="/admin/carts" class="nav-link"><i class="fas fa-shopping-cart nav-icon"></i><p>Carts</p></a></li>
-            <li class="nav-item"><a href="/admin/orders" class="nav-link"><i class="fas fa-receipt nav-icon"></i><p>Orders</p></a></li>
-            <li class="nav-item"><a href="/admin/payments" class="nav-link"><i class="fas fa-credit-card nav-icon"></i><p>Payments</p></a></li>
-            <li class="nav-item"><a href="/admin/shipments" class="nav-link"><i class="fas fa-truck nav-icon"></i><p>Shippings</p></a></li>
-            <li class="nav-item"><a href="/admin/addresses" class="nav-link"><i class="fas fa-map-marker-alt nav-icon"></i><p>Addresses</p></a></li>
-          </ul>
-          </li>
-
-          <li class="nav-item has-treeview">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-users"></i>
-            <p>Users & Access <i class="right fas fa-angle-left"></i></p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="/admin/users" class="nav-link"><i class="fas fa-user nav-icon"></i><p>Users</p></a></li>
-            <li class="nav-item"><a href="/admin/roles-and-permissions" class="nav-link"><i class="fas fa-user-shield nav-icon"></i><p>Roles & Permissions</p></a></li>
-          </ul>
-          </li>
-
-           <li class="nav-item has-treeview">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-chart-pie"></i>
-            <p>Reports & Settings <i class="right fas fa-angle-left"></i></p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="/admin/bloggers" class="nav-link"><i class="fas fa-chart-line nav-icon"></i><p>Sales Reports</p></a></li>
-            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Inventory Reports</p></a></li>
-            <li class="nav-item"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>System Settings</p></a></li>
-          </ul>
-          </li>
-
-        <!-- Community & Engagement -->
-        <li class="nav-header">COMMUNITY & ENGAGEMENT</li>
-
-        <li class="nav-item"><a href="/admin/careers" class="nav-link"><i class="nav-icon fas fa-briefcase"></i><p>Careers</p></a></li>
-        <li class="nav-item"><a href="/admin/applications" class="nav-link"><i class="nav-icon fas fa-gear"></i><p>Applications</p></a></li>
-
-        <!-- Mailbox -->
-        <li class="nav-item has-treeview">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-envelope"></i>
-            <p>Mailbox <i class="fas fa-angle-left right"></i></p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Inbox</p></a></li>
-            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Compose</p></a></li>
-            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Read</p></a></li>
-          </ul>
-        </li>
-
-        <!-- Logout -->
-        @if(Auth::check())
-        <li class="nav-item mt-3 border-top border-secondary">
-          <a href="#" class="nav-link text-danger" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="nav-icon fas fa-right-from-bracket"></i>
-            <p>Logout</p>
-          </a>
-          <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
-        </li>
-        @endif
-
-      </ul>
-    </nav>
-  </div>
 </aside>
 
 
