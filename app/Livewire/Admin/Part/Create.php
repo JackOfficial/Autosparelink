@@ -132,6 +132,17 @@ class Create extends Component
     session()->flash('success', 'Spare part created successfully.');
     return redirect()->route('admin.spare-parts.index');
 }
+
+public function toggleFitment($specId)
+{
+    if (in_array($specId, $this->fitment_specifications)) {
+        $this->fitment_specifications = array_diff($this->fitment_specifications, [$specId]);
+    } else {
+        $this->fitment_specifications[] = $specId;
+    }
+    // Optional: Clear search after selection to close the dropdown
+    // $this->searchVehicle = ''; 
+}
     
     public function render()
     {
