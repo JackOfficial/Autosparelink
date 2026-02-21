@@ -22,11 +22,12 @@
     .badge-soft-danger { background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; }
     .badge-soft-warning { background: #fffaf0; color: #dd6b20; border: 1px solid #fbd38d; }
 
-    .sku-copy { cursor: pointer; border-style: dashed !important; transition: 0.2s; }
+    .sku-copy { cursor: pointer; border-style: dashed !important; transition: 0.2s; font-family: monospace; }
     .sku-copy:hover { background: #f1f5f9; color: #3b82f6; border-color: #3b82f6 !important; }
 
     /* Compatibility pill styling */
-    .compat-pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; background: #f8f9fe; color: #525f7f; border: 1px solid #e9ecef; margin-right: 4px; margin-bottom: 4px; display: inline-block; }
+    .compat-pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: #f8f9fe; color: #525f7f; border: 1px solid #e9ecef; margin-right: 4px; margin-bottom: 4px; display: inline-block; font-weight: 500; }
+    .sub-item { font-size: 0.75rem; color: #4c51bf; background: #ebf4ff; padding: 1px 6px; border-radius: 3px; display: block; margin-top: 2px; width: fit-content; border: 1px solid #c3dafe; }
     
     [x-cloak] { display: none !important; }
 </style>
@@ -96,7 +97,7 @@
             <div class="row align-items-center">
                 <div class="col-md-5">
                     <div class="input-group border rounded-pill px-3 py-1 bg-light">
-                        <input type="text" x-model="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Search name, SKU, vehicle or substitutions...">
+                        <input type="text" x-model="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Search name, SKU, fitment or substitutes...">
                         <div class="input-group-append">
                             <span class="btn btn-transparent p-0 text-muted d-flex align-items-center">
                                 <i class="fa fa-search" x-show="search === ''"></i>
@@ -126,7 +127,7 @@
                 <thead class="bg-light-subtle">
                     <tr>
                         <th class="pl-4">Item Details</th>
-                        <th>Compatibility</th>
+                        <th>Fitment Compatibility</th>
                         <th>Inventory</th>
                         <th>Pricing & Subs</th>
                         <th>Status</th>
@@ -144,16 +145,14 @@
                                     @forelse($part->photos->take(3) as $index => $photo)
                                         <img src="{{ asset('storage/' . $photo->file_path) }}" class="stack-img shadow-sm" style="left: {{ $index * 10 }}px; z-index: {{ 10 - $index }};">
                                     @empty
-                                        <div class="bg-light rounded border d-flex align-items-center justify-content-center" style="width:40px; height:40px">
-                                            <i class="fa fa-image text-muted small"></i>
-                                        </div>
+                                        <div class="bg-light rounded border d-flex align-items-center justify-content-center" style="width:40px; height:40px text-muted"><i class="fa fa-image small"></i></div>
                                     @endforelse
                                 </div>
                                 <div>
                                     <div class="font-weight-bold text-dark mb-0" style="font-size: 0.95rem;">{{ $part->part_name }}</div>
                                     <div class="d-flex align-items-center mt-1">
                                         <span class="badge badge-light border sku-copy text-muted mr-2" @click="copyToClipboard('{{ $part->sku }}')" title="Click to copy SKU">
-                                            <i class="far fa-copy mr-1 small"></i>{{ $part->sku }}
+                                            {{ $part->sku }}
                                         </span>
                                         <small class="text-muted border-left pl-2">PN: {{ $part->part_number }}</small>
                                     </div>
@@ -163,14 +162,18 @@
                         <td>
                             <div class="small text-dark fw-500 mb-1">{{ $part->category->category_name ?? 'General' }}</div>
                             <div class="d-flex flex-wrap" style="max-width: 250px;">
-                                {{-- Assuming a vehicles relationship exists --}}
-                                @forelse($part->vehicles->take(3) as $vehicle)
-                                    <span class="compat-pill">{{ $vehicle->make }} {{ $vehicle->model }}</span>
+                                {{-- Accessing through the fitments relationship created in your save() --}}
+                                @forelse($part->fitments->take(3) as $fitment)
+                                    <span class="compat-pill">
+                                        {{-- Adjust these property names if your Specification model uses different ones --}}
+                                        {{ $fitment->specification->vehicleModel->name ?? 'Model' }} 
+                                        ({{ $fitment->start_year }})
+                                    </span>
                                 @empty
-                                    <span class="text-muted small">Universal Fit</span>
+                                    <span class="text-muted small">No specific fitments</span>
                                 @endforelse
-                                @if($part->vehicles->count() > 3)
-                                    <span class="text-primary small mt-1">+{{ $part->vehicles->count() - 3 }} more</span>
+                                @if($part->fitments->count() > 3)
+                                    <span class="text-primary small mt-1">+{{ $part->fitments->count() - 3 }} more</span>
                                 @endif
                             </div>
                         </td>
@@ -185,15 +188,13 @@
                         </td>
                         <td>
                             <div class="font-weight-bold text-dark">{{ number_format($part->price, 0) }} RWF</div>
-                            {{-- Substitutions logic --}}
                             <div class="mt-1">
-                                <small class="text-muted d-block">Substitutes:</small>
                                 @forelse($part->substitutions->take(2) as $sub)
-                                    <small class="text-info d-block" style="font-size: 0.75rem;">
-                                        <i class="fas fa-exchange-alt mr-1"></i>{{ $sub->sku }}
-                                    </small>
+                                    <span class="sub-item" title="Alternative Part SKU">
+                                        <i class="fas fa-sync-alt mr-1" style="font-size: 0.6rem;"></i>{{ $sub->sku }}
+                                    </span>
                                 @empty
-                                    <small class="text-muted italic" style="font-size: 0.75rem;">None</small>
+                                    <small class="text-muted italic" style="font-size: 0.75rem;">No alternatives</small>
                                 @endforelse
                             </div>
                         </td>
@@ -206,7 +207,7 @@
                         </td>
                         <td class="text-right pr-4">
                             <div class="dropdown">
-                                <button class="btn btn-sm btn-light border dropdown-toggle no-caret px-2" data-toggle="dropdown">
+                                <button class="btn btn-sm btn-light border dropdown-toggle no-caret" data-toggle="dropdown">
                                     <i class="fas fa-ellipsis-v text-muted"></i>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2">
@@ -223,11 +224,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr>
-                        <td colspan="6" class="text-center py-5">
-                            <p class="text-muted">No records found.</p>
-                        </td>
-                    </tr>
+                    <tr><td colspan="6" class="text-center py-5">No records found.</td></tr>
                     @endforelse
                 </tbody>
             </table>
