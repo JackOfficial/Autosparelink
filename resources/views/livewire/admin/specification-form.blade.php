@@ -42,7 +42,7 @@
                     
                     <div class="row">
                         @if(!$hideBrandModel)
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label class="small font-weight-bold text-muted">Brand *</label>
                                 <select wire:model.live="brand_id" class="form-control shadow-none">
                                     <option value="">Select Brand</option>
@@ -50,7 +50,7 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label class="small font-weight-bold text-muted">Vehicle Model *</label>
                                 <select wire:model.live="vehicle_model_id" class="form-control shadow-none" @disabled(!$brand_id)>
                                     <option value="">Select Model</option>
@@ -59,12 +59,12 @@
                             </div>
                         @endif
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="small font-weight-bold text-muted">Trim Level *</label>
                             <input type="text" wire:model.live="trim_level" class="form-control shadow-none" placeholder="e.g. AMG Line">
                         </div>
 
-                        <div class="col-md-2 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="small font-weight-bold text-muted">Mkt. Year *</label>
                             <input type="number" wire:model.live="production_year" class="form-control shadow-none">
                         </div>
@@ -77,9 +77,14 @@
                             </select>
                         </div>
 
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-2 mb-3">
                             <label class="small font-weight-bold text-muted">Chassis Code</label>
                             <input type="text" wire:model="chassis_code" class="form-control shadow-none" placeholder="e.g. W213">
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                            <label class="small font-weight-bold text-muted">Model Code</label>
+                            <input type="text" wire:model="model_code" class="form-control shadow-none" placeholder="e.g. W213">
                         </div>
 
                         <div class="col-md-4 mb-3">
