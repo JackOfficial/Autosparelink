@@ -20,8 +20,6 @@
 
 <section class="content" x-data="{ 
     search: '',
-    /** * Helper to check if a brand or any of its models match the search 
-     */
     shouldShowBrand(brandName, models) {
         if (!this.search) return true;
         let term = this.search.toLowerCase();
@@ -87,6 +85,7 @@
                         <tr>
                             <th style="width: 80px">Photo</th>
                             <th>Model Identity</th>
+                            <th>Production Period</th> {{-- New Column --}}
                             <th>Description</th>
                             <th>Status</th>
                             <th class="text-right">Actions</th>
@@ -108,12 +107,22 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <strong>{{ $model->model_name }}</strong>
-                                    <div class="small text-muted">Year: {{ $model->year ?? 'N/A' }}</div>
+                                    <strong class="text-primary">{{ $model->model_name }}</strong>
                                 </td>
                                 <td>
-                                    <span class="">
-                                        {{ Str::limit($model->description, 200) ?? 'No description'}}
+                                    @if($model->production_start_year)
+                                        <span class="text-dark font-weight-bold">
+                                            {{ $model->production_start_year }} 
+                                            <i class="fas fa-long-arrow-alt-right mx-1 text-muted"></i> 
+                                            {{ $model->production_end_year ?? 'Present' }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted small">Not specified</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="small text-muted">
+                                        {{ Str::limit($model->description, 80) ?? 'No description'}}
                                     </span>
                                 </td>
                                 <td>
