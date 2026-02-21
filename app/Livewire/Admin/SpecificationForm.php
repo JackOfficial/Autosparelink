@@ -21,7 +21,7 @@ class SpecificationForm extends Component
     public $production_year_start; // For Spec Table
     public $production_year_end;   // For Spec Table
     public $destination_id; 
-    
+
 
     // Technical Fields
     public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
@@ -58,13 +58,33 @@ class SpecificationForm extends Component
 
     // This "computed property" creates the name on the fly for the UI
     public function getGeneratedNameProperty()
-    {
-    $model = $this->vehicle_model_id ? VehicleModel::find($this->vehicle_model_id)?->model_name : 'Model';
-    $year = $this->production_year ?: 'YYYY';
-    $trim = $this->trim_level ?: 'Trim';
+{
+    // 1. Get Brand and Model names
+    $brandModel = \App\Models\VehicleModel::with('brand')->find($this->vehicle_model_id);
     
-    return "{$year} {$model} {$trim}";
-    }
+    // 2. Fetch the labels for the selected technical IDs
+    $body = $this->body_type_id ? \App\Models\BodyType::find($this->body_type_id)?->name : null;
+    $displacement = $this->engine_displacement_id ? \App\Models\EngineDisplacement::find($this->engine_displacement_id)?->name : null;
+    $engine = $this->engine_type_id ? \App\Models\EngineType::find($this->engine_type_id)?->name : null;
+    $trans = $this->transmission_type_id ? \App\Models\TransmissionType::find($this->transmission_type_id)?->name : null;
+
+    // 3. Assemble the pieces exactly like syncNameFromSpec()
+    $pieces = [
+        $brandModel?->brand?->brand_name,      // Toyota
+        $brandModel?->model_name,             // Verso
+        $this->trim_level,                    // S
+        $body,                                // Hatchback
+        $this->production_year,               // 2011
+        $displacement,                        // 1.4
+        $engine,                              // Diesel
+        $trans,                               // Manual
+    ];
+
+    // 4. Filter out nulls and join with spaces
+    $fullName = implode(' ', array_filter($pieces));
+
+    return $fullName ?: 'New Vehicle Variant';
+}
 
     protected function rules()
     {

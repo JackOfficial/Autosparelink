@@ -109,14 +109,14 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="small font-weight-bold text-muted">Fuel Type</label>
-                                    <select wire:model="engine_type_id" class="form-control shadow-none">
+                                    <select wire:model.live="engine_type_id" class="form-control shadow-none">
                                         <option value="">Select Fuel</option>
                                         @foreach($engineTypes as $et) <option value="{{ $et->id }}">{{ $et->name }}</option> @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="small font-weight-bold text-muted">Displacement</label>
-                                    <select wire:model="engine_displacement_id" class="form-control shadow-none">
+                                    <select wire:model.live="engine_displacement_id" class="form-control shadow-none">
                                         <option value="">Select CC</option>
                                         @foreach($engineDisplacements as $ed) <option value="{{ $ed->id }}">{{ $ed->name }}</option> @endforeach
                                     </select>
@@ -142,14 +142,14 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="small font-weight-bold text-muted">Transmission</label>
-                                    <select wire:model="transmission_type_id" class="form-control shadow-none">
+                                    <select wire:model.live="transmission_type_id" class="form-control shadow-none">
                                         <option value="">Select Type</option>
                                         @foreach($transmissionTypes as $tt) <option value="{{ $tt->id }}">{{ $tt->name }}</option> @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="small font-weight-bold text-muted">Body Type</label>
-                                    <select wire:model="body_type_id" class="form-control shadow-none">
+                                    <select wire:model.live="body_type_id" class="form-control shadow-none">
                                         <option value="">Select Style</option>
                                         @foreach($bodyTypes as $bt) <option value="{{ $bt->id }}">{{ $bt->name }}</option> @endforeach
                                     </select>
