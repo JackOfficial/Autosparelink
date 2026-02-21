@@ -81,12 +81,12 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label>Variant Name</label>
+                                    <label>Variant Name (Auto Generated)</label>
                                     <input type="text"
                                            name="name"
                                            class="form-control"
                                            value="{{ old('name', $variant->name) }}"
-                                           placeholder="e.g. Corolla 1.8L Sedan">
+                                           placeholder="e.g. Corolla 1.8L Sedan" readonly>
                                 </div>
                             </div>
                         </fieldset>
