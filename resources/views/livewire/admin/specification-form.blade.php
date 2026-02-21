@@ -1,159 +1,198 @@
-<div class="card card-primary shadow-lg border-0">
-    <div class="card-header bg-primary text-white">
-        <h3 class="card-title font-weight-bold">Vehicle Specification Details</h3>
+<div class="card shadow-lg border-0 overflow-hidden">
+    {{-- Dynamic Header based on Auto-Generated Name --}}
+    <div class="card-header bg-gradient-primary text-white p-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="text-uppercase mb-1" style="opacity: 0.8; letter-spacing: 1px;">New Specification Entry</h6>
+                <h3 class="font-weight-bold mb-0">
+                    <i class="fas fa-car-side mr-2"></i> {{ $this->generatedName }}
+                </h3>
+            </div>
+            <div class="text-right">
+                <span class="badge badge-light px-3 py-2 shadow-sm rounded-pill text-primary">
+                    <i class="fas fa-sync-alt fa-spin mr-1"></i> Live Preview
+                </span>
+            </div>
+        </div>
     </div>
     
-    <div class="card-body bg-white">
+    <div class="card-body bg-light-gray p-4">
         {{-- Flash Messages --}}
-        @if (session()->has('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
-        @if (session()->has('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
+        @if (session()->has('error')) <div class="alert alert-danger shadow-sm border-0"><i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}</div> @endif
+        @if (session()->has('success')) <div class="alert alert-success shadow-sm border-0"><i class="fas fa-check-circle mr-2"></i> {{ session('success') }}</div> @endif
 
         <form wire:submit.prevent="save">
-            {{-- Identity Section --}}
-            <fieldset class="border p-4 mb-4 rounded shadow-sm">
-                <legend class="w-auto px-3 font-weight-bold text-primary small text-uppercase">Identity & Lifecycle</legend>
+            
+            {{-- IDENTITY SECTION --}}
+            <div class="bg-white p-4 rounded shadow-sm mb-4">
+                <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
+                    <i class="fas fa-id-card mr-2"></i> Identity & Market
+                </h5>
+                
                 <div class="row">
                     @if(!$hideBrandModel)
-                        <div class="col-md-3 mb-3">
-                            <label class="small font-weight-bold">Brand *</label>
-                            <select wire:model.live="brand_id" class="form-control rounded-pill shadow-sm">
-                                <option value="">Select Brand</option>
-                                @foreach($brands as $brand)
-                                    <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
-                                @endforeach
-                            </select>
+                        <div class="col-md-4 mb-3">
+                            <label class="small font-weight-bold text-muted">Brand *</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text bg-white border-right-0"><i class="fas fa-copyright text-muted"></i></span></div>
+                                <select wire:model.live="brand_id" class="form-control border-left-0 shadow-none">
+                                    <option value="">Select Brand</option>
+                                    @foreach($brands as $brand) <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option> @endforeach
+                                </select>
+                            </div>
                             @error('brand_id') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
 
-                        <div class="col-md-3 mb-3">
-                            <label class="small font-weight-bold">Vehicle Model *</label>
-                            <select wire:model.live="vehicle_model_id" class="form-control rounded-pill shadow-sm" @disabled(!$brand_id)>
-                                <option value="">Select Model</option>
-                                @foreach($this->vehicleModels as $model)
-                                    <option value="{{ $model->id }}">{{ $model->model_name }}</option>
-                                @endforeach
-                            </select>
-                            @error('vehicle_model_id') <span class="text-danger small">{{ $message }}</span> @enderror
+                        <div class="col-md-4 mb-3">
+                            <label class="small font-weight-bold text-muted">Vehicle Model *</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text bg-white border-right-0"><i class="fas fa-car text-muted"></i></span></div>
+                                <select wire:model.live="vehicle_model_id" class="form-control border-left-0 shadow-none" @disabled(!$brand_id)>
+                                    <option value="">Select Model</option>
+                                    @foreach($this->vehicleModels as $model) <option value="{{ $model->id }}">{{ $model->model_name }}</option> @endforeach
+                                </select>
+                            </div>
                         </div>
                     @endif
 
-                    <div class="col-md-3 mb-3">
-                        <label class="small font-weight-bold">Trim Level *</label>
-                        <input type="text" wire:model="trim_level" class="form-control shadow-sm" placeholder="e.g. AMG Line">
-                        @error('trim_level') <span class="text-danger small">{{ $message }}</span> @enderror
-                    </div>
-
-                     <div class="col-md-3 mb-3">
-                        <label class="small font-weight-bold">Market</label>
-                        <select wire:model="destination_id" class="form-control shadow-sm">
-                            <option value="">Select Region</option>
-                            @foreach($destinations as $dest)
-                                <option value="{{ $dest->id }}">{{ $dest->region_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label class="small font-weight-bold">Chassis Code</label>
-                        <input type="text" wire:model="chassis_code" class="form-control shadow-sm">
-                    </div>
-
-                     <div class="col-md-3 mb-3">
-                        <label class="small font-weight-bold">Model Code</label>
-                        <input type="text" wire:model="model_code" class="form-control shadow-sm">
-                    </div>
-                    
-                    <div class="col-md-3 mb-3">
-                        <div class="row">
-                        <div class="col-md-6">
-                            <label class="small font-weight-bold">Prod. Start</label>
-                        <input type="number" wire:model="production_year_start" class="form-control shadow-sm" placeholder="YYYY">
-                        @error('production_year_start') <span class="text-danger small">{{ $message }}</span> @enderror
+                    <div class="col-md-4 mb-3">
+                        <label class="small font-weight-bold text-muted">Trim Level *</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend"><span class="input-group-text bg-white border-right-0"><i class="fas fa-tags text-muted"></i></span></div>
+                            <input type="text" wire:model.live="trim_level" class="form-control border-left-0 shadow-none" placeholder="e.g. Luxury, Sport, AMG">
                         </div>
-                        <div class="col-md-6 mb-3">
-                        <label class="small font-weight-bold">Prod. End</label>
-                        <input type="number" wire:model="production_year_end" class="form-control shadow-sm" placeholder="Leave blank if active">
-                    </div>
-                       </div>
-                        
                     </div>
 
                     <div class="col-md-3 mb-3">
-                        <label class="small font-weight-bold">Marketing Year *</label>
-                        <input type="number" wire:model="production_year" class="form-control shadow-sm" placeholder="e.g. 2024">
-                        @error('production_year') <span class="text-danger small">{{ $message }}</span> @enderror
+                        <label class="small font-weight-bold text-muted">Market Region</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend"><span class="input-group-text bg-white border-right-0"><i class="fas fa-globe-americas text-muted"></i></span></div>
+                            <select wire:model="destination_id" class="form-control border-left-0 shadow-none">
+                                <option value="">Global</option>
+                                @foreach($destinations as $dest) <option value="{{ $dest->id }}">{{ $dest->region_name }}</option> @endforeach
+                            </select>
+                        </div>
                     </div>
-                   
-                </div>
-            </fieldset>
 
-            {{-- Technical Section --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="small font-weight-bold text-muted">Marketing Year *</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend"><span class="input-group-text bg-white border-right-0"><i class="fas fa-calendar-check text-muted"></i></span></div>
+                            <input type="number" wire:model.live="production_year" class="form-control border-left-0 shadow-none" placeholder="2024">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="small font-weight-bold text-muted">Chassis Code</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend"><span class="input-group-text bg-white border-right-0"><i class="fas fa-barcode text-muted"></i></span></div>
+                            <input type="text" wire:model="chassis_code" class="form-control border-left-0 shadow-none" placeholder="e.g. W213">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="small font-weight-bold text-muted">Prod. Timeline (Start - End)</label>
+                        <div class="d-flex align-items-center">
+                            <input type="number" wire:model="production_year_start" class="form-control shadow-none mr-2" placeholder="Start">
+                            <span class="text-muted">-</span>
+                            <input type="number" wire:model="production_year_end" class="form-control shadow-none ml-2" placeholder="End">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
-                <div class="col-md-6">
-                    <fieldset class="border p-3 mb-4 rounded bg-light shadow-sm">
-                        <legend class="w-auto px-2 font-weight-bold text-primary small text-uppercase">Engine & Performance</legend>
+                {{-- ENGINE SECTION --}}
+                <div class="col-md-6 mb-4">
+                    <div class="bg-white p-4 rounded shadow-sm h-100">
+                        <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
+                            <i class="fas fa-engine mr-2"></i> Engine & Power
+                        </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="small font-weight-bold">Displacement (CC) *</label>
-                                <select wire:model="engine_displacement_id" class="form-control">
-                                    <option value="">Select</option>
-                                    @foreach($engineDisplacements as $ed) <option value="{{ $ed->id }}">{{ $ed->name }}</option> @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="small font-weight-bold">Fuel Type *</label>
-                                <select wire:model="engine_type_id" class="form-control">
-                                    <option value="">Select</option>
+                                <label class="small font-weight-bold text-muted">Fuel Type</label>
+                                <select wire:model="engine_type_id" class="form-control shadow-none">
+                                    <option value="">Select Fuel</option>
                                     @foreach($engineTypes as $et) <option value="{{ $et->id }}">{{ $et->name }}</option> @endforeach
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="small font-weight-bold">Horse Power (HP)</label>
-                                <input type="number" wire:model="horsepower" class="form-control">
+                                <label class="small font-weight-bold text-muted">Displacement</label>
+                                <select wire:model="engine_displacement_id" class="form-control shadow-none">
+                                    <option value="">Select CC</option>
+                                    @foreach($engineDisplacements as $ed) <option value="{{ $ed->id }}">{{ $ed->name }}</option> @endforeach
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="small font-weight-bold">Efficiency (L/100km)</label>
-                                <input type="number" step="0.1" wire:model="fuel_efficiency" class="form-control">
+                                <label class="small font-weight-bold text-muted">Horsepower (HP)</label>
+                                <div class="input-group">
+                                    <input type="number" wire:model="horsepower" class="form-control border-right-0 shadow-none">
+                                    <div class="input-group-append"><span class="input-group-text bg-white text-muted small">HP</span></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="small font-weight-bold text-muted">Fuel Efficiency</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.1" wire:model="fuel_efficiency" class="form-control border-right-0 shadow-none">
+                                    <div class="input-group-append"><span class="input-group-text bg-white text-muted small">L/100km</span></div>
+                                </div>
                             </div>
                         </div>
-                    </fieldset>
+                    </div>
                 </div>
-                
-                <div class="col-md-6">
-                    <fieldset class="border p-3 mb-4 rounded bg-light shadow-sm">
-                        <legend class="w-auto px-2 font-weight-bold text-primary small text-uppercase">Transmission & Body</legend>
+
+                {{-- DRIVETRAIN SECTION --}}
+                <div class="col-md-6 mb-4">
+                    <div class="bg-white p-4 rounded shadow-sm h-100">
+                        <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
+                            <i class="fas fa-cog mr-2"></i> Transmission & Body
+                        </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="small font-weight-bold">Transmission *</label>
-                                <select wire:model="transmission_type_id" class="form-control">
-                                    <option value="">Select</option>
+                                <label class="small font-weight-bold text-muted">Transmission</label>
+                                <select wire:model="transmission_type_id" class="form-control shadow-none">
+                                    <option value="">Select Type</option>
                                     @foreach($transmissionTypes as $tt) <option value="{{ $tt->id }}">{{ $tt->name }}</option> @endforeach
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="small font-weight-bold">Body Type *</label>
-                                <select wire:model="body_type_id" class="form-control">
-                                    <option value="">Select</option>
+                                <label class="small font-weight-bold text-muted">Body Type</label>
+                                <select wire:model="body_type_id" class="form-control shadow-none">
+                                    <option value="">Select Style</option>
                                     @foreach($bodyTypes as $bt) <option value="{{ $bt->id }}">{{ $bt->name }}</option> @endforeach
                                 </select>
                             </div>
                             <div class="col-md-12">
-                                <label class="small font-weight-bold">Steering</label>
-                                <select wire:model="steering_position" class="form-control">
-                                    <option value="LEFT">LHD (Left)</option>
-                                    <option value="RIGHT">RHD (Right)</option>
-                                </select>
+                                <label class="small font-weight-bold text-muted d-block">Steering Configuration</label>
+                                <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                                    <label class="btn btn-outline-primary {{ $steering_position == 'LEFT' ? 'active' : '' }} w-50">
+                                        <input type="radio" wire:model="steering_position" value="LEFT"> <i class="fas fa-arrow-left mr-1"></i> Left (LHD)
+                                    </label>
+                                    <label class="btn btn-outline-primary {{ $steering_position == 'RIGHT' ? 'active' : '' }} w-50">
+                                        <input type="radio" wire:model="steering_position" value="RIGHT"> Right (RHD) <i class="fas fa-arrow-right ml-1"></i>
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                    </fieldset>
+                    </div>
                 </div>
             </div>
 
-            <div class="text-right">
+            <div class="text-right mt-2">
+                <hr>
+                <button type="button" class="btn btn-link text-muted mr-3">Cancel</button>
                 <button type="submit" class="btn btn-primary btn-lg px-5 shadow rounded-pill">
-                    <i class="fa fa-save mr-2"></i> Save Variant
+                    <i class="fas fa-save mr-2"></i> Confirm and Create Variant
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    .bg-gradient-primary { background: linear-gradient(45deg, #4e73df 0%, #224abe 100%); }
+    .bg-light-gray { background-color: #f8f9fc; }
+    .input-group-text { border-color: #d1d3e2; }
+    .form-control { border-color: #d1d3e2; }
+    .form-control:focus { border-color: #4e73df; box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.1); }
+</style>
