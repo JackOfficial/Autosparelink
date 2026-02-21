@@ -84,7 +84,7 @@
 
                         <div class="col-md-3 mb-3">
                             <label class="small font-weight-bold text-muted">Model Code</label>
-                            <input type="text" wire:model="model_code" class="form-control shadow-none" placeholder="e.g. W213">
+                            <input type="text" wire:model="model_code" class="form-control shadow-none" placeholder="e.g. ZVW30">
                         </div>
 
                         <div class="col-md-3 mb-3">
