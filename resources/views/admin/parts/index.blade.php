@@ -55,13 +55,22 @@
     
     {{-- Header & Stats --}}
     <div class="row mb-4 align-items-end">
+        <div class="col-md-6">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-1">
+                    <li class="breadcrumb-item"><a href="#" class="text-muted">Admin</a></li>
+                    <li class="breadcrumb-item active text-primary">Inventory</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Spare Parts Management</h2>
+        </div>
         <div class="col-md-6 text-right">
             <div class="dropdown d-inline-block mr-2">
-                <button class="btn btn-outline-secondary btn-sm dropdown-toggle shadow-none" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle shadow-none" type="button" data-toggle="dropdown">
                     <i class="fas fa-file-export mr-1"></i> Export
                 </button>
                 <div class="dropdown-menu dropdown-menu-right shadow border-0">
-                    <h6 class="dropdown-header">Download Report</h6>
+                    <h6 class="dropdown-header font-weight-bold">Download Report</h6>
                     <a class="dropdown-item" :href="'{{ route('admin.export.excel') }}?search=' + search + '&filter=' + filterType">
                         <i class="fas fa-file-excel mr-2 text-success"></i> Excel (.xlsx)
                     </a>
