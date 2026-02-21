@@ -78,26 +78,29 @@
 
             {{-- Compatibility & Media Section --}}
             <div class="col-md-5">
-                <div class="card border-primary shadow-none">
+            <div class="card border-primary shadow-none">
     <div class="card-header bg-primary py-2">
         <h3 class="card-title text-sm">Vehicle Compatibility</h3>
     </div>
     <div class="card-body p-0" style="height: 400px; overflow-y: auto; background: #fff;">
         <ul class="list-group list-group-flush">
             @foreach($vehicleModels as $model)
-                <li class="list-group-item bg-light py-1 font-weight-bold text-xs text-uppercase">
-                    {{ $model->brand->brand_name ?? 'Brand' }} - {{ $model->model_name }}
+                <li class="list-group-item bg-light py-1 font-weight-bold text-xs" wire:key="model-header-{{ $model->id }}">
+                    {{ strtoupper($model->brand->brand_name ?? 'Brand') }} - {{ $model->model_name }}
                 </li>
                 
                 @foreach($model->specifications as $spec)
-                    <li class="list-group-item py-2 pl-4">
-                        <div class="custom-control custom-checkbox">
+                    {{-- KEY IS CRITICAL HERE --}}
+                    <li class="list-group-item py-1 pl-4" wire:key="spec-wrapper-{{ $spec->id }}">
+                        <div class="form-check">
                             <input type="checkbox" 
-                                   class="custom-control-input" 
+                                   class="form-check-input" 
                                    id="spec_{{ $spec->id }}" 
                                    value="{{ $spec->id }}"
-                                   wire:model="fitment_specifications">
-                            <label class="custom-control-label d-block cursor-pointer font-weight-normal" for="spec_{{ $spec->id }}">
+                                   wire:model.live="fitment_specifications"
+                                   style="cursor: pointer; width: 18px; height: 18px;">
+                            
+                            <label class="form-check-label ml-2 d-inline-block" for="spec_{{ $spec->id }}" style="cursor: pointer; font-size: 14px;">
                                 {{ $spec->variant->name ?? 'Standard' }} 
                                 <span class="text-muted small">({{ $spec->production_start }}-{{ $spec->production_end }})</span>
                             </label>
