@@ -79,11 +79,6 @@
             {{-- Compatibility & Media Section --}}
             <div class="col-md-5">
                 <div class="card border-primary shadow-none">
-                    <div class="card-header bg-primary py-2">
-                        <h3 class="card-title text-sm">Vehicle Compatibility</h3>
-                    </div>
-                   {{-- Compatibility Section --}}
-<div class="card border-primary shadow-none">
     <div class="card-header bg-primary py-2">
         <h3 class="card-title text-sm">Vehicle Compatibility</h3>
     </div>
