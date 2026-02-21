@@ -31,14 +31,19 @@ class CreateComponent extends Component
         $this->category_id = null; // Reset child when parent changes
     }
 
-    public function toggleVehicle($specId)
-    {
-        if (in_array($specId, $this->selectedSpecs)) {
-            $this->selectedSpecs = array_diff($this->selectedSpecs, [$specId]);
-        } else {
-            $this->selectedSpecs[] = $specId;
-        }
+   public function toggleVehicle($specId)
+{
+    if (in_array($specId, $this->selectedSpecs)) {
+        // Remove if already selected
+        $this->selectedSpecs = array_diff($this->selectedSpecs, [$specId]);
+    } else {
+        // Add to selected
+        $this->selectedSpecs[] = $specId;
     }
+
+    // THIS IS THE FIX: Reset the search string so the dropdown closes
+    $this->searchVehicle = ''; 
+}
 
     public function toggleSubstitution($partId)
 {

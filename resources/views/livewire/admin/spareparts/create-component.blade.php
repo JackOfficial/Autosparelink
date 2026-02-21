@@ -129,24 +129,26 @@
                 <div class="card border-primary shadow-none">
                     <div class="card-header bg-primary py-2"><h3 class="card-title text-sm text-white">Vehicle Compatibility</h3></div>
                     <div class="card-body p-3">
-                        <div class="form-group position-relative">
-                            <label class="text-xs">Search Brand or Model</label>
-                            <input type="text" class="form-control form-control-sm" placeholder="e.g. Toyota Hilux..." 
-                                   wire:model.live.debounce.300ms="searchVehicle">
-                            
-                            @if(count($searchResults) > 0)
-                                <div class="list-group position-absolute shadow-lg search-results-overlay">
-                                    @foreach($searchResults as $spec)
-                                        <button type="button" class="list-group-item list-group-item-action py-2 text-xs" 
-                                                wire:click="toggleVehicle({{ $spec->id }})">
-                                            <i class="fas {{ in_array($spec->id, $selectedSpecs) ? 'fa-check-circle text-success' : 'fa-plus text-muted' }} mr-2"></i>
-                                            <strong>{{ $spec->vehicleModel->brand->brand_name }} {{ $spec->vehicleModel->model_name }}</strong>
-                                            <span class="text-muted ml-1">({{ $spec->variant->name ?? 'Std' }} {{ $spec->production_start }})</span>
-                                        </button>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
+                        <div class="form-group position-relative" x-data="{ open: true }" @click.away="open = false">
+    <label class="text-xs">Search Brand or Model</label>
+    <input type="text" 
+           class="form-control form-control-sm" 
+           placeholder="e.g. Toyota Hilux..." 
+           wire:model.live.debounce.300ms="searchVehicle"
+           @input="open = true"> {{-- Only show if search has results AND Alpine 'open' is true --}}
+    @if(count($searchResults) > 0)
+        <div class="list-group position-absolute shadow-lg search-results-overlay" x-show="open">
+            @foreach($searchResults as $spec)
+                <button type="button" class="list-group-item list-group-item-action py-2 text-xs" 
+                        wire:click="toggleVehicle({{ $spec->id }})">
+                    <i class="fas {{ in_array($spec->id, $selectedSpecs) ? 'fa-check-circle text-success' : 'fa-plus text-muted' }} mr-2"></i>
+                    <strong>{{ $spec->vehicleModel->brand->brand_name }} {{ $spec->vehicleModel->model_name }}</strong>
+                    <span class="text-muted ml-1">({{ $spec->variant->name ?? 'Std' }} {{ $spec->production_start }})</span>
+                </button>
+            @endforeach
+        </div>
+    @endif
+</div>
 
                         <div class="mt-3 bg-light border rounded p-2" style="min-height: 100px; max-height: 200px; overflow-y: auto;">
                             <label class="text-xs font-weight-bold">Selected Vehicles ({{ count($selectedSpecs) }})</label>
