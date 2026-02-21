@@ -19,22 +19,25 @@ class PartController extends Controller
     /* ============================
      | LIST
      ============================ */
-    public function index()
-    {
-        $parts = Part::with([
-                'category',
-                'partBrand',
-                'photos',
-                'fitments.vehicleModel.brand',
-                'fitments.vehicleModel',
-                'fitments.variant',
-                'substitutions.partBrand'
-            ])
-            ->latest()
-            ->paginate(20);
+   public function index(Request $request)
+{
+    $parts = Part::with([
+            'category:id,category_name', // Selecting specific columns for performance
+            'partBrand:id,name',
+            'photos',
+            'fitments.vehicleModel.brand',
+        ])
+        ->when($request->search, function($query, $search) {
+            $query->where('part_name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%")
+                  ->orWhere('part_number', 'like', "%{$search}%");
+        })
+        ->latest()
+        ->paginate(15)
+        ->withQueryString(); // Keeps search parameters in pagination links
 
-        return view('admin.parts.index', compact('parts'));
-    }
+    return view('admin.parts.index', compact('parts'));
+}
 
     /* ============================
      | CREATE
