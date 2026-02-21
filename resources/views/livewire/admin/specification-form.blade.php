@@ -123,9 +123,14 @@
                                     <input type="number" wire:model="torque" class="form-control shadow-none">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="small font-weight-bold text-muted">Efficiency</label>
-                                    <input type="number" step="0.1" wire:model="fuel_efficiency" class="form-control shadow-none">
-                                </div>
+                              <label class="small font-weight-bold text-muted">Efficiency</label>
+                  <div class="input-group">
+        <input type="number" step="0.1" wire:model="fuel_efficiency" class="form-control shadow-none" placeholder="0.0">
+        <div class="input-group-append">
+            <span class="input-group-text bg-light small">L/100km</span>
+        </div>
+                 </div>
+           </div>
                                 <div class="col-md-12">
                                     <label class="small font-weight-bold text-muted">Fuel Tank Capacity (L)</label>
                                     <input type="number" wire:model="fuel_capacity" class="form-control shadow-none">
