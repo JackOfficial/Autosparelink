@@ -112,10 +112,6 @@
         <button type="button" class="btn btn-xs btn-link float-right" wire:click="$set('fitment_specifications', [])">Clear All</button>
     </div>
 </div>
-                    <div class="card-footer py-1 bg-light text-center">
-                        <small class="text-muted text-xs">Hold Ctrl/Cmd to select multiple</small>
-                    </div>
-                </div>
 
                 <div class="card border shadow-none">
                     <div class="card-body" x-data="{ previews: [] }">
