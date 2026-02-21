@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Variant extends Model
 {
@@ -38,6 +39,11 @@ class Variant extends Model
     {
         return $this->hasMany(Specification::class)
                     ->where('status', 1);
+    }
+
+    public function destinations(): BelongsToMany
+    {
+       return $this->belongsToMany(Destination::class);
     }
 
     // Parts fitted to this variant
