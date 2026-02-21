@@ -12,8 +12,6 @@ return new class extends Migration
     public function up(): void
     {
       Schema::table('part_fitments', function (Blueprint $table) {
-            // 1. Remove the old unique constraint and index first
-            $table->dropUnique(['part_id', 'variant_id']);
 
             // 2. Drop the unnecessary columns
             $table->dropColumn(['variant_id', 'vehicle_model_id', 'start_year', 'end_year']);
@@ -23,9 +21,6 @@ return new class extends Migration
                   ->after('part_id')
                   ->constrained()
                   ->onDelete('cascade');
-
-            // 4. Add a new unique constraint to prevent duplicate fitments
-            $table->unique(['part_id', 'specification_id']);
         });
     }
 
