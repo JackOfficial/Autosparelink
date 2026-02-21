@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 class Variant extends Model
 {
@@ -153,7 +154,7 @@ public function syncNameFromSpec()
     $this->update([
         'name' => $generatedName,
         // Generate a URL-friendly slug (e.g., toyota-verso-s-hatchback-2011)
-        'slug' => \Illuminate\Support\Str::slug($generatedName . '-' . ($this->chassis_code ?? '')),
+        'slug' => Str::slug($generatedName . '-' . ($this->chassis_code ?? '')),
     ]);
 }
 

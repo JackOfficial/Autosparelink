@@ -57,33 +57,32 @@ class SpecificationForm extends Component
     }
 
     // This "computed property" creates the name on the fly for the UI
-    public function getGeneratedNameProperty()
+   public function getGeneratedNameProperty()
 {
     // 1. Get Brand and Model names
-    $brandModel = \App\Models\VehicleModel::with('brand')->find($this->vehicle_model_id);
+    $brandModel = VehicleModel::with('brand')->find($this->vehicle_model_id);
     
-    // 2. Fetch the labels for the selected technical IDs
-    $body = $this->body_type_id ? \App\Models\BodyType::find($this->body_type_id)?->name : null;
-    $displacement = $this->engine_displacement_id ? \App\Models\EngineDisplacement::find($this->engine_displacement_id)?->name : null;
-    $engine = $this->engine_type_id ? \App\Models\EngineType::find($this->engine_type_id)?->name : null;
-    $trans = $this->transmission_type_id ? \App\Models\TransmissionType::find($this->transmission_type_id)?->name : null;
+    // 2. Fetch the labels only if the ID is set
+    $body = $this->body_type_id ? BodyType::find($this->body_type_id)?->name : null;
+    $displacement = $this->engine_displacement_id ? EngineDisplacement::find($this->engine_displacement_id)?->name : null;
+    $engine = $this->engine_type_id ? EngineType::find($this->engine_type_id)?->name : null;
+    $trans = $this->transmission_type_id ? TransmissionType::find($this->transmission_type_id)?->name : null;
 
-    // 3. Assemble the pieces exactly like syncNameFromSpec()
     $pieces = [
-        $brandModel?->brand?->brand_name,      // Toyota
-        $brandModel?->model_name,             // Verso
-        $this->trim_level,                    // S
-        $body,                                // Hatchback
-        $this->production_year,               // 2011
-        $displacement,                        // 1.4
-        $engine,                              // Diesel
-        $trans,                               // Manual
+        $brandModel?->brand?->brand_name,
+        $brandModel?->model_name,
+        $this->trim_level,
+        $body,
+        $this->production_year,
+        $displacement ? ($displacement . 'L') : null, // Added 'L' for engine size feel
+        $engine,
+        $trans,
     ];
 
-    // 4. Filter out nulls and join with spaces
     $fullName = implode(' ', array_filter($pieces));
 
-    return $fullName ?: 'New Vehicle Variant';
+    // Return a placeholder if the form is empty
+    return $fullName ?: 'New Vehicle Specification';
 }
 
     protected function rules()

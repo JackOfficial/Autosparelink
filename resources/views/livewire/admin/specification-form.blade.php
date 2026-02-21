@@ -1,5 +1,14 @@
 <div>
     {{-- resources/views/livewire/admin/specification-form.blade.php --}}
+     @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 <div> {{-- <--- ADD THIS SINGLE ROOT WRAPPER --}}
     <div class="card shadow-lg border-0 overflow-hidden">
         {{-- Dynamic Header based on Auto-Generated Name --}}
@@ -108,14 +117,14 @@
                             </h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="small font-weight-bold text-muted">Fuel Type</label>
-                                    <select wire:model.live="engine_type_id" class="form-control shadow-none">
+                                    <label class="small font-weight-bold text-muted">Fuel Type *</label>
+                                    <select wire:model.live="engine_type_id" class="form-control shadow-none" required>
                                         <option value="">Select Fuel</option>
                                         @foreach($engineTypes as $et) <option value="{{ $et->id }}">{{ $et->name }}</option> @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="small font-weight-bold text-muted">Displacement</label>
+                                    <label class="small font-weight-bold text-muted">Displacement *</label>
                                     <select wire:model.live="engine_displacement_id" class="form-control shadow-none">
                                         <option value="">Select CC</option>
                                         @foreach($engineDisplacements as $ed) <option value="{{ $ed->id }}">{{ $ed->name }}</option> @endforeach
@@ -141,14 +150,14 @@
                             </h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="small font-weight-bold text-muted">Transmission</label>
+                                    <label class="small font-weight-bold text-muted">Transmission *</label>
                                     <select wire:model.live="transmission_type_id" class="form-control shadow-none">
                                         <option value="">Select Type</option>
                                         @foreach($transmissionTypes as $tt) <option value="{{ $tt->id }}">{{ $tt->name }}</option> @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="small font-weight-bold text-muted">Body Type</label>
+                                    <label class="small font-weight-bold text-muted">Body Type *</label>
                                     <select wire:model.live="body_type_id" class="form-control shadow-none">
                                         <option value="">Select Style</option>
                                         @foreach($bodyTypes as $bt) <option value="{{ $bt->id }}">{{ $bt->name }}</option> @endforeach
@@ -181,4 +190,4 @@
         .input-group-text { border-color: #d1d3e2; border-radius: 0.35rem 0 0 0.35rem; }
         .form-control { border-color: #d1d3e2; }
     </style>
-</div> {{-- <--- CLOSE SINGLE ROOT WRAPPER --}}
+  </div> {{-- <--- CLOSE SINGLE ROOT WRAPPER --}}
