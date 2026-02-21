@@ -11,7 +11,7 @@
     </ol>
 </section>
 
-<section class="content" x-data="{ 
+<section class="container" x-data="{ 
     search: '',
     checkGroup(el) {
         let rows = el.querySelectorAll('tbody tr');
