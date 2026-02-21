@@ -9,11 +9,7 @@ class PartFitment extends Model
     protected $fillable = [
         'part_id',
         'specification_id',
-        'variant_id',
-        'vehicle_model_id',
         'status',
-        'start_year',
-        'end_year',
     ];
 
     public function part()
