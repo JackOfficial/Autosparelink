@@ -65,7 +65,7 @@
                         </div>
 
                         <div class="col-md-3 mb-3">
-                            <label class="small font-weight-bold text-muted">Mkt. Year *</label>
+                            <label class="small font-weight-bold text-muted">Production Year *</label>
                             <input type="number" wire:model.live="production_year" class="form-control shadow-none">
                         </div>
 
