@@ -30,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
         Login::class,
         MigrateCartOnLogin::class,
        );
+
+       Paginator::useBootstrapFive(); // Add this line
+       
     //    $loader = AliasLoader::getInstance();
     //   $loader->alias('Cart', \Darryldecode\Cart\Facades\CartFacade::class);
     }
