@@ -178,11 +178,11 @@
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label class="small font-weight-bold text-muted">Start Year</label>
-                                        <input type="number" wire:model="production_start" class="form-control shadow-none">
+                                        <input type="number" wire:model="production_year_start" class="form-control shadow-none">
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label class="small font-weight-bold text-muted">End Year</label>
-                                        <input type="number" wire:model="production_end" class="form-control shadow-none">
+                                        <input type="number" wire:model="production_year_end" class="form-control shadow-none">
                                     </div>
                                 </div>
                             </div>
