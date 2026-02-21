@@ -8,18 +8,20 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class PartsExport implements FromView, ShouldAutoSize
 {
+    protected $parts;
+
     /**
      * Create a new class instance.
      */
-    public function __construct()
+    public function __construct($parts)
     {
-        //
+        $this->parts = $parts;
     }
 
     public function view(): View
     {
         return view('admin.parts.exports.table', [
-            'parts' => Part::with(['category', 'partBrand', 'fitments.specification.vehicleModel'])->get()
+            'parts' => $this->parts
         ]);
     }
 }

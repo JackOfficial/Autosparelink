@@ -55,21 +55,22 @@
     
     {{-- Header & Stats --}}
     <div class="row mb-4 align-items-end">
-        <div class="col-md-6">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-transparent p-0 mb-1">
-                    <li class="breadcrumb-item"><a href="#">Admin</a></li>
-                    <li class="breadcrumb-item active">Inventory</li>
-                </ol>
-            </nav>
-            <h2 class="fw-bold mb-0">Spare Parts Management</h2>
-        </div>
         <div class="col-md-6 text-right">
-            <button class="btn btn-outline-secondary btn-sm mr-2"><i class="fas fa-file-export mr-1"></i> Export</button>
-            <a href="{{ route('admin.export.excel') }}">Excel</a>
-            <a :href="'{{ route('admin.export.pdf') }}?search=' + search + '&filter=' + filterType" class="dropdown-item">
-    <i class="fas fa-file-pdf mr-2 text-danger"></i> PDF (.pdf)
-</a>
+            <div class="dropdown d-inline-block mr-2">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle shadow-none" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-file-export mr-1"></i> Export
+                </button>
+                <div class="dropdown-menu dropdown-menu-right shadow border-0">
+                    <h6 class="dropdown-header">Download Report</h6>
+                    <a class="dropdown-item" :href="'{{ route('admin.export.excel') }}?search=' + search + '&filter=' + filterType">
+                        <i class="fas fa-file-excel mr-2 text-success"></i> Excel (.xlsx)
+                    </a>
+                    <a class="dropdown-item" :href="'{{ route('admin.export.pdf') }}?search=' + search + '&filter=' + filterType">
+                        <i class="fas fa-file-pdf mr-2 text-danger"></i> PDF (.pdf)
+                    </a>
+                </div>
+            </div>
+
             <a href="{{ route('admin.spare-parts.create') }}" class="btn btn-primary px-4 shadow-sm">
                 <i class="fa fa-plus-circle mr-2"></i>New Part
             </a>
