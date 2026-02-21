@@ -13,50 +13,46 @@ class SpecificationForm extends Component
     public $brand_id;
     public $vehicle_model_id;
     public $trim_level; 
-    public $vehicleModels;
     public $hideBrandModel = false;
 
-    // Variant Identity Fields
+    // Identity Fields
     public $chassis_code, $model_code, $is_default = false;
-    
-    // Newly Added lifecycle & market fields
-    public $production_year_start;
-    public $production_year_end;
-    public $destination_id; // For the Market Destination
+    public $production_year;       // For Variant Table
+    public $production_year_start; // For Spec Table
+    public $production_year_end;   // For Spec Table
+    public $destination_id; 
 
-    // Form Fields (Specifications)
+    // Technical Fields
     public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
     public $horsepower, $torque, $fuel_capacity, $fuel_efficiency;
-    public $seats, $doors, $steering_position = 'LEFT', $color = '#000000';
-    public $status = 1;
+    public $seats, $doors, $steering_position = 'LEFT', $color = '#000000', $status = 1;
+
+    /**
+     * Re-fetch vehicle models whenever brand_id changes.
+     * This avoids serialization 500 errors by not storing models in properties.
+     */
+    public function getVehicleModelsProperty()
+    {
+        return $this->brand_id 
+            ? VehicleModel::where('brand_id', $this->brand_id)->orderBy('model_name')->get() 
+            : collect();
+    }
 
     public function mount($vehicle_model_id = null)
     {
-        $this->vehicleModels = collect();
-
         if ($vehicle_model_id) {
             $this->vehicle_model_id = $vehicle_model_id;
             $this->hideBrandModel = true;
-            
             $model = VehicleModel::find($vehicle_model_id);
             if ($model) {
                 $this->brand_id = $model->brand_id;
-                $this->loadModels();
             }
         }
     }
 
-    public function updatedBrandId($value)
+    public function updatedBrandId()
     {
-        $this->loadModels();
         $this->vehicle_model_id = null;
-    }
-
-    protected function loadModels()
-    {
-        $this->vehicleModels = $this->brand_id 
-            ? VehicleModel::where('brand_id', $this->brand_id)->orderBy('model_name')->get() 
-            : collect();
     }
 
     protected function rules()
@@ -65,29 +61,15 @@ class SpecificationForm extends Component
             'brand_id' => 'required|exists:brands,id',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'trim_level' => 'required|string|max:50',
-            
-            'chassis_code' => 'nullable|string|max:50',
-            'model_code' => 'nullable|string|max:50',
-            'is_default' => 'boolean',
-
-            'production_year_start' => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'production_year_end' => 'nullable|integer|min:1900|gte:production_year_start',
-            'destination_id' => 'nullable|exists:destinations,id',
-
+            'production_year' => 'required|integer|min:1950|max:' . (date('Y') + 2),
+            'production_year_start' => 'required|integer|min:1950',
+            'production_year_end' => 'nullable|integer|gte:production_year_start',
             'body_type_id' => 'required|exists:body_types,id',
-            'engine_displacement_id' => 'required|exists:engine_displacements,id',
             'engine_type_id' => 'required|exists:engine_types,id',
+            'engine_displacement_id' => 'required|exists:engine_displacements,id',
             'transmission_type_id' => 'required|exists:transmission_types,id',
-            'drive_type_id' => 'nullable|exists:drive_types,id',
-            
-            'horsepower' => 'nullable|numeric|min:0',
-            'torque' => 'nullable|numeric|min:0',
-            'fuel_capacity' => 'nullable|numeric|min:0',
-            'fuel_efficiency' => 'nullable|numeric|min:0',
-            'seats' => 'nullable|integer|min:1',
-            'doors' => 'nullable|integer|min:1',
             'steering_position' => 'required|in:LEFT,RIGHT',
-            'color' => 'nullable|string',
+            // Other fields are optional based on your UI
         ];
     }
 
@@ -97,24 +79,22 @@ class SpecificationForm extends Component
         
         try {
             DB::transaction(function () {
-                // 1. Create the Variant
                 $variant = Variant::create([
                     'vehicle_model_id' => $this->vehicle_model_id,
+                    'production_year'  => $this->production_year,
                     'trim_level'       => $this->trim_level,
                     'chassis_code'     => $this->chassis_code,
                     'model_code'       => $this->model_code,
                     'is_default'       => $this->is_default,
                     'status'           => $this->status,
-                    'name'             => 'Generating...', 
-                    'slug'             => Str::slug($this->trim_level . '-' . ($this->chassis_code ?? rand(1000,9999)) . '-' . Str::random(5)),
+                    'name'             => 'Syncing...', 
+                    'slug'             => Str::slug($this->trim_level . '-' . ($this->chassis_code ?? rand(1000,9999)) . '-' . Str::random(4)),
                 ]);
 
-                // 2. Attach Destination (Market) if selected
                 if ($this->destination_id) {
                     $variant->destinations()->sync([$this->destination_id]);
                 }
 
-                // 3. Create the Specification 
                 Specification::create([
                     'variant_id'             => $variant->id,
                     'vehicle_model_id'       => $this->vehicle_model_id,
@@ -136,18 +116,15 @@ class SpecificationForm extends Component
                     'status'                 => $this->status,
                 ]);
 
-                // 4. Finalize Variant Name
                 $variant->refresh(); 
-                if (method_exists($variant, 'syncNameFromSpec')) {
-                    $variant->syncNameFromSpec(); 
-                }
+                if (method_exists($variant, 'syncNameFromSpec')) { $variant->syncNameFromSpec(); }
             });
 
-            session()->flash('success', 'Vehicle Variant created successfully with full specifications.');
+            session()->flash('success', 'Variant and Specifications created!');
             return redirect()->route('admin.specifications.index');
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Database Error: ' . $e->getMessage());
+            session()->flash('error', 'Error: ' . $e->getMessage());
         }
     }
 
@@ -160,7 +137,7 @@ class SpecificationForm extends Component
             'transmissionTypes'   => TransmissionType::orderBy('name')->get(),
             'driveTypes'          => DriveType::orderBy('name')->get(),
             'engineDisplacements' => EngineDisplacement::orderBy('name')->get(),
-            'destinations'        => Destination::orderBy('code')->get(), // For the dropdown
+            'destinations'        => Destination::orderBy('name')->get(),
         ]);
     }
 }
