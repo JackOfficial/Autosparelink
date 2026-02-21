@@ -83,27 +83,39 @@
                         <h3 class="card-title text-sm">Vehicle Compatibility</h3>
                     </div>
                    {{-- Compatibility Section --}}
-<div class="card-body p-0" style="position: relative; z-index: 999; overflow: visible;">
-    <select 
-        wire:model="fitment_specifications" 
-        id="fitment_specifications"
-        class="form-control" 
-        multiple 
-        style="height: 320px; border: 0; cursor: pointer; display: block !important; opacity: 1 !important; pointer-events: auto !important;"
-    >
-        @foreach($vehicleModels as $model)
-            {{-- Using a manual separator instead of optgroup to test clickability --}}
-            <option disabled class="bg-dark text-white font-weight-bold">
-                == {{ strtoupper($model->brand->brand_name ?? 'BRAND') }} {{ $model->model_name }} ==
-            </option>
-            
-            @foreach($model->specifications as $spec)
-                <option value="{{ (string)$spec->id }}" style="padding: 8px;">
-                    &nbsp;&nbsp;• {{ $spec->variant->name ?? 'Standard' }} ({{ $spec->production_start }}-{{ $spec->production_end }})
-                </option>
+<div class="card border-primary shadow-none">
+    <div class="card-header bg-primary py-2">
+        <h3 class="card-title text-sm">Vehicle Compatibility</h3>
+    </div>
+    <div class="card-body p-0" style="height: 400px; overflow-y: auto; background: #fff;">
+        <ul class="list-group list-group-flush">
+            @foreach($vehicleModels as $model)
+                <li class="list-group-item bg-light py-1 font-weight-bold text-xs text-uppercase">
+                    {{ $model->brand->brand_name ?? 'Brand' }} - {{ $model->model_name }}
+                </li>
+                
+                @foreach($model->specifications as $spec)
+                    <li class="list-group-item py-2 pl-4">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" 
+                                   class="custom-control-input" 
+                                   id="spec_{{ $spec->id }}" 
+                                   value="{{ $spec->id }}"
+                                   wire:model="fitment_specifications">
+                            <label class="custom-control-label d-block cursor-pointer font-weight-normal" for="spec_{{ $spec->id }}">
+                                {{ $spec->variant->name ?? 'Standard' }} 
+                                <span class="text-muted small">({{ $spec->production_start }}-{{ $spec->production_end }})</span>
+                            </label>
+                        </div>
+                    </li>
+                @endforeach
             @endforeach
-        @endforeach
-    </select>
+        </ul>
+    </div>
+    <div class="card-footer py-2 bg-white border-top">
+        <span class="badge badge-info">{{ count($fitment_specifications) }} Vehicles Selected</span>
+        <button type="button" class="btn btn-xs btn-link float-right" wire:click="$set('fitment_specifications', [])">Clear All</button>
+    </div>
 </div>
                     <div class="card-footer py-1 bg-light text-center">
                         <small class="text-muted text-xs">Hold Ctrl/Cmd to select multiple</small>
