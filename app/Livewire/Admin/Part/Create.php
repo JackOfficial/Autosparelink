@@ -11,39 +11,18 @@ class Create extends Component
 {
     use WithFileUploads;
 
-    // Form Properties
+    // Form fields
     public $part_number, $part_name, $parentCategoryId, $category_id, $part_brand_id;
     public $oem_number, $price, $stock_quantity, $description;
     public $status = 'Active';
-    
-    // Arrays for Selection
+
+    // Selections
     public $fitment_specifications = [];
     public $substitution_part_ids = [];
     public $photos = [];
 
-    // Search Property
+    // Search
     public $searchVehicle = '';
-
-    // Data for dropdowns
-    public $parentCategories = [];
-    public $childCategories = [];
-    public $partBrands = [];
-    public $allParts = [];
-
-    protected function rules()
-    {
-        return [
-            'part_name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'part_brand_id' => 'required|exists:part_brands,id',
-            'price' => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
-            'status' => 'required|in:Active,Inactive',
-            'photos.*' => 'image|max:2048',
-            'fitment_specifications' => 'nullable|array',
-            'substitution_part_ids' => 'nullable|array',
-        ];
-    }
 
     public function mount()
     {
@@ -70,12 +49,17 @@ class Create extends Component
 
     public function save()
     {
-        $this->validate();
+        $this->validate([
+            'part_name' => 'required|string|max:255',
+            'category_id' => 'required',
+            'part_brand_id' => 'required',
+            'price' => 'required|numeric',
+            'stock_quantity' => 'required|integer',
+        ]);
 
-        $brand = PartBrand::findOrFail($this->part_brand_id);
-        $category = Category::findOrFail($this->category_id);
-        $sku = Part::generateSku($brand->name, $category->category_name, $this->part_name);
-
+        $brand = PartBrand::find($this->part_brand_id);
+        $category = Category::find($this->category_id);
+        
         $part = Part::create([
             'part_number'    => $this->part_number,
             'part_name'      => $this->part_name,
@@ -86,55 +70,58 @@ class Create extends Component
             'stock_quantity' => $this->stock_quantity,
             'status'         => $this->status === 'Active' ? 1 : 0,
             'description'    => $this->description,
-            'sku'            => $sku,
+            'sku'            => Part::generateSku($brand->name, $category->category_name, $this->part_name),
         ]);
 
-        // Fitments
         foreach ($this->fitment_specifications as $specId) {
             $spec = Specification::find($specId);
-            if ($spec) {
+            if($spec) {
                 PartFitment::create([
-                    'part_id'          => $part->id,
+                    'part_id' => $part->id,
                     'specification_id' => $spec->id,
-                    'variant_id'       => $spec->variant_id,
+                    'variant_id' => $spec->variant_id,
                     'vehicle_model_id' => $spec->vehicle_model_id,
-                    'start_year'       => $spec->production_start,
-                    'end_year'         => $spec->production_end,
-                    'status'           => 'active',
+                    'start_year' => $spec->production_start,
+                    'end_year' => $spec->production_end,
+                    'status' => 'active'
                 ]);
             }
         }
 
-        // Photos
         foreach ($this->photos as $photo) {
             $path = $photo->store('parts/' . Str::slug($brand->name), 'public');
             $part->photos()->create(['file_path' => $path, 'caption' => $this->part_name]);
         }
 
-        // Substitutions
         if (!empty($this->substitution_part_ids)) {
             $part->substitutions()->sync($this->substitution_part_ids);
         }
 
-        session()->flash('success', 'Spare part created successfully.');
+        session()->flash('success', 'Part Created!');
         return redirect()->route('admin.spare-parts.index');
     }
 
     public function render()
     {
         $searchResults = [];
-        if (strlen($this->searchVehicle) > 2) {
-            $searchResults = VehicleModel::with(['brand', 'specifications.variant'])
-                ->where('model_name', 'like', '%' . $this->searchVehicle . '%')
-                ->orWhereHas('brand', fn($q) => $q->where('brand_name', 'like', '%' . $this->searchVehicle . '%'))
-                ->limit(15)
+        if (strlen($this->searchVehicle) >= 2) {
+            $searchResults = Specification::with(['vehicleModel.brand', 'variant'])
+                ->whereHas('vehicleModel', function($q) {
+                    $q->where('model_name', 'like', '%' . $this->searchVehicle . '%')
+                      ->orWhereHas('brand', fn($b) => $b->where('brand_name', 'like', '%' . $this->searchVehicle . '%'));
+                })
+                ->limit(10)
                 ->get();
         }
 
         return view('livewire.admin.part.create', [
             'searchResults' => $searchResults,
             'selectedSpecs' => Specification::whereIn('id', $this->fitment_specifications)
-                ->with(['vehicleModel.brand', 'variant'])->get()
+                ->with(['vehicleModel.brand', 'variant'])->get(),
+            'parentCategories' => Category::whereNull('parent_id')->get(),
+            'partBrands' => PartBrand::all(),
+            'childCategories' => $this->childCategories ?? [],
+            'allParts' => Part::all()
         ]);
     }
 }
