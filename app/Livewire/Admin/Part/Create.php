@@ -36,6 +36,7 @@ class Create extends Component
     public $childCategories = [];
     public $partBrands = [];
     public $vehicleModels = [];
+    public $searchVehicle = '';
 
     protected function rules()
     {
@@ -134,6 +135,17 @@ class Create extends Component
     
     public function render()
     {
-        return view('livewire.admin.part.create');
+        $filteredVehicles = [];
+    if (strlen($this->searchVehicle) > 2) {
+        $filteredVehicles = VehicleModel::with(['brand', 'specifications.variant'])
+            ->where('model_name', 'like', '%' . $this->searchVehicle . '%')
+            ->orWhereHas('brand', function($q) {
+                $q->where('brand_name', 'like', '%' . $this->searchVehicle . '%');
+            })
+            ->get();
+    }
+        return view('livewire.admin.part.create', [
+        'searchResults' => $filteredVehicles
+    ]);
     }
 }

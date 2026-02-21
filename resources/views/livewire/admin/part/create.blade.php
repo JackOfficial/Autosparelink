@@ -90,42 +90,69 @@
 
             {{-- Compatibility & Media Section --}}
             <div class="col-md-5">
-            <div class="card border-primary shadow-none">
+           <div class="card border-primary shadow-none" x-data="{ searching: false }">
     <div class="card-header bg-primary py-2">
         <h3 class="card-title text-sm">Vehicle Compatibility</h3>
     </div>
-    <div class="card-body p-0" style="height: 400px; overflow-y: auto; background: #fff;">
-        <ul class="list-group list-group-flush">
-            @foreach($vehicleModels as $model)
-                <li class="list-group-item bg-light py-1 font-weight-bold text-xs" wire:key="model-header-{{ $model->id }}">
-                    {{ strtoupper($model->brand->brand_name ?? 'Brand') }} - {{ $model->model_name }}
-                </li>
+    
+    <div class="card-body p-3">
+        <div class="form-group mb-3">
+            <label class="text-xs">Search Vehicle (Brand or Model)</label>
+            <div class="input-group input-group-sm">
+                <input type="text" 
+                       class="form-control" 
+                       placeholder="e.g. Toyota Hilux..."
+                       wire:model.live.debounce.300ms="searchVehicle"
+                       @focus="searching = true">
+                <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="position-relative">
+            @if(count($searchResults) > 0)
+                <div class="list-group shadow-lg position-absolute w-100" style="z-index: 1050; max-height: 250px; overflow-y: auto;">
+                    @foreach($searchResults as $model)
+                        @foreach($model->specifications as $spec)
+                            <button type="button" 
+                                    class="list-group-item list-group-item-action py-2 text-xs"
+                                    wire:click="toggleFitment({{ $spec->id }})">
+                                <i class="fas {{ in_array($spec->id, $fitment_specifications) ? 'fa-check-circle text-success' : 'fa-plus-circle text-muted' }} mr-2"></i>
+                                <strong>{{ $model->brand->brand_name }} {{ $model->model_name }}</strong> 
+                                ({{ $spec->variant->name ?? 'Standard' }} - {{ $spec->production_start }})
+                            </button>
+                        @endforeach
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
+        <div class="mt-3">
+            <label class="text-xs font-weight-bold">Selected ({{ count($fitment_specifications) }})</label>
+            <div class="d-flex flex-wrap" style="gap: 5px; max-height: 200px; overflow-y: auto;">
+                @php
+                    // Get only the selected ones to show as tags
+                    $selectedSpecs = \App\Models\Specification::whereIn('id', $fitment_specifications)->with('vehicleModel.brand')->get();
+                @endphp
                 
-                @foreach($model->specifications as $spec)
-                    {{-- KEY IS CRITICAL HERE --}}
-                    <li class="list-group-item py-1 pl-4" wire:key="spec-wrapper-{{ $spec->id }}">
-                        <div class="form-check">
-                            <input type="checkbox" 
-                                   class="form-check-input" 
-                                   id="spec_{{ $spec->id }}" 
-                                   value="{{ $spec->id }}"
-                                   wire:model.live="fitment_specifications"
-                                   style="cursor: pointer; width: 18px; height: 18px;">
-                            
-                            <label class="form-check-label ml-2 d-inline-block" for="spec_{{ $spec->id }}" style="cursor: pointer; font-size: 14px;">
-                                {{ $spec->variant->name ?? 'Standard' }} 
-                                <span class="text-muted small">({{ $spec->production_start }}-{{ $spec->production_end }})</span>
-                            </label>
-                        </div>
-                    </li>
-                @endforeach
-            @endforeach
-        </ul>
+                @forelse($selectedSpecs as $sSpec)
+                    <span class="badge badge-info p-2 d-flex align-items-center">
+                        {{ $sSpec->vehicleModel->brand->brand_name }} {{ $sSpec->vehicleModel->model_name }}
+                        <i class="fas fa-times ml-2 cursor-pointer" wire:click="toggleFitment({{ $sSpec->id }})"></i>
+                    </span>
+                @empty
+                    <p class="text-muted text-xs italic">No vehicles selected yet.</p>
+                @endforelse
+            </div>
+        </div>
     </div>
-    <div class="card-footer py-2 bg-white border-top">
-        <span class="badge badge-info">{{ count($fitment_specifications) }} Vehicles Selected</span>
-        <button type="button" class="btn btn-xs btn-link float-right" wire:click="$set('fitment_specifications', [])">Clear All</button>
+    
+    @if(count($fitment_specifications) > 0)
+    <div class="card-footer py-2">
+        <button type="button" class="btn btn-xs btn-outline-danger" wire:click="$set('fitment_specifications', [])">Clear All</button>
     </div>
+    @endif
 </div>
 
                 <div class="card border shadow-none">
