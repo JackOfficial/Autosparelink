@@ -5,7 +5,6 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use App\Models\{Specification, Brand, VehicleModel, Variant, BodyType, EngineType, TransmissionType, DriveType, EngineDisplacement, Destination};
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 
 class SpecificationForm extends Component
@@ -25,8 +24,12 @@ class SpecificationForm extends Component
 
     // Technical Fields
     public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
-    public $horsepower, $torque, $fuel_capacity, $fuel_efficiency;
-    public $seats, $doors, $steering_position = 'LEFT', $color = '#000000', $status = 1;
+    public $horsepower, $torque, $fuel_efficiency;
+    
+    // Body & Dimensions (Newly Added to match Blade)
+    public $seats, $doors, $curb_weight, $tank_capacity;
+    public $front_tire_size, $rear_tire_size, $rim_type;
+    public $steering_position = 'LEFT', $status = 1, $is_default = false;
 
     public function mount($vehicle_model_id = null)
     {
@@ -58,8 +61,6 @@ class SpecificationForm extends Component
         
         $body = $this->body_type_id ? BodyType::find($this->body_type_id)?->name : null;
         $displacement = $this->engine_displacement_id ? EngineDisplacement::find($this->engine_displacement_id)?->name : null;
-        $engine = $this->engine_type_id ? EngineType::find($this->engine_type_id)?->name : null;
-        $trans = $this->transmission_type_id ? TransmissionType::find($this->transmission_type_id)?->name : null;
 
         $pieces = [
             $brandModel?->brand?->brand_name,
@@ -68,8 +69,6 @@ class SpecificationForm extends Component
             $body,
             $this->production_year,
             $displacement ? ($displacement . 'L') : null,
-            $engine,
-            $trans,
         ];
 
         $fullName = implode(' ', array_filter($pieces));
@@ -78,20 +77,25 @@ class SpecificationForm extends Component
 
     protected function rules()
     {
-        return [
+       return [
             'brand_id' => 'required|exists:brands,id',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'trim_level' => 'required|string|max:50',
-            'production_year' => 'required|integer|min:1950|max:' . (date('Y') + 2),
-            'production_year_start' => 'required|integer|min:1950',
-            'production_year_end' => 'nullable|integer|gte:production_year_start',
+            'trim_level' => 'required|string|max:100',
+            'production_year' => 'required|integer|min:1900',
+            
             'body_type_id' => 'required|exists:body_types,id',
             'engine_type_id' => 'required|exists:engine_types,id',
-            'engine_displacement_id' => 'required|exists:engine_displacements,id',
-            'transmission_type_id' => 'required|exists:transmission_types,id',
-            'drive_type_id' => 'required|exists:drive_types,id',
+            'transmission_type_id' => 'nullable|exists:transmission_types,id',
+            'drive_type_id' => 'nullable|exists:drive_types,id',
+            
+            'horsepower' => 'nullable|integer|min:0',
+            'torque' => 'nullable|integer|min:0',
+            'curb_weight' => 'nullable|integer|min:0',
+            'tank_capacity' => 'nullable|integer|min:0',
+            
+            'status' => 'required|boolean',
+            'is_default' => 'boolean',
             'steering_position' => 'required|in:LEFT,RIGHT',
-            'destination_id' => 'nullable|exists:destinations,id',
         ];
     }
 
@@ -101,15 +105,22 @@ class SpecificationForm extends Component
         
         try {
             DB::transaction(function () {
-                // 1. Create the Variant
+                // 1. Handle "Default" logic: if this is set as default, unset others for this model
+                if ($this->is_default) {
+                    Variant::where('vehicle_model_id', $this->vehicle_model_id)
+                        ->update(['is_default' => false]);
+                }
+
+                // 2. Create the Variant
                 $variant = Variant::create([
                     'vehicle_model_id' => $this->vehicle_model_id,
                     'production_year'  => $this->production_year,
                     'trim_level'       => $this->trim_level,
                     'status'           => $this->status,
+                    'is_default'       => $this->is_default,
                 ]);
 
-                // 2. Create the Specification
+                // 3. Create the Specification
                 $spec = Specification::create([
                     'variant_id'             => $variant->id,
                     'vehicle_model_id'       => $this->vehicle_model_id,
@@ -122,12 +133,15 @@ class SpecificationForm extends Component
                     'model_code'             => $this->model_code,
                     'horsepower'             => $this->horsepower,
                     'torque'                 => $this->torque,
-                    'fuel_capacity'          => $this->fuel_capacity,
                     'fuel_efficiency'        => $this->fuel_efficiency,
+                    'curb_weight'            => $this->curb_weight,
+                    'tank_capacity'          => $this->tank_capacity,
                     'seats'                  => $this->seats,
                     'doors'                  => $this->doors,
+                    'front_tire_size'        => $this->front_tire_size,
+                    'rear_tire_size'         => $this->rear_tire_size,
+                    'rim_type'               => $this->rim_type,
                     'steering_position'      => $this->steering_position,
-                    'color'                  => $this->color,
                     'production_start'       => $this->production_year_start,
                     'production_end'         => $this->production_year_end,
                     'status'                 => $this->status,
@@ -137,14 +151,14 @@ class SpecificationForm extends Component
                     $spec->destinations()->sync([$this->destination_id]);
                 }
 
-                // 3. Sync Name (Uses your model logic to compile the final string)
+                // 4. Sync Name
                 $variant->refresh();
                 if (method_exists($variant, 'syncNameFromSpec')) {
                     $variant->syncNameFromSpec(); 
                 }
             });
 
-            session()->flash('success', 'Variant and Specifications created!');
+            session()->flash('success', 'Specification created successfully!');
             return redirect()->route('admin.specifications.index');
 
         } catch (\Exception $e) {
