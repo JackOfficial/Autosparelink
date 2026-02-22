@@ -168,17 +168,22 @@
                         @forelse($specifications as $spec)
                             <tr class="spec-row">
                                 {{-- 1. Codes --}}
-                                <td class="ps-4 py-5">
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-dark text-white fw-bold rounded-3 px-3 py-2 me-4 small font-monospace shadow-sm" style="min-width: 90px; text-align: center; letter-spacing: 1px;">
-                                            {{ $spec->model_code }}
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold text-dark fs-6 mb-1">{{ $spec->chassis_code }}</div>
-                                            <div class="text-muted text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Chassis Reference</div>
-                                        </div>
-                                    </div>
-                                </td>
+                              <td class="ps-4 py-5">
+        <div class="d-flex align-items-center">
+            {{-- Accent Model Code --}}
+            <div class="pe-4 me-4 border-end border-2 border-primary border-opacity-25">
+                <div class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.6rem; letter-spacing: 1px;">Model</div>
+                <div class="fw-black text-dark font-monospace fs-5" style="letter-spacing: -0.5px;">
+                    {{ $spec->model_code }}
+                </div>
+            </div>
+            {{-- Chassis Info --}}
+            <div>
+                <div class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.6rem; letter-spacing: 1px;">Chassis</div>
+                <div class="fw-bold text-dark fs-6">{{ $spec->chassis_code }}</div>
+            </div>
+        </div>
+    </td>
 
                                 {{-- 2. Region & Drive Type (Including Steering) --}}
                                 <td class="py-5">
@@ -188,7 +193,7 @@
                                             <i class="fa fa-road me-1"></i> {{ $spec->driveType->name ?? 'N/A' }}
                                         </span>
                                         <span class="badge bg-dark bg-opacity-10 text-white border-0 px-3 py-2" style="font-size: 0.7rem; border-radius: 6px;">
-                                            <i class="fa fa-dharmachakra me-1"></i> {{ $spec->steering_position }}HD
+                                            <i class="fa fa-dharmachakra me-1"></i> {{ $spec->steering_position }} Hand
                                         </span>
                                     </div>
                                 </td>
