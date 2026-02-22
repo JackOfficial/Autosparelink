@@ -12,13 +12,13 @@
             </nav>
         </div>
     </div>
-
-    {{-- Hero Variant Header: The Anchor --}}
+    
+    {{-- Hero Variant Header: High Contrast Fix --}}
     <div class="container-fluid px-xl-5 mb-4">
-        <div class="card border-0 bg-dark text-white overflow-hidden shadow-lg" style="border-radius: 20px;">
-            {{-- Background Decorative Element --}}
+        <div class="card border-0 bg-dark shadow-lg overflow-hidden" style="border-radius: 20px;">
+            {{-- Background Decorative Element (Subtle Grey-White) --}}
             <div class="position-absolute end-0 bottom-0 opacity-10 d-none d-lg-block" style="transform: translate(10%, 30%); z-index: 1;">
-                 <i class="fa fa-car" style="font-size: 250px;"></i>
+                 <i class="fa fa-car text-white" style="font-size: 250px;"></i>
             </div>
 
             <div class="card-body p-4 p-lg-5 position-relative" style="z-index: 2;">
@@ -29,51 +29,60 @@
                                 Selected Variant
                             </span>
                             <div class="vr bg-white opacity-25" style="height: 20px;"></div>
-                            <span class="text-white-50 small fw-bold text-uppercase">{{ $item->vehicleModel->brand->brand_name }} Catalog</span>
+                            <span class="text-white opacity-75 small fw-bold text-uppercase">{{ $item->vehicleModel->brand->brand_name }} Catalog</span>
                         </div>
                         
-                        <h1 class="display-4 fw-black mb-2 tracking-tight">{{ $item->name }}</h1>
+                        {{-- Forced White Text for Variant Name --}}
+                        <h1 class="display-4 fw-black mb-2 tracking-tight text-white">{{ $item->name }}</h1>
                         
                         @if(!empty($lockedInfo))
                             <div class="d-flex flex-wrap gap-3 mt-4">
-                                <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-3 px-3 py-2 border border-white border-opacity-10 shadow-sm">
+                                {{-- Engine Block --}}
+                                <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-3 px-3 py-2 border border-white border-opacity-25 shadow-sm">
                                     <div class="bg-primary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
                                         <i class="fa fa-gas-pump text-white small"></i>
                                     </div>
                                     <div>
-                                        <div class="text-white-50 small-xs text-uppercase fw-bold" style="font-size: 0.6rem;">Engine</div>
-                                        <div class="fw-bold small">{{ $lockedInfo['engine'] }}</div>
+                                        <div class="text-white-50 text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Engine</div>
+                                        <div class="fw-bold small text-white">{{ $lockedInfo['engine'] }}</div>
                                     </div>
                                 </div>
-                                <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-3 px-3 py-2 border border-white border-opacity-10 shadow-sm">
+
+                                {{-- Transmission Block --}}
+                                <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-3 px-3 py-2 border border-white border-opacity-25 shadow-sm">
                                     <div class="bg-primary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
                                         <i class="fa fa-cog text-white small"></i>
                                     </div>
                                     <div>
-                                        <div class="text-white-50 small-xs text-uppercase fw-bold" style="font-size: 0.6rem;">Transmission</div>
-                                        <div class="fw-bold small">{{ $lockedInfo['trans'] }}</div>
+                                        <div class="text-white-50 text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Transmission</div>
+                                        <div class="fw-bold small text-white">{{ $lockedInfo['trans'] }}</div>
                                     </div>
                                 </div>
-                                <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-3 px-3 py-2 border border-white border-opacity-10 shadow-sm">
+
+                                {{-- Body Style Block --}}
+                                <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-3 px-3 py-2 border border-white border-opacity-25 shadow-sm">
                                     <div class="bg-primary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
                                         <i class="fa fa-car-side text-white small"></i>
                                     </div>
                                     <div>
-                                        <div class="text-white-50 small-xs text-uppercase fw-bold" style="font-size: 0.6rem;">Body Style</div>
-                                        <div class="fw-bold small">{{ $lockedInfo['body'] }}</div>
+                                        <div class="text-white-50 text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Body Style</div>
+                                        <div class="fw-bold small text-white">{{ $lockedInfo['body'] }}</div>
                                     </div>
                                 </div>
                             </div>
                         @endif
                     </div>
+                    
                     <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
                         @if($item->vehicleModel->brand->brand_logo)
-                            <div class="d-inline-block bg-white p-3 rounded-4 shadow-lg mb-2">
-                                <img src="{{ asset('storage/' . $item->vehicleModel->brand->brand_logo) }}" style="height: 70px; width: 120px; object-fit: contain;" alt="Brand Logo" />
+                            <div class="d-inline-block bg-white p-3 rounded-4 shadow-lg mb-2 border border-light border-opacity-10">
+                                <img src="{{ asset('storage/' . $item->vehicleModel->brand->brand_logo) }}" style="height: 65px; width: 110px; object-fit: contain;" alt="Brand Logo" />
                             </div>
                         @endif
                         <div wire:loading class="d-block mt-2">
-                            <span class="badge bg-primary px-3 py-2"><i class="fa fa-sync fa-spin me-2"></i>Updating specs...</span>
+                            <span class="badge bg-primary text-white px-3 py-2 shadow-sm">
+                                <i class="fa fa-sync fa-spin me-2"></i>Loading...
+                            </span>
                         </div>
                     </div>
                 </div>
