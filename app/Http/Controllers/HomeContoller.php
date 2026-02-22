@@ -6,16 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Part;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
-class HomeController extends Controller
+class HomeContoller extends Controller
 {
-    /**
-     * Handle the incoming request for the homepage.
-     */
-    public function index(): View
-    {
-       // 1. Fetch data once
+     function index(){
+      // 1. Fetch data once
         $parts = Part::with('photos')->latest()->take(8)->get();
         
         // 2. Reuse collection (saves a DB hit)
