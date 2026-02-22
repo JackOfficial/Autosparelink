@@ -125,7 +125,7 @@ class EditSpecification extends Component
         'production_year' => 'required|integer|min:1900',
         
         // Date Logic: Production can start up to 2 years before the Model Year
-        'start_year' => 'required|integer|min:1900|gte:' . ($this->production_year - 2),
+        'start_year' => 'required|integer|min:1900',
         'start_month' => 'nullable|integer|between:1,12',
         'end_year' => 'nullable|integer|min:1900|gte:start_year',
         'end_month' => 'nullable|integer|between:1,12',
