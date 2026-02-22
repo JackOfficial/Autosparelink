@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Validation\ValidationException;
 
 class Specification extends Model
@@ -45,6 +46,11 @@ class Specification extends Model
     {
         return $this->belongsTo(Variant::class);
     }
+
+    public function destinations(): BelongsToMany
+{
+    return $this->belongsToMany(Destination::class);
+}
 
     public function vehicleModel()
     {

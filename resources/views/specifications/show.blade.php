@@ -98,8 +98,14 @@
                                     <div class="fw-bold text-dark">{{ $spec->variant->model_code ?? 'MODEL-CODE' }}</div>
                                     <div class="text-primary small fw-bold">{{ $spec->variant->chassis_code ?? 'CHASSIS' }}</div>
                                     <small class="text-muted d-block mt-1">
-                                        {{ $spec->variant->destinations->region_name ?? 'Global' }} | {{ $spec->production_start ?? 'N/A' }} — {{ $spec->production_end ?? 'Present' }}
-                                    </small>
+        {{-- Access destinations via the current specification row --}}
+        @if($spec->destinations->isNotEmpty())
+            {{ $spec->destinations->pluck('name')->implode(', ') }}
+        @else
+            Global Market
+        @endif
+        | {{ $spec->production_start ?? 'N/A' }} — {{ $spec->production_end ?? 'Present' }}
+    </small>
                                 </td>
 
                                 {{-- Performance --}}
