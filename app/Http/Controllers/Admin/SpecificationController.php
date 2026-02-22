@@ -18,14 +18,16 @@ class SpecificationController extends Controller
 public function index(Request $request)
 {
     // 1. Efficient Eager Loading
+    // Added 'destinations' in case you want to show which market the spec is for
     $query = Specification::with([
-        'vehicleModel.brand', // Direct link to model and brand
+        'vehicleModel.brand',
         'variant',
         'bodyType',
         'engineDisplacement',
         'engineType',
         'transmissionType',
         'driveType',
+        'destinations' 
     ]);
 
     // 2. Database Level Filtering
@@ -33,17 +35,18 @@ public function index(Request $request)
         $query->where('vehicle_model_id', $request->vehicle_model_id);
     }
 
+    // Use paginate instead of get if your database grows
     $specifications = $query->latest()->get();
 
-    // 3. Grouping by the unique Brand | Model | Trim
+    // 3. Grouping Logic
+    // Included chassis_code in the grouping so different generations/body codes stay distinct
     $groupedSpecs = $specifications->groupBy(function ($spec) {
         $brand = $spec->vehicleModel?->brand?->brand_name ?? 'Unknown Brand';
         $model = $spec->vehicleModel?->model_name ?? 'Unknown Model';
-        
-        // Use trim_level as the variant name
-        $trim = $spec->variant->trim_level ?? 'Standard Trim'; 
+        $trim  = $spec->variant?->trim_level ?? 'Standard';
+        $chassis = $spec->chassis_code ? " ({$spec->chassis_code})" : '';
 
-        return "{$brand}|{$model}|{$trim}";
+        return "{$brand} {$model} {$trim}{$chassis}";
     });
 
     return view('admin.specifications.index', compact('groupedSpecs'));
