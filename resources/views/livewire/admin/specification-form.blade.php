@@ -252,23 +252,28 @@
                         </div>
                         <div class="col-md-3 mb-3">
     <label class="small font-weight-bold text-muted">Primary Color</label>
-    <div class="input-group shadow-sm">
+    {{-- We use x-data to sync the two inputs locally in the browser --}}
+    <div class="input-group shadow-sm" x-data="{ colorName: @entangle('color') }">
         <div class="input-group-prepend">
             <span class="input-group-text bg-white">
                 <i class="fas fa-palette text-muted"></i>
             </span>
         </div>
         
-        {{-- Text Input for Color Name --}}
-        <input type="text" wire:model="color" class="form-control" placeholder="e.g. Midnight Black">
+        {{-- Text Input --}}
+        <input type="text" 
+               x-model="colorName" 
+               class="form-control" 
+               placeholder="e.g. Midnight Black">
         
-        {{-- Visual Color Picker Suffix --}}
+        {{-- Visual Picker --}}
         <div class="input-group-append">
             <div class="input-group-text bg-white p-1">
                 <input type="color" 
+                       x-model="colorName"
                        class="border-0 bg-transparent" 
                        style="width: 30px; height: 24px; cursor: pointer;"
-                       title="Pick a visual color">
+                       title="Pick a color code">
             </div>
         </div>
     </div>
