@@ -184,10 +184,10 @@
                                 <td class="py-5">
                                     <div class="fw-bold text-dark mb-2 fs-6">{{ $spec->destinations->pluck('region_name')->first() ?? 'Global' }}</div>
                                     <div class="d-flex flex-wrap gap-2">
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border-0 px-3 py-2" style="font-size: 0.7rem; border-radius: 6px;">
+                                        <span class="badge bg-primary bg-opacity-10 text-white border-0 px-3 py-2" style="font-size: 0.7rem; border-radius: 6px;">
                                             <i class="fa fa-road me-1"></i> {{ $spec->driveType->name ?? 'N/A' }}
                                         </span>
-                                        <span class="badge bg-dark bg-opacity-10 text-dark border-0 px-3 py-2" style="font-size: 0.7rem; border-radius: 6px;">
+                                        <span class="badge bg-dark bg-opacity-10 text-white border-0 px-3 py-2" style="font-size: 0.7rem; border-radius: 6px;">
                                             <i class="fa fa-dharmachakra me-1"></i> {{ $spec->steering_position }}HD
                                         </span>
                                     </div>
@@ -202,7 +202,7 @@
                                                 <i class="fa fa-bolt text-warning me-2"></i>{{ $spec->horsepower ?? '-' }} <span class="small text-muted fw-normal">HP</span>
                                             </div>
                                             <div class="fw-bold text-dark">
-                                                <i class="fa fa-tachometer-alt text-secondary me-2"></i>{{ $spec->torque ?? '-' }} <span class="small text-muted fw-normal">Nm</span>
+                                                <i class="fa fa-tachometer-alt text-warning me-2"></i>{{ $spec->torque ?? '-' }} <span class="small text-muted fw-normal">Nm</span>
                                             </div>
                                         </div>
                                         <div class="fuel-group border-start ps-4">
@@ -211,7 +211,7 @@
                                                 <i class="fa fa-gas-pump text-primary me-2"></i>{{ $spec->fuel_capacity ?? '-' }} <span class="small text-muted fw-normal">L</span>
                                             </div>
                                             <div class="fw-bold text-success">
-                                                <i class="fa fa-leaf me-2"></i>{{ $spec->fuel_efficiency ?? '-' }} <span class="small text-muted fw-normal">km/L</span>
+                                                <i class="fa fa-leaf me-2"></i>{{ $spec->fuel_efficiency ?? '-' }} <span class="small text-muted fw-normal">L/100 Km</span>
                                             </div>
                                         </div>
                                     </div>
