@@ -95,8 +95,8 @@
                             <tr>
                                 {{-- Market, Chassis, Model Code & Period --}}
                                 <td class="ps-4">
-                                    <div class="fw-bold text-dark">{{ $spec->variant->model_code ?? 'MODEL-CODE' }}</div>
-                                    <div class="text-primary small fw-bold">{{ $spec->variant->chassis_code ?? 'CHASSIS' }}</div>
+                                    <div class="fw-bold text-dark">{{ $spec->model_code ?? 'MODEL-CODE' }}</div>
+                                    <div class="text-primary small fw-bold">{{ $spec->chassis_code ?? 'CHASSIS' }}</div>
                                  <small class="text-muted d-block mt-1">
     {{-- Now looking at the specific row ($spec) instead of the parent ($item) --}}
     @if($spec->destinations->isNotEmpty())
