@@ -141,7 +141,8 @@
 
                                 {{-- Action --}}
                                 <td class="text-center pe-4">
-                                    <a href="{{ route('parts.index', ['spec' => $spec->id]) }}" class="btn btn-dark btn-sm px-4 rounded-pill fw-bold">
+                                    {{-- {{ route('parts.index', ['spec' => $spec->id]) }} --}}
+                                    <a href="" class="btn btn-dark btn-sm px-4 rounded-pill fw-bold">
                                         View Parts <i class="fa-solid fa-gears ms-1"></i>
                                     </a>
                                 </td>
