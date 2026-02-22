@@ -19,13 +19,17 @@ class VariantController extends Controller
      * Display a listing of variants grouped by brand
      */
     public function index()
-    {
-        $brands = Brand::with(['vehicleModels.variants' => function($q) {
-            $q->orderBy('name');
-        }])->orderBy('brand_name')->get();
+{
+    $brands = Brand::with([
+        // Fixed typo: specifications
+        'vehicleModels.variants.specifications', 
+        'vehicleModels.variants' => function($q) {
+            $q->orderBy('production_year', 'desc'); // Usually better to sort variants by year
+        }
+    ])->orderBy('brand_name')->get();
 
-        return view('admin.variants.index', compact('brands'));
-    }
+    return view('admin.variants.index', compact('brands'));
+}
 
     /**
      * Show create form
