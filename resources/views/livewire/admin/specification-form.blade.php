@@ -221,21 +221,11 @@
 
                 {{-- PUBLISHING CONTROLS --}}
                 <div class="bg-white p-4 rounded shadow-sm mb-4">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <div class="custom-control custom-switch custom-switch-lg">
-                                <input type="checkbox" class="custom-control-input" id="statusSwitch" wire:model="status">
-                                <label class="custom-control-label font-weight-bold" for="statusSwitch">
-                                    {{ $status ? 'Active / Visible' : 'Draft / Hidden' }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-right">
+                    <div class="col-md-4 text-right">
                             <button type="submit" class="btn btn-primary btn-lg px-5 shadow rounded-pill">
                                 <i class="fas fa-save mr-2"></i> Save Specification
                             </button>
                         </div>
-                    </div>
                 </div>
             </form>
         </div>
