@@ -20,50 +20,66 @@
                             @endif
 
                             {{-- 1. Vehicle & Identity --}}
-                            <div class="bg-light p-3 rounded mb-4 border">
-                                <h6 class="text-uppercase text-muted font-weight-bold small mb-3">Vehicle & Identity</h6>
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <label class="small font-weight-bold">Brand *</label>
-                                        <select wire:model.live="brand_id" class="form-control @error('brand_id') is-invalid @enderror">
-                                            <option value="">Select Brand</option>
-                                            @foreach($brands as $brand)
-                                                <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="small font-weight-bold">Model *</label>
-                                        <select wire:model.live="vehicle_model_id" class="form-control @error('vehicle_model_id') is-invalid @enderror">
-                                            <option value="">Select Model</option>
-                                            @foreach($this->vehicleModels as $model)
-                                                <option value="{{ $model->id }}">{{ $model->model_name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="small font-weight-bold">Trim Level</label>
-                                        <input type="text" wire:model="trim_level" class="form-control" placeholder="e.g. XL, Premium">
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="small font-weight-bold">Chassis Code</label>
-                                        <input type="text" wire:model="chassis_code" class="form-control">
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="small font-weight-bold">Model Code</label>
-                                        <input type="text" wire:model="model_code" class="form-control">
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="small font-weight-bold">Destination Market</label>
-                                        <select wire:model="destination_id" class="form-control">
-                                            <option value="">Select Region</option>
-                                            @foreach($destinations as $dest)
-                                                <option value="{{ $dest->id }}">{{ $dest->region_name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+                           {{-- 1. Vehicle & Identity --}}
+<div class="bg-light p-3 rounded mb-4 border">
+    <h6 class="text-uppercase text-muted font-weight-bold small mb-3">Vehicle & Identity</h6>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="small font-weight-bold">Brand *</label>
+            <select wire:model.live="brand_id" class="form-control @error('brand_id') is-invalid @enderror">
+                <option value="">Select Brand</option>
+                @foreach($brands as $brand)
+                    <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="small font-weight-bold">Model *</label>
+            <select wire:model.live="vehicle_model_id" class="form-control @error('vehicle_model_id') is-invalid @enderror">
+                <option value="">Select Model</option>
+                @foreach($this->vehicleModels as $model)
+                    <option value="{{ $model->id }}">{{ $model->model_name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="small font-weight-bold">Trim Level</label>
+            <input type="text" wire:model="trim_level" class="form-control" placeholder="e.g. XL, Premium">
+        </div>
+        
+        {{-- Chassis Code with # --}}
+        <div class="col-md-4 mb-3">
+            <label class="small font-weight-bold">Chassis Code</label>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text bg-white text-muted">#</span>
+                </div>
+                <input type="text" wire:model="chassis_code" class="form-control" placeholder="E-AE101">
+            </div>
+        </div>
+
+        {{-- Model Code with # --}}
+        <div class="col-md-4 mb-3">
+            <label class="small font-weight-bold">Model Code</label>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text bg-white text-muted">#</span>
+                </div>
+                <input type="text" wire:model="model_code" class="form-control" placeholder="AE101-AEMNK">
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label class="small font-weight-bold">Destination Market</label>
+            <select wire:model="destination_id" class="form-control">
+                <option value="">Select Region</option>
+                @foreach($destinations as $dest)
+                    <option value="{{ $dest->id }}">{{ $dest->region_name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+</div>
 
                             {{-- 2. Engine & Drivetrain --}}
                             <div class="bg-white p-3 rounded mb-4 border shadow-sm">
