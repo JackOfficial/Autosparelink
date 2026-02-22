@@ -30,7 +30,7 @@
             </div>
             <input type="text" x-model="search" 
                    class="form-control border-0 py-4" 
-                   placeholder="Type to filter by brand, model, chassis or trim..."
+                   placeholder="Search by Brand, Model, Chassis or Trim..."
                    style="height: 50px; font-size: 15px;">
             <div class="input-group-append" x-show="search" @click="search = ''" style="cursor: pointer;">
                 <span class="input-group-text bg-white border-0 pr-4"><i class="fa fa-times-circle text-danger"></i></span>
@@ -40,9 +40,13 @@
 
     @forelse($groupedSpecs as $key => $specGroup)
         @php
-            [$brand, $model, $variantGroupName] = explode('|', $key . '||');
+            [$brandName, $model, $variantGroupName] = explode('|', $key . '||');
             $collapseId = 'group-' . $loop->index;
-            $groupSearchTag = strtolower("$brand $model $variantGroupName");
+            $groupSearchTag = strtolower("$brandName $model $variantGroupName");
+            
+            // Assuming your Specification -> Variant -> Brand relationship exists
+            // and the Brand model has a 'logo' attribute (path to image)
+            $brandLogo = $specGroup->first()->variant->brand->logo ?? null;
         @endphp
 
         <div class="card mb-4 border-0 shadow-sm" 
@@ -56,9 +60,16 @@
                 <div class="row align-items-center">
                     <div class="col-md-8">
                         <div class="d-flex align-items-center">
-                            <div class="brand-avatar mr-3 text-uppercase shadow-xs">{{ substr($brand, 0, 1) }}</div>
+                            {{-- BRAND LOGO INSTEAD OF LETTER --}}
+                            <div class="brand-logo-container mr-3 shadow-xs">
+                                @if($brandLogo)
+                                    <img src="{{ asset('storage/' . $brandLogo) }}" alt="{{ $brandName }}" class="img-fluid">
+                                @else
+                                    <i class="fa fa-car text-muted opacity-50"></i>
+                                @endif
+                            </div>
                             <div>
-                                <small class="text-muted font-weight-bold text-uppercase" style="letter-spacing: 1px; font-size: 10px;">{{ $brand }}</small>
+                                <small class="text-muted font-weight-bold text-uppercase" style="letter-spacing: 1px; font-size: 10px;">{{ $brandName }}</small>
                                 <h4 class="mb-0 font-weight-bold" style="color: #2c3e50;">
                                     {{ $model }} 
                                     @if($variantGroupName)
@@ -78,7 +89,7 @@
                 </div>
             </div>
 
-            {{-- EXPANDABLE TABLE --}}
+            {{-- EXPANDABLE TABLE (Stays the same) --}}
             <div id="{{ $collapseId }}" class="collapse show">
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -99,7 +110,6 @@
                                         $rowSearch = strtolower(($v->name ?? '') . ' ' . $spec->chassis_code . ' ' . $spec->model_code);
                                     @endphp
                                     <tr class="spec-row" x-show="search === '' || '{{ $rowSearch }}'.includes(search.toLowerCase()) || '{{ $groupSearchTag }}'.includes(search.toLowerCase())">
-                                        {{-- 1. Identity --}}
                                         <td class="pl-4 py-3">
                                             <div class="font-weight-bold text-dark">{{ $v->name ?? 'N/A' }}</div>
                                             <div class="mt-1">
@@ -107,22 +117,18 @@
                                                 <span class="badge-code">{{ $spec->model_code ?: '---' }}</span>
                                             </div>
                                             <div class="small text-muted mt-1">
-                                                <i class="fa fa-map-marker-alt mr-1"></i> {{ $spec->destinations->pluck('region_name')->first() ?: 'Global' }}
+                                                <i class="fa fa-globe-africa mr-1"></i> {{ $spec->destinations->pluck('region_name')->join(', ') ?: 'Global' }}
                                             </div>
                                         </td>
-
-                                        {{-- 2. Performance --}}
                                         <td>
                                             <div class="d-flex flex-column">
                                                 <span class="small font-weight-bold text-dark">{{ $spec->engineType->name ?? 'N/A' }}</span>
                                                 <span class="small text-muted">{{ $spec->transmissionType->name ?? 'N/A' }} • {{ $spec->driveType->name ?? 'N/A' }}</span>
-                                                <span class="mt-1 font-weight-bold text-warning small" style="letter-spacing: 0.5px;">
+                                                <span class="mt-1 font-weight-bold text-warning small">
                                                     {{ $spec->horsepower ?? 0 }} HP / {{ $spec->torque ?? 0 }} NM
                                                 </span>
                                             </div>
                                         </td>
-
-                                        {{-- 3. Lifecycle --}}
                                         <td class="text-center">
                                             <div class="small font-weight-bold text-dark">{{ $spec->production_start }}</div>
                                             <div class="small text-muted">to</div>
@@ -130,27 +136,25 @@
                                                 {{ $spec->production_end ?? 'Present' }}
                                             </div>
                                         </td>
-
-                                        {{-- 4. Status --}}
                                         <td class="text-center">
                                             @if($v?->is_default)
                                                 <span class="badge badge-pill badge-soft-warning mb-1 d-block">Default</span>
                                             @endif
-                                            <span class="dot-indicator {{ $spec->status ? 'bg-success' : 'bg-danger' }}"></span>
-                                            <span class="small font-weight-bold {{ $spec->status ? 'text-success' : 'text-danger' }}">
-                                                {{ $spec->status ? 'Active' : 'Draft' }}
-                                            </span>
+                                            <div class="d-flex align-items-center justify-content-center">
+                                                <span class="dot-indicator {{ $spec->status ? 'bg-success' : 'bg-danger' }}"></span>
+                                                <span class="small font-weight-bold {{ $spec->status ? 'text-success' : 'text-danger' }}">
+                                                    {{ $spec->status ? 'Active' : 'Draft' }}
+                                                </span>
+                                            </div>
                                         </td>
-
-                                        {{-- 5. Actions --}}
                                         <td class="pr-4 text-right">
                                             <div class="dropdown">
-                                                <button class="btn btn-light btn-sm rounded-circle" data-toggle="dropdown" style="width: 32px; height: 32px; padding: 0;">
+                                                <button class="btn btn-light btn-sm rounded-circle" data-toggle="dropdown">
                                                     <i class="fa fa-ellipsis-v text-muted"></i>
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-right border-0 shadow-lg">
                                                     <a class="dropdown-item" href="{{ route('admin.specifications.edit', $spec->id) }}">
-                                                        <i class="fa fa-edit text-primary mr-2"></i> Edit Specification
+                                                        <i class="fa fa-edit text-primary mr-2"></i> Edit
                                                     </a>
                                                     <div class="dropdown-divider"></div>
                                                     <button class="dropdown-item text-danger" onclick="confirm('Delete this spec?')">
@@ -176,22 +180,34 @@
 </section>
 
 <style>
-    /* Modern UI Tweaks */
     body { background-color: #f4f7f6; }
     .bg-lightest { background-color: #fbfbfc; }
-    .brand-avatar { width: 40px; height: 40px; background: #3c8dbc; color: white; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 800; font-size: 18px; }
+    
+    /* BRAND LOGO STYLING */
+    .brand-logo-container { 
+        width: 50px; 
+        height: 50px; 
+        background: #fff; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        border-radius: 10px; 
+        padding: 5px;
+        border: 1px solid #eee;
+    }
+    .brand-logo-container img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain; /* Keeps logo proportions perfect */
+    }
+
     .badge-code { background: #f0f2f5; color: #475467; font-family: 'Monaco', monospace; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; border: 1px solid #e2e8f0; }
     .spec-row:hover { background-color: #f8faff !important; }
-    .spec-row { transition: all 0.2s ease; }
     .collapse-arrow { transition: transform 0.3s; }
     [aria-expanded="true"] .collapse-arrow { transform: rotate(180deg); }
-    
-    /* Dot Status Indicator */
-    .dot-indicator { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
-    .badge-soft-warning { background-color: #fff8e1; color: #f57c00; font-size: 9px; }
-    
-    /* Remove default AdminLTE styling for cards */
-    .card { transition: transform 0.2s; }
-    .card:hover { transform: translateY(-2px); }
+    .dot-indicator { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .badge-soft-warning { background-color: #fff8e1; color: #f57c00; font-size: 9px; border: 1px solid #ffe0b2; }
+    .card { transition: all 0.2s; }
+    .card:hover { border-color: #3c8dbc !important; }
 </style>
 @endsection
