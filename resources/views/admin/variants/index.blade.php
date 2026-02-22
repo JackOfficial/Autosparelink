@@ -34,11 +34,6 @@
                         </button>
                     </div>
                 </div>
-                <div class="col-sm-3 text-end">
-                    <a href="{{ route('admin.variants.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm">
-                        <i class="fa fa-plus me-1"></i> New Variant
-                    </a>
-                </div>
             </div>
         </div>
     </section>
