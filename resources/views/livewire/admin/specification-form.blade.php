@@ -287,7 +287,7 @@
                         <div class="col-md-6 mb-3 mb-md-0">
                             <div class="custom-control custom-switch custom-switch-lg">
                                 <input type="checkbox" wire:model="status" class="custom-control-input" id="statusSwitch">
-                                <label class="custom-control-label font-weight-bold" for="statusSwitch">
+                                <label class="custom-control-label font-weight-bold ml-3" for="statusSwitch">
                                     Published & Visible to Public
                                 </label>
                             </div>
