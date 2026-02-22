@@ -127,7 +127,7 @@ class SpecificationForm extends Component
                     'horsepower'             => $this->horsepower,
                     'torque'                 => $this->torque,
                     'fuel_efficiency'        => $this->fuel_efficiency,
-                    'tank_capacity'          => $this->tank_capacity, 
+                    'fuel_capacity'          => $this->tank_capacity, 
                     'seats'                  => $this->seats,
                     'doors'                  => $this->doors,
                     'steering_position'      => $this->steering_position,
