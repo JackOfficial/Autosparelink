@@ -13,60 +13,59 @@
         </div>
     </div>
     
-    {{-- Hero Variant Header: High Contrast Fix --}}
+    {{-- Hero Variant Header: Refined High-Contrast --}}
     <div class="container-fluid px-xl-5 mb-4">
-        <div class="card border-0 bg-dark shadow-lg overflow-hidden" style="border-radius: 20px;">
-            {{-- Background Decorative Element (Subtle Grey-White) --}}
-            <div class="position-absolute end-0 bottom-0 opacity-10 d-none d-lg-block" style="transform: translate(10%, 30%); z-index: 1;">
-                 <i class="fa fa-car text-white" style="font-size: 250px;"></i>
-            </div>
-
-            <div class="card-body p-4 p-lg-5 position-relative" style="z-index: 2;">
+        <div class="card border-0 shadow-lg overflow-hidden" 
+             style="border-radius: 24px; background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);">
+            
+            <div class="card-body p-4 p-lg-5 position-relative">
                 <div class="row align-items-center">
                     <div class="col-lg-8">
+                        {{-- Identity Tag --}}
                         <div class="d-flex align-items-center gap-3 mb-3">
-                            <span class="badge bg-primary text-white px-3 py-2 rounded-pill text-uppercase fw-bold shadow-sm" style="font-size: 0.65rem; letter-spacing: 1px;">
-                                Selected Variant
+                            <span class="badge bg-primary text-white px-3 py-2 rounded-pill text-uppercase fw-bold shadow-sm" style="font-size: 0.7rem; letter-spacing: 1px;">
+                                <i class="fa fa-check-circle me-1"></i> Current Variant
                             </span>
                             <div class="vr bg-white opacity-25" style="height: 20px;"></div>
-                            <span class="text-white opacity-75 small fw-bold text-uppercase">{{ $item->vehicleModel->brand->brand_name }} Catalog</span>
+                            <span class="text-white-50 small fw-bold text-uppercase" style="letter-spacing: 1px;">
+                                {{ $item->vehicleModel->brand->brand_name }} {{ $item->vehicleModel->model_name }}
+                            </span>
                         </div>
                         
-                        {{-- Forced White Text for Variant Name --}}
-                        <h1 class="display-4 fw-black mb-2 tracking-tight text-white">{{ $item->name }}</h1>
+                        {{-- Variant Name --}}
+                        <h1 class="display-4 fw-black mb-1 tracking-tight text-white">{{ $item->name }}</h1>
+                        <p class="text-white-50 mb-4 fs-5">Technical Specification & Configuration Catalog</p>
                         
                         @if(!empty($lockedInfo))
                             <div class="d-flex flex-wrap gap-3 mt-4">
-                                {{-- Engine Block --}}
-                                <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-3 px-3 py-2 border border-white border-opacity-25 shadow-sm">
-                                    <div class="bg-primary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
-                                        <i class="fa fa-gas-pump text-white small"></i>
+                                {{-- Feature Badges with clearer contrast --}}
+                                <div class="d-flex align-items-center bg-dark bg-opacity-50 rounded-4 px-3 py-2 border border-white border-opacity-10 shadow-sm">
+                                    <div class="bg-primary rounded-3 p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fa fa-gas-pump text-white"></i>
                                     </div>
                                     <div>
-                                        <div class="text-white-50 text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Engine</div>
-                                        <div class="fw-bold small text-white">{{ $lockedInfo['engine'] }}</div>
+                                        <div class="text-white-50 text-uppercase fw-bold" style="font-size: 0.65rem;">Engine</div>
+                                        <div class="fw-bold text-white fs-6">{{ $lockedInfo['engine'] }}</div>
                                     </div>
                                 </div>
 
-                                {{-- Transmission Block --}}
-                                <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-3 px-3 py-2 border border-white border-opacity-25 shadow-sm">
-                                    <div class="bg-primary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
-                                        <i class="fa fa-cog text-white small"></i>
+                                <div class="d-flex align-items-center bg-dark bg-opacity-50 rounded-4 px-3 py-2 border border-white border-opacity-10 shadow-sm">
+                                    <div class="bg-primary rounded-3 p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fa fa-cog text-white"></i>
                                     </div>
                                     <div>
-                                        <div class="text-white-50 text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Transmission</div>
-                                        <div class="fw-bold small text-white">{{ $lockedInfo['trans'] }}</div>
+                                        <div class="text-white-50 text-uppercase fw-bold" style="font-size: 0.65rem;">Transmission</div>
+                                        <div class="fw-bold text-white fs-6">{{ $lockedInfo['trans'] }}</div>
                                     </div>
                                 </div>
 
-                                {{-- Body Style Block --}}
-                                <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-3 px-3 py-2 border border-white border-opacity-25 shadow-sm">
-                                    <div class="bg-primary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
-                                        <i class="fa fa-car-side text-white small"></i>
+                                <div class="d-flex align-items-center bg-dark bg-opacity-50 rounded-4 px-3 py-2 border border-white border-opacity-10 shadow-sm">
+                                    <div class="bg-primary rounded-3 p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fa fa-car-side text-white"></i>
                                     </div>
                                     <div>
-                                        <div class="text-white-50 text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Body Style</div>
-                                        <div class="fw-bold small text-white">{{ $lockedInfo['body'] }}</div>
+                                        <div class="text-white-50 text-uppercase fw-bold" style="font-size: 0.65rem;">Body Style</div>
+                                        <div class="fw-bold text-white fs-6">{{ $lockedInfo['body'] }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -75,14 +74,13 @@
                     
                     <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
                         @if($item->vehicleModel->brand->brand_logo)
-                            <div class="d-inline-block bg-white p-3 rounded-4 shadow-lg mb-2 border border-light border-opacity-10">
-                                <img src="{{ asset('storage/' . $item->vehicleModel->brand->brand_logo) }}" style="height: 65px; width: 110px; object-fit: contain;" alt="Brand Logo" />
+                            <div class="d-inline-block bg-white p-3 rounded-4 shadow-lg mb-2 border border-white border-opacity-10">
+                                <img src="{{ asset('storage/' . $item->vehicleModel->brand->brand_logo) }}" style="height: 80px; width: 130px; object-fit: contain;" alt="Brand Logo" />
                             </div>
                         @endif
-                        <div wire:loading class="d-block mt-2">
-                            <span class="badge bg-primary text-white px-3 py-2 shadow-sm">
-                                <i class="fa fa-sync fa-spin me-2"></i>Loading...
-                            </span>
+                        <div wire:loading class="d-block mt-3">
+                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                            <span class="text-white-50 small fw-bold">Refreshing results...</span>
                         </div>
                     </div>
                 </div>
@@ -92,24 +90,27 @@
 
     {{-- Filter Bar --}}
     <div class="container-fluid px-xl-5 mb-4">
-        <div class="card border-0 shadow-sm" style="border-radius: 15px; margin-top: -30px;">
-            <div class="card-body p-4">
+        <div class="card border-0 shadow-sm" style="border-radius: 18px; margin-top: -35px; z-index: 10;">
+            <div class="card-body p-4 p-lg-4">
                 <div class="row g-3 align-items-end">
                     <div class="col-lg-4">
-                        <label class="form-label fw-bold text-dark small mb-2"><i class="fa fa-search me-2 text-primary"></i>Refine by Code</label>
-                        <input type="text" wire:model.live.debounce.300ms="search" class="form-control form-control-lg border-light bg-light rounded-3 fs-6" placeholder="Chassis or Model code...">
+                        <label class="form-label fw-bold text-dark small mb-2 text-uppercase" style="letter-spacing: 0.5px;">Search Codes</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-light text-muted"><i class="fa fa-search"></i></span>
+                            <input type="text" wire:model.live.debounce.300ms="search" class="form-control form-control-lg border-light bg-light rounded-end-3 fs-6" placeholder="Chassis / Model code...">
+                        </div>
                     </div>
                     <div class="col-lg-2">
-                        <label class="form-label fw-bold text-dark small mb-2">Market</label>
+                        <label class="form-label fw-bold text-dark small mb-2 text-uppercase" style="letter-spacing: 0.5px;">Market</label>
                         <select wire:model.live="destination" class="form-select form-select-lg border-light bg-light rounded-3 fs-6">
-                            <option value="">Global Market</option>
+                            <option value="">All Markets</option>
                             @foreach($destinations as $dest)
                                 <option value="{{ $dest->id }}">{{ $dest->region_name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-lg-2">
-                        <label class="form-label fw-bold text-dark small mb-2">Drivetrain</label>
+                        <label class="form-label fw-bold text-dark small mb-2 text-uppercase" style="letter-spacing: 0.5px;">Drivetrain</label>
                         <select wire:model.live="drive" class="form-select form-select-lg border-light bg-light rounded-3 fs-6">
                             <option value="">Any Drive</option>
                             @foreach($driveTypes as $dt)
@@ -118,16 +119,16 @@
                         </select>
                     </div>
                     <div class="col-lg-2">
-                        <label class="form-label fw-bold text-dark small mb-2">Steering</label>
+                        <label class="form-label fw-bold text-dark small mb-2 text-uppercase" style="letter-spacing: 0.5px;">Steering</label>
                         <select wire:model.live="steering_position" class="form-select form-select-lg border-light bg-light rounded-3 fs-6">
                             <option value="">LHD & RHD</option>
-                            <option value="LEFT">Left Hand</option>
-                            <option value="RIGHT">Right Hand</option>
+                            <option value="LEFT">Left Hand (LHD)</option>
+                            <option value="RIGHT">Right Hand (RHD)</option>
                         </select>
                     </div>
                     <div class="col-lg-2">
-                        <button wire:click="resetFilters" class="btn btn-lg btn-outline-secondary border-light w-100 rounded-3 hover-shadow transition">
-                            <i class="fa fa-undo me-2"></i>Reset
+                        <button wire:click="resetFilters" class="btn btn-lg btn-outline-danger border-0 w-100 rounded-3 transition">
+                            <i class="fa fa-refresh me-2"></i>Reset
                         </button>
                     </div>
                 </div>
@@ -137,16 +138,19 @@
 
     {{-- Results Area --}}
     <div class="container-fluid px-xl-5 pb-5">
-        <div class="d-flex align-items-center justify-content-between mb-3 px-2">
-            <h5 class="fw-bold text-dark m-0">Technical Configurations <span class="badge bg-light text-primary ms-2 border">{{ count($specifications) }} Found</span></h5>
-        </div>
-
-        <div class="card shadow-sm border-0" style="border-radius: 15px;">
+        <div class="card shadow-sm border-0 overflow-hidden" style="border-radius: 18px;">
+            <div class="card-header bg-white py-3 border-0">
+                <h6 class="fw-bold text-dark m-0">
+                    <i class="fa fa-list-ul me-2 text-primary"></i> 
+                    Available Configurations 
+                    <span class="badge bg-primary bg-opacity-10 text-primary ms-2">{{ count($specifications) }} Specs Found</span>
+                </h6>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
-                        <tr class="text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">
-                            <th class="ps-4 py-4 border-0">Technical Codes</th>
+                        <tr class="text-uppercase text-muted" style="font-size: 0.7rem; letter-spacing: 1px;">
+                            <th class="ps-4 py-3 border-0">Technical Codes</th>
                             <th class="border-0">Compliance & Drivetrain</th>
                             <th class="border-0">Performance Specs</th>
                             <th class="text-end pe-4 border-0">Action</th>
@@ -157,41 +161,41 @@
                             <tr>
                                 <td class="ps-4 py-3">
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-primary bg-opacity-10 text-primary fw-bold rounded-3 p-2 me-3 text-center" style="min-width: 60px;">
+                                        <div class="bg-light text-primary fw-bold rounded-3 p-2 me-3 text-center border" style="min-width: 70px;">
                                             {{ $spec->model_code }}
                                         </div>
                                         <div>
-                                            <div class="fw-bold text-dark font-monospace">{{ $spec->chassis_code }}</div>
-                                            <div class="text-muted small-xs text-uppercase">Identification Code</div>
+                                            <div class="fw-bold text-dark font-monospace fs-6">{{ $spec->chassis_code }}</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">Vehicle ID</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="fw-bold text-dark">{{ $spec->destinations->pluck('region_name')->first() ?? 'Global' }}</div>
                                     <div class="small text-muted d-flex align-items-center mt-1">
-                                        <span class="badge bg-white text-muted border me-2 shadow-xs">{{ $spec->driveType->name ?? '-' }}</span>
-                                        <i class="fa fa-location-arrow me-1 small"></i> {{ $spec->steering_position }}HD
+                                        <span class="badge bg-light text-dark border me-2">{{ $spec->driveType->name ?? '-' }}</span>
+                                        <span class="text-uppercase">{{ $spec->steering_position }}HD</span>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="row g-0">
-                                        <div class="col-auto me-3">
-                                            <div class="text-muted small-xs text-uppercase fw-bold" style="font-size: 0.6rem;">Power</div>
-                                            <div class="fw-bold"><i class="fa fa-bolt text-warning me-1"></i>{{ $spec->horsepower ?? '-' }} <small class="fw-normal">HP</small></div>
+                                    <div class="d-flex gap-4">
+                                        <div>
+                                            <div class="text-muted fw-bold mb-0" style="font-size: 0.65rem;">POWER</div>
+                                            <div class="fw-bold"><i class="fa fa-bolt text-warning me-1 small"></i>{{ $spec->horsepower ?? '-' }} <small class="fw-normal">HP</small></div>
                                         </div>
-                                        <div class="col-auto me-3">
-                                            <div class="text-muted small-xs text-uppercase fw-bold" style="font-size: 0.6rem;">Capacity</div>
-                                            <div class="fw-bold"><i class="fa fa-users text-info me-1"></i>{{ $spec->seats }} <small class="fw-normal">Seats</small></div>
+                                        <div>
+                                            <div class="text-muted fw-bold mb-0" style="font-size: 0.65rem;">SEATS</div>
+                                            <div class="fw-bold"><i class="fa fa-users text-info me-1 small"></i>{{ $spec->seats }}</div>
                                         </div>
-                                        <div class="col-auto">
-                                            <div class="text-muted small-xs text-uppercase fw-bold" style="font-size: 0.6rem;">Doors</div>
-                                            <div class="fw-bold"><i class="fa fa-door-open text-secondary me-1"></i>{{ $spec->doors }}</div>
+                                        <div>
+                                            <div class="text-muted fw-bold mb-0" style="font-size: 0.65rem;">DOORS</div>
+                                            <div class="fw-bold"><i class="fa fa-door-open text-secondary me-1 small"></i>{{ $spec->doors }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <a href="#" class="btn btn-primary rounded-3 px-4 py-2 fw-bold shadow-sm btn-hover-zoom">
-                                        Catalog <i class="fa fa-arrow-right ms-2"></i>
+                                    <a href="#" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm btn-hover-zoom">
+                                        Open Catalog <i class="fa fa-arrow-right ms-2 small"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -199,10 +203,9 @@
                             <tr>
                                 <td colspan="4" class="text-center py-5">
                                     <div class="py-4">
-                                        <i class="fa fa-database fa-3x text-light mb-3"></i>
-                                        <h5 class="text-muted fw-bold">No specifications match your filters.</h5>
-                                        <p class="text-muted small">Try broadening your search or resetting the market filter.</p>
-                                        <button wire:click="resetFilters" class="btn btn-primary rounded-pill px-4 mt-2 shadow-sm">Show All Specs</button>
+                                        <i class="fa fa-search fa-3x text-light mb-3"></i>
+                                        <h5 class="text-muted fw-bold">No specifications match your search.</h5>
+                                        <button wire:click="resetFilters" class="btn btn-primary rounded-pill px-4 mt-2">Clear All Filters</button>
                                     </div>
                                 </td>
                             </tr>
@@ -214,13 +217,10 @@
     </div>
 
     <style>
-    .fw-black { font-weight: 900; }
-    .tracking-tight { letter-spacing: -1.5px; }
-    .small-xs { font-size: 0.7rem; }
-    .shadow-xs { shadow: 0 1px 2px rgba(0,0,0,0.05); }
-    .btn-hover-zoom:hover { transform: scale(1.05); transition: 0.2s; }
-    .transition { transition: all 0.2s ease-in-out; }
-</style>
-
+        .fw-black { font-weight: 900; }
+        .tracking-tight { letter-spacing: -1.5px; }
+        .btn-hover-zoom:hover { transform: translateY(-2px); transition: 0.2s; box-shadow: 0 5px 15px rgba(0,123,255,0.3); }
+        .transition { transition: all 0.2s ease-in-out; }
+        .form-select-lg, .form-control-lg { border-radius: 10px; }
+    </style>
 </div>
-
