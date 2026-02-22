@@ -99,7 +99,7 @@ class EditSpecification extends Component
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'trim_level' => 'required|string|max:100',
             'production_year' => 'required|integer|min:1900',
-            'start_year' => 'required|integer|min:1900',
+            'start_year' => 'required|integer|min:1900|gte:production_year',
             'body_type_id' => 'required|exists:body_types,id',
             'engine_type_id' => 'required|exists:engine_types,id',
             'steering_position' => 'required|in:LEFT,RIGHT',
