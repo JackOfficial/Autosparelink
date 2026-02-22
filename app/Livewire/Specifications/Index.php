@@ -30,7 +30,7 @@ class Index extends Component
     public function mount(Variant $variant)
     {
         // Eager load everything needed for the locked header and table
-        $this->item = $variant->load(['vehicleModel.brand', 'specifications.bodyType', 'specifications.engineType', 'specifications.transmissionType']);
+        $this->item = $variant->load(['vehicleModel.brand', 'bodyType', 'engineType', 'transmissionType']);
     }
 
     public function resetFilters()
