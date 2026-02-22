@@ -149,11 +149,11 @@
 
                                 {{-- Improved Input Groups with Suffixes --}}
                                 <div class="col-md-4 mb-3">
-                                    <label class="small font-weight-bold text-muted">Power</label>
+                                    <label class="small font-weight-bold text-muted">Horse Power</label>
                                     <div class="input-group">
                                         <input type="number" wire:model="horsepower" class="form-control">
                                         <div class="input-group-append">
-                                            <span class="input-group-text font-weight-bold bg-light small">Horse Power</span>
+                                            <span class="input-group-text font-weight-bold bg-light small">HP</span>
                                         </div>
                                     </div>
                                 </div>
