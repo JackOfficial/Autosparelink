@@ -60,7 +60,7 @@ class Variant extends Model
             $spec?->engineDisplacement?->name,
             $spec?->engineType?->name,
             $spec?->transmissionType?->name,
-        ];
+        ];  
 
         // Generate the Name
         $newName = implode(' ', array_filter($pieces));
