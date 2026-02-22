@@ -10,6 +10,8 @@ use Illuminate\Auth\Events\Login;
 use App\Listeners\MigrateCartOnLogin;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Pagination\Paginator; // Import this
+use App\Observers\SpecificationObserver;
+use App\Models\Specification;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
        );
 
        Paginator::useBootstrapFive(); // Add this line
+       Specification::observe(SpecificationObserver::class);
 
     //    $loader = AliasLoader::getInstance();
     //   $loader->alias('Cart', \Darryldecode\Cart\Facades\CartFacade::class);
