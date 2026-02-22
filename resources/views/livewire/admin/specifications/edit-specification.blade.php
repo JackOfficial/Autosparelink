@@ -7,7 +7,7 @@
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                             <h3 class="card-title font-weight-bold text-primary mb-0">
-                                <i class="fas fa- car-side mr-2"></i> Edit Technical Specification
+                                <i class="fas fa-car-side mr-2"></i> Edit Technical Specification
                             </h3>
                             <a href="{{ route('admin.specifications.index') }}" class="btn btn-light btn-sm border">
                                 <i class="fas fa-arrow-left mr-1"></i> Back
@@ -90,7 +90,7 @@
                             {{-- 2. Engine & Drivetrain --}}
                             <div class="bg-white p-3 rounded mb-4 border shadow-sm">
                                 <h6 class="text-uppercase text-primary font-weight-bold small mb-3">
-                                    <i class="fas fa-engine mr-1"></i> Engine & Drivetrain
+                                    <i class="fas fa-cogs mr-1"></i> Engine & Drivetrain
                                 </h6>
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
@@ -131,7 +131,7 @@
                                         <label class="small font-weight-bold text-primary">Horsepower</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fas fa-bolt text-warning small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-tachometer-alt text-warning small"></i></span>
                                             </div>
                                             <input type="number" wire:model="horsepower" class="form-control">
                                             <div class="input-group-append">
@@ -217,14 +217,19 @@
                                         <label class="small font-weight-bold">Seats</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fas fa-users text-muted small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-chair text-muted small"></i></span>
                                             </div>
                                             <input type="number" wire:model="seats" class="form-control">
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label class="small font-weight-bold">Doors</label>
-                                        <input type="number" wire:model="doors" class="form-control">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-white"><i class="fas fa-door-open text-muted small"></i></span>
+                                            </div>
+                                            <input type="number" wire:model="doors" class="form-control">
+                                        </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label class="small font-weight-bold">Exterior Color</label>
@@ -312,11 +317,11 @@
                                         <span class="font-weight-bold small text-success">{{ $fuel_efficiency ? $fuel_efficiency . ' L/100km' : '---' }}</span>
                                     </div>
                                     <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                        <span class="text-muted small"><i class="fas fa-bolt mr-1"></i> Power</span>
+                                        <span class="text-muted small"><i class="fas fa-tachometer-alt mr-1"></i> Power</span>
                                         <span class="font-weight-bold small">{{ $horsepower ? $horsepower . ' HP' : '---' }}</span>
                                     </div>
                                     <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                        <span class="text-muted small"><i class="fas fa-history mr-1"></i> Torque</span>
+                                        <span class="text-muted small"><i class="fas fa-sync-alt mr-1"></i> Torque</span>
                                         <span class="font-weight-bold small">{{ $torque ? $torque . ' Nm' : '---' }}</span>
                                     </div>
                                     <div class="d-flex justify-content-between">
