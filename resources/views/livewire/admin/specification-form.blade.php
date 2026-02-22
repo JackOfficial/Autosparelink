@@ -153,7 +153,7 @@
                                     <div class="input-group">
                                         <input type="number" wire:model="horsepower" class="form-control">
                                         <div class="input-group-append">
-                                            <span class="input-group-text font-weight-bold bg-light small">HP</span>
+                                            <span class="input-group-text font-weight-bold bg-light small">Horse Power</span>
                                         </div>
                                     </div>
                                 </div>
@@ -167,11 +167,11 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="small font-weight-bold text-muted">Efficiency</label>
+                                    <label class="small font-weight-bold text-muted">Fuel Efficiency</label>
                                     <div class="input-group">
                                         <input type="text" wire:model="fuel_efficiency" class="form-control" placeholder="10.5">
                                         <div class="input-group-append">
-                                            <span class="input-group-text bg-light"><i class="fas fa-gas-pump fa-xs"></i></span>
+                                            <span class="input-group-text font-weight-bold bg-light small">L/100 Km</span>
                                         </div>
                                     </div>
                                 </div>
