@@ -230,12 +230,6 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="col-md-4 border-left border-right">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="defaultSwitch" wire:model="is_default">
-                                <label class="custom-control-label" for="defaultSwitch">Set as Default variation for this model</label>
-                            </div>
-                        </div>
                         <div class="col-md-4 text-right">
                             <button type="submit" class="btn btn-primary btn-lg px-5 shadow rounded-pill">
                                 <i class="fas fa-save mr-2"></i> Save Specification
