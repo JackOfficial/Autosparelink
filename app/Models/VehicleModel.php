@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class VehicleModel extends Model
 {
@@ -53,5 +54,17 @@ class VehicleModel extends Model
         return $this->hasMany(Specification::class)
                     ->whereNull('variant_id'); // only specs directly for model
     }
+
+protected static function booted()
+{
+    static::created(function ($vehicleModel) {
+        // Automatically create a default variant so the UI never crashes
+        $vehicleModel->variants()->create([
+            'name' => 'Standard Configuration',
+            'slug' => Str::slug($vehicleModel->model_name . '-' . uniqid()),
+            'brand_id' => $vehicleModel->brand_id,
+        ]);
+    });
+}
 
 }
