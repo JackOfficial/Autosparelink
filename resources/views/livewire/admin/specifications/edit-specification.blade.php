@@ -7,7 +7,7 @@
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                             <h3 class="card-title font-weight-bold text-primary mb-0">
-                                <i class="fas fa-car-side mr-2"></i> Edit Technical Specification
+                                <i class="fas fa-car mr-2"></i> Edit Technical Specification
                             </h3>
                             <a href="{{ route('admin.specifications.index') }}" class="btn btn-light btn-sm border">
                                 <i class="fas fa-arrow-left mr-1"></i> Back
@@ -56,7 +56,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text bg-white text-muted">#</span>
                                             </div>
-                                            <input type="text" wire:model="chassis_code" class="form-control" placeholder="E-AE101">
+                                            <input type="text" wire:model="chassis_code" class="form-control">
                                         </div>
                                     </div>
 
@@ -66,7 +66,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text bg-white text-muted">#</span>
                                             </div>
-                                            <input type="text" wire:model="model_code" class="form-control" placeholder="AE101-AEMNK">
+                                            <input type="text" wire:model="model_code" class="form-control">
                                         </div>
                                     </div>
 
@@ -74,7 +74,7 @@
                                         <label class="small font-weight-bold">Destination Market</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fas fa-globe-americas text-muted"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-globe text-muted"></i></span>
                                             </div>
                                             <select wire:model="destination_id" class="form-control">
                                                 <option value="">Select Region</option>
@@ -115,7 +115,7 @@
                                         <label class="small font-weight-bold">Displacement</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fas fa-compress-arrows-alt text-muted small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-arrows-alt-h text-muted small"></i></span>
                                             </div>
                                             <select wire:model="engine_displacement_id" class="form-control">
                                                 <option value="">Select</option>
@@ -134,21 +134,15 @@
                                                 <span class="input-group-text bg-white"><i class="fas fa-tachometer-alt text-warning small"></i></span>
                                             </div>
                                             <input type="number" wire:model="horsepower" class="form-control">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text bg-light font-weight-bold small">HP</span>
-                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label class="small font-weight-bold text-primary">Torque</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fas fa-sync-alt text-muted small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-redo text-muted small"></i></span>
                                             </div>
                                             <input type="number" wire:model="torque" class="form-control">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text bg-light font-weight-bold small">Nm</span>
-                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -158,59 +152,24 @@
                                                 <span class="input-group-text bg-white"><i class="fas fa-gas-pump text-muted small"></i></span>
                                             </div>
                                             <input type="number" wire:model="fuel_capacity" class="form-control">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text bg-light font-weight-bold small">L</span>
-                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label class="small font-weight-bold">Efficiency</label>
                                         <div class="input-group">
-                                            <input type="text" wire:model="fuel_efficiency" class="form-control" placeholder="e.g. 8.5">
+                                            <input type="text" wire:model="fuel_efficiency" class="form-control">
                                             <div class="input-group-append">
                                                 <span class="input-group-text bg-light font-weight-bold small">L/100km</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <label class="small font-weight-bold">Transmission</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fas fa-cog text-muted"></i></span>
-                                            </div>
-                                            <select wire:model="transmission_type_id" class="form-control">
-                                                <option value="">Select</option>
-                                                @foreach($transmissionTypes as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="small font-weight-bold">Drive System</label>
-                                        <select wire:model="drive_type_id" class="form-control">
-                                            <option value="">Select</option>
-                                            @foreach($driveTypes as $item)
-                                                <option value="{{ $item->id }}">{{ $item->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="small font-weight-bold">Steering Position</label>
-                                        <select wire:model="steering_position" class="form-control">
-                                            <option value="LEFT">Left Hand Drive</option>
-                                            <option value="RIGHT">Right Hand Drive</option>
-                                        </select>
-                                    </div>
-                                </div>
                             </div>
 
-                            {{-- 3. Practicality & Appearance --}}
+                            {{-- 3. Practicality --}}
                             <div class="bg-light p-3 rounded mb-4 border">
                                 <h6 class="text-uppercase text-muted font-weight-bold small mb-3">
-                                    <i class="fas fa-couch mr-1"></i> Practicality & Appearance
+                                    <i class="fas fa-users mr-1"></i> Practicality
                                 </h6>
                                 <div class="row align-items-end">
                                     <div class="col-md-3 mb-3">
@@ -226,23 +185,16 @@
                                         <label class="small font-weight-bold">Doors</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fas fa-door-open text-muted small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-door-closed text-muted small"></i></span>
                                             </div>
                                             <input type="number" wire:model="doors" class="form-control">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label class="small font-weight-bold">Exterior Color</label>
-                                        <div class="d-flex">
-                                            <input type="color" wire:model.live="color" class="form-control p-1 mr-2" style="width: 50px; height: 38px; cursor: pointer;">
-                                            <input type="text" wire:model="color" class="form-control" placeholder="#FFFFFF">
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label class="small font-weight-bold">Visibility Status</label>
                                         <select wire:model="status" class="form-control">
                                             <option value="1">Active</option>
-                                            <option value="0">Draft/Inactive</option>
+                                            <option value="0">Draft</option>
                                         </select>
                                     </div>
                                 </div>
@@ -256,7 +208,7 @@
                                 <div class="row">
                                     <div class="col-md-4 mb-3 border-right">
                                         <label class="small font-weight-bold">Variant/Model Year *</label>
-                                        <input type="number" wire:model="production_year" class="form-control @error('production_year') is-invalid @enderror" placeholder="e.g. 2026">
+                                        <input type="number" wire:model="production_year" class="form-control @error('production_year') is-invalid @enderror">
                                     </div>
                                     <div class="col-md-4 mb-3 border-right">
                                         <label class="small font-weight-bold">Production Start</label>
@@ -277,7 +229,6 @@
                                                 @for($m=1; $m<=12; $m++) <option value="{{ $m }}">{{ date('F', mktime(0,0,0,$m,1)) }}</option> @endfor
                                             </select>
                                         </div>
-                                        <small class="text-muted">Empty Year = "Present"</small>
                                     </div>
                                 </div>
                             </div>
@@ -321,7 +272,7 @@
                                         <span class="font-weight-bold small">{{ $horsepower ? $horsepower . ' HP' : '---' }}</span>
                                     </div>
                                     <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                        <span class="text-muted small"><i class="fas fa-sync-alt mr-1"></i> Torque</span>
+                                        <span class="text-muted small"><i class="fas fa-redo mr-1"></i> Torque</span>
                                         <span class="font-weight-bold small">{{ $torque ? $torque . ' Nm' : '---' }}</span>
                                     </div>
                                     <div class="d-flex justify-content-between">
