@@ -1,164 +1,162 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Specifications')
+@section('title', 'Vehicle Specifications')
 
 @section('content')
-<section class="container-fluid">
-    <h1>Vehicle Specifications</h1>
-    <ol class="breadcrumb">
-        <li><a href="/admin"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Specifications</li>
-    </ol>
-</section>
-
-<section class="container-fluid" x-data="{ search: '' }">
-    
-    {{-- TOP ACTION BAR --}}
-    <div class="row" style="margin-bottom: 20px;">
-        <div class="col-md-6">
-            <a href="{{ route('admin.specifications.create') }}" class="btn btn-primary shadow-sm">
-                <i class="fa fa-plus"></i> Add New Specification
-            </a>
+<div class="content-header px-4">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h1 class="font-weight-bold text-dark mb-1" style="letter-spacing: -0.5px;">Vehicle Specifications</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 m-0 small">
+                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Specifications</li>
+                </ol>
+            </nav>
         </div>
-        
-        <div class="col-md-6">
-            <div class="input-group shadow-sm">
-                <span class="input-group-addon" style="background: #fff;"><i class="fa fa-search text-primary"></i></span>
-                <input type="text" 
-                       x-model="search" 
-                       class="form-control" 
-                       placeholder="Search Model, Chassis, or Trim..."
-                       style="height: 40px; border-left: none;">
-                <span class="input-group-addon" style="background: #fff; cursor: pointer;" x-show="search" @click="search = ''">
-                    <i class="fa fa-times text-red"></i>
-                </span>
+        <a href="{{ route('admin.specifications.create') }}" class="btn btn-primary btn-lg shadow-sm px-4" style="border-radius: 8px;">
+            <i class="fa fa-plus mr-2"></i> Add Specification
+        </a>
+    </div>
+</div>
+
+<section class="content px-4" x-data="{ search: '' }">
+    
+    {{-- UNIFIED SEARCH BAR --}}
+    <div class="mb-4">
+        <div class="input-group shadow-sm border-0" style="border-radius: 10px; overflow: hidden;">
+            <div class="input-group-prepend">
+                <span class="input-group-text bg-white border-0 pl-4"><i class="fa fa-search text-muted"></i></span>
+            </div>
+            <input type="text" x-model="search" 
+                   class="form-control border-0 py-4" 
+                   placeholder="Type to filter by brand, model, chassis or trim..."
+                   style="height: 50px; font-size: 15px;">
+            <div class="input-group-append" x-show="search" @click="search = ''" style="cursor: pointer;">
+                <span class="input-group-text bg-white border-0 pr-4"><i class="fa fa-times-circle text-danger"></i></span>
             </div>
         </div>
     </div>
 
     @forelse($groupedSpecs as $key => $specGroup)
         @php
-            $parts = explode('|', $key);
-            $brand = $parts[0] ?? '';
-            $model = $parts[1] ?? '';
-            $variantGroupName = $parts[2] ?? '';
+            [$brand, $model, $variantGroupName] = explode('|', $key . '||');
             $collapseId = 'group-' . $loop->index;
-            // Tag for Alpine search filtering
             $groupSearchTag = strtolower("$brand $model $variantGroupName");
         @endphp
 
-        <div class="box box-solid box-default shadow-sm spec-group-wrapper" 
+        <div class="card mb-4 border-0 shadow-sm" 
              x-show="search === '' || $el.innerText.toLowerCase().includes(search.toLowerCase())"
-             style="border-radius: 4px; border-left: 3px solid #3c8dbc; margin-bottom: 20px;">
+             style="border-radius: 12px; overflow: hidden;">
             
-            <div class="box-header with-border" 
-                 data-toggle="collapse" 
-                 data-target="#{{ $collapseId }}" 
-                 style="cursor:pointer; padding: 12px 15px;">
-                <div class="row">
-                    <div class="col-xs-9">
-                        <span class="text-uppercase" style="font-size: 10px; font-weight: 700; color: #999; letter-spacing: 1.2px; display: block;">
-                            {{ $brand }}
-                        </span>
-                        <span style="font-size: 16px; font-weight: 600;">
-                            {{ $model }} 
-                            @if($variantGroupName)
-                                <small style="color: #ccc; margin: 0 8px;">|</small> 
-                                <span class="text-primary">{{ $variantGroupName }}</span>
-                            @endif
-                        </span>
+            {{-- GROUP HEADER --}}
+            <div class="card-header bg-white py-3 border-bottom-0" 
+                 data-toggle="collapse" data-target="#{{ $collapseId }}"
+                 style="cursor: pointer; transition: background 0.2s;">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center">
+                            <div class="brand-avatar mr-3 text-uppercase shadow-xs">{{ substr($brand, 0, 1) }}</div>
+                            <div>
+                                <small class="text-muted font-weight-bold text-uppercase" style="letter-spacing: 1px; font-size: 10px;">{{ $brand }}</small>
+                                <h4 class="mb-0 font-weight-bold" style="color: #2c3e50;">
+                                    {{ $model }} 
+                                    @if($variantGroupName)
+                                        <span class="mx-2 text-light" style="font-weight: 300;">|</span>
+                                        <span class="text-primary font-weight-normal">{{ $variantGroupName }}</span>
+                                    @endif
+                                </h4>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-xs-3 text-right">
-                        <span class="spec-pill">{{ $specGroup->count() }} Variations</span>
-                        <i class="fa fa-chevron-down text-muted" style="margin-left:10px;"></i>
+                    <div class="col-md-4 text-right">
+                        <span class="badge badge-light border px-3 py-2 text-primary" style="border-radius: 20px;">
+                            {{ $specGroup->count() }} Variations
+                        </span>
+                        <i class="fa fa-chevron-down ml-3 text-muted opacity-50 collapse-arrow"></i>
                     </div>
                 </div>
             </div>
 
-            <div id="{{ $collapseId }}" class="panel-collapse collapse in">
-                <div class="box-body no-padding">
+            {{-- EXPANDABLE TABLE --}}
+            <div id="{{ $collapseId }}" class="collapse show">
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover" style="margin-bottom: 0;">
-                            <thead>
-                                <tr style="background: #fcfcfc; font-size: 11px; text-transform: uppercase; color: #777;">
-                                    <th style="padding-left: 15px; width: 250px;">Codes & Market</th>
-                                    <th>Technical Specs</th>
-                                    <th>Configuration</th>
-                                    <th class="text-center">Status</th>
-                                    <th class="text-right" style="padding-right: 15px;">Actions</th>
+                        <table class="table mb-0 align-middle">
+                            <thead class="bg-lightest">
+                                <tr class="small text-muted text-uppercase font-weight-bold">
+                                    <th class="pl-4 border-0">Identity & Market</th>
+                                    <th class="border-0">Technical Data</th>
+                                    <th class="border-0 text-center">Lifecycle</th>
+                                    <th class="border-0 text-center">Status</th>
+                                    <th class="pr-4 border-0 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($specGroup as $spec)
                                     @php
                                         $v = $spec->variant;
-                                        // CORRECTED: Pull codes from $spec, not $v
-                                        $rowSearch = strtolower(($v->name ?? '') . ' ' . ($spec->chassis_code ?? '') . ' ' . ($spec->model_code ?? ''));
+                                        $rowSearch = strtolower(($v->name ?? '') . ' ' . $spec->chassis_code . ' ' . $spec->model_code);
                                     @endphp
-                                    <tr x-show="search === '' || '{{ $rowSearch }}'.includes(search.toLowerCase()) || '{{ $groupSearchTag }}'.includes(search.toLowerCase())">
-                                        {{-- 1. IDENTITY & MARKET --}}
-                                        <td style="padding-left: 15px;">
-                                            {{-- The Variant Name is already auto-generated by your model --}}
-                                            <div style="font-weight: 700; color: #333; font-size: 13px;">{{ $v->name ?? 'N/A' }}</div>
-                                            <div style="margin-top: 4px;">
-                                                {{-- UPDATED: Accessing codes via $spec --}}
-                                                <span class="badge-code" title="Chassis Code">{{ $spec->chassis_code ?: '---' }}</span>
-                                                <span class="badge-code" title="Model Code">{{ $spec->model_code ?: '---' }}</span>
+                                    <tr class="spec-row" x-show="search === '' || '{{ $rowSearch }}'.includes(search.toLowerCase()) || '{{ $groupSearchTag }}'.includes(search.toLowerCase())">
+                                        {{-- 1. Identity --}}
+                                        <td class="pl-4 py-3">
+                                            <div class="font-weight-bold text-dark">{{ $v->name ?? 'N/A' }}</div>
+                                            <div class="mt-1">
+                                                <span class="badge-code">{{ $spec->chassis_code ?: '---' }}</span>
+                                                <span class="badge-code">{{ $spec->model_code ?: '---' }}</span>
                                             </div>
-                                            <div style="font-size: 11px; margin-top: 5px; color: #666;">
-                                                <i class="fa fa-globe text-muted"></i> 
-                                                {{ $spec->destinations->pluck('region_name')->join(', ') ?: 'Global' }}
+                                            <div class="small text-muted mt-1">
+                                                <i class="fa fa-map-marker-alt mr-1"></i> {{ $spec->destinations->pluck('region_name')->first() ?: 'Global' }}
                                             </div>
                                         </td>
 
-                                        {{-- 2. TECHNICAL SPECS --}}
+                                        {{-- 2. Performance --}}
                                         <td>
-                                            <div style="display: flex; gap: 15px;">
-                                                <div>
-                                                    <small class="text-muted block text-uppercase" style="font-size: 9px;">Engine / Trans</small>
-                                                    <div style="font-size: 12px;">
-                                                        <strong>{{ $spec->engineType->name ?? 'N/A' }}</strong> 
-                                                        <span class="text-muted">({{ $spec->transmissionType->name ?? 'N/A' }})</span>
-                                                    </div>
-                                                    <div style="font-size: 11px; color: #555;">
-                                                        <i class="fa fa-bolt text-warning"></i> {{ $spec->horsepower ?? 0 }} HP / {{ $spec->torque ?? 0 }} Nm
-                                                    </div>
-                                                </div>
+                                            <div class="d-flex flex-column">
+                                                <span class="small font-weight-bold text-dark">{{ $spec->engineType->name ?? 'N/A' }}</span>
+                                                <span class="small text-muted">{{ $spec->transmissionType->name ?? 'N/A' }} • {{ $spec->driveType->name ?? 'N/A' }}</span>
+                                                <span class="mt-1 font-weight-bold text-warning small" style="letter-spacing: 0.5px;">
+                                                    {{ $spec->horsepower ?? 0 }} HP / {{ $spec->torque ?? 0 }} NM
+                                                </span>
                                             </div>
                                         </td>
 
-                                        {{-- 3. CONFIGURATION --}}
-                                        <td>
-                                            <div style="font-size: 11px; line-height: 1.6;">
-                                                <div><i class="fa fa-car text-muted" style="width: 14px;"></i> {{ $spec->bodyType->name ?? 'N/A' }} ({{ $spec->driveType->name ?? 'N/A' }})</div>
-                                                <div><i class="fa fa-users text-muted" style="width: 14px;"></i> {{ $spec->seats }} Seats | {{ $spec->doors }} Doors</div>
-                                                <div class="text-primary" style="font-weight: 600;">
-                                                    <i class="fa fa-calendar-o" style="width: 14px;"></i> 
-                                                    {{ $spec->production_start }} - {{ $spec->production_end ?? 'Present' }}
-                                                </div>
+                                        {{-- 3. Lifecycle --}}
+                                        <td class="text-center">
+                                            <div class="small font-weight-bold text-dark">{{ $spec->production_start }}</div>
+                                            <div class="small text-muted">to</div>
+                                            <div class="small font-weight-bold {{ $spec->production_end == 'Present' ? 'text-success' : 'text-dark' }}">
+                                                {{ $spec->production_end ?? 'Present' }}
                                             </div>
                                         </td>
 
-                                        {{-- 4. STATUS --}}
+                                        {{-- 4. Status --}}
                                         <td class="text-center">
                                             @if($v?->is_default)
-                                                <span class="label label-warning" style="display:block; margin-bottom: 5px; font-size: 9px;">DEFAULT</span>
+                                                <span class="badge badge-pill badge-soft-warning mb-1 d-block">Default</span>
                                             @endif
-                                            <span class="label {{ $spec->status ? 'label-success' : 'label-danger' }}">
-                                                {{ $spec->status ? 'Active' : 'Inactive' }}
+                                            <span class="dot-indicator {{ $spec->status ? 'bg-success' : 'bg-danger' }}"></span>
+                                            <span class="small font-weight-bold {{ $spec->status ? 'text-success' : 'text-danger' }}">
+                                                {{ $spec->status ? 'Active' : 'Draft' }}
                                             </span>
                                         </td>
 
-                                        {{-- 5. ACTIONS --}}
-                                        <td class="text-right" style="padding-right: 15px;">
-                                            <div class="btn-group">
-                                                <a href="{{ route('admin.specifications.edit', $spec->id) }}" class="btn btn-default btn-sm shadow-xs">
-                                                    <i class="fa fa-pencil text-blue"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-default btn-sm shadow-xs" 
-                                                        onclick="confirm('Are you sure?') || event.stopImmediatePropagation()">
-                                                    <i class="fa fa-trash text-red"></i>
+                                        {{-- 5. Actions --}}
+                                        <td class="pr-4 text-right">
+                                            <div class="dropdown">
+                                                <button class="btn btn-light btn-sm rounded-circle" data-toggle="dropdown" style="width: 32px; height: 32px; padding: 0;">
+                                                    <i class="fa fa-ellipsis-v text-muted"></i>
                                                 </button>
+                                                <div class="dropdown-menu dropdown-menu-right border-0 shadow-lg">
+                                                    <a class="dropdown-item" href="{{ route('admin.specifications.edit', $spec->id) }}">
+                                                        <i class="fa fa-edit text-primary mr-2"></i> Edit Specification
+                                                    </a>
+                                                    <div class="dropdown-divider"></div>
+                                                    <button class="dropdown-item text-danger" onclick="confirm('Delete this spec?')">
+                                                        <i class="fa fa-trash mr-2"></i> Delete
+                                                    </button>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -170,21 +168,30 @@
             </div>
         </div>
     @empty
-        <div class="box box-solid text-center" style="padding: 40px;">
-            <p class="text-muted">No specifications found in the database.</p>
+        <div class="text-center py-5 bg-white shadow-sm rounded-lg">
+            <i class="fa fa-car-crash fa-3x text-light mb-3"></i>
+            <h4 class="text-muted">No specifications found</h4>
         </div>
     @endforelse
 </section>
 
 <style>
-    .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-    .spec-pill { background: #e7f3ff; color: #3c8dbc; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 11px; }
-    .badge-code { background: #f8f9fa; border: 1px solid #ddd; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 10px; color: #444; margin-right: 3px; font-weight: bold; }
-    .table > tbody > tr > td { vertical-align: middle; border-top: 1px solid #f4f4f4; padding: 12px 8px; }
-    .block { display: block; }
-    [data-toggle="collapse"] .fa-chevron-down { transition: 0.3s; transform: rotate(180deg); }
-    [data-toggle="collapse"].collapsed .fa-chevron-down { transform: rotate(0deg); }
-    .table-hover tbody tr:hover { background-color: #f9fbff !important; }
+    /* Modern UI Tweaks */
+    body { background-color: #f4f7f6; }
+    .bg-lightest { background-color: #fbfbfc; }
+    .brand-avatar { width: 40px; height: 40px; background: #3c8dbc; color: white; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 800; font-size: 18px; }
+    .badge-code { background: #f0f2f5; color: #475467; font-family: 'Monaco', monospace; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; border: 1px solid #e2e8f0; }
+    .spec-row:hover { background-color: #f8faff !important; }
+    .spec-row { transition: all 0.2s ease; }
+    .collapse-arrow { transition: transform 0.3s; }
+    [aria-expanded="true"] .collapse-arrow { transform: rotate(180deg); }
+    
+    /* Dot Status Indicator */
+    .dot-indicator { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+    .badge-soft-warning { background-color: #fff8e1; color: #f57c00; font-size: 9px; }
+    
+    /* Remove default AdminLTE styling for cards */
+    .card { transition: transform 0.2s; }
+    .card:hover { transform: translateY(-2px); }
 </style>
 @endsection
