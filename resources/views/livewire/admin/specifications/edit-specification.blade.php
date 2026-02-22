@@ -176,7 +176,7 @@
                                         <label class="small font-weight-bold">Seats
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fa-solid fa-couch text-muted small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-couch text-muted small"></i></span>
                                             </div>
                                             <input type="number" wire:model="seats" class="form-control">
                                         </div>
