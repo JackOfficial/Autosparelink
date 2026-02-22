@@ -95,10 +95,10 @@
                         </div>
 
                         <div class="col-md-3 mb-3">
-                            <label class="small font-weight-bold text-muted">Production Timeline (Start / End)</label>
+                            <label class="small font-weight-bold text-muted">Production Timeline</label>
                             <div class="d-flex">
                                 <input type="number" wire:model="production_year_start" class="form-control mr-1" placeholder="Start">
-                                <input type="text" wire:model="production_year_end" class="form-control" placeholder="End or 'Present'">
+                                <input type="text" wire:model="production_year_end" class="form-control" placeholder="End/Present">
                             </div>
                         </div>
                     </div>
@@ -177,57 +177,34 @@
 
                 <div class="row">
                     {{-- BODY & DIMENSIONS --}}
-                    <div class="col-md-6 mb-4">
-                        <div class="bg-white p-4 rounded shadow-sm h-100">
+                    <div class="col-12 mb-4">
+                        <div class="bg-white p-4 rounded shadow-sm">
                             <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
                                 <i class="fas fa-ruler-combined mr-2"></i> Body & Capacity
                             </h5>
                             <div class="row">
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-2 mb-3">
                                     <label class="small font-weight-bold text-muted">Body Type</label>
                                     <select wire:model="body_type_id" class="form-control">
                                         <option value="">Select</option>
                                         @foreach($bodyTypes as $bt) <option value="{{ $bt->id }}">{{ $bt->name }}</option> @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-2 mb-3">
                                     <label class="small font-weight-bold text-muted">Doors</label>
                                     <input type="number" wire:model="doors" class="form-control">
                                 </div>
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-2 mb-3">
                                     <label class="small font-weight-bold text-muted">Seats</label>
                                     <input type="number" wire:model="seats" class="form-control">
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-3 mb-3">
                                     <label class="small font-weight-bold text-muted">Weight (kg)</label>
                                     <input type="number" wire:model="curb_weight" class="form-control">
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-3 mb-3">
                                     <label class="small font-weight-bold text-muted">Fuel Tank (L)</label>
                                     <input type="number" wire:model="tank_capacity" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- TIRES & WHEELS --}}
-                    <div class="col-md-6 mb-4">
-                        <div class="bg-white p-4 rounded shadow-sm h-100">
-                            <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
-                                <i class="fas fa-dot-circle mr-2"></i> Wheels & Tires
-                            </h5>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="small font-weight-bold text-muted">Front Tire</label>
-                                    <input type="text" wire:model="front_tire_size" class="form-control" placeholder="245/40 R19">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="small font-weight-bold text-muted">Rear Tire</label>
-                                    <input type="text" wire:model="rear_tire_size" class="form-control" placeholder="275/35 R19">
-                                </div>
-                                <div class="col-md-12 mb-3">
-                                    <label class="small font-weight-bold text-muted">Rim Type</label>
-                                    <input type="text" wire:model="rim_type" class="form-control" placeholder="Alloy, Steel, etc.">
                                 </div>
                             </div>
                         </div>
@@ -253,7 +230,7 @@
                         </div>
                         <div class="col-md-4 text-right">
                             <button type="submit" class="btn btn-primary btn-lg px-5 shadow rounded-pill">
-                                <i class="fas fa-save mr-2"></i> Save Full Specification
+                                <i class="fas fa-save mr-2"></i> Save Specification
                             </button>
                         </div>
                     </div>
@@ -263,12 +240,10 @@
     </div>
 
     <style>
-    .bg-light-gray { background-color: #f8f9fa; }
-    .bg-gradient-primary { background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important; }
-    .custom-switch-lg .custom-control-label::before { height: 1.5rem; width: 2.5rem; border-radius: 1rem; }
-    .custom-switch-lg .custom-control-label::after { width: calc(1.5rem - 4px); height: calc(1.5rem - 4px); border-radius: 1rem; }
-    .custom-switch-lg .custom-control-input:checked ~ .custom-control-label::after { transform: translateX(1rem); }
-</style>
-
+        .bg-light-gray { background-color: #f8f9fa; }
+        .bg-gradient-primary { background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important; }
+        .custom-switch-lg .custom-control-label::before { height: 1.5rem; width: 2.5rem; border-radius: 1rem; }
+        .custom-switch-lg .custom-control-label::after { width: calc(1.5rem - 4px); height: calc(1.5rem - 4px); border-radius: 1rem; }
+        .custom-switch-lg .custom-control-input:checked ~ .custom-control-label::after { transform: translateX(1rem); }
+    </style>
 </div>
-
