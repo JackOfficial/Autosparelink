@@ -158,9 +158,9 @@ class Variant extends Model
     /**
  * Use the 'slug' column for Route Model Binding.
  */
-public function getRouteKeyName(): string
-{
-    return 'slug';
-}
+// public function getRouteKeyName(): string
+// {
+//     return 'slug';
+// }
 
 }
