@@ -35,16 +35,23 @@ class Brand extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-   public function parts()
-    {
-        /**
-         * hasManyDeep Parameters:
-         * 1. The destination model (Part)
-         * 2. An array of intermediate models in order (Model -> Variant -> Specification)
-         */
-        return $this->hasManyDeep(
-            Part::class, 
-            [VehicleModel::class, Variant::class, Specification::class]
-        );
-    }
+  public function parts()
+{
+    return $this->hasManyDeep(
+        Part::class,
+        [VehicleModel::class, Variant::class, Specification::class],
+        [
+            'brand_id',         // Foreign key on vehicle_models
+            'vehicle_model_id', // Foreign key on variants (check if this is 'model_id' in your DB)
+            'variant_id',       // Foreign key on specifications
+            'specification_id'  // Foreign key on parts (The one causing the error!)
+        ],
+        [
+            'id', // Local key on brands
+            'id', // Local key on vehicle_models
+            'id', // Local key on variants
+            'id'  // Local key on specifications
+        ]
+    );
+}
 }
