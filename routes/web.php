@@ -133,8 +133,13 @@ Route::get('/spare-parts/{part:sku}', [PartCatalogController::class, 'show'])->n
 
 // Route::get('/specifications/{type}/{id}/parts', [PartCatalogController::class, 'index'])
 //     ->name('specification.parts');
-    
-Route::get('/specifications/{type}/{id}', [SpecificationController::class, 'show'])->name('specifications.show');
+
+
+Route::get('/variant/{variant:slug}/specifications', [SpecificationController::class, 'show'])
+    ->name('variant.specifications');
+
+
+//Route::get('/specifications/{type}/{id}', [SpecificationController::class, 'show'])->name('specifications.show');
 Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 
 // Show all models for a brand

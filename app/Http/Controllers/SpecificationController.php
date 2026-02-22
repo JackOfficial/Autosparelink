@@ -32,30 +32,27 @@ class SpecificationController extends Controller
         return view('admin.specifications.index', compact('specifications'));
     }
 
-    public function show($type, $id)
-    {
-        if ($type === 'model') {
-            $item = VehicleModel::with(['brand', 'variants'])->findOrFail($id);
-            $specifications = Specification::where('vehicle_model_id', $id)->get();
-        } elseif ($type === 'variant') {
-            $item = Variant::with(['vehicleModel', 'vehicleModel.brand'])->findOrFail($id);
-            $specifications = Specification::with(['vehicleModel', 'variant', 'bodyType', 'engineType', 'transmissionType', 'driveType'])->where('variant_id', $id)->get();
-        } else {
-            abort(404);
-        }
+    public function show(Variant $variant)
+{
+    // Eager load everything needed for the header and the table
+    $variant->load([
+        'vehicleModel.brand',
+        'specifications.bodyType',
+        'specifications.engineType',
+        'specifications.transmissionType',
+        'specifications.driveType'
+    ]);
 
-         $vehicleModels = VehicleModel::all();
-        $bodyTypes = BodyType::all();
-        $engineTypes = EngineType::all();
-        $driveTypes = DriveType::all();
-        $transmissionTypes = TransmissionType::all();
-
-        return view('specification', compact('item', 'specifications', 'type', 'vehicleModels',
-            'bodyTypes',
-            'engineTypes',
-            'driveTypes',
-            'transmissionTypes'));
-    }
+    return view('specifications.show', [
+        'item' => $variant,
+        'specifications' => $variant->specifications,
+        // These should be filtered to only show options available for THIS variant
+        'bodyTypes' => BodyType::all(), 
+        'engineTypes' => EngineType::all(),
+        'transmissionTypes' => TransmissionType::all(),
+        'driveTypes' => DriveType::all(),
+    ]);
+}
 
     public function model_specification(Request $request, $model_id)
     {

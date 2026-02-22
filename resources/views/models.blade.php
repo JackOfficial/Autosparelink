@@ -131,52 +131,60 @@
                    style="border-radius: 10px; max-width: 200px;" placeholder="Filter models...">
         </div>
 
-        <div class="row">
-            @forelse($models as $model)
-                @php $hasVariants = $model->variants->count() > 0; @endphp
-                <div class="col-lg-4 col-md-6" x-show="modelSearch === '' || '{{ strtolower($model->model_name) }}'.includes(modelSearch.toLowerCase())">
-                    <div class="compact-card shadow-sm" @click="{{ $hasVariants ? "activeModel = (activeModel === $model->id ? null : $model->id)" : "window.location.href='".route('specifications.show', ['type' => 'model', 'id' => $model->id])."'" }}">
-                        
-                        <div class="d-flex align-items-center">
-                            {{-- Car Icon --}}
-                            <div class="card-icon">
-                                <i class="fa-solid fa-car-side"></i>
-                            </div>
-                            
-                            <div class="flex-grow-1">
-                                <div class="model-name">{{ $model->model_name }}</div>
-                                @if($model->production_start_year)
-                                    <div class="model-years">{{ $model->production_start_year }} — {{ $model->production_end_year ?? 'Present' }}</div>
-                                @endif
-                            </div>
+       <div class="row">
+    @forelse($models as $model)
+        {{-- Identify the default variant to use if the user clicks a model directly --}}
+        @php 
+            $hasVariants = $model->variants->count() > 0; 
+            $defaultVariant = $model->variants->first(); // Or $model->variants->where('is_default', true)->first()
+        @endphp
 
-                            {{-- Right End Toggle --}}
-                            @if($hasVariants)
-                                <i class="fa-solid fa-chevron-down text-muted small transition" :class="activeModel === {{ $model->id }} ? 'rotate-180' : ''"></i>
-                            @else
-                                <i class="fa-solid fa-arrow-right text-muted small"></i>
-                            @endif
-                        </div>
-
-                        {{-- Full Length Variants --}}
-                        @if($hasVariants)
-                            <div x-show="activeModel === {{ $model->id }}" x-cloak x-collapse @click.stop class="variant-container">
-                                @foreach($model->variants as $variant)
-                                    <a href="{{ route('specifications.show', ['type' => 'variant', 'id' => $variant->id]) }}" class="variant-full-btn">
-                                        <span>{{ $variant->name }}</span>
-                                        <i class="fa-solid fa-chevron-right fa-xs opacity-50"></i>
-                                    </a>
-                                @endforeach
-                            </div>
+        <div class="col-lg-4 col-md-6" x-show="modelSearch === '' || '{{ strtolower($model->model_name) }}'.includes(modelSearch.toLowerCase())">
+            
+            {{-- Update 1: Click logic --}}
+            <div class="compact-card shadow-sm" 
+                 @click="{{ $hasVariants 
+                    ? "activeModel = (activeModel === $model->id ? null : $model->id)" 
+                    : "window.location.href='".route('variant.specifications', $defaultVariant->slug)."'" }}">
+                
+                <div class="d-flex align-items-center">
+                    <div class="card-icon">
+                        <i class="fa-solid fa-car-side"></i>
+                    </div>
+                    
+                    <div class="flex-grow-1">
+                        <div class="model-name">{{ $model->model_name }}</div>
+                        @if($model->production_start_year)
+                            <div class="model-years">{{ $model->production_start_year }} — {{ $model->production_end_year ?? 'Present' }}</div>
                         @endif
                     </div>
+
+                    @if($hasVariants)
+                        <i class="fa-solid fa-chevron-down text-muted small transition" :class="activeModel === {{ $model->id }} ? 'rotate-180' : ''"></i>
+                    @else
+                        <i class="fa-solid fa-arrow-right text-muted small"></i>
+                    @endif
                 </div>
-            @empty
-                <div class="col-12 text-center py-5">
-                    <p class="text-muted">No models found.</p>
-                </div>
-            @endforelse
+
+                {{-- Update 2: Variant Button Links --}}
+                @if($hasVariants)
+                    <div x-show="activeModel === {{ $model->id }}" x-cloak x-collapse @click.stop class="variant-container">
+                        @foreach($model->variants as $variant)
+                            <a href="{{ route('variant.specifications', $variant->slug) }}" class="variant-full-btn">
+                                <span>{{ $variant->name }}</span>
+                                <i class="fa-solid fa-chevron-right fa-xs opacity-50"></i>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
+    @empty
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">No models found.</p>
+        </div>
+    @endforelse
+</div>
 
         <div class="row justify-content-center mt-5 pt-5">
             <div class="col-lg-8">
