@@ -7,24 +7,24 @@
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                             <h3 class="card-title font-weight-bold text-primary mb-0">
-                                <i class="fa-solid fa-car-side mr-2"></i> Edit Technical Specification
+                                <i class="fas fa- car-side mr-2"></i> Edit Technical Specification
                             </h3>
                             <a href="{{ route('admin.specifications.index') }}" class="btn btn-light btn-sm border">
-                                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+                                <i class="fas fa-arrow-left mr-1"></i> Back
                             </a>
                         </div>
 
                         <div class="card-body">
                             @if (session()->has('error'))
                                 <div class="alert alert-danger">
-                                    <i class="fa-solid fa-circle-exclamation mr-2"></i> {{ session('error') }}
+                                    <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
                                 </div>
                             @endif
 
                             {{-- 1. Vehicle & Identity --}}
                             <div class="bg-light p-3 rounded mb-4 border">
                                 <h6 class="text-uppercase text-muted font-weight-bold small mb-3">
-                                    <i class="fa-solid fa-id-card mr-1"></i> Vehicle & Identity
+                                    <i class="fas fa-id-card mr-1"></i> Vehicle & Identity
                                 </h6>
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
@@ -54,7 +54,7 @@
                                         <label class="small font-weight-bold">Chassis Code</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white text-muted"><i class="fa-solid fa-hashtag small"></i></span>
+                                                <span class="input-group-text bg-white text-muted">#</span>
                                             </div>
                                             <input type="text" wire:model="chassis_code" class="form-control" placeholder="E-AE101">
                                         </div>
@@ -64,7 +64,7 @@
                                         <label class="small font-weight-bold">Model Code</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white text-muted"><i class="fa-solid fa-barcode small"></i></span>
+                                                <span class="input-group-text bg-white text-muted">#</span>
                                             </div>
                                             <input type="text" wire:model="model_code" class="form-control" placeholder="AE101-AEMNK">
                                         </div>
@@ -74,7 +74,7 @@
                                         <label class="small font-weight-bold">Destination Market</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fa-solid fa-earth-americas text-muted"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-globe-americas text-muted"></i></span>
                                             </div>
                                             <select wire:model="destination_id" class="form-control">
                                                 <option value="">Select Region</option>
@@ -90,7 +90,7 @@
                             {{-- 2. Engine & Drivetrain --}}
                             <div class="bg-white p-3 rounded mb-4 border shadow-sm">
                                 <h6 class="text-uppercase text-primary font-weight-bold small mb-3">
-                                    <i class="fa-solid fa-gears mr-1"></i> Engine & Drivetrain
+                                    <i class="fas fa-engine mr-1"></i> Engine & Drivetrain
                                 </h6>
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
@@ -115,7 +115,7 @@
                                         <label class="small font-weight-bold">Displacement</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fa-solid fa-compress text-muted small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-compress-arrows-alt text-muted small"></i></span>
                                             </div>
                                             <select wire:model="engine_displacement_id" class="form-control">
                                                 <option value="">Select</option>
@@ -131,7 +131,7 @@
                                         <label class="small font-weight-bold text-primary">Horsepower</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fa-solid fa-bolt-lightning text-warning small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-bolt text-warning small"></i></span>
                                             </div>
                                             <input type="number" wire:model="horsepower" class="form-control">
                                             <div class="input-group-append">
@@ -143,7 +143,7 @@
                                         <label class="small font-weight-bold text-primary">Torque</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fa-solid fa-arrows-rotate text-muted small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-sync-alt text-muted small"></i></span>
                                             </div>
                                             <input type="number" wire:model="torque" class="form-control">
                                             <div class="input-group-append">
@@ -155,7 +155,7 @@
                                         <label class="small font-weight-bold">Fuel Capacity</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fa-solid fa-gas-pump text-muted small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-gas-pump text-muted small"></i></span>
                                             </div>
                                             <input type="number" wire:model="fuel_capacity" class="form-control">
                                             <div class="input-group-append">
@@ -178,7 +178,7 @@
                                         <label class="small font-weight-bold">Transmission</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fa-solid fa-gear text-muted"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-cog text-muted"></i></span>
                                             </div>
                                             <select wire:model="transmission_type_id" class="form-control">
                                                 <option value="">Select</option>
@@ -210,14 +210,14 @@
                             {{-- 3. Practicality & Appearance --}}
                             <div class="bg-light p-3 rounded mb-4 border">
                                 <h6 class="text-uppercase text-muted font-weight-bold small mb-3">
-                                    <i class="fa-solid fa-chair mr-1"></i> Practicality & Appearance
+                                    <i class="fas fa-couch mr-1"></i> Practicality & Appearance
                                 </h6>
                                 <div class="row align-items-end">
                                     <div class="col-md-3 mb-3">
                                         <label class="small font-weight-bold">Seats</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-white"><i class="fa-solid fa-users text-muted small"></i></span>
+                                                <span class="input-group-text bg-white"><i class="fas fa-users text-muted small"></i></span>
                                             </div>
                                             <input type="number" wire:model="seats" class="form-control">
                                         </div>
@@ -246,7 +246,7 @@
                             {{-- 4. Production Dates --}}
                             <div class="bg-white p-3 rounded border mb-4 shadow-sm">
                                 <h6 class="text-uppercase text-muted font-weight-bold small mb-3">
-                                    <i class="fa-solid fa-calendar-days mr-1"></i> Production Lifecycle
+                                    <i class="fas fa-calendar-alt mr-1"></i> Production Lifecycle
                                 </h6>
                                 <div class="row">
                                     <div class="col-md-4 mb-3 border-right">
@@ -279,8 +279,8 @@
 
                             <div class="d-flex justify-content-end">
                                 <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm" wire:loading.attr="disabled">
-                                    <span wire:loading.remove><i class="fa-solid fa-floppy-disk mr-2"></i> Update Specification</span>
-                                    <span wire:loading><i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...</span>
+                                    <span wire:loading.remove><i class="fas fa-save mr-2"></i> Update Specification</span>
+                                    <span wire:loading><i class="fas fa-spinner fa-spin mr-2"></i> Saving...</span>
                                 </button>
                             </div>
                         </div>
@@ -292,7 +292,7 @@
                     <div class="sticky-top" style="top: 20px;">
                         <div class="card shadow border-0">
                             <div class="card-header bg-dark text-white font-weight-bold">
-                                <i class="fa-solid fa-eye mr-2"></i> Live Preview
+                                <i class="fas fa-eye mr-2"></i> Live Preview
                             </div>
                             <div class="card-body text-center py-4">
                                 <div class="rounded-circle mx-auto mb-3 border shadow-sm" 
@@ -308,19 +308,19 @@
                                 
                                 <div class="bg-light rounded p-3 text-left">
                                     <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                        <span class="text-muted small"><i class="fa-solid fa-leaf mr-1"></i> Efficiency</span>
+                                        <span class="text-muted small"><i class="fas fa-leaf mr-1"></i> Efficiency</span>
                                         <span class="font-weight-bold small text-success">{{ $fuel_efficiency ? $fuel_efficiency . ' L/100km' : '---' }}</span>
                                     </div>
                                     <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                        <span class="text-muted small"><i class="fa-solid fa-bolt-lightning mr-1"></i> Power</span>
+                                        <span class="text-muted small"><i class="fas fa-bolt mr-1"></i> Power</span>
                                         <span class="font-weight-bold small">{{ $horsepower ? $horsepower . ' HP' : '---' }}</span>
                                     </div>
                                     <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                        <span class="text-muted small"><i class="fa-solid fa-arrows-rotate mr-1"></i> Torque</span>
+                                        <span class="text-muted small"><i class="fas fa-history mr-1"></i> Torque</span>
                                         <span class="font-weight-bold small">{{ $torque ? $torque . ' Nm' : '---' }}</span>
                                     </div>
                                     <div class="d-flex justify-content-between">
-                                        <span class="text-muted small"><i class="fa-solid fa-calendar mr-1"></i> Year</span>
+                                        <span class="text-muted small"><i class="fas fa-calendar mr-1"></i> Year</span>
                                         <span class="font-weight-bold small">{{ $production_year ?: '----' }}</span>
                                     </div>
                                 </div>
