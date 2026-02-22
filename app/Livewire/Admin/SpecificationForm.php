@@ -38,14 +38,45 @@ class SpecificationForm extends Component
     /**
      * Syncs with the {{ $this->generatedName }} in your Blade header
      */
-    #[Computed]
-    public function generatedName()
-    {
-        $model = VehicleModel::find($this->vehicle_model_id);
-        if (!$model) return 'New Specification';
-        
-        return ($model->brand->brand_name ?? '') . ' ' . $model->model_name . ' ' . ($this->trim_level ?? '');
+#[Computed]
+public function generatedName()
+{
+    $model = VehicleModel::with('brand')->find($this->vehicle_model_id);
+    if (!$model) return 'New Specification';
+
+    $brand = $model->brand->brand_name ?? '';
+    $name = "{$brand} {$model->model_name}";
+
+    // 1. Add Trim
+    if ($this->trim_level) {
+        $name .= " " . $this->trim_level;
     }
+
+    // 2. Add Body Type (New)
+    $body = BodyType::find($this->body_type_id);
+    if ($body) {
+        $name .= " " . $body->name;
+    }
+
+    // 3. Add Production Year in brackets
+    if ($this->production_year) {
+        $name .= " ({$this->production_year})";
+    }
+
+    // 4. Add Technical Specs after the dash
+    $engine = EngineDisplacement::find($this->engine_displacement_id);
+    $trans = TransmissionType::find($this->transmission_type_id);
+
+    if ($engine || $trans) {
+        $details = [];
+        if ($engine) $details[] = $engine->name;
+        if ($trans) $details[] = $trans->name;
+        
+        $name .= " — " . implode(' ', $details);
+    }
+
+    return $name;
+}
 
     /**
      * Syncs with @foreach($this->vehicleModels as $model) in your Blade
