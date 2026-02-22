@@ -134,7 +134,7 @@
                                     </small>
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('specification.parts', $spec->id) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="" class="btn btn-sm btn-outline-primary">
                                         View Parts <i class="fa fa-angle-right ms-1"></i>
                                     </a>
                                 </td>
