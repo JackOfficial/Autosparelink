@@ -35,22 +35,29 @@ class Brand extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-  public function parts()
+ public function parts()
 {
     return $this->hasManyDeep(
         Part::class,
-        [VehicleModel::class, Variant::class, Specification::class],
         [
-            'brand_id',         // Foreign key on vehicle_models
-            'vehicle_model_id', // Foreign key on variants (check if this is 'model_id' in your DB)
-            'variant_id',       // Foreign key on specifications
-            'specification_id'  // Foreign key on parts (The one causing the error!)
+            VehicleModel::class, 
+            Variant::class, 
+            Specification::class, 
+            'part_fitments' // Add the pivot table here
         ],
         [
-            'id', // Local key on brands
-            'id', // Local key on vehicle_models
-            'id', // Local key on variants
-            'id'  // Local key on specifications
+            'brand_id',         // Foreign key on vehicle_models
+            'vehicle_model_id', // Foreign key on variants
+            'variant_id',       // Foreign key on specifications
+            'specification_id', // Foreign key on part_fitments (links to spec)
+            'id'                // Local key on parts (matched to part_fitments.part_id)
+        ],
+        [
+            'id',               // Local key on brands
+            'id',               // Local key on vehicle_models
+            'id',               // Local key on variants
+            'id',               // Local key on specifications
+            'part_id'           // Foreign key on part_fitments (links to part)
         ]
     );
 }
