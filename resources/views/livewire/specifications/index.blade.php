@@ -66,11 +66,6 @@
                     </div>
                     
                     <div class="col-lg-4 text-center text-lg-right mt-4 mt-lg-0">
-                        @if($item->vehicleModel->brand->brand_logo)
-                            <div class="d-inline-block bg-white p-3 rounded shadow-lg mb-2 logo-container" style="border-radius: 15px !important;">
-                                <img src="{{ asset('storage/' . $item->vehicleModel->brand->brand_logo) }}" style="height: 80px; width: 130px; object-fit: contain;" alt="Brand Logo" />
-                            </div>
-                        @endif
                        <div class="col-lg-4 text-center text-lg-right mt-4 mt-lg-0 position-relative">
     @if($item->vehicleModel->brand->brand_logo)
         <div class="d-inline-block bg-white p-3 rounded shadow-lg mb-2 logo-container" style="border-radius: 15px !important;">
