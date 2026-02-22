@@ -30,9 +30,7 @@
             </div>
             
             {{-- Loading Spinner --}}
-            <div wire:loading class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+            <div wire:loading class="spinner-border text-primary" role="status"></div>
         </div>
     </div>
 
