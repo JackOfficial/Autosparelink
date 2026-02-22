@@ -32,26 +32,10 @@ class SpecificationController extends Controller
         return view('admin.specifications.index', compact('specifications'));
     }
 
-    public function show(Variant $variant)
+ public function show(Variant $variant)
 {
-    // Eager load everything needed for the header and the table
-    $variant->load([
-        'vehicleModel.brand',
-        'specifications.bodyType',
-        'specifications.engineType',
-        'specifications.transmissionType',
-        'specifications.driveType',
-        'specifications.destinations',
-    ]);
-
     return view('specifications.show', [
-        'item' => $variant,
-        'specifications' => $variant->specifications,
-        // These should be filtered to only show options available for THIS variant
-        'bodyTypes' => BodyType::all(), 
-        'engineTypes' => EngineType::all(),
-        'transmissionTypes' => TransmissionType::all(),
-        'driveTypes' => DriveType::all(),
+        'variant' => $variant,
     ]);
 }
 
