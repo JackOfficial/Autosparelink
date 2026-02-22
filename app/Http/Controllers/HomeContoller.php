@@ -6,11 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Part;
 use Illuminate\Http\Request;
-
-namespace App\Http\Controllers;
-
-use App\Models\Brand;
-use App\Models\Part;
 use Illuminate\View\View;
 
 class HomeController extends Controller
