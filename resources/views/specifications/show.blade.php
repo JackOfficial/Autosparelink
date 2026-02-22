@@ -14,6 +14,6 @@
 @section('content')
 
 {{-- Pass the variant from the controller to the Livewire component --}}
-<livewire:specification.index :variant="$variant" />
+<livewire:specifications.index :variant="$variant" />
 
 @endsection
