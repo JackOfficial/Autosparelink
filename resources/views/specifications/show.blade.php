@@ -110,7 +110,7 @@
                                 {{-- Efficiency & Fuel --}}
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span class="text-dark">{{ $spec->fuel_efficiency ?? '-' }}</span>
+                                        <span class="text-dark">{{ $spec->fuel_efficiency ?? '-' }} L/100 KM</span>
                                         <small class="text-muted">{{ $spec->fuel_capacity ?? '-' }}L Capacity</small>
                                     </div>
                                 </td>
