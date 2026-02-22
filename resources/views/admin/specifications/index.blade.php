@@ -46,7 +46,7 @@
             
             // Assuming your Specification -> Variant -> Brand relationship exists
             // and the Brand model has a 'logo' attribute (path to image)
-            $brandLogo = $specGroup->first()->variant->brand->logo ?? null;
+            $brandLogo = $specGroup->first()->variant->brand->brand_logo ?? null;
         @endphp
 
         <div class="card mb-4 border-0 shadow-sm" 
