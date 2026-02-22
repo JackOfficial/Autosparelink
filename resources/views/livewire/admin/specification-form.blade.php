@@ -251,12 +251,28 @@
                             </div>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="small font-weight-bold text-muted">Primary Color</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend"><span class="input-group-text bg-white"><i class="fas fa-palette text-muted"></i></span></div>
-                                <input type="text" wire:model="color" class="form-control" placeholder="e.g. Midnight Black">
-                            </div>
-                        </div>
+    <label class="small font-weight-bold text-muted">Primary Color</label>
+    <div class="input-group shadow-sm">
+        <div class="input-group-prepend">
+            <span class="input-group-text bg-white">
+                <i class="fas fa-palette text-muted"></i>
+            </span>
+        </div>
+        
+        {{-- Text Input for Color Name --}}
+        <input type="text" wire:model="color" class="form-control" placeholder="e.g. Midnight Black">
+        
+        {{-- Visual Color Picker Suffix --}}
+        <div class="input-group-append">
+            <div class="input-group-text bg-white p-1">
+                <input type="color" 
+                       class="border-0 bg-transparent" 
+                       style="width: 30px; height: 24px; cursor: pointer;"
+                       title="Pick a visual color">
+            </div>
+        </div>
+    </div>
+</div>
                     </div>
                 </div>
 
