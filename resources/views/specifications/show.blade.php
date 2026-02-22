@@ -33,17 +33,16 @@
         @endif
         <div>
             <h4 class="text-uppercase mb-1" style="font-weight: 700; letter-spacing: -0.5px;">
-                {{ $item->name }}
+                {{ $item->vehicleModel->brand->brand_name }} {{ $item->name }}
             </h4>
             <div class="d-flex align-items-center">
                 <span class="badge bg-dark me-2">{{ $item->vehicleModel->model_name }}</span>
-                <small class="text-muted">Technical Data Sheet & Component Specifications</small>
+                <small class="text-muted">Detailed Technical Specifications & Market Configurations</small>
             </div>
         </div>
     </div>
 </div>
 
-{{-- Filters remain for refining specific tech details --}}
 <div class="container-fluid px-xl-5 mb-3">
     <div class="card shadow-sm filter-card border-0">
         <div class="card-body">
@@ -58,14 +57,14 @@
                     </div>
                     <div class="col-md-3">
                         <select name="drive" class="form-control">
-                            <option value="">Drivetrain</option>
+                            <option value="">Drivetrain (All)</option>
                             @foreach($driveTypes as $drive)
                                 <option value="{{ $drive->id }}" {{ request('drive') == $drive->id ? 'selected' : '' }}>{{ $drive->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <input type="text" name="query" class="form-control" placeholder="Search by Engine Code or Specs..." value="{{ request('query') }}">
+                        <input type="text" name="query" class="form-control" placeholder="Search by destination or color..." value="{{ request('query') }}">
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100 fw-bold">Update View</button>
@@ -83,10 +82,10 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr class="text-muted" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
-                            <th class="ps-4">Market & Period</th>
+                            <th class="ps-4">Market / Production</th>
                             <th>Performance</th>
                             <th>Efficiency & Fuel</th>
-                            <th>Configuration</th>
+                            <th>Configuration & Drive</th>
                             <th>Exterior</th>
                             <th class="text-center pe-4">Catalog</th>
                         </tr>
@@ -96,12 +95,8 @@
                             <tr>
                                 {{-- Market & Period --}}
                                 <td class="ps-4">
-                                    <div class="fw-bold text-dark">
-                                        {{ $spec->destination ?? 'Global Market' }}
-                                    </div>
-                                    <small class="text-muted d-block">
-                                        {{ $spec->production_start ?? 'N/A' }} — {{ $spec->production_end ?? 'Present' }}
-                                    </small>
+                                    <div class="fw-bold text-dark">{{ $spec->destination ?? 'Global Market' }}</div>
+                                    <small class="text-muted">{{ $spec->production_start ?? 'N/A' }} — {{ $spec->production_end ?? 'Present' }}</small>
                                 </td>
 
                                 {{-- Performance --}}
@@ -115,15 +110,16 @@
                                 {{-- Efficiency & Fuel --}}
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span class="text-dark">{{ $spec->fuel_efficiency ?? '-' }} L/100km</span>
-                                        <small class="text-muted">{{ $spec->fuel_capacity ?? '-' }}L Full Tank</small>
+                                        <span class="text-dark">{{ $spec->fuel_efficiency ?? '-' }}</span>
+                                        <small class="text-muted">{{ $spec->fuel_capacity ?? '-' }}L Capacity</small>
                                     </div>
                                 </td>
 
-                                {{-- Configuration --}}
+                                {{-- Configuration & DRIVE TYPE --}}
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span class="text-dark">{{ $spec->steering_position ?? '-' }} Hand Drive</span>
+                                        <span class="text-dark fw-bold">{{ $spec->driveType->name ?? 'Drive N/A' }}</span>
+                                        <small class="text-muted">{{ $spec->steering_position }} Hand Drive</small>
                                         <small class="text-muted">{{ $spec->seats ?? '-' }} Seats / {{ $spec->doors ?? '-' }} Doors</small>
                                     </div>
                                 </td>
@@ -131,8 +127,7 @@
                                 {{-- Exterior --}}
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        {{-- If color is a hex code, show a small circle, else just text --}}
-                                        @if(str_starts_with($spec->color, '#'))
+                                        @if($spec->color && str_starts_with($spec->color, '#'))
                                             <span class="me-2" style="display:inline-block; width:15px; height:15px; border-radius:50%; background-color:{{ $spec->color }}; border:1px solid #ddd;"></span>
                                         @endif
                                         <span class="text-muted small text-uppercase">{{ $spec->color ?? 'Standard' }}</span>
@@ -150,7 +145,7 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="text-center py-5">
-                                    <p class="text-muted mb-0">No detailed specs found for this market destination.</p>
+                                    <p class="text-muted mb-0">No technical specs found matching your filters.</p>
                                 </td>
                             </tr>
                         @endforelse
