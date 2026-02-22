@@ -124,11 +124,11 @@
                 <div class="d-flex flex-column">
                     <div class="small mb-1">
                         <span class="text-muted small text-uppercase fw-bold">Chassis:</span>
-                        <code class="text-danger fw-bold bg-light px-1 rounded">{{ $variant->chassis_code ?? 'N/A' }}</code>
+                        <code class="text-danger fw-bold bg-light px-1 rounded">{{ $variant->specifications->chassis_code ?? 'N/A' }}</code>
                     </div>
                     <div class="small">
                         <span class="text-muted small text-uppercase fw-bold">Code:</span>
-                        <span class="text-dark font-monospace">{{ $variant->model_code ?? 'N/A' }}</span>
+                        <span class="text-dark font-monospace">{{ $variant->specifications->model_code ?? 'N/A' }}</span>
                     </div>
                 </div>
             </td>
