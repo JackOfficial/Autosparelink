@@ -33,7 +33,7 @@
         @endif
         <div>
             <h4 class="text-uppercase mb-1" style="font-weight: 700; letter-spacing: -0.5px;">
-                {{ $item->vehicleModel->brand->brand_name }} {{ $item->name }}
+                {{ $item->name }}
             </h4>
             <div class="d-flex align-items-center">
                 <span class="badge bg-dark me-2">{{ $item->vehicleModel->model_name }}</span>
