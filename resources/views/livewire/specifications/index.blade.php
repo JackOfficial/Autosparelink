@@ -19,12 +19,20 @@
                 <h6 class="text-primary text-uppercase mb-1 fw-bold small" style="letter-spacing: 2px;">Step 2: Technical Specification</h6>
                 <h2 class="display-6 fw-bold mb-2">{{ $item->name }}</h2>
                 
-                {{-- Locked attributes from the variant name --}}
-                <div class="d-flex flex-wrap gap-2 mt-3">
-                    <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2"><i class="fa fa-gas-pump text-primary me-2"></i>{{ $item->engineType->name }}</span>
-                    <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2"><i class="fa fa-cog text-primary me-2"></i>{{ $item->transmissionType->name }}</span>
-                    <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2"><i class="fa fa-car text-primary me-2"></i>{{ $item->bodyType->name }}</span>
-                </div>
+                {{-- Data pulled from $lockedInfo (populated from first Specification in Component) --}}
+                @if(!empty($lockedInfo))
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2">
+                            <i class="fa fa-gas-pump text-primary me-2"></i>{{ $lockedInfo['engine'] }}
+                        </span>
+                        <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2">
+                            <i class="fa fa-cog text-primary me-2"></i>{{ $lockedInfo['trans'] }}
+                        </span>
+                        <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2">
+                            <i class="fa fa-car text-primary me-2"></i>{{ $lockedInfo['body'] }}
+                        </span>
+                    </div>
+                @endif
             </div>
             
             <div class="d-flex align-items-center z-index-2">
@@ -78,7 +86,7 @@
                         </select>
                     </div>
                     <div class="col-md-1 d-flex align-items-end">
-                        <button wire:click="resetFilters" class="btn btn-outline-danger border-0 w-100 fw-bold" title="Reset Filters">
+                        <button wire:click="resetFilters" class="btn btn-outline-danger border-0 w-100 fw-bold shadow-sm" title="Reset Filters">
                             <i class="fa fa-refresh"></i>
                         </button>
                     </div>
@@ -116,7 +124,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="d-flex gap-2">
+                                        <div class="d-flex align-items-center gap-2">
                                             <span class="small" title="Horsepower"><i class="fa fa-bolt text-warning me-1"></i>{{ $spec->horsepower ?? '-' }} HP</span>
                                             <span class="small text-muted">|</span>
                                             <span class="small" title="Doors"><i class="fa fa-door-open me-1"></i>{{ $spec->doors }}D</span>
@@ -138,7 +146,8 @@
                                     <td colspan="4" class="text-center py-5">
                                         <i class="fa fa-search-minus display-4 text-light mb-3"></i>
                                         <h6 class="text-muted fw-bold">No exact technical match found.</h6>
-                                        <p class="small text-muted">Try clearing filters to see all available configurations for this variant.</p>
+                                        <p class="small text-muted mb-0">Try clearing filters to see all available configurations for this variant.</p>
+                                        <button wire:click="resetFilters" class="btn btn-link btn-sm text-decoration-none mt-2">Clear all filters</button>
                                     </td>
                                 </tr>
                             @endforelse

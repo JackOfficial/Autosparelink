@@ -12,25 +12,34 @@ use Livewire\Attributes\Url;
 class Index extends Component
 {
     public Variant $item;
+    public array $lockedInfo = [];
 
-    /** * Technical Filters - Focused only on attributes NOT in the variant name.
+    /** * Technical Filters 
+     * We exclude Body, Engine, and Transmission as they define the Variant itself.
      */
-    #[Url(history: true)]
-    public $steering_position = '';
-
-    #[Url(history: true)]
-    public $drive = '';
-
-    #[Url(history: true)]
-    public $destination = '';
-
-    #[Url(history: true)]
-    public $search = '';
+    #[Url(history: true)] public $steering_position = '';
+    #[Url(history: true)] public $drive = '';
+    #[Url(history: true)] public $destination = '';
+    #[Url(history: true)] public $search = '';
 
     public function mount(Variant $variant)
     {
-        // Eager load everything needed for the locked header and table
-        $this->item = $variant->load(['vehicleModel.brand', 'bodyType', 'engineType', 'transmissionType']);
+        // Load the variant and its brand
+        $this->item = $variant->load(['vehicleModel.brand']);
+
+        // Since the Variant name is generated from spec data, 
+        // we grab the first spec to extract the "Locked" info for the header.
+        $firstSpec = $this->item->specifications()
+            ->with(['bodyType', 'engineType', 'transmissionType'])
+            ->first();
+
+        if ($firstSpec) {
+            $this->lockedInfo = [
+                'body'   => $firstSpec->bodyType->name ?? 'N/A',
+                'engine' => $firstSpec->engineType->name ?? 'N/A',
+                'trans'  => $firstSpec->transmissionType->name ?? 'N/A',
+            ];
+        }
     }
 
     public function resetFilters()
@@ -42,7 +51,7 @@ class Index extends Component
     public function specifications()
     {
         return $this->item->specifications()
-            ->with(['driveType', 'destinations'])
+            ->with(['driveType', 'destinations', 'bodyType', 'engineType', 'transmissionType'])
             ->when($this->steering_position, fn($q) => $q->where('steering_position', $this->steering_position))
             ->when($this->drive, fn($q) => $q->where('drive_type_id', $this->drive))
             ->when($this->destination, function($q) {
@@ -62,7 +71,6 @@ class Index extends Component
     {
         return view('livewire.specifications.index', [
             'specifications' => $this->specifications,
-            // Only show Drive Types and Destinations that exist for this specific Variant
             'driveTypes'     => DriveType::whereHas('specifications', fn($q) => $q->where('variant_id', $this->item->id))->get(),
             'destinations'   => Destination::whereHas('specifications', fn($q) => $q->where('variant_id', $this->item->id))->get(),
         ]);
