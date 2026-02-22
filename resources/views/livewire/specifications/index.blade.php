@@ -216,7 +216,7 @@
                                         <div class="border-start ps-3">
                                             <div class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.6rem;">Fuel Tank</div>
                                             <div class="fw-bold text-dark small">
-                                                <i class="fa fa-gas-pump text-primary me-1"></i>{{ $spec->fuel_tank_capacity ?? '-' }} <span class="fw-normal">L</span>
+                                                <i class="fa fa-gas-pump text-primary me-1"></i>{{ $spec->fuel_capacity ?? '-' }} <span class="fw-normal">L</span>
                                             </div>
                                         </div>
                                     </div>
