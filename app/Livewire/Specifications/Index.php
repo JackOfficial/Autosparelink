@@ -12,6 +12,15 @@ class Index extends Component
 {
     public Variant $item;
 
+    public $body_type = '';
+public $engine_type = '';
+public $transmission_type = '';
+
+public function resetFilters()
+{
+    $this->reset(['steering_position', 'drive', 'search', 'body_type', 'engine_type', 'transmission_type']);
+}
+
     // Filter Properties - #[Url] keeps them in the browser's address bar
     #[Url(history: true)]
     public $steering_position = '';
@@ -43,11 +52,6 @@ class Index extends Component
             })
             ->get();
     }
-
-    public function resetFilters()
-{
-    $this->reset(['steering_position', 'drive', 'search']);
-}
 
     public function render()
     {
