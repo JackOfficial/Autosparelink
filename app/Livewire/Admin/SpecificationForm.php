@@ -21,7 +21,7 @@ class SpecificationForm extends Component
     public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
     public $horsepower, $torque, $fuel_efficiency, $tank_capacity; // Match DB column name
     public $seats, $doors, $color;
-    public $steering_position = 'LEFT', $status = 1, $is_default = false;
+    public $steering_position = 'LEFT', $status = 1;
 
     public function mount($vehicle_model_id = null)
     {
@@ -103,10 +103,7 @@ class SpecificationForm extends Component
                     ? ($this->end_year . ($this->end_month ? '-' . str_pad($this->end_month, 2, '0', STR_PAD_LEFT) : '')) 
                     : 'Present';
 
-                // 2. Handle Default Logic
-                if ($this->is_default) {
-                    Variant::where('vehicle_model_id', $this->vehicle_model_id)->update(['is_default' => false]);
-                }
+               
 
                 // 3. Create the Variant
                 $variant = Variant::create([
@@ -114,7 +111,6 @@ class SpecificationForm extends Component
                     'production_year'  => $this->production_year,
                     'trim_level'       => $this->trim_level,
                     'status'           => $this->status,
-                    'is_default'       => $this->is_default,
                 ]);
 
                 // 4. Create the Specification (Aligned with Edit Component columns)

@@ -225,13 +225,6 @@
                             <div class="row align-items-center mt-3">
                                 <div class="col-md-4">
                                     <div class="custom-control custom-switch custom-switch-lg">
-                                        <input type="checkbox" wire:model="is_default" class="custom-control-input" id="isDefaultSwitch">
-                                        <label class="custom-control-label font-weight-bold" for="isDefaultSwitch">Set as Default Variant</label>
-                                    </div>
-                                    <small class="text-muted">Will display this spec first for this model.</small>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="custom-control custom-switch custom-switch-lg">
                                         <input type="checkbox" wire:model="status" class="custom-control-input" id="statusSwitch">
                                         <label class="custom-control-label font-weight-bold" for="statusSwitch">Published Status</label>
                                     </div>
