@@ -103,59 +103,65 @@ class SpecificationForm extends Component
         ];
     }
 
-    public function save()
-    {
-        $this->validate();
-        
-        try {
-            DB::transaction(function () {
-                $variant = Variant::create([
-                    'vehicle_model_id' => $this->vehicle_model_id,
-                    'production_year'  => $this->production_year,
-                    'trim_level'       => $this->trim_level,
-                    'chassis_code'     => $this->chassis_code,
-                    'model_code'       => $this->model_code,
-                    'status'           => $this->status,
-                    'name'             => 'Syncing...', 
-                    'slug'             => Str::slug($this->trim_level . '-' . ($this->chassis_code ?? rand(1000,9999)) . '-' . Str::random(4)),
-                ]);
+   public function save()
+{
+    $this->validate();
+    
+    try {
+        DB::transaction(function () {
+            // 1. Create the Variant
+            // We don't need to pass 'name' or 'slug' anymore. 
+            // The Model hook will fill them automatically.
+            $variant = Variant::create([
+                'vehicle_model_id' => $this->vehicle_model_id,
+                'production_year'  => $this->production_year,
+                'trim_level'       => $this->trim_level,
+                'chassis_code'     => $this->chassis_code,
+                'model_code'       => $this->model_code,
+                'status'           => $this->status,
+            ]);
 
-                if ($this->destination_id) {
-                    $variant->destinations()->sync([$this->destination_id]);
-                }
+            if ($this->destination_id) {
+                $variant->destinations()->sync([$this->destination_id]);
+            }
 
-                Specification::create([
-                    'variant_id'             => $variant->id,
-                    'vehicle_model_id'       => $this->vehicle_model_id,
-                    'body_type_id'           => $this->body_type_id,
-                    'engine_type_id'         => $this->engine_type_id,
-                    'transmission_type_id'   => $this->transmission_type_id,
-                    'drive_type_id'          => $this->drive_type_id,
-                    'engine_displacement_id' => $this->engine_displacement_id,
-                    'horsepower'             => $this->horsepower,
-                    'torque'                 => $this->torque,
-                    'fuel_capacity'          => $this->fuel_capacity,
-                    'fuel_efficiency'        => $this->fuel_efficiency,
-                    'seats'                  => $this->seats,
-                    'doors'                  => $this->doors,
-                    'steering_position'      => $this->steering_position,
-                    'color'                  => $this->color,
-                    'production_start'       => $this->production_year_start,
-                    'production_end'         => $this->production_year_end,
-                    'status'                 => $this->status,
-                ]);
+            // 2. Create the Specification
+            Specification::create([
+                'variant_id'             => $variant->id,
+                'vehicle_model_id'       => $this->vehicle_model_id,
+                'body_type_id'           => $this->body_type_id,
+                'engine_type_id'         => $this->engine_type_id,
+                'transmission_type_id'   => $this->transmission_type_id,
+                'drive_type_id'          => $this->drive_type_id,
+                'engine_displacement_id' => $this->engine_displacement_id,
+                'horsepower'             => $this->horsepower,
+                'torque'                 => $this->torque,
+                'fuel_capacity'          => $this->fuel_capacity,
+                'fuel_efficiency'        => $this->fuel_efficiency,
+                'seats'                  => $this->seats,
+                'doors'                  => $this->doors,
+                'steering_position'      => $this->steering_position,
+                'color'                  => $this->color,
+                'production_start'       => $this->production_year_start,
+                'production_end'         => $this->production_year_end,
+                'status'                 => $this->status,
+            ]);
 
-                $variant->refresh(); 
-                if (method_exists($variant, 'syncNameFromSpec')) { $variant->syncNameFromSpec(); }
-            });
+            // 3. Final Sync
+            // Since the Variant was created BEFORE the Specification, 
+            // the name might be missing the technical specs initially. 
+            // This final call ensures the Variant name is 100% accurate.
+            $variant->refresh();
+            $variant->syncNameFromSpec(); 
+        });
 
-            session()->flash('success', 'Variant and Specifications created!');
-            return redirect()->route('admin.specifications.index');
+        session()->flash('success', 'Variant and Specifications created!');
+        return redirect()->route('admin.specifications.index');
 
-        } catch (\Exception $e) {
-            session()->flash('error', 'Error: ' . $e->getMessage());
-        }
+    } catch (\Exception $e) {
+        session()->flash('error', 'Error: ' . $e->getMessage());
     }
+}
 
     public function render()
     {

@@ -29,8 +29,7 @@ class Variant extends Model
     protected static function booted()
     {
         static::saving(function ($variant) {
-            // Automatically calculate name/slug before any database write.
-            // This ensures changes to trim_level or production_year are caught.
+            // Automatically calculate name and slug before any database write.
             $variant->generateNameSilently();
         });
     }
@@ -40,7 +39,7 @@ class Variant extends Model
      */
     public function generateNameSilently()
     {
-        // Load relationships if they aren't already present to ensure name accuracy
+        // Load relationships to ensure name accuracy
         $this->loadMissing([
             'vehicleModel.brand', 
             'specifications.bodyType', 
@@ -50,32 +49,59 @@ class Variant extends Model
         ]);
 
         $spec = $this->specifications->first();
-        if (!$spec) return;
-
+        
+        // Even if there is no spec yet, we should generate a basic name from model/brand
         $model = $this->vehicleModel;
 
         $pieces = [
             $model?->brand?->brand_name,
             $model?->model_name,
             $this->trim_level,
-            $spec->bodyType?->name,
+            $spec?->bodyType?->name,
             $this->production_year,
-            $spec->engineDisplacement?->name,
-            $spec->engineType?->name,
-            $spec->transmissionType?->name,
+            $spec?->engineDisplacement?->name,
+            $spec?->engineType?->name,
+            $spec?->transmissionType?->name,
         ];
 
-        $this->name = implode(' ', array_filter($pieces));
-        $this->slug = Str::slug($this->name . '-' . ($this->chassis_code ?? Str::random(4)));
+        // 1. Generate the Name
+        $newName = implode(' ', array_filter($pieces));
+        $this->name = $newName ?: 'Unnamed Variant';
+
+        // 2. Generate Unique Slug
+        // We include chassis_code to help uniqueness, or a random string if missing
+        $slugBase = Str::slug($this->name . '-' . ($this->chassis_code ?? ''));
+        
+        // If the slug is empty (due to special characters), fallback to model name
+        if (empty($slugBase)) {
+            $slugBase = Str::slug($model?->model_name ?? 'variant') . '-' . Str::random(5);
+        }
+
+        $this->slug = $this->makeSlugUnique($slugBase);
+    }
+
+    /**
+     * Ensures the slug is unique in the database
+     */
+    protected function makeSlugUnique($slug)
+    {
+        $originalSlug = $slug;
+        $count = 1;
+
+        while (static::where('slug', $slug)
+                     ->where('id', '!=', $this->id) // Don't match self when updating
+                     ->exists()) {
+            $slug = $originalSlug . '-' . $count++;
+        }
+
+        return $slug;
     }
 
     /**
      * Compatibility Method: Syncs name from specification and saves to DB.
-     * Keep this so existing code calling this method does not break.
      */
     public function syncNameFromSpec()
     {
-        // Simply calling save() triggers the 'saving' hook in booted()
         return $this->save();
     }
 
@@ -128,4 +154,13 @@ class Variant extends Model
     {
         return $this->name;
     }
+
+    /**
+ * Use the 'slug' column for Route Model Binding.
+ */
+public function getRouteKeyName(): string
+{
+    return 'slug';
+}
+
 }
