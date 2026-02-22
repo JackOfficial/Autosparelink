@@ -168,22 +168,27 @@
                         @forelse($specifications as $spec)
                             <tr class="spec-row">
                                 {{-- 1. Codes --}}
-                              <td class="ps-4 py-5">
-        <div class="d-flex align-items-center">
-            {{-- Accent Model Code --}}
-            <div class="pe-4 me-4 border-end border-2 border-primary border-opacity-25">
-                <div class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.6rem; letter-spacing: 1px;">Model</div>
-                <div class="fw-black text-dark font-monospace fs-5" style="letter-spacing: -0.5px;">
-                    {{ $spec->model_code }}
-                </div>
-            </div>
-            {{-- Chassis Info --}}
-            <div>
-                <div class="text-muted text-uppercase fw-bold mb-1" style="font-size: 0.6rem; letter-spacing: 1px;">Chassis</div>
-                <div class="fw-bold text-dark fs-6">{{ $spec->chassis_code }}</div>
-            </div>
+                              <td class="pl-4 py-5" style="vertical-align: middle;">
+    <div class="d-flex align-items-center">
+        <div class="pr-5 border-right" style="border-color: rgba(0,0,0,0.08) !important;">
+            <small class="d-block text-muted text-uppercase font-weight-bold mb-1" style="font-size: 0.65rem; letter-spacing: 1px;">
+                Model Code
+            </small>
+            <span class="d-block font-weight-bold text-dark font-family-mono h5 mb-0" style="letter-spacing: -0.5px;">
+                {{ $spec->model_code }}
+            </span>
         </div>
-    </td>
+
+        <div class="pl-5">
+            <small class="d-block text-muted text-uppercase font-weight-bold mb-1" style="font-size: 0.65rem; letter-spacing: 1px;">
+                Chassis ID
+            </small>
+            <span class="d-block font-weight-bold text-dark mb-0" style="font-size: 1rem;">
+                {{ $spec->chassis_code }}
+            </span>
+        </div>
+    </div>
+</td>
 
                                 {{-- 2. Region & Drive Type (Including Steering) --}}
                                 <td class="py-5">
