@@ -173,7 +173,7 @@
                                 </h6>
                                 <div class="row align-items-end">
                                     <div class="col-md-3 mb-3">
-                                        <label class="small font-weight-bold">Seats
+                                        <label class="small font-weight-bold">Seats</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text bg-white"><i class="fas fa-couch text-muted small"></i></span>
