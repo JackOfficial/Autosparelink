@@ -133,7 +133,8 @@
                                 </td>
 
                                 <td class="text-center pe-4">
-                                    <a href="{{ route('parts.index', ['spec' => $spec->id]) }}" class="btn btn-dark btn-sm rounded-pill px-4">
+                                    {{-- {{ route('parts.index', ['spec' => $spec->id]) }} --}}
+                                    <a href="" class="btn btn-dark btn-sm rounded-pill px-4">
                                         Exploded Views <i class="fa fa-diagram-project ms-1"></i>
                                     </a>
                                 </td>
