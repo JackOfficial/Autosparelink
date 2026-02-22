@@ -25,9 +25,11 @@
                     </h3>
                 </div>
                 <div class="text-right">
+                    <a href="admin/specifications/index">
                     <span class="badge badge-light px-3 py-2 shadow-sm rounded-pill text-primary">
-                        <i class="fas fa-car mr-1"></i> Laravel 12 Form
+                        <i class="fas fa-car mr-1"></i> Cancel
                     </span>
+                    </a>
                 </div>
             </div>
         </div>
