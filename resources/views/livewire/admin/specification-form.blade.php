@@ -285,14 +285,18 @@
                 <div class="bg-white p-4 rounded shadow-sm border-top border-primary">
                     <div class="row align-items-center">
                         <div class="col-md-6 mb-3 mb-md-0">
-                            <div class="custom-control custom-switch custom-switch-lg">
-                                <input type="checkbox" wire:model="status" class="custom-control-input" id="statusSwitch">
-                                <label class="custom-control-label font-weight-bold ml-3" for="statusSwitch">
-                                    Published & Visible to Public
-                                </label>
-                            </div>
-                            <small class="text-muted">Unpublished specifications will only be visible to admins.</small>
-                        </div>
+    <div class="custom-control custom-switch custom-switch-lg d-flex align-items-center">
+        <input type="checkbox" wire:model="status" class="custom-control-input" id="statusSwitch">
+        {{-- Added 'pl-4' and 'ml-2' to push the text away from the large toggle --}}
+        <label class="custom-control-label font-weight-bold pl-4 ml-2" for="statusSwitch" style="cursor: pointer; line-height: 1.5rem;">
+            Published & Visible to Public
+        </label>
+    </div>
+    {{-- Added margin-left to align the help text with the label above --}}
+    <small class="text-muted d-block mt-1" style="margin-left: 3.5rem;">
+        Unpublished specifications will only be visible to admins.
+    </small>
+</div>
                         <div class="col-md-6 text-md-right text-center">
                             <button type="submit" class="btn btn-primary btn-lg px-5 shadow-lg rounded-pill">
                                 <i class="fas fa-cloud-upload-alt mr-2"></i> Save Specification
