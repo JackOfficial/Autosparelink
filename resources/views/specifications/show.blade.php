@@ -82,68 +82,74 @@
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">Engine Code / ID</th>
+                        <tr class="text-muted" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
+                            <th class="ps-4">Market & Period</th>
                             <th>Performance</th>
-                            <th>Capacities</th>
-                            <th>Weights & Chassis</th>
-                            <th>Technical Features</th>
-                            <th class="text-center">Action</th>
+                            <th>Efficiency & Fuel</th>
+                            <th>Configuration</th>
+                            <th>Exterior</th>
+                            <th class="text-center pe-4">Catalog</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($specifications as $spec)
                             <tr>
+                                {{-- Market & Period --}}
                                 <td class="ps-4">
-                                    <div class="fw-bold text-primary" style="font-size: 1.1rem;">{{ $spec->engine_code ?? 'M-SPEC' }}</div>
-                                    <small class="text-muted">{{ $spec->steering_position }} Hand Drive</small>
-                                </td>
-                                
-                                <td>
-                                    <div class="tech-label">Power Output</div>
-                                    <div class="tech-value fw-bold">{{ $spec->horsepower ?? '-' }} HP / {{ $spec->torque ?? '-' }} Nm</div>
-                                    <div class="tech-label mt-1">Top Speed</div>
-                                    <small class="tech-value">{{ $spec->top_speed ?? '-' }} km/h</small>
-                                </td>
-
-                                <td>
-                                    <div class="tech-label">Fuel Tank</div>
-                                    <div class="tech-value">{{ $spec->fuel_capacity ?? '-' }} Liters</div>
-                                    <div class="tech-label mt-1">Oil Capacity</div>
-                                    <small class="tech-value">{{ $spec->oil_capacity ?? '-' }} L</small>
-                                </td>
-
-                                <td>
-                                    <div class="tech-label">Curb Weight</div>
-                                    <div class="tech-value">{{ $spec->curb_weight ?? '-' }} kg</div>
-                                    <div class="tech-label mt-1">Wheel / Tire</div>
-                                    <small class="tech-value">{{ $spec->tire_size ?? '-' }}</small>
-                                </td>
-
-                                <td>
-                                    <div class="d-flex flex-wrap gap-1">
-                                        @if($spec->abs) <span class="badge border text-dark fw-normal bg-light">ABS</span> @endif
-                                        @if($spec->air_conditioning) <span class="badge border text-dark fw-normal bg-light">AC</span> @endif
-                                        @if($spec->turbo) <span class="badge border text-dark fw-normal bg-light">Turbo</span> @endif
+                                    <div class="fw-bold text-dark">
+                                        {{ $spec->destination ?? 'Global Market' }}
                                     </div>
-                                    <div class="mt-2">
-                                        <div class="tech-label">Emission</div>
-                                        <small class="tech-value text-uppercase">{{ $spec->emission_standard ?? 'N/A' }}</small>
+                                    <small class="text-muted d-block">
+                                        {{ $spec->production_start ?? 'N/A' }} — {{ $spec->production_end ?? 'Present' }}
+                                    </small>
+                                </td>
+
+                                {{-- Performance --}}
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-primary">{{ $spec->horsepower ?? '-' }} HP</span>
+                                        <small class="text-muted">{{ $spec->torque ?? '-' }} Nm Torque</small>
                                     </div>
                                 </td>
 
+                                {{-- Efficiency & Fuel --}}
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="text-dark">{{ $spec->fuel_efficiency ?? '-' }}</span>
+                                        <small class="text-muted">{{ $spec->fuel_capacity ?? '-' }}L Tank</small>
+                                    </div>
+                                </td>
+
+                                {{-- Configuration --}}
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="text-dark">{{ $spec->steering_position ?? '-' }} Hand Drive</span>
+                                        <small class="text-muted">{{ $spec->seats ?? '-' }} Seats / {{ $spec->doors ?? '-' }} Doors</small>
+                                    </div>
+                                </td>
+
+                                {{-- Exterior --}}
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {{-- If color is a hex code, show a small circle, else just text --}}
+                                        @if(str_starts_with($spec->color, '#'))
+                                            <span class="me-2" style="display:inline-block; width:15px; height:15px; border-radius:50%; background-color:{{ $spec->color }}; border:1px solid #ddd;"></span>
+                                        @endif
+                                        <span class="text-muted small text-uppercase">{{ $spec->color ?? 'Standard' }}</span>
+                                    </div>
+                                </td>
+
+                                {{-- Action --}}
                                 <td class="text-center pe-4">
-                                    {{-- {{ route('parts.index', ['spec' => $spec->id]) }} --}}
-                                    <a href="" class="btn btn-dark btn-sm rounded-pill px-4">
-                                        Exploded Views <i class="fa fa-diagram-project ms-1"></i>
+                                    <a href="{{ route('parts.index', ['spec' => $spec->id]) }}" class="btn btn-dark btn-sm px-4 rounded-pill fw-bold">
+                                        View Parts <i class="fa-solid fa-gears ms-1"></i>
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="6" class="text-center py-5">
-                                    <i class="fa fa-info-circle fa-2x mb-3 text-muted opacity-50"></i>
-                                    <p class="text-muted">No specific technical configurations match these filters.</p>
+                                    <p class="text-muted mb-0">No detailed specs found for this market destination.</p>
                                 </td>
                             </tr>
                         @endforelse
