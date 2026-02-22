@@ -261,12 +261,14 @@
             </form>
         </div>
     </div>
-</div>
 
-<style>
+    <style>
     .bg-light-gray { background-color: #f8f9fa; }
     .bg-gradient-primary { background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important; }
     .custom-switch-lg .custom-control-label::before { height: 1.5rem; width: 2.5rem; border-radius: 1rem; }
     .custom-switch-lg .custom-control-label::after { width: calc(1.5rem - 4px); height: calc(1.5rem - 4px); border-radius: 1rem; }
     .custom-switch-lg .custom-control-input:checked ~ .custom-control-label::after { transform: translateX(1rem); }
 </style>
+
+</div>
+
