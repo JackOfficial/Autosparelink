@@ -67,7 +67,7 @@ class EditSpecification extends Component
 
     public function mount($specificationId)
     {
-        $spec = Specification::with('variant.destinations', 'vehicleModel')->findOrFail($specificationId);
+        $spec = Specification::with('destinations', 'vehicleModel')->findOrFail($specificationId);
         $this->specificationId = $specificationId;
 
         // 1. Fill Specification Table Data
@@ -89,15 +89,15 @@ class EditSpecification extends Component
         $this->status = $spec->status;
         $this->production_year_start = $spec->production_start;
         $this->production_year_end = $spec->production_end;
+        $this->chassis_code = $spec->chassis_code;
+        $this->model_code = $spec->model_code;
+        $this->destination_id = $spec->destinations->first()?->id;
 
         // 2. Fill Variant Table Data
         if ($spec->variant) {
             $this->trim_level = $spec->variant->trim_level;
             $this->production_year = $spec->variant->production_year;
-            $this->chassis_code = $spec->variant->chassis_code;
-            $this->model_code = $spec->variant->model_code;
             $this->is_default = (bool)$spec->variant->is_default;
-            $this->destination_id = $spec->variant->destinations->first()?->id;
         }
     }
 
@@ -139,6 +139,8 @@ class EditSpecification extends Component
                 'transmission_type_id'   => $this->transmission_type_id,
                 'drive_type_id'          => $this->drive_type_id,
                 'engine_displacement_id' => $this->engine_displacement_id,
+                'chassis_code'           => $this->chassis_code,
+                'model_code'             => $this->model_code,
                 'horsepower'             => $this->horsepower,
                 'torque'                 => $this->torque,
                 'fuel_capacity'          => $this->fuel_capacity,
@@ -158,8 +160,6 @@ class EditSpecification extends Component
                     'vehicle_model_id' => $this->vehicle_model_id,
                     'production_year'  => $this->production_year,
                     'trim_level'       => $this->trim_level,
-                    'chassis_code'     => $this->chassis_code,
-                    'model_code'       => $this->model_code,
                     'status'           => $this->status,
                 ]);
 
@@ -170,7 +170,8 @@ class EditSpecification extends Component
                 $spec->variant->syncNameFromSpec(); 
                 
                 if ($this->destination_id) {
-                    $spec->variant->destinations()->sync([$this->destination_id]);
+                    // If destination_id is null, sync([]) removes all existing links (making it Global)
+                    $spec->destinations()->sync($this->destination_id ? [$this->destination_id] : []);
                 }
             }
         });
@@ -186,7 +187,6 @@ class EditSpecification extends Component
     public function render()
     {
         return view('livewire.admin.specifications.edit-specification', [
-            'vehicleModels'       => VehicleModel::orderBy('model_name')->get(),
             'brands'              => Brand::orderBy('brand_name')->get(),
             'bodyTypes'           => BodyType::orderBy('name')->get(),
             'engineTypes'         => EngineType::orderBy('name')->get(),

@@ -50,9 +50,9 @@
 
                                     <div class="col-md-4 mb-3">
                                         <label class="small font-weight-bold text-muted">Vehicle Model <span class="text-danger">*</span></label>
-                                        <select wire:model.live="vehicle_model_id" class="form-control shadow-none @error('vehicle_model_id') is-invalid @enderror">
+                                        <select wire:model.live="vehicle_model_id" wire:loading.attr="disabled" wire:target="brand_id" class="form-control shadow-none @error('vehicle_model_id') is-invalid @enderror">
                                             <option value="">Select Model</option>
-                                            @foreach($vehicleModels as $model)
+                                            @foreach($this->vehicleModels as $model)
                                                 <option value="{{ $model->id }}">{{ $model->model_name }}</option>
                                             @endforeach
                                         </select>

@@ -49,8 +49,6 @@ class VariantController extends Controller
         $validated = $request->validate([
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'production_year'  => 'required|integer|min:1900|max:' . (date('Y') + 2),
-            'chassis_code'     => 'nullable|string|max:255',
-            'model_code'       => 'nullable|string|max:255',
             'trim_level'       => 'nullable|string|max:255',
             'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status'           => 'required|in:0,1',
@@ -108,8 +106,6 @@ class VariantController extends Controller
         $validated = $request->validate([
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'production_year'  => 'required|integer|min:1900|max:' . (date('Y') + 2),
-            'chassis_code'     => 'nullable|string|max:255',
-            'model_code'       => 'nullable|string|max:255',
             'trim_level'       => 'nullable|string|max:255',
             'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status'           => 'required|in:0,1',

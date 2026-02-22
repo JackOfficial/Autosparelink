@@ -99,6 +99,7 @@ class SpecificationForm extends Component
             'engine_displacement_id' => 'required|exists:engine_displacements,id',
             'transmission_type_id' => 'required|exists:transmission_types,id',
             'steering_position' => 'required|in:LEFT,RIGHT',
+            'destination_id' => 'nullable|exists:destinations,id',
             // Other fields are optional based on your UI
         ];
     }
@@ -116,17 +117,11 @@ class SpecificationForm extends Component
                 'vehicle_model_id' => $this->vehicle_model_id,
                 'production_year'  => $this->production_year,
                 'trim_level'       => $this->trim_level,
-                'chassis_code'     => $this->chassis_code,
-                'model_code'       => $this->model_code,
                 'status'           => $this->status,
             ]);
 
-            if ($this->destination_id) {
-                $variant->destinations()->sync([$this->destination_id]);
-            }
-
             // 2. Create the Specification
-            Specification::create([
+            $spec = Specification::create([
                 'variant_id'             => $variant->id,
                 'vehicle_model_id'       => $this->vehicle_model_id,
                 'body_type_id'           => $this->body_type_id,
@@ -134,6 +129,8 @@ class SpecificationForm extends Component
                 'transmission_type_id'   => $this->transmission_type_id,
                 'drive_type_id'          => $this->drive_type_id,
                 'engine_displacement_id' => $this->engine_displacement_id,
+                'chassis_code'           => $this->chassis_code,
+                'model_code'             => $this->model_code,
                 'horsepower'             => $this->horsepower,
                 'torque'                 => $this->torque,
                 'fuel_capacity'          => $this->fuel_capacity,
@@ -146,6 +143,10 @@ class SpecificationForm extends Component
                 'production_end'         => $this->production_year_end,
                 'status'                 => $this->status,
             ]);
+
+            if ($this->destination_id) {
+                $spec->destinations()->sync([$this->destination_id]);
+            }
 
             // 3. Final Sync
             // Since the Variant was created BEFORE the Specification, 
