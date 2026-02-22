@@ -16,11 +16,10 @@ class Variant extends Model
         'name',
         'slug',
         'production_year',
-        'chassis_code',
-        'model_code',
         'trim_level',
         'is_default',
         'status',
+        // chassis_code and model_code removed as they are now in specifications
     ];
 
     /**
@@ -39,7 +38,7 @@ class Variant extends Model
      */
     public function generateNameSilently()
     {
-        // Load relationships to ensure name accuracy
+        // 1. Load missing relationships, now including chassis_code from spec
         $this->loadMissing([
             'vehicleModel.brand', 
             'specifications.bodyType', 
@@ -49,10 +48,9 @@ class Variant extends Model
         ]);
 
         $spec = $this->specifications->first();
-        
-        // Even if there is no spec yet, we should generate a basic name from model/brand
         $model = $this->vehicleModel;
 
+        // 2. Build the name pieces
         $pieces = [
             $model?->brand?->brand_name,
             $model?->model_name,
@@ -64,15 +62,16 @@ class Variant extends Model
             $spec?->transmissionType?->name,
         ];
 
-        // 1. Generate the Name
+        // Generate the Name
         $newName = implode(' ', array_filter($pieces));
         $this->name = $newName ?: 'Unnamed Variant';
 
-        // 2. Generate Unique Slug
-        // We include chassis_code to help uniqueness, or a random string if missing
-        $slugBase = Str::slug($this->name . '-' . ($this->chassis_code ?? ''));
+        // 3. Generate Unique Slug
+        // We now pull chassis_code from the SPECIFICATION relationship
+        $chassis = $spec?->chassis_code ?? '';
+        $slugBase = Str::slug($this->name . '-' . $chassis);
         
-        // If the slug is empty (due to special characters), fallback to model name
+        // Fallback if slug is empty
         if (empty($slugBase)) {
             $slugBase = Str::slug($model?->model_name ?? 'variant') . '-' . Str::random(5);
         }
@@ -89,7 +88,7 @@ class Variant extends Model
         $count = 1;
 
         while (static::where('slug', $slug)
-                     ->where('id', '!=', $this->id) // Don't match self when updating
+                     ->where('id', '!=', $this->id)
                      ->exists()) {
             $slug = $originalSlug . '-' . $count++;
         }
@@ -102,6 +101,7 @@ class Variant extends Model
      */
     public function syncNameFromSpec()
     {
+        // Triggers the 'saving' hook which calls generateNameSilently()
         return $this->save();
     }
 
@@ -154,13 +154,4 @@ class Variant extends Model
     {
         return $this->name;
     }
-
-    /**
- * Use the 'slug' column for Route Model Binding.
- */
-// public function getRouteKeyName(): string
-// {
-//     return 'slug';
-// }
-
 }
