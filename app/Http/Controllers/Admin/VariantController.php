@@ -16,17 +16,16 @@ use Illuminate\Support\Facades\Storage;
 class VariantController extends Controller
 {
     /**
-     * Display a listing of variants
+     * Display a listing of variants grouped by brand
      */
-  public function index()
-{
-    // Load all variants with their models and brands, eager loaded
-    $brands = Brand::with(['vehicleModels.variants' => function($q) {
-        $q->orderBy('name'); // Optional: sort variants by name
-    }])->orderBy('brand_name')->get();
+    public function index()
+    {
+        $brands = Brand::with(['vehicleModels.variants' => function($q) {
+            $q->orderBy('name');
+        }])->orderBy('brand_name')->get();
 
-    return view('admin.variants.index', compact('brands'));
-}
+        return view('admin.variants.index', compact('brands'));
+    }
 
     /**
      * Show create form
@@ -34,11 +33,11 @@ class VariantController extends Controller
     public function create()
     {
         return view('admin.variants.create', [
-            'vehicleModels'      => VehicleModel::all(),
+            'vehicleModels'      => VehicleModel::orderBy('model_name')->get(),
             'bodyTypes'          => BodyType::all(),
             'engineTypes'        => EngineType::all(),
             'driveTypes'         => DriveType::all(),
-            'transmissionTypes' => TransmissionType::all(),
+            'transmissionTypes'  => TransmissionType::all(),
         ]);
     }
 
@@ -49,7 +48,7 @@ class VariantController extends Controller
     {
         $validated = $request->validate([
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'name'             => 'nullable|string|max:255',
+            'production_year'  => 'required|integer|min:1900|max:' . (date('Y') + 2),
             'chassis_code'     => 'nullable|string|max:255',
             'model_code'       => 'nullable|string|max:255',
             'trim_level'       => 'nullable|string|max:255',
@@ -58,10 +57,10 @@ class VariantController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            $validated['photo'] = $request->file('photo')
-                ->store('variants', 'public');
+            $validated['photo'] = $request->file('photo')->store('variants', 'public');
         }
 
+        // The name and slug are generated automatically by Variant Model (booted/saving event)
         Variant::create($validated);
 
         return redirect()
@@ -70,22 +69,21 @@ class VariantController extends Controller
     }
 
     /**
- * Display the specified variant and its specifications
- */
-public function show($id)
-{
-    // Load variant with its vehicle model, brand, and specifications
-    $variant = Variant::with([
-        'vehicleModel.brand',
-        'specifications.engineType',
-        'specifications.transmissionType',
-        'specifications.driveType',
-        'specifications.bodyType',
-    ])->findOrFail($id);
+     * Display the specified variant and its technical specifications
+     */
+    public function show($id)
+    {
+        $variant = Variant::with([
+            'vehicleModel.brand',
+            'specifications.engineType',
+            'specifications.transmissionType',
+            'specifications.driveType',
+            'specifications.bodyType',
+            'specifications.engineDisplacement',
+        ])->findOrFail($id);
 
-    return view('admin.variants.show', compact('variant'));
-}
-
+        return view('admin.variants.show', compact('variant'));
+    }
 
     /**
      * Show edit form
@@ -93,11 +91,11 @@ public function show($id)
     public function edit(Variant $variant)
     {
         return view('admin.variants.edit', [
-            'variant'            => $variant,
-            'vehicleModels'      => VehicleModel::all(),
-            'bodyTypes'          => BodyType::all(),
-            'engineTypes'        => EngineType::all(),
-            'driveTypes'         => DriveType::all(),
+            'variant'           => $variant,
+            'vehicleModels'     => VehicleModel::orderBy('model_name')->get(),
+            'bodyTypes'         => BodyType::all(),
+            'engineTypes'       => EngineType::all(),
+            'driveTypes'        => DriveType::all(),
             'transmissionTypes' => TransmissionType::all(),
         ]);
     }
@@ -109,7 +107,7 @@ public function show($id)
     {
         $validated = $request->validate([
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'name'             => 'nullable|string|max:255',
+            'production_year'  => 'required|integer|min:1900|max:' . (date('Y') + 2),
             'chassis_code'     => 'nullable|string|max:255',
             'model_code'       => 'nullable|string|max:255',
             'trim_level'       => 'nullable|string|max:255',
@@ -118,15 +116,13 @@ public function show($id)
         ]);
 
         if ($request->hasFile('photo')) {
-
             if ($variant->photo) {
                 Storage::disk('public')->delete($variant->photo);
             }
-
-            $validated['photo'] = $request->file('photo')
-                ->store('variants', 'public');
+            $validated['photo'] = $request->file('photo')->store('variants', 'public');
         }
 
+        // Updating triggers the Variant Model 'saving' hook to refresh the name and slug
         $variant->update($validated);
 
         return redirect()
