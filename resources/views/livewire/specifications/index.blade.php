@@ -71,9 +71,9 @@
                                 <img src="{{ asset('storage/' . $item->vehicleModel->brand->brand_logo) }}" style="height: 80px; width: 130px; object-fit: contain;" alt="Brand Logo" />
                             </div>
                         @endif
-                        <div wire:loading class="d-block mt-3">
-                            <div class="spinner-border spinner-border-sm text-primary mr-2" role="status"></div>
-                            <span class="text-white-50 small font-weight-bold">Refreshing results...</span>
+                        <div wire:loading wire:target="search, destination, drive, steering_position, resetFilters" class="mt-3">
+                           <div class="spinner-border spinner-border-sm text-primary mr-2" role="status"></div>
+                           <span class="text-white-50 small font-weight-bold">Refreshing results...</span>
                         </div>
                     </div>
                 </div>
