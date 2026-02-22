@@ -177,7 +177,7 @@
                                                 Model Code
                                             </small>
                                             <span class="d-block font-weight-bold text-dark font-family-mono h5 mb-0" style="letter-spacing: -0.5px;">
-                                                {{ $spec->model_code }}
+                                                #{{ $spec->model_code }}
                                             </span>
                                         </div>
                                         <div class="pl-5">
@@ -185,7 +185,7 @@
                                                 Chassis ID
                                             </small>
                                             <span class="d-block font-weight-bold text-dark mb-0" style="font-size: 1rem;">
-                                                {{ $spec->chassis_code }}
+                                                #{{ $spec->chassis_code }}
                                             </span>
                                         </div>
                                     </div>
@@ -251,7 +251,7 @@
                                 {{-- 5. Action --}}
                                 <td class="text-right pr-4 py-5" style="vertical-align: middle;">
                                     <a href="#" class="btn btn-outline-primary font-weight-bold px-3 py-2 hover-lift" style="border-radius: 10px; font-size: 0.85rem;">
-                                        Full Specs <i class="fa fa-arrow-right ml-2 small"></i>
+                                        Browse parts <i class="fas fa-arrow-right ml-2 small"></i>
                                     </a>
                                 </td>
                             </tr>
