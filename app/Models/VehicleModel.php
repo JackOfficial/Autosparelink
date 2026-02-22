@@ -53,4 +53,5 @@ class VehicleModel extends Model
         return $this->hasMany(Specification::class)
                     ->whereNull('variant_id'); // only specs directly for model
     }
+
 }

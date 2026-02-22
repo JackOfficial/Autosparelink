@@ -133,19 +133,22 @@
 
        <div class="row">
     @forelse($models as $model)
-        {{-- Identify the default variant to use if the user clicks a model directly --}}
         @php 
             $hasVariants = $model->variants->count() > 0; 
-            $defaultVariant = $model->variants->first(); // Or $model->variants->where('is_default', true)->first()
+            // Null-safe assignment: first() returns null if no variants exist
+            $defaultVariant = $model->variants->first(); 
         @endphp
 
         <div class="col-lg-4 col-md-6" x-show="modelSearch === '' || '{{ strtolower($model->model_name) }}'.includes(modelSearch.toLowerCase())">
             
-            {{-- Update 1: Click logic --}}
+            {{-- Patch: Added logic to handle the case where $defaultVariant is null --}}
             <div class="compact-card shadow-sm" 
                  @click="{{ $hasVariants 
                     ? "activeModel = (activeModel === $model->id ? null : $model->id)" 
-                    : "window.location.href='".route('variant.specifications', $defaultVariant->slug)."'" }}">
+                    : ($defaultVariant 
+                        ? "window.location.href='".route('variant.specifications', $defaultVariant->slug)."'" 
+                        : "console.warn('No variants found for this model'); alert('Specifications coming soon!')") 
+                 }}">
                 
                 <div class="d-flex align-items-center">
                     <div class="card-icon">
@@ -166,11 +169,11 @@
                     @endif
                 </div>
 
-                {{-- Update 2: Variant Button Links --}}
                 @if($hasVariants)
                     <div x-show="activeModel === {{ $model->id }}" x-cloak x-collapse @click.stop class="variant-container">
                         @foreach($model->variants as $variant)
-                            <a href="{{ route('variant.specifications', $variant->slug) }}" class="variant-full-btn">
+                            {{-- Null-safe slug fallback just in case of DB corruption --}}
+                            <a href="{{ route('variant.specifications', $variant->slug ?? 'default') }}" class="variant-full-btn">
                                 <span>{{ $variant->name }}</span>
                                 <i class="fa-solid fa-chevron-right fa-xs opacity-50"></i>
                             </a>
@@ -181,7 +184,7 @@
         </div>
     @empty
         <div class="col-12 text-center py-5">
-            <p class="text-muted">No models found.</p>
+            <p class="text-muted">No models found for this brand.</p>
         </div>
     @endforelse
 </div>
