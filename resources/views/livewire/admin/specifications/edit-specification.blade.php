@@ -21,14 +21,12 @@
                 <div>
                     <h6 class="text-uppercase mb-1" style="opacity: 0.8; letter-spacing: 1px;">Specification Management</h6>
                     <h3 class="font-weight-bold mb-0">
-                        <i class="fas fa-plus-circle mr-2"></i> {{ $this->generatedName }}
+                        <i class="fas fa-car-side mr-2"></i> {{ $this->generatedName }}
                     </h3>
                 </div>
                 <div class="text-right">
-                    <a href="/admin/specifications">
-                        <span class="badge badge-light px-3 py-2 shadow-sm rounded-pill text-primary">
-                            <i class="fas fa-close mr-1"></i> Cancel
-                        </span>
+                    <a href="/admin/specifications" class="btn btn-link text-white text-decoration-none">
+                        <i class="fas fa-times mr-1"></i> Cancel
                     </a>
                 </div>
             </div>
@@ -40,7 +38,7 @@
 
             <form wire:submit.prevent="save">
                 {{-- IDENTITY & TIMELINE SECTION --}}
-                <div class="bg-white p-4 rounded shadow-sm mb-4">
+                <div class="bg-white p-4 rounded shadow-sm mb-4 border-left border-primary" style="border-left-width: 5px !important;">
                     <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
                         <i class="fas fa-id-card mr-2"></i> Identity & Production Timeline
                     </h5>
@@ -49,7 +47,7 @@
                         @if(!$hideBrandModel)
                             <div class="col-md-3 mb-3">
                                 <label class="small font-weight-bold text-muted">Brand *</label>
-                                <select wire:model.live="brand_id" class="form-control @error('brand_id') is-invalid @enderror">
+                                <select wire:model.live="brand_id" class="form-control select-custom @error('brand_id') is-invalid @enderror">
                                     <option value="">Select Brand</option>
                                     @foreach($brands as $brand) <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option> @endforeach
                                 </select>
@@ -57,7 +55,7 @@
 
                             <div class="col-md-3 mb-3">
                                 <label class="small font-weight-bold text-muted">Vehicle Model *</label>
-                                <select wire:model.live="vehicle_model_id" class="form-control @error('vehicle_model_id') is-invalid @enderror" @disabled(!$brand_id)>
+                                <select wire:model.live="vehicle_model_id" class="form-control select-custom @error('vehicle_model_id') is-invalid @enderror" @disabled(!$brand_id)>
                                     <option value="">Select Model</option>
                                     @foreach($this->vehicleModels as $model) <option value="{{ $model->id }}">{{ $model->model_name }}</option> @endforeach
                                 </select>
@@ -66,15 +64,19 @@
 
                         <div class="col-md-3 mb-3">
                             <label class="small font-weight-bold text-muted">Trim Level *</label>
-                            <input type="text" wire:model.live="trim_level" class="form-control @error('trim_level') is-invalid @enderror" placeholder="e.g. SE, HSE">
+                            <input type="text" wire:model.live="trim_level" class="form-control @error('trim_level') is-invalid @enderror" placeholder="e.g. VXR, AMG Line">
                         </div>
 
                         <div class="col-md-3 mb-3">
                             <label class="small font-weight-bold text-muted">Model Year *</label>
-                            <input type="number" wire:model.live="production_year" class="form-control @error('production_year') is-invalid @enderror">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white"><i class="fas fa-calendar-alt text-primary"></i></span>
+                                </div>
+                                <input type="number" wire:model.live="production_year" class="form-control @error('production_year') is-invalid @enderror">
+                            </div>
                         </div>
 
-                        {{-- Production Start Selection --}}
                         <div class="col-md-6 mb-3">
                             <label class="small font-weight-bold text-muted">Production Start (Month & Year) *</label>
                             <div class="d-flex">
@@ -86,7 +88,6 @@
                             </div>
                         </div>
 
-                        {{-- Production End Selection --}}
                         <div class="col-md-6 mb-3">
                             <label class="small font-weight-bold text-muted">Production End (Leave blank for "Present")</label>
                             <div class="d-flex">
@@ -100,20 +101,25 @@
 
                         <div class="col-md-4 mb-3">
                             <label class="small font-weight-bold text-muted">Regional Market</label>
-                            <select wire:model="destination_id" class="form-control">
-                                <option value="">Select Market</option>
-                                @foreach($destinations as $dest) <option value="{{ $dest->id }}">{{ $dest->region_name }}</option> @endforeach
-                            </select>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white"><i class="fas fa-globe-americas text-muted"></i></span>
+                                </div>
+                                <select wire:model="destination_id" class="form-control">
+                                    <option value="">Select Market</option>
+                                    @foreach($destinations as $dest) <option value="{{ $dest->id }}">{{ $dest->region_name }}</option> @endforeach
+                                </select>
+                            </div>
                         </div>
 
                         <div class="col-md-4 mb-3">
                             <label class="small font-weight-bold text-muted">Chassis Code</label>
-                            <input type="text" wire:model="chassis_code" class="form-control" placeholder="e.g. W223">
+                            <input type="text" wire:model="chassis_code" class="form-control" placeholder="e.g. LC300">
                         </div>
 
                         <div class="col-md-4 mb-3">
                             <label class="small font-weight-bold text-muted">Model Code</label>
-                            <input type="text" wire:model="model_code" class="form-control" placeholder="e.g. GAF-123">
+                            <input type="text" wire:model="model_code" class="form-control" placeholder="e.g. VJA300L">
                         </div>
                     </div>
                 </div>
@@ -121,9 +127,9 @@
                 <div class="row">
                     {{-- ENGINE SECTION --}}
                     <div class="col-md-6 mb-4">
-                        <div class="bg-white p-4 rounded shadow-sm h-100">
-                            <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
-                                <i class="fas fa-microchip mr-2"></i> Engine & Power
+                        <div class="bg-white p-4 rounded shadow-sm h-100 border-top border-info" style="border-top-width: 3px !important;">
+                            <h5 class="text-info font-weight-bold mb-4 border-bottom pb-2">
+                                <i class="fas fa-engine mr-2"></i> Engine & Power
                             </h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -140,37 +146,33 @@
                                         @foreach($engineDisplacements as $ed) <option value="{{ $ed->id }}">{{ $ed->name }}</option> @endforeach
                                     </select>
                                 </div>
-                                
-                                {{-- Horsepower --}}
+
+                                {{-- Improved Input Groups with Suffixes --}}
                                 <div class="col-md-4 mb-3">
                                     <label class="small font-weight-bold text-muted">Power</label>
-                                    <div class="input-group shadow-sm">
+                                    <div class="input-group">
                                         <input type="number" wire:model="horsepower" class="form-control">
                                         <div class="input-group-append">
-                                            <span class="input-group-text small bg-light font-weight-bold">HP</span>
+                                            <span class="input-group-text font-weight-bold bg-light small">HP</span>
                                         </div>
                                     </div>
                                 </div>
-
-                                {{-- Torque --}}
                                 <div class="col-md-4 mb-3">
                                     <label class="small font-weight-bold text-muted">Torque</label>
-                                    <div class="input-group shadow-sm">
+                                    <div class="input-group">
                                         <input type="number" wire:model="torque" class="form-control">
                                         <div class="input-group-append">
-                                            <span class="input-group-text small bg-light font-weight-bold">Nm</span>
+                                            <span class="input-group-text font-weight-bold bg-light small">Nm</span>
                                         </div>
                                     </div>
                                 </div>
-
-                                {{-- Efficiency --}}
                                 <div class="col-md-4 mb-3">
                                     <label class="small font-weight-bold text-muted">Efficiency</label>
-                                    <div class="input-group shadow-sm">
-                                        <div class="input-group-prepend">
+                                    <div class="input-group">
+                                        <input type="text" wire:model="fuel_efficiency" class="form-control" placeholder="10.5">
+                                        <div class="input-group-append">
                                             <span class="input-group-text bg-light"><i class="fas fa-gas-pump fa-xs"></i></span>
                                         </div>
-                                        <input type="text" wire:model="fuel_efficiency" class="form-control" placeholder="5.5L">
                                     </div>
                                 </div>
                             </div>
@@ -179,8 +181,8 @@
 
                     {{-- DRIVETRAIN SECTION --}}
                     <div class="col-md-6 mb-4">
-                        <div class="bg-white p-4 rounded shadow-sm h-100">
-                            <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
+                        <div class="bg-white p-4 rounded shadow-sm h-100 border-top border-info" style="border-top-width: 3px !important;">
+                            <h5 class="text-info font-weight-bold mb-4 border-bottom pb-2">
                                 <i class="fas fa-cogs mr-2"></i> Drivetrain & Layout
                             </h5>
                             <div class="row">
@@ -200,9 +202,13 @@
                                 </div>
                                 <div class="col-md-12 mb-3">
                                     <label class="small font-weight-bold text-muted d-block">Steering Position</label>
-                                    <div class="btn-group w-100 shadow-sm">
-                                        <button type="button" wire:click="$set('steering_position', 'LEFT')" class="btn {{ $steering_position == 'LEFT' ? 'btn-primary' : 'btn-outline-primary' }} w-50">LHD</button>
-                                        <button type="button" wire:click="$set('steering_position', 'RIGHT')" class="btn {{ $steering_position == 'RIGHT' ? 'btn-primary' : 'btn-outline-primary' }} w-50">RHD</button>
+                                    <div class="btn-group w-100 shadow-sm rounded">
+                                        <button type="button" wire:click="$set('steering_position', 'LEFT')" class="btn {{ $steering_position == 'LEFT' ? 'btn-primary' : 'btn-outline-primary' }} font-weight-bold py-2">
+                                            <i class="fas fa-arrow-left mr-1"></i> Left Hand Drive
+                                        </button>
+                                        <button type="button" wire:click="$set('steering_position', 'RIGHT')" class="btn {{ $steering_position == 'RIGHT' ? 'btn-primary' : 'btn-outline-primary' }} font-weight-bold py-2">
+                                            Right Hand Drive <i class="fas fa-arrow-right ml-1"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -210,62 +216,66 @@
                     </div>
                 </div>
 
-                <div class="row">
-                    {{-- BODY & CAPACITY --}}
-                    <div class="col-12 mb-4">
-                        <div class="bg-white p-4 rounded shadow-sm">
-                            <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
-                                <i class="fas fa-ruler-combined mr-2"></i> Body, Capacity & Settings
-                            </h5>
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label class="small font-weight-bold text-muted">Body Type *</label>
-                                    <select wire:model="body_type_id" class="form-control @error('body_type_id') is-invalid @enderror">
-                                        <option value="">Select</option>
-                                        @foreach($bodyTypes as $bt) <option value="{{ $bt->id }}">{{ $bt->name }}</option> @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-2 mb-3">
-                                    <label class="small font-weight-bold text-muted">Doors</label>
-                                    <input type="number" wire:model="doors" class="form-control">
-                                </div>
-                                <div class="col-md-2 mb-3">
-                                    <label class="small font-weight-bold text-muted">Seats</label>
-                                    <input type="number" wire:model="seats" class="form-control">
-                                </div>
-
-                                {{-- Fuel Tank --}}
-                                <div class="col-md-2 mb-3">
-                                    <label class="small font-weight-bold text-muted">Fuel Tank</label>
-                                    <div class="input-group shadow-sm">
-                                        <input type="number" wire:model="tank_capacity" class="form-control">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text bg-light font-weight-bold">L</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3 mb-3">
-                                    <label class="small font-weight-bold text-muted">Primary Color</label>
-                                    <input type="text" wire:model="color" class="form-control" placeholder="e.g. Alpine White">
-                                </div>
+                {{-- BODY & CAPACITY --}}
+                <div class="bg-white p-4 rounded shadow-sm mb-4 border-top border-success" style="border-top-width: 3px !important;">
+                    <h5 class="text-success font-weight-bold mb-4 border-bottom pb-2">
+                        <i class="fas fa-vector-square mr-2"></i> Body & Interior
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="small font-weight-bold text-muted">Body Type *</label>
+                            <select wire:model="body_type_id" class="form-control @error('body_type_id') is-invalid @enderror">
+                                <option value="">Select</option>
+                                @foreach($bodyTypes as $bt) <option value="{{ $bt->id }}">{{ $bt->name }}</option> @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="small font-weight-bold text-muted">Doors</label>
+                            <div class="input-group">
+                                <input type="number" wire:model="doors" class="form-control">
+                                <div class="input-group-append"><span class="input-group-text bg-light font-weight-bold">D</span></div>
                             </div>
-
-                            <hr>
-
-                            <div class="row align-items-center mt-3">
-                                <div class="col-md-4">
-                                    <div class="custom-control custom-switch custom-switch-lg">
-                                        <input type="checkbox" wire:model="status" class="custom-control-input" id="statusSwitch">
-                                        <label class="custom-control-label font-weight-bold" for="statusSwitch">Published Status</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 text-right">
-                                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow rounded-pill">
-                                        <i class="fas fa-save mr-2"></i> Save Specification
-                                    </button>
-                                </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="small font-weight-bold text-muted">Seats</label>
+                            <div class="input-group">
+                                <input type="number" wire:model="seats" class="form-control">
+                                <div class="input-group-append"><span class="input-group-text bg-light font-weight-bold">S</span></div>
                             </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="small font-weight-bold text-muted">Fuel Tank</label>
+                            <div class="input-group">
+                                <input type="number" wire:model="tank_capacity" class="form-control">
+                                <div class="input-group-append"><span class="input-group-text bg-light font-weight-bold text-primary">L</span></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="small font-weight-bold text-muted">Primary Color</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text bg-white"><i class="fas fa-palette text-muted"></i></span></div>
+                                <input type="text" wire:model="color" class="form-control" placeholder="e.g. Midnight Black">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- FINAL ACTIONS --}}
+                <div class="bg-white p-4 rounded shadow-sm border-top border-primary">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="custom-control custom-switch custom-switch-lg">
+                                <input type="checkbox" wire:model="status" class="custom-control-input" id="statusSwitch">
+                                <label class="custom-control-label font-weight-bold" for="statusSwitch">
+                                    Published & Visible to Public
+                                </label>
+                            </div>
+                            <small class="text-muted">Unpublished specifications will only be visible to admins.</small>
+                        </div>
+                        <div class="col-md-6 text-md-right text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 shadow-lg rounded-pill">
+                                <i class="fas fa-cloud-upload-alt mr-2"></i> Save Specification
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -274,11 +284,30 @@
     </div>
 
     <style>
-        .bg-light-gray { background-color: #f4f6f9; }
-        .bg-gradient-primary { background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important; }
-        .custom-switch-lg .custom-control-label::before { height: 1.5rem; width: 2.5rem; border-radius: 1rem; cursor: pointer; }
+        .bg-light-gray { background-color: #f8f9fa; }
+        .bg-gradient-primary { background: linear-gradient(135deg, #4e73df 0%, #224abe 100%) !important; }
+        
+        /* Custom Styling for Input Groups */
+        .input-group-text {
+            border: 1px solid #ced4da;
+            color: #495057;
+        }
+        .form-control:focus {
+            border-color: #bac8f3;
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.1);
+        }
+
+        /* Large Toggle Switch */
+        .custom-switch-lg .custom-control-label::before { height: 1.5rem; width: 2.75rem; border-radius: 1rem; cursor: pointer; }
         .custom-switch-lg .custom-control-label::after { width: calc(1.5rem - 4px); height: calc(1.5rem - 4px); border-radius: 1rem; cursor: pointer; }
-        .custom-switch-lg .custom-control-input:checked ~ .custom-control-label::after { transform: translateX(1rem); }
-        .input-group-text { font-size: 0.8rem; border-color: #dee2e6; }
+        .custom-switch-lg .custom-control-input:checked ~ .custom-control-label::after { transform: translateX(1.25rem); }
+        
+        .select-custom {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right .75rem center;
+            background-size: 16px 12px;
+            appearance: none;
+        }
     </style>
 </div>
