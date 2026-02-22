@@ -41,7 +41,7 @@ class SpecificationController extends Controller
         'specifications.engineType',
         'specifications.transmissionType',
         'specifications.driveType',
-        'destinations',
+        'specifications.destinations',
     ]);
 
     return view('specifications.show', [

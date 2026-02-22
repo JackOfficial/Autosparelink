@@ -97,15 +97,21 @@
                                 <td class="ps-4">
                                     <div class="fw-bold text-dark">{{ $spec->variant->model_code ?? 'MODEL-CODE' }}</div>
                                     <div class="text-primary small fw-bold">{{ $spec->variant->chassis_code ?? 'CHASSIS' }}</div>
-                                   <small class="text-muted d-block mt-1">
-        {{-- Look at the parent $item (Variant) instead of $spec --}}
-        @if($item->destinations->isNotEmpty())
-            {{ $item->destinations->pluck('region_name')->implode(', ') }}
-        @else
-            Global Market
-        @endif
-        | {{ $spec->production_start ?? 'N/A' }} — {{ $spec->production_end ?? 'Present' }}
-    </small>
+                                 <small class="text-muted d-block mt-1">
+    {{-- Now looking at the specific row ($spec) instead of the parent ($item) --}}
+    @if($spec->destinations->isNotEmpty())
+        <span class="text-primary fw-bold">
+            {{ $spec->destinations->pluck('region_name')->join(', ') }}
+        </span>
+    @else
+        <span class="text-muted">Global Market</span>
+    @endif
+    
+    <span class="mx-1">|</span> 
+    
+    {{-- Production Period --}}
+    {{ $spec->production_start ?? 'N/A' }} — {{ $spec->production_end ?? 'Present' }}
+</small>
                                 </td>
 
                                 {{-- Performance --}}

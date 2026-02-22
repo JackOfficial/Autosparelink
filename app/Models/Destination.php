@@ -9,14 +9,13 @@ class Destination extends Model
 {
     protected $fillable = ['region_name', 'region_code'];
 
-    public function variants(): BelongsToMany
+    /**
+     * If you want to keep the link to Variant, you can, 
+     * but based on our discussion, Specification is the better home.
+     */
+    public function specifications(): BelongsToMany
     {
-        return $this->belongsToMany(Variant::class);
+        // This links the Destination back to the technical specs table
+        return $this->belongsToMany(Specification::class, 'destination_specification');
     }
-
-    public function destinations(): BelongsToMany
-{
-    return $this->belongsToMany(Destination::class, 'destination_variant');
-} 
-
 }

@@ -47,9 +47,9 @@ class Specification extends Model
         return $this->belongsTo(Variant::class);
     }
 
-    public function destinations(): BelongsToMany
+public function destinations(): BelongsToMany
 {
-    return $this->belongsToMany(Destination::class);
+    return $this->belongsToMany(Destination::class, 'destination_specification');
 }
 
     public function vehicleModel()
