@@ -138,130 +138,133 @@
 
     {{-- Results Area --}}
     <div class="container-fluid px-xl-5 pb-5">
-        <div class="card shadow-sm border-0 overflow-hidden" style="border-radius: 20px;">
-            {{-- Header --}}
-            <div class="card-header bg-white py-4 px-4 border-bottom border-light">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
-                                <i class="fa fa-microchip text-primary fs-5"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-bold text-dark m-0">Technical Configurations</h5>
-                                <p class="text-muted small mb-0">Full engineering specifications for {{ $item->name }}</p>
-                            </div>
+    <div class="card shadow-sm border-0 overflow-hidden" style="border-radius: 20px;">
+        {{-- Header --}}
+        <div class="card-header bg-white py-4 px-4 border-bottom border-light">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                            <i class="fa fa-microchip text-primary fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-dark m-0">Technical Configurations</h5>
+                            <p class="text-muted small mb-0">Full engineering specifications for {{ $item->name }}</p>
                         </div>
                     </div>
-                    <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                        <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">
-                            <i class="fa fa-database me-1"></i> {{ count($specifications) }} Configurations Found
-                        </span>
-                    </div>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">
+                        <i class="fa fa-database me-1"></i> {{ count($specifications) }} Configurations Found
+                    </span>
                 </div>
             </div>
+        </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr class="text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 1.2px;">
-                            <th class="ps-4 py-3 border-0">Technical Codes</th>
-                            <th class="border-0">Region & Drive</th>
-                            <th class="border-0">Performance & Fuel</th>
-                            <th class="border-0">Dimensions/Color</th>
-                            <th class="text-end pe-4 border-0">Action</th>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr class="text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 1.2px;">
+                        <th class="ps-4 py-3 border-0">Technical Codes</th>
+                        <th class="border-0">Region & Drive</th>
+                        <th class="border-0">Performance & Fuel</th>
+                        <th class="border-0">Dimensions/Color</th>
+                        <th class="text-end pe-4 border-0">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($specifications as $spec)
+                        <tr class="spec-row">
+                            {{-- Technical Codes --}}
+                            <td class="ps-4 py-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-dark text-white fw-bold rounded-2 px-2 py-1 me-3 small font-monospace shadow-sm" style="min-width: 75px; text-align: center;">
+                                        {{ $spec->model_code }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark fs-6 mb-0">{{ $spec->chassis_code }}</div>
+                                        <div class="text-muted" style="font-size: 0.7rem;">CHASSIS ID</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            {{-- Region & Drive Type & Steering --}}
+                            <td>
+                                <div class="fw-bold text-dark mb-1">{{ $spec->destinations->pluck('region_name')->first() ?? 'Global' }}</div>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <span class="badge bg-info bg-opacity-10 text-info border-0 px-2 py-1" style="font-size: 0.65rem;">
+                                        <i class="fa fa-road me-1"></i> {{ $spec->driveType->name ?? 'N/A' }}
+                                    </span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 px-2 py-1" style="font-size: 0.65rem;">
+                                        <i class="fa fa-dharmachakra me-1"></i> {{ $spec->steering_position }}HD
+                                    </span>
+                                </div>
+                            </td>
+
+                            {{-- Performance (HP & Torque) & Fuel (Tank & Efficiency) --}}
+                            <td>
+                                <div class="d-flex gap-3">
+                                    <div>
+                                        <div class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.6rem;">Output</div>
+                                        <div class="fw-bold text-dark small">
+                                            <i class="fa fa-bolt text-warning me-1"></i>{{ $spec->horsepower ?? '-' }} <span class="fw-normal">HP</span>
+                                        </div>
+                                        <div class="fw-bold text-dark small">
+                                            <i class="fa fa-weight-hanging text-muted me-1"></i>{{ $spec->torque ?? '-' }} <span class="fw-normal">Nm</span>
+                                        </div>
+                                    </div>
+                                    <div class="border-start ps-3">
+                                        <div class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.6rem;">Fuel Economy</div>
+                                        <div class="fw-bold text-dark small">
+                                            <i class="fa fa-gas-pump text-primary me-1"></i>{{ $spec->fuel_capacity ?? '-' }} <span class="fw-normal">L</span>
+                                        </div>
+                                        <div class="fw-bold text-success small">
+                                            <i class="fa fa-leaf me-1"></i>{{ $spec->fuel_efficiency ?? '-' }} <span class="fw-normal">km/L</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            {{-- Dimensions (Seats/Doors) & Color --}}
+                            <td>
+                                <div class="d-flex gap-3">
+                                    <div>
+                                        <div class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.6rem;">Layout</div>
+                                        <div class="fw-bold text-dark small">{{ $spec->seats }} Seats / {{ $spec->doors }} Doors</div>
+                                    </div>
+                                    <div class="border-start ps-3">
+                                        <div class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.6rem;">Color Code</div>
+                                        <div class="d-flex align-items-center mt-1">
+                                            <i class="fa fa-tint me-2 text-muted"></i>
+                                            <span class="badge bg-light text-dark border fw-bold">{{ $spec->color ?? 'N/A' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            {{-- Action --}}
+                            <td class="text-end pe-4">
+                                <a href="#" class="btn btn-primary rounded-3 px-4 py-2 fw-bold shadow-sm transition">
+                                    View Details <i class="fa fa-arrow-right ms-2 small"></i>
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($specifications as $spec)
-                            <tr class="spec-row">
-                                {{-- Technical Codes --}}
-                                <td class="ps-4 py-4">
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-dark text-white fw-bold rounded-2 px-2 py-1 me-3 small font-monospace shadow-sm" style="min-width: 75px; text-align: center;">
-                                            {{ $spec->model_code }}
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold text-dark fs-6 mb-0">{{ $spec->chassis_code }}</div>
-                                            <div class="text-muted" style="font-size: 0.7rem;">CHASSIS ID</div>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                {{-- Region & Drive Type & Steering --}}
-                                <td>
-                                    <div class="fw-bold text-dark mb-1">{{ $spec->destinations->pluck('region_name')->first() ?? 'Global' }}</div>
-                                    <div class="d-flex flex-wrap gap-1">
-                                        <span class="badge bg-info bg-opacity-10 text-info border-0 px-2 py-1" style="font-size: 0.65rem;">
-                                            <i class="fa fa-road me-1"></i> {{ $spec->driveType->name ?? 'N/A' }}
-                                        </span>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 px-2 py-1" style="font-size: 0.65rem;">
-                                            <i class="fa fa-dharmachakra me-1"></i> {{ $spec->steering_position }}HD
-                                        </span>
-                                    </div>
-                                </td>
-
-                                {{-- Performance (Horsepower & Torque) & Fuel --}}
-                                <td>
-                                    <div class="d-flex gap-3">
-                                        <div>
-                                            <div class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.6rem;">Output</div>
-                                            <div class="fw-bold text-dark small">
-                                                <i class="fa fa-bolt text-warning me-1"></i>{{ $spec->horsepower ?? '-' }} HP
-                                            </div>
-                                            <div class="fw-bold text-dark small">
-                                                <i class="fa fa-weight-hanging text-muted me-1"></i>{{ $spec->torque ?? '-' }} <span class="fw-normal">Nm</span>
-                                            </div>
-                                        </div>
-                                        <div class="border-start ps-3">
-                                            <div class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.6rem;">Fuel Tank</div>
-                                            <div class="fw-bold text-dark small">
-                                                <i class="fa fa-gas-pump text-primary me-1"></i>{{ $spec->fuel_capacity ?? '-' }} <span class="fw-normal">L</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                {{-- Dimensions (Seats/Doors) & Color --}}
-                                <td>
-                                    <div class="d-flex gap-3">
-                                        <div>
-                                            <div class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.6rem;">Layout</div>
-                                            <div class="fw-bold text-dark small">{{ $spec->seats }} Seats / {{ $spec->doors }} Doors</div>
-                                        </div>
-                                        <div class="border-start ps-3">
-                                            <div class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.6rem;">Color Code</div>
-                                            <div class="d-flex align-items-center mt-1">
-                                                <i class="fa fa-tint me-2 text-muted"></i>
-                                                <span class="badge bg-light text-dark border fw-bold">{{ $spec->color_code ?? 'N/A' }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                {{-- Action --}}
-                                <td class="text-end pe-4">
-                                    <a href="#" class="btn btn-primary rounded-3 px-4 py-2 fw-bold shadow-sm transition">
-                                        View Details <i class="fa fa-arrow-right ms-2 small"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <div class="py-4">
-                                        <i class="fa fa-search fa-3x text-light mb-3"></i>
-                                        <h5 class="text-muted fw-bold">No specs found.</h5>
-                                        <button wire:click="resetFilters" class="btn btn-primary rounded-pill px-4 mt-2">Reset Search</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="py-4">
+                                    <i class="fa fa-search fa-3x text-light mb-3"></i>
+                                    <h5 class="text-muted fw-bold">No specs found.</h5>
+                                    <button wire:click="resetFilters" class="btn btn-primary rounded-pill px-4 mt-2">Reset Search</button>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
     <style>
         .spec-row { transition: background-color 0.2s ease; }
