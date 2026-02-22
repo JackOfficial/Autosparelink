@@ -96,6 +96,46 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="small font-weight-bold text-primary">Horsepower</label>
+                                        <div class="input-group">
+                                            <input type="number" wire:model="horsepower" class="form-control">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-light font-weight-bold small">HP</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="small font-weight-bold text-primary">Torque</label>
+                                        <div class="input-group">
+                                            <input type="number" wire:model="torque" class="form-control">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-light font-weight-bold small">Nm</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="small font-weight-bold">Fuel Capacity</label>
+                                        <div class="input-group">
+                                            <input type="number" wire:model="fuel_capacity" class="form-control">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-light font-weight-bold small">L</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="small font-weight-bold">Efficiency</label>
+                                        <div class="input-group">
+                                            <input type="text" wire:model="fuel_efficiency" class="form-control" placeholder="e.g. 8.5">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-light font-weight-bold small">L/100km</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <label class="small font-weight-bold">Transmission</label>
                                         <select wire:model="transmission_type_id" class="form-control">
@@ -122,30 +162,12 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-3 mb-3">
-                                        <label class="small font-weight-bold">HP</label>
-                                        <input type="number" wire:model="horsepower" class="form-control">
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label class="small font-weight-bold">Torque (Nm)</label>
-                                        <input type="number" wire:model="torque" class="form-control">
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label class="small font-weight-bold">Fuel Capacity (L)</label>
-                                        <input type="number" wire:model="fuel_capacity" class="form-control">
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label class="small font-weight-bold">Efficiency</label>
-                                        <input type="text" wire:model="fuel_efficiency" class="form-control" placeholder="e.g. 8.5L/100km">
-                                    </div>
-                                </div>
                             </div>
 
                             {{-- 3. Practicality & Appearance --}}
                             <div class="bg-light p-3 rounded mb-4 border">
                                 <h6 class="text-uppercase text-muted font-weight-bold small mb-3">Practicality & Appearance</h6>
-                                <div class="row">
+                                <div class="row align-items-end">
                                     <div class="col-md-3 mb-3">
                                         <label class="small font-weight-bold">Seats</label>
                                         <input type="number" wire:model="seats" class="form-control">
@@ -156,7 +178,10 @@
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label class="small font-weight-bold">Exterior Color</label>
-                                        <input type="text" wire:model="color" class="form-control" placeholder="e.g. #FFFFFF">
+                                        <div class="d-flex">
+                                            <input type="color" wire:model.live="color" class="form-control p-1 mr-2" style="width: 50px; height: 38px; cursor: pointer;">
+                                            <input type="text" wire:model="color" class="form-control" placeholder="#FFFFFF">
+                                        </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label class="small font-weight-bold">Visibility Status</label>
@@ -214,10 +239,10 @@
                 <div class="col-md-4">
                     <div class="sticky-top" style="top: 20px;">
                         <div class="card shadow border-0">
-                            <div class="card-header bg-dark text-white">Live Preview</div>
+                            <div class="card-header bg-dark text-white font-weight-bold">Live Preview</div>
                             <div class="card-body text-center py-4">
                                 <div class="rounded-circle mx-auto mb-3 border shadow-sm" 
-                                     style="width: 60px; height: 60px; background-color: {{ $color ?: '#eee' }}; border: 3px solid white !important;">
+                                     style="width: 70px; height: 70px; background-color: {{ $color ?: '#eee' }}; border: 4px solid white !important;">
                                 </div>
                                 <h5 class="mb-0 font-weight-bold">
                                     {{ $brands->firstWhere('id', $brand_id)?->brand_name ?? 'Brand' }}
@@ -225,23 +250,24 @@
                                 <p class="text-primary mb-2">
                                     {{ collect($this->vehicleModels)->firstWhere('id', $vehicle_model_id)['model_name'] ?? 'Model' }}
                                 </p>
-                                <span class="badge badge-secondary">{{ $trim_level ?: 'Base Trim' }}</span>
-                                <hr>
-                                <div class="row small text-left px-3">
-                                    <div class="col-6 text-muted mb-1">Model Year:</div>
-                                    <div class="col-6 font-weight-bold mb-1 text-right">{{ $production_year ?: '----' }}</div>
-                                    
-                                    <div class="col-6 text-muted mb-1">Drivetrain:</div>
-                                    <div class="col-6 font-weight-bold mb-1 text-right">
-                                        {{ $driveTypes->firstWhere('id', $drive_type_id)?->name ?? '---' }}
+                                <span class="badge badge-secondary mb-3">{{ $trim_level ?: 'Base Trim' }}</span>
+                                
+                                <div class="bg-light rounded p-3 text-left">
+                                    <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                                        <span class="text-muted small">Efficiency</span>
+                                        <span class="font-weight-bold small text-success">{{ $fuel_efficiency ? $fuel_efficiency . ' L/100km' : '---' }}</span>
                                     </div>
-
-                                    <div class="col-6 text-muted mb-1">Power:</div>
-                                    <div class="col-6 font-weight-bold mb-1 text-right">{{ $horsepower ? $horsepower . ' HP' : '---' }}</div>
-
-                                    <div class="col-6 text-muted">Lifecycle:</div>
-                                    <div class="col-6 font-weight-bold text-right">
-                                        {{ $start_year ?: '----' }} - {{ $end_year ?: 'Present' }}
+                                    <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                                        <span class="text-muted small">Power</span>
+                                        <span class="font-weight-bold small">{{ $horsepower ? $horsepower . ' HP' : '---' }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                                        <span class="text-muted small">Torque</span>
+                                        <span class="font-weight-bold small">{{ $torque ? $torque . ' Nm' : '---' }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted small">Year</span>
+                                        <span class="font-weight-bold small">{{ $production_year ?: '----' }}</span>
                                     </div>
                                 </div>
                             </div>
