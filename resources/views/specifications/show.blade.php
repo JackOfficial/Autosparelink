@@ -82,7 +82,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr class="text-muted" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
-                            <th class="ps-4">Market / Production</th>
+                            <th class="ps-4">Identification / Period</th>
                             <th>Performance</th>
                             <th>Efficiency & Fuel</th>
                             <th>Configuration & Drive</th>
@@ -93,10 +93,13 @@
                     <tbody>
                         @forelse($specifications as $spec)
                             <tr>
-                                {{-- Market & Period --}}
+                                {{-- Market, Chassis, Model Code & Period --}}
                                 <td class="ps-4">
-                                    <div class="fw-bold text-dark">{{ $spec->destination ?? 'Global Market' }}</div>
-                                    <small class="text-muted">{{ $spec->production_start ?? 'N/A' }} — {{ $spec->production_end ?? 'Present' }}</small>
+                                    <div class="fw-bold text-dark">{{ $spec->model_code ?? 'MODEL-CODE' }}</div>
+                                    <div class="text-primary small fw-bold">{{ $spec->chassis_code ?? 'CHASSIS' }}</div>
+                                    <small class="text-muted d-block mt-1">
+                                        {{ $spec->destination ?? 'Global' }} | {{ $spec->production_start ?? 'N/A' }} — {{ $spec->production_end ?? 'Present' }}
+                                    </small>
                                 </td>
 
                                 {{-- Performance --}}
@@ -110,7 +113,7 @@
                                 {{-- Efficiency & Fuel --}}
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span class="text-dark">{{ $spec->fuel_efficiency ?? '-' }} L/100 KM</span>
+                                        <span class="text-dark">{{ $spec->fuel_efficiency ?? '-' }}L/100 KM</span>
                                         <small class="text-muted">{{ $spec->fuel_capacity ?? '-' }}L Capacity</small>
                                     </div>
                                 </td>
