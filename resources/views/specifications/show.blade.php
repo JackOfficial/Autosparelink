@@ -97,10 +97,10 @@
                                 <td class="ps-4">
                                     <div class="fw-bold text-dark">{{ $spec->variant->model_code ?? 'MODEL-CODE' }}</div>
                                     <div class="text-primary small fw-bold">{{ $spec->variant->chassis_code ?? 'CHASSIS' }}</div>
-                                    <small class="text-muted d-block mt-1">
-        {{-- Access destinations via the current specification row --}}
-        @if($spec->destinations->isNotEmpty())
-            {{ $spec->destinations->pluck('name')->implode(', ') }}
+                                   <small class="text-muted d-block mt-1">
+        {{-- Look at the parent $item (Variant) instead of $spec --}}
+        @if($item->destinations->isNotEmpty())
+            {{ $item->destinations->pluck('region_name')->implode(', ') }}
         @else
             Global Market
         @endif
