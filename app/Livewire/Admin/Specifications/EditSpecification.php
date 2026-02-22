@@ -92,19 +92,45 @@ class EditSpecification extends Component
             : collect();
     }
 
-    protected function rules()
-    {
-        return [
-            'brand_id' => 'required|exists:brands,id',
-            'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'trim_level' => 'required|string|max:100',
-            'production_year' => 'required|integer|min:1900',
-            'start_year' => 'required|integer|min:1900|gte:production_year',
-            'body_type_id' => 'required|exists:body_types,id',
-            'engine_type_id' => 'required|exists:engine_types,id',
-            'steering_position' => 'required|in:LEFT,RIGHT',
-        ];
-    }
+   protected function rules()
+{
+    return [
+        // Vehicle Selection
+        'brand_id' => 'required|exists:brands,id',
+        'vehicle_model_id' => 'required|exists:vehicle_models,id',
+        'trim_level' => 'required|string|max:100',
+        
+        // Identity & Technical
+        'chassis_code' => 'nullable|string|max:100',
+        'model_code' => 'nullable|string|max:100',
+        'destination_id' => 'nullable|exists:destinations,id',
+        'body_type_id' => 'required|exists:body_types,id',
+        'engine_type_id' => 'required|exists:engine_types,id',
+        'transmission_type_id' => 'nullable|exists:transmission_types,id',
+        'drive_type_id' => 'nullable|exists:drive_types,id',
+        'engine_displacement_id' => 'nullable|exists:engine_displacements,id',
+        
+        // Specs (Numeric)
+        'horsepower' => 'nullable|integer|min:0',
+        'torque' => 'nullable|integer|min:0',
+        'fuel_capacity' => 'nullable|numeric|min:0',
+        'fuel_efficiency' => 'nullable|string|max:50',
+        'seats' => 'nullable|integer|min:1|max:100',
+        'doors' => 'nullable|integer|min:1|max:10',
+        
+        // Settings & Production
+        'steering_position' => 'required|in:LEFT,RIGHT',
+        'color' => 'nullable|string|max:50',
+        'status' => 'required|boolean',
+        'production_year' => 'required|integer|min:1900',
+        
+        // Date Logic: Production can start up to 2 years before the Model Year
+        'start_year' => 'required|integer|min:1900|gte:' . ($this->production_year - 2),
+        'start_month' => 'nullable|integer|between:1,12',
+        'end_year' => 'nullable|integer|min:1900|gte:start_year',
+        'end_month' => 'nullable|integer|between:1,12',
+    ];
+}
 
     public function save()
     {
