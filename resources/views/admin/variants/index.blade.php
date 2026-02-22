@@ -105,18 +105,18 @@
                                         <tbody>
                                             @foreach($model->variants as $variant)
                                                 @php 
-                                                    $spec = $variant->specifications;
-                                                    // Built a robust search string including the nested specifications data
-                                                    $searchData = strtolower(
-                                                        $brand->brand_name . ' ' . 
-                                                        $model->model_name . ' ' . 
-                                                        $variant->name . ' ' . 
-                                                        $variant->trim_level . ' ' . 
-                                                        ($spec->chassis_code ?? '') . ' ' . 
-                                                        ($spec->model_code ?? '') . ' ' . 
-                                                        $variant->production_year
-                                                    );
-                                                @endphp
+        // Use ->first() to get the actual object out of the collection
+        $spec = $variant->specifications->first(); 
+        
+        $searchData = strtolower(
+            $brand->brand_name . ' ' . 
+            $model->model_name . ' ' . 
+            $variant->name . ' ' . 
+            ($spec->chassis_code ?? '') . ' ' . 
+            ($spec->model_code ?? '') . ' ' . 
+            $variant->production_year
+        );
+    @endphp
                                                 <tr class="variant-row" x-show="search === '' || '{{ $searchData }}'.includes(search.toLowerCase())">
                                                     <td class="ps-3 text-muted small">{{ $loop->iteration }}</td>
                                                     <td>
