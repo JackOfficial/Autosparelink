@@ -21,12 +21,12 @@
                 <div>
                     <h6 class="text-uppercase mb-1" style="opacity: 0.8; letter-spacing: 1px;">Specification Management</h6>
                     <h3 class="font-weight-bold mb-0">
-                        <i class="fas fa-car mr-2"></i> {{ $this->generatedName }}
+                        <i class="fas fa-plus-circle mr-2"></i> {{ $this->generatedName }}
                     </h3>
                 </div>
                 <div class="text-right">
                     <span class="badge badge-light px-3 py-2 shadow-sm rounded-pill text-primary">
-                        <i class="fas fa-edit mr-1"></i> Laravel 12 Form
+                        <i class="fas fa-car mr-1"></i> Laravel 12 Form
                     </span>
                 </div>
             </div>
@@ -64,12 +64,12 @@
 
                         <div class="col-md-3 mb-3">
                             <label class="small font-weight-bold text-muted">Trim Level *</label>
-                            <input type="text" wire:model.live="trim_level" class="form-control @error('trim_level') is-invalid @enderror" placeholder="e.g. SE, HSE, Luxury">
+                            <input type="text" wire:model.live="trim_level" class="form-control @error('trim_level') is-invalid @enderror" placeholder="e.g. SE, HSE">
                         </div>
 
                         <div class="col-md-3 mb-3">
                             <label class="small font-weight-bold text-muted">Model Year *</label>
-                            <input type="number" wire:model.live="production_year" class="form-control @error('production_year') is-invalid @enderror" placeholder="e.g. 2026">
+                            <input type="number" wire:model.live="production_year" class="form-control @error('production_year') is-invalid @enderror">
                         </div>
 
                         {{-- Production Start Selection --}}
@@ -77,7 +77,7 @@
                             <label class="small font-weight-bold text-muted">Production Start (Month & Year) *</label>
                             <div class="d-flex">
                                 <select wire:model="start_month" class="form-control mr-2 @error('start_month') is-invalid @enderror" style="width: 45%;">
-                                    <option value="">Select Month</option>
+                                    <option value="">Month</option>
                                     @foreach($months as $num => $name) <option value="{{ $num }}">{{ $name }}</option> @endforeach
                                 </select>
                                 <input type="number" wire:model="start_year" class="form-control @error('start_year') is-invalid @enderror" placeholder="Year">
@@ -86,13 +86,13 @@
 
                         {{-- Production End Selection --}}
                         <div class="col-md-6 mb-3">
-                            <label class="small font-weight-bold text-muted">Production End (Month & Year)</label>
+                            <label class="small font-weight-bold text-muted">Production End (Leave blank for "Present")</label>
                             <div class="d-flex">
                                 <select wire:model="end_month" class="form-control mr-2" style="width: 45%;">
-                                    <option value="">Select Month</option>
+                                    <option value="">Month</option>
                                     @foreach($months as $num => $name) <option value="{{ $num }}">{{ $name }}</option> @endforeach
                                 </select>
-                                <input type="number" wire:model="end_year" class="form-control" placeholder="Year (or empty for Present)">
+                                <input type="number" wire:model="end_year" class="form-control" placeholder="Year">
                             </div>
                         </div>
 
@@ -147,8 +147,8 @@
                                     <input type="number" wire:model="torque" class="form-control">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="small font-weight-bold text-muted">Efficiency (L/100k)</label>
-                                    <input type="number" step="0.1" wire:model="fuel_efficiency" class="form-control">
+                                    <label class="small font-weight-bold text-muted">Efficiency</label>
+                                    <input type="text" wire:model="fuel_efficiency" class="form-control" placeholder="e.g. 5.5L/100km">
                                 </div>
                             </div>
                         </div>
@@ -192,7 +192,7 @@
                     <div class="col-12 mb-4">
                         <div class="bg-white p-4 rounded shadow-sm">
                             <h5 class="text-primary font-weight-bold mb-4 border-bottom pb-2">
-                                <i class="fas fa-ruler-combined mr-2"></i> Body & Capacity
+                                <i class="fas fa-ruler-combined mr-2"></i> Body, Capacity & Settings
                             </h5>
                             <div class="row">
                                 <div class="col-md-3 mb-3">
@@ -202,30 +202,48 @@
                                         @foreach($bodyTypes as $bt) <option value="{{ $bt->id }}">{{ $bt->name }}</option> @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-3 mb-3">
+                                <div class="col-md-2 mb-3">
                                     <label class="small font-weight-bold text-muted">Doors</label>
                                     <input type="number" wire:model="doors" class="form-control">
                                 </div>
-                                <div class="col-md-3 mb-3">
+                                <div class="col-md-2 mb-3">
                                     <label class="small font-weight-bold text-muted">Seats</label>
                                     <input type="number" wire:model="seats" class="form-control">
                                 </div>
-                                <div class="col-md-3 mb-3">
+                                <div class="col-md-2 mb-3">
                                     <label class="small font-weight-bold text-muted">Fuel Tank (L)</label>
                                     <input type="number" wire:model="tank_capacity" class="form-control">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="small font-weight-bold text-muted">Primary Color</label>
+                                    <input type="text" wire:model="color" class="form-control" placeholder="e.g. Alpine White">
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="row align-items-center mt-3">
+                                <div class="col-md-4">
+                                    <div class="custom-control custom-switch custom-switch-lg">
+                                        <input type="checkbox" wire:model="is_default" class="custom-control-input" id="isDefaultSwitch">
+                                        <label class="custom-control-label font-weight-bold" for="isDefaultSwitch">Set as Default Variant</label>
+                                    </div>
+                                    <small class="text-muted">Will display this spec first for this model.</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="custom-control custom-switch custom-switch-lg">
+                                        <input type="checkbox" wire:model="status" class="custom-control-input" id="statusSwitch">
+                                        <label class="custom-control-label font-weight-bold" for="statusSwitch">Published Status</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow rounded-pill">
+                                        <i class="fas fa-save mr-2"></i> Save Specification
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {{-- PUBLISHING CONTROLS --}}
-                <div class="bg-white p-4 rounded shadow-sm mb-4">
-                    <div class="col-md-4 text-right">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 shadow rounded-pill">
-                                <i class="fas fa-save mr-2"></i> Save Specification
-                            </button>
-                        </div>
                 </div>
             </form>
         </div>
@@ -234,8 +252,8 @@
     <style>
         .bg-light-gray { background-color: #f4f6f9; }
         .bg-gradient-primary { background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important; }
-        .custom-switch-lg .custom-control-label::before { height: 1.5rem; width: 2.5rem; border-radius: 1rem; }
-        .custom-switch-lg .custom-control-label::after { width: calc(1.5rem - 4px); height: calc(1.5rem - 4px); border-radius: 1rem; }
+        .custom-switch-lg .custom-control-label::before { height: 1.5rem; width: 2.5rem; border-radius: 1rem; cursor: pointer; }
+        .custom-switch-lg .custom-control-label::after { width: calc(1.5rem - 4px); height: calc(1.5rem - 4px); border-radius: 1rem; cursor: pointer; }
         .custom-switch-lg .custom-control-input:checked ~ .custom-control-label::after { transform: translateX(1rem); }
     </style>
 </div>

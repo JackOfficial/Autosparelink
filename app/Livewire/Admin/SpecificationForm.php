@@ -14,12 +14,13 @@ class SpecificationForm extends Component
     public $chassis_code, $model_code, $destination_id;
     public $hideBrandModel = false;
 
-    // Production Timeline
+    // Production Timeline (Split for UI, concatenated for DB)
     public $start_year, $start_month, $end_year, $end_month;
 
     // Technical Fields
     public $body_type_id, $engine_type_id, $transmission_type_id, $drive_type_id, $engine_displacement_id;
-    public $horsepower, $torque, $fuel_efficiency, $tank_capacity, $seats, $doors;
+    public $horsepower, $torque, $fuel_efficiency, $tank_capacity; // Match DB column name
+    public $seats, $doors, $color;
     public $steering_position = 'LEFT', $status = 1, $is_default = false;
 
     public function mount($vehicle_model_id = null)
@@ -35,7 +36,7 @@ class SpecificationForm extends Component
     }
 
     /**
-     * Computed property for the dynamic header title in your Blade
+     * Syncs with the {{ $this->generatedName }} in your Blade header
      */
     #[Computed]
     public function generatedName()
@@ -47,7 +48,7 @@ class SpecificationForm extends Component
     }
 
     /**
-     * Computed property for the Model dropdown
+     * Syncs with @foreach($this->vehicleModels as $model) in your Blade
      */
     #[Computed]
     public function vehicleModels()
@@ -64,15 +65,28 @@ class SpecificationForm extends Component
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'trim_level' => 'required|string|max:100',
             'production_year' => 'required|integer|min:1900',
+            
+            // Timeline Validation
             'start_year' => 'required|integer|min:1900',
             'start_month' => 'nullable|integer|between:1,12',
             'end_year' => 'nullable|integer|min:1900|gte:start_year',
             'end_month' => 'nullable|integer|between:1,12',
+
+            // Technical
             'body_type_id' => 'required|exists:body_types,id',
             'engine_type_id' => 'required|exists:engine_types,id',
-            'transmission_type_id' => 'required|exists:transmission_types,id',
-            'drive_type_id' => 'required|exists:drive_types,id',
-            'engine_displacement_id' => 'required|exists:engine_displacements,id',
+            'transmission_type_id' => 'nullable|exists:transmission_types,id',
+            'drive_type_id' => 'nullable|exists:drive_types,id',
+            'engine_displacement_id' => 'nullable|exists:engine_displacements,id',
+            
+            'horsepower' => 'nullable|integer|min:0',
+            'torque' => 'nullable|integer|min:0',
+            'tank_capacity' => 'nullable|numeric|min:0',
+            'fuel_efficiency' => 'nullable|string|max:50',
+            'seats' => 'nullable|integer|min:1',
+            'doors' => 'nullable|integer|min:1',
+            'steering_position' => 'required|in:LEFT,RIGHT',
+            'status' => 'required|boolean',
         ];
     }
 
@@ -82,12 +96,19 @@ class SpecificationForm extends Component
         
         try {
             DB::transaction(function () {
-                // Handle Default Switch logic
+                // 1. Format Dates to Match Edit Component (YYYY-MM)
+                $prodStart = $this->start_year . ($this->start_month ? '-' . str_pad($this->start_month, 2, '0', STR_PAD_LEFT) : '');
+                
+                $prodEnd = $this->end_year 
+                    ? ($this->end_year . ($this->end_month ? '-' . str_pad($this->end_month, 2, '0', STR_PAD_LEFT) : '')) 
+                    : 'Present';
+
+                // 2. Handle Default Logic
                 if ($this->is_default) {
                     Variant::where('vehicle_model_id', $this->vehicle_model_id)->update(['is_default' => false]);
                 }
 
-                // 1. Create the Variant
+                // 3. Create the Variant
                 $variant = Variant::create([
                     'vehicle_model_id' => $this->vehicle_model_id,
                     'production_year'  => $this->production_year,
@@ -96,7 +117,7 @@ class SpecificationForm extends Component
                     'is_default'       => $this->is_default,
                 ]);
 
-                // 2. Create the Specification
+                // 4. Create the Specification (Aligned with Edit Component columns)
                 $spec = Specification::create([
                     'variant_id'             => $variant->id,
                     'vehicle_model_id'       => $this->vehicle_model_id,
@@ -110,29 +131,28 @@ class SpecificationForm extends Component
                     'horsepower'             => $this->horsepower,
                     'torque'                 => $this->torque,
                     'fuel_efficiency'        => $this->fuel_efficiency,
-                    'tank_capacity'          => $this->tank_capacity,
+                    'tank_capacity'          => $this->tank_capacity, 
                     'seats'                  => $this->seats,
                     'doors'                  => $this->doors,
                     'steering_position'      => $this->steering_position,
-                    'production_start_year'  => $this->start_year,
-                    'production_start_month' => $this->start_month,
-                    'production_end_year'    => $this->end_year,
-                    'production_end_month'   => $this->end_month,
+                    'color'                  => $this->color,
+                    'production_start'       => $prodStart, // Matches Edit logic
+                    'production_end'         => $prodEnd,   // Matches Edit logic
                     'status'                 => $this->status,
                 ]);
 
-                // 3. Handle Many-to-Many Destinations
+                // 5. Handle Destinations
                 if ($this->destination_id) {
                     $spec->destinations()->sync([$this->destination_id]);
                 }
 
-                // Optional: Sync variant name logic
+                // 6. Name Sync Logic
                 if (method_exists($variant, 'syncNameFromSpec')) {
                     $variant->syncNameFromSpec();
                 }
             });
 
-            session()->flash('success', 'Specification saved successfully!');
+            session()->flash('success', 'Specification created successfully!');
             return redirect()->route('admin.specifications.index');
 
         } catch (\Exception $e) {
@@ -151,8 +171,8 @@ class SpecificationForm extends Component
             'engineDisplacements' => EngineDisplacement::orderBy('name')->get(),
             'destinations'        => Destination::orderBy('region_name')->get(),
             'months'              => [
-                1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April', 5 => 'May', 6 => 'June',
-                7 => 'July', 8 => 'August', 9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+                1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May', 6 => 'Jun',
+                7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'
             ]
         ]);
     }
