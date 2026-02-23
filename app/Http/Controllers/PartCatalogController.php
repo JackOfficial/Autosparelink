@@ -22,6 +22,7 @@ class PartCatalogController extends Controller
 
 public function part_for_specification($brand, $model, $slug)
 {
+    dd("hello");
     // 1. Fetch the spec by slug (our unique identifier)
     $specification = Specification::where('slug', $slug)
         ->with(['vehicleModel.brand'])
