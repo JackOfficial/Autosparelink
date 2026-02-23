@@ -109,19 +109,21 @@ public function destinations(): BelongsToMany
             }
 
             // Only generate slug if model_code or chassis_code has changed
-            if ($specification->isDirty(['model_code', 'chassis_code'])) {
-                $slugSource = $specification->model_code . '-' . $specification->chassis_code;
-                $specification->slug = Str::slug($slugSource);
-                
-                // Optional: Ensure uniqueness if multiple specs have the same codes
-                $count = static::where('slug', 'LIKE', "{$specification->slug}%")
-                               ->where('id', '<>', $specification->id)
-                               ->count();
-                
-                if ($count > 0) {
-                    $specification->slug .= '-' . ($count + 1);
-                }
-            }
+            // Generate slug if it's currently empty OR if the codes have changed
+if (empty($specification->slug) || $specification->isDirty(['model_code', 'chassis_code'])) {
+    
+    $slugSource = $specification->model_code . '-' . $specification->chassis_code;
+    $specification->slug = Str::slug($slugSource);
+    
+    // Check for uniqueness
+    $count = static::where('slug', 'LIKE', "{$specification->slug}%")
+                   ->where('id', '<>', $specification->id)
+                   ->count();
+    
+    if ($count > 0) {
+        $specification->slug .= '-' . ($count + 1);
+    }
+}
         });
     }
 }
