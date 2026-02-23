@@ -147,29 +147,22 @@ public function part_for_specification($brand, $model, $slug)
         ]);
     }
 
-    public function show(Part $part){
-          // Load relationships (eager loading)
+   public function show(Part $part) {
+    // 1. Unified Eager Loading
     $part->load([
-        'partBrand',                         // Brand of this part
-        'photos',                            // Uploaded photos
-        'fitments.vehicleModel.brand',       // Compatibility chain
-        'substitutions.partBrand'          // Optional substitutions
+        'partBrand', 
+        'photos', 
+        'fitments.vehicleModel.brand',
+        'fitments.variant', // Added this
+        'substitutions.partBrand'
     ]);
 
-    // Photos for gallery
-    $photos = $part->photos;
-
-    // Substitutions (fallback to empty collection)
-    $substitutions = $part->substitutions ?? collect();
-
-    // Compatibility / fitments
-    $compatibilities = $part->fitments ?? collect();
-
-    return view('parts.show', compact(
-        'part',
-        'photos',
-        'substitutions',
-        'compatibilities'
-    ));
-    }
+    // 2. Use Collection methods for safety
+    return view('parts.show', [
+        'part' => $part,
+        'photos' => $part->photos ?? collect(),
+        'substitutions' => $part->substitutions ?? collect(),
+        'compatibilities' => $part->fitments ?? collect(),
+    ]);
+}
 }
