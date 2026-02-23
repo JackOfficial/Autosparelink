@@ -131,6 +131,9 @@ Route::get('/{type}/specifications/{specification}/parts', [PartCatalogControlle
 
 Route::get('/spare-parts/{part:sku}', [PartCatalogController::class, 'show'])->name('spare-parts.show'); 
 
+Route::get('/catalog/{brand}/{model}/{slug}-parts', [PartCatalogController::class, 'part_for_specification'])
+    ->name('specification.parts');
+
 // Route::get('/specifications/{type}/{id}/parts', [PartCatalogController::class, 'index'])
 //     ->name('specification.parts');
 

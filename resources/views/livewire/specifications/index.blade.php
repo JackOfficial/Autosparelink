@@ -246,7 +246,11 @@
 
                                 {{-- 5. Action --}}
                                 <td class="text-right pr-4 py-5" style="vertical-align: middle;">
-                                    <a href="#" class="btn btn-outline-primary font-weight-bold px-3 py-2 hover-lift" style="border-radius: 10px; font-size: 0.85rem;">
+                                    <a href="{{ route('specification.parts', [
+                                     'brand' => Str::slug($spec->vehicleModel->brand->brand_name),
+                                      'model' => Str::slug($spec->vehicleModel->model_name),
+                                      'slug'  => $spec->slug
+                                    ]) }}" class="btn btn-outline-primary font-weight-bold px-3 py-2 hover-lift" style="border-radius: 10px; font-size: 0.85rem;">
                                         Browse parts <i class="fas fa-arrow-right ml-2 small"></i>
                                     </a>
                                 </td>

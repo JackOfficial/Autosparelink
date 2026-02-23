@@ -15,9 +15,19 @@ class PartCatalogController extends Controller
      */
 
     public function parts(){
-        dd("hello");
+
         return view('parts.index');
     }
+
+ public function part_for_specification($brand, $model, $slug)
+{
+    // Search by slug for SEO benefits
+    $specification = Specification::where('slug', $slug)
+        ->with(['parts', 'vehicleModel.brand'])
+        ->firstOrFail();
+
+    return view('inventory.parts-list', compact('specification'));
+}
 
     public function index(Request $request, string $type, Specification $specification)
     {

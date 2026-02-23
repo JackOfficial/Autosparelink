@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class Specification extends Model
@@ -16,6 +17,7 @@ class Specification extends Model
     // ];
 
     protected $fillable = [
+        'slug',
         'variant_id',
         'vehicle_model_id', 
         'trim_level',
@@ -99,16 +101,26 @@ public function destinations(): BelongsToMany
     protected static function booted()
     {
         static::saving(function ($specification) {
-
             // Block empty specification
-            if (
-                empty($specification->vehicle_model_id) &&
-                empty($specification->variant_id)
-            ) {
+            if (empty($specification->variant_id)) {
                 throw ValidationException::withMessages([
-                    'vehicle_model_id' => 'Specification must have at least a Vehicle Model or a Variant.',
-                    'variant_id' => 'Specification must have at least a Vehicle Model or a Variant.',
+                    'variant_id' => 'Specification must have a Variant.',
                 ]);
+            }
+
+            // Only generate slug if model_code or chassis_code has changed
+            if ($specification->isDirty(['model_code', 'chassis_code'])) {
+                $slugSource = $specification->model_code . '-' . $specification->chassis_code;
+                $specification->slug = Str::slug($slugSource);
+                
+                // Optional: Ensure uniqueness if multiple specs have the same codes
+                $count = static::where('slug', 'LIKE', "{$specification->slug}%")
+                               ->where('id', '<>', $specification->id)
+                               ->count();
+                
+                if ($count > 0) {
+                    $specification->slug .= '-' . ($count + 1);
+                }
             }
         });
     }
