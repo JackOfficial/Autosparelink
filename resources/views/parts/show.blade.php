@@ -178,7 +178,7 @@
                                     @php
                                         $routeParam = $fitment->variant_id ? ['type' => 'variant', 'id' => $fitment->variant_id] : ['type' => 'model', 'id' => $fitment->vehicle_model_id];
                                     @endphp
-                                    <a href="{{ route('specifications.show', $routeParam) }}" class="text-dark text-decoration-none">
+                                    <a href="#" class="text-dark text-decoration-none">
                                         {{ $fitment->vehicleModel->model_name ?? ''}} <i class="fa fa-external-link-alt ml-1 small text-muted"></i>
                                     </a>
                                 </td>
