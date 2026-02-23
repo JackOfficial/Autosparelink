@@ -6,6 +6,7 @@ use App\Models\Part;
 use App\Models\Category;
 use App\Models\Specification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PartCatalogController extends Controller
 {
@@ -19,14 +20,27 @@ class PartCatalogController extends Controller
         return view('parts.index');
     }
 
- public function part_for_specification($brand, $model, $slug)
+public function part_for_specification($brand, $model, $slug)
 {
-    // Search by slug for SEO benefits
+    // 1. Fetch the spec by slug (our unique identifier)
     $specification = Specification::where('slug', $slug)
-        ->with(['parts', 'vehicleModel.brand'])
+        ->with(['vehicleModel.brand'])
         ->firstOrFail();
 
-    return view('inventory.parts-list', compact('specification'));
+    // 2. Generate what the correct slugs SHOULD be
+    $correctBrand = Str::slug($specification->vehicleModel->brand->brand_name);
+    $correctModel = Str::slug($specification->vehicleModel->model_name);
+
+    // 3. Strict Verification: Check both Brand AND Model
+    if ($brand !== $correctBrand || $model !== $correctModel) {
+        return redirect()->route('specification.parts', [
+            'brand' => $correctBrand,
+            'model' => $correctModel,
+            'slug'  => $specification->slug
+        ], 301); // 301 is crucial for SEO
+    }
+
+    return view('parts.specification-parts', compact('specification'));
 }
 
     public function index(Request $request, string $type, Specification $specification)
