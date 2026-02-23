@@ -6,6 +6,14 @@
         .form-control-pill { border-radius: 50px; padding-left: 1.25rem; }
         .btn-toggle.active { background-color: #007bff; color: white; border-color: #007bff; }
         .part-grid-transition { transition: all 0.3s ease; }
+        .force-full-width-child > div[class*="col-"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-bottom: 0 !important; /* Prevents double spacing */
+    }
     </style>
 
     {{-- 1. VIN Matched Vehicle Banner --}}
@@ -146,21 +154,23 @@
             </div>
 
             {{-- Results Grid/List --}}
-            <div class="row" wire:loading.remove>
-                @forelse($parts as $part)
-                    <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'" class="part-grid-transition">
-                        {{-- Here we call your existing part component --}}
-                        @livewire('part-component', ['part' => $part, 'view' => 'grid'], key($part->id)) 
-                    </div>
-                @empty
-                    <div class="col-12 py-5 text-center">
-                        <img src="https://cdn-icons-png.flaticon.com/512/6134/6134065.png" style="width: 100px; opacity: 0.2;" class="mb-4">
-                        <h5 class="text-muted">No parts match your current selection.</h5>
-                        <p class="text-muted small">Try adjusting your filters or search terms.</p>
-                    </div>
-                @endforelse
+          <div class="row" wire:loading.remove>
+    @forelse($parts as $part)
+        {{-- 1. This is the Parent Grid --}}
+        <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'">
+            
+            {{-- 2. This wrapper "neutralizes" the col-lg-3 inside your child component --}}
+            <div class="force-full-width-child">
+                @livewire('part-component', ['part' => $part], key($part->id)) 
             </div>
 
+        </div>
+    @empty
+        <div class="col-12 text-center py-5">
+            <h5 class="text-muted">No parts found.</h5>
+        </div>
+    @endforelse
+</div>
             {{-- Pagination --}}
             <div class="d-flex justify-content-center mt-4">
                 {{ $parts->links() }}
