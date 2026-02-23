@@ -131,7 +131,7 @@
                         <div class="card-footer bg-light border-0 p-4">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Subtotal</span>
-                                <span class="text-dark">{{ number_format((float)$total, 0) }} RWF</span>
+                                <span class="text-dark">{{ $total }} RWF</span>
                             </div>
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="text-muted">Delivery</span>
