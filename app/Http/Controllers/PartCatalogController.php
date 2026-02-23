@@ -16,7 +16,6 @@ class PartCatalogController extends Controller
      */
 
     public function parts(){
-dd("gfhjhgh");
         return view('parts.index');
     }
 

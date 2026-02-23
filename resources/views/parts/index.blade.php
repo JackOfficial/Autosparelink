@@ -53,6 +53,6 @@
 
 @section('content')
 
-@livewire('parts.parts-category')
+@livewire('parts.parts-catalog')
 
 @endsection
