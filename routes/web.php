@@ -124,10 +124,7 @@ Route::resource('shop', ShopController::class);
 
 // Route::get('/model-specification/{id}', [SpecificationController::class, 'model_specification']);
 // Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
-// Route::get('/spare-parts/', [SparePartController::class, 'parts']);
-Route::get('/{type}/specifications/{specification}/parts', [PartCatalogController::class, 'index'])
-->whereIn('type', ['model', 'variant'])
-->name('specification.parts');   
+// Route::get('/spare-parts/', [SparePartController::class, 'parts']);  
 
 Route::get('/spare-parts/{part:sku}', [PartCatalogController::class, 'show'])->name('spare-parts.show'); 
 
