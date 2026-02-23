@@ -84,7 +84,7 @@
                         <div class="mt-3 p-3 bg-white border border-warning rounded text-center">
                             <span class="text-muted small d-block">Merchant Code</span>
                             <h3 class="font-weight-bold text-dark mb-0 tracking-widest">38223</h3> {{-- Replace with your real code --}}
-                            <small class="text-muted">Account Name: <strong>HYBRID TECHNOLOGY</strong></small>
+                            <small class="text-muted">Account Name: <strong>HYBRID TECHNOLOGY RWANDA LTD</strong></small>
                         </div>
                     </div>
                 </div>
