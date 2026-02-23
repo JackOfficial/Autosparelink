@@ -13,7 +13,7 @@
                     <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-primary"><i class="fa fa-home"></i></a></li>
                     <li class="breadcrumb-item"><a href="#" class="text-muted text-decoration-none">Catalog</a></li>
                     <li class="breadcrumb-item"><a href="#" class="text-muted text-decoration-none">{{ $specification->vehicleModel->brand->brand_name }}</a></li>
-                    <li class="breadcrumb-item active text-dark font-weight-bold">{{ $specification->vehicleModel->model_name }}</li>
+                    <li class="breadcrumb-item"><a href="#" class="text-muted text-decoration-none">{{ $specification->vehicleModel->model_name }}</a></li>
                     <li class="breadcrumb-item active text-dark font-weight-bold">{{ $specification->variant->name }}</li>
                 </ol>
             </nav>
