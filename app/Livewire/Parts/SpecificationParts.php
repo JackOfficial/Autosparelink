@@ -14,7 +14,7 @@ class SpecificationParts extends Component
 
     public $specificationId;
     public $search = '';
-    public $categoryId = null; // Track selected category
+    public $category_id = null;
     public $inStockOnly = false; // Track stock filter
     
     protected $paginationTheme = 'bootstrap';
