@@ -74,7 +74,7 @@
                     <div class="card-body p-4">
                         <h5 class="font-weight-bold mb-3"><i class="fa fa-wallet text-warning mr-2"></i>Payment Method</h5>
                         <div class="d-flex align-items-center p-3 bg-light rounded-lg border">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/MTN_Logo.svg" style="width: 40px;" class="mr-3">
+                            <img src="{{ asset('images/momo.jpg')}}" style="width: 40px;" class="mr-3">
                             <div>
                                 <h6 class="mb-0 font-weight-bold">MTN MoMo Pay</h6>
                                 <p class="small text-muted mb-0">Pay manually using the code below after placing order.</p>
@@ -84,7 +84,7 @@
                         <div class="mt-3 p-3 bg-white border border-warning rounded text-center">
                             <span class="text-muted small d-block">Merchant Code</span>
                             <h3 class="font-weight-bold text-dark mb-0 tracking-widest">000 000</h3> {{-- Replace with your real code --}}
-                            <small class="text-muted">Account Name: <strong>Your Company Name Ltd</strong></small>
+                            <small class="text-muted">Account Name: <strong>AutoSpareLink</strong></small>
                         </div>
                     </div>
                 </div>
