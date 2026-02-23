@@ -10,7 +10,7 @@ use App\Models\VehicleModel; // Assuming your model names
 use App\Models\Specification; // Assuming your variant/specification model
 use Livewire\WithPagination;
 
-class GlobalPartsCatalog extends Component
+class PartsCatalog extends Component
 {
     use WithPagination;
 
@@ -77,7 +77,7 @@ class GlobalPartsCatalog extends Component
             default: $partsQuery->latest(); break;
         }
 
-        return view('livewire.parts.global-parts-catalog', [
+        return view('livewire.parts.parts-catalog', [
             'parts' => $partsQuery->paginate(12),
             'brands' => $brands,
             'models' => $models,
