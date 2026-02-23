@@ -17,7 +17,7 @@
                             <select class="form-control" wire:model.live="address_id">
                                 <option value="">-- Select --</option>
                                 @foreach($addresses as $address)
-                                    <option value="{{ $address->id }}">
+                                    <option value="{{ $address->id }}" selected>
                                         {{ $address->full_name }}, {{ $address->street_address }}, {{ $address->city }}, {{ $address->country }}
                                     </option>
                                 @endforeach
