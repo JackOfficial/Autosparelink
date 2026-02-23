@@ -92,7 +92,7 @@
                 {{-- Call to Action Buttons --}}
                 <div class="d-flex flex-column flex-md-row gap-3">
                     @if(Auth::check())
-                        <button class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm font-weight-bold mb-2 mb-md-0" wire:click="placeOrder">
+                        <button class="btn btn-primary btn-lg ml-2 rounded-pill px-5 shadow-sm font-weight-bold mb-2 mb-md-0" wire:click="placeOrder">
                             <i class="fa fa-check-circle mr-2"></i>Confirm & Place Order
                         </button>
                     @endif
