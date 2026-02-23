@@ -38,7 +38,7 @@
                             @foreach($categories as $cat)
                                 <a href="#" wire:click.prevent="$set('category_id', {{ $cat->id }})" 
                                    class="list-group-item list-group-item-action category-item d-flex justify-content-between align-items-center {{ $category_id == $cat->id ? 'active' : '' }}">
-                                    <span class="text-truncate mr-2">{{ $cat->name }}</span>
+                                    <span class="text-truncate mr-2">{{ $cat->category_name }}</span>
                                     <span class="badge badge-pill badge-light border small">{{ $cat->parts_count }}</span>
                                 </a>
                             @endforeach
