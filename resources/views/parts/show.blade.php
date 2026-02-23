@@ -155,7 +155,7 @@
                                     $routeParam = $fitment->variant_id ? ['type' => 'variant', 'id' => $fitment->variant_id] : ['type' => 'model', 'id' => $fitment->vehicle_model_id];
                                 @endphp
                                 <a href="#" class="text-primary font-weight-bold">
-                                    {{ $fitment->vehicleModel->model_name }}
+                                    {{ $fitment->vehicleModel->model_name ?? ''}}
                                 </a>
                             </td>
                             <td class="align-middle text-muted small">
