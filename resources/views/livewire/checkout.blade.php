@@ -14,7 +14,7 @@
                     @if(!empty($addresses))
                         <div class="mb-3">
                             <label>Select Address</label>
-                            <select class="form-control" wire:model="address_id">
+                            <select class="form-control" wire:model.live="address_id">
                                 <option value="">-- Select --</option>
                                 @foreach($addresses as $address)
                                     <option value="{{ $address->id }}">
@@ -27,7 +27,7 @@
 
                     {{-- Use new address checkbox --}}
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" wire:model="use_new_address" id="useNewAddress">
+                        <input type="checkbox" class="form-check-input" wire:model.live="use_new_address" id="useNewAddress">
                         <label class="form-check-label" for="useNewAddress">Use new address</label>
                     </div>
 
