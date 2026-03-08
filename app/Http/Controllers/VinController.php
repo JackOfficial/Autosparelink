@@ -122,8 +122,6 @@ $matchedVariant = Variant::where('vehicle_model_id', $model->id)
     ->orderByRaw('LENGTH(name) DESC') 
     ->first();
 
-    
-
     // 4. ULTIMATE FALLBACK
 if (!$matchedVariant) { 
     $matchedVariant = Variant::where('vehicle_model_id', $model->id)
@@ -138,12 +136,19 @@ if (!$matchedVariant) {
     $matchedVariant = Variant::where('vehicle_model_id', $model->id)->first();
 }
 
-    dd($matchedVariant); // Use this to verify the final match!
+ if ($matchedVariant) {
+    $variantSpecs = $matchedVariant->specifications()->get();
+} else {
+    $variantSpecs = collect(); // empty collection if no variant
+}
+
+    dd($variantSpecs); // Use this to verify the final match!
 
     return view('parts.index', [
         'brandId' => $brand->id,
         'modelId' => $model->id,
         'variantId' => $matchedVariant?->id,
+        'variantSpecs' => $variantSpecs,
         'vehicleData' => $vehicle
     ]);
 }
