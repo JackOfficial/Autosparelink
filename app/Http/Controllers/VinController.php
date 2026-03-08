@@ -68,8 +68,6 @@ public function search(Request $request)
     $gen = $vehicle['General Information'];
     $spec = $vehicle['Vehicle Specification'];
 
-    dd("Hello");
-
     // 1. BRAND MATCH
     $brand = Brand::whereRaw('UPPER(brand_name) = ?', [strtoupper($gen['Make'])])->first();
     if (!$brand) return back()->with('vin', 'Brand not found');
@@ -83,6 +81,7 @@ public function search(Request $request)
         })
         ->first();
 
+    dd($model);
     // Fallback to first word (e.g., "VERSO")
     if (!$model) {
         $firstWord = strtoupper(strtok($apiModelRaw, ' '));
