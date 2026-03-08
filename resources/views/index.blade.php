@@ -70,10 +70,10 @@
 
             <form action="/vin-search" method="GET" class="animate__animated animate__fadeInUp" role="search">
                 <div class="search-wrapper">
-                    <input type="text" name="vin" placeholder="Enter VIN / Frame Number (e.g. JTDBE32K220123456)" required>
+                    <input type="text" name="search_query" placeholder="Enter VIN / Frame Number (e.g. JTDBE32K220123456)" required>
                     <button class="btn btn-primary" type="submit">Search</button>
                 </div>
-                @error('vin')<div class="text-danger text-center">{{ $message }}</div>@enderror
+                @error('search_query')<div class="text-danger text-center">{{ $message }}</div>@enderror
                 
                 <div class="d-flex align-items-center justify-content-between hero-popular mt-2">
                     <div>
