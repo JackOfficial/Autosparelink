@@ -81,7 +81,7 @@ public function search(Request $request)
         })
         ->first();
 
-    dd($model);
+  
     // Fallback to first word (e.g., "VERSO")
     if (!$model) {
         $firstWord = strtoupper(strtok($apiModelRaw, ' '));
