@@ -184,6 +184,7 @@ public function search(Request $request, VinSearchService $vinService)
         });
 
         if (!$vinData) {
+            dd("Invalid VIN or decoding service unavailable.");
             return back()->with('vin', 'Invalid VIN or decoding service unavailable.');
         }
 
@@ -194,6 +195,7 @@ public function search(Request $request, VinSearchService $vinService)
         });
 
         if (!$results) {
+            dd("Vehicle identified, but no matching parts found in our database.");
             return back()->with('vin', 'Vehicle identified, but no matching parts found in our database.');
         }
  
@@ -210,9 +212,12 @@ public function search(Request $request, VinSearchService $vinService)
         ->latest()
         ->paginate(12);
 
-        
 
-    dd("Local Search: \n $parts");    
+    if($parts)
+    dd("Local Search: \n $parts");  
+    else
+    dd("no matching parts found in our database matching with your entered part number or search keyword.");    
+      
 
     return view('parts.index', [
         'parts' => $parts,
