@@ -142,10 +142,15 @@ if (!$matchedVariant) {
     $variantSpecs = collect(); // empty collection if no variant
 }
 
-$parts = Part::whereHas('fitments', function($q) use ($matchedVariant, $variantSpecs) {
-    $q->where('variant_id', $matchedVariant->id)
-      ->orWhereIn('specification_id', $variantSpecs->pluck('id'));
-})->with(['photos', 'category', 'partBrand'])->get();
+// 1. Get all specification IDs for the matched variant
+$variantSpecs = $matchedVariant->specifications()->pluck('id');
+
+// 2. Get all parts linked to those specifications
+$parts = Part::whereHas('fitments', function($q) use ($variantSpecs) {
+    $q->whereIn('specification_id', $variantSpecs);
+})
+->with(['photos', 'category', 'partBrand']) // optional eager load
+->get();
 
     dd($parts); // Use this to verify the final match!
 
