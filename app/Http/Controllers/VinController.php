@@ -91,6 +91,8 @@ public function search(Request $request)
     }
 
     if (!$model) return back()->with('vin', 'Model not found');
+   
+    dd("Found: $model");
 
     // 3. SMART VARIANT SEARCH (Tokens)
     $searchTokens = collect([
