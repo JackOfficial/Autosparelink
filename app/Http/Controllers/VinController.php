@@ -171,7 +171,7 @@ public function search(Request $request, VinSearchService $vinService)
     $userInput = strtoupper(trim($request->input('search_query')));
     
     if (empty($userInput)) {
-        return back()->with('error', 'Please enter a VIN, Part Number, or Name.');
+        return back()->with('vin', 'Please enter a VIN, Part Number, or Name.');
     }
 
     // --- PATH A: VIN SEARCH (Usually 17 Characters) ---
@@ -209,6 +209,8 @@ public function search(Request $request, VinSearchService $vinService)
         ->with(['photos', 'category', 'partBrand'])
         ->latest()
         ->paginate(12);
+
+        
 
     dd("Local Search: \n $parts");    
 
