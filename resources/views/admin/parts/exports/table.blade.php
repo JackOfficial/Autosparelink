@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style>
+        /* PDF base styling */
+        body { font-family: 'Helvetica', sans-serif; color: #333; font-size: 10px; margin: 0; padding: 0; }
+        
+        /* Header Layout */
+        .header-container { width: 100%; border-bottom: 2px solid #444; margin-bottom: 20px; padding-bottom: 10px; }
+        .header-table { width: 100%; border: none; }
+        .header-table td { border: none; padding: 0; vertical-align: middle; }
+        
+        .logo { width: 140px; height: auto; }
+        .report-info { text-align: right; }
+        .report-title { font-size: 16px; font-weight: bold; text-transform: uppercase; color: #1a202c; }
+        .report-meta { color: #718096; font-size: 9px; margin-top: 4px; }
+        
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { background-color: #f7fafc; color: #2d3748; font-weight: bold; text-align: left; border: 1px solid #e2e8f0; padding: 8px; text-transform: uppercase; font-size: 8px; }
+        td { border: 1px solid #e2e8f0; padding: 6px; vertical-align: top; word-wrap: break-word; }
+        
+        /* Helpers */
+        .text-right { text-align: right; }
+        .stock-low { color: #e53e3e; font-weight: bold; }
+        .substitute-label { font-size: 7px; color: #4c51bf; font-weight: bold; text-transform: uppercase; margin-top: 5px; display: block; }
+        .substitute-item { font-size: 8px; color: #555; background-color: #edf2f7; padding: 1px 2px; }
+        
+        /* Footer & Page Numbering */
+        .footer { position: fixed; bottom: -30px; left: 0; right: 0; height: 30px; text-align: center; font-size: 8px; color: #a0aec0; border-top: 1px solid #edf2f7; padding-top: 5px; }
+        .pagenum:before { content: counter(page); }
+        .pagecount:before { content: counter(pages); }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <table class="header-table">
+            <tr>
+                <td>
+                    {{-- Using public_path ensures the PDF engine finds the file on the disk --}}
+                    @php $logo = public_path('frontend/img/logo.png'); @endphp
+                    @if(file_exists($logo))
+                        <img src="{{ $logo }}" class="logo">
+                    @else
+                        <div style="color:#ccc; font-style:italic;">[ {{ config('app.name') }} Logo ]</div>
+                    @endif
+                </td>
+                <td class="report-info">
+                    <div class="report-title">Spare Parts Inventory</div>
+                    <div class="report-meta">
+                        Date: {{ now()->format('d M Y, H:i A') }}<br>
+                        Items: {{ $parts->count() }} | Valuation: {{ number_format($parts->sum(fn($p) => $p->price * $p->stock_quantity)) }} RWF
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="18%">Part Name</th>
+                <th width="17%">SKU / Substitutes</th>
+                <th width="12%">Category</th>
+                <th width="10%">Brand</th>
+                <th width="12%">Price (RWF)</th>
+                <th width="7%">Stock</th>
+                <th width="24%">Compatibility</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($parts as $part)
+            <tr>
+                <td>
+                    <strong>{{ $part->part_name }}</strong><br>
+                    <small style="color: #718096;">OEM: {{ $part->oem_number ?? 'N/A' }}</small>
+                </td>
+                <td>
+                    <div>{{ $part->sku }}</div>
+                    @if($part->substitutions && $part->substitutions->count() > 0)
+                        <span class="substitute-label">Alt:</span>
+                        @foreach($part->substitutions as $sub)
+                            <span class="substitute-item">{{ $sub->sku }}</span>{{ !$loop->last ? ',' : '' }}
+                        @endforeach
+                    @endif
+                </td>
+                <td>{{ $part->category->category_name ?? 'N/A' }}</td>
+                <td>{{ $part->partBrand->name ?? 'N/A' }}</td>
+                <td class="text-right">{{ number_format($part->price) }}</td>
+                <td class="text-right {{ $part->stock_quantity <= 5 ? 'stock-low' : '' }}">
+                    {{ $part->stock_quantity }}
+                </td>
+                <td>
+                    @if($part->fitments && $part->fitments->count() > 0)
+                        @foreach($part->fitments as $f)
+                            {{ $f->specification->variant->name ?? 'N/A' }}{{ !$loop->last ? ', ' : '' }}
+                        @endforeach
+                    @else
+                        <span style="color: #cbd5e0;">Universal Fit</span>
+                    @endif
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Inventory Report — Page <span class="pagenum"></span> of <span class="pagecount"></span> — Generated by {{ config('app.name') }}
+    </div>
+
+</body>
+</html>

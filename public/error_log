@@ -1,0 +1,6 @@
+[19-Oct-2025 20:07:28 UTC] PHP Fatal error:  Trait "App\Models\HasFactory" not found in /home/happcncc/public_html/app/Models/Photo.php on line 8
+[19-Oct-2025 21:03:06 UTC] PHP Fatal error:  Trait "App\Models\HasFactory" not found in /home/happcncc/public_html/app/Models/Organization.php on line 7
+[19-Oct-2025 21:03:12 UTC] PHP Fatal error:  Trait "App\Models\HasFactory" not found in /home/happcncc/public_html/app/Models/Organization.php on line 7
+[20-Oct-2025 14:19:31 UTC] PHP Fatal error:  Cannot use SebastianBergmann\CodeCoverage\Report\Xml\Project as Project because the name is already in use in /home/happcncc/public_html/app/Http/Controllers/Admin/ProjectController.php on line 10
+[21-Oct-2025 03:50:48 UTC] PHP Fatal error:  Trait "App\Models\HasFactory" not found in /home/happcncc/public_html/app/Models/Document.php on line 7
+[21-Oct-2025 03:51:56 UTC] PHP Fatal error:  Trait "App\Models\SoftDeletes" not found in /home/happcncc/public_html/app/Models/Document.php on line 8
