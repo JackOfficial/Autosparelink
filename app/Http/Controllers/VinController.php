@@ -168,77 +168,103 @@ $parts = Part::whereHas('fitments', function($q) use ($variantSpecs) {
 
 public function search(Request $request, VinSearchService $vinService)
 {
-    // 1. Your API Response Data (Mocked or Live)
-   // $vehicle = [ /* ... your mocked data ... */ ];
-    $data = [
-    'VIN' => 'JTDKC3C3801008749',
-
-    'VIN Analytics' => [
-        'Squish VIN' => 'JTDKC3C3801',
-        'Serial number' => '008749',
-    ],
-
-    'General Information' => [
-        'Make' => 'TOYOTA',
-        'Model' => 'VERSO',
-        'Year' => '2011',
-        'Trim level' => 'S',
-        'Body style' => 'MPV',
-        'Engine type' => '1.4 D4-D (NLP121_)',
-        'Fuel type' => 'Diesel',
-        'Transmission' => '6-Speed Manual',
-        'Vehicle class' => 'Compact MPV',
-        'Vehicle type' => 'MPV',
-        'Manufactured in' => 'Japan',
-    ],
-
-    'Manufacturer' => [
-        'Manufacturer' => 'Toyota Motor Corp',
-        'City' => '1 Toyota-cho Toyota -Shi',
-        'Region' => 'Asia',
-        'Country' => 'Japan',
-    ],
-
-    'Vehicle Specification' => [
-        'Body type' => 'Hatchback',
-        'Number of doors' => '5',
-        'Number of seats' => '5-7',
-        'Displacement SI' => 1364,
-        'Displacement CID' => '83',
-        'Displacement nominal' => '1.40',
-        'Engine valves' => 2,
-        'Engine cylinders' => '4',
-        'Engine horsepower' => 90,
-        'Engine kilowatts' => 66,
-        'Driveline' => 'FWD',
-        'Anti-lock braking system' => '',
-    ],
-    ];
-
-    // 2. Define a Cache Key based on the VIN
-    $cacheKey = 'vin_search_' . ($data['VIN'] ?? 'unknown');
-
-    // 3. Execute through the Service (with 24-hour caching)
-    $results = Cache::remember($cacheKey, now()->addDay(), function () use ($vinService, $data) {
-        return $vinService->findPartsByVinData($data);
-    });
-
-    // 4. Handle "No Match Found"
-    if (!$results) {
-        return back()->with('vin', 'We could not find a match for this vehicle in our catalog.');
+    $userInput = strtoupper(trim($request->input('search_query')));
+    
+    if (empty($userInput)) {
+        return back()->with('error', 'Please enter a VIN, Part Number, or Name.');
     }
 
-    // Optional: Keep the dd() for your testing, then remove for production
-    dd($results['parts']); 
+    // --- PATH A: VIN SEARCH (Usually 17 Characters) ---
+    if (strlen($userInput) === 17) {
+        
+        // 1. Layer 1: Cache the raw API response (The "Expensive" Data)
+        // We use a long duration (30 days+) because vehicle specs don't change.
+        $vinData = Cache::remember("vin_api_raw_{$userInput}", now()->addMonths(1), function () use ($userInput) {
+            return $this->callExternalVinApi($userInput); 
+        });
 
-    // 5. Return View with clean data
+        if (!$vinData) {
+            return back()->with('vin', 'Invalid VIN or decoding service unavailable.');
+        }
+
+        // 2. Layer 2: Cache the DB Matching Result
+        // This avoids running the fuzzy logic/service every time.
+        $results = Cache::remember("vin_db_match_{$userInput}", now()->addDay(), function () use ($vinService, $vinData) {
+            return $vinService->findPartsByVinData($vinData);
+        });
+
+        if (!$results) {
+            return back()->with('vin', 'Vehicle identified, but no matching parts found in our database.');
+        }
+ 
+        dd("Local Search: \n $results"); 
+
+        return view('parts.index', array_merge($results, ['vehicleData' => $vinData]));
+    }
+
+    // --- PATH B: PART NUMBER OR NAME SEARCH ---
+    // No expensive API here. Pure database lookup.
+    $parts = Part::where('part_number', 'LIKE', "%{$userInput}%")
+        ->orWhere('name', 'LIKE', "%{$userInput}%")
+        ->with(['photos', 'category', 'partBrand'])
+        ->latest()
+        ->paginate(12);
+
+    dd("Local Search: \n $parts");    
+
     return view('parts.index', [
-        'brand'       => $results['brand'],
-        'model'       => $results['model'],
-        'variant'     => $results['variant'],
-        'parts'       => $results['parts'], // This is now paginated/optimized
-        'vehicleData' => $data
+        'parts' => $parts,
+        'searchTerm' => $userInput
     ]);
+}
+
+/**
+ * Logic to call your actual External VIN Provider
+ */
+private function callExternalVinApi($vin)
+{
+    // Place your real HTTP::get() call here.
+    // For now, I'll return your mock data structure.
+   return [
+        'VIN' => $vin,
+        'VIN Analytics' => [
+            'Squish VIN' => substr($vin, 0, 11),
+            'Serial number' => substr($vin, 11),
+        ],
+        'General Information' => [
+            'Make' => 'TOYOTA',
+            'Model' => 'VERSO',
+            'Year' => '2011',
+            'Trim level' => 'S',
+            'Body style' => 'MPV',
+            'Engine type' => '1.4 D4-D (NLP121_)',
+            'Fuel type' => 'Diesel',
+            'Transmission' => '6-Speed Manual',
+            'Vehicle class' => 'Compact MPV',
+            'Vehicle type' => 'MPV',
+            'Manufactured in' => 'Japan',
+        ],
+        'Manufacturer' => [
+            'Manufacturer' => 'Toyota Motor Corp',
+            'City' => '1 Toyota-cho Toyota -Shi',
+            'Region' => 'Asia',
+            'Country' => 'Japan',
+        ],
+        'Vehicle Specification' => [
+            'Body type' => 'Hatchback',
+            'Number of doors' => '5',
+            'Number of seats' => '5-7',
+            'Displacement SI' => 1364,
+            'Displacement CID' => '83',
+            'Displacement nominal' => '1.40',
+            'Engine valves' => 2,
+            'Engine cylinders' => '4',
+            'Engine horsepower' => 90,
+            'Engine kilowatts' => 66,
+            'Driveline' => 'FWD',
+            'Anti-lock braking system' => '',
+        ],
+    ];
 }
 
 public function searchByVin(Request $request, VinDecoderService $decoder)
