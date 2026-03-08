@@ -142,13 +142,19 @@ if (!$matchedVariant) {
     $variantSpecs = collect(); // empty collection if no variant
 }
 
-    dd($variantSpecs); // Use this to verify the final match!
+$parts = Part::whereHas('fitments', function($q) use ($matchedVariant, $variantSpecs) {
+    $q->where('variant_id', $matchedVariant->id)
+      ->orWhereIn('specification_id', $variantSpecs->pluck('id'));
+})->with(['photos', 'category', 'partBrand'])->get();
+
+    dd($parts); // Use this to verify the final match!
 
     return view('parts.index', [
         'brandId' => $brand->id,
         'modelId' => $model->id,
         'variantId' => $matchedVariant?->id,
         'variantSpecs' => $variantSpecs,
+        'parts' => $parts,
         'vehicleData' => $vehicle
     ]);
 }

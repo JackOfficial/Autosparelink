@@ -76,6 +76,7 @@ public function destinations(): BelongsToMany
         return $this->belongsTo(TransmissionType::class);
     }
 
+
     public function driveType()
     {
         return $this->belongsTo(DriveType::class);
