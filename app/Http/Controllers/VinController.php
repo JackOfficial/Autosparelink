@@ -62,10 +62,13 @@ public function search(Request $request)
         'Anti-lock braking system' => '',
     ],
     ];
-     $vehicle = $data;
+     
+    $vehicle = $data;
 
     $gen = $vehicle['General Information'];
     $spec = $vehicle['Vehicle Specification'];
+
+    dd("Hello");
 
     // 1. BRAND MATCH
     $brand = Brand::whereRaw('UPPER(brand_name) = ?', [strtoupper($gen['Make'])])->first();
