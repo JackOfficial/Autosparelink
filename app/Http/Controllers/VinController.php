@@ -91,18 +91,15 @@ public function search(Request $request)
     }
 
     if (!$model) return back()->with('vin', 'Model not found');
-   
-    dd("Found: $model");
 
     // 3. SMART VARIANT SEARCH (Tokens)
     $searchTokens = collect([
         $gen['Year'],
         $gen['Trim level'],
-        $gen['Body style'],
         $spec['Body type'],
         $gen['Fuel type'],
-        strtok($gen['Engine type'], ' '),
-        strtok($gen['Transmission'], ' '), // Changed from '-' to ' ' to get "6" from "6-Speed"
+        strtok($gen['Engine type'], ' ') . 'L',
+        str_contains(strtolower($gen['Transmission']), 'manual') ? 'Manual' : 'Automatic',
     ])->filter()->unique();
 
     // 3. SMART VARIANT SEARCH (Fixed Logic)
@@ -125,6 +122,8 @@ $matchedVariant = Variant::where('vehicle_model_id', $model->id)
     ->orderByRaw('LENGTH(name) DESC') 
     ->first();
 
+    dd($matchedVariant);
+
     // 4. ULTIMATE FALLBACK
 if (!$matchedVariant) { 
     $matchedVariant = Variant::where('vehicle_model_id', $model->id)
@@ -139,7 +138,7 @@ if (!$matchedVariant) {
     $matchedVariant = Variant::where('vehicle_model_id', $model->id)->first();
 }
 
-    dd($matchedVariant); // Use this to verify the final match!
+     // Use this to verify the final match!
 
     return view('parts.index', [
         'brandId' => $brand->id,
