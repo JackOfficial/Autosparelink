@@ -152,7 +152,7 @@ $parts = Part::whereHas('fitments', function($q) use ($variantSpecs) {
 ->with(['photos', 'category', 'partBrand']) // optional eager load
 ->get();
 
-    dd($variantSpecs); // Use this to verify the final match!
+    dd($parts); // Use this to verify the final match!
 
     return view('parts.index', [
         'brandId' => $brand->id,
