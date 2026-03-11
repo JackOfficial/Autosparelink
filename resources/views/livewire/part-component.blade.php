@@ -43,7 +43,7 @@
         </a>
 
         <small class="text-muted d-block mb-1">
-            <i class="fa fa-car mr-1"></i> Fits: {{ $part->specifications->first()?->full_name ?? 'Multiple vehicles' }}
+            <i class="fa fa-car mr-1"></i> Fits: {{ $part->variants->first()?->full_name ?? $part->specifications->first()?->full_name ?? 'Multiple vehicles' }}
         </small>
 
         <small class="text-muted d-block mb-1">

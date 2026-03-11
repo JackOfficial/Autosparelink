@@ -7,17 +7,14 @@
         .btn-toggle.active { background-color: #007bff; color: white; border-color: #007bff; }
         .part-grid-transition { transition: all 0.3s ease; }
         .force-full-width-child > div[class*="col-"] {
-        width: 100% !important;
-        max-width: 100% !important;
-        flex: 0 0 100% !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        margin-bottom: 0 !important; /* Prevents double spacing */
-    }
-
-    .transition-all {
-    transition: all 0.3s ease-in-out !important;
-    }
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 100% !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-bottom: 0 !important;
+        }
+        .transition-all { transition: all 0.3s ease-in-out !important; }
     </style>
 
     {{-- 1. VIN Matched Vehicle Banner --}}
@@ -77,11 +74,13 @@
                             <select class="form-control mb-3 custom-select border-light" wire:model.live="variant" @if(!$variants || count($variants) == 0) disabled @endif>
                                 <option value="">Select Variant</option>
                                 @foreach($variants as $v)
+                                    {{-- Use the full_name attribute from your Variant model --}}
                                     <option value="{{ $v->id }}">{{ $v->full_name }}</option>
                                 @endforeach
                             </select>
                         </div>
 
+                        {{-- Technical Details (Visible during VIN search) --}}
                         @if(!empty($vinData))
                         <div class="p-3 mb-4 rounded bg-light border-0 small">
                             <h6 class="font-weight-bold mb-2" style="font-size: 0.8rem;">Technical Details</h6>
@@ -95,7 +94,9 @@
                         <select class="form-control mb-4 custom-select border-light" wire:model.live="category">
                             <option value="">All Categories</option>
                             @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->category_name }} ({{ $cat->parts_count }})</option>
+                                <option value="{{ $cat->id }}" {{ $category == $cat->id ? 'selected' : '' }}>
+                                    {{ $cat->category_name }} ({{ $cat->parts_count }})
+                                </option>
                             @endforeach
                         </select>
 
@@ -127,7 +128,11 @@
             <div class="d-flex justify-content-between align-items-end mb-4">
                 <div>
                     <h4 class="font-weight-bold text-dark mb-0">{{ number_format($parts->total()) }} Parts Found</h4>
-                    <p class="text-muted small mb-0">Showing {{ $parts->firstItem() }} to {{ $parts->lastItem() }}</p>
+                    @if($category)
+                        <span class="badge badge-primary px-3 py-2 rounded-pill mt-2">
+                            Category: {{ $categories->find($category)?->category_name }}
+                        </span>
+                    @endif
                 </div>
 
                 <div class="d-flex align-items-center">
@@ -158,26 +163,25 @@
             </div>
 
             {{-- Results Grid/List --}}
-          <div class="row" wire:loading.remove>
-    @forelse($parts as $part)
-        {{-- 1. This is the Parent Grid --}}
-        <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'">
-
-            <div class="force-full-width-child">
-                {{-- UPDATE THIS LINE BELOW --}}
-                @livewire('part-component', [
-                    'part' => $part, 
-                    'isCompatible' => !empty($vinData) 
-                ], key('part-'.$part->id)) 
+            <div class="row" wire:loading.remove>
+                @forelse($parts as $part)
+                    <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'">
+                        <div class="force-full-width-child h-100">
+                            @livewire('part-component', [
+                                'part' => $part, 
+                                'isCompatible' => !empty($vinData) 
+                            ], key('part-'.$part->id . '-' . $loop->index)) 
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12 text-center py-5">
+                        <img src="{{ asset('frontend/img/no-results.png') }}" alt="No results" style="max-width: 150px; opacity: 0.5;">
+                        <h5 class="text-muted mt-3">No parts found matching your criteria.</h5>
+                        <button wire:click="clearFilters" class="btn btn-primary btn-sm rounded-pill mt-2 px-4">See All Parts</button>
+                    </div>
+                @endforelse
             </div>
 
-        </div>
-    @empty
-        <div class="col-12 text-center py-5">
-            <h5 class="text-muted">No parts found matching your criteria.</h5>
-        </div>
-    @endforelse
-</div>
             {{-- Pagination --}}
             <div class="d-flex justify-content-center mt-4">
                 {{ $parts->links() }}

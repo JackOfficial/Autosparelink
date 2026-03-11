@@ -39,6 +39,7 @@ class PartsCatalog extends Component
         $this->model = $model;
         $this->variant = $variant;
         $this->vinData = $vinData;
+        $this->category = $category ?? request()->query('category');
     }
 
     // Reset pagination on filter change
@@ -80,7 +81,7 @@ class PartsCatalog extends Component
         $categories = Category::withCount('parts')->get();
 
         // 2. Build the Unified Parts Query
-        $partsQuery = Part::query()
+        $partsQuery = Part::query()->with(['photos', 'partBrand', 'specifications.vehicleModel'])
             // --- VEHICLE FILTERING ---
             // If we have a specific Variant (from VIN or Manual Select)
             ->when($this->variant, function($q) {
@@ -106,7 +107,8 @@ class PartsCatalog extends Component
             // --- TEXT SEARCH ---
             ->where(function($q) {
                 $q->where('part_name', 'like', '%' . $this->search . '%')
-                  ->orWhere('part_number', 'like', '%' . $this->search . '%');
+                  ->orWhere('part_number', 'like', '%' . $this->search . '%')
+                  ->orWhere('oem_number', 'like', '%' . $this->search . '%'); // Added OEM search
             });
 
         // 3. Apply Sorting
