@@ -29,24 +29,31 @@
                         </div>
                         <div>
                             <small class="text-white-50 text-uppercase font-weight-bold" style="letter-spacing: 1px; font-size: 0.7rem;">Vehicle Identified</small>
-                            <h5 class="mb-0 font-weight-bold">
-                                @php
-                                    $specRecord = $variant ? \App\Models\Specification::with('variant')->find($variant) : null;
-                                @endphp
+                           <h5 class="mb-0 font-weight-bold">
+    @php
+        // Fetch the Variant directly since $variant is now a Variant ID
+        $selectedVariant = $variant ? \App\Models\Variant::find($variant) : null;
+    @endphp
 
-                                @if($specRecord && $specRecord->variant)
-                                    {{ $specRecord->variant->name }}
-                                @else
-                                    {{ $vinData['General Information']['Year'] ?? '' }} 
-                                    {{ $vinData['General Information']['Make'] ?? '' }} 
-                                    {{ $vinData['General Information']['Model'] ?? '' }}
-                                @endif
+    @if($selectedVariant)
+        {{-- Priority 1: The clean name from your database (e.g., "Corolla LE") --}}
+        {{ $selectedVariant->name }}
+    @elseif(!empty($vinData))
+        {{-- Priority 2: Fallback to API data if Variant isn't found/selected yet --}}
+        {{ $vinData['General Information']['Year'] ?? '' }} 
+        {{ $vinData['General Information']['Make'] ?? '' }} 
+        {{ $vinData['General Information']['Model'] ?? '' }}
+    @else
+        All Parts
+    @endif
 
-                                <span class="mx-2 text-white-50">|</span>
-                                <span class="font-weight-normal small">
-                                    {{ $vinData['General Information']['Engine type'] ?? 'N/A' }}
-                                </span>
-                            </h5>
+    <span class="mx-2 text-white-50">|</span>
+
+    <span class="font-weight-normal small">
+        {{-- Technical info from API stays as the secondary detail --}}
+        {{ $vinData['General Information']['Engine type'] ?? 'N/A' }}
+    </span>
+</h5>
                         </div>
                     </div>
                     <button wire:click="clearFilters" class="btn btn-sm btn-outline-light rounded-pill px-4">
