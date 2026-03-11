@@ -15,7 +15,6 @@
             margin-bottom: 0 !important;
         }
         .transition-all { transition: all 0.3s ease-in-out !important; }
-        /* Highlight for pre-selected variant */
         .variant-preselected { border: 2px solid #007bff !important; background-color: #f0f7ff !important; }
     </style>
 
@@ -31,31 +30,26 @@
                         </div>
                         <div>
                             <small class="text-white-50 text-uppercase font-weight-bold" style="letter-spacing: 1px; font-size: 0.7rem;">VIN Search Active</small>
-                           <h5 class="mb-0 font-weight-bold">
-    @php
-        // We fetch the Specification model using the ID stored in $variant, 
-        // then grab the descriptive name from its related Variant.
-        $specRecord = \App\Models\Specification::with('variant')->find($variant);
-        
-    @endphp
+                            <h5 class="mb-0 font-weight-bold">
+                                @php
+                                    // Added null check for $variant to avoid errors on 'All Parts' visit
+                                    $specRecord = $variant ? \App\Models\Specification::with('variant')->find($variant) : null;
+                                @endphp
 
-    {{-- 1. Display the Auto-generated Variant Name if it exists --}}
-    @if($specRecord && $specRecord->variant)
-        {{ $specRecord->variant->name }}
-    @else
-        {{-- 2. Fallback: Show VIN Year/Make/Model if DB record isn't found --}}
-        {{ $vinData['General Information']['Year'] ?? '' }} 
-        {{ $vinData['General Information']['Make'] ?? '' }} 
-        {{ $vinData['General Information']['Model'] ?? '' }}
-    @endif
+                                @if($specRecord && $specRecord->variant)
+                                    {{ $specRecord->variant->name }}
+                                @else
+                                    {{ $vinData['General Information']['Year'] ?? '' }} 
+                                    {{ $vinData['General Information']['Make'] ?? '' }} 
+                                    {{ $vinData['General Information']['Model'] ?? '' }}
+                                @endif
 
-    <span class="mx-2 text-white-50">|</span>
+                                <span class="mx-2 text-white-50">|</span>
 
-    {{-- 3. Keep the Technical Engine Type from VIN for extra detail --}}
-    <span class="font-weight-normal small">
-        {{ $vinData['General Information']['Engine type'] ?? 'N/A' }}
-    </span>
-  </h5>
+                                <span class="font-weight-normal small">
+                                    {{ $vinData['General Information']['Engine type'] ?? 'N/A' }}
+                                </span>
+                            </h5>
                         </div>
                     </div>
                     <button wire:click="clearFilters" class="btn btn-sm btn-outline-light rounded-pill px-4">
@@ -79,7 +73,6 @@
 
                         <h6 class="font-weight-bold mb-3 text-dark"><i class="fa fa-filter mr-2 text-primary"></i>Vehicle Filter</h6>
                         <div class="form-group small">
-                            {{-- Brand Select --}}
                             <select class="form-control mb-2 custom-select border-light shadow-none" wire:model.live="brand">
                                 <option value="">All Brands</option>
                                 @foreach($brands as $b)
@@ -87,7 +80,6 @@
                                 @endforeach
                             </select>
 
-                            {{-- Model Select --}}
                             <select class="form-control mb-2 custom-select border-light shadow-none" wire:model.live="model" @disabled(!$brand || count($models) == 0)>
                                 <option value="">Select Model</option>
                                 @foreach($models as $m)
@@ -95,24 +87,18 @@
                                 @endforeach
                             </select>
 
-                            {{-- Variant Select: Added dynamic class if pre-selected via VIN --}}
                             <select class="form-control mb-3 custom-select border-light shadow-none {{ !empty($variant) && !empty($vinData) ? 'variant-preselected' : '' }}" 
-            wire:model.live="variant" 
-            @disabled(!$model || count($variants) == 0)>
-        <option value="">Select Variant</option>
-        @foreach($variants as $v)
-            {{-- 
-               $v here is a Specification model. 
-               We reach into the 'variant' relationship to get the descriptive name.
-            --}}
-            <option value="{{ $v->id }}">
-                {{ $v->variant->name ?? ($v->engine_code . ' ' . $v->engine_capacity) }}
-            </option>
-        @endforeach
-    </select>
+                                    wire:model.live="variant" 
+                                    @disabled(!$model || count($variants) == 0)>
+                                <option value="">Select Variant</option>
+                                @foreach($variants as $v)
+                                    <option value="{{ $v->id }}">
+                                        {{ $v->variant->name ?? ($v->engine_code . ' ' . $v->engine_capacity) }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        {{-- Technical Details (Visible during VIN search) --}}
                         @if(!empty($vinData))
                         <div class="p-3 mb-4 rounded bg-light border-0 small">
                             <h6 class="font-weight-bold mb-2 text-primary" style="font-size: 0.8rem;">VIN Match Details</h6>
@@ -201,8 +187,8 @@
                         <div class="force-full-width-child h-100 part-grid-transition">
                             @livewire('part-component', [
                                 'part' => $part, 
-                                'isCompatible' => !empty($vinData) || !empty($this->variant)
-                            ], key('part-'.$part->id . '-' . ($this->variant ?? 'all') . '-' . ($grid ? 'grid' : 'list'))) 
+                                'isCompatible' => !empty($vinData) || !empty($variant)
+                            ], key('part-'.$part->id . '-' . ($variant ?? 'all') . '-' . ($grid ? 'grid' : 'list'))) 
                         </div>
                     </div>
                 @empty

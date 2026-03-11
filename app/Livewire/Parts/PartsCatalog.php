@@ -17,7 +17,6 @@ class PartsCatalog extends Component
 {
     use WithPagination;
 
-    // Filter Properties with URL persistence
     #[Url(history: true)]
     public $search = '';
 
@@ -28,7 +27,7 @@ class PartsCatalog extends Component
     public $model = null;
 
     #[Url(history: true)]
-    public $variant = null; // Represents the Specification ID in the UI
+    public $variant = null; 
 
     #[Url(history: true)]
     public $category = null;
@@ -45,8 +44,6 @@ class PartsCatalog extends Component
     #[Url(history: true)]
     public $sort = 'latest';
 
-    public $selectedVariantModel;
-
     public $vinData = null; 
 
     protected $paginationTheme = 'bootstrap';
@@ -56,21 +53,27 @@ class PartsCatalog extends Component
      */
     public function mount($brand = null, $model = null, $variant = null, $vinData = null, $category = null)
     {
-        $this->brand = $brand ?? request()->query('brand', $this->brand);
-        $this->model = $model ?? request()->query('model', $this->model);
-        $this->variant = $variant ?? request()->query('variant', $this->variant);
-        $this->category = $category ?? request()->query('category', $this->category);
-        $this->vinData = $vinData;
+        // 1. If VIN data is passed from a search, prioritize it
+        if ($vinData) {
+            $this->vinData = $vinData;
+            $this->brand = $vinData['brand_id'] ?? null;
+            $this->model = $vinData['model_id'] ?? null;
+            // Note: If you have a specific variant from VIN, set it here
+        } else {
+            // 2. Otherwise, use passed parameters or URL queries (for 'View All')
+            $this->brand = $brand ?? request()->query('brand', $this->brand);
+            $this->model = $model ?? request()->query('model', $this->model);
+            $this->variant = $variant ?? request()->query('variant', $this->variant);
+            $this->category = $category ?? request()->query('category', $this->category);
+        }
+
+        // Set search query if present in request (e.g. from a global search bar)
+        if(request()->has('search_query')) {
+            $this->search = request()->query('search_query');
+        }
     }
 
-//     public function updatedVariant($value)
-//    {
-//     // Retrieve the full model from DB to get descriptive names
-//     $this->selectedVariantModel = \App\Models\Specification::with('vehicleModel.brand')->find($value);
-//    }
-
     // --- Filter Lifecycle Hooks ---
-    // These reset dependent dropdowns and pagination when a parent filter changes
     public function updatedBrand() { $this->model = null; $this->variant = null; $this->resetPage(); }
     public function updatedModel() { $this->variant = null; $this->resetPage(); }
     public function updatedVariant() { $this->resetPage(); }
@@ -80,9 +83,6 @@ class PartsCatalog extends Component
     public function updatedMinPrice() { $this->resetPage(); }
     public function updatedMaxPrice() { $this->resetPage(); }
 
-    /**
-     * Reset all filters to default
-     */
     public function clearFilters()
     {
         $this->reset(['brand', 'model', 'variant', 'search', 'vinData', 'category', 'min_price', 'max_price', 'in_stock']);
@@ -103,7 +103,6 @@ class PartsCatalog extends Component
             ? VehicleModel::where('brand_id', $this->brand)->orderBy('model_name')->get() 
             : collect();
 
-        // Loading Specifications tied to the selected Model
         $variants = $this->model 
             ? Specification::where('vehicle_model_id', $this->model)->get() 
             : collect();
@@ -115,15 +114,12 @@ class PartsCatalog extends Component
             ->with(['photos', 'partBrand', 'specifications.vehicleModel.brand'])
             
             // --- VEHICLE HIERARCHY FILTERS ---
-            // Priority 1: Specific Specification (Variant Select)
             ->when($this->variant, function($q) {
                 $q->whereHas('specifications', fn($query) => $query->where('specifications.id', $this->variant));
             }) 
-            // Priority 2: Model Level (if no specific specification selected)
             ->when($this->model && !$this->variant, function($q) {
                 $q->whereHas('specifications', fn($query) => $query->where('vehicle_model_id', $this->model));
             })
-            // Priority 3: Brand Level (if no model selected)
             ->when($this->brand && !$this->model, function($q) {
                 $q->whereHas('specifications.vehicleModel', fn($query) => $query->where('brand_id', $this->brand));
             })
@@ -134,7 +130,7 @@ class PartsCatalog extends Component
             ->when($this->min_price, fn($q) => $q->where('price', '>=', $this->min_price))
             ->when($this->max_price, fn($q) => $q->where('price', '<=', $this->max_price))
 
-            // --- SEARCH ---
+            // --- SEARCH (Supports Part Name, Number, etc.) ---
             ->when($this->search, function($q) {
                 $q->where(function($sub) {
                     $term = '%' . $this->search . '%';
@@ -145,7 +141,7 @@ class PartsCatalog extends Component
                 });
             });
 
-        // 3. Sorting logic
+        // 3. Sorting
         switch ($this->sort) {
             case 'price_asc': $partsQuery->orderBy('price', 'asc'); break;
             case 'price_desc': $partsQuery->orderBy('price', 'desc'); break;

@@ -16,7 +16,12 @@ class PartCatalogController extends Controller
      */
 
     public function parts(){
-        return view('parts.index');
+        return view('parts.index', [
+        'brandId' => null,
+        'modelId' => null,
+        'variantId' => null,
+        'vehicleData' => null
+    ]);
     }
 
 public function part_for_specification($brand, $model, $slug)
