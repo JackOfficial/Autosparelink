@@ -58,10 +58,11 @@ class PartsCatalog extends Component
     {
         // 1. If VIN data is passed from a search, prioritize it
         if ($vinData) {
-            dd($vinData);
             $this->vinData = $vinData;
             $this->brand = $vinData['brand_id'] ?? null;
             $this->model = $vinData['model_id'] ?? null;
+            dd($this->model);
+
             // Note: If you have a specific variant from VIN, set it here
         } else {
             // 2. Otherwise, use passed parameters or URL queries (for 'View All')
