@@ -2,7 +2,7 @@
     <style>
         .filter-card { border-radius: 15px; border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
         .sticky-filter { top: 90px; z-index: 1020; }
-        .vin-banner { border-radius: 12px; background: linear-gradient(45deg, #1a1a1a, #333); }
+        .vin-banner { border-radius: 12px; background: linear-gradient(45deg, #1a1a1a, #333); border-left: 5px solid #007bff; }
         .form-control-pill { border-radius: 50px; padding-left: 1.25rem; }
         .btn-toggle.active { background-color: #007bff; color: white; border-color: #007bff; }
         .part-grid-transition { transition: all 0.3s ease; }
@@ -15,6 +15,8 @@
             margin-bottom: 0 !important;
         }
         .transition-all { transition: all 0.3s ease-in-out !important; }
+        /* Highlight for pre-selected variant */
+        .variant-preselected { border: 2px solid #007bff !important; background-color: #f0f7ff !important; }
     </style>
 
     {{-- 1. VIN Matched Vehicle Banner --}}
@@ -52,13 +54,13 @@
                 <div class="card filter-card mb-4">
                     <div class="card-body p-4">
                         <h6 class="font-weight-bold mb-3 text-dark"><i class="fa fa-search mr-2 text-primary"></i>Quick Search</h6>
-                        <input type="text" class="form-control form-control-pill mb-4 border-light bg-light" 
+                        <input type="text" class="form-control form-control-pill mb-4 border-light bg-light shadow-none" 
                                placeholder="Part name, SKU, OEM..." wire:model.live.debounce.500ms="search">
 
                         <h6 class="font-weight-bold mb-3 text-dark"><i class="fa fa-filter mr-2 text-primary"></i>Vehicle Filter</h6>
                         <div class="form-group small">
                             {{-- Brand Select --}}
-                            <select class="form-control mb-2 custom-select border-light" wire:model.live="brand">
+                            <select class="form-control mb-2 custom-select border-light shadow-none" wire:model.live="brand">
                                 <option value="">All Brands</option>
                                 @foreach($brands as $b)
                                     <option value="{{ $b->id }}">{{ $b->brand_name }}</option>
@@ -66,18 +68,19 @@
                             </select>
 
                             {{-- Model Select --}}
-                            <select class="form-control mb-2 custom-select border-light" wire:model.live="model" @disabled(!$brand || count($models) == 0)>
+                            <select class="form-control mb-2 custom-select border-light shadow-none" wire:model.live="model" @disabled(!$brand || count($models) == 0)>
                                 <option value="">Select Model</option>
                                 @foreach($models as $m)
                                     <option value="{{ $m->id }}">{{ $m->model_name }}</option>
                                 @endforeach
                             </select>
 
-                            {{-- Specification Select (Labeled as Variant for users) --}}
-                            <select class="form-control mb-3 custom-select border-light" wire:model.live="variant" @disabled(!$model || count($variants) == 0)>
+                            {{-- Variant Select: Added dynamic class if pre-selected via VIN --}}
+                            <select class="form-control mb-3 custom-select border-light shadow-none {{ !empty($variant) && !empty($vinData) ? 'variant-preselected' : '' }}" 
+                                    wire:model.live="variant" 
+                                    @disabled(!$model || count($variants) == 0)>
                                 <option value="">Select Specification/Engine</option>
                                 @foreach($variants as $v)
-                                    {{-- Using specification details as the variant description --}}
                                     <option value="{{ $v->id }}">
                                         {{ $v->engine_code ?? '' }} {{ $v->engine_capacity ?? '' }} ({{ $v->start_year ?? 'N/A' }})
                                     </option>
@@ -88,7 +91,7 @@
                         {{-- Technical Details (Visible during VIN search) --}}
                         @if(!empty($vinData))
                         <div class="p-3 mb-4 rounded bg-light border-0 small">
-                            <h6 class="font-weight-bold mb-2" style="font-size: 0.8rem;">Technical Details</h6>
+                            <h6 class="font-weight-bold mb-2 text-primary" style="font-size: 0.8rem;">VIN Match Details</h6>
                             <div class="d-flex justify-content-between mb-1"><span>Fuel:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Fuel type'] ?? 'N/A' }}</span></div>
                             <div class="d-flex justify-content-between mb-1"><span>Transmission:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Transmission'] ?? 'N/A' }}</span></div>
                             <div class="d-flex justify-content-between"><span>Origin:</span> <span class="text-dark font-weight-bold">{{ $vinData['Manufacturer']['Country'] ?? 'N/A' }}</span></div>
@@ -96,7 +99,7 @@
                         @endif
 
                         <h6 class="font-weight-bold mb-3 text-dark">Category</h6>
-                        <select class="form-control mb-4 custom-select border-light" wire:model.live="category">
+                        <select class="form-control mb-4 custom-select border-light shadow-none" wire:model.live="category">
                             <option value="">All Categories</option>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}">
@@ -108,10 +111,10 @@
                         <h6 class="font-weight-bold mb-3 text-dark">Price Range</h6>
                         <div class="row no-gutters mb-4">
                             <div class="col-6 pr-1">
-                                <input type="number" class="form-control border-light small" placeholder="Min" wire:model.lazy="min_price">
+                                <input type="number" class="form-control border-light small shadow-none" placeholder="Min" wire:model.lazy="min_price">
                             </div>
                             <div class="col-6 pl-1">
-                                <input type="number" class="form-control border-light small" placeholder="Max" wire:model.lazy="max_price">
+                                <input type="number" class="form-control border-light small shadow-none" placeholder="Max" wire:model.lazy="max_price">
                             </div>
                         </div>
 
@@ -174,9 +177,8 @@
                         <div class="force-full-width-child h-100 part-grid-transition">
                             @livewire('part-component', [
                                 'part' => $part, 
-                                // Compatibility is true if VIN data is active OR a specific Specification is selected
                                 'isCompatible' => !empty($vinData) || !empty($this->variant)
-                            ], key('part-'.$part->id . '-' . now())) 
+                            ], key('part-'.$part->id . '-' . ($this->variant ?? 'all') . '-' . ($grid ? 'grid' : 'list'))) 
                         </div>
                     </div>
                 @empty
