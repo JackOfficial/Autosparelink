@@ -197,9 +197,7 @@ public function search(Request $request, VinSearchService $vinService)
         if (!$results) {
            // dd("Vehicle identified, but no matching parts found in our database.");
             return back()->with('vin', 'Vehicle identified, but no matching parts found in our database.');
-        }
- 
-        dd($results); 
+        } 
 
         return view('parts.index', [
           'brandId'     => $results['brand']->id ?? null,
