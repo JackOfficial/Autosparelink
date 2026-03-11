@@ -35,14 +35,15 @@ class Part extends Model
         return $this->hasMany(PartFitment::class);
     }
 
-    public function specifications()
+public function specifications()
 {
     return $this->belongsToMany(
         Specification::class,
         'part_fitments',
         'part_id',
-        'specification_id'
-    )->withTimestamps();
+        'specification_id' // Correct column
+    )->withPivot(['vehicle_model_id', 'start_year', 'end_year'])
+     ->withTimestamps();
 }
 
     public function variants()
@@ -57,17 +58,17 @@ class Part extends Model
         ->withTimestamps();
     }
 
-    public function vehicleModels()
-    {
-        return $this->belongsToMany(
-            VehicleModel::class,
-            'part_fitments',
-            'part_id',
-            'vehicle_model_id'
-        )
-        ->withPivot(['variant_id', 'start_year', 'end_year'])
-        ->withTimestamps();
-    }
+   public function vehicleModels()
+{
+    return $this->belongsToMany(
+        VehicleModel::class,
+        'part_fitments',
+        'part_id',
+        'vehicle_model_id'
+    )
+    ->withPivot(['specification_id', 'start_year', 'end_year']) // Fixed column name here
+    ->withTimestamps();
+}
 
     public function photos()
     {
@@ -107,14 +108,10 @@ public function substitutedFor()
         );
     }
 
-    public function scopeForSpecification($query, Specification $spec, string $type)
+public function scopeForSpecification($query, $specId)
 {
-    return $query->whereHas('fitments', function ($q) use ($spec, $type) {
-        if ($type === 'model') {
-            $q->where('vehicle_model_id', $spec->vehicle_model_id);
-        } else {
-            $q->where('variant_id', $spec->variant_id);
-        }
+    return $query->whereHas('specifications', function ($q) use ($specId) {
+        $q->where('specifications.id', $specId);
     });
 }
 

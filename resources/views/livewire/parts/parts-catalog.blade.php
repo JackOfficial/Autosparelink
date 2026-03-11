@@ -30,9 +30,9 @@
                         <div>
                             <small class="text-white-50 text-uppercase font-weight-bold" style="letter-spacing: 1px; font-size: 0.7rem;">VIN Search Active</small>
                             <h5 class="mb-0 font-weight-bold">
-                                {{ $vinData['General Information']['Year'] }} {{ $vinData['General Information']['Make'] }} {{ $vinData['General Information']['Model'] }} 
+                                {{ $vinData['General Information']['Year'] ?? '' }} {{ $vinData['General Information']['Make'] ?? '' }} {{ $vinData['General Information']['Model'] ?? '' }} 
                                 <span class="mx-2 text-white-50">|</span>
-                                <span class="font-weight-normal small">{{ $vinData['General Information']['Engine type'] }} ({{ $vinData['Vehicle Specification']['Engine horsepower'] }} HP)</span>
+                                <span class="font-weight-normal small">{{ $vinData['General Information']['Engine type'] ?? 'N/A' }}</span>
                             </h5>
                         </div>
                     </div>
@@ -57,6 +57,7 @@
 
                         <h6 class="font-weight-bold mb-3 text-dark"><i class="fa fa-filter mr-2 text-primary"></i>Vehicle Filter</h6>
                         <div class="form-group small">
+                            {{-- Brand Select --}}
                             <select class="form-control mb-2 custom-select border-light" wire:model.live="brand">
                                 <option value="">All Brands</option>
                                 @foreach($brands as $b)
@@ -64,18 +65,22 @@
                                 @endforeach
                             </select>
 
-                            <select class="form-control mb-2 custom-select border-light" wire:model.live="model" @if(!$models || count($models) == 0) disabled @endif>
+                            {{-- Model Select --}}
+                            <select class="form-control mb-2 custom-select border-light" wire:model.live="model" @disabled(!$brand || count($models) == 0)>
                                 <option value="">Select Model</option>
                                 @foreach($models as $m)
                                     <option value="{{ $m->id }}">{{ $m->model_name }}</option>
                                 @endforeach
                             </select>
 
-                            <select class="form-control mb-3 custom-select border-light" wire:model.live="variant" @if(!$variants || count($variants) == 0) disabled @endif>
-                                <option value="">Select Variant</option>
+                            {{-- Specification Select (Labeled as Variant for users) --}}
+                            <select class="form-control mb-3 custom-select border-light" wire:model.live="variant" @disabled(!$model || count($variants) == 0)>
+                                <option value="">Select Specification/Engine</option>
                                 @foreach($variants as $v)
-                                    {{-- Use the full_name attribute from your Variant model --}}
-                                    <option value="{{ $v->id }}">{{ $v->full_name }}</option>
+                                    {{-- Using specification details as the variant description --}}
+                                    <option value="{{ $v->id }}">
+                                        {{ $v->engine_code ?? '' }} {{ $v->engine_capacity ?? '' }} ({{ $v->start_year ?? 'N/A' }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -84,9 +89,9 @@
                         @if(!empty($vinData))
                         <div class="p-3 mb-4 rounded bg-light border-0 small">
                             <h6 class="font-weight-bold mb-2" style="font-size: 0.8rem;">Technical Details</h6>
-                            <div class="d-flex justify-content-between mb-1"><span>Fuel:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Fuel type'] }}</span></div>
-                            <div class="d-flex justify-content-between mb-1"><span>Transmission:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Transmission'] }}</span></div>
-                            <div class="d-flex justify-content-between"><span>Origin:</span> <span class="text-dark font-weight-bold">{{ $vinData['Manufacturer']['Country'] }}</span></div>
+                            <div class="d-flex justify-content-between mb-1"><span>Fuel:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Fuel type'] ?? 'N/A' }}</span></div>
+                            <div class="d-flex justify-content-between mb-1"><span>Transmission:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Transmission'] ?? 'N/A' }}</span></div>
+                            <div class="d-flex justify-content-between"><span>Origin:</span> <span class="text-dark font-weight-bold">{{ $vinData['Manufacturer']['Country'] ?? 'N/A' }}</span></div>
                         </div>
                         @endif
 
@@ -94,7 +99,7 @@
                         <select class="form-control mb-4 custom-select border-light" wire:model.live="category">
                             <option value="">All Categories</option>
                             @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ $category == $cat->id ? 'selected' : '' }}>
+                                <option value="{{ $cat->id }}">
                                     {{ $cat->category_name }} ({{ $cat->parts_count }})
                                 </option>
                             @endforeach
@@ -130,7 +135,7 @@
                     <h4 class="font-weight-bold text-dark mb-0">{{ number_format($parts->total()) }} Parts Found</h4>
                     @if($category)
                         <span class="badge badge-primary px-3 py-2 rounded-pill mt-2">
-                            Category: {{ $categories->find($category)?->category_name }}
+                            Category: {{ $categories->firstWhere('id', $category)?->category_name }}
                         </span>
                     @endif
                 </div>
@@ -157,25 +162,26 @@
             </div>
 
             {{-- Loading State --}}
-            <div wire:loading.flex class="justify-content-center align-items-center py-5">
+            <div wire:loading.flex wire:target="brand, model, variant, category, search, sort, in_stock" class="justify-content-center align-items-center py-5">
                 <div class="spinner-grow text-primary" role="status"></div>
                 <span class="ml-3 font-weight-bold text-primary">Updating Catalog...</span>
             </div>
 
             {{-- Results Grid/List --}}
-            <div class="row" wire:loading.remove>
+            <div class="row" wire:loading.remove wire:target="brand, model, variant, category, search, sort, in_stock">
                 @forelse($parts as $part)
                     <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'">
-                        <div class="force-full-width-child h-100">
+                        <div class="force-full-width-child h-100 part-grid-transition">
                             @livewire('part-component', [
                                 'part' => $part, 
-                                'isCompatible' => !empty($vinData) 
-                            ], key('part-'.$part->id . '-' . $loop->index)) 
+                                // Compatibility is true if VIN data is active OR a specific Specification is selected
+                                'isCompatible' => !empty($vinData) || !empty($this->variant)
+                            ], key('part-'.$part->id . '-' . now())) 
                         </div>
                     </div>
                 @empty
                     <div class="col-12 text-center py-5">
-                        <img src="{{ asset('frontend/img/no-results.png') }}" alt="No results" style="max-width: 150px; opacity: 0.5;">
+                        <i class="fa fa-box-open fa-4x text-light mb-3"></i>
                         <h5 class="text-muted mt-3">No parts found matching your criteria.</h5>
                         <button wire:click="clearFilters" class="btn btn-primary btn-sm rounded-pill mt-2 px-4">See All Parts</button>
                     </div>
