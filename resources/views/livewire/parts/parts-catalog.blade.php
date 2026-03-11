@@ -14,6 +14,10 @@
         padding-right: 0 !important;
         margin-bottom: 0 !important; /* Prevents double spacing */
     }
+
+    .transition-all {
+    transition: all 0.3s ease-in-out !important;
+    }
     </style>
 
     {{-- 1. VIN Matched Vehicle Banner --}}
@@ -35,7 +39,7 @@
                             </h5>
                         </div>
                     </div>
-                    <button wire:click="$reset" class="btn btn-sm btn-outline-light rounded-pill px-4">
+                    <button wire:click="clearFilters" class="btn btn-sm btn-outline-light rounded-pill px-4">
                         <i class="fa fa-times mr-1"></i> Clear VIN
                     </button>
                 </div>
@@ -110,7 +114,7 @@
                             <label class="custom-control-label small font-weight-bold" for="inStockCheck">In Stock Only</label>
                         </div>
 
-                        <button wire:click="$reset" class="btn btn-block btn-light text-muted font-weight-bold small py-2" style="border-radius: 10px;">
+                        <button wire:click="clearFilters" class="btn btn-block btn-light text-muted font-weight-bold small py-2" style="border-radius: 10px;">
                             <i class="fa fa-undo mr-1"></i> Reset Filters
                         </button>
                     </div>
@@ -158,16 +162,19 @@
     @forelse($parts as $part)
         {{-- 1. This is the Parent Grid --}}
         <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'">
-            
-            {{-- 2. This wrapper "neutralizes" the col-lg-3 inside your child component --}}
+
             <div class="force-full-width-child">
-                @livewire('part-component', ['part' => $part], key($part->id)) 
+                {{-- UPDATE THIS LINE BELOW --}}
+                @livewire('part-component', [
+                    'part' => $part, 
+                    'isCompatible' => !empty($vinData) 
+                ], key('part-'.$part->id)) 
             </div>
 
         </div>
     @empty
         <div class="col-12 text-center py-5">
-            <h5 class="text-muted">No parts found.</h5>
+            <h5 class="text-muted">No parts found matching your criteria.</h5>
         </div>
     @endforelse
 </div>

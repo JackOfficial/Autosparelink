@@ -199,7 +199,14 @@ public function search(Request $request, VinSearchService $vinService)
             return back()->with('vin', 'Vehicle identified, but no matching parts found in our database.');
         }
  
-        dd("Ahangaha" . $results); 
+        dd($results); 
+
+        return view('parts.index', [
+          'brandId'     => $results['brand']->id ?? null,
+          'modelId'     => $results['model']->id ?? null,
+          'variantId'   => $results['variant']->id ?? null,
+          'vehicleData' => $vinData
+        ]);
 
         return view('parts.index', array_merge($results, ['vehicleData' => $vinData]));
     }

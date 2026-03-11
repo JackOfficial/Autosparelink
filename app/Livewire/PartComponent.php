@@ -4,46 +4,61 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Part;
-use Gloudemans\Shoppingcart\Facades\Cart; // The correct Facade for the package
+use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class PartComponent extends Component
 {
-    public Part $part; // Type-hinting the Model enables Route Model Binding/Auto-serialization
+    public Part $part;
     public $quantity = 1;
     public $currencySymbol;
+    public $isCompatible; // Added this
 
-    public function mount(Part $part, $currencySymbol = 'RWF')
+    // Add $isCompatible = false as the third parameter
+    public function mount(Part $part, $currencySymbol = 'RWF', $isCompatible = false)
     {
         $this->part = $part;
         $this->currencySymbol = $currencySymbol;
+        $this->isCompatible = $isCompatible;
     }
 
-   public function addToCart()
+  public function addToCart()
 {
+    // 1. Basic check: Is the requested quantity even available?
+    if ($this->part->stock_quantity < $this->quantity) {
+        $this->dispatch('notify', message: "Only {$this->part->stock_quantity} left in stock!");
+        return;
+    }
+
     $identifier = Auth::id();
     $instance = 'default';
 
-     $mainPhoto = $this->part->photos->first()?->file_path ?? 'frontend/img/placeholder.png';
-    // 1. Sync with DB if logged in
     if (Auth::check()) {
         Cart::instance($instance)->restore($identifier);
     }
 
-    // 2. Search for the item in the current cart
+    // 2. Find the item in the cart to check existing quantity
     $cartItem = Cart::instance($instance)->search(function ($cartItem, $rowId) {
         return $cartItem->id === $this->part->id;
     })->first();
 
+    $currentQtyInCart = $cartItem ? $cartItem->qty : 0;
+    $newTotalQty = $currentQtyInCart + $this->quantity;
+
+    // 3. CRITICAL: Check if (Existing Cart + New Request) exceeds Stock
+    if ($newTotalQty > $this->part->stock_quantity) {
+        $this->dispatch('notify', message: "Cannot add more. You already have {$currentQtyInCart} in cart and total stock is {$this->part->stock_quantity}.");
+        
+        // If logged in, we must re-store because 'restore' removes the row from the DB
+        if (Auth::check()) { Cart::instance($instance)->store($identifier); }
+        return;
+    }
+
     if ($cartItem) {
-        // Item exists: Update the quantity of the existing rowId
-        Cart::instance($instance)->update($cartItem->rowId, [
-            'qty' => $cartItem->qty + $this->quantity
-        ]);
+        Cart::instance($instance)->update($cartItem->rowId, ['qty' => $newTotalQty]);
         $message = 'Cart updated!';
     } else {
-        // Item does not exist: Add it fresh
+        $mainPhoto = $this->part->photos->first()?->file_path ?? 'frontend/img/placeholder.png';
         Cart::instance($instance)->add([
             'id'      => $this->part->id,
             'name'    => $this->part->part_name,
@@ -58,57 +73,44 @@ class PartComponent extends Component
         $message = 'Added to cart!';
     }
 
-    // 3. Persist back to DB
     if (Auth::check()) {
         Cart::instance($instance)->store($identifier);
     }
 
-    // 4. Notify UI
-    $this->dispatch('cartUpdated'); 
+    $this->dispatch('cartUpdated', part_id: $this->part->id);
     $this->dispatch('notify', message: $message);
 }
 
     public function addToWishlist()
-{
-    $instance = 'wishlist';
-    
-    // 1. Sync with DB if logged in
-    if (Auth::check()) {
-        Cart::instance($instance)->restore(Auth::id() . '_wishlist');
-    }
+    {
+        $instance = 'wishlist';
+        if (Auth::check()) {
+            Cart::instance($instance)->restore(Auth::id() . '_wishlist');
+        }
 
-    // 2. Check if the item is already in the wishlist
-    $exists = Cart::instance($instance)->search(function ($cartItem, $rowId) {
-        return $cartItem->id === $this->part->id;
-    });
+        $exists = Cart::instance($instance)->search(fn($cartItem) => $cartItem->id === $this->part->id);
 
-    if ($exists->isNotEmpty()) {
-        // If it exists, save back to DB (because restore deleted it) and exit
+        if ($exists->isNotEmpty()) {
+            if (Auth::check()) { Cart::instance($instance)->store(Auth::id() . '_wishlist'); }
+            $this->dispatch('notify', message: 'Item is already in your wishlist!');
+            return;
+        }
+
+        Cart::instance($instance)->add([
+            'id'    => $this->part->id,
+            'name'  => $this->part->part_name,
+            'qty'   => 1,
+            'price' => $this->part->price,
+            'weight'=> 0,
+        ]);
+
         if (Auth::check()) {
             Cart::instance($instance)->store(Auth::id() . '_wishlist');
         }
-        
-        $this->dispatch('notify', message: 'Item is already in your wishlist!');
-        return;
+
+        $this->dispatch('wishlistUpdated');
+        $this->dispatch('notify', message: 'Added to wishlist!');
     }
-
-    // 3. If it doesn't exist, add it
-    Cart::instance($instance)->add([
-        'id'    => $this->part->id,
-        'name'  => $this->part->part_name,
-        'qty'   => 1,
-        'price' => $this->part->price,
-        'weight'=> 0,
-    ]);
-
-    // 4. Store back to DB
-    if (Auth::check()) {
-        Cart::instance($instance)->store(Auth::id() . '_wishlist');
-    }
-
-    $this->dispatch('wishlistUpdated');
-    $this->dispatch('notify', message: 'Added to wishlist!');
-}
 
     public function render()
     {

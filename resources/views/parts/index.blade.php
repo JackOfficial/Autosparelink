@@ -53,6 +53,11 @@
 
 @section('content')
 
-@livewire('parts.parts-catalog')
+@livewire('parts.parts-catalog', [
+    'brand' => $brandId ?? null,
+    'model' => $modelId ?? null,
+    'variant' => $variantId ?? null,
+    'vinData' => $vehicleData ?? null
+])
 
 @endsection

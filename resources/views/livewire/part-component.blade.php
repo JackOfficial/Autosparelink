@@ -5,87 +5,87 @@
         : null;
 @endphp
 
-<div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-    <div class="product-item bg-white h-100">
-        <div class="product-img position-relative">
-
-            {{-- Badge: NEW / OEM / Aftermarket --}}
-            @if(!empty($part->partBrand->type) && $part->partBrand->type == "OEM")
-                <div class="badge-custom badge-new">{{ $part->partBrand->type }}</div>
-            @else
-                <div class="badge-custom badge-aftermarket">{{ $part->partBrand->type }}</div>
-            @endif
-
-            {{-- Discount Badge --}}
-            @if($discount)
-                <div class="badge-custom badge-discount" style="top:50px;">-{{ $discount }}%</div>
-            @endif
-
-            <a href="{{ route('spare-parts.show', $part->sku) }}">
-                <img loading="lazy" src="{{ asset('storage/'.$mainPhoto) }}" alt="{{ $part->part_name }}">
-            </a>
-
-            <div class="product-action">
-                <button wire:click="addToCart" class="btn btn-light btn-square" title="Add to cart">
-                    <i class="fa fa-shopping-cart"></i>
-                </button>
-
-                <button wire:click="addToWishlist" class="btn btn-light btn-square" title="Add to wishlist">
-                    <i class="far fa-heart"></i>
-                </button>
-
-                <button class="btn btn-light btn-square" title="Compare">
-                    <i class="fa fa-sync-alt"></i>
-                </button>
-
-                <a href="{{ route('spare-parts.show', $part->sku) }}" class="btn btn-light btn-square" title="View">
-                    <i class="fa fa-search"></i>
-                </a>
+<div class="product-item bg-white h-100 shadow-sm border-0" style="border-radius: 12px; transition: 0.3s;">
+    <div class="product-img position-relative overflow-hidden">
+        
+        {{-- 1. Compatibility Badge --}}
+        @if($isCompatible)
+            <div class="position-absolute w-100 text-center" style="top: 10px; z-index: 10;">
+                <span class="badge badge-success shadow-sm px-3 py-2 rounded-pill" style="font-size: 0.75rem; opacity: 0.95;">
+                    <i class="fa fa-check-circle mr-1"></i> Guaranteed Fit
+                </span>
             </div>
+        @endif
+
+        {{-- Badge: OEM / Aftermarket --}}
+        <div class="badge-custom {{ ($part->partBrand->type ?? '') == 'OEM' ? 'badge-new' : 'badge-aftermarket' }}" style="z-index: 5;">
+            {{ $part->partBrand->type ?? 'Parts' }}
         </div>
 
-        <div class="text-center py-3 px-2">
-            <a class="h6 text-truncate d-block mb-1 text-dark"
-               href="{{ route('spare-parts.show', $part->sku) }}">
-               {{ Str::limit($part->part_name, 30) }}
-            </a>
+        @if($discount)
+            <div class="badge-custom badge-discount" style="top:50px; z-index: 5;">-{{ $discount }}%</div>
+        @endif
 
-            <small class="text-muted d-block">
-                Fits: {{ $part->specification->full_name ?? 'Multiple vehicles' }}
+        <a href="{{ route('spare-parts.show', $part->sku) }}">
+            <img loading="lazy" src="{{ asset('storage/'.$mainPhoto) }}" alt="{{ $part->part_name }}" style="width: 100%; height: 200px; object-fit: cover;">
+        </a>
+
+        <div class="product-action">
+            <button wire:click="addToCart" class="btn btn-light btn-square shadow-sm"><i class="fa fa-shopping-cart"></i></button>
+            <button wire:click="addToWishlist" class="btn btn-light btn-square shadow-sm"><i class="far fa-heart"></i></button>
+            <a href="{{ route('spare-parts.show', $part->sku) }}" class="btn btn-light btn-square shadow-sm"><i class="fa fa-search"></i></a>
+        </div>
+    </div>
+
+    <div class="text-center py-3 px-2">
+        <a class="h6 text-truncate d-block mb-1 text-dark font-weight-bold" href="{{ route('spare-parts.show', $part->sku) }}">
+            {{ Str::limit($part->part_name, 35) }}
+        </a>
+
+        <small class="text-muted d-block mb-1">
+            <i class="fa fa-car mr-1"></i> Fits: {{ $part->specifications->first()?->full_name ?? 'Multiple vehicles' }}
+        </small>
+
+        <small class="text-muted d-block mb-1">
+            <i class="fa fa-cog mr-1"></i> {{ $part->part_number }}
+        </small>
+
+        @if($part->stock_quantity > 0)
+            <small class="badge {{ $part->stock_quantity < 5 ? 'badge-warning' : 'badge-light text-success' }} mb-2">
+                {{ $part->stock_quantity < 5 ? 'Low Stock' : 'In Stock' }}
             </small>
+        @else
+            <small class="badge badge-light text-danger mb-2">Out of Stock</small>
+        @endif
 
+        <div class="d-flex align-items-center justify-content-center mb-2">
+            <h5 class="mb-0 text-primary font-weight-bold">{{ number_format($part->price, 0) }} {{ $currencySymbol }}</h5>
+            @if(!empty($part->old_price))
+                <small class="text-muted ml-2"><del>{{ number_format($part->old_price, 0) }}</del></small>
+            @endif
+        </div>
+
+        {{-- BOTTOM ACTION AREA --}}
+        <div class="px-2" x-data="{ success: false }" @cart-updated.window="if($event.detail.part_id == {{ $part->id }}) { success = true; setTimeout(() => success = false, 2000) }">
+            
             @if($part->stock_quantity > 0)
-                <small class="{{ $part->stock_quantity < 5 ? 'text-warning' : 'text-success' }}">
-                    {{ $part->stock_quantity < 5 ? 'Low Stock' : 'In Stock' }}
-                </small>
+                <button wire:click="addToCart" 
+                        class="btn btn-block btn-sm rounded-pill py-2 transition-all shadow-sm" 
+                        :class="success ? 'btn-success' : 'btn-primary'"
+                        wire:loading.attr="disabled">
+                    
+                    <i x-show="success" class="fa fa-check mr-1"></i>
+                    <span wire:loading wire:target="addToCart" class="spinner-border spinner-border-sm mr-1" role="status"></span>
+                    <i x-show="!success" wire:loading.remove wire:target="addToCart" class="fa fa-shopping-cart mr-1"></i>
+
+                    <span x-text="success ? 'Added!' : 'Add to Cart'"></span>
+                </button>
             @else
-                <small class="text-danger">Out of Stock</small>
+                <button class="btn btn-secondary btn-block btn-sm rounded-pill py-2" disabled title="Check back later for availability">
+                    <i class="fa fa-clock mr-1"></i> Out of Stock
+                </button>
             @endif
 
-            <div class="d-flex align-items-center justify-content-center mb-2">
-                <h5 class="mb-0">{{ number_format($part->price, 2) }} {{ $currencySymbol }}</h5>
-                @if(!empty($part->old_price))
-                    <h6 class="price-old mb-0">{{ number_format($part->old_price, 2) }}</h6>
-                @endif
-            </div>
-
-            <div class="d-flex align-items-center justify-content-center mb-2">
-                <small class="text-primary me-2">
-                    @for($i=1;$i<=5;$i++)
-                        <i class="fa fa-star {{ $i <= ($part->rating ?? 0) ? 'text-warning' : '' }}"></i>
-                    @endfor
-                </small>
-                <small class="text-muted">({{ $part->reviews_count ?? 0 }})</small>
-            </div>
-
-            <div class="d-flex gap-2 justify-content-center">
-                <a href="{{ route('spare-parts.show', $part->sku) }}" class="btn btn-outline-primary btn-sm">
-                    View details
-                </a>
-                <button wire:click="addToCart" class="btn btn-primary btn-sm" wire:loading.attr="disabled">
-                    Add to cart
-                </button>
-            </div>
         </div>
     </div>
 </div>

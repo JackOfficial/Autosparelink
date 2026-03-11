@@ -41,23 +41,10 @@ class VinSearchService
         // 3. Match Variant (Fuzzy Search)
         $variant = $this->findVariant($model->id, $gen, $spec);
 
-        // 4. Fetch Parts (with eager loading)
-        $parts = collect();
-        if ($variant) {
-            $variantSpecs = $variant->specifications()->pluck('id');
-            $parts = Part::whereHas('fitments', function($q) use ($variantSpecs) {
-                $q->whereIn('specification_id', $variantSpecs);
-            })
-            ->with(['photos', 'category', 'partBrand'])
-            ->latest()
-            ->paginate(12);
-        }
-
         return [
             'brand'   => $brand,
             'model'   => $model,
             'variant' => $variant,
-            'parts'   => $parts,
         ];
     }
 
