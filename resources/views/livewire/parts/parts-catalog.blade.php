@@ -31,12 +31,30 @@
                         </div>
                         <div>
                             <small class="text-white-50 text-uppercase font-weight-bold" style="letter-spacing: 1px; font-size: 0.7rem;">VIN Search Active</small>
-                            <h5 class="mb-0 font-weight-bold">
-                                {{-- {{ $vinData['General Information']['Year'] ?? '' }} {{ $vinData['General Information']['Make'] ?? '' }} {{ $vinData['General Information']['Model'] ?? '' }}  --}}
-                                {{ $variant->name ??  $vinData['General Information']['Year'] }}
-                                <span class="mx-2 text-white-50">|</span>
-                                <span class="font-weight-normal small">{{ $vinData['General Information']['Engine type'] ?? 'N/A' }}</span>
-                            </h5>
+                           <h5 class="mb-0 font-weight-bold">
+    @php
+        // We fetch the Specification model using the ID stored in $variant, 
+        // then grab the descriptive name from its related Variant.
+        $specRecord = \App\Models\Specification::with('variant')->find($variant);
+    @endphp
+
+    {{-- 1. Display the Auto-generated Variant Name if it exists --}}
+    @if($specRecord && $specRecord->variant)
+        {{ $specRecord->variant->variant_name }}
+    @else
+        {{-- 2. Fallback: Show VIN Year/Make/Model if DB record isn't found --}}
+        {{ $vinData['General Information']['Year'] ?? '' }} 
+        {{ $vinData['General Information']['Make'] ?? '' }} 
+        {{ $vinData['General Information']['Model'] ?? '' }}
+    @endif
+
+    <span class="mx-2 text-white-50">|</span>
+
+    {{-- 3. Keep the Technical Engine Type from VIN for extra detail --}}
+    <span class="font-weight-normal small">
+        {{ $vinData['General Information']['Engine type'] ?? 'N/A' }}
+    </span>
+  </h5>
                         </div>
                     </div>
                     <button wire:click="clearFilters" class="btn btn-sm btn-outline-light rounded-pill px-4">

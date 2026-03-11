@@ -46,17 +46,17 @@ public function specifications()
      ->withTimestamps();
 }
 
-    public function variants()
-    {
-        return $this->belongsToMany(
-            Variant::class,
-            'part_fitments',
-            'part_id',
-            'variant_id'
-        )
-        ->withPivot(['vehicle_model_id', 'start_year', 'end_year'])
-        ->withTimestamps();
-    }
+    // public function variants()
+    // {
+    //     return $this->belongsToMany(
+    //         Variant::class,
+    //         'part_fitments',
+    //         'part_id',
+    //         'variant_id'
+    //     )
+    //     ->withPivot(['vehicle_model_id', 'start_year', 'end_year'])
+    //     ->withTimestamps();
+    // }
 
    public function vehicleModels()
 {
