@@ -3,6 +3,15 @@
     $discount = !empty($part->old_price) && $part->old_price > $part->price
         ? round((($part->old_price - $part->price)/$part->old_price)*100)
         : null;
+    
+    /** * Get the descriptive name from the first specification's variant.
+     * We use specifications->first() because parts are linked to specs, 
+     * and each spec belongs to a descriptive Variant.
+     */
+    $firstSpec = $part->specifications->first();
+    $descriptiveName = $firstSpec && $firstSpec->variant 
+        ? $firstSpec->variant->name 
+        : 'Multiple vehicles';
 @endphp
 
 <div class="product-item bg-white h-100 shadow-sm border-0" style="border-radius: 12px; transition: 0.3s;">
@@ -42,8 +51,9 @@
             {{ Str::limit($part->part_name, 35) }}
         </a>
 
-        <small class="text-muted d-block mb-1">
-            <i class="fa fa-car mr-1"></i> Fits: {{ $part->variants->first()?->full_name ?? $part->specifications->first()?->full_name ?? 'Multiple vehicles' }}
+        {{-- UPDATED: Accessing descriptive name via Specification -> Variant --}}
+        <small class="text-muted d-block mb-1 text-truncate">
+            <i class="fa fa-car mr-1"></i> Fits: {{ $descriptiveName }}
         </small>
 
         <small class="text-muted d-block mb-1">

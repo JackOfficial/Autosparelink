@@ -99,7 +99,7 @@
                             <select class="form-control mb-3 custom-select border-light shadow-none {{ !empty($variant) && !empty($vinData) ? 'variant-preselected' : '' }}" 
             wire:model.live="variant" 
             @disabled(!$model || count($variants) == 0)>
-        <option value="">Select Specification/Engine</option>
+        <option value="">Select Variant</option>
         @foreach($variants as $v)
             {{-- 
                $v here is a Specification model. 
