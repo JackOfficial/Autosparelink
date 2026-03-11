@@ -36,11 +36,12 @@
         // We fetch the Specification model using the ID stored in $variant, 
         // then grab the descriptive name from its related Variant.
         $specRecord = \App\Models\Specification::with('variant')->find($variant);
+        
     @endphp
 
     {{-- 1. Display the Auto-generated Variant Name if it exists --}}
     @if($specRecord && $specRecord->variant)
-        {{ $specRecord->variant->variant_name }}
+        {{ $specRecord->variant->name }}
     @else
         {{-- 2. Fallback: Show VIN Year/Make/Model if DB record isn't found --}}
         {{ $vinData['General Information']['Year'] ?? '' }} 
