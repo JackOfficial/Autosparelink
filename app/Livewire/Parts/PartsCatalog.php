@@ -61,7 +61,7 @@ class PartsCatalog extends Component
             $this->vinData = $vinData;
             $this->brand = $vinData['brand_id'] ?? null;
             $this->model = $vinData['model_id'] ?? null;
-            dd($variant);
+            dd($brand);
 
             // Note: If you have a specific variant from VIN, set it here
         } else {
