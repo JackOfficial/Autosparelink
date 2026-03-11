@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\VehicleModel;
 use App\Models\Specification;
+use App\Models\Variant;
 use Livewire\WithPagination;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Url;
@@ -59,13 +60,12 @@ class PartsCatalog extends Component
         // 1. Priority 1: VIN data from a search session
         if ($vinData) {
             $this->vinData = $vinData;
-            $this->brand = $vinData['brand_id'] ?? null;
-            $this->model = $vinData['model_id'] ?? null;
+            $this->brand = $brand;
+            $this->model = $model;
             $this->variant = $variant; 
 
         } else {
-            // 2. Priority 2: Direct URL queries or Parameters (View All / Filtered Links)
-            // We use request()->query() to ensure that even if $brand is null, we check the URL.
+            // 2. Priority 2: Direct URL queries or Parameters
             $this->brand = request()->query('brand', $brand ?? $this->brand);
             $this->model = request()->query('model', $model ?? $this->model);
             $this->variant = request()->query('variant', $variant ?? $this->variant);
@@ -79,7 +79,6 @@ class PartsCatalog extends Component
     }
 
     // --- Filter Lifecycle Hooks ---
-    // When a parent changes, we MUST nullify children to reset the chain
     public function updatedBrand() { $this->model = null; $this->variant = null; $this->resetPage(); }
     public function updatedModel() { $this->variant = null; $this->resetPage(); }
     public function updatedVariant() { $this->resetPage(); }
@@ -107,30 +106,39 @@ class PartsCatalog extends Component
 
     public function render()
     {
-        // 1. Fetch Sidebar Collections
-        // These will react automatically to $this->brand and $this->model being set in mount()
+        // 1. Fetch Sidebar Collections based on your Model -> Variant hierarchy
         $brands = Brand::orderBy('brand_name')->get();
         
         $models = $this->brand 
             ? VehicleModel::where('brand_id', $this->brand)->orderBy('model_name')->get() 
             : collect();
 
+        // Updated to use the Variant model as per your requested logic
         $variants = $this->model 
-            ? Specification::where('vehicle_model_id', $this->model)->with('variant')->get() 
+            ? Variant::where('vehicle_model_id', $this->model)->orderBy('name')->get() 
             : collect();
+
+        // While not displayed in a dropdown, we fetch specs if a variant is selected 
+        // for internal logic or compatibility badges
+        $specifications = $this->variant 
+            ? Specification::where('variant_id', $this->variant)->get() 
+            : collect();    
 
         $categories = Category::withCount('parts')->orderBy('category_name')->get();
 
-        // 2. Build Query
+        // 2. Build Query using part_fitment relationship (via specifications)
         $partsQuery = Part::query()
-            ->with(['photos', 'partBrand', 'specifications.vehicleModel.brand'])
+            ->with(['photos', 'partBrand', 'specifications.variant', 'specifications.vehicleModel.brand'])
             
+            // Filter by selected Variant
             ->when($this->variant, function($q) {
                 $q->whereHas('specifications', fn($query) => $query->where('variant_id', $this->variant));
             }) 
+            // Filter by Model if no specific Variant is selected
             ->when($this->model && !$this->variant, function($q) {
                 $q->whereHas('specifications', fn($query) => $query->where('vehicle_model_id', $this->model));
             })
+            // Filter by Brand if no specific Model is selected
             ->when($this->brand && !$this->model, function($q) {
                 $q->whereHas('specifications.vehicleModel', fn($query) => $query->where('brand_id', $this->brand));
             })
@@ -164,6 +172,7 @@ class PartsCatalog extends Component
             'models' => $models,
             'variants' => $variants,
             'categories' => $categories,
+            'currentSpecs' => $specifications // Optional: Pass to view if you want to show tech specs
         ]);
     }
 }
