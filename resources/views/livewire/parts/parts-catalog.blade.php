@@ -31,17 +31,11 @@
                         </div>
                         <div>
                             <small class="text-white-50 text-uppercase font-weight-bold" style="letter-spacing: 1px; font-size: 0.7rem;">VIN Search Active</small>
-                           <h5 class="mb-0 font-weight-bold">
-                                {{-- Pulling descriptive name from the DB Variant Model instead of raw VIN strings --}}
-                                @if($selectedVariantModel)
-                                    {{ $selectedVariantModel->vehicleModel->brand->brand_name ?? '' }} 
-                                    {{ $selectedVariantModel->vehicleModel->model_name ?? '' }} 
-                                    <span class="mx-2 text-white-50">|</span>
-                                    <span class="font-weight-normal small text-info">{{ $selectedVariantModel->engine_code }} {{ $selectedVariantModel->engine_capacity }}</span>
-                                @else
-                                    {{-- Fallback if DB match isn't found yet --}}
-                                    {{ $vinData['General Information']['Year'] ?? '' }} {{ $vinData['General Information']['Make'] ?? '' }} {{ $vinData['General Information']['Model'] ?? '' }}
-                                @endif
+                            <h5 class="mb-0 font-weight-bold">
+                                {{-- {{ $vinData['General Information']['Year'] ?? '' }} {{ $vinData['General Information']['Make'] ?? '' }} {{ $vinData['General Information']['Model'] ?? '' }}  --}}
+                                {{ $variant->name ??  $vinData['General Information']['Year'] }}
+                                <span class="mx-2 text-white-50">|</span>
+                                <span class="font-weight-normal small">{{ $vinData['General Information']['Engine type'] ?? 'N/A' }}</span>
                             </h5>
                         </div>
                     </div>

@@ -45,6 +45,8 @@ class PartsCatalog extends Component
     #[Url(history: true)]
     public $sort = 'latest';
 
+    public $selectedVariantModel;
+
     public $vinData = null; 
 
     protected $paginationTheme = 'bootstrap';
@@ -60,6 +62,12 @@ class PartsCatalog extends Component
         $this->category = $category ?? request()->query('category', $this->category);
         $this->vinData = $vinData;
     }
+
+//     public function updatedVariant($value)
+//    {
+//     // Retrieve the full model from DB to get descriptive names
+//     $this->selectedVariantModel = \App\Models\Specification::with('vehicleModel.brand')->find($value);
+//    }
 
     // --- Filter Lifecycle Hooks ---
     // These reset dependent dropdowns and pagination when a parent filter changes
