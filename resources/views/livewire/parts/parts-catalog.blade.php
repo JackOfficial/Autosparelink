@@ -93,7 +93,7 @@
                                 <option value="">Select Variant</option>
                                 @foreach($variants as $v)
                                     <option value="{{ $v->id }}">
-                                        {{ $v->variant->name ?? ($v->engine_code . ' ' . $v->engine_capacity) }}
+                                        {{ $v->name }}
                                     </option>
                                 @endforeach
                             </select>
