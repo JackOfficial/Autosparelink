@@ -181,24 +181,26 @@
             </div>
 
             {{-- Results Grid/List --}}
-            <div class="row" wire:loading.remove wire:target="brand, model, variant, category, search, sort, in_stock">
-                @forelse($parts as $part)
-                    <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'">
-                        <div class="force-full-width-child h-100 part-grid-transition">
-                            @livewire('part-component', [
-                                'part' => $part, 
-                                'isCompatible' => !empty($vinData) || !empty($variant)
-                            ], key('part-'.$part->id . '-' . ($variant ?? 'all') . '-' . ($grid ? 'grid' : 'list'))) 
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-12 text-center py-5">
-                        <i class="fa fa-box-open fa-4x text-light mb-3"></i>
-                        <h5 class="text-muted mt-3">No parts found matching your criteria.</h5>
-                        <button wire:click="clearFilters" class="btn btn-primary btn-sm rounded-pill mt-2 px-4">See All Parts</button>
-                    </div>
-                @endforelse
+           {{-- Results Grid/List --}}
+<div class="row" wire:loading.remove wire:target="brand, model, variant, category, search, sort, in_stock">
+    @forelse($parts as $part)
+        {{-- Use x-bind:class instead of PHP ternary --}}
+        <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'" class="transition-all">
+            <div class="force-full-width-child h-100 part-grid-transition">
+                @livewire('part-component', [
+                    'part' => $part, 
+                    'isCompatible' => !empty($vinData) || !empty($variant)
+                ], key('part-'.$part->id)) {{-- Removed ($grid) from here --}}
             </div>
+        </div>
+    @empty
+        <div class="col-12 text-center py-5">
+            <i class="fa fa-box-open fa-4x text-light mb-3"></i>
+            <h5 class="text-muted mt-3">No parts found matching your criteria.</h5>
+            <button wire:click="clearFilters" class="btn btn-primary btn-sm rounded-pill mt-2 px-4">See All Parts</button>
+        </div>
+    @endforelse
+</div>
 
             {{-- Pagination --}}
             <div class="d-flex justify-content-center mt-4">

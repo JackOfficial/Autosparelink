@@ -44,6 +44,9 @@ class PartsCatalog extends Component
     #[Url(history: true)]
     public $sort = 'latest';
 
+    #[Url(history: true)]
+    public $grid = true;
+
     public $vinData = null; 
 
     protected $paginationTheme = 'bootstrap';
@@ -93,6 +96,11 @@ class PartsCatalog extends Component
     {
         return view('livewire.parts.skeleton');
     }
+
+    public function setToggle($isGrid)
+{
+    $this->grid = $isGrid;
+}
 
     public function render()
     {
