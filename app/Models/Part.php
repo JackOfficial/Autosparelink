@@ -42,8 +42,7 @@ public function specifications()
         'part_fitments',
         'part_id',
         'specification_id' // Correct column
-    )->withPivot(['vehicle_model_id', 'start_year', 'end_year'])
-     ->withTimestamps();
+    )->withTimestamps();
 }
 
     // public function variants()
