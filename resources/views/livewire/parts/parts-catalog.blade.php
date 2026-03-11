@@ -97,15 +97,19 @@
 
                             {{-- Variant Select: Added dynamic class if pre-selected via VIN --}}
                             <select class="form-control mb-3 custom-select border-light shadow-none {{ !empty($variant) && !empty($vinData) ? 'variant-preselected' : '' }}" 
-                                    wire:model.live="variant" 
-                                    @disabled(!$model || count($variants) == 0)>
-                                <option value="">Select Specification/Engine</option>
-                                @foreach($variants as $v)
-                                    <option value="{{ $v->id }}">
-                                        {{ $v->engine_code ?? '' }} {{ $v->engine_capacity ?? '' }} ({{ $v->start_year ?? 'N/A' }})
-                                    </option>
-                                @endforeach
-                            </select>
+            wire:model.live="variant" 
+            @disabled(!$model || count($variants) == 0)>
+        <option value="">Select Specification/Engine</option>
+        @foreach($variants as $v)
+            {{-- 
+               $v here is a Specification model. 
+               We reach into the 'variant' relationship to get the descriptive name.
+            --}}
+            <option value="{{ $v->id }}">
+                {{ $v->variant->name ?? ($v->engine_code . ' ' . $v->engine_capacity) }}
+            </option>
+        @endforeach
+    </select>
                         </div>
 
                         {{-- Technical Details (Visible during VIN search) --}}
