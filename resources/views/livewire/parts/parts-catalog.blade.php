@@ -29,16 +29,18 @@
                             <i class="fa fa-car-side fa-fw"></i>
                         </div>
                         <div>
-                            <small class="text-white-50 text-uppercase font-weight-bold" style="letter-spacing: 1px; font-size: 0.7rem;">VIN Search Active</small>
+                            <small class="text-white-50 text-uppercase font-weight-bold" style="letter-spacing: 1px; font-size: 0.7rem;">Vehicle Identified</small>
                             <h5 class="mb-0 font-weight-bold">
                                 @php
-                                    // Added null check for $variant to avoid errors on 'All Parts' visit
-                                    $specRecord = $variant ? \App\Models\Specification::with('variant')->find($variant) : null;
+                                    // Use $this->variant which holds your local DB ID from mount()
+                                    $specRecord = $this->variant ? \App\Models\Specification::with('variant')->find($this->variant) : null;
                                 @endphp
 
                                 @if($specRecord && $specRecord->variant)
+                                    {{-- Priority: Show the specific local Variant name --}}
                                     {{ $specRecord->variant->name }}
                                 @else
+                                    {{-- Fallback: Use API data if no local variant record is found --}}
                                     {{ $vinData['General Information']['Year'] ?? '' }} 
                                     {{ $vinData['General Information']['Make'] ?? '' }} 
                                     {{ $vinData['General Information']['Model'] ?? '' }}
@@ -47,6 +49,7 @@
                                 <span class="mx-2 text-white-50">|</span>
 
                                 <span class="font-weight-normal small">
+                                    {{-- Technical info from API --}}
                                     {{ $vinData['General Information']['Engine type'] ?? 'N/A' }}
                                 </span>
                             </h5>
@@ -174,33 +177,25 @@
                 </div>
             </div>
 
-            {{-- Loading State --}}
-            <div wire:loading.flex wire:target="brand, model, variant, category, search, sort, in_stock" class="justify-content-center align-items-center py-5">
-                <div class="spinner-grow text-primary" role="status"></div>
-                <span class="ml-3 font-weight-bold text-primary">Updating Catalog...</span>
-            </div>
-
             {{-- Results Grid/List --}}
-           {{-- Results Grid/List --}}
-<div class="row" wire:loading.remove wire:target="brand, model, variant, category, search, sort, in_stock">
-    @forelse($parts as $part)
-        {{-- Use x-bind:class instead of PHP ternary --}}
-        <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'" class="transition-all">
-            <div class="force-full-width-child h-100 part-grid-transition">
-                @livewire('part-component', [
-                    'part' => $part, 
-                    'isCompatible' => !empty($vinData) || !empty($variant)
-                ], key('part-'.$part->id)) {{-- Removed ($grid) from here --}}
+            <div class="row" wire:loading.remove wire:target="brand, model, variant, category, search, sort, in_stock">
+                @forelse($parts as $part)
+                    <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'" class="transition-all">
+                        <div class="force-full-width-child h-100 part-grid-transition">
+                            @livewire('part-component', [
+                                'part' => $part, 
+                                'isCompatible' => !empty($vinData) || !empty($variant)
+                            ], key('part-'.$part->id))
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12 text-center py-5">
+                        <i class="fa fa-box-open fa-4x text-light mb-3"></i>
+                        <h5 class="text-muted mt-3">No parts found matching your criteria.</h5>
+                        <button wire:click="clearFilters" class="btn btn-primary btn-sm rounded-pill mt-2 px-4">See All Parts</button>
+                    </div>
+                @endforelse
             </div>
-        </div>
-    @empty
-        <div class="col-12 text-center py-5">
-            <i class="fa fa-box-open fa-4x text-light mb-3"></i>
-            <h5 class="text-muted mt-3">No parts found matching your criteria.</h5>
-            <button wire:click="clearFilters" class="btn btn-primary btn-sm rounded-pill mt-2 px-4">See All Parts</button>
-        </div>
-    @endforelse
-</div>
 
             {{-- Pagination --}}
             <div class="d-flex justify-content-center mt-4">
