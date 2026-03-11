@@ -42,7 +42,7 @@
     .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 18px; }
     .section-header h2 { font-size:1.125rem; font-weight:700; margin:0; }
 
-    .feature-card { transition: transform .22s ease, box-shadow .22s ease; border-radius: var(--card-radius); }
+    .feature-card { transition: transform .22s ease, box-shadow .22s ease; border-radius: var(--card-radius); background: #fff; }
     .feature-card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(2,6,23,0.08); }
     .feature-icon { 
         width:64px; height:64px; border-radius:50%; display:flex; align-items:center; 
@@ -56,6 +56,23 @@
     }
     .cat-item:hover { transform: translateY(-6px); box-shadow: 0 22px 50px rgba(2,6,23,0.06); }
     .cat-item img { width:80px; height:80px; object-fit:contain; }
+
+    /* Part Card Design Restoration */
+    .product-item {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .product-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    }
+    .product-img .product-action {
+        position: absolute; width: 100%; height: 100%;
+        top: 0; left: 0; display: flex; align-items: center;
+        justify-content: center; transition: 0.5s;
+        background: rgba(255, 255, 255, 0.7); opacity: 0;
+    }
+    .product-item:hover .product-action { opacity: 1; }
+    .btn-square { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
 
     @media (max-width: 991px){ .hero-banner{ height: 420px; } .hero-title{ font-size:1.6rem; } }
     @media (max-width: 576px){ .hero-banner{ height:360px; } .brand-pill img{ display:none; } }
@@ -100,22 +117,23 @@
     </div>
 </div>
 
+{{-- Features Section --}}
 <div class="container-fluid py-4 bg-light">
     <div class="row px-xl-5 gy-4">
         <div class="col-lg-3 col-md-6">
-            <div class="feature-card d-flex align-items-center p-3">
+            <div class="feature-card d-flex align-items-center p-3 shadow-sm">
                 <div class="feature-icon me-3"><i class="fa fa-check fa-lg"></i></div>
                 <div><h6 class="fw-bold mb-1">Genuine OEM Parts</h6><small class="text-muted">Certified & quality-assured</small></div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="feature-card d-flex align-items-center p-3">
+            <div class="feature-card d-flex align-items-center p-3 shadow-sm">
                 <div class="feature-icon me-3"><i class="fa fa-shipping-fast fa-lg"></i></div>
                 <div><h6 class="fw-bold mb-1">Fast & Secure Shipping</h6><small class="text-muted">Worldwide delivery</small></div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="feature-card d-flex align-items-center p-3">
+            <div class="feature-card d-flex align-items-center p-3 shadow-sm">
                 <div class="feature-icon me-3"><i class="fas fa-cogs fa-lg"></i></div>
                 <div>
                     <h6 class="fw-bold mb-1">{{ number_format($partsCounter) }} Parts In Stock</h6>
@@ -124,7 +142,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="feature-card d-flex align-items-center p-3">
+            <div class="feature-card d-flex align-items-center p-3 shadow-sm">
                 <div class="feature-icon me-3"><i class="fa fa-headset fa-lg"></i></div>
                 <div><h6 class="fw-bold mb-1">Expert Support</h6><small class="text-muted">Help with fitment</small></div>
             </div>
@@ -132,6 +150,7 @@
     </div>
 </div>
 
+{{-- Catalogs --}}
 <div class="container-fluid pt-4">
     <div class="section-header px-xl-5">
         <h2>Genuine Parts Online Catalogs</h2>
@@ -139,9 +158,9 @@
     </div>
     <div class="row px-xl-5 pb-3">
         @forelse ($brands as $brand)
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4"> {{-- Added margin bottom --}}
                 <a href="{{ url('models/'.$brand->id) }}" class="text-decoration-none">
-                    <div class="cat-item d-flex align-items-center gap-3 p-3">
+                    <div class="cat-item d-flex align-items-center gap-3 p-3 h-100">
                         <div class="overflow-hidden" style="width:85px; height:85px;">
                             <img class="img-fluid" src="{{ asset('storage/' . $brand->brand_logo) }}" alt="{{ $brand->brand_name }}" loading="lazy">
                         </div>
@@ -161,6 +180,7 @@
     </div>
 </div>
 
+{{-- Featured Spare Parts --}}
 <div class="container-fluid pt-4 pb-3">
     <div class="section-header px-xl-5">
         <h2>Featured Spare Parts</h2>
@@ -168,13 +188,16 @@
     </div>
     <div class="row px-xl-5">
         @forelse ($parts as $part)
-            @livewire('part-component', ['part' => $part], key($part->id))
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4"> {{-- Fixed hugging --}}
+                @livewire('part-component', ['part' => $part], key('featured-'.$part->id))
+            </div>
         @empty
             <div class="col-12 text-center py-3">No spare parts found.</div>
         @endforelse
     </div>
 </div>
 
+{{-- Recent Spare Parts --}}
 <div class="container-fluid pt-4 pb-3">
     <div class="section-header px-xl-5">
         <h2>Recent Spare Parts</h2>
@@ -182,7 +205,9 @@
     </div>
     <div class="row px-xl-5">
         @forelse ($recent_parts as $recent_part)
-            @livewire('part-component', ['part' => $recent_part], key($recent_part->id))
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4"> {{-- Fixed hugging --}}
+                @livewire('part-component', ['part' => $recent_part], key('recent-'.$recent_part->id))
+            </div>
         @empty
             <div class="col-12 text-center py-3">No recent spare parts available.</div>
         @endforelse
