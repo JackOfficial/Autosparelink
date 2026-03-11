@@ -105,7 +105,7 @@ public function searchmmmmm(Request $request)
     ])->filter()->unique();
 
     // 3. SMART VARIANT SEARCH (Fixed Logic)
-$matchedVariant = Variant::where('vehicle_model_id', $model->id)
+     $matchedVariant = Variant::where('vehicle_model_id', $model->id)
     ->where(function ($query) use ($searchTokens, $gen) {
         // MANDATORY: The Year must be in the name
         $query->where('name', 'LIKE', "%{$gen['Year']}%");
@@ -199,7 +199,7 @@ public function search(Request $request, VinSearchService $vinService)
             return back()->with('vin', 'Vehicle identified, but no matching parts found in our database.');
         }
  
-        dd($results); 
+        dd("Ahangaha" . $results); 
 
         return view('parts.index', array_merge($results, ['vehicleData' => $vinData]));
     }
