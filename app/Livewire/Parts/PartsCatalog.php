@@ -56,29 +56,30 @@ class PartsCatalog extends Component
      */
     public function mount($brand = null, $model = null, $variant = null, $vinData = null, $category = null)
     {
-        // 1. If VIN data is passed from a search, prioritize it
+        // 1. Priority 1: VIN data from a search session
         if ($vinData) {
             $this->vinData = $vinData;
             $this->brand = $vinData['brand_id'] ?? null;
             $this->model = $vinData['model_id'] ?? null;
-            // FIX 1: Explicitly set the variant from your local database ID parameter
             $this->variant = $variant; 
 
         } else {
-            // 2. Otherwise, use passed parameters or URL queries (for 'View All')
-            $this->brand = $brand ?? request()->query('brand', $this->brand);
-            $this->model = $model ?? request()->query('model', $this->model);
-            $this->variant = $variant ?? request()->query('variant', $this->variant);
-            $this->category = $category ?? request()->query('category', $this->category);
+            // 2. Priority 2: Direct URL queries or Parameters (View All / Filtered Links)
+            // We use request()->query() to ensure that even if $brand is null, we check the URL.
+            $this->brand = request()->query('brand', $brand ?? $this->brand);
+            $this->model = request()->query('model', $model ?? $this->model);
+            $this->variant = request()->query('variant', $variant ?? $this->variant);
+            $this->category = request()->query('category', $category ?? $this->category);
         }
 
-        // Set search query if present in request (e.g. from a global search bar)
+        // Global search bar handling
         if(request()->has('search_query')) {
             $this->search = request()->query('search_query');
         }
     }
 
     // --- Filter Lifecycle Hooks ---
+    // When a parent changes, we MUST nullify children to reset the chain
     public function updatedBrand() { $this->model = null; $this->variant = null; $this->resetPage(); }
     public function updatedModel() { $this->variant = null; $this->resetPage(); }
     public function updatedVariant() { $this->resetPage(); }
@@ -107,6 +108,7 @@ class PartsCatalog extends Component
     public function render()
     {
         // 1. Fetch Sidebar Collections
+        // These will react automatically to $this->brand and $this->model being set in mount()
         $brands = Brand::orderBy('brand_name')->get();
         
         $models = $this->brand 
@@ -114,7 +116,7 @@ class PartsCatalog extends Component
             : collect();
 
         $variants = $this->model 
-            ? Specification::where('vehicle_model_id', $this->model)->get() 
+            ? Specification::where('vehicle_model_id', $this->model)->with('variant')->get() 
             : collect();
 
         $categories = Category::withCount('parts')->orderBy('category_name')->get();
@@ -123,9 +125,7 @@ class PartsCatalog extends Component
         $partsQuery = Part::query()
             ->with(['photos', 'partBrand', 'specifications.vehicleModel.brand'])
             
-            // --- VEHICLE HIERARCHY FILTERS ---
             ->when($this->variant, function($q) {
-                // FIX 2: Filter parts by variant_id in the specifications table
                 $q->whereHas('specifications', fn($query) => $query->where('variant_id', $this->variant));
             }) 
             ->when($this->model && !$this->variant, function($q) {
@@ -135,13 +135,11 @@ class PartsCatalog extends Component
                 $q->whereHas('specifications.vehicleModel', fn($query) => $query->where('brand_id', $this->brand));
             })
 
-            // --- ATTRIBUTE FILTERS ---
             ->when($this->category, fn($q) => $q->where('category_id', $this->category))
             ->when($this->in_stock, fn($q) => $q->where('stock_quantity', '>', 0))
             ->when($this->min_price, fn($q) => $q->where('price', '>=', $this->min_price))
             ->when($this->max_price, fn($q) => $q->where('price', '<=', $this->max_price))
 
-            // --- SEARCH ---
             ->when($this->search, function($q) {
                 $q->where(function($sub) {
                     $term = '%' . $this->search . '%';

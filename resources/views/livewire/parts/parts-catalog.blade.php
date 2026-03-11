@@ -1,4 +1,4 @@
-<div class="container-fluid px-xl-5 py-4" x-data="{ grid: true }">
+<div class="container-fluid px-xl-5 py-4" x-data="{ grid: @entangle('grid') }">
     <style>
         .filter-card { border-radius: 15px; border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
         .sticky-filter { top: 90px; z-index: 1020; }
@@ -7,15 +7,14 @@
         .btn-toggle.active { background-color: #007bff; color: white; border-color: #007bff; }
         .part-grid-transition { transition: all 0.3s ease; }
         .force-full-width-child > div[class*="col-"] {
-            width: 100% !important;
-            max-width: 100% !important;
-            flex: 0 0 100% !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-            margin-bottom: 0 !important;
+            width: 100% !important; max-width: 100% !important; flex: 0 0 100% !important;
+            padding-left: 0 !important; padding-right: 0 !important; margin-bottom: 0 !important;
         }
         .transition-all { transition: all 0.3s ease-in-out !important; }
-        .variant-preselected { border: 2px solid #007bff !important; background-color: #f0f7ff !important; }
+        .variant-preselected { border: 2px solid #007bff !important; background-color: #f0f7ff !important; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25) !important; }
+        
+        /* Loading Overlay */
+        .catalog-loading { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); z-index: 10; display: flex; align-items: center; justify-content: center; border-radius: 15px; }
     </style>
 
     {{-- 1. VIN Matched Vehicle Banner --}}
@@ -25,31 +24,26 @@
             <div class="card vin-banner text-white shadow-sm border-0">
                 <div class="card-body d-flex align-items-center justify-content-between py-3">
                     <div class="d-flex align-items-center">
-                        <div class="bg-primary rounded-circle p-2 mr-3">
+                        <div class="bg-primary rounded-circle p-2 mr-3 shadow-sm">
                             <i class="fa fa-car-side fa-fw"></i>
                         </div>
                         <div>
                             <small class="text-white-50 text-uppercase font-weight-bold" style="letter-spacing: 1px; font-size: 0.7rem;">Vehicle Identified</small>
                             <h5 class="mb-0 font-weight-bold">
                                 @php
-                                    // Use $this->variant which holds your local DB ID from mount()
-                                    $specRecord = $this->variant ? \App\Models\Specification::with('variant')->find($this->variant) : null;
+                                    $specRecord = $variant ? \App\Models\Specification::with('variant')->find($variant) : null;
                                 @endphp
 
                                 @if($specRecord && $specRecord->variant)
-                                    {{-- Priority: Show the specific local Variant name --}}
                                     {{ $specRecord->variant->name }}
                                 @else
-                                    {{-- Fallback: Use API data if no local variant record is found --}}
                                     {{ $vinData['General Information']['Year'] ?? '' }} 
                                     {{ $vinData['General Information']['Make'] ?? '' }} 
                                     {{ $vinData['General Information']['Model'] ?? '' }}
                                 @endif
 
                                 <span class="mx-2 text-white-50">|</span>
-
                                 <span class="font-weight-normal small">
-                                    {{-- Technical info from API --}}
                                     {{ $vinData['General Information']['Engine type'] ?? 'N/A' }}
                                 </span>
                             </h5>
@@ -64,7 +58,7 @@
     </div>
     @endif
 
-    <div class="row">
+    <div class="row position-relative">
         {{-- 2. Sidebar Filters --}}
         <div class="col-lg-3">
             <div class="sticky-top sticky-filter">
@@ -76,6 +70,7 @@
 
                         <h6 class="font-weight-bold mb-3 text-dark"><i class="fa fa-filter mr-2 text-primary"></i>Vehicle Filter</h6>
                         <div class="form-group small">
+                            {{-- Brand Select --}}
                             <select class="form-control mb-2 custom-select border-light shadow-none" wire:model.live="brand">
                                 <option value="">All Brands</option>
                                 @foreach($brands as $b)
@@ -83,16 +78,18 @@
                                 @endforeach
                             </select>
 
-                            <select class="form-control mb-2 custom-select border-light shadow-none" wire:model.live="model" @disabled(!$brand || count($models) == 0)>
+                            {{-- Model Select --}}
+                            <select class="form-control mb-2 custom-select border-light shadow-none" wire:model.live="model" @disabled(!$brand || $models->isEmpty())>
                                 <option value="">Select Model</option>
                                 @foreach($models as $m)
                                     <option value="{{ $m->id }}">{{ $m->model_name }}</option>
                                 @endforeach
                             </select>
 
-                            <select class="form-control mb-3 custom-select border-light shadow-none {{ !empty($variant) && !empty($vinData) ? 'variant-preselected' : '' }}" 
+                            {{-- Variant Select (Highlighted if pre-selected by VIN) --}}
+                            <select class="form-control mb-3 custom-select border-light shadow-none {{ ($variant) ? 'variant-preselected' : '' }}" 
                                     wire:model.live="variant" 
-                                    @disabled(!$model || count($variants) == 0)>
+                                    @disabled(!$model || $variants->isEmpty())>
                                 <option value="">Select Variant</option>
                                 @foreach($variants as $v)
                                     <option value="{{ $v->id }}">
@@ -102,12 +99,13 @@
                             </select>
                         </div>
 
+                        {{-- Technical Specs Snippet (Only if VIN present) --}}
                         @if(!empty($vinData))
-                        <div class="p-3 mb-4 rounded bg-light border-0 small">
+                        <div class="p-3 mb-4 rounded bg-light border-0 small border-left border-primary" style="border-left-width: 4px !important;">
                             <h6 class="font-weight-bold mb-2 text-primary" style="font-size: 0.8rem;">VIN Match Details</h6>
-                            <div class="d-flex justify-content-between mb-1"><span>Fuel:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Fuel type'] ?? 'N/A' }}</span></div>
-                            <div class="d-flex justify-content-between mb-1"><span>Transmission:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Transmission'] ?? 'N/A' }}</span></div>
-                            <div class="d-flex justify-content-between"><span>Origin:</span> <span class="text-dark font-weight-bold">{{ $vinData['Manufacturer']['Country'] ?? 'N/A' }}</span></div>
+                            <div class="d-flex justify-content-between mb-1 text-muted"><span>Fuel:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Fuel type'] ?? 'N/A' }}</span></div>
+                            <div class="d-flex justify-content-between mb-1 text-muted"><span>Transmission:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Transmission'] ?? 'N/A' }}</span></div>
+                            <div class="d-flex justify-content-between text-muted"><span>Origin:</span> <span class="text-dark font-weight-bold">{{ $vinData['Manufacturer']['Country'] ?? 'N/A' }}</span></div>
                         </div>
                         @endif
 
@@ -145,7 +143,14 @@
         </div>
 
         {{-- 3. Main Parts Area --}}
-        <div class="col-lg-9">
+        <div class="col-lg-9 position-relative">
+            {{-- Loading State --}}
+            <div wire:loading wire:target="brand, model, variant, category, search, sort, in_stock, min_price, max_price" class="catalog-loading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+
             <div class="d-flex justify-content-between align-items-end mb-4">
                 <div>
                     <h4 class="font-weight-bold text-dark mb-0">{{ number_format($parts->total()) }} Parts Found</h4>
@@ -178,21 +183,26 @@
             </div>
 
             {{-- Results Grid/List --}}
-            <div class="row" wire:loading.remove wire:target="brand, model, variant, category, search, sort, in_stock">
+            <div class="row">
                 @forelse($parts as $part)
                     <div :class="grid ? 'col-md-6 col-xl-4 mb-4' : 'col-12 mb-3'" class="transition-all">
                         <div class="force-full-width-child h-100 part-grid-transition">
                             @livewire('part-component', [
                                 'part' => $part, 
-                                'isCompatible' => !empty($vinData) || !empty($variant)
+                                'isCompatible' => !empty($variant)
                             ], key('part-'.$part->id))
                         </div>
                     </div>
                 @empty
                     <div class="col-12 text-center py-5">
-                        <i class="fa fa-box-open fa-4x text-light mb-3"></i>
+                        <div class="mb-3">
+                            <i class="fa fa-box-open fa-4x text-light"></i>
+                        </div>
                         <h5 class="text-muted mt-3">No parts found matching your criteria.</h5>
-                        <button wire:click="clearFilters" class="btn btn-primary btn-sm rounded-pill mt-2 px-4">See All Parts</button>
+                        <p class="text-muted small">Try adjusting your filters or search term.</p>
+                        <button wire:click="clearFilters" class="btn btn-primary btn-sm rounded-pill mt-2 px-4 shadow-sm">
+                            Show All Parts
+                        </button>
                     </div>
                 @endforelse
             </div>
