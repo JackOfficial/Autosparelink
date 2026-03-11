@@ -61,10 +61,9 @@ class PartsCatalog extends Component
             $this->vinData = $vinData;
             $this->brand = $vinData['brand_id'] ?? null;
             $this->model = $vinData['model_id'] ?? null;
-            //$this->variant = $variant;
-            dd($variant);
+            // FIX 1: Explicitly set the variant from your local database ID parameter
+            $this->variant = $variant; 
 
-            // Note: If you have a specific variant from VIN, set it here
         } else {
             // 2. Otherwise, use passed parameters or URL queries (for 'View All')
             $this->brand = $brand ?? request()->query('brand', $this->brand);
@@ -101,9 +100,9 @@ class PartsCatalog extends Component
     }
 
     public function setToggle($isGrid)
-{
-    $this->grid = $isGrid;
-}
+    {
+        $this->grid = $isGrid;
+    }
 
     public function render()
     {
@@ -126,7 +125,8 @@ class PartsCatalog extends Component
             
             // --- VEHICLE HIERARCHY FILTERS ---
             ->when($this->variant, function($q) {
-                $q->whereHas('specifications', fn($query) => $query->where('specifications.id', $this->variant));
+                // FIX 2: Filter parts by variant_id in the specifications table
+                $q->whereHas('specifications', fn($query) => $query->where('variant_id', $this->variant));
             }) 
             ->when($this->model && !$this->variant, function($q) {
                 $q->whereHas('specifications', fn($query) => $query->where('vehicle_model_id', $this->model));
@@ -141,7 +141,7 @@ class PartsCatalog extends Component
             ->when($this->min_price, fn($q) => $q->where('price', '>=', $this->min_price))
             ->when($this->max_price, fn($q) => $q->where('price', '<=', $this->max_price))
 
-            // --- SEARCH (Supports Part Name, Number, etc.) ---
+            // --- SEARCH ---
             ->when($this->search, function($q) {
                 $q->where(function($sub) {
                     $term = '%' . $this->search . '%';
