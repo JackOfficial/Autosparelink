@@ -1,17 +1,19 @@
 @php
     $mainPhoto = $part->photos->first()?->file_path ?? 'frontend/img/placeholder.png';
+    
     $discount = !empty($part->old_price) && $part->old_price > $part->price
-        ? round((($part->old_price - $part->price)/$part->old_price)*100)
+        ? round((($part->old_price - $part->price) / $part->old_price) * 100)
         : null;
     
-    /** * Get the descriptive name from the first specification's variant.
-     * We use specifications->first() because parts are linked to specs, 
-     * and each spec belongs to a descriptive Variant.
-     */
+    // Defensive check: Only try to get the spec if the relationship is loaded
+    // and use the correct column name 'variant_name'
     $firstSpec = $part->specifications->first();
-    $descriptiveName = $firstSpec && $firstSpec->variant 
-        ? $firstSpec->variant->name 
-        : 'Multiple vehicles';
+    
+    $descriptiveName = 'Multiple vehicles';
+    if ($firstSpec && $firstSpec->variant) {
+        // Double check if your column is 'name' or 'variant_name'
+        $descriptiveName = $firstSpec->variant->name ?? $firstSpec->variant->name ?? 'Multiple vehicles';
+    }
 @endphp
 
 <div class="product-item bg-white h-100 shadow-sm border-0" style="border-radius: 12px; transition: 0.3s;">
