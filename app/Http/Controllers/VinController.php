@@ -29,7 +29,7 @@ class VinController extends Controller
             });
 
             // DEBUG 1: Check the final structured data returned from the API logic
-            dd('Structured VIN Data:', $vinData);
+            // dd('Structured VIN Data:', $vinData);
 
             if (!$vinData) {
                 return back()->with('error', 'Vehicle not found in Global or European databases.');

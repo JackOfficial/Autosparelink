@@ -48,7 +48,7 @@ class VinDecoderService
 
             if (!$response->successful()) {
         // ADD THIS TEMPORARILY:
-        dd("API Failed", $url, $response->status(), $response->body());
+        // dd("API Failed", $url, $response->status(), $response->body());
             }
 
             if ($response->successful()) {
