@@ -105,6 +105,7 @@ class PartsCatalog extends Component
 
     public function render()
     {
+        dd($this->search);
         // 1. Fetch Sidebar Collections based on your Model -> Variant hierarchy
         $brands = Brand::orderBy('brand_name')->get();
         
@@ -147,7 +148,7 @@ class PartsCatalog extends Component
             ->when($this->min_price, fn($q) => $q->where('price', '>=', $this->min_price))
             ->when($this->max_price, fn($q) => $q->where('price', '<=', $this->max_price))
 
-            ->when($this->search, function($q) {
+            ->when(filled($this->search), function($q) {
                 $q->where(function($sub) {
                     $term = '%' . $this->search . '%';
                     $sub->where('part_name', 'like', $term)
