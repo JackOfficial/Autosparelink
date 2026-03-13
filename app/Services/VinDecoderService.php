@@ -48,36 +48,30 @@ private function executeRequest(string $path): ?array
             'Accept'    => 'application/json',
         ])->timeout(15)->get($url);
 
-        // --- THE LOUD DEBUGGER ---
-        // If we are testing 'advanced' and it's NOT successful, STOP and show why.
-        if (str_contains($path, 'advanced') && !$response->successful()) {
-            dd([
-                'DEBUG_STEP' => 'Advanced API Failed',
-                'URL' => $url,
-                'HTTP_STATUS' => $response->status(),
-                'SERVER_MESSAGE' => $response->body(),
-                'HINT' => 'If status is 400, the VIN failed checksum. If 401, check your key.'
-            ]);
-        }
-
         if ($response->successful()) {
             $data = $response->json();
             
-            // Check for internal API "error" status even on 200 OK
+            // Handle cases where the API returns 200 OK but the body says "error"
             if (isset($data['status']) && $data['status'] === 'error') {
-                if (str_contains($path, 'advanced')) {
-                    dd('Advanced API returned 200 OK but Internal Error:', $data);
-                }
+                Log::info("VIN API Info: {$path} - Record not found.");
                 return null;
             }
 
             return $data;
         }
 
+        // Log actual failures (400, 500, etc.) for your review later
+        Log::warning("VIN API External Failure", [
+            'path'   => $path,
+            'status' => $response->status(),
+            'body'   => $response->body()
+        ]);
+
         return null;
 
     } catch (\Exception $e) {
-        dd("Critical Connection Error: " . $e->getMessage());
+        Log::critical("VIN Service Connection Failed: " . $e->getMessage());
+        return null;
     }
 }
 }

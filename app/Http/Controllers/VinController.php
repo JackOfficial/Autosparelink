@@ -75,7 +75,7 @@ class VinController extends Controller
         $apiResponse = $decoder->decodeAdvanced($vin);
         $source = 'advanced';
 
-        dd('Advanced API Raw Response:', $apiResponse);
+        // dd('Advanced API Raw Response:', $apiResponse);
 
         if (!$apiResponse || ($apiResponse['status'] ?? '') !== 'success') {
             $apiResponse = $decoder->decodeEurope($vin);
