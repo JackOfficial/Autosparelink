@@ -46,6 +46,11 @@ class VinDecoderService
                 'Accept'    => 'application/json',
             ])->timeout(12)->get($url);
 
+            if (!$response->successful()) {
+        // ADD THIS TEMPORARILY:
+        dd("API Failed", $url, $response->status(), $response->body());
+            }
+
             if ($response->successful()) {
                 // Returns the whole JSON so Controller can verify ['status'] === 'success'
                 return $response->json();
