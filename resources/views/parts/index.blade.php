@@ -58,7 +58,7 @@
     'model' => $modelId ?? null,
     'variant' => $variantId ?? null,
     'vinData' => $vehicleData ?? null,
-    'search'  => $searchTerm ?? null,
+    'search'  => $search ?? null,
 ])
 
 @endsection
