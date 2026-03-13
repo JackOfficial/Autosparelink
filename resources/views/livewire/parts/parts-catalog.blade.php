@@ -33,7 +33,7 @@
                             
                             {{-- Status Badge: Tells user if we have their car in our DB --}}
                             @if($variant)
-                                <span class="badge badge-success" style="font-size: 0.6rem;">MATCHED IN CATALOG {{ $variant }}</span>
+                                <span class="badge badge-success" style="font-size: 0.6rem;">MATCHED IN CATALOG</span>
                             @else
                                 <span class="badge badge-warning text-dark" style="font-size: 0.6rem;">NOT IN CATALOG YET</span>
                             @endif
