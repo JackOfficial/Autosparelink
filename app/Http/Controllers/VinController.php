@@ -13,9 +13,6 @@ use Illuminate\Support\Facades\Cache;
 
 class VinController extends Controller
 {
-    /**
-     * Unified search for VINs or Part Numbers/Names
-     */
     public function search(Request $request, VinSearchService $vinService, VinDecoderService $decoder)
     {
         $userInput = strtoupper(trim($request->input('search_query')));
@@ -31,6 +28,9 @@ class VinController extends Controller
                 return $this->callExternalVinApi($userInput, $decoder); 
             });
 
+            // DEBUG 1: Check the final structured data returned from the API logic
+            // dd('Structured VIN Data:', $vinData);
+
             if (!$vinData) {
                 return back()->with('error', 'Vehicle not found in Global or European databases.');
             }
@@ -42,6 +42,9 @@ class VinController extends Controller
             $brandId   = $results['brand']->id   ?? $vinData['db_match']['brand_id'];
             $modelId   = $results['model']->id   ?? $vinData['db_match']['model_id'];
             $variantId = $results['variant']->id ?? $vinData['db_match']['variant_id'];
+
+            // DEBUG 2: Check if local Database IDs were matched correctly
+            // dd('DB Match IDs:', ['brand' => $brandId, 'model' => $modelId, 'variant' => $variantId]);
 
             if (!$modelId) {
                 return view('parts.index', [
@@ -63,26 +66,29 @@ class VinController extends Controller
         }
 
         // --- PATH B: PART NUMBER OR NAME SEARCH ---
-
         return view('parts.index', [
             'searchTerm'  => $userInput,
             'brandId'     => null, 'modelId' => null, 'variantId' => null, 'vehicleData' => null,
+            'search'      => $userInput
         ]);
     }
 
-    /**
-     * Maps API responses to local DB and standardizes structure for Blade
-     */
     private function callExternalVinApi($vin, VinDecoderService $decoder)
     {
         // 1. Try Advanced Decoder First
         $apiResponse = $decoder->decodeAdvanced($vin);
         $source = 'advanced';
 
+        // DEBUG 3: Check raw Advanced API response
+        dd('Advanced API Raw:', $apiResponse);
+
         // 2. Fallback to Europe Decoder if Advanced fails
         if (!$apiResponse || ($apiResponse['status'] ?? '') !== 'success') {
             $apiResponse = $decoder->decodeEurope($vin);
             $source = 'europe';
+            
+            // DEBUG 4: Check raw Europe API response if fallback triggered
+            dd('Europe API Raw (Fallback):', $apiResponse);
         }
 
         if (!$apiResponse || ($apiResponse['status'] ?? '') !== 'success') {
@@ -91,7 +97,7 @@ class VinController extends Controller
 
         $raw = $apiResponse['data'];
 
-        // 3. Standardize Data Extraction (Handling both JSON formats)
+        // 3. Standardize Data Extraction
         if ($source === 'europe') {
             $make      = $raw['General Information']['Make'] ?? null;
             $modelName = $raw['General Information']['Model'] ?? null;
@@ -121,8 +127,8 @@ class VinController extends Controller
                     ->where('name', 'LIKE', '%' . ($trim ?? '') . '%')
                     ->first() : null;
 
-        // 5. Return standardized array for your Blade template
         return [
+            'api_source' => $source, // Added this to help you see which one worked
             'General Information' => [
                 'Make'         => $make,
                 'Model'        => $modelName,
