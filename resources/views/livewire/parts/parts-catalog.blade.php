@@ -17,53 +17,69 @@
         .catalog-loading { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); z-index: 10; display: flex; align-items: center; justify-content: center; border-radius: 15px; }
     </style>
 
-    {{-- 1. VIN Matched Vehicle Banner --}}
-    @if(!empty($vinData))
-    <div class="row mb-4 animate__animated animate__fadeInDown">
-        <div class="col-12">
-            <div class="card vin-banner text-white shadow-sm border-0">
-                <div class="card-body d-flex align-items-center justify-content-between py-3">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary rounded-circle p-2 mr-3 shadow-sm">
-                            <i class="fa fa-car-side fa-fw"></i>
-                        </div>
-                        <div>
-                            <small class="text-white-50 text-uppercase font-weight-bold" style="letter-spacing: 1px; font-size: 0.7rem;">Vehicle Identified</small>
-                           <h5 class="mb-0 font-weight-bold">
-    @php
-        // Fetch the Variant directly since $variant is now a Variant ID
-        $selectedVariant = $variant ? \App\Models\Variant::find($variant) : null;
-    @endphp
-
-    @if($selectedVariant)
-        {{-- Priority 1: The clean name from your database (e.g., "Corolla LE") --}}
-        {{ $selectedVariant->name }}
-    @elseif(!empty($vinData))
-        {{-- Priority 2: Fallback to API data if Variant isn't found/selected yet --}}
-        {{ $vinData['General Information']['Year'] ?? '' }} 
-        {{ $vinData['General Information']['Make'] ?? '' }} 
-        {{ $vinData['General Information']['Model'] ?? '' }}
-    @else
-        All Parts
-    @endif
-
-    <span class="mx-2 text-white-50">|</span>
-
-    <span class="font-weight-normal small">
-        {{-- Technical info from API stays as the secondary detail --}}
-        {{ $vinData['General Information']['Engine type'] ?? 'N/A' }}
-    </span>
-</h5>
-                        </div>
+ {{-- 1. VIN Matched Vehicle Banner --}}
+@if(!empty($vinData))
+<div class="row mb-4 animate__animated animate__fadeInDown">
+    <div class="col-12">
+        <div class="card vin-banner text-white shadow-sm border-0">
+            <div class="card-body d-flex align-items-center justify-content-between py-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary rounded-circle p-2 mr-3 shadow-sm">
+                        <i class="fa fa-car-side fa-fw"></i>
                     </div>
-                    <button wire:click="clearFilters" class="btn btn-sm btn-outline-light rounded-pill px-4">
-                        <i class="fa fa-times mr-1"></i> Clear VIN
-                    </button>
+                    <div>
+                        <div class="d-flex align-items-center mb-0">
+                            <small class="text-white-50 text-uppercase font-weight-bold mr-2" style="letter-spacing: 1px; font-size: 0.7rem;">Vehicle Identified</small>
+                            
+                            {{-- Status Badge: Tells user if we have their car in our DB --}}
+                            @if($variant)
+                                <span class="badge badge-success" style="font-size: 0.6rem;">MATCHED IN CATALOG</span>
+                            @else
+                                <span class="badge badge-warning text-dark" style="font-size: 0.6rem;">NOT IN CATALOG YET</span>
+                            @endif
+                        </div>
+
+                        <h5 class="mb-0 font-weight-bold">
+                            @php
+                                // Fetch the Variant directly since $variant is now a Variant ID
+                                $selectedVariant = $variant ? \App\Models\Variant::find($variant) : null;
+                            @endphp
+
+                            @if($selectedVariant)
+                                {{-- Priority 1: The descriptive name from your database (e.g., "Corolla LE 1.8L") --}}
+                                {{ $selectedVariant->name }}
+                            @else
+                                {{-- Priority 2: Full descriptive name from API when DB match is missing --}}
+                                {{ $vinData['General Information']['Year'] ?? '' }} 
+                                {{ $vinData['General Information']['Make'] ?? '' }} 
+                                {{ $vinData['General Information']['Model'] ?? '' }}
+                                @if(!empty($vinData['General Information']['Trim']))
+                                    <span class="text-white-50">({{ $vinData['General Information']['Trim'] }})</span>
+                                @endif
+                            @endif
+
+                            <span class="mx-2 text-white-50">|</span>
+
+                            <span class="font-weight-normal small">
+                                {{-- Engine detail remains as secondary technical info --}}
+                                {{ $vinData['General Information']['Engine type'] ?? 'N/A' }}
+                            </span>
+                        </h5>
+                        
+                        {{-- Show a small message only if the vehicle isn't in your DB --}}
+                        @if(!$variant)
+                            <small class="text-info font-italic">Showing general parts. We don't have specific parts for this exact model variation yet.</small>
+                        @endif
+                    </div>
                 </div>
+                <button wire:click="clearFilters" class="btn btn-sm btn-outline-light rounded-pill px-4">
+                    <i class="fa fa-times mr-1"></i> Clear VIN
+                </button>
             </div>
         </div>
     </div>
-    @endif
+</div>
+@endif
 
     <div class="row position-relative">
         {{-- 2. Sidebar Filters --}}
