@@ -37,35 +37,28 @@ class VinDecoderService
      * Shared request logic to keep code DRY
      */
     private function executeRequest(string $path): ?array
-    {
-        try {
-            $url = "{$this->baseUrl}/{$path}";
+{
+    try {
+        $url = "{$this->baseUrl}/{$path}";
 
-            $response = Http::withHeaders([
-                'x-authkey' => $this->apiKey,
-                'Accept'    => 'application/json',
-            ])->timeout(12)->get($url);
+        $response = Http::withHeaders([
+            'x-authkey' => $this->apiKey,
+            'Accept'    => 'application/json',
+        ])->timeout(12)->get($url);
 
-            if (!$response->successful()) {
-        // ADD THIS TEMPORARILY:
-        // dd("API Failed", $url, $response->status(), $response->body());
-            }
+        // DEBUG: If the Europe request (which has 'europe' in the path) fails, show why.
+        if (!$response->successful() && str_contains($path, 'europe')) {
+            dd("Europe API Failed", $url, $response->status(), $response->body());
+        }
 
-            if ($response->successful()) {
-                // Returns the whole JSON so Controller can verify ['status'] === 'success'
-                return $response->json();
-            }
-
-            Log::error("VehicleDatabases API Error", [
-                'endpoint' => $path,
-                'status'   => $response->status(),
-                'body'     => $response->body()
-            ]);
-
-        } catch (\Exception $e) {
-            Log::critical("VIN Service Connection Failed for {$path}: " . $e->getMessage());
+        if ($response->successful()) {
+            return $response->json();
         }
 
         return null;
+    } catch (\Exception $e) {
+        Log::critical("Connection Failed: " . $e->getMessage());
+        return null;
     }
+}
 }
