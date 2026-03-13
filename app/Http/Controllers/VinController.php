@@ -18,7 +18,7 @@ class VinController extends Controller
         $userInput = strtoupper(trim($request->input('search_query')));
         
         if (empty($userInput)) {
-            return back()->with('error', 'Please enter a VIN, Part Number, or Name.');
+            return back()->with('vin', 'Please enter a VIN, Part Number, or Name.');
         }
 
         // --- PATH A: VIN SEARCH (17 Characters) ---
@@ -32,7 +32,7 @@ class VinController extends Controller
             // dd('Structured VIN Data:', $vinData);
 
             if (!$vinData) {
-                return back()->with('error', 'Vehicle not found in Global or European databases.');
+                return back()->with('vin', 'Vehicle not found in Global or European databases.');
             }
 
             $results = Cache::remember("vin_db_match_{$userInput}", now()->addDay(), function () use ($vinService, $vinData) {
@@ -49,7 +49,7 @@ class VinController extends Controller
                     'modelId'     => null,
                     'variantId'   => null,
                     'vehicleData' => $vinData,
-                    'error'       => 'Vehicle identified, but no matching parts found in our catalog.'
+                    'vin'       => 'Vehicle identified, but no matching parts found in our catalog.'
                 ]);
             } 
 
@@ -74,6 +74,8 @@ class VinController extends Controller
     {
         $apiResponse = $decoder->decodeAdvanced($vin);
         $source = 'advanced';
+
+        dd('Advanced API Raw Response:', $apiResponse);
 
         if (!$apiResponse || ($apiResponse['status'] ?? '') !== 'success') {
             $apiResponse = $decoder->decodeEurope($vin);
