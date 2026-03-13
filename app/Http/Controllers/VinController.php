@@ -64,7 +64,6 @@ class VinController extends Controller
 
         // --- PATH B: PART NUMBER OR NAME SEARCH ---
         return view('parts.index', [
-            'searchTerm'  => $userInput,
             'brandId'     => null, 'modelId' => null, 'variantId' => null, 'vehicleData' => null,
             'search'      => $userInput
         ]);
