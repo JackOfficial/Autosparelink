@@ -13,20 +13,22 @@ class VinDecoderService
     public function __construct()
     {
         $this->apiKey = config('services.vehicle_api.key');
-        // Ensure this is: https://api.vehicledatabases.com
-        $this->baseUrl = rtrim(config('services.vehicle_api.base_url'), '/');
+        // Final fallback to ensure the URL is never empty
+        $this->baseUrl = rtrim(config('services.vehicle_api.base_url', 'https://api.vehicledatabases.com'), '/');
     }
 
     /**
-     * PRIMARY: Advanced V2 (Good for US/Global/General)
+     * PRIMARY: Advanced V2
+     * Note: We ensure the path matches the 'advanced-vin-decode' requirement
      */
     public function decodeAdvanced(string $vin): ?array
     {
+        // Some tiers use 'advanced-vin-decode/v2/decode' - we will try the standard first
         return $this->executeRequest("advanced-vin-decode/v2/{$vin}");
     }
 
     /**
-     * FALLBACK: Europe V2 (Crucial for Rwanda - European/Korean/Dubai imports)
+     * FALLBACK: Europe V2
      */
     public function decodeEurope(string $vin): ?array
     {
@@ -34,9 +36,9 @@ class VinDecoderService
     }
 
     /**
-     * Shared request logic to keep code DRY
+     * Shared request logic
      */
-    private function executeRequest(string $path): ?array
+private function executeRequest(string $path): ?array
 {
     try {
         $url = "{$this->baseUrl}/{$path}";
@@ -44,21 +46,38 @@ class VinDecoderService
         $response = Http::withHeaders([
             'x-authkey' => $this->apiKey,
             'Accept'    => 'application/json',
-        ])->timeout(12)->get($url);
+        ])->timeout(15)->get($url);
 
-        // DEBUG: If the Europe request (which has 'europe' in the path) fails, show why.
-        if (!$response->successful() && str_contains($path, 'europe')) {
-            dd("Europe API Failed", $url, $response->status(), $response->body());
+        // --- THE LOUD DEBUGGER ---
+        // If we are testing 'advanced' and it's NOT successful, STOP and show why.
+        if (str_contains($path, 'advanced') && !$response->successful()) {
+            dd([
+                'DEBUG_STEP' => 'Advanced API Failed',
+                'URL' => $url,
+                'HTTP_STATUS' => $response->status(),
+                'SERVER_MESSAGE' => $response->body(),
+                'HINT' => 'If status is 400, the VIN failed checksum. If 401, check your key.'
+            ]);
         }
 
         if ($response->successful()) {
-            return $response->json();
+            $data = $response->json();
+            
+            // Check for internal API "error" status even on 200 OK
+            if (isset($data['status']) && $data['status'] === 'error') {
+                if (str_contains($path, 'advanced')) {
+                    dd('Advanced API returned 200 OK but Internal Error:', $data);
+                }
+                return null;
+            }
+
+            return $data;
         }
 
         return null;
+
     } catch (\Exception $e) {
-        Log::critical("Connection Failed: " . $e->getMessage());
-        return null;
+        dd("Critical Connection Error: " . $e->getMessage());
     }
 }
 }
