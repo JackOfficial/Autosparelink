@@ -28,7 +28,7 @@ class VinController extends Controller
                 return $this->callExternalVinApi($userInput, $decoder); 
             });
 
-            // DEBUG 1: Check the final structured data returned from the API logic
+            // DEBUG 1: Final structured check (Brand/Model IDs should now be populated)
             // dd('Structured VIN Data:', $vinData);
 
             if (!$vinData) {
@@ -42,9 +42,6 @@ class VinController extends Controller
             $brandId   = $results['brand']->id   ?? $vinData['db_match']['brand_id'];
             $modelId   = $results['model']->id   ?? $vinData['db_match']['model_id'];
             $variantId = $results['variant']->id ?? $vinData['db_match']['variant_id'];
-
-            // DEBUG 2: Check if local Database IDs were matched correctly
-            // dd('DB Match IDs:', ['brand' => $brandId, 'model' => $modelId, 'variant' => $variantId]);
 
             if (!$modelId) {
                 return view('parts.index', [
@@ -75,20 +72,12 @@ class VinController extends Controller
 
     private function callExternalVinApi($vin, VinDecoderService $decoder)
     {
-        // 1. Try Advanced Decoder First
         $apiResponse = $decoder->decodeAdvanced($vin);
         $source = 'advanced';
 
-        // DEBUG 3: Check raw Advanced API response
-        // dd('Advanced API Raw:', $apiResponse);
-
-        // 2. Fallback to Europe Decoder if Advanced fails
         if (!$apiResponse || ($apiResponse['status'] ?? '') !== 'success') {
             $apiResponse = $decoder->decodeEurope($vin);
             $source = 'europe';
-            
-            // DEBUG 4: Check raw Europe API response if fallback triggered
-            dd('Europe API Raw (Fallback):', $apiResponse);
         }
 
         if (!$apiResponse || ($apiResponse['status'] ?? '') !== 'success') {
@@ -97,7 +86,6 @@ class VinController extends Controller
 
         $raw = $apiResponse['data'];
 
-        // 3. Standardize Data Extraction
         if ($source === 'europe') {
             $make      = $raw['General Information']['Make'] ?? null;
             $modelName = $raw['General Information']['Model'] ?? null;
@@ -118,17 +106,27 @@ class VinController extends Controller
             $country   = $raw['plant_country'] ?? null;
         }
 
+        // --- NEW: CLEANING LOGIC FOR BETTER DB MATCHING ---
+        // Converts "YARIS/HYBRID" -> "YARIS" to avoid query misses
+        $cleanModelName = head(explode('/', $modelName)); 
+
         // 4. DB Matching
         $brand = Brand::where('brand_name', 'LIKE', $make)->first();
+        
         $model = $brand ? VehicleModel::where('brand_id', $brand->id)
-                    ->where('model_name', 'LIKE', '%' . $modelName . '%')
-                    ->first() : null;
-        $variant = $model ? Variant::where('vehicle_model_id', $model->id)
-                    ->where('name', 'LIKE', '%' . ($trim ?? '') . '%')
-                    ->first() : null;
+                    ->where(function($q) use ($cleanModelName, $modelName) {
+                        $q->where('model_name', 'LIKE', '%' . $cleanModelName . '%')
+                          ->orWhere('model_name', 'LIKE', '%' . $modelName . '%');
+                    })->first() : null;
+
+        $variant = ($model && !empty($trim)) 
+                    ? Variant::where('vehicle_model_id', $model->id)
+                        ->where('name', 'LIKE', '%' . $trim . '%')
+                        ->first() 
+                    : null;
 
         return [
-            'api_source' => $source, // Added this to help you see which one worked
+            'api_source' => $source,
             'General Information' => [
                 'Make'         => $make,
                 'Model'        => $modelName,
