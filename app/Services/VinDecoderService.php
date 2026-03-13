@@ -7,50 +7,58 @@ use Illuminate\Support\Facades\Log;
 
 class VinDecoderService
 {
-    /**
-     * The API key for the service.
-     */
     protected string $apiKey;
-
-    /**
-     * The base URL for the API.
-     */
     protected string $baseUrl;
 
     public function __construct()
     {
-        $this->apiKey = config('services.vehicledatabases.key');
-        $this->baseUrl = config('services.vehicledatabases.base_url');
+        $this->apiKey = config('services.vehicle_api.key');
+        // Ensure this is: https://api.vehicledatabases.com
+        $this->baseUrl = rtrim(config('services.vehicle_api.base_url'), '/');
     }
 
     /**
-     * Decode a 17-character VIN.
+     * PRIMARY: Advanced V2 (Good for US/Global/General)
      */
-    public function decode(string $vin): ?array
+    public function decodeAdvanced(string $vin): ?array
     {
-        // Simple regex validation to save API credits
-        if (!preg_php_match('/^[A-HJ-NPR-Z0-9]{17}$/i', $vin)) {
-            return null;
-        }
+        return $this->executeRequest("advanced-vin-decode/v2/{$vin}");
+    }
 
+    /**
+     * FALLBACK: Europe V2 (Crucial for Rwanda - European/Korean/Dubai imports)
+     */
+    public function decodeEurope(string $vin): ?array
+    {
+        return $this->executeRequest("europe-vin-decode/v2/{$vin}");
+    }
+
+    /**
+     * Shared request logic to keep code DRY
+     */
+    private function executeRequest(string $path): ?array
+    {
         try {
+            $url = "{$this->baseUrl}/{$path}";
+
             $response = Http::withHeaders([
-                'x-api-key' => $this->apiKey,
-                'Accept' => 'application/json',
-            ])->timeout(10)->get($this->baseUrl . strtoupper($vin));
+                'x-authkey' => $this->apiKey,
+                'Accept'    => 'application/json',
+            ])->timeout(12)->get($url);
 
             if ($response->successful()) {
-                return $response->json()['data'] ?? null;
+                // Returns the whole JSON so Controller can verify ['status'] === 'success'
+                return $response->json();
             }
 
-            // Log errors for debugging without crashing the app
-            Log::error("VIN Decoder API Error: " . $response->status(), [
-                'vin' => $vin,
-                'body' => $response->body()
+            Log::error("VehicleDatabases API Error", [
+                'endpoint' => $path,
+                'status'   => $response->status(),
+                'body'     => $response->body()
             ]);
 
         } catch (\Exception $e) {
-            Log::critical("VIN Decoder Connection Failed: " . $e->getMessage());
+            Log::critical("VIN Service Connection Failed for {$path}: " . $e->getMessage());
         }
 
         return null;

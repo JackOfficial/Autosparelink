@@ -55,28 +55,27 @@ class PartsCatalog extends Component
     /**
      * Handle initial data and URL parameters
      */
-    public function mount($brand = null, $model = null, $variant = null, $vinData = null, $category = null)
-    {
-        // 1. Priority 1: VIN data from a search session
-        if ($vinData) {
-            $this->vinData = $vinData;
-            $this->brand = $brand;
-            $this->model = $model;
-            $this->variant = $variant; 
-
-        } else {
-            // 2. Priority 2: Direct URL queries or Parameters
-            $this->brand = request()->query('brand', $brand ?? $this->brand);
-            $this->model = request()->query('model', $model ?? $this->model);
-            $this->variant = request()->query('variant', $variant ?? $this->variant);
-            $this->category = request()->query('category', $category ?? $this->category);
-        }
-
-        // Global search bar handling
-        if(request()->has('search_query')) {
-            $this->search = request()->query('search_query');
-        }
+   public function mount($brand = null, $model = null, $variant = null, $vinData = null, $category = null, $search = null)
+{
+    // 1. Priority 1: VIN data from a search session (Decoded successfully)
+    if ($vinData) {
+        $this->vinData = $vinData;
+        $this->brand = $brand;
+        $this->model = $model;
+        $this->variant = $variant;
+        // When a VIN is found, we clear text search to focus on the specific car
+        $this->search = ''; 
+    } else {
+        // 2. Priority 2: Text Search or Manual Filtering
+        $this->brand = request()->query('brand', $brand ?? $this->brand);
+        $this->model = request()->query('model', $model ?? $this->model);
+        $this->variant = request()->query('variant', $variant ?? $this->variant);
+        $this->category = request()->query('category', $category ?? $this->category);
+        
+        // This line ensures the 'search' passed from your controller is used!
+        $this->search = $search ?? request()->query('search_query', request()->query('search', $this->search));
     }
+}
 
     // --- Filter Lifecycle Hooks ---
     public function updatedBrand() { $this->model = null; $this->variant = null; $this->resetPage(); }
