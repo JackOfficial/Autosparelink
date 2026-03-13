@@ -105,7 +105,6 @@ class PartsCatalog extends Component
 
     public function render()
     {
-        dd($this->search);
         // 1. Fetch Sidebar Collections based on your Model -> Variant hierarchy
         $brands = Brand::orderBy('brand_name')->get();
         
