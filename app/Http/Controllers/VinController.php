@@ -80,7 +80,7 @@ class VinController extends Controller
         $source = 'advanced';
 
         // DEBUG 3: Check raw Advanced API response
-        // dd('Advanced API Raw:', $apiResponse);
+        dd('Advanced API Raw:', $apiResponse);
 
         // 2. Fallback to Europe Decoder if Advanced fails
         if (!$apiResponse || ($apiResponse['status'] ?? '') !== 'success') {
@@ -88,7 +88,7 @@ class VinController extends Controller
             $source = 'europe';
             
             // DEBUG 4: Check raw Europe API response if fallback triggered
-            // dd('Europe API Raw (Fallback):', $apiResponse);
+            dd('Europe API Raw (Fallback):', $apiResponse);
         }
 
         if (!$apiResponse || ($apiResponse['status'] ?? '') !== 'success') {
