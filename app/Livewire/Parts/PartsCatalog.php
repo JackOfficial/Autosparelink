@@ -55,7 +55,7 @@ class PartsCatalog extends Component
     /**
      * Handle initial data and URL parameters
      */
-   public function mount($brand = null, $model = null, $variant = null, $vinData = null, $category = null, $search = null)
+   public function mount($brand = null, $model = null, $variant = null, $vinData = null, $search = null, $category = null)
 {
     // 1. Priority 1: VIN data from a search session (Decoded successfully)
     if ($vinData) {
