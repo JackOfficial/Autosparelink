@@ -33,7 +33,7 @@
                             
                             {{-- Status Badge: Tells user if we have their car in our DB --}}
                             @if($variant)
-                                <span class="badge badge-success" style="font-size: 0.6rem;">MATCHED IN CATALOG</span>
+                                <span class="badge badge-success" style="font-size: 0.6rem;">MATCHED IN CATALOG {{ $variant }}</span>
                             @else
                                 <span class="badge badge-warning text-dark" style="font-size: 0.6rem;">NOT IN CATALOG YET</span>
                             @endif
@@ -47,9 +47,8 @@
 
                             @if($selectedVariant)
                                 {{-- Priority 1: The descriptive name from your database (e.g., "Corolla LE 1.8L") --}}
-                                {{ $selectedVariant->name }} kkkkkkkkk
+                                {{ $selectedVariant->name }}
                             @else
-                            nnnnnnnnnnnnnnnnnnn
                                 {{-- Priority 2: Full descriptive name from API when DB match is missing --}}
                                 {{ $vinData['General Information']['Year'] ?? '' }} 
                                 {{ $vinData['General Information']['Make'] ?? '' }} 
