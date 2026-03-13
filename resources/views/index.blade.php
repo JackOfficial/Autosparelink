@@ -90,7 +90,17 @@
                     <input type="text" name="search_query" placeholder="Enter VIN like (e.g. JTDBE32K220123456) or simply Part number/name " required>
                     <button class="btn btn-primary" type="submit">Search</button>
                 </div>
-                @error('vin')<div class="text-danger text-center">{{ $message }}</div>@enderror
+                {{-- 1. This catches the manual 'back()->with("vin", ...)' from your Controller --}}
+    @if(session('vin'))
+        <div class="alert alert-warning mt-2 text-center animate__animated animate__shakeX" style="border-radius: 30px;">
+            <i class="fas fa-exclamation-triangle me-2"></i> {{ session('vin') }}
+        </div>
+    @endif
+
+    {{-- 2. Keep this just in case you use standard validation later --}}
+    @error('vin')
+        <div class="text-danger text-center mt-2">{{ $message }}</div>
+    @enderror
                 
                 <div class="d-flex align-items-center justify-content-between hero-popular mt-2">
                     <div>

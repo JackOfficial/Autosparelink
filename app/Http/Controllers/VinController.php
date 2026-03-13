@@ -24,17 +24,17 @@ class VinController extends Controller
         // --- PATH A: VIN SEARCH (17 Characters) ---
         if (strlen($userInput) === 17) {
             
+            // 1. Check API Cache (Banks the external data for 1 month)
             $vinData = Cache::remember("vin_api_unified_{$userInput}", now()->addMonths(1), function () use ($userInput, $decoder) {
                 return $this->callExternalVinApi($userInput, $decoder); 
             });
 
-            // DEBUG 1: Final structured check (Brand/Model IDs should now be populated)
-            // dd('Structured VIN Data:', $vinData);
-
+            // If API failed entirely (No record found globally or in Europe)
             if (!$vinData) {
                 return back()->with('vin', 'Vehicle not found in Global or European databases.');
             }
 
+            // 2. Check Database Match (Matches API data to local parts catalog)
             $results = Cache::remember("vin_db_match_{$userInput}", now()->addDay(), function () use ($vinService, $vinData) {
                 return $vinService->findPartsByVinData($vinData);
             });
@@ -43,16 +43,18 @@ class VinController extends Controller
             $modelId   = $results['model']->id   ?? $vinData['db_match']['model_id'];
             $variantId = $results['variant']->id ?? $vinData['db_match']['variant_id'];
 
+            // 3. Logic for Partial Match (Vehicle found in API but NOT in local DB)
             if (!$modelId) {
                 return view('parts.index', [
                     'brandId'     => $brandId,
                     'modelId'     => null,
                     'variantId'   => null,
                     'vehicleData' => $vinData,
-                    'vin'       => 'Vehicle identified, but no matching parts found in our catalog.'
+                    'vin'         => "We identified your {$vinData['General Information']['Year']} {$vinData['General Information']['Make']} {$vinData['General Information']['Model']}, but no matching parts were found in our catalog."
                 ]);
             } 
 
+            // 4. Full Match Success
             return view('parts.index', [
                 'brandId'     => $brandId,
                 'modelId'     => $modelId,
@@ -74,13 +76,12 @@ class VinController extends Controller
         $apiResponse = $decoder->decodeAdvanced($vin);
         $source = 'advanced';
 
-        // dd('Advanced API Raw Response:', $apiResponse);
-
         if (!$apiResponse || ($apiResponse['status'] ?? '') !== 'success') {
             $apiResponse = $decoder->decodeEurope($vin);
             $source = 'europe';
         }
 
+        // If both APIs fail, return null (Controller handles the error message)
         if (!$apiResponse || ($apiResponse['status'] ?? '') !== 'success') {
             return null;
         }
@@ -107,11 +108,9 @@ class VinController extends Controller
             $country   = $raw['plant_country'] ?? null;
         }
 
-        // --- NEW: CLEANING LOGIC FOR BETTER DB MATCHING ---
-        // Converts "YARIS/HYBRID" -> "YARIS" to avoid query misses
         $cleanModelName = head(explode('/', $modelName)); 
 
-        // 4. DB Matching
+        // DB Matching logic remains the same
         $brand = Brand::where('brand_name', 'LIKE', $make)->first();
         
         $model = $brand ? VehicleModel::where('brand_id', $brand->id)
