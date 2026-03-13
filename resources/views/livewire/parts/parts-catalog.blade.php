@@ -47,7 +47,7 @@
 
                             @if($selectedVariant)
                                 {{-- Priority 1: The descriptive name from your database (e.g., "Corolla LE 1.8L") --}}
-                                {{ $selectedVariant->name }}
+                                {{ $selectedVariant->name }} kkkkkkkkk
                             @else
                                 {{-- Priority 2: Full descriptive name from API when DB match is missing --}}
                                 {{ $vinData['General Information']['Year'] ?? '' }} 
