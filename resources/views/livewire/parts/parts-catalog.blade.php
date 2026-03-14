@@ -40,15 +40,7 @@
                         </div>
 
                         <h5 class="mb-0 font-weight-bold">
-                            @php
-                                // Fetch the Variant directly since $variant is now a Variant ID
-                                $selectedVariant = $variant ? \App\Models\Variant::find($variant) : null;
-                            @endphp
-
-                            @if($selectedVariant)
-                                {{-- Priority 1: The descriptive name from your database (e.g., "Corolla LE 1.8L") --}}
-                                {{ $selectedVariant->name }}
-                            @else
+                            @if($vinData)
                                 {{-- Priority 2: Full descriptive name from API when DB match is missing --}}
                                 {{ $vinData['General Information']['Year'] ?? '' }} 
                                 {{ $vinData['General Information']['Make'] ?? '' }} 
@@ -56,14 +48,21 @@
                                 @if(!empty($vinData['General Information']['Trim']))
                                     <span class="text-white-50">({{ $vinData['General Information']['Trim'] }})</span>
                                 @endif
-                            @endif
-
-                            <span class="mx-2 text-white-50">|</span>
+                            @elseif($variant)
+                                @php
+                                // Fetch the Variant directly since $variant is now a Variant ID
+                                $selectedVariant = $variant ? \App\Models\Variant::find($variant) : null;
+                                @endphp
+                                <span class="mx-2 text-white-50">{{ $selectedVariant->name ?? '' }}</span>
+                            @else
+                             <span class="mx-2 text-white-50">|</span>
 
                             <span class="font-weight-normal small">
-                                {{-- Engine detail remains as secondary technical info --}}
-                                {{ $vinData['General Information']['Engine type'] ?? 'N/A' }}
-                            </span>
+                               {{ $brand }}  {{ $model }}
+                            </span>    
+                            @endif
+
+                           
                         </h5>
                         
                         {{-- Show a small message only if the vehicle isn't in your DB --}}
