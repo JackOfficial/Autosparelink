@@ -120,6 +120,76 @@
     -webkit-appearance: none;
     margin: 0;
 }
+
+/* Image Wrapper - The fix for 'bitter' looks */
+.sub-image-wrapper {
+    width: 64px;
+    height: 64px;
+    background: #f8fafc; /* Soft background so the image pops */
+    border: 1px solid #edf2f7;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    transition: all 0.3s ease;
+}
+
+.sub-image-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Prevents stretching */
+    mix-blend-mode: multiply; /* Makes white backgrounds of photos transparent */
+}
+
+/* Row Hover Effect */
+.tech-table tbody tr { transition: background 0.2s; }
+.tech-table tbody tr:hover { background-color: #fbfcfe; }
+.tech-table tbody tr:hover .sub-image-wrapper { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+/* Typography & Elements */
+.part-link { color: #1a202c; font-weight: 800; text-decoration: none !important; font-size: 0.95rem; }
+.part-link:hover { color: var(--primary-blue); }
+
+.manufacturer-tag { 
+    background: #f1f5f9; 
+    color: #475569; 
+    padding: 4px 12px; 
+    border-radius: 6px; 
+    font-size: 0.8rem; 
+    font-weight: 700; 
+    display: inline-block; 
+}
+
+.price-text { font-size: 1.1rem; font-weight: 800; color: #000; }
+
+/* Stock Indicator */
+.stock-indicator { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; }
+.stock-indicator .dot { width: 8px; height: 8px; border-radius: 50%; }
+.stock-indicator.is-in { color: #059669; }
+.stock-indicator.is-in .dot { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+.stock-indicator.is-out { color: #dc2626; }
+.stock-indicator.is-out .dot { background: #ef4444; }
+
+/* Circular View Button */
+.btn-view-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.btn-view-circle:hover {
+    background: var(--primary-blue);
+    color: #fff;
+    border-color: var(--primary-blue);
+    transform: translateX(3px);
+}
 </style>
 @endpush
 
@@ -185,64 +255,72 @@
         </div>
     </div>
 
- {{-- 4. SUBSTITUTIONS --}}
+{{-- 4. SUBSTITUTIONS --}}
 @if($substitutions->isNotEmpty())
 <div class="row mt-5">
     <div class="col-12">
-        <h4 class="section-title">Alternative Replacements</h4>
-        <div class="card tech-card overflow-hidden">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="section-title mb-0">Alternative Replacements</h4>
+            <span class="badge badge-soft-primary px-3 py-2 rounded-pill small font-weight-bold">
+                {{ $substitutions->count() }} Options Available
+            </span>
+        </div>
+        
+        <div class="card tech-card border-0 shadow-sm overflow-hidden" style="border-radius: 16px;">
             <div class="table-responsive">
-                <table class="table tech-table mb-0">
-                    <thead>
+                <table class="table tech-table mb-0 align-middle">
+                    <thead class="bg-light">
                         <tr>
-                            <th>Part</th> {{-- Combined Photo & Info --}}
-                            <th>Manufacturer</th>
-                            <th>Stock Status</th>
-                            <th class="text-right">Price</th>
-                            <th class="text-center">Action</th>
+                            <th class="py-3 pl-4">Product Details</th>
+                            <th class="py-3">Brand</th>
+                            <th class="py-3">Availability</th>
+                            <th class="py-3 text-right">Price (RWF)</th>
+                            <th class="py-3 text-center">Details</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($substitutions as $sub)
-                        <tr class="align-middle">
+                        <tr>
                             {{-- Photo & Identification --}}
-                            <td style="min-width: 150px;">
+                            <td class="pl-4 py-3" style="min-width: 320px;">
                                 <div class="d-flex align-items-center">
-                                    <div class="sub-thumbnail mr-3">
+                                    <div class="sub-image-wrapper">
                                         <img src="{{ $sub->photos->first() ? asset('storage/' . $sub->photos->first()->file_path) : asset('frontend/img/placeholder.jpg') }}" 
-                                             alt="{{ $sub->part_name }}" 
-                                             class="img-fluid rounded border">
+                                             alt="{{ $sub->part_name }}">
                                     </div>
-                                    <div>
-                                        <a href="{{ route('spare-parts.show', $sub->sku) }}" class="text-primary font-weight-bold text-decoration-none d-block">
+                                    <div class="ml-3">
+                                        <a href="{{ route('spare-parts.show', $sub->sku) }}" class="part-link">
                                             {{ $sub->part_number }}
                                         </a>
-                                        <small class="text-muted d-block">{{ Str::limit($sub->part_name, 30) }}</small>
+                                        <div class="text-muted small font-weight-medium">{{ Str::limit($sub->part_name, 35) }}</div>
                                     </div>
                                 </div>
                             </td>
 
                             {{-- Manufacturer --}}
                             <td>
-                                <span class="font-weight-bold text-dark">{{ $sub->partBrand->name ?? 'Generic' }}</span>
+                                <div class="manufacturer-tag">
+                                    {{ $sub->partBrand->name ?? 'Generic' }}
+                                </div>
                             </td>
 
                             {{-- Stock --}}
                             <td>
-                                <span class="badge-pill-custom {{ $sub->stock_quantity > 0 ? 'badge-in' : 'badge-out' }}">
-                                    <span class="small">●</span> {{ $sub->stock_quantity > 0 ? 'In Stock' : 'Call for Stock' }}
-                                </span>
+                                <div class="stock-indicator {{ $sub->stock_quantity > 0 ? 'is-in' : 'is-out' }}">
+                                    <span class="dot"></span>
+                                    {{ $sub->stock_quantity > 0 ? 'In Stock' : 'On Order' }}
+                                </div>
                             </td>
 
                             {{-- Price --}}
-                            <td class="text-right">
-                                <span class="h6 mb-0 font-weight-bold text-dark">{{ number_format($sub->price, 0) }} RWF</span>
+                            <td class="text-right pr-4">
+                                <span class="price-text">{{ number_format($sub->price, 0) }}</span>
                             </td>
 
                             {{-- Action Link --}}
-                            <td class="text-center">
-                                <a href="{{ route('spare-parts.show', $sub->sku) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                    View <i class="fas fa-arrow-right ml-1" style="font-size: 0.7rem;"></i>
+                            <td class="text-center pr-4">
+                                <a href="{{ route('spare-parts.show', $sub->sku) }}" class="btn-view-circle">
+                                    <i class="fas fa-arrow-right"></i>
                                 </a>
                             </td>
                         </tr>
