@@ -173,13 +173,6 @@
         {{-- 3. PRODUCT INFO (Sticky Sidebar) --}}
         <div class="col-lg-5">
             <div class="sticky-sidebar">
-                <div class="mb-2">
-                    <span class="text-primary font-weight-bold small text-uppercase tracking-wider">
-                        {{ $part->partBrand->name ?? 'Premium Quality' }}
-                    </span>
-                </div>
-                <h1 class="h2 font-weight-bold text-dark mb-3">{{ $part->part_name }}</h1>
-                
                 {{-- Livewire Component handles Price, Stock, and Add-to-Cart logic --}}
                 @livewire('product-info', ['part' => $part])
 
