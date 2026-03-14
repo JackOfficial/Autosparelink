@@ -41,24 +41,29 @@
 
                      <h5 class="mb-0 font-weight-bold">
     {{-- Always use vinData if available as it contains the string names --}}
-    @if($vinData)
-    {{-- We use 'array_filter' to join only the pieces of data that actually exist --}}
+@if($vinData)
+    {{-- We use 'array_filter' to remove empty values and 'array_unique' to prevent duplicates like 'Hybrid Hybrid' --}}
     @php
         $info = $vinData['General Information'];
-        $details = array_filter([
+        $details = [
             $info['Make'] ?? null,
             $info['Model'] ?? null,
             $info['Trim'] ?? null,
             $info['Body Type'] ?? null,
             $info['Transmission'] ?? null,
             $info['Engine type'] ?? null,
-        ]);
+        ];
+
+        // 1. array_filter removes nulls/empty strings
+        // 2. array_unique removes duplicates (e.g., if Body and Engine both say 'Hybrid')
+        $cleanDetails = array_unique(array_filter($details));
     @endphp
 
-    {{ implode(' ', $details) }}
+    {{ implode(' ', $cleanDetails) }}
     <span class="text-white-50">({{ $info['Year'] ?? 'N/A' }})</span>
 
 @elseif($variant)
+    {{-- Fallback for manual database selection without a VIN --}}
     @php 
         $selectedVariant = \App\Models\Variant::with('vehicleModel.brand')->find($variant); 
     @endphp
