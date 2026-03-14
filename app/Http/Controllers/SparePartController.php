@@ -20,33 +20,28 @@ class SparePartController extends Controller
 
     }
  
-     public function parts($id)
-    {
-       // Load part with brand, photos, compatibilities, substitutions
-        $part = Part::with([
-            'partBrand',            // The brand of this part
-            'photos',               // All uploaded photos
-            'fitments.vehicleModel.brand', // Compatibility table
-            // 'substitutions.partBrand'             // Substitution parts and their brands
-        ])->findOrFail($id);
+   public function parts($id)
+{
+    // 1. Load everything in ONE query to the database
+    $part = Part::with([
+        'partBrand',
+        'photos',
+        'fitments.vehicleModel.brand',
+        'substitutions.partBrand', // Uncommented and added brand eager loading
+        'substitutions.photos'     // Helpful if you want to show small icons of the alternatives
+    ])->findOrFail($id);
 
-        // Photos for gallery
-        $photos = $part->photos;
-
-        // Substitutions (other parts that can replace this one)
-        $substitutions = $part->substitutions ?? collect();
-
-        // Compatibility (pivot table linking parts to vehicle variants)
-        $compatibilities = $part->fitments ?? collect();
-
-        return view('parts.show', [
-            'part' => $part,
-            'photos' => $photos,
-            'substitutions' => $substitutions,
-            'compatibilities' => $compatibilities
-        ]);
-    }
-
+    // 2. Simplify variables using the loaded relationship
+    // No need to use ?? collect() if the relationship is properly defined; 
+    // Laravel returns an empty collection by default for HasMany/BelongsToMany.
+    
+    return view('parts.show', [
+        'part'            => $part,
+        'photos'          => $part->photos,
+        'substitutions'   => $part->substitutions,
+        'compatibilities' => $part->fitments,
+    ]);
+}
     public function showCompatibleParts(Request $request, $type, $id)
     {
         // Determine the specification type
