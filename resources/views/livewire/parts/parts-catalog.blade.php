@@ -2,9 +2,11 @@
     <style>
         .filter-card { border-radius: 15px; border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
         .sticky-filter { top: 100px; z-index: 1000; /* This is the magic: */
-    max-height: calc(100vh - 120px); /* Sets height to screen size minus navbar space */
-    overflow-y: auto; /* Adds scrollbar only if content is too long */
-    padding-right: 5px; /* Space for the scrollbar */}
+        max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    padding-right: 8px; /* Extra padding to prevent layout jump when scrollbar appears */
+    transition: all 0.3s ease;
+}
         .vin-banner { border-radius: 12px; background: linear-gradient(45deg, #1a1a1a, #333); border-left: 5px solid #007bff; }
         .form-control-pill { border-radius: 50px; padding-left: 1.25rem; }
         .btn-toggle.active { background-color: #007bff; color: white; border-color: #007bff; }
@@ -13,20 +15,38 @@
             width: 100% !important; max-width: 100% !important; flex: 0 0 100% !important;
             padding-left: 0 !important; padding-right: 0 !important; margin-bottom: 0 !important;
         }
-        /* Make the scrollbar look modern and thin (Webkit browsers like Chrome/Safari) */
+
+        /* 1. Hide scrollbar by default for Chrome/Safari/Edge */
 .sticky-filter::-webkit-scrollbar {
-    width: 4px;
+    width: 5px;
 }
-.sticky-filter::-webkit-scrollbar-track {
-    background: transparent;
-}
+
 .sticky-filter::-webkit-scrollbar-thumb {
-    background: #d1d1d1;
+    background: transparent; /* Invisible by default */
     border-radius: 10px;
+    transition: background 0.3s ease;
 }
-.sticky-filter::-webkit-scrollbar-thumb:hover {
+
+/* 2. Show scrollbar on Hover */
+.sticky-filter:hover::-webkit-scrollbar-thumb {
+    background: #d1d1d1; /* Soft gray appears on hover */
+}
+
+/* 3. Optional: Make the scrollbar handle blue when the user is actually scrolling it */
+.sticky-filter::-webkit-scrollbar-thumb:active {
     background: #007bff;
 }
+
+/* 4. Support for Firefox */
+.sticky-filter {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+
+.sticky-filter:hover {
+    scrollbar-color: #d1d1d1 transparent;
+}
+
         .transition-all { transition: all 0.3s ease-in-out !important; }
         .variant-preselected { border: 2px solid #007bff !important; background-color: #f0f7ff !important; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25) !important; }
         
