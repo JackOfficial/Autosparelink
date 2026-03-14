@@ -255,7 +255,7 @@
                             <th class="py-3">Model & Series</th>
                             <th class="py-3">Engine / Trim</th>
                             <th class="py-3 text-center">Production Years</th>
-                            <th class="py-3 text-center">Shop Category</th> {{-- New Column --}}
+                            <th class="py-3 text-center">Shop Category</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -265,18 +265,22 @@
                             $model = $spec?->vehicleModel; 
                             $variant = $spec?->variant;
                             
-                            // Build the Catalog Link
+                            /** * UPDATED LINK LOGIC
+                             * Matches: Route::get('/parts-catalog/{brandId?}/{modelId?}/{variantId?}')
+                             */
                             $catalogUrl = route('parts.catalog', [
-                                'brand' => $model?->brand?->slug ?? $model?->brand?->id,
-                                'model' => $model?->slug ?? $model?->id,
-                                'variant' => $variant?->slug ?? $variant?->id
+                                'brandId'   => $model?->brand_id,
+                                'modelId'   => $model?->id,
+                                'variantId' => $variant?->id
                             ]);
                         @endphp
                         <tr class="hover-row"> 
+                            {{-- 1. Brand --}}
                             <td class="pl-4">
                                 <span class="brand-badge">{{ $model?->brand?->brand_name ?? '—' }}</span>
                             </td>
 
+                            {{-- 2. Model --}}
                             <td>
                                 <div class="model-text">
                                     {{ $model?->model_name ?? 'Universal Fit' }}
@@ -286,6 +290,7 @@
                                 </div>
                             </td>
 
+                            {{-- 3. Engine / Variant --}}
                             <td>
                                 <div class="trim-box">
                                     <i class="fas fa-microchip mr-2 text-muted small"></i>
@@ -293,6 +298,7 @@
                                 </div>
                             </td>
 
+                            {{-- 4. Years --}}
                             <td class="text-center">
                                 @if($model?->production_start_year)
                                     <div class="year-range">
@@ -305,7 +311,7 @@
                                 @endif
                             </td>
 
-                            {{-- INTERACTIVE BUTTON --}}
+                            {{-- 5. Updated Interactive Button --}}
                             <td class="text-center">
                                 <a href="{{ $catalogUrl }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm font-weight-bold">
                                     <i class="fas fa-search-plus mr-1"></i> See All Parts
@@ -317,7 +323,9 @@
                 </table>
             </div>
         </div>
-        {{-- ... footer info ... --}}
+        <p class="mt-3 text-muted small px-2">
+            <i class="fas fa-info-circle mr-1"></i> Click "See All Parts" to view all components compatible with this specific vehicle configuration.
+        </p>
     </div>
 </div>
 @endif

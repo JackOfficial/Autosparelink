@@ -16,8 +16,21 @@ class SparePartController extends Controller
        return view('parts.index');
     }
 
-    public function show($id){
+  public function catalog($brandId = null, $modelId = null, $variantId = null)
+    {
+        // Fetch vehicle info if modelId is present to support your 'vinData' variable
+        $vehicleData = null;
+        if ($modelId) {
+            $vehicleData = VehicleModel::with('brand')->find($modelId);
+        }
 
+        return view('parts.index', [
+            'brandId'     => $brandId,
+            'modelId'     => $modelId,
+            'variantId'   => $variantId,
+            'vehicleData' => $vehicleData, // Passed as 'vinData' in your blade
+            'search'      => request('search'), // Captures search if coming from a search bar
+        ]);
     }
  
    public function parts($id)
