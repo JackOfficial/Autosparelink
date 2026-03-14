@@ -245,18 +245,45 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($compatibilities as $fitment)
-                            <tr> 
-                                <td class="font-weight-bold text-primary">{{ $fitment->vehicleModel->brand->brand_name ?? '—' }}</td>
-                                <td>{{ $fitment->specification->variant->name ?? ''}}</td>
-                                <td><span class="text-muted">{{ $fitment->variant->name ?? 'Standard' }}</span></td>
-                                <td>
-                                    <span class="badge badge-light border font-weight-bold">
-                                        {{ $fitment->vehicleModel?->production_start_year ?? '—' }} - {{ $fitment->vehicleModel?->production_end_year ?? 'Present' }}
-                                    </span>
-                                </td>
-                            </tr>
-                            @endforeach
+                         @foreach($compatibilities as $fitment)
+    @php
+        // Mirror the Admin logic: Fitment -> Specification -> (Variant & Model)
+        $spec = $fitment->specification;
+        $model = $spec?->vehicleModel; 
+        $variant = $spec?->variant;
+    @endphp
+    <tr> 
+        {{-- 1. Brand Name --}}
+        <td class="font-weight-bold text-primary">
+            {{ $model?->brand?->brand_name ?? '—' }}
+        </td>
+
+        {{-- 2. Model & Series --}}
+        <td>
+            <div class="font-weight-bold text-dark">
+                {{ $model?->model_name ?? 'Universal Fit' }}
+            </div>
+        </td>
+
+        {{-- 3. Engine / Trim (Variant) --}}
+        <td>
+            <span class="text-muted">
+                {{ $variant?->name ?? 'Standard' }}
+            </span>
+        </td>
+
+        {{-- 4. Production Years --}}
+        <td>
+            @if($model?->production_start_year)
+                <span class="badge badge-light border font-weight-bold px-2 py-1">
+                    {{ $model->production_start_year }} - {{ $model->production_end_year ?? 'Present' }}
+                </span>
+            @else
+                <span class="text-muted small">Year N/A</span>
+            @endif
+        </td>
+    </tr>
+@endforeach
                         </tbody>
                     </table>
                 </div>
