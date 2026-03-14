@@ -254,6 +254,47 @@
 }
 .bg-primary-soft { background: rgba(0, 97, 242, 0.1); }
 
+/* Custom Orange Theme for Alternative Replacements */
+.bg-orange-soft { 
+    background: rgba(255, 138, 0, 0.1) !important; 
+}
+.text-orange { 
+    color: #ff8a00 !important; 
+}
+
+/* Make the icon box perfectly square and centered */
+.icon-box-sm {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+/* Soft Badge for the right side */
+.badge-soft-primary {
+    background-color: #e0e7ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+}
+
+/* Table Row Polish */
+.tech-table tbody tr:hover {
+    background-color: #fcfcfc;
+}
+
+.sub-image-wrapper {
+    width: 60px;
+    height: 60px;
+    background: #fff;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
 </style>
 @endpush
 
