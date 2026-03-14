@@ -42,8 +42,18 @@
                      <h5 class="mb-0 font-weight-bold">
     {{-- Always use vinData if available as it contains the string names --}}
     @if($vinData)
+
+     'General Information' => [
+                'Make'          => $make,
+                'Model'         => $modelName,
+                'Year'          => $year,
+             
         {{ $vinData['General Information']['Make'] }} 
         {{ $vinData['General Information']['Model'] }}
+        {{ $vinData['General Information']['Trim'] ? $vinData['General Information']['Trim'] : '' }}
+        {{ $vinData['General Information']['Body Type'] ? $vinData['General Information']['Body Type'] : '' }}
+        {{ $vinData['General Information']['Transmission'] ? $vinData['General Information']['Transmission'] : '' }}
+         {{ $vinData['General Information']['Engine type'] ? $vinData['General Information']['Engine type'] : '' }}
         <span class="text-white-50">({{ $vinData['General Information']['Year'] }})</span>
     @elseif($variant)
         {{-- If no VIN, but a variant is selected, fetch the name --}}
