@@ -190,6 +190,70 @@
     border-color: var(--primary-blue);
     transform: translateX(3px);
 }
+
+/* Background for headers */
+.bg-soft-blue { background-color: #f0f7ff; }
+
+/* Brand Badge */
+.brand-badge {
+    background: #0061f2;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Model & Trim Typography */
+.model-text { font-weight: 700; color: #1e293b; font-size: 0.95rem; }
+.trim-box { 
+    font-size: 0.85rem; 
+    color: #64748b; 
+    background: #f8fafc; 
+    padding: 4px 10px; 
+    border-radius: 6px;
+    display: inline-block;
+}
+
+/* Year Range Visuals */
+.year-range {
+    display: inline-flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    padding: 2px;
+    border-radius: 8px;
+}
+.year-tag {
+    padding: 2px 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #334155;
+}
+.year-divider {
+    width: 8px;
+    height: 2px;
+    background: #cbd5e1;
+    margin: 0 2px;
+}
+
+/* Hover Effects */
+.hover-row { transition: all 0.2s; }
+.hover-row:hover { background-color: #f8fbff !important; }
+
+/* Icon Box */
+.icon-box-sm {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+.bg-primary-soft { background: rgba(0, 97, 242, 0.1); }
+
 </style>
 @endpush
 
@@ -333,69 +397,84 @@
 </div>
 @endif
 
-    {{-- 5. COMPATIBILITY --}}
-    @if($compatibilities->isNotEmpty())
-    <div class="row mt-5 mb-5">
-        <div class="col-12">
-            <h4 class="section-title">Exact Fitment Guide</h4>
-            
-            <div class="card tech-card overflow-hidden">
-                <div class="table-responsive">
-                    <table class="table tech-table mb-0">
-                        <thead>
-                            <tr>
-                                <th>Make</th>
-                                <th>Model & Series</th>
-                                <th>Variant / Trim</th>
-                                <th>Years</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                         @foreach($compatibilities as $fitment)
-    @php
-        // Mirror the Admin logic: Fitment -> Specification -> (Variant & Model)
-        $spec = $fitment->specification;
-        $model = $spec?->vehicleModel; 
-        $variant = $spec?->variant;
-    @endphp
-    <tr> 
-        {{-- 1. Brand Name --}}
-        <td class="font-weight-bold text-primary">
-            {{ $model?->brand?->brand_name ?? '—' }}
-        </td>
-
-        {{-- 2. Model & Series --}}
-        <td>
-            <div class="font-weight-bold text-dark">
-                {{ $model?->model_name ?? 'Universal Fit' }}
+{{-- 5. COMPATIBILITY --}}
+@if($compatibilities->isNotEmpty())
+<div class="row mt-5 mb-5">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-4">
+            <div class="icon-box-sm bg-primary-soft mr-3">
+                <i class="fas fa-car-side text-primary"></i>
             </div>
-        </td>
+            <h4 class="section-title mb-0">Exact Fitment Guide</h4>
+        </div>
+        
+        <div class="card tech-card border-0 shadow-sm overflow-hidden" style="border-radius: 16px;">
+            <div class="table-responsive">
+                <table class="table tech-table mb-0">
+                    <thead class="bg-soft-blue">
+                        <tr>
+                            <th class="py-3 pl-4">Vehicle Make</th>
+                            <th class="py-3">Model & Series</th>
+                            <th class="py-3">Engine / Trim</th>
+                            <th class="py-3 text-center">Production Years</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($compatibilities as $fitment)
+                        @php
+                            $spec = $fitment->specification;
+                            $model = $spec?->vehicleModel; 
+                            $variant = $spec?->variant;
+                        @endphp
+                        <tr class="hover-row"> 
+                            {{-- 1. Brand Name with Badge style --}}
+                            <td class="pl-4">
+                                <span class="brand-badge">
+                                    {{ $model?->brand?->brand_name ?? '—' }}
+                                </span>
+                            </td>
 
-        {{-- 3. Engine / Trim (Variant) --}}
-        <td>
-            <span class="text-muted">
-                {{ $variant?->name ?? 'Standard' }}
-            </span>
-        </td>
+                            {{-- 2. Model & Series --}}
+                            <td>
+                                <div class="model-text">
+                                    {{ $model?->model_name ?? 'Universal Fit' }}
+                                    @if($model?->series)
+                                        <small class="text-muted d-block">{{ $model->series }}</small>
+                                    @endif
+                                </div>
+                            </td>
 
-        {{-- 4. Production Years --}}
-        <td>
-            @if($model?->production_start_year)
-                <span class="badge badge-light border font-weight-bold px-2 py-1">
-                    {{ $model->production_start_year }} - {{ $model->production_end_year ?? 'Present' }}
-                </span>
-            @else
-                <span class="text-muted small">Year N/A</span>
-            @endif
-        </td>
-    </tr>
-@endforeach
-                        </tbody>
-                    </table>
-                </div>
+                            {{-- 3. Engine / Trim --}}
+                            <td>
+                                <div class="trim-box">
+                                    <i class="fas fa-microchip mr-2 text-muted small"></i>
+                                    {{ $variant?->name ?? 'Standard' }}
+                                </div>
+                            </td>
+
+                            {{-- 4. Production Years --}}
+                            <td class="text-center">
+                                @if($model?->production_start_year)
+                                    <div class="year-range">
+                                        <span class="year-tag">{{ $model->production_start_year }}</span>
+                                        <span class="year-divider"></span>
+                                        <span class="year-tag">{{ $model->production_end_year ?? 'Now' }}</span>
+                                    </div>
+                                @else
+                                    <span class="text-muted small">Universal</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
+        <p class="mt-3 text-muted small px-2">
+            <i class="fas fa-info-circle mr-1"></i> Please verify your part number matches the identification above to ensure 100% compatibility.
+        </p>
     </div>
-    @endif
+</div>
+@endif
 </div>
 @endsection
