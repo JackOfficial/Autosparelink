@@ -248,7 +248,7 @@
                             @foreach($compatibilities as $fitment)
                             <tr> 
                                 <td class="font-weight-bold text-primary">{{ $fitment->vehicleModel->brand->brand_name ?? '—' }}</td>
-                                <td>{{ $fitment->vehicleModel->model_name ?? ''}}</td>
+                                <td>{{ $fitment->specifications->variant->name ?? ''}}</td>
                                 <td><span class="text-muted">{{ $fitment->variant->name ?? 'Standard' }}</span></td>
                                 <td>
                                     <span class="badge badge-light border font-weight-bold">
