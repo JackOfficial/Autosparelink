@@ -9,292 +9,84 @@
         --dark-steel: #212529; 
         --soft-bg: #f8fafc;
         --border-color: #e2e8f0;
+        --orange-main: #ff8a00;
     }
     
-    /* 1. Enhanced Layout & Spacing */
+    /* 1. Layout & Sidebar */
     .container-custom { max-width: 1320px; margin: 0 auto; }
     .sticky-sidebar { position: sticky; top: 2rem; }
 
-    /* 2. Gallery Refinement */
+    /* 2. Gallery Viewport */
     .gallery-container { 
-        background: #fff; 
-        border-radius: 16px; 
-        border: 1px solid var(--border-color); 
-        overflow: hidden; 
-        transition: box-shadow 0.3s ease;
+        background: #fff; border-radius: 16px; border: 1px solid var(--border-color); 
+        overflow: hidden; transition: box-shadow 0.3s ease;
     }
     .gallery-container:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
     .main-image-viewport { 
-        height: 520px; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        background: #fff; 
-        padding: 1.5rem; 
-        position: relative; 
+        height: 520px; display: flex; align-items: center; justify-content: center; 
+        background: #fff; padding: 1.5rem; position: relative; 
     }
     .main-image-viewport img { 
-        max-height: 100%; 
-        width: auto; 
-        object-fit: contain; 
+        max-height: 100%; width: auto; object-fit: contain; 
         transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
     }
     
-    /* 3. Modern Tech Tables */
-    .tech-card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+    /* 3. Global Tech Tables */
+    .tech-card { border: none; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
     .tech-table thead th { 
-        background: var(--soft-bg); 
-        color: #64748b; 
-        font-weight: 700; 
-        text-transform: uppercase; 
-        font-size: 0.7rem; 
-        letter-spacing: 0.05em;
-        padding: 1rem 1.2rem;
+        background: var(--soft-bg); color: #64748b; font-weight: 700; 
+        text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; padding: 1rem 1.2rem;
     }
-    .tech-table tbody td { padding: 1rem 1.2rem; border-bottom: 1px solid var(--soft-bg) !important; }
+    .tech-table tbody td { padding: 1rem 1.2rem; vertical-align: middle !important; border-bottom: 1px solid var(--soft-bg) !important; }
+    .tech-table tbody tr { transition: all 0.2s; }
+    .tech-table tbody tr:hover { background-color: #f8fbff !important; }
 
-    /* 4. Functional Badges */
-    .badge-pill-custom {
-        padding: 0.35rem 0.8rem;
-        border-radius: 50px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+    /* 4. Common Components (Merged Duplicates) */
+    .icon-box-sm {
+        width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px;
     }
-    .badge-in { background: #ecfdf5; color: #059669; border: 1px solid #bbf7d0; }
-    .badge-out { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .bg-primary-soft { background: rgba(0, 97, 242, 0.1); }
+    .bg-orange-soft { background: rgba(255, 138, 0, 0.1) !important; }
+    .text-orange { color: var(--orange-main) !important; }
 
+    .sub-image-wrapper {
+        width: 64px; height: 64px; background: #fff; border: 1px solid var(--border-color);
+        border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        padding: 6px; transition: all 0.3s ease;
+    }
+    .sub-image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    .tech-table tr:hover .sub-image-wrapper { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+    /* 5. Badges & Buttons */
+    .brand-badge {
+        background: var(--primary-blue); color: #fff; padding: 5px 12px; border-radius: 6px;
+        font-weight: 800; font-size: 0.8rem; text-transform: uppercase;
+    }
+    .badge-soft-primary { background-color: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+    
+    .btn-primary.rounded-pill {
+        transition: all 0.3s ease; font-size: 0.75rem; text-transform: uppercase;
+        letter-spacing: 0.5px; border: none; background: linear-gradient(135deg, #0061f2 0%, #0045ab 100%);
+    }
+    .btn-primary.rounded-pill:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 97, 242, 0.3); }
+
+    /* 6. Typography */
+    .part-link { color: #1a202c; font-weight: 800; text-decoration: none !important; }
+    .part-link:hover { color: var(--primary-blue); }
+    .model-text { font-weight: 700; color: #1e293b; font-size: 0.95rem; }
+    .trim-box { font-size: 0.85rem; color: #64748b; background: var(--soft-bg); padding: 4px 10px; border-radius: 6px; display: inline-block; }
+    .price-text { font-size: 1.1rem; font-weight: 800; color: #000; }
+
+    /* 7. Fitment Years */
+    .year-range { display: inline-flex; align-items: center; background: #fff; border: 1px solid var(--border-color); padding: 2px; border-radius: 8px; }
+    .year-tag { padding: 2px 8px; font-weight: 700; font-size: 0.8rem; color: #334155; }
+    .year-divider { width: 8px; height: 2px; background: #cbd5e1; margin: 0 2px; }
+
+    /* 8. Responsive Fixes */
     @media (max-width: 991px) {
         .main-image-viewport { height: 350px; }
         .sticky-sidebar { position: relative; top: 0; }
     }
-
-    /* Modern Quantity Selector */
-.qty-container {
-    display: flex;
-    align-items: center;
-    background: #f1f5f9;
-    border-radius: 12px;
-    padding: 4px;
-    width: fit-content;
-    border: 1px solid var(--border-color);
-}
-
-.qty-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    border: none;
-    background: #fff;
-    color: var(--dark-steel);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.qty-btn:hover {
-    background: var(--primary-blue);
-    color: #fff;
-}
-
-.qty-input {
-    width: 50px;
-    text-align: center;
-    border: none;
-    background: transparent;
-    font-weight: 800;
-    color: var(--dark-steel);
-    font-size: 1.1rem;
-    outline: none;
-}
-
-/* Chrome, Safari, Edge, Opera - Remove Arrows */
-.qty-input::-webkit-outer-spin-button,
-.qty-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-/* Image Wrapper - The fix for 'bitter' looks */
-.sub-image-wrapper {
-    width: 64px;
-    height: 64px;
-    background: #f8fafc; /* Soft background so the image pops */
-    border: 1px solid #edf2f7;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
-    transition: all 0.3s ease;
-}
-
-.sub-image-wrapper img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain; /* Prevents stretching */
-    mix-blend-mode: multiply; /* Makes white backgrounds of photos transparent */
-}
-
-/* Row Hover Effect */
-.tech-table tbody tr { transition: background 0.2s; }
-.tech-table tbody tr:hover { background-color: #fbfcfe; }
-.tech-table tbody tr:hover .sub-image-wrapper { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-
-/* Typography & Elements */
-.part-link { color: #1a202c; font-weight: 800; text-decoration: none !important; font-size: 0.95rem; }
-.part-link:hover { color: var(--primary-blue); }
-
-.manufacturer-tag { 
-    background: #f1f5f9; 
-    color: #475569; 
-    padding: 4px 12px; 
-    border-radius: 6px; 
-    font-size: 0.8rem; 
-    font-weight: 700; 
-    display: inline-block; 
-}
-
-.price-text { font-size: 1.1rem; font-weight: 800; color: #000; }
-
-/* Stock Indicator */
-.stock-indicator { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; }
-.stock-indicator .dot { width: 8px; height: 8px; border-radius: 50%; }
-.stock-indicator.is-in { color: #059669; }
-.stock-indicator.is-in .dot { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
-.stock-indicator.is-out { color: #dc2626; }
-.stock-indicator.is-out .dot { background: #ef4444; }
-
-/* Circular View Button */
-.btn-view-circle {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-.btn-view-circle:hover {
-    background: var(--primary-blue);
-    color: #fff;
-    border-color: var(--primary-blue);
-    transform: translateX(3px);
-}
-
-/* Background for headers */
-.bg-soft-blue { background-color: #f0f7ff; }
-
-/* Brand Badge */
-.brand-badge {
-    background: #0061f2;
-    color: #fff;
-    padding: 5px 12px;
-    border-radius: 6px;
-    font-weight: 800;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Model & Trim Typography */
-.model-text { font-weight: 700; color: #1e293b; font-size: 0.95rem; }
-.trim-box { 
-    font-size: 0.85rem; 
-    color: #64748b; 
-    background: #f8fafc; 
-    padding: 4px 10px; 
-    border-radius: 6px;
-    display: inline-block;
-}
-
-/* Year Range Visuals */
-.year-range {
-    display: inline-flex;
-    align-items: center;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    padding: 2px;
-    border-radius: 8px;
-}
-.year-tag {
-    padding: 2px 8px;
-    font-weight: 700;
-    font-size: 0.8rem;
-    color: #334155;
-}
-.year-divider {
-    width: 8px;
-    height: 2px;
-    background: #cbd5e1;
-    margin: 0 2px;
-}
-
-/* Hover Effects */
-.hover-row { transition: all 0.2s; }
-.hover-row:hover { background-color: #f8fbff !important; }
-
-/* Icon Box */
-.icon-box-sm {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-}
-.bg-primary-soft { background: rgba(0, 97, 242, 0.1); }
-
-/* Custom Orange Theme for Alternative Replacements */
-.bg-orange-soft { 
-    background: rgba(255, 138, 0, 0.1) !important; 
-}
-.text-orange { 
-    color: #ff8a00 !important; 
-}
-
-/* Make the icon box perfectly square and centered */
-.icon-box-sm {
-    width: 42px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-}
-
-/* Soft Badge for the right side */
-.badge-soft-primary {
-    background-color: #e0e7ff;
-    color: #4338ca;
-    border: 1px solid #c7d2fe;
-}
-
-/* Table Row Polish */
-.tech-table tbody tr:hover {
-    background-color: #fcfcfc;
-}
-
-.sub-image-wrapper {
-    width: 60px;
-    height: 60px;
-    background: #fff;
-    border: 1px solid #f1f5f9;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px;
-}
 </style>
 @endpush
 
@@ -463,6 +255,7 @@
                             <th class="py-3">Model & Series</th>
                             <th class="py-3">Engine / Trim</th>
                             <th class="py-3 text-center">Production Years</th>
+                            <th class="py-3 text-center">Shop Category</th> {{-- New Column --}}
                         </tr>
                     </thead>
                     <tbody>
@@ -471,16 +264,19 @@
                             $spec = $fitment->specification;
                             $model = $spec?->vehicleModel; 
                             $variant = $spec?->variant;
+                            
+                            // Build the Catalog Link
+                            $catalogUrl = route('parts.catalog', [
+                                'brand' => $model?->brand?->slug ?? $model?->brand?->id,
+                                'model' => $model?->slug ?? $model?->id,
+                                'variant' => $variant?->slug ?? $variant?->id
+                            ]);
                         @endphp
                         <tr class="hover-row"> 
-                            {{-- 1. Brand Name with Badge style --}}
                             <td class="pl-4">
-                                <span class="brand-badge">
-                                    {{ $model?->brand?->brand_name ?? '—' }}
-                                </span>
+                                <span class="brand-badge">{{ $model?->brand?->brand_name ?? '—' }}</span>
                             </td>
 
-                            {{-- 2. Model & Series --}}
                             <td>
                                 <div class="model-text">
                                     {{ $model?->model_name ?? 'Universal Fit' }}
@@ -490,7 +286,6 @@
                                 </div>
                             </td>
 
-                            {{-- 3. Engine / Trim --}}
                             <td>
                                 <div class="trim-box">
                                     <i class="fas fa-microchip mr-2 text-muted small"></i>
@@ -498,7 +293,6 @@
                                 </div>
                             </td>
 
-                            {{-- 4. Production Years --}}
                             <td class="text-center">
                                 @if($model?->production_start_year)
                                     <div class="year-range">
@@ -510,15 +304,20 @@
                                     <span class="text-muted small">Universal</span>
                                 @endif
                             </td>
+
+                            {{-- INTERACTIVE BUTTON --}}
+                            <td class="text-center">
+                                <a href="{{ $catalogUrl }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm font-weight-bold">
+                                    <i class="fas fa-search-plus mr-1"></i> See All Parts
+                                </a>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
-        <p class="mt-3 text-muted small px-2">
-            <i class="fas fa-info-circle mr-1"></i> Please verify your part number matches the identification above to ensure 100% compatibility.
-        </p>
+        {{-- ... footer info ... --}}
     </div>
 </div>
 @endif
