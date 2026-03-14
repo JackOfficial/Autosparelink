@@ -95,7 +95,8 @@
                         @if($parent->photo)
                             <img src="{{ asset('storage/' . $parent->photo) }}"
                                  class="img-thumbnail mr-2 elevation-1"
-                                 style="width:40px; height:40px; object-fit:cover; border-radius: 6px;">
+                                 style="width:40px; height:40px; object-fit:cover; border-radius: 6px;"
+                                 onerror="this.src='https://placehold.co/40?text=No+Img'">
                         @else
                             <div class="mr-2 bg-light border d-flex align-items-center justify-content-center" style="width:40px; height:40px; border-radius: 6px;">
                                 <i class="fas fa-image text-muted fa-xs"></i>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
@@ -47,9 +48,12 @@ class CategoryController extends Controller
         ]);
 
         $photoPath = null;
-        if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('categories', 'public');
-        }
+       if ($request->hasFile('photo')) {
+    // Creates a name like: braking-system-171045600.jpg
+    $filename = Str::slug($request->category_name) . '-' . time() . '.' . $request->file('photo')->extension();
+    
+    $photoPath = $request->file('photo')->storeAs('categories', $filename, 'public');
+    }
 
         Category::create([
             'category_name' => $request->category_name,
@@ -80,29 +84,35 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $category)
-    {
-       $request->validate([
-            'category_name' => 'required|string|max:255',
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'parent_id' => 'nullable|exists:categories,id',
-        ]);
+   public function update(Request $request, Category $category)
+{
+    $request->validate([
+        'category_name' => 'required|string|max:255',
+        'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        'parent_id' => 'nullable|exists:categories,id',
+    ]);
 
-        // Replace old photo if new one uploaded
-        if ($request->hasFile('photo')) {
-            if ($category->photo && Storage::disk('public')->exists($category->photo)) {
-                Storage::disk('public')->delete($category->photo);
-            }
-            $category->photo = $request->file('photo')->store('categories', 'public');
+    $data = $request->only(['category_name', 'parent_id']);
+
+    if ($request->hasFile('photo')) {
+        // 1. Delete old photo if it exists
+        if ($category->photo && Storage::disk('public')->exists($category->photo)) {
+            Storage::disk('public')->delete($category->photo);
         }
 
-        $category->update([
-            'category_name' => $request->category_name,
-            'parent_id' => $request->parent_id,
-        ]);
+        // 2. Generate a clean, SEO-friendly name: "category-name-171045600.webp"
+        $extension = $request->file('photo')->extension();
+        $filename = Str::slug($request->category_name) . '-' . time() . '.' . $extension;
 
-        return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully.');
+        // 3. Store with the custom name
+        $data['photo'] = $request->file('photo')->storeAs('categories', $filename, 'public');
     }
+
+    $category->update($data);
+
+    return redirect()->route('admin.categories.index')
+        ->with('success', 'Category updated successfully.');
+}
 
     /**
      * Remove the specified resource from storage.
