@@ -1,7 +1,7 @@
 <div class="container-fluid px-xl-5 py-4" x-data="{ grid: @entangle('grid') }">
     <style>
         .filter-card { border-radius: 15px; border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
-        .sticky-filter { top: 90px; z-index: 1020; }
+        .sticky-filter { top: 100px; z-index: 1000; }
         .vin-banner { border-radius: 12px; background: linear-gradient(45deg, #1a1a1a, #333); border-left: 5px solid #007bff; }
         .form-control-pill { border-radius: 50px; padding-left: 1.25rem; }
         .btn-toggle.active { background-color: #007bff; color: white; border-color: #007bff; }
