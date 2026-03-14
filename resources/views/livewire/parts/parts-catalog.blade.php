@@ -42,10 +42,11 @@
                      <h5 class="mb-0 font-weight-bold">
     {{-- Always use vinData if available as it contains the string names --}}
     @if($vinData)
-    {{-- We use 'array_filter' to join only the pieces of data that actually exist --}}
     @php
         $info = $vinData['General Information'];
-        $details = array_filter([
+        
+        // 1. Gather all potential details
+        $raw = array_filter([
             $info['Make'] ?? null,
             $info['Model'] ?? null,
             $info['Trim'] ?? null,
@@ -53,16 +54,39 @@
             $info['Transmission'] ?? null,
             $info['Engine type'] ?? null,
         ]);
+
+        // 2. Smart Deduplication Logic
+        $final = [];
+        foreach ($raw as $item) {
+            $item = trim($item);
+            $isRedundant = false;
+
+            foreach ($final as $key => $existing) {
+                // Check if current item is inside existing one (e.g., "Hybrid" in "2.0 Hybrid")
+                if (stripos($existing, $item) !== false) {
+                    $isRedundant = true;
+                    break;
+                }
+                // Check if existing item is inside current one (e.g., "2.0" in "2.0 Hybrid")
+                if (stripos($item, $existing) !== false) {
+                    // Replace the shorter existing one with the more descriptive current one
+                    $final[$key] = $item;
+                    $isRedundant = true;
+                    break;
+                }
+            }
+
+            if (!$isRedundant) {
+                $final[] = $item;
+            }
+        }
     @endphp
 
-    {{ implode(' ', $details) }}
+    {{ implode(' ', array_unique($final)) }}
     <span class="text-white-50">({{ $info['Year'] ?? 'N/A' }})</span>
 
 @elseif($variant)
-    @php 
-        $selectedVariant = \App\Models\Variant::with('vehicleModel.brand')->find($variant); 
-    @endphp
-    
+    @php $selectedVariant = \App\Models\Variant::with('vehicleModel.brand')->find($variant); @endphp
     @if($selectedVariant)
         {{ $selectedVariant->vehicleModel->brand->brand_name }} 
         {{ $selectedVariant->vehicleModel->model_name }}
