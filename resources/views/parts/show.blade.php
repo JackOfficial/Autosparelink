@@ -259,7 +259,7 @@
                                 <td><span class="text-muted">{{ $fitment->variant->name ?? 'Standard' }}</span></td>
                                 <td>
                                     <span class="badge badge-light border font-weight-bold">
-                                        {{ $fitment->vehicleModel->production_start_year }} - {{ $fitment->vehicleModel->production_end_year ?? 'Now' }}
+                                        {{ $fitment->vehicleModel?->production_start_year ?? '—' }} - {{ $fitment->vehicleModel?->production_end_year ?? 'Present' }}
                                     </span>
                                 </td>
                             </tr>
