@@ -41,10 +41,11 @@
 
                      <h5 class="mb-0 font-weight-bold">
     {{-- Always use vinData if available as it contains the string names --}}
-@if($vinData)
+    @if($vinData)
+    {{-- We use 'array_filter' to join only the pieces of data that actually exist --}}
     @php
         $info = $vinData['General Information'];
-        $rawDetails = array_filter([
+        $details = array_filter([
             $info['Make'] ?? null,
             $info['Model'] ?? null,
             $info['Trim'] ?? null,
@@ -52,32 +53,16 @@
             $info['Transmission'] ?? null,
             $info['Engine type'] ?? null,
         ]);
-
-        $finalDetails = [];
-        foreach ($rawDetails as $detail) {
-            $isDuplicate = false;
-            foreach ($finalDetails as $existing) {
-                // If "Hybrid" is already in "2.0 Hybrid", we don't add it again
-                if (stripos($existing, $detail) !== false || stripos($detail, $existing) !== false) {
-                    // Keep the longer string (e.g., "2.0 Hybrid" instead of just "Hybrid")
-                    if (strlen($detail) > strlen($existing)) {
-                        $finalDetails[array_search($existing, $finalDetails)] = $detail;
-                    }
-                    $isDuplicate = true;
-                    break;
-                }
-            }
-            if (!$isDuplicate) {
-                $finalDetails[] = $detail;
-            }
-        }
     @endphp
 
-    {{ implode(' ', $finalDetails) }}
+    {{ implode(' ', $details) }}
     <span class="text-white-50">({{ $info['Year'] ?? 'N/A' }})</span>
+
 @elseif($variant)
-    {{-- Manual DB Fallback --}}
-    @php $selectedVariant = \App\Models\Variant::with('vehicleModel.brand')->find($variant); @endphp
+    @php 
+        $selectedVariant = \App\Models\Variant::with('vehicleModel.brand')->find($variant); 
+    @endphp
+    
     @if($selectedVariant)
         {{ $selectedVariant->vehicleModel->brand->brand_name }} 
         {{ $selectedVariant->vehicleModel->model_name }}
