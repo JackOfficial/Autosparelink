@@ -1,101 +1,165 @@
 <div>
-<div class="col-12 mb-4">
-    <div class="bg-white p-4 rounded shadow-sm border-0" style="border-radius: 20px;">
-        
-        {{-- 1. Brand & Title --}}
-        <div class="mb-3">
-            <span class="text-primary font-weight-bold text-uppercase small tracking-widest">
-                {{ optional($part->partBrand)->name ?? 'Genuine Part' }}
-            </span>
-            <h1 class="h2 font-weight-bold text-dark mt-1 mb-2">{{ $part->part_name }}</h1>
-            <div class="d-flex align-items-center">
-                <span class="text-muted small mr-3">SKU: <strong class="text-dark">{{ $part->part_number ?? 'N/A' }}</strong></span>
-                <span class="text-muted small">Category: <strong class="text-dark">{{ $part->category->name ?? 'Spare Parts' }}</strong></span>
-            </div>
+    {{-- 1. Brand & Title Section --}}
+    <div class="mb-4">
+        <span class="text-primary font-weight-bold text-uppercase small tracking-widest">
+            {{ optional($part->partBrand)->name ?? 'Genuine Part' }}
+        </span>
+        <h1 class="display-6 font-weight-bold text-dark mt-1 mb-2">{{ $part->part_name }}</h1>
+        <div class="d-flex align-items-center flex-wrap">
+            <span class="text-muted small mr-3">SKU: <strong class="text-dark">{{ $part->part_number ?? 'N/A' }}</strong></span>
+            <span class="text-muted small">Category: <strong class="text-dark">{{ $part->category->name ?? 'Spare Parts' }}</strong></span>
         </div>
-
-        <hr class="my-4" style="border-top: 1px dashed #e2e8f0;">
-
-        {{-- 2. Pricing & Availability --}}
-        <div class="row align-items-center mb-4">
-            <div class="col-sm-6">
-                <h2 class="text-primary font-weight-bold mb-0">
-                    {{ number_format($part->price, 0) }} <span class="small">RWF</span>
-                </h2>
-                @if($part->weight)
-                    <p class="text-muted small mb-0 mt-1"><i class="fa fa-weight-hanging mr-1"></i> Shipping Weight: {{ $part->weight }} kg</p>
-                @endif
-            </div>
-            <div class="col-sm-6 text-sm-right mt-3 mt-sm-0">
-                <div class="d-inline-block p-2 px-3 rounded-pill {{ $part->stock_quantity > 0 ? 'bg-light-success text-success' : 'bg-light-warning text-warning' }}" style="font-size: 0.85rem; font-weight: 700;">
-                    <i class="fa fa-circle mr-1" style="font-size: 8px; vertical-align: middle;"></i>
-                    {{ $part->stock_quantity > 0 ? 'In Stock: ' . $part->stock_quantity . ' units' : 'Low Stock' }}
-                </div>
-            </div>
-        </div>
-
-        {{-- 3. Quantity & Actions --}}
-        <div class="card bg-light border-0 p-3 mb-4" style="border-radius: 15px;">
-            <div class="row align-items-center">
-                <div class="col-md-4 mb-3 mb-md-0">
-                    <label class="small font-weight-bold text-muted text-uppercase mb-2 d-block">Quantity</label>
-                    <div class="input-group shadow-sm bg-white rounded-pill overflow-hidden border">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-white border-0 px-3" type="button" wire:click="decrementQty">
-                                <i class="fa fa-minus text-muted small"></i>
-                            </button>
-                        </div>
-                        <input type="number" class="form-control border-0 text-center font-weight-bold bg-white" 
-                               wire:model="quantity" readonly style="box-shadow: none;">
-                        <div class="input-group-append">
-                            <button class="btn btn-white border-0 px-3" type="button" wire:click="incrementQty">
-                                <i class="fa fa-plus text-muted small"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-8 d-flex align-items-end">
-                    <button class="btn btn-primary btn-lg rounded-pill px-4 flex-grow-1 mr-2 shadow-sm font-weight-bold" 
-                            wire:click="addToCart" style="letter-spacing: 0.5px;">
-                        <i class="fa fa-shopping-cart mr-2"></i> Add to Cart
-                    </button>
-                    <button class="btn btn-outline-dark btn-lg rounded-pill shadow-sm" 
-                            wire:click="addToWishlist" title="Save to Wishlist">
-                        <i class="fa fa-heart"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        {{-- 4. Social Sharing (Minimalist) --}}
-        <div class="d-flex align-items-center mb-4">
-            <span class="small text-muted font-weight-bold mr-3">SHARE:</span>
-            <div class="share-links">
-                <a href="https://wa.me/?text={{ urlencode($shareText . ' ' . $shareUrl) }}" target="_blank" class="text-success mx-2"><i class="fab fa-whatsapp fa-lg"></i></a>
-                <a href="https://twitter.com/intent/tweet?text={{ urlencode($shareText) }}&url={{ urlencode($shareUrl) }}" target="_blank" class="text-dark mx-2"><i class="fab fa-twitter fa-lg"></i></a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}" target="_blank" class="text-primary mx-2"><i class="fab fa-facebook-f fa-lg"></i></a>
-            </div>
-        </div>
-
-        {{-- 5. Tabs-style Description --}}
-        <div class="border-top pt-4">
-            <h6 class="text-uppercase font-weight-bold text-dark small mb-3" style="letter-spacing: 1px;">Product Specifications</h6>
-            <div class="text-muted" style="line-height: 1.8; font-size: 0.95rem;">
-                {{ $part->description ?? 'Premium quality replacement part specifically engineered for your vehicle model. Please check the compatibility guide below before purchasing.' }}
-            </div>
-        </div>
-
     </div>
-</div>
 
-{{-- Add this to your push('styles') section for the custom stock badge colors --}}
-<style>
-    .bg-light-success { background-color: #dcfce7 !important; }
-    .bg-light-warning { background-color: #fef3c7 !important; }
-    .tracking-widest { letter-spacing: 2px; }
-    .btn-white { background-color: white; color: #333; }
-    .btn-white:hover { background-color: #f8fafc; }
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-</style>
+    {{-- 2. Pricing & Stock Status --}}
+    <div class="d-flex align-items-baseline justify-content-between mb-4">
+        <div>
+            <h2 class="text-dark font-weight-bold mb-0">
+                {{ number_format($part->price, 0) }} <span class="h5 text-muted">RWF</span>
+            </h2>
+            @if($part->weight)
+                <p class="text-muted small mb-0"><i class="fa fa-weight-hanging mr-1"></i> {{ $part->weight }} kg</p>
+            @endif
+        </div>
+        <div class="text-right">
+            <span class="badge-stock-status {{ $part->stock_quantity > 0 ? 'in-stock' : 'low-stock' }}">
+                <i class="fa fa-circle mr-1 small"></i>
+                {{ $part->stock_quantity > 0 ? $part->stock_quantity . ' Units Available' : 'Low Stock' }}
+            </span>
+        </div>
+    </div>
+
+    <hr class="my-4 border-soft">
+
+    {{-- 3. STRUCTURED ACTION BAR --}}
+    <div class="action-bar-grid">
+        {{-- Custom Quantity Selector --}}
+        <div class="qty-group">
+            <label class="small font-weight-bold text-muted text-uppercase d-block mb-2">Quantity</label>
+            <div class="qty-controls">
+                <button type="button" wire:click="decrementQty" class="qty-btn-minus">
+                    <i class="fa fa-minus"></i>
+                </button>
+                <input type="number" wire:model="quantity" readonly class="qty-val">
+                <button type="button" wire:click="incrementQty" class="qty-btn-plus">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        {{-- Add to Cart & Wishlist --}}
+        <div class="btn-group-actions">
+            <button class="btn btn-primary btn-action shadow-sm" 
+                    wire:click="addToCart" 
+                    {{ $part->stock_quantity <= 0 ? 'disabled' : '' }}>
+                <i class="fa fa-shopping-cart mr-2"></i> 
+                {{ $part->stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
+            </button>
+            <button class="btn btn-wishlist" wire:click="addToWishlist">
+                <i class="fa fa-heart"></i>
+            </button>
+        </div>
+    </div>
+
+    {{-- 4. Shipping Note & Sharing --}}
+    <div class="mt-4 d-flex justify-content-between align-items-center flex-wrap">
+        <div class="text-muted small">
+            <i class="fas fa-truck-moving text-primary mr-2"></i> Delivery within 24-48h in Kigali
+        </div>
+        <div class="share-area">
+            <a href="https://wa.me/?text={{ urlencode($shareText . ' ' . $shareUrl) }}" target="_blank" class="share-icon wa"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" class="share-icon tw"><i class="fab fa-twitter"></i></a>
+        </div>
+    </div>
+
+    {{-- 5. Product Specs --}}
+    <div class="mt-5 border-top pt-4">
+        <h6 class="text-uppercase font-weight-bold text-dark small mb-3">Product Specifications</h6>
+        <p class="text-muted" style="line-height: 1.8;">
+            {{ $part->description ?? 'Premium quality replacement part specifically engineered for your vehicle model.' }}
+        </p>
+    </div>
+
+    {{-- REFINED STYLES --}}
+    <style>
+        .border-soft { border-color: #f1f5f9; }
+        
+        /* The Grid for Actions */
+        .action-bar-grid {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 15px;
+            align-items: end;
+        }
+
+        /* Quantity Styling */
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            height: 54px;
+            overflow: hidden;
+        }
+        .qty-btn-minus, .qty-btn-plus {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            transition: 0.2s;
+        }
+        .qty-btn-minus:hover, .qty-btn-plus:hover { background: #e2e8f0; color: #000; }
+        .qty-val {
+            width: 45px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* Action Buttons */
+        .btn-group-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-action {
+            height: 54px;
+            border-radius: 12px;
+            flex-grow: 1;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-wishlist {
+            height: 54px;
+            width: 54px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #64748b;
+        }
+        .btn-wishlist:hover { border-color: #f43f5e; color: #f43f5e; }
+
+        /* Stock Badge */
+        .badge-stock-status {
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .in-stock { background: #dcfce7; color: #166534; }
+        .low-stock { background: #fee2e2; color: #991b1b; }
+
+        /* Share Icons */
+        .share-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; margin-left: 8px; font-size: 0.9rem; transition: 0.3s; color: #94a3b8; border: 1px solid #e2e8f0; }
+        .share-icon:hover { color: #fff; transform: translateY(-3px); }
+        .share-icon.wa:hover { background: #25D366; border-color: #25D366; }
+
+        @media (max-width: 576px) {
+            .action-bar-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </div>

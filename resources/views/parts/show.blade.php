@@ -70,6 +70,56 @@
         .main-image-viewport { height: 350px; }
         .sticky-sidebar { position: relative; top: 0; }
     }
+
+    /* Modern Quantity Selector */
+.qty-container {
+    display: flex;
+    align-items: center;
+    background: #f1f5f9;
+    border-radius: 12px;
+    padding: 4px;
+    width: fit-content;
+    border: 1px solid var(--border-color);
+}
+
+.qty-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: none;
+    background: #fff;
+    color: var(--dark-steel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.qty-btn:hover {
+    background: var(--primary-blue);
+    color: #fff;
+}
+
+.qty-input {
+    width: 50px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-weight: 800;
+    color: var(--dark-steel);
+    font-size: 1.1rem;
+    outline: none;
+}
+
+/* Chrome, Safari, Edge, Opera - Remove Arrows */
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
 </style>
 @endpush
 
@@ -209,7 +259,7 @@
                                 <td><span class="text-muted">{{ $fitment->variant->name ?? 'Standard' }}</span></td>
                                 <td>
                                     <span class="badge badge-light border font-weight-bold">
-                                        {{ $fitment->vehicleModel?->production_start_year ?? '—' }} - {{ $fitment->vehicleModel->production_end_year ?? 'Now' }}
+                                        {{ $fitment->vehicleModel->production_start_year }} - {{ $fitment->vehicleModel->production_end_year ?? 'Now' }}
                                     </span>
                                 </td>
                             </tr>
