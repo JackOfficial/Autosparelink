@@ -324,9 +324,14 @@
 <div class="row mt-5">
     <div class="col-12">
         <div class="d-flex align-items-center justify-content-between mb-4">
-            <h4 class="section-title mb-0">Alternative Replacements</h4>
+            <div class="d-flex align-items-center">
+                <div class="icon-box-sm bg-orange-soft mr-3">
+                    <i class="fas fa-exchange-alt text-orange"></i>
+                </div>
+                <h4 class="section-title mb-0">Alternative Replacements</h4>
+            </div>
             <span class="badge badge-soft-primary px-3 py-2 rounded-pill small font-weight-bold">
-                {{ $substitutions->count() }} Options Available
+                {{ $substitutions->count() }} Compatible Alternatives
             </span>
         </div>
         
