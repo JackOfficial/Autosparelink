@@ -16,11 +16,12 @@ class CategoryController extends Controller
     {
              // Parent categories only (parent_id IS NULL)
         $categories = Category::with(['children' => function ($query) {
-                $query->orderBy('category_name', 'asc');
-            }])
-            ->whereNull('parent_id')
-            ->orderBy('category_name', 'asc')
-            ->get();
+        $query->orderBy('category_name', 'asc')->withCount('parts'); // Count parts in subcategories
+    }])
+    ->withCount('children')
+    ->whereNull('parent_id')
+    ->orderBy('category_name', 'asc')
+    ->get();
 
         return view('admin.categories.index', compact('categories'));
     }

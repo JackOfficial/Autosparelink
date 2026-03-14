@@ -85,58 +85,67 @@
             </div>
 
             {{-- CHILD CATEGORIES --}}
-            <div class="card-body p-0">
-                @if($parent->children->isNotEmpty())
-                    <table class="table table-striped mb-0">
-                        <thead class="thead-light">
-                            <tr>
-                                <th width="80">Photo</th>
-                                <th>Subcategory Name</th>
-                                <th width="150">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($parent->children as $child)
-                                <tr>
-                                    <td>
-                                        @if($child->photo)
-                                            <img src="{{ asset('storage/' . $child->photo) }}"
-                                                 class="img-thumbnail"
-                                                 style="width:50px; height:50px; object-fit:cover;">
-                                        @else
-                                            <span class="text-muted">—</span>
-                                        @endif
-                                    </td>
-
-                                    <td>{{ $child->category_name }}</td>
-
-                                    <td>
-                                        <a href="{{ route('admin.categories.edit', $child->id) }}"
-                                           class="btn btn-warning btn-sm">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-
-                                        <form action="{{ route('admin.categories.destroy', $child->id) }}"
-                                              method="POST"
-                                              class="d-inline"
-                                              onsubmit="return confirm('Delete this subcategory?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-danger btn-sm">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                @else
-                    <div class="p-3 text-muted text-center">
-                        No subcategories under this category.
-                    </div>
-                @endif
-            </div>
+          {{-- CHILD CATEGORIES --}}
+<div class="card-body p-0">
+    @if($parent->children->isNotEmpty())
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="pl-4" width="80">Photo</th>
+                        <th>Subcategory Name</th>
+                        <th class="text-center">Items</th> {{-- Added Count --}}
+                        <th class="text-right pr-4" width="150">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($parent->children as $child)
+                        <tr>
+                            <td class="pl-4">
+                                @if($child->photo)
+                                    <img src="{{ asset('storage/' . $child->photo) }}"
+                                         class="img-circle elevation-1"
+                                         style="width:35px; height:35px; object-fit:cover;">
+                                @else
+                                    <div class="img-circle bg-secondary d-flex align-items-center justify-content-center" style="width:35px; height:35px;">
+                                        <i class="fas fa-folder fa-xs"></i>
+                                    </div>
+                                @endif
+                            </td>
+                            <td class="align-middle">
+                                <strong>{{ $child->category_name }}</strong>
+                            </td>
+                            <td class="text-center align-middle">
+                                <span class="badge badge-info">{{ $child->parts_count ?? 0 }}</span>
+                            </td>
+                            <td class="text-right pr-4 align-middle">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ route('admin.categories.edit', $child->id) }}"
+                                       class="btn btn-default shadow-sm" title="Edit">
+                                        <i class="fas fa-edit text-primary"></i>
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-default shadow-sm" 
+                                            onclick="if(confirm('Delete subcategory?')) document.getElementById('delete-{{ $child->id }}').submit();"
+                                            title="Delete">
+                                        <i class="fas fa-trash text-danger"></i>
+                                    </button>
+                                </div>
+                                <form id="delete-{{ $child->id }}" action="{{ route('admin.categories.destroy', $child->id) }}" method="POST" class="d-none">
+                                    @csrf @method('DELETE')
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @else
+        <div class="p-4 text-center">
+            <p class="text-muted mb-0"><i class="fas fa-info-circle mr-1"></i> No subcategories available.</p>
+        </div>
+    @endif
+</div>
 
         </div>
     @empty
