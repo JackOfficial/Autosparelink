@@ -47,10 +47,11 @@
                                 @if(!empty($vinData['General Information']['Trim']))
                                     <span class="text-white-50">({{ $vinData['General Information']['Trim'] }})</span>
                                 @endif
-                                {{ $vinData['General Information']['Year'] ?? '' }} 
+                                
                                 {{ $vinData['General Information']['Transmission'] ?? 'Transmission' }}
                                 {{-- {{ $vinData['General Information']['Engine type'] ?? 'Engine Type' }} --}}
                                 {{ $vinData['General Information']['Fuel type'] ?? 'Fuel Type' }}
+                                {{ $vinData['General Information']['Year'] ?? '' }} 
                             @elseif($variant)
                                 @php
                                 // Fetch the Variant directly since $variant is now a Variant ID
