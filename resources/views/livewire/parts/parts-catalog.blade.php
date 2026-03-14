@@ -39,34 +39,19 @@
                             @endif
                         </div>
 
-                        <h5 class="mb-0 font-weight-bold">
-                            @if($vinData)
-                                {{-- Priority 2: Full descriptive name from API when DB match is missing --}}
-                                {{ $vinData['General Information']['Make'] ?? '' }} 
-                                {{ $vinData['General Information']['Model'] ?? '' }}
-                                @if(!empty($vinData['General Information']['Trim']))
-                                    <span class="text-white-50">({{ $vinData['General Information']['Trim'] }})</span>
-                                @endif
-                                {{ $vinData['General Information']['Transmission'] ?? '' }}
-                                {{ $vinData['General Information']['Fuel type'] ?? '' }}
-                                {{ $vinData['General Information']['Year'] ?? '' }} 
-                                ({{ $vinData['General Information']['Engine type'] ?? '' }})
-                            @elseif($variant)
-                                @php
-                                // Fetch the Variant directly since $variant is now a Variant ID
-                                $selectedVariant = $variant ? \App\Models\Variant::find($variant) : null;
-                                @endphp
-                                <span class="mx-2 text-white-50">{{ $selectedVariant->name ?? '' }}</span>
-                            @else
-                             <span class="mx-2 text-white-50">|</span>
-
-                            <span class="font-weight-normal small">
-                               {{ $brand }}  {{ $model }}
-                            </span>    
-                            @endif
-
-                           
-                        </h5>
+                     <h5 class="mb-0 font-weight-bold">
+    {{-- Always use vinData if available as it contains the string names --}}
+    @if($vinData)
+        {{ $vinData['General Information']['Make'] }} 
+        {{ $vinData['General Information']['Model'] }}
+        <span class="text-white-50">({{ $vinData['General Information']['Year'] }})</span>
+    @elseif($variant)
+        {{-- If no VIN, but a variant is selected, fetch the name --}}
+        @php $selectedVariant = \App\Models\Variant::with('vehicleModel.brand')->find($variant); @endphp
+        {{ $selectedVariant->vehicleModel->brand->brand_name }} {{ $selectedVariant->vehicleModel->model_name }}
+        <span class="text-white-50">({{ $selectedVariant->name }})</span>
+    @endif
+</h5>
                         
                         {{-- Show a small message only if the vehicle isn't in your DB --}}
                         @if(!$variant)
@@ -131,6 +116,7 @@
                             <div class="d-flex justify-content-between mb-1 text-muted"><span>Fuel:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Fuel type'] ?? 'N/A' }}</span></div>
                             <div class="d-flex justify-content-between mb-1 text-muted"><span>Transmission:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Transmission'] ?? 'N/A' }}</span></div>
                             <div class="d-flex justify-content-between text-muted"><span>Origin:</span> <span class="text-dark font-weight-bold">{{ $vinData['Manufacturer']['Country'] ?? 'N/A' }}</span></div>
+                            <div class="d-flex justify-content-between mb-1 text-muted"><span>Tank:</span> <span class="text-dark font-weight-bold">{{ $vinData['General Information']['Fuel Capacity'] ?? 'N/A' }}</span></div>
                         </div>
                         @endif
 

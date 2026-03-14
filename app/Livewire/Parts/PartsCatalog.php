@@ -55,25 +55,20 @@ class PartsCatalog extends Component
     /**
      * Handle initial data and URL parameters
      */
-   public function mount($brand = null, $model = null, $variant = null, $vinData = null, $search = null, $category = null)
+public function mount($brand = null, $model = null, $variant = null, $vinData = null, $search = null, $category = null)
 {
-    // 1. Priority 1: VIN data from a search session (Decoded successfully)
     if ($vinData) {
         $this->vinData = $vinData;
         $this->brand = $brand;
         $this->model = $model;
         $this->variant = $variant;
-        // When a VIN is found, we clear text search to focus on the specific car
         $this->search = ''; 
     } else {
-        // 2. Priority 2: Text Search or Manual Filtering
-        $this->brand = request()->query('brand', $brand ?? $this->brand);
-        $this->model = request()->query('model', $model ?? $this->model);
-        $this->variant = request()->query('variant', $variant ?? $this->variant);
-        $this->category = request()->query('category', $category ?? $this->category);
-        
-        // This line ensures the 'search' passed from your controller is used!
-        $this->search = $search ?? request()->query('search_query', request()->query('search', $this->search));
+        // Fallback to URL query params if no direct VIN data was injected
+        $this->brand = $brand ?? request()->query('brand');
+        $this->model = $model ?? request()->query('model');
+        $this->variant = $variant ?? request()->query('variant');
+        $this->search = $search ?? request()->query('search');
     }
 }
 
