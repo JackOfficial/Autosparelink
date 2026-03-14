@@ -42,12 +42,15 @@
                         <h5 class="mb-0 font-weight-bold">
                             @if($vinData)
                                 {{-- Priority 2: Full descriptive name from API when DB match is missing --}}
-                                {{ $vinData['General Information']['Year'] ?? '' }} 
                                 {{ $vinData['General Information']['Make'] ?? '' }} 
                                 {{ $vinData['General Information']['Model'] ?? '' }}
                                 @if(!empty($vinData['General Information']['Trim']))
                                     <span class="text-white-50">({{ $vinData['General Information']['Trim'] }})</span>
                                 @endif
+                                {{ $vinData['General Information']['Year'] ?? '' }} 
+                                {{ $vinData['General Information']['Transmission'] ?? 'Transmission' }}
+                                {{ $vinData['General Information']['Engine type'] ?? 'Engine Type' }}
+                                {{ $vinData['General Information']['Fuel type'] ?? 'Fuel Type' }}
                             @elseif($variant)
                                 @php
                                 // Fetch the Variant directly since $variant is now a Variant ID
