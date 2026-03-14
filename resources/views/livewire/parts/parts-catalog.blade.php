@@ -42,25 +42,33 @@
                      <h5 class="mb-0 font-weight-bold">
     {{-- Always use vinData if available as it contains the string names --}}
     @if($vinData)
+    {{-- We use 'array_filter' to join only the pieces of data that actually exist --}}
+    @php
+        $info = $vinData['General Information'];
+        $details = array_filter([
+            $info['Make'] ?? null,
+            $info['Model'] ?? null,
+            $info['Trim'] ?? null,
+            $info['Body Type'] ?? null,
+            $info['Transmission'] ?? null,
+            $info['Engine type'] ?? null,
+        ]);
+    @endphp
 
-     'General Information' => [
-                'Make'          => $make,
-                'Model'         => $modelName,
-                'Year'          => $year,
-             
-        {{ $vinData['General Information']['Make'] }} 
-        {{ $vinData['General Information']['Model'] }}
-        {{ $vinData['General Information']['Trim'] ? $vinData['General Information']['Trim'] : '' }}
-        {{ $vinData['General Information']['Body Type'] ? $vinData['General Information']['Body Type'] : '' }}
-        {{ $vinData['General Information']['Transmission'] ? $vinData['General Information']['Transmission'] : '' }}
-         {{ $vinData['General Information']['Engine type'] ? $vinData['General Information']['Engine type'] : '' }}
-        <span class="text-white-50">({{ $vinData['General Information']['Year'] }})</span>
-    @elseif($variant)
-        {{-- If no VIN, but a variant is selected, fetch the name --}}
-        @php $selectedVariant = \App\Models\Variant::with('vehicleModel.brand')->find($variant); @endphp
-        {{ $selectedVariant->vehicleModel->brand->brand_name }} {{ $selectedVariant->vehicleModel->model_name }}
+    {{ implode(' ', $details) }}
+    <span class="text-white-50">({{ $info['Year'] ?? 'N/A' }})</span>
+
+@elseif($variant)
+    @php 
+        $selectedVariant = \App\Models\Variant::with('vehicleModel.brand')->find($variant); 
+    @endphp
+    
+    @if($selectedVariant)
+        {{ $selectedVariant->vehicleModel->brand->brand_name }} 
+        {{ $selectedVariant->vehicleModel->model_name }}
         <span class="text-white-50">({{ $selectedVariant->name }})</span>
     @endif
+@endif
 </h5>
                         
                         {{-- Show a small message only if the vehicle isn't in your DB --}}
