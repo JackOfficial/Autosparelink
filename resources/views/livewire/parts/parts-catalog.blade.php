@@ -49,7 +49,7 @@
                                 @endif
                                 {{ $vinData['General Information']['Year'] ?? '' }} 
                                 {{ $vinData['General Information']['Transmission'] ?? 'Transmission' }}
-                                {{ $vinData['General Information']['Engine type'] ?? 'Engine Type' }}
+                                {{-- {{ $vinData['General Information']['Engine type'] ?? 'Engine Type' }} --}}
                                 {{ $vinData['General Information']['Fuel type'] ?? 'Fuel Type' }}
                             @elseif($variant)
                                 @php
