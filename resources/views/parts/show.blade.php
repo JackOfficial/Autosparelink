@@ -206,7 +206,7 @@
                         @foreach($substitutions as $sub)
                         <tr class="align-middle">
                             {{-- Photo & Identification --}}
-                            <td style="min-width: 280px;">
+                            <td style="min-width: 150px;">
                                 <div class="d-flex align-items-center">
                                     <div class="sub-thumbnail mr-3">
                                         <img src="{{ $sub->photos->first() ? asset('storage/' . $sub->photos->first()->file_path) : asset('frontend/img/placeholder.jpg') }}" 
