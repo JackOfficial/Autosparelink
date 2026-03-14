@@ -185,47 +185,75 @@
         </div>
     </div>
 
-    {{-- 4. SUBSTITUTIONS --}}
-    @if($substitutions->isNotEmpty())
-    <div class="row mt-5">
-        <div class="col-12">
-            <h4 class="section-title">Alternative Replacements</h4>
-            <div class="card tech-card overflow-hidden">
-                <div class="table-responsive">
-                    <table class="table tech-table mb-0">
-                        <thead>
-                            <tr>
-                                <th>Manufacturer</th>
-                                <th>Identification</th>
-                                <th>Stock</th>
-                                <th class="text-right">Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($substitutions as $sub)
-                            <tr class="align-middle">
-                                <td><span class="font-weight-bold text-dark">{{ $sub->partBrand->name ?? 'Generic' }}</span></td>
-                                <td>
-                                    <a href="{{ route('spare-parts.show', $sub->sku) }}" class="text-primary font-weight-bold text-decoration-none d-block">
-                                        {{ $sub->part_number }}
-                                    </a>
-                                    <small class="text-muted">{{ $sub->part_name }}</small>
-                                </td>
-                                <td>
-                                    <span class="badge-pill-custom {{ $sub->stock_quantity > 0 ? 'badge-in' : 'badge-out' }}">
-                                        <span class="small">●</span> {{ $sub->stock_quantity > 0 ? 'In Stock' : 'Call for Stock' }}
-                                    </span>
-                                </td>
-                                <td class="text-right"><span class="h6 mb-0 font-weight-bold">{{ number_format($sub->price, 0) }} RWF</span></td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+ {{-- 4. SUBSTITUTIONS --}}
+@if($substitutions->isNotEmpty())
+<div class="row mt-5">
+    <div class="col-12">
+        <h4 class="section-title">Alternative Replacements</h4>
+        <div class="card tech-card overflow-hidden">
+            <div class="table-responsive">
+                <table class="table tech-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Part</th> {{-- Combined Photo & Info --}}
+                            <th>Manufacturer</th>
+                            <th>Stock Status</th>
+                            <th class="text-right">Price</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($substitutions as $sub)
+                        <tr class="align-middle">
+                            {{-- Photo & Identification --}}
+                            <td style="min-width: 280px;">
+                                <div class="d-flex align-items-center">
+                                    <div class="sub-thumbnail mr-3">
+                                        <img src="{{ $sub->photos->first() ? asset('storage/' . $sub->photos->first()->file_path) : asset('frontend/img/placeholder.jpg') }}" 
+                                             alt="{{ $sub->part_name }}" 
+                                             class="img-fluid rounded border">
+                                    </div>
+                                    <div>
+                                        <a href="{{ route('spare-parts.show', $sub->sku) }}" class="text-primary font-weight-bold text-decoration-none d-block">
+                                            {{ $sub->part_number }}
+                                        </a>
+                                        <small class="text-muted d-block">{{ Str::limit($sub->part_name, 30) }}</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            {{-- Manufacturer --}}
+                            <td>
+                                <span class="font-weight-bold text-dark">{{ $sub->partBrand->name ?? 'Generic' }}</span>
+                            </td>
+
+                            {{-- Stock --}}
+                            <td>
+                                <span class="badge-pill-custom {{ $sub->stock_quantity > 0 ? 'badge-in' : 'badge-out' }}">
+                                    <span class="small">●</span> {{ $sub->stock_quantity > 0 ? 'In Stock' : 'Call for Stock' }}
+                                </span>
+                            </td>
+
+                            {{-- Price --}}
+                            <td class="text-right">
+                                <span class="h6 mb-0 font-weight-bold text-dark">{{ number_format($sub->price, 0) }} RWF</span>
+                            </td>
+
+                            {{-- Action Link --}}
+                            <td class="text-center">
+                                <a href="{{ route('spare-parts.show', $sub->sku) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    View <i class="fas fa-arrow-right ml-1" style="font-size: 0.7rem;"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-    @endif
+</div>
+@endif
 
     {{-- 5. COMPATIBILITY --}}
     @if($compatibilities->isNotEmpty())
@@ -240,7 +268,7 @@
                             <tr>
                                 <th>Make</th>
                                 <th>Model & Series</th>
-                                <th>Engine / Trim</th>
+                                <th>Variant / Trim</th>
                                 <th>Years</th>
                             </tr>
                         </thead>
