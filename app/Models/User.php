@@ -102,4 +102,12 @@ public function orders()
     return $this->hasMany(CartItem::class);
 }
 
+public function vehicles() {
+    return $this->hasMany(UserVehicle::class);
+}
+
+public function primaryVehicle() {
+    return $this->hasOne(UserVehicle::class)->where('is_primary', true);
+}
+
 }
