@@ -26,9 +26,9 @@ class PaymentController extends Controller
     public function process(Order $order)
 {
     // Safety check: Ensure the person trying to pay is the owner of the order
-    if ($order->user_id !== auth()->id()) {
-        abort(403, 'Unauthorized action.');
-    }
+    // if ($order->user_id !== auth()->id()) {
+    //     abort(403, 'Unauthorized action.');
+    // }
 
     // Return a view that will auto-submit a POST form to our initialize route
     return view('payment.process', [

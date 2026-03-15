@@ -120,7 +120,7 @@ class Checkout extends Component
         }
     }
 
-    public function requestCallback()
+    public function requestCallback() 
     {
         // Simple callback logic for the button in your blade
         $this->dispatch('notify', message: 'We have received your request. A representative will call you shortly.');
