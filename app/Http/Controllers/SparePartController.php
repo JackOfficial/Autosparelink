@@ -26,7 +26,7 @@ public function catalog($brand = null, $model = null, $variant = null)
         'brandId'     => $brandId,
         'modelId'     => $modelId,
         'variantId'   => $variantId,
-        'vehicleData' => $modelId ? \App\Models\VehicleModel::with('brand')->find($modelId) : null,
+        'vehicleData' => null,
         'search'      => request('search'),
     ]);
 }
