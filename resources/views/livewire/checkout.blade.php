@@ -11,7 +11,7 @@
             <div class="card-body">
                 <i class="fa fa-shopping-cart fa-4x text-light mb-3"></i>
                 <h4 class="text-muted">Your cart is empty!</h4>
-                <a href="{{ route('parts.index') }}" class="btn btn-primary rounded-pill px-4 mt-3">Browse Parts</a>
+                <a href="/spare-parts" class="btn btn-primary rounded-pill px-4 mt-3">Browse Parts</a>
             </div>
         </div>
     @else
