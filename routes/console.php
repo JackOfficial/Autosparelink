@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Run the cleanup every day at midnight
 Schedule::command('asl:cleanup-orders')->daily();
+
+// Check stock every morning at 8:00 AM
+Schedule::command('app:check-low-stock')->dailyAt('08:00');

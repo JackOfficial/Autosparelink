@@ -9,6 +9,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\PaymentLog;
 use App\Models\Order; // Added Order model
 use App\Models\Part; // Added Part/Part model
+use App\Mail\OrderPaidInvoice;
+use Illuminate\Support\Facades\Mail;
 
 class PaymentController extends Controller
 {
@@ -169,6 +171,9 @@ private function finalizeOrder($txRef)
             ['order_id' => $order->id],
             ['status' => 'pending']
         );
+
+         // Inside finalizeOrder after setting order to completed
+        Mail::to($order->user->email)->send(new OrderPaidInvoice($order));
     }
 }
 
