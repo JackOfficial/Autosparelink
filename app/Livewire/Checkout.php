@@ -22,7 +22,7 @@ class Checkout extends Component
         if (!Auth::check()) return;
 
         // Load user's addresses - ensure the relationship exists on User model
-        $this->addresses = Auth::user()->address()->get() ?? collect();
+        $this->addresses = Auth::user()->addresses()->get() ?? collect();
 
         // Auto toggle new address if none exist
         $this->use_new_address = $this->addresses->isEmpty();
@@ -142,7 +142,7 @@ class Checkout extends Component
         $total = Cart::instance('default')->subtotal();
         
         // Refresh addresses list
-        $this->addresses = Auth::check() ? Auth::user()->address()->get() : collect();
+        $this->addresses = Auth::check() ? Auth::user()->addresses()->get() : collect();
 
         return view('livewire.checkout', [
             'cartItems' => $cartItems,

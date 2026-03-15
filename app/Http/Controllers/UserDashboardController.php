@@ -60,7 +60,7 @@ class UserDashboardController extends Controller
     public function editProfile()
     {
         $user = Auth::user();
-        $address = $user->address; 
+        $address = $user->addresses; 
 
         return view('dashboard.edit-profile', compact('user', 'address'));
     }
@@ -82,7 +82,7 @@ class UserDashboardController extends Controller
 
         $user->update($request->only('name', 'email'));
 
-        $user->address()->updateOrCreate(
+        $user->addresses()->updateOrCreate(
             ['user_id' => $user->id],
             $request->only('phone', 'street_address', 'city')
         );
