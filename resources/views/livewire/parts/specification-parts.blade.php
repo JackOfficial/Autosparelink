@@ -72,15 +72,6 @@
                 <div class="card filter-card mb-4">
                     <div class="card-body p-3">
                         <h6 class="font-weight-bold mb-3 text-dark px-2">Refine Search</h6>
-                        
-                        <div class="form-group px-2">
-                            <label class="small font-weight-bold text-muted text-uppercase">Condition</label>
-                            <select wire:model.live="condition" class="form-control form-control-sm custom-select">
-                                <option value="">All Conditions</option>
-                                <option value="new">Brand New</option>
-                                <option value="used">Used / Refurbished</option>
-                            </select>
-                        </div>
 
                         <div class="form-group px-2 mt-4">
                             <label class="small font-weight-bold text-muted text-uppercase">Max Price (RWF)</label>

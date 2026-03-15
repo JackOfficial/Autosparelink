@@ -17,7 +17,7 @@ class SpecificationParts extends Component
     public $category_id = null;
     public $inStockOnly = false;
     
-    public $condition = '';      
+    // Condition removed as per request
     public $maxPrice = 2000000;  
     public $sortBy = 'latest';   
     
@@ -26,14 +26,13 @@ class SpecificationParts extends Component
     protected $queryString = [
         'search' => ['except' => ''],
         'category_id' => ['except' => null],
-        'condition' => ['except' => ''],
         'sortBy' => ['except' => 'latest'],
     ];
 
+    // Reset pagination when any filter property is updated
     public function updatedSearch() { $this->resetPage(); }
     public function updatedCategoryId() { $this->resetPage(); }
     public function updatedInStockOnly() { $this->resetPage(); }
-    public function updatedCondition() { $this->resetPage(); }
     public function updatedMaxPrice() { $this->resetPage(); }
     public function updatedSortBy() { $this->resetPage(); }
 
@@ -44,25 +43,25 @@ class SpecificationParts extends Component
 
     public function resetFilters()
     {
-        $this->reset(['search', 'category_id', 'inStockOnly', 'condition', 'maxPrice', 'sortBy']);
+        // Removed condition from reset list
+        $this->reset(['search', 'category_id', 'inStockOnly', 'maxPrice', 'sortBy']);
     }
 
     public function render()
     {
+        // 1. Fetch Specification Details
         $specification = Specification::with(['vehicleModel.brand', 'destinations'])
             ->findOrFail($this->specificationId);
 
-        // 1. Get IDs of all categories that actually contain parts for this vehicle
-        // This prevents showing empty categories.
+        // 2. Identify Active Categories (Categories that have parts for this vehicle)
         $activeCategoryIds = Category::whereHas('parts', function($q) {
             $q->whereHas('specifications', function($s) {
                 $s->where('specifications.id', $this->specificationId);
             });
         })->pluck('id')->toArray();
 
-        // 2. Fetch Categories for Sidebar
+        // 3. Fetch Sidebar Categories (Dynamic Drill-down)
         $categories = Category::query()
-            // Handle Top-level (null or 0) vs Sub-category drill-down
             ->where(function($q) {
                 if (is_null($this->category_id)) {
                     $q->whereNull('parent_id')->orWhere('parent_id', 0);
@@ -70,7 +69,6 @@ class SpecificationParts extends Component
                     $q->where('parent_id', $this->category_id);
                 }
             })
-            // SHOW category if it has parts OR if any of its children have parts
             ->where(function($q) use ($activeCategoryIds) {
                 $q->whereIn('id', $activeCategoryIds)
                   ->orWhereHas('children', function($child) use ($activeCategoryIds) {
@@ -85,18 +83,17 @@ class SpecificationParts extends Component
             ->withCount('children')
             ->get();
 
-        // 3. Build the Parts Query
+        // 4. Build the Parts Query
         $partsQuery = Part::whereHas('specifications', function($q) {
             $q->where('specifications.id', $this->specificationId);
         })
         ->when($this->category_id, function($q) {
-            // Recursive: Show parts in selected category AND its children
-            $categoryAndChildren = Category::where('id', $this->category_id)
+            // Recursive: Show parts in the selected category AND its subcategories
+            $categoryIds = Category::where('id', $this->category_id)
                 ->orWhere('parent_id', $this->category_id)
                 ->pluck('id');
-            $q->whereIn('category_id', $categoryAndChildren);
+            $q->whereIn('category_id', $categoryIds);
         })
-        ->when($this->condition, fn($q) => $q->where('condition', $this->condition))
         ->when($this->inStockOnly, fn($q) => $q->where('stock', '>', 0))
         ->where(function($q) {
             $q->where('part_name', 'like', '%' . $this->search . '%')
@@ -107,10 +104,17 @@ class SpecificationParts extends Component
             $partsQuery->where('price', '<=', $this->maxPrice);
         }
 
+        // 5. Apply Sorting
         switch ($this->sortBy) {
-            case 'price_low': $partsQuery->orderBy('price', 'asc'); break;
-            case 'price_high': $partsQuery->orderBy('price', 'desc'); break;
-            default: $partsQuery->latest(); break;
+            case 'price_low': 
+                $partsQuery->orderBy('price', 'asc'); 
+                break;
+            case 'price_high': 
+                $partsQuery->orderBy('price', 'desc'); 
+                break;
+            default: 
+                $partsQuery->latest(); 
+                break;
         }
 
         return view('livewire.parts.specification-parts', [
