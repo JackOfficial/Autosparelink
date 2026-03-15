@@ -61,6 +61,4 @@
     'search'  => $search ?? null,
 ])
 
-
-
 @endsection

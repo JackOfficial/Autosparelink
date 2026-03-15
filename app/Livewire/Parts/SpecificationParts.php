@@ -27,6 +27,11 @@ class SpecificationParts extends Component
         'sortBy' => ['except' => 'latest'],
     ];
 
+     public function placeholder()
+    {
+        return view('livewire.parts.skeleton');
+    }
+    
     public function updatedSearch() { $this->resetPage(); }
     public function updatedCategoryId() { $this->resetPage(); }
     public function updatedInStockOnly() { $this->resetPage(); }
