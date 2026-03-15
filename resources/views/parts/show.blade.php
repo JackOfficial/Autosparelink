@@ -262,7 +262,8 @@
                         @foreach($compatibilities as $fitment)
                       @php
     $spec = $fitment->specification;
-    $model = $spec?->vehicleModel; 
+    $model = $spec?->vehicleModel;
+    dd($model) 
     $variant = $spec?->variant;
     
     // 1. Use keys that match your Route placeholders exactly to avoid Query Strings (?)
