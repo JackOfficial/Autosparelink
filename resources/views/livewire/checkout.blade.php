@@ -45,16 +45,20 @@
                             @if($use_new_address || empty($addresses))
                                 <div class="row animate__animated animate__fadeIn">
                                     <div class="col-md-6 mb-3">
-                                        <input type="text" class="form-control border-light bg-light @error('new_address.full_name') is-invalid @enderror" placeholder="Recipient Name" wire:model="new_address.full_name">
+                                        <input type="text" class="form-control border-light bg-light" placeholder="Recipient Name" wire:model="new_address.full_name">
+                                        @error('new_address.full_name') <span class="text-danger small">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <input type="text" class="form-control border-light bg-light @error('new_address.phone') is-invalid @enderror" placeholder="Phone Number" wire:model="new_address.phone">
+                                        <input type="text" class="form-control border-light bg-light" placeholder="Phone Number" wire:model="new_address.phone">
+                                        @error('new_address.phone') <span class="text-danger small">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-12 mb-3">
-                                        <input type="text" class="form-control border-light bg-light @error('new_address.street_address') is-invalid @enderror" placeholder="Street Address / House No." wire:model="new_address.street_address">
+                                        <input type="text" class="form-control border-light bg-light" placeholder="Street Address / House No." wire:model="new_address.street_address">
+                                        @error('new_address.street_address') <span class="text-danger small">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <input type="text" class="form-control border-light bg-light @error('new_address.city') is-invalid @enderror" placeholder="City" wire:model="new_address.city">
+                                        <input type="text" class="form-control border-light bg-light" placeholder="City" wire:model="new_address.city">
+                                        @error('new_address.city') <span class="text-danger small">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <input type="text" class="form-control border-light bg-light" placeholder="Postal Code (Optional)" wire:model="new_address.postal_code">
@@ -69,32 +73,31 @@
                     </div>
                 </div>
 
-                {{-- Payment Section (Unified with Livewire) --}}
+                {{-- Payment Section --}}
                 <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px; border-left: 5px solid #ffcc00 !important;">
                     <div class="card-body p-4">
                         <h5 class="font-weight-bold mb-3"><i class="fa fa-credit-card text-warning mr-2"></i>Payment Method</h5>
                         
-                        <div class="p-3 bg-light rounded-lg border mb-4">
+                        <div class="p-3 bg-light rounded-lg border mb-3">
                             <div class="d-flex align-items-center mb-2">
                                 <img src="{{ asset('images/momo.jpg')}}" style="width: 35px;" class="mr-2">
                                 <h6 class="mb-0 font-weight-bold">Mobile Money & Cards</h6>
                             </div>
-                            <p class="small text-muted mb-0">Securely pay using MTN MoMo, Airtel Money, or Cards via Flutterwave.</p>
+                            <p class="small text-muted mb-0">Securely pay via Flutterwave (MoMo & Cards).</p>
                         </div>
 
                         @if(Auth::check())
+                            {{-- IMPORTANT: Use wire:click instead of <form> to handle order creation first --}}
                             <button wire:click="placeOrder" wire:loading.attr="disabled" class="btn btn-primary btn-lg btn-block rounded-pill shadow-sm font-weight-bold py-3">
                                 <span wire:loading.remove>
-                                    <i class="fa fa-lock mr-2"></i>Securely Pay {{ $total }} RWF
+                                    <i class="fa fa-lock mr-2"></i>Pay {{ $total }} RWF Now
                                 </span>
                                 <span wire:loading>
-                                    <i class="fa fa-spinner fa-spin mr-2"></i>Creating Order...
+                                    <i class="fa fa-spinner fa-spin mr-2"></i>Processing Order...
                                 </span>
                             </button>
                         @else
-                            <button class="btn btn-secondary btn-lg btn-block rounded-pill disabled" disabled>
-                                Login to Pay
-                            </button>
+                            <button class="btn btn-secondary btn-lg btn-block rounded-pill disabled" disabled>Login to Pay</button>
                         @endif
                     </div>
                 </div>
@@ -104,10 +107,10 @@
                         <i class="fa fa-phone-alt mr-2"></i>Request a Callback
                     </button>
                 </div>
-                <p class="small text-muted mt-3"><i class="fa fa-shield-alt mr-1"></i> Your data is secure. A representative will contact you to confirm delivery.</p>
+                <p class="small text-muted mt-3"><i class="fa fa-shield-alt mr-1"></i> Your data is secure. A representative will contact you shortly.</p>
             </div>
 
-            {{-- Summary Sidebar --}}
+            {{-- Order Summary Side Bar --}}
             <div class="col-lg-5 mt-4 mt-lg-0">
                 <div class="sticky-top" style="top: 20px;">
                     <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">

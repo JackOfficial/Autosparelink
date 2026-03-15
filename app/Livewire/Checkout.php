@@ -6,8 +6,6 @@ use Livewire\Component;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Payment;
-use App\Models\Shipping;
 use App\Models\Address;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,8 +21,8 @@ class Checkout extends Component
     {
         if (!Auth::check()) return;
 
-        // Load user's addresses
-        $this->addresses = Auth::user()->addresses ?? collect();
+        // Load user's addresses - ensure the relationship exists on User model
+        $this->addresses = Auth::user()->address()->get() ?? collect();
 
         // Auto toggle new address if none exist
         $this->use_new_address = $this->addresses->isEmpty();
@@ -55,20 +53,18 @@ class Checkout extends Component
             return;
         }
 
-        // Validate new address if selected
+        // 1. Validation Logic
         if ($this->use_new_address) {
             $this->validate([
                 'new_address.full_name' => 'required|string|max:255',
                 'new_address.phone' => 'required|string|max:20',
                 'new_address.street_address' => 'required|string|max:255',
                 'new_address.city' => 'required|string|max:100',
-                'new_address.state' => 'nullable|string|max:100',
-                'new_address.postal_code' => 'nullable|string|max:20',
                 'new_address.country' => 'required|string|max:100',
             ]);
         } else {
             if (!$this->address_id) {
-                $this->dispatch('notify', message: 'Please select an address.');
+                $this->dispatch('notify', message: 'Please select a delivery address.');
                 return;
             }
         }
@@ -76,60 +72,62 @@ class Checkout extends Component
         DB::beginTransaction();
 
         try {
-        // 1. Save address
-        $address_id = $this->address_id;
-        if ($this->use_new_address) {
-            $address = Address::create(array_merge($this->new_address, [
+            // 2. Process Address
+            $final_address_id = $this->address_id;
+            if ($this->use_new_address) {
+                $address = Address::create(array_merge($this->new_address, [
+                    'user_id' => Auth::id(),
+                ]));
+                $final_address_id = $address->id;
+            }
+
+            // 3. Create the Order
+            // Remove commas from subtotal string to ensure it's a valid float
+            $subtotal = str_replace(',', '', Cart::instance('default')->subtotal());
+            
+            $order = Order::create([
                 'user_id' => Auth::id(),
-            ]));
-            $address_id = $address->id;
-        }
-
-        // 2. Create the Order
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'address_id' => $address_id,
-            'total_amount' => (float) str_replace(',', '', Cart::instance('default')->subtotal()),
-            'status' => 'pending',
-        ]);
-
-        // 3. Create Order Items
-        foreach ($cartItems as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'part_id' => $item->id,
-                'quantity' => $item->qty,
-                'unit_price' => $item->price,
+                'address_id' => $final_address_id,
+                'total_amount' => (float) $subtotal,
+                'status' => 'pending',
             ]);
+
+            // 4. Create Order Items
+            foreach ($cartItems as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'part_id' => $item->id,
+                    'quantity' => $item->qty,
+                    'unit_price' => $item->price,
+                ]);
+            }
+
+            DB::commit();
+
+            // 5. Clear the Cart
+            Cart::instance('default')->destroy();
+
+            /**
+             * FIX: Redirect to a GET route.
+             * Instead of posting directly to initialize, we redirect to a 'processing' 
+             * page that will then submit the POST form to Flutterwave/Payment Gateway.
+             */
+            return redirect()->route('payment.process', ['order' => $order->id]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('notify', message: 'Something went wrong: ' . $e->getMessage());
         }
-
-        DB::commit();
-
-        // 4. Instead of showing the order, redirect to our Payment Initialization
-        // We pass the order ID so the controller knows what we are paying for
-        return redirect()->route('payment.initialize', [
-            'order_id' => $order->id,
-            'amount' => $order->total_amount
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        $this->dispatch('notify', message: 'Error: ' . $e->getMessage());
     }
-    
+
+    public function requestCallback()
+    {
+        // Simple callback logic for the button in your blade
+        $this->dispatch('notify', message: 'We have received your request. A representative will call you shortly.');
     }
 
     public function render()
     {
-        if (!Auth::check()) {
-            return view('livewire.checkout', [
-                'cartItems' => [],
-                'total' => 0,
-                'addresses' => collect(),
-            ]);
-        }
-
-        // Convert cart items to plain array for Livewire
         $cartItems = Cart::instance('default')->content()->map(function ($item) {
             return [
                 'rowId' => $item->rowId,
@@ -137,14 +135,19 @@ class Checkout extends Component
                 'name' => $item->name,
                 'qty' => $item->qty,
                 'price' => $item->price,
-                'weight' => $item->weight,
                 'options' => $item->options,
             ];
         })->toArray();
 
         $total = Cart::instance('default')->subtotal();
-        $addresses = Auth::user()->addresses ?? collect();
+        
+        // Refresh addresses list
+        $this->addresses = Auth::check() ? Auth::user()->address()->get() : collect();
 
-        return view('livewire.checkout', compact('cartItems', 'total', 'addresses'));
+        return view('livewire.checkout', [
+            'cartItems' => $cartItems,
+            'total' => $total,
+            'addresses' => $this->addresses
+        ]);
     }
 }

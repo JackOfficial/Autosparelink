@@ -165,6 +165,8 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::resource('orders', OrderController::class)->middleware('auth');
 
+Route::get('/payment/process/{order}', [PaymentController::class, 'process'])->name('payment.process');
+
 Route::middleware(['auth'])->group(function () {
     
     // --- Dashboard & Profile Management ---
