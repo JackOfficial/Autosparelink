@@ -14,38 +14,45 @@ class UserDashboardController extends Controller
     /**
      * Main Dashboard View
      */
-    public function index()
-    {
-        $user = Auth::user();
+ public function index()
+{
+    $user = Auth::user();
 
-        // 1. Fetch Orders with relationships for the UI
-        $allOrders = $user->orders()
-            ->with(['orderItems.part', 'payment', 'shipping', 'address'])
-            ->latest()
-            ->get();
+    // 1. Fetch Orders with relationships for the UI
+    $allOrders = $user->orders()
+        ->with(['orderItems.part', 'payment', 'shipping', 'address'])
+        ->latest()
+        ->get();
 
-        // 2. Dashboard Statistics
-        $stats = [
-            'total_orders'  => $allOrders->count(),
-            'active_orders' => $allOrders->whereIn('status', ['pending', 'shipped', 'processing'])->count(),
-            'total_spent'   => $allOrders->where('status', 'completed')->sum('total_amount'),
-            'last_order'    => $allOrders->first(),
-        ];
+    // 2. Fetch Tickets (The missing part!)
+    // We fetch the latest 5 to show a "Recent Tickets" table on the dashboard
+    $tickets = $user->tickets()->latest()->take(5)->get();
 
-        // 3. Cart & Wishlist Content
-        $wishlistItems = Cart::instance('wishlist')->content();
-        $cartItems     = Cart::instance('default')->content();
-        $cartTotal     = Cart::instance('default')->subtotal();
+    // 3. Dashboard Statistics
+    $stats = [
+        'total_orders'  => $allOrders->count(),
+        'active_orders' => $allOrders->whereIn('status', ['pending', 'shipped', 'processing'])->count(),
+        'total_spent'   => $allOrders->where('status', 'completed')->sum('total_amount'),
+        'last_order'    => $allOrders->first(),
+        'open_tickets'  => $user->tickets()->where('status', 'open')->count(), // For the UI badge
+    ];
 
-        return view('dashboard.index', compact(
-            'user', 
-            'allOrders', 
-            'stats', 
-            'wishlistItems', 
-            'cartItems', 
-            'cartTotal'
-        ));
-    }
+    // 4. Cart & Wishlist Content
+    $wishlistItems = Cart::instance('wishlist')->content();
+    $cartItems     = Cart::instance('default')->content();
+    $cartTotal     = Cart::instance('default')->subtotal();
+
+    // 5. Return View with 'tickets' added to compact
+    return view('dashboard.index', compact(
+        'user', 
+        'allOrders', 
+        'stats', 
+        'wishlistItems', 
+        'cartItems', 
+        'cartTotal',
+        'tickets' // Variable now passed to Blade
+    ));
+}
 
     /**
      * Show Profile Edit Form
