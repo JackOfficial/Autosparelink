@@ -110,4 +110,9 @@ public function primaryVehicle() {
     return $this->hasOne(UserVehicle::class)->where('is_primary', true);
 }
 
+public function tickets()
+{
+    return $this->hasMany(Ticket::class);
+}
+
 }

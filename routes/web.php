@@ -62,6 +62,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PartCatalogController;
 use App\Http\Controllers\PaymentController as FlutterwavePaymentController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\VinController;
 use App\Http\Controllers\WishlistController;
@@ -164,7 +165,27 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::resource('orders', OrderController::class)->middleware('auth');
 
-Route::get('/user-dashboard', [UserDashboardController::class, 'index'])->name('dashboard.index')->middleware('auth');
+Route::middleware(['auth'])->group(function () {
+    
+    // --- Dashboard & Profile Management ---
+    Route::controller(UserDashboardController::class)->group(function () {
+        Route::get('/user-dashboard', 'index')->name('dashboard.index');
+        Route::get('/profile/edit', 'editProfile')->name('profile.edit');
+        Route::patch('/profile/update', 'updateProfile')->name('profile.update');
+        Route::put('/profile/password', 'updatePassword')->name('profile.password');
+        Route::post('/garage/update', 'updateGarage')->name('garage.update');
+        Route::post('/notifications/read-all', 'markAllRead')->name('notifications.readAll');
+    });
+
+    // --- Support Ticket System ---
+    // URL: /tickets/... | Name: tickets....
+    Route::prefix('tickets')->name('tickets.')->controller(TicketController::class)->group(function () {
+        Route::get('/', 'index')->name('index');           // View all tickets
+        Route::post('/store', 'store')->name('store');     // Modal submission
+        Route::get('/{ticket}', 'show')->name('show');     // View single ticket conversation
+    });
+
+});
 
 /////////////////
 //Route::get('/brand/{brand}/models', [BrandController::class, 'models'])->name('brand.models');
