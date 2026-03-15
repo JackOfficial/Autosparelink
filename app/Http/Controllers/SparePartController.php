@@ -16,18 +16,18 @@ class SparePartController extends Controller
        return view('parts.index');
     }
 
-public function catalog($brandSlug = null, $modelSlug = null, $variantSlug = null)
+public function catalog($brand = null, $model = null, $variant = null)
 {
-    // Find IDs based on the slugs we just passed from the Blade link
-    $brandId   = $brandSlug   ? \App\Models\Brand::where('slug', $brandSlug)->value('id') : null;
-    $modelId   = $modelSlug   ? \App\Models\VehicleModel::where('slug', $modelSlug)->value('id') : null;
-    $variantId = $variantSlug ? \App\Models\Variant::where('slug', $variantSlug)->value('id') : null;
+    // If $brand is a number, use it. If it's a string, find the ID by slug.
+    $brandId = is_numeric($brand) ? $brand : Brand::where('slug', $brand)->value('id');
+    $modelId = is_numeric($model) ? $model : VehicleModel::where('slug', $model)->value('id');
+    $variantId = is_numeric($variant) ? $variant : Variant::where('slug', $variant)->value('id');
 
     return view('parts.index', [
         'brandId'     => $brandId,
         'modelId'     => $modelId,
         'variantId'   => $variantId,
-        'vehicleData' => $modelId ? \App\Models\VehicleModel::with('brand')->find($modelId) : null,
+        'vehicleData' => $modelId ? VehicleModel::with('brand')->find($modelId) : null,
         'search'      => request('search'),
     ]);
 }
