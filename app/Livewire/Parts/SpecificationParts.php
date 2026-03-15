@@ -16,7 +16,6 @@ class SpecificationParts extends Component
     public $search = '';
     public $category_id = null;
     public $inStockOnly = false;
-    
     public $maxPrice = 2000000;  
     public $sortBy = 'latest';   
     
@@ -46,16 +45,15 @@ class SpecificationParts extends Component
 
     public function render()
     {
-        // 1. Fetch Specification Details
         $specification = Specification::with(['vehicleModel.brand', 'destinations'])
             ->findOrFail($this->specificationId);
 
-        // 2. Identify Categories that have parts for this vehicle
-        $activeCategoryIds = Category::whereHas('parts', function($q) {
-            $q->forSpecification($this->specificationId); // Using your model scope
+        // 1. Fetch active categories (Direct check against specifications relationship)
+        $activeCategoryIds = Category::whereHas('parts.specifications', function($q) {
+            $q->where('specifications.id', $this->specificationId);
         })->pluck('id')->toArray();
 
-        // 3. Fetch Sidebar Categories (Dynamic Drill-down)
+        // 2. Fetch Sidebar Categories
         $categories = Category::query()
             ->where(function($q) {
                 if (is_null($this->category_id)) {
@@ -71,47 +69,43 @@ class SpecificationParts extends Component
                   });
             })
             ->withCount(['parts' => function($q) {
-                $q->forSpecification($this->specificationId);
+                $q->whereHas('specifications', function($s) {
+                    $s->where('specifications.id', $this->specificationId);
+                });
             }])
             ->withCount('children')
             ->get();
 
-        // 4. Build the Parts Query
-        $partsQuery = Part::query()
-            ->forSpecification($this->specificationId) // Model Scope
-            ->with(['partBrand', 'photos', 'category']) // Eager Load
-            ->where('status', 'active') // Ensure parts are active
-            ->when($this->category_id, function($q) {
-                // Recursive: Show parts in the selected category AND its subcategories
-                $categoryIds = Category::where('id', $this->category_id)
-                    ->orWhere('parent_id', $this->category_id)
-                    ->pluck('id');
-                $q->whereIn('category_id', $categoryIds);
-            })
-            ->when($this->inStockOnly, function($q) {
-                $q->where('stock_quantity', '>', 0); // Corrected to match your Model
-            })
-            ->where(function($q) {
-                $q->where('part_name', 'like', '%' . $this->search . '%')
-                  ->orWhere('part_number', 'like', '%' . $this->search . '%')
-                  ->orWhere('sku', 'like', '%' . $this->search . '%');
-            });
+        // 3. Build the Parts Query (Direct Relationship Query)
+        $partsQuery = Part::whereHas('specifications', function($q) {
+            $q->where('specifications.id', $this->specificationId);
+        })
+        ->with(['partBrand', 'photos']) 
+        ->when($this->category_id, function($q) {
+            $categoryIds = Category::where('id', $this->category_id)
+                ->orWhere('parent_id', $this->category_id)
+                ->pluck('id');
+            $q->whereIn('category_id', $categoryIds);
+        })
+        ->when($this->inStockOnly, function($q) {
+            $q->where('stock_quantity', '>', 0);
+        })
+        ->where(function($q) {
+            $searchTerm = '%' . $this->search . '%';
+            $q->where('part_name', 'like', $searchTerm)
+              ->orWhere('part_number', 'like', $searchTerm)
+              ->orWhere('sku', 'like', $searchTerm);
+        });
 
+        // 4. Price and Sorting
         if ($this->maxPrice) {
             $partsQuery->where('price', '<=', $this->maxPrice);
         }
 
-        // 5. Apply Sorting
         switch ($this->sortBy) {
-            case 'price_low': 
-                $partsQuery->orderBy('price', 'asc'); 
-                break;
-            case 'price_high': 
-                $partsQuery->orderBy('price', 'desc'); 
-                break;
-            default: 
-                $partsQuery->latest(); 
-                break;
+            case 'price_low': $partsQuery->orderBy('price', 'asc'); break;
+            case 'price_high': $partsQuery->orderBy('price', 'desc'); break;
+            default: $partsQuery->latest(); break;
         }
 
         return view('livewire.parts.specification-parts', [
