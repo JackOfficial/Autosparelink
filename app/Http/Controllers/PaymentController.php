@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\PaymentLog;
+use App\Models\Order; // Added Order model
+use App\Models\Part; // Added Part/Part model
 
 class PaymentController extends Controller
 {
@@ -20,50 +22,60 @@ class PaymentController extends Controller
     /**
      * Start the payment process and log the attempt
      */
-    public function initialize(Request $request)
-    {
-        $request->validate(['amount' => 'required|numeric']);
-        
-        $reference = 'ASL-' . Str::upper(Str::random(10)); 
+  public function initialize(Request $request)
+{
+    // 1. Ensure order_id and amount are present
+    $request->validate([
+        'amount' => 'required|numeric',
+        'order_id' => 'required|exists:orders,id'
+    ]);
 
-        // 1. Create the log entry as 'pending'
-        PaymentLog::create([
-            'user_id' => auth()->id(),
-            'tx_ref' => $reference,
-            'amount' => $request->amount,
-            'status' => 'pending'
-        ]);
+    // 2. Create a reference that includes the Order ID
+    // We append a timestamp to make it unique in case they retry a failed payment
+    $reference = 'ASL-' . $request->order_id . '-' . time(); 
 
-        $data = [
-            'tx_ref' => $reference,
-            'amount' => $request->amount,
-            'currency' => 'RWF',
-            'payment_options' => 'card,mobilemoneyrwanda',
-            'redirect_url' => route('payment.callback'),
-            'customer' => [
-                'email' => auth()->user()->email,
-                'name' => auth()->user()->name,
-            ],
-            'customizations' => [
-                'title' => 'Autosparelink Payment',
-                'logo' => asset('images/logo.png'),
-            ],
-        ];
+    // 3. Log the intent to pay
+    PaymentLog::create([
+        'user_id' => auth()->id(),
+        'tx_ref' => $reference,
+        'amount' => $request->amount,
+        'currency' => 'RWF', // Added currency for your log model
+        'status' => 'pending'
+    ]);
 
-        $payment = $this->flwService->initializePayment($data);
+    $data = [
+        'tx_ref' => $reference,
+        'amount' => $request->amount,
+        'currency' => 'RWF',
+        'payment_options' => 'card,mobilemoneyrwanda',
+        'redirect_url' => route('payment.callback'),
+        'customer' => [
+            'email' => auth()->user()->email,
+            'name' => auth()->user()->name,
+            'phonenumber' => auth()->user()->phone ?? '', // Good for MoMo
+        ],
+        'customizations' => [
+            'title' => 'AutoSpareLink Payment',
+            'description' => 'Payment for Order #' . $request->order_id,
+            'logo' => asset('images/logo.png'),
+        ],
+    ];
 
-        if (isset($payment['status']) && $payment['status'] === 'success') {
-            return redirect($payment['data']['link']);
-        }
+    $payment = $this->flwService->initializePayment($data);
 
-        // 2. Log the initialization failure
-        PaymentLog::where('tx_ref', $reference)->update([
-            'status' => 'failed',
-            'error_message' => $payment['message'] ?? 'Initialization failed'
-        ]);
-
-        return back()->with('error', 'Payment failed to start. Please try again.');
+    if (isset($payment['status']) && $payment['status'] === 'success') {
+        return redirect($payment['data']['link']);
     }
+
+    // Handle initialization failure
+    PaymentLog::where('tx_ref', $reference)->update([
+        'status' => 'failed',
+        'error_message' => $payment['message'] ?? 'Initialization failed',
+        'raw_response' => json_encode($payment) // Keep the raw error for debugging
+    ]);
+
+    return back()->with('error', 'Payment gateway unavailable. Please try again.');
+}
 
     /**
      * Handle the return redirect from Flutterwave
@@ -78,28 +90,33 @@ class PaymentController extends Controller
 
         $verification = $this->flwService->verifyTransaction($transactionId);
 
-        // 3. Update log based on verification
-        $log = PaymentLog::where('tx_ref', $verification['data']['tx_ref'])->first();
-
         if ($verification['status'] === 'success' && $verification['data']['status'] === 'successful') {
-            if ($log) {
-                $log->update([
-                    'status' => 'successful',
-                    'transaction_id' => $transactionId,
-                    'raw_response' => json_encode($verification)
-                ]);
-            }
+           $txRef = $verification['data']['tx_ref'] ?? $request->tx_ref;
+            
+            // 1. Update Payment Log
+            $log = PaymentLog::where('tx_ref', $txRef)->first();
+if ($log) {
+    $log->update([
+        'status' => 'failed',
+        'transaction_id' => $transactionId,
+        'error_message' => $verification['message'] ?? 'Payment failed',
+        'raw_response' => json_encode($verification)
+    ]);
+}
 
-            // SUCCESS: logic to update order status or SMM balance would go here
+            // 2. AutoSpareLink Fulfillment Logic
+            $this->finalizeOrder($txRef);
+
             return view('payment.success', ['data' => $verification['data']]);
         }
 
-        // 4. Log the specific failure reason
+        // Handle Failure
+        $log = PaymentLog::where('tx_ref', $request->tx_ref)->first();
         if ($log) {
             $log->update([
                 'status' => 'failed',
                 'transaction_id' => $transactionId,
-                'error_message' => $verification['message'] ?? 'User cancelled or network error',
+                'error_message' => $verification['message'] ?? 'Payment failed',
                 'raw_response' => json_encode($verification)
             ]);
         }
@@ -108,8 +125,53 @@ class PaymentController extends Controller
     }
 
     /**
-     * Generate and download the PDF receipt
-     */
+ * Finalize the AutoSpareLink Order after successful payment
+ */
+private function finalizeOrder($txRef)
+{
+    // Extract the Order ID from 'ASL-123-170945600'
+    $parts = explode('-', $txRef);
+    $orderId = (isset($parts[1])) ? $parts[1] : $txRef;
+
+    $order = Order::where('id', $orderId)
+                  ->with('orderItems.part')
+                  ->first();
+
+    // Safety Check: Only finalize if the order exists and hasn't been completed yet
+    if ($order && $order->status !== 'completed') {
+        
+        // 1. Update Order Status
+        $order->update(['status' => 'completed']);
+
+        // 2. Link the Payment record (using your specific Payment model)
+        \App\Models\Payment::updateOrCreate(
+            ['order_id' => $order->id],
+            [
+                'amount' => $order->total_amount,
+                'method' => 'flutterwave',
+                'transaction_reference' => $txRef,
+                'status' => 'successful',
+                'paid_at' => now()
+            ]
+        );
+
+        // 3. Inventory: Reduce stock for each part
+        foreach ($order->orderItems as $item) {
+            if ($item->part) {
+                // Ensure stock doesn't go below zero (optional but recommended)
+                $item->part->decrement('stock_quantity', $item->quantity);
+            }
+        }
+
+        // 4. Update or Create Shipping record
+        // Since your Checkout component creates a placeholder, use updateOrCreate
+        \App\Models\Shipping::updateOrCreate(
+            ['order_id' => $order->id],
+            ['status' => 'pending']
+        );
+    }
+}
+
     public function downloadReceipt($transactionId)
     {
         $verification = $this->flwService->verifyTransaction($transactionId);
@@ -119,15 +181,11 @@ class PaymentController extends Controller
         }
 
         $data = $verification['data'];
-        
         $pdf = Pdf::loadView('payment.receipt', compact('data'));
 
-        return $pdf->download('Receipt-' . $data['tx_ref'] . '.pdf');
+        return $pdf->download('AutoSpareLink-Receipt-' . $data['tx_ref'] . '.pdf');
     }
 
-    /**
-     * Handle the background Webhook from Flutterwave
-     */
     public function webhook(Request $request)
     {
         $signature = $request->header('verif-hash');
@@ -138,7 +196,6 @@ class PaymentController extends Controller
         $payload = $request->all();
 
         if ($payload['status'] === 'successful') {
-            // Background update logic (Ensure we don't double-process if callback already finished)
             $log = PaymentLog::where('tx_ref', $payload['tx_ref'])->first();
             
             if ($log && $log->status !== 'successful') {
@@ -148,7 +205,7 @@ class PaymentController extends Controller
                     'raw_response' => json_encode($payload)
                 ]);
                 
-                // Finalize order here
+                $this->finalizeOrder($payload['tx_ref']);
             }
         }
 

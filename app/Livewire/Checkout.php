@@ -76,62 +76,47 @@ class Checkout extends Component
         DB::beginTransaction();
 
         try {
-            // 1️⃣ Save new address if needed
-            $address_id = $this->address_id;
-            if ($this->use_new_address) {
-                $address = Address::create(array_merge($this->new_address, [
-                    'user_id' => Auth::id(),
-                ]));
-                $address_id = $address->id;
-            }
-
-            // 2️⃣ Create order
-            $order = Order::create([
+        // 1. Save address
+        $address_id = $this->address_id;
+        if ($this->use_new_address) {
+            $address = Address::create(array_merge($this->new_address, [
                 'user_id' => Auth::id(),
-                'address_id' => $address_id,
-                'total_amount' => (float) Cart::instance('default')->subtotal(),
-                'status' => 'pending',
-            ]);
-
-            // 3️⃣ Create order items
-            foreach ($cartItems as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'part_id' => $item->id,
-                    'quantity' => $item->qty,
-                    'unit_price' => $item->price,
-                ]);
-            }
-
-            // 4️⃣ Create payment placeholder
-            Payment::create([
-                'order_id' => $order->id,
-                'amount' => (float) Cart::instance('default')->subtotal(),
-                'method' => 'pending',
-                'status' => 'pending',
-            ]);
-
-            // 5️⃣ Create shipping placeholder
-            Shipping::create([
-                'order_id' => $order->id,
-                'status' => 'pending',
-            ]);
-
-            // 6️⃣ Clear cart
-            Cart::instance('default')->destroy();
-            if (Auth::check()) {
-                Cart::instance('default')->erase(Auth::id());
-            }
-
-            DB::commit();
-
-            $this->dispatch('notify', message: 'Order placed successfully!');
-            return redirect()->route('orders.show', $order->id);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $this->dispatch('notify', message: 'Failed to place order: ' . $e->getMessage());
+            ]));
+            $address_id = $address->id;
         }
+
+        // 2. Create the Order
+        $order = Order::create([
+            'user_id' => Auth::id(),
+            'address_id' => $address_id,
+            'total_amount' => (float) str_replace(',', '', Cart::instance('default')->subtotal()),
+            'status' => 'pending',
+        ]);
+
+        // 3. Create Order Items
+        foreach ($cartItems as $item) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'part_id' => $item->id,
+                'quantity' => $item->qty,
+                'unit_price' => $item->price,
+            ]);
+        }
+
+        DB::commit();
+
+        // 4. Instead of showing the order, redirect to our Payment Initialization
+        // We pass the order ID so the controller knows what we are paying for
+        return redirect()->route('payment.initialize', [
+            'order_id' => $order->id,
+            'amount' => $order->total_amount
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        $this->dispatch('notify', message: 'Error: ' . $e->getMessage());
+    }
+    
     }
 
     public function render()

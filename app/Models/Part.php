@@ -114,4 +114,10 @@ public function scopeForSpecification($query, $specId)
     });
 }
 
+// Add this to your Part.php model
+public function isAvailable($requestedQuantity = 1)
+{
+    return $this->status === 'active' && $this->stock_quantity >= $requestedQuantity;
+}
+
 }
