@@ -143,7 +143,8 @@ Route::get('/variant/{variant:slug}/specifications', [SpecificationController::c
 Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 
 // web.php
-Route::get('/parts-catalog/{brand?}/{model?}/{variant?}', [SparePartController::class, 'catalog'])
+// Ensure the names are exactly brandId, modelId, and variantId
+Route::get('/parts-catalog/{brandId?}/{modelId?}/{variantId?}', [SparePartController::class, 'catalog'])
     ->name('parts.catalog');
 
 // Show all models for a brand
