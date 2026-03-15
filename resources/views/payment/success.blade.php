@@ -51,7 +51,7 @@
                     <i class="fas fa-file-pdf mr-2"></i> Download Receipt
                 </a>
                 
-                <a href="{{ route('parts.index') }}" class="btn btn-outline-primary px-4 py-2">
+                <a href="/spare-parts" class="btn btn-outline-primary px-4 py-2">
                     <i class="fas fa-shopping-cart mr-2"></i> Continue Shopping
                 </a>
 
