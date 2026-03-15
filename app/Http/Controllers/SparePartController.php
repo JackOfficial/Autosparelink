@@ -18,20 +18,19 @@ class SparePartController extends Controller
 
 public function catalog($brand = null, $model = null, $variant = null)
 {
-    // If $brand is a number, use it. If it's a string, find the ID by slug.
-    $brandId = is_numeric($brand) ? $brand : Brand::where('slug', $brand)->value('id');
-    $modelId = is_numeric($model) ? $model : VehicleModel::where('slug', $model)->value('id');
-    $variantId = is_numeric($variant) ? $variant : Variant::where('slug', $variant)->value('id');
+    $brandId   = ($brand && $brand !== 'all')   ? \App\Models\Brand::where('slug', $brand)->value('id') : null;
+    $modelId   = ($model && $model !== 'all')   ? \App\Models\VehicleModel::where('slug', $model)->value('id') : null;
+    $variantId = ($variant && $variant !== 'all') ? \App\Models\Variant::where('slug', $variant)->value('id') : null;
 
     return view('parts.index', [
         'brandId'     => $brandId,
         'modelId'     => $modelId,
         'variantId'   => $variantId,
-        'vehicleData' => $modelId ? VehicleModel::with('brand')->find($modelId) : null,
+        'vehicleData' => $modelId ? \App\Models\VehicleModel::with('brand')->find($modelId) : null,
         'search'      => request('search'),
     ]);
 }
- 
+
    public function parts($id)
 {
     // 1. Load everything in ONE query to the database

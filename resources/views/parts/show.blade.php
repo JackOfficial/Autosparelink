@@ -265,11 +265,11 @@
     $model = $spec?->vehicleModel; 
     $variant = $spec?->variant;
     
-    // 1. Swap IDs for Slugs for a professional, SEO-friendly URL
+    // 1. Use keys that match your Route placeholders exactly to avoid Query Strings (?)
     $params = [
-        'brandId'   => $model?->brand?->slug,   // Was brand_id
-        'modelId'   => $model?->slug,         // Was id
-        'variantId' => $variant?->slug        // Was id
+        'brand'   => $model?->brand?->slug ?? 'all',
+        'model'   => $model?->slug ?? 'all',
+        'variant' => $variant?->slug ?? 'all'
     ];
 
     // 2. Only add search if it's actually set
@@ -277,6 +277,7 @@
         $params['search'] = request('search');
     }
 
+    // This will now produce: /parts-catalog/kia/k5/kia-k5-hybrid...
     $catalogUrl = route('parts.catalog', $params);
 @endphp
                         <tr class="hover-row"> 
