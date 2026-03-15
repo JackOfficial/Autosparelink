@@ -259,3 +259,9 @@ Route::get('/checkifemailisverified', function () {
 })->middleware(['verified']);
 
 Route::post('/flw-webhook', [FlutterwavePaymentController::class, 'webhook'])->name('payment.webhook');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/payment/initialize', [PaymentController::class, 'initialize'])->name('payment.initialize');
+    Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+    Route::get('/payment/receipt/{id}', [PaymentController::class, 'downloadReceipt'])->name('payment.receipt');
+});

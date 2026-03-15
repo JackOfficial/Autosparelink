@@ -69,38 +69,44 @@
                     </div>
                 </div>
 
-                {{-- Payment Section (MoMo Focus) --}}
-                <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px; border-left: 5px solid #ffcc00 !important;">
-                    <div class="card-body p-4">
-                        <h5 class="font-weight-bold mb-3"><i class="fa fa-wallet text-warning mr-2"></i>Payment Method</h5>
-                        <div class="d-flex align-items-center p-3 bg-light rounded-lg border">
-                            <img src="{{ asset('images/momo.jpg')}}" style="width: 40px;" class="mr-3">
-                            <div>
-                                <h6 class="mb-0 font-weight-bold">MTN MoMo Pay</h6>
-                                <p class="small text-muted mb-0">Pay manually using the code below after placing order.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-3 p-3 bg-white border border-warning rounded text-center">
-                            <span class="text-muted small d-block">Merchant Code</span>
-                            <h3 class="font-weight-bold text-dark mb-0 tracking-widest">38223</h3> {{-- Replace with your real code --}}
-                            <small class="text-muted">Account Name: <strong>HYBRID TECHNOLOGY RWANDA LTD</strong></small>
-                        </div>
-                    </div>
-                </div>
+                {{-- Payment Section (Automated via Flutterwave) --}}
+                {{-- Payment Section (Automated via Flutterwave) --}}
+<div class="card border-0 shadow-sm mb-4" style="border-radius: 15px; border-left: 5px solid #ffcc00 !important;">
+    <div class="card-body p-4">
+        <h5 class="font-weight-bold mb-3"><i class="fa fa-credit-card text-warning mr-2"></i>Payment Method</h5>
+        
+        <div class="p-3 bg-light rounded-lg border mb-3">
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('images/momo.jpg')}}" style="width: 35px;" class="mr-2">
+                <h6 class="mb-0 font-weight-bold">Mobile Money & Cards</h6>
+            </div>
+            <p class="small text-muted mb-0">Securely pay using MTN MoMo, Airtel Money, or your Debit/Credit Card via Flutterwave.</p>
+        </div>
+
+        @if(Auth::check())
+            <form method="POST" action="{{ route('payment.initialize') }}">
+                @csrf
+                {{-- Pass the total directly from your Livewire property --}}
+                <input type="hidden" name="amount" value="{{ str_replace(',', '', $total) }}">
+                
+                <button type="submit" class="btn btn-primary btn-lg btn-block rounded-pill shadow-sm font-weight-bold py-3">
+                    <i class="fa fa-lock mr-2"></i>Pay {{ $total }} RWF Now
+                </button>
+            </form>
+        @else
+            <button class="btn btn-secondary btn-lg btn-block rounded-pill disabled" disabled>
+                Login to Pay
+            </button>
+        @endif
+    </div>
+</div>
 
                 {{-- Call to Action Buttons --}}
-                <div class="d-flex flex-column flex-md-row gap-3">
-                    @if(Auth::check())
-                        <button class="btn btn-primary btn-lg ml-2 rounded-pill px-5 shadow-sm font-weight-bold mb-2 mb-md-0" wire:click="placeOrder">
-                            <i class="fa fa-check-circle mr-2"></i>Confirm & Place Order
-                        </button>
-                    @endif
-                    
-                    <button class="btn btn-outline-dark btn-lg rounded-pill px-4 shadow-sm" wire:click="requestCallback">
-                        <i class="fa fa-phone-alt mr-2"></i>Request a Callback
-                    </button>
-                </div>
+<div class="d-flex flex-column flex-md-row gap-3">
+    <button class="btn btn-outline-dark btn-lg rounded-pill px-4 shadow-sm" wire:click="requestCallback">
+        <i class="fa fa-phone-alt mr-2"></i>Request a Callback
+    </button>
+</div>
                 <p class="small text-muted mt-3"><i class="fa fa-shield-alt mr-1"></i> Your data is secure. A representative will contact you to confirm delivery.</p>
             </div>
 
