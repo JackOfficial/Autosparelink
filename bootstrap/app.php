@@ -26,6 +26,11 @@ return Application::configure(basePath: dirname(__DIR__))
     $middleware->web(append: [
         // any middleware you want for all 'web' routes
     ]);
+
+    $middleware->validateCsrfTokens(except: [
+        'flw-webhook', // This allows Flutterwave to send data to your site
+    ]);
+    
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

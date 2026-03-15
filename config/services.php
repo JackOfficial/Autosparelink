@@ -46,4 +46,9 @@ return [
         'base_url' => env('VEHICLE_API_BASE_URL', 'https://api.vehicledatabases.com'),
     ],
 
+    'flutterwave' => [
+    'public_key' => env('FLW_PUBLIC_KEY'),
+    'secret_key' => env('FLW_SECRET_KEY'),
+    ],
+
 ];

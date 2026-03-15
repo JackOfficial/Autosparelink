@@ -60,6 +60,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ModelPartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PartCatalogController;
+use App\Http\Controllers\PaymentController as FlutterwavePaymentController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\VinController;
@@ -257,3 +258,4 @@ Route::get('/checkifemailisverified', function () {
     return "You have verified";
 })->middleware(['verified']);
 
+Route::post('/flw-webhook', [FlutterwavePaymentController::class, 'webhook'])->name('payment.webhook');
