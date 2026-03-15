@@ -17,7 +17,6 @@ class SpecificationParts extends Component
     public $category_id = null;
     public $inStockOnly = false;
     
-    // Condition removed as per request
     public $maxPrice = 2000000;  
     public $sortBy = 'latest';   
     
@@ -29,7 +28,6 @@ class SpecificationParts extends Component
         'sortBy' => ['except' => 'latest'],
     ];
 
-    // Reset pagination when any filter property is updated
     public function updatedSearch() { $this->resetPage(); }
     public function updatedCategoryId() { $this->resetPage(); }
     public function updatedInStockOnly() { $this->resetPage(); }
@@ -43,7 +41,6 @@ class SpecificationParts extends Component
 
     public function resetFilters()
     {
-        // Removed condition from reset list
         $this->reset(['search', 'category_id', 'inStockOnly', 'maxPrice', 'sortBy']);
     }
 
@@ -53,11 +50,9 @@ class SpecificationParts extends Component
         $specification = Specification::with(['vehicleModel.brand', 'destinations'])
             ->findOrFail($this->specificationId);
 
-        // 2. Identify Active Categories (Categories that have parts for this vehicle)
+        // 2. Identify Categories that have parts for this vehicle
         $activeCategoryIds = Category::whereHas('parts', function($q) {
-            $q->whereHas('specifications', function($s) {
-                $s->where('specifications.id', $this->specificationId);
-            });
+            $q->forSpecification($this->specificationId); // Using your model scope
         })->pluck('id')->toArray();
 
         // 3. Fetch Sidebar Categories (Dynamic Drill-down)
@@ -76,29 +71,31 @@ class SpecificationParts extends Component
                   });
             })
             ->withCount(['parts' => function($q) {
-                $q->whereHas('specifications', function($s) {
-                    $s->where('specifications.id', $this->specificationId);
-                });
+                $q->forSpecification($this->specificationId);
             }])
             ->withCount('children')
             ->get();
 
         // 4. Build the Parts Query
-        $partsQuery = Part::whereHas('specifications', function($q) {
-            $q->where('specifications.id', $this->specificationId);
-        })
-        ->when($this->category_id, function($q) {
-            // Recursive: Show parts in the selected category AND its subcategories
-            $categoryIds = Category::where('id', $this->category_id)
-                ->orWhere('parent_id', $this->category_id)
-                ->pluck('id');
-            $q->whereIn('category_id', $categoryIds);
-        })
-        ->when($this->inStockOnly, fn($q) => $q->where('stock', '>', 0))
-        ->where(function($q) {
-            $q->where('part_name', 'like', '%' . $this->search . '%')
-              ->orWhere('part_number', 'like', '%' . $this->search . '%');
-        });
+        $partsQuery = Part::query()
+            ->forSpecification($this->specificationId) // Model Scope
+            ->with(['partBrand', 'photos', 'category']) // Eager Load
+            ->where('status', 'active') // Ensure parts are active
+            ->when($this->category_id, function($q) {
+                // Recursive: Show parts in the selected category AND its subcategories
+                $categoryIds = Category::where('id', $this->category_id)
+                    ->orWhere('parent_id', $this->category_id)
+                    ->pluck('id');
+                $q->whereIn('category_id', $categoryIds);
+            })
+            ->when($this->inStockOnly, function($q) {
+                $q->where('stock_quantity', '>', 0); // Corrected to match your Model
+            })
+            ->where(function($q) {
+                $q->where('part_name', 'like', '%' . $this->search . '%')
+                  ->orWhere('part_number', 'like', '%' . $this->search . '%')
+                  ->orWhere('sku', 'like', '%' . $this->search . '%');
+            });
 
         if ($this->maxPrice) {
             $partsQuery->where('price', '<=', $this->maxPrice);
