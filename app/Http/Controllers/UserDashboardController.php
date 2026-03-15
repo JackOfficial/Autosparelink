@@ -88,6 +88,18 @@ public function updateGarage(Request $request)
     return back()->with('success', 'Your Garage has been updated! We will now prioritize parts for this vehicle.');
 }
 
+public function storeTicket(Request $request)
+{
+    $request->validate([
+        'subject' => 'required|max:255',
+        'message' => 'required',
+    ]);
+
+    Auth::user()->tickets()->create($request->all());
+
+    return back()->with('success', 'Ticket opened! We will get back to you soon.');
+}
+
 public function updateProfile(Request $request)
 {
     $user = Auth::user();

@@ -49,9 +49,15 @@
                     <a href="#cart" class="list-group-item list-group-item-action py-3 d-flex align-items-center">
                         <i class="fas fa-shopping-cart mr-3 text-success"></i> My Cart
                     </a>
+
+                    <a href="#tickets" class="list-group-item list-group-item-action py-3 d-flex align-items-center">
+    <i class="fas fa-headset mr-3 text-warning"></i> Support Tickets
+</a>
+
                     <a href="#" class="list-group-item list-group-item-action py-3 d-flex align-items-center">
                         <i class="fas fa-user-cog mr-3 text-muted"></i> Account Settings
                     </a>
+
                     <form action="{{ route('logout') }}" method="POST" class="m-0">
                         @csrf
                         <button type="submit" class="list-group-item list-group-item-action py-3 d-flex align-items-center text-danger border-0 w-100">
@@ -265,6 +271,82 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Support Tickets Section --}}
+<div id="tickets" class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="font-weight-bold mb-0">Support Tickets</h5>
+        <button class="btn btn-warning btn-sm rounded-pill px-3 font-weight-bold" data-toggle="modal" data-target="#newTicketModal">
+            <i class="fas fa-plus mr-1"></i> New Ticket
+        </button>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 small">
+                <thead class="bg-light text-muted uppercase x-small">
+                    <tr>
+                        <th class="border-0 px-4">Subject</th>
+                        <th class="border-0">Status</th>
+                        <th class="border-0">Last Update</th>
+                        <th class="border-0 text-right px-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($tickets as $ticket)
+                        <tr>
+                            <td class="px-4 align-middle">
+                                <span class="font-weight-bold text-dark d-block">{{ $ticket->subject }}</span>
+                                <span class="text-muted x-small">ID: #TK-{{ $ticket->id }}</span>
+                            </td>
+                            <td class="align-middle">
+                                <span class="badge badge-pill {{ $ticket->status == 'open' ? 'badge-success' : 'badge-secondary' }} px-2">
+                                    {{ ucfirst($ticket->status) }}
+                                </span>
+                            </td>
+                            <td class="align-middle text-muted">{{ $ticket->updated_at->diffForHumans() }}</td>
+                            <td class="text-right px-4 align-middle">
+                                <a href="#" class="btn btn-sm btn-light rounded-pill border">View</a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">No active tickets.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{{-- New Ticket Modal --}}
+<div class="modal fade" id="newTicketModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 border-radius-15">
+            <div class="modal-header border-0 pt-4 px-4">
+                <h5 class="font-weight-bold">Open New Ticket</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <form action="{{ route('tickets.store') }}" method="POST">
+                @csrf
+                <div class="modal-body px-4">
+                    <div class="form-group">
+                        <label class="small font-weight-bold text-muted">Subject</label>
+                        <input type="text" name="subject" class="form-control bg-light border-0 rounded-pill" placeholder="e.g. Order #123 delayed" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="small font-weight-bold text-muted">Message</label>
+                        <textarea name="message" rows="4" class="form-control bg-light border-0" style="border-radius: 15px;" placeholder="Describe your issue..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pb-4 px-4">
+                    <button type="submit" class="btn btn-primary btn-block rounded-pill font-weight-bold">Submit Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
         </div>
     </div>
