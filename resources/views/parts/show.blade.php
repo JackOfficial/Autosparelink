@@ -260,22 +260,19 @@
                     </thead>
                     <tbody>
                         @foreach($compatibilities as $fitment)
-                       @php
+                      @php
     $spec = $fitment->specification;
     $model = $spec?->vehicleModel; 
     $variant = $spec?->variant;
     
-    // 1. Define the primary route parameters
+    // 1. Swap IDs for Slugs for a professional, SEO-friendly URL
     $params = [
-        'brandId'   => $model?->brand_id,
-        'modelId'   => $model?->id,
-        'variantId' => $variant?->id
+        'brandId'   => $model?->brand?->slug,   // Was brand_id
+        'modelId'   => $model?->slug,         // Was id
+        'variantId' => $variant?->slug        // Was id
     ];
 
-    /**
-     * 2. Only add search if it's actually set in the current request.
-     * This prevents the ugly "?search=" from appearing.
-     */
+    // 2. Only add search if it's actually set
     if (request('search')) {
         $params['search'] = request('search');
     }
