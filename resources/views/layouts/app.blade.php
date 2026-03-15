@@ -189,7 +189,7 @@
             <i class="fas fa-cogs mr-2 text-primary"></i> Admin Panel
         </a>
     @else
-        <a class="dropdown-item d-flex align-items-center py-2 px-3" href="/profile">
+        <a class="dropdown-item d-flex align-items-center py-2 px-3" href="/user-dashboard">
             <i class="fas fa-user mr-2 text-primary"></i> Profile
         </a>
     @endif
