@@ -260,20 +260,28 @@
                     </thead>
                     <tbody>
                         @foreach($compatibilities as $fitment)
-                        @php
-                            $spec = $fitment->specification;
-                            $model = $spec?->vehicleModel; 
-                            $variant = $spec?->variant;
-                            
-                            /** * UPDATED LINK LOGIC
-                             * Matches: Route::get('/parts-catalog/{brandId?}/{modelId?}/{variantId?}')
-                             */
-                            $catalogUrl = route('parts.catalog', [
-                                'brandId'   => $model?->brand_id,
-                                'modelId'   => $model?->id,
-                                'variantId' => $variant?->id
-                            ]);
-                        @endphp
+                       @php
+    $spec = $fitment->specification;
+    $model = $spec?->vehicleModel; 
+    $variant = $spec?->variant;
+    
+    // 1. Define the primary route parameters
+    $params = [
+        'brandId'   => $model?->brand_id,
+        'modelId'   => $model?->id,
+        'variantId' => $variant?->id
+    ];
+
+    /**
+     * 2. Only add search if it's actually set in the current request.
+     * This prevents the ugly "?search=" from appearing.
+     */
+    if (request('search')) {
+        $params['search'] = request('search');
+    }
+
+    $catalogUrl = route('parts.catalog', $params);
+@endphp
                         <tr class="hover-row"> 
                             {{-- 1. Brand --}}
                             <td class="pl-4">

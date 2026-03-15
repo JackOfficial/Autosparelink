@@ -16,22 +16,28 @@ class SparePartController extends Controller
        return view('parts.index');
     }
 
-  public function catalog($brandId = null, $modelId = null, $variantId = null)
-    {
-        // Fetch vehicle info if modelId is present to support your 'vinData' variable
-        $vehicleData = null;
-        if ($modelId) {
-            $vehicleData = VehicleModel::with('brand')->find($modelId);
-        }
+  public function catalog($brandSlug = null, $modelSlug = null, $variantSlug = null)
+{
+    // 1. Translate Slugs to IDs so Livewire doesn't crash
+    $brandId   = $brandSlug   ? \App\Models\Brand::where('slug', $brandSlug)->value('id') : null;
+    $modelId   = $modelSlug   ? \App\Models\VehicleModel::where('slug', $modelSlug)->value('id') : null;
+    $variantId = $variantSlug ? \App\Models\Variant::where('slug', $variantSlug)->value('id') : null;
 
-        return view('parts.index', [
-            'brandId'     => $brandId,
-            'modelId'     => $modelId,
-            'variantId'   => $variantId,
-            'vehicleData' => $vehicleData, // Passed as 'vinData' in your blade
-            'search'      => request('search'), // Captures search if coming from a search bar
-        ]);
+    // 2. Fetch the vehicle info for your 'vinData' display
+    $vehicleData = null;
+    if ($modelId) {
+        $vehicleData = \App\Models\VehicleModel::with('brand')->find($modelId);
     }
+
+    // 3. Match the names to your Blade variables
+    return view('parts.index', [
+        'brandId'     => $brandId,     // Matches $brandId in your @livewire
+        'modelId'     => $modelId,     // Matches $modelId in your @livewire
+        'variantId'   => $variantId,   // Matches $variantId in your @livewire
+        'vehicleData' => $vehicleData, // Matches $vehicleData in your @livewire
+        'search'      => request('search'),
+    ]);
+}
  
    public function parts($id)
 {
