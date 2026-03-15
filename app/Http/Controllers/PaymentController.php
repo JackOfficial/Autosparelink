@@ -73,7 +73,7 @@ class PaymentController extends Controller
         $transactionId = $request->transaction_id;
         
         if (!$transactionId) {
-            return redirect()->route('parts.index')->with('error', 'Transaction was cancelled.');
+            return redirect()->route('home')->with('error', 'Transaction was cancelled.');
         }
 
         $verification = $this->flwService->verifyTransaction($transactionId);
