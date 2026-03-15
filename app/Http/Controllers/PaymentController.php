@@ -22,6 +22,21 @@ class PaymentController extends Controller
         $this->flwService = $flwService;
     }
 
+
+    public function process(Order $order)
+{
+    // Safety check: Ensure the person trying to pay is the owner of the order
+    if ($order->user_id !== auth()->id()) {
+        abort(403, 'Unauthorized action.');
+    }
+
+    // Return a view that will auto-submit a POST form to our initialize route
+    return view('payment.process', [
+        'order' => $order,
+        'amount' => $order->total_amount
+    ]);
+}
+
     /**
      * Start the payment process and log the attempt.
      * Triggered by the POST request after the Livewire order is saved.

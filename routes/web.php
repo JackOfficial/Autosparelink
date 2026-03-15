@@ -165,8 +165,6 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::resource('orders', OrderController::class)->middleware('auth');
 
-Route::get('/payment/process/{order}', [FlutterwavePaymentController::class, 'process'])->name('payment.process');
-
 Route::middleware(['auth'])->group(function () {
     
     // --- Dashboard & Profile Management ---
@@ -282,8 +280,8 @@ Route::get('/checkifemailisverified', function () {
 })->middleware(['verified']);
 
 Route::post('/flw-webhook', [FlutterwavePaymentController::class, 'webhook'])->name('payment.webhook');
-
 Route::middleware(['auth'])->group(function () {
+    Route::get('/payment/process/{order}', [FlutterwavePaymentController::class, 'process'])->name('payment.process');
     Route::post('/payment/initialize', [FlutterwavePaymentController::class, 'initialize'])->name('payment.initialize');
     Route::get('/payment/callback', [FlutterwavePaymentController::class, 'callback'])->name('payment.callback');
     Route::get('/payment/receipt/{id}', [FlutterwavePaymentController::class, 'downloadReceipt'])->name('payment.receipt');
