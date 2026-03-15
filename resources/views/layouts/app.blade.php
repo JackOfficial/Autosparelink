@@ -190,7 +190,7 @@
         </a>
     @else
         <a class="dropdown-item d-flex align-items-center py-2 px-3" href="/user-dashboard">
-            <i class="fas fa-user mr-2 text-primary"></i> Profile
+            <i class="fas fa-user mr-2 text-primary"></i> Dashboard
         </a>
     @endif
 
