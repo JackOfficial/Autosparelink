@@ -46,20 +46,52 @@
                     </div>
                 </div>
 
-                <div class="card filter-card">
-                    <div class="card-body">
-                        <h6 class="font-weight-bold text-dark mb-3">Availability</h6>
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="inStock" wire:model.live="inStockOnly">
-                            <label class="custom-control-label small font-weight-bold" for="inStock">In Stock Only</label>
-                        </div>
-                    </div>
-                </div>
+                {{-- Sidebar: Expanded Filters --}}
+<div class="card filter-card mb-4">
+    <div class="card-body p-3">
+        <h6 class="font-weight-bold mb-3 text-dark px-2">Refine Search</h6>
+        
+        <div class="form-group px-2">
+            <label class="small font-weight-bold text-muted text-uppercase">Condition</label>
+            <select wire:model.live="condition" class="form-control form-control-sm custom-select">
+                <option value="">All Conditions</option>
+                <option value="new">Brand New</option>
+                <option value="used">Used / Refurbished</option>
+            </select>
+        </div>
+
+        <div class="form-group px-2 mt-4">
+            <label class="small font-weight-bold text-muted text-uppercase">Max Price (RWF)</label>
+            <input type="range" class="custom-range" min="0" max="1000000" step="10000" wire:model.live="maxPrice">
+            <div class="d-flex justify-content-between small font-weight-bold text-primary">
+                <span>0</span>
+                <span>{{ number_format($maxPrice ?? 1000000) }} RWF</span>
+            </div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="custom-control custom-switch px-2 ml-4">
+            <input type="checkbox" class="custom-control-input" id="inStock" wire:model.live="inStockOnly">
+            <label class="custom-control-label small font-weight-bold" for="inStock">In Stock Only</label>
+        </div>
+    </div>
+</div>
             </div>
         </div>
 
         {{-- 2. Main Content --}}
         <div class="col-lg-9">
+
+            {{-- Breadcrumb Navigation --}}
+<nav aria-label="breadcrumb" class="mb-3 px-2">
+    <ol class="breadcrumb bg-transparent p-0 small">
+        <li class="breadcrumb-item"><a href="" class="text-muted">Catalog</a></li>
+        <li class="breadcrumb-item"><a href="#" class="text-muted">{{ $specification->vehicleModel->brand->brand_name }}</a></li>
+        <li class="breadcrumb-item"><a href="#" class="text-muted">{{ $specification->vehicleModel->model_name }}</a></li>
+        <li class="breadcrumb-item active text-primary font-weight-bold" aria-current="page">{{ $specification->model_code }}</li>
+    </ol>
+</nav>
             
             {{-- Vehicle Header Banner --}}
             <div class="card spec-banner text-white shadow-sm border-0 mb-4">
@@ -83,17 +115,31 @@
             </div>
 
             {{-- Grid Controls --}}
-            <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-                <h5 class="font-weight-bold text-dark mb-0">{{ number_format($parts->total()) }} Parts Found</h5>
-                <div class="btn-group btn-group-sm bg-white shadow-sm p-1" style="border-radius: 10px;">
-                    <button class="btn btn-light border-0 py-1 px-3 btn-toggle" @click="grid = true" :class="grid ? 'active' : ''">
-                        <i class="fa fa-th-large"></i>
-                    </button>
-                    <button class="btn btn-light border-0 py-1 px-3 btn-toggle" @click="grid = false" :class="!grid ? 'active' : ''">
-                        <i class="fa fa-list"></i>
-                    </button>
-                </div>
-            </div>
+           {{-- Grid Controls with Sorting --}}
+<div class="d-flex justify-content-between align-items-center mb-4 px-2">
+    <div>
+        <h5 class="font-weight-bold text-dark mb-0">{{ number_format($parts->total()) }} Parts Found</h5>
+        <p class="small text-muted mb-0">Filtered for your {{ $specification->chassis_code }}</p>
+    </div>
+    
+    <div class="d-flex align-items-center">
+        <select wire:model.live="sortBy" class="form-control form-control-sm border-0 shadow-sm mr-3" style="width: 150px; border-radius: 8px;">
+            <option value="latest">Newest First</option>
+            <option value="price_low">Price: Low to High</option>
+            <option value="price_high">Price: High to Low</option>
+            <option value="popularity">Most Popular</option>
+        </select>
+
+        <div class="btn-group btn-group-sm bg-white shadow-sm p-1" style="border-radius: 10px;">
+            <button class="btn btn-light border-0 py-1 px-3 btn-toggle" @click="grid = true" :class="grid ? 'active' : ''">
+                <i class="fa fa-th-large"></i>
+            </button>
+            <button class="btn btn-light border-0 py-1 px-3 btn-toggle" @click="grid = false" :class="!grid ? 'active' : ''">
+                <i class="fa fa-list"></i>
+            </button>
+        </div>
+    </div>
+</div>
 
             {{-- Parts Display --}}
             <div class="row" wire:loading.remove>
@@ -107,8 +153,15 @@
                     </div>
                 @empty
                     <div class="col-12 text-center py-5">
-                        <h5 class="text-muted">No matching parts found for this vehicle.</h5>
-                    </div>
+        <div class="mb-3">
+            <i class="fas fa-tools fa-3x text-light"></i>
+        </div>
+        <h5 class="text-dark font-weight-bold">No Exact Matches Found</h5>
+        <p class="text-muted">Try adjusting your filters or search terms for this {{ $specification->chassis_code }}.</p>
+        <button wire:click="resetFilters" class="btn btn-primary rounded-pill px-4">
+            Clear All Filters
+        </button>
+    </div>
                 @endforelse
             </div>
 
