@@ -18,7 +18,6 @@
             </div>
 
             @if($cartContent->count() > 0)
-            <h1>{{ $item->options->image }}</h1>
                 <div class="card shadow-sm border-0 rounded-lg">
                     <div class="table-responsive">
                         <table class="table table-borderless align-middle mb-0">
@@ -36,6 +35,7 @@
                                 <tr class="border-bottom">
                                     <td class="py-4 px-4">
                                        <div class="d-flex align-items-center">
+                                         <h1>{{ $item->options->image }}</h1>
     <img src="{{ $item->options->image ? Storage::url($item->options->image) : asset('images/placeholder-part.png') }}" 
          class="rounded mr-3" 
          style="width: 70px; height: 70px; object-fit: cover;"
