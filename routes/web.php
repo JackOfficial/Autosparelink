@@ -39,6 +39,7 @@ use App\Http\Controllers\Admin\StoryController;
 use App\Http\Controllers\Admin\WebpagesController;
 use App\Http\Controllers\Admin\ApplicationsController;
 use App\Http\Controllers\Admin\BodyTypeController;
+use App\Http\Controllers\Admin\BroadcastController;
 use App\Http\Controllers\Admin\CartController as AdminCartController;
 use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\Admin\VehicleBrandController;
@@ -184,6 +185,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile/password', 'updatePassword')->name('profile.password');
         Route::post('/garage/update', 'updateGarage')->name('garage.update');
         Route::post('/notifications/read-all', 'markAllRead')->name('notifications.readAll');
+        Route::post('/notifications/read', function () {
+         auth()->user()->unreadNotifications->markAsRead();
+         return back();
+       })->name('notifications.read');
     });
 
     // --- Support Ticket System ---
@@ -253,6 +258,9 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('shippings', ShippingController::class);
     Route::resource('addresses', AddressController::class);
     //////////////////////////////////
+
+    Route::get('/broadcast', [BroadcastController::class, 'index'])->name('broadcast.index');
+    Route::post('/broadcast', [BroadcastController::class, 'send'])->name('broadcast.send');
 
     Route::resource('vehicle-brands', VehicleBrandController::class);
     Route::resource('part-brands', PartBrandController::class);
