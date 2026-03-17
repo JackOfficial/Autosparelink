@@ -366,39 +366,49 @@
         <li class="nav-item" x-show="isVisible($el)"><a href="/admin/careers" class="nav-link"><i class="nav-icon fas fa-briefcase"></i><p>Careers</p></a></li>
         <li class="nav-item" x-show="isVisible($el)"><a href="/admin/applications" class="nav-link"><i class="nav-icon fas fa-gear"></i><p>Applications</p></a></li>
 
-        <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-envelope"></i>
-            <p>Mailbox <i class="fas fa-angle-left right"></i></p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/mailbox/inbox" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Inbox</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/mailbox/inbox" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Compose</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/mailbox/inbox" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Read</p></a></li>
-          </ul>
+      <li class="nav-item has-treeview {{ request()->is('admin/mailbox*') || request()->routeIs('admin.broadcast.*') ? 'menu-open' : '' }}" 
+    x-show="isVisible($el)" 
+    :class="search !== '' ? 'menu-open' : ''">
+    
+    <a href="#" class="nav-link {{ request()->is('admin/mailbox*') || request()->routeIs('admin.broadcast.*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-envelope"></i>
+        <p>
+            Communications 
+            <i class="fas fa-angle-left right"></i>
+        </p>
+    </a>
+    
+    <ul class="nav nav-treeview">
+        {{-- Inbox --}}
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="/admin/mailbox/inbox" class="nav-link {{ request()->is('admin/mailbox/inbox') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Inbox</p>
+            </a>
         </li>
 
+        {{-- Support Tickets --}}
         <li class="nav-item" x-show="isVisible($el)">
             <a href="{{ route('admin.tickets.index') }}" class="nav-link {{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-headset"></i>
-              <p>
-                Support Tickets
-                @php $openTickets = \App\Models\Ticket::where('status', 'open')->count(); @endphp
-                @if($openTickets > 0)
-                  <span class="badge badge-danger right">{{ $openTickets }}</span>
-                @endif
-              </p>
+                <i class="fas fa-headset nav-icon"></i>
+                <p>
+                    Support Tickets
+                    @php $openTickets = \App\Models\Ticket::where('status', 'open')->count(); @endphp
+                    @if($openTickets > 0)
+                        <span class="badge badge-danger right">{{ $openTickets }}</span>
+                    @endif
+                </p>
             </a>
-          </li>
+        </li>
 
-          {{-- Broadcast Link --}}
-<li class="nav-item {{ request()->routeIs('broadcast.*') ? 'active' : '' }}">
-    <a class="nav-link d-flex align-items-center" href="{{ route('admin.broadcast.index') }}">
-        <div class="icon-shape icon-sm shadow border-radius-md bg-white text-center mr-2 d-flex align-items-center justify-content-center">
-            <i class="fas fa-bullhorn {{ request()->routeIs('broadcast.*') ? 'text-white' : 'text-dark' }}"></i>
-        </div>
-        <span class="nav-link-text ms-1">Broadcast Message</span>
-    </a>
+        {{-- Broadcast Message --}}
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="{{ route('admin.broadcast.index') }}" class="nav-link {{ request()->routeIs('admin.broadcast.*') ? 'active' : '' }}">
+                <i class="fas fa-bullhorn nav-icon"></i>
+                <p>Broadcast Message</p>
+            </a>
+        </li>
+    </ul>
 </li>
 
         @if(Auth::check())
