@@ -391,6 +391,16 @@
             </a>
           </li>
 
+          {{-- Broadcast Link --}}
+<li class="nav-item {{ request()->routeIs('broadcast.*') ? 'active' : '' }}">
+    <a class="nav-link d-flex align-items-center" href="{{ route('admin.broadcast.index') }}">
+        <div class="icon-shape icon-sm shadow border-radius-md bg-white text-center mr-2 d-flex align-items-center justify-content-center">
+            <i class="fas fa-bullhorn {{ request()->routeIs('broadcast.*') ? 'text-white' : 'text-dark' }}"></i>
+        </div>
+        <span class="nav-link-text ms-1">Broadcast Message</span>
+    </a>
+</li>
+
         @if(Auth::check())
         <li class="nav-item mt-3 border-top border-secondary">
           <a href="#" class="nav-link text-danger" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
