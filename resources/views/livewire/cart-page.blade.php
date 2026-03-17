@@ -35,7 +35,6 @@
                                 <tr class="border-bottom">
                                     <td class="py-4 px-4">
                                        <div class="d-flex align-items-center">
-                                         <h1>{{ $item->options->image }}</h1>
     <img src="{{ $item->options->image ? Storage::url($item->options->image) : asset('images/placeholder-part.png') }}" 
          class="rounded mr-3" 
          style="width: 70px; height: 70px; object-fit: cover;"
