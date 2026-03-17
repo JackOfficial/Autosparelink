@@ -22,11 +22,11 @@ public function index()
     $allOrders = $user->orders()
         ->with(['orderItems.part', 'payment', 'shipping', 'address'])
         ->latest()
-        ->get();
+        ->paginate(10);
 
     // 2. Fetch Tickets
     // We fetch the latest 5 to show on the dashboard table
-    $tickets = $user->tickets()->latest()->take(5)->get();
+    $tickets = $user->tickets()->latest()->latest()->paginate(5);
 
     // 3. Dashboard Statistics
     $stats = [
