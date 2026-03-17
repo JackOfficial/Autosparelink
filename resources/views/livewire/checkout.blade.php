@@ -98,9 +98,20 @@
                     </div>
                 </div>
 
-                <button class="btn btn-outline-dark btn-lg rounded-pill px-4 shadow-sm" wire:click="requestCallback">
-                    <i class="fa fa-phone-alt mr-2"></i>Request a Callback
-                </button>
+               <button class="btn btn-outline-dark btn-lg rounded-pill px-4 shadow-sm" 
+        wire:click="requestCallback" 
+        wire:loading.attr="disabled">
+    
+    {{-- Text shown normally --}}
+    <span wire:loading.remove wire:target="requestCallback">
+        <i class="fa fa-phone-alt mr-2"></i>Request a Callback
+    </span>
+
+    {{-- Text/Spinner shown while processing --}}
+    <span wire:loading wire:target="requestCallback">
+        <i class="fa fa-spinner fa-spin mr-2"></i>Processing...
+    </span>
+</button>
             </div>
 
             {{-- Sidebar Summary --}}
