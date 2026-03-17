@@ -273,7 +273,7 @@
             <h5 class="font-weight-bold mb-0">Help Desk</h5>
             <p class="small text-muted mb-0">Track your inquiries and part requests.</p>
         </div>
-        <button class="btn btn-warning btn-sm rounded-pill px-3 font-weight-bold shadow-sm" data-toggle="modal" data-target="#createTicketModal">
+        <button class="btn btn-warning btn-sm rounded-pill px-3 font-weight-bold shadow-sm" data-toggle="modal" data-target="#newTicketModal">
             <i class="fas fa-plus mr-1"></i> New Ticket
         </button>
     </div>
