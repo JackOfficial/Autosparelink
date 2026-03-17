@@ -71,6 +71,7 @@ use App\Http\Controllers\PartCatalogController;
 use App\Http\Controllers\PaymentController as FlutterwavePaymentController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\Admin\TicketController as Ticket;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\VinController;
 use App\Http\Controllers\WishlistController;
@@ -186,13 +187,12 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // --- Support Ticket System ---
-    // URL: /tickets/... | Name: tickets....
-    Route::prefix('tickets')->name('tickets.')->controller(TicketController::class)->group(function () {
-        Route::get('/', 'index')->name('index');           // View all tickets
-        Route::post('/store', 'store')->name('store');     // Modal submission
-        Route::get('/{ticket}', 'show')->name('show');     // View single ticket conversation
-    });
-
+   Route::prefix('tickets')->name('tickets.')->controller(TicketController::class)->group(function () {
+    Route::get('/', 'index')->name('index');           // View all tickets
+    Route::post('/store', 'store')->name('store');     // Modal submission
+    Route::get('/{id}', 'show')->name('show');         // View single ticket
+    Route::post('/{id}/reply', 'reply')->name('reply'); // Post a reply
+});
 });
 
 /////////////////
@@ -272,6 +272,12 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::get('/export/pdf', [PartController::class, 'exportPdf'])->name('export.pdf');
     Route::get('/reports/sales/pdf', [ReportsController::class, 'downloadSalesPDF'])->name('reports.sales.pdf');
     Route::get('/reports/inventory/pdf', [ReportsController::class, 'downloadInventoryPDF'])->name('reports.inventory.pdf');
+
+    // Ticket Management
+    Route::get('/tickets', [Ticket::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/{ticket}', [Ticket::class, 'show'])->name('tickets.show');
+    Route::patch('/tickets/{ticket}/status', [Ticket::class, 'updateStatus'])->name('tickets.status');
+    Route::post('/tickets/{ticket}/reply', [Ticket::class, 'storeReply'])->name('tickets.reply');
 
     // --- Mailbox (Using your Contacts migration) ---
     Route::prefix('mailbox')->group(function () {

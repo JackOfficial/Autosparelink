@@ -266,46 +266,72 @@
                 </div>
             </div>
 
-            {{-- Support Tickets Table --}}
-            <div id="tickets" class="card border-0 shadow-sm rounded-xl overflow-hidden">
-                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-                    <h5 class="font-weight-bold mb-0">Help Desk</h5>
-                    <button class="btn btn-warning btn-sm rounded-pill px-3 font-weight-bold shadow-sm" data-toggle="modal" data-target="#newTicketModal">
-                        <i class="fas fa-plus mr-1"></i> New Ticket
-                    </button>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="bg-light text-muted uppercase x-small font-weight-bold">
-                            <tr>
-                                <th class="border-0 px-4">Subject</th>
-                                <th class="border-0 text-center">Status</th>
-                                <th class="border-0 text-right px-4">Manage</th>
-                            </tr>
-                        </thead>
-                        <tbody class="small font-weight-medium">
-                            @forelse($tickets as $ticket)
-                                <tr>
-                                    <td class="px-4 py-3">
-                                        <span class="d-block text-dark font-weight-bold">{{ $ticket->subject }}</span>
-                                        <span class="x-small text-muted">Opened {{ $ticket->created_at->format('d M') }}</span>
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <span class="badge badge-pill {{ $ticket->status == 'open' ? 'badge-success' : 'badge-secondary' }} px-3 py-1">
-                                            {{ strtoupper($ticket->status) }}
-                                        </span>
-                                    </td>
-                                    <td class="text-right px-4 align-middle">
-                                        <a href="#" class="btn btn-sm btn-outline-light text-dark border rounded-pill">View Case</a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="3" class="text-center py-5 text-muted">No active support requests</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+           {{-- Support Tickets Table --}}
+<div id="tickets" class="card border-0 shadow-sm rounded-xl overflow-hidden">
+    <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="font-weight-bold mb-0">Help Desk</h5>
+            <p class="small text-muted mb-0">Track your inquiries and part requests.</p>
+        </div>
+        <button class="btn btn-warning btn-sm rounded-pill px-3 font-weight-bold shadow-sm" data-toggle="modal" data-target="#createTicketModal">
+            <i class="fas fa-plus mr-1"></i> New Ticket
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="bg-light text-muted uppercase x-small font-weight-bold">
+                <tr>
+                    <th class="border-0 px-4">Subject</th>
+                    <th class="border-0 text-center">Status</th>
+                    <th class="border-0 text-right px-4">Manage</th>
+                </tr>
+            </thead>
+            <tbody class="small font-weight-medium">
+                @forelse($tickets as $ticket)
+                    <tr>
+                        <td class="px-4 py-3">
+                            <span class="d-block text-dark font-weight-bold">{{ $ticket->subject }}</span>
+                            <div class="d-flex align-items-center mt-1">
+                                <span class="badge badge-light border x-small mr-2">{{ ucfirst($ticket->category) }}</span>
+                                <span class="x-small text-muted">Opened {{ $ticket->created_at->format('d M, Y') }}</span>
+                            </div>
+                        </td>
+                        <td class="text-center align-middle">
+                            @php
+                                $statusClasses = [
+                                    'open' => 'bg-success-light text-success',
+                                    'pending' => 'bg-warning-light text-warning',
+                                    'closed' => 'bg-secondary text-white'
+                                ];
+                                $currentClass = $statusClasses[$ticket->status] ?? 'bg-light text-muted';
+                            @endphp
+                            <span class="badge badge-pill {{ $currentClass }} px-3 py-1 shadow-xs">
+                                {{ strtoupper($ticket->status) }}
+                            </span>
+                        </td>
+                        <td class="text-right px-4 align-middle">
+                            <a href="{{ route('tickets.show', $ticket->id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 transition-3s">
+                                <i class="fas fa-comments mr-1"></i> View Case
+                            </a>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" class="text-center py-5 text-muted">
+                            <i class="fas fa-ticket-alt fa-2x mb-3 opacity-25"></i>
+                            <p class="mb-0">No active support requests found.</p>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    @if($tickets->hasPages())
+        <div class="card-footer bg-white border-top py-3">
+            {{ $tickets->links() }}
+        </div>
+    @endif
+</div>
         </div>
     </div>
 </div>

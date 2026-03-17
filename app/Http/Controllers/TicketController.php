@@ -18,7 +18,7 @@ class TicketController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('user.tickets.index', compact('tickets'));
+        return view('tickets.index', compact('tickets'));
     }
 
     /**
@@ -26,37 +26,63 @@ class TicketController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validation
         $validated = $request->validate([
             'category'  => 'required|string|in:order,payment,part_request,technical',
             'subject'   => 'required|string|min:5|max:255',
             'message'   => 'required|string|min:10',
-            'order_ref' => 'nullable|string|max:100', // Added for SMM order tracking
+            'order_ref' => 'nullable|string|max:100', 
         ]);
 
-        // 2. Creation
-        // We assume the Ticket model has 'user_id' in $fillable or uses the relationship
         $ticket = Auth::user()->tickets()->create([
             'category'  => $validated['category'],
             'subject'   => $validated['subject'],
             'message'   => $validated['message'],
             'order_ref' => $validated['order_ref'],
-            'status'    => 'open', // Default status
+            'status'    => 'open',
             'priority'  => 'medium',
         ]);
 
-        // 3. Response
-        // Redirecting back to the dashboard (or wherever the modal was triggered)
         return redirect()->back()->with('success', "Ticket #{$ticket->id} has been opened. Our team will review it shortly.");
     }
 
     /**
-     * View a specific ticket conversation.
+     * View a specific ticket conversation with replies.
      */
     public function show($id)
     {
-        $ticket = Auth::user()->tickets()->findOrFail($id);
+        // Eager load replies and the user who wrote them
+        $ticket = Auth::user()->tickets()
+            ->with(['replies.user'])
+            ->findOrFail($id);
         
-        return view('user.tickets.show', compact('ticket'));
+        return view('tickets.show', compact('ticket'));
+    }
+
+    /**
+     * Allow the customer to reply to an existing ticket.
+     */
+    public function reply(Request $request, $id)
+    {
+        $ticket = Auth::user()->tickets()->findOrFail($id);
+
+        // Security: Don't allow replies to closed tickets
+        if ($ticket->status === 'closed') {
+            return redirect()->back()->with('error', 'This ticket is closed and cannot receive replies.');
+        }
+
+        $request->validate([
+            'message' => 'required|string|min:2'
+        ]);
+
+        // Create the reply
+        $ticket->replies()->create([
+            'user_id' => Auth::id(),
+            'message' => $request->message,
+        ]);
+
+        // Update status to 'open' so admin knows there is a new response
+        $ticket->update(['status' => 'open']);
+
+        return redirect()->back()->with('success', 'Your reply has been sent.');
     }
 }

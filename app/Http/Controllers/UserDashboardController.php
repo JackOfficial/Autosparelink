@@ -14,7 +14,7 @@ class UserDashboardController extends Controller
     /**
      * Main Dashboard View
      */
- public function index()
+public function index()
 {
     $user = Auth::user();
 
@@ -24,25 +24,31 @@ class UserDashboardController extends Controller
         ->latest()
         ->get();
 
-    // 2. Fetch Tickets (The missing part!)
-    // We fetch the latest 5 to show a "Recent Tickets" table on the dashboard
+    // 2. Fetch Tickets
+    // We fetch the latest 5 to show on the dashboard table
     $tickets = $user->tickets()->latest()->take(5)->get();
 
     // 3. Dashboard Statistics
     $stats = [
-        'total_orders'  => $allOrders->count(),
-        'active_orders' => $allOrders->whereIn('status', ['pending', 'shipped', 'processing'])->count(),
-        'total_spent'   => $allOrders->where('status', 'completed')->sum('total_amount'),
-        'last_order'    => $allOrders->first(),
-        'open_tickets'  => $user->tickets()->where('status', 'open')->count(), // For the UI badge
+        'total_orders'     => $allOrders->count(),
+        'active_orders'    => $allOrders->whereIn('status', ['pending', 'shipped', 'processing'])->count(),
+        'total_spent'      => $allOrders->where('status', 'completed')->sum('total_amount'),
+        'last_order'       => $allOrders->first(),
+        
+        // Ticket Stats for your new Summary Cards
+        'open_tickets'     => $user->tickets()->where('status', 'open')->count(),    // User waiting for Admin
+        'pending_tickets'  => $user->tickets()->where('status', 'pending')->count(), // Admin has replied!
+        'closed_tickets'   => $user->tickets()->where('status', 'closed')->count(),  // Resolved
     ];
 
     // 4. Cart & Wishlist Content
     $wishlistItems = Cart::instance('wishlist')->content();
     $cartItems     = Cart::instance('default')->content();
-    $cartTotal     = Cart::instance('default')->subtotal();
+    
+    // Clean up cart total to ensure it's numeric for number_format
+    $cartTotal     = (float) str_replace(',', '', Cart::instance('default')->subtotal());
 
-    // 5. Return View with 'tickets' added to compact
+    // 5. Return View
     return view('dashboard.index', compact(
         'user', 
         'allOrders', 
@@ -50,10 +56,9 @@ class UserDashboardController extends Controller
         'wishlistItems', 
         'cartItems', 
         'cartTotal',
-        'tickets' // Variable now passed to Blade
+        'tickets'
     ));
 }
-
     /**
      * Show Profile Edit Form
      */
