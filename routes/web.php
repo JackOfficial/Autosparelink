@@ -62,6 +62,7 @@ use App\Http\Controllers\Admin\TransmissionTypeController;
 use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
 use App\Http\Controllers\Admin\SystemSettings;
+use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ModelPartController;
@@ -298,8 +299,9 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
 
    });
 
-    // --- System Management ---
-    Route::get('/settings', SystemSettings::class)->name('admin.settings');
+    // System Settings
+    Route::get('/settings', [SystemSettingsController::class, 'index'])->name('admin.settings');
+    Route::post('/settings', [SystemSettingsController::class, 'update'])->name('admin.settings.update');
 
 });
 
