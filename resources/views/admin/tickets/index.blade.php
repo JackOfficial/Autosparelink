@@ -99,7 +99,7 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="text-center py-5">
-                                    <img src="{{ asset('admin/assets/img/no-data.svg') }}" alt="No Tickets" style="width: 80px;" class="mb-3 opacity-50">
+                                    <img src="{{ asset('frontend/img/no-data.png') }}" alt="No Tickets" style="width: 80px;" class="mb-3 opacity-50">
                                     <p class="text-muted">No {{ $status }} tickets found at the moment.</p>
                                 </td>
                             </tr>
