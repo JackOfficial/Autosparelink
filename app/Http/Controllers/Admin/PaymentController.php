@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class PaymentController extends Controller
 {
     /**
-     * Display all payments
+     * Display all payments with eager loaded order and user data
      */
     public function index()
     {
@@ -21,43 +21,30 @@ class PaymentController extends Controller
     }
 
     /**
-     * Not used (payments created automatically)
-     */
-    public function create()
-    {
-        abort(404);
-    }
-
-    /**
-     * Not used
-     */
-    public function store(Request $request)
-    {
-        abort(404);
-    }
-
-    /**
-     * Show single payment
+     * Show single payment details
      */
     public function show(string $id)
     {
-        $payment = Payment::with('order.user')->findOrFail($id);
+        $payment = Payment::with(['order.user', 'order.orderItems.part'])->findOrFail($id);
 
         return view('admin.payments.show', compact('payment'));
     }
 
     /**
-     * Edit payment (admin updates status)
+     * Edit payment status
      */
     public function edit(string $id)
     {
         $payment = Payment::findOrFail($id);
+        
+        // Match the statuses allowed in your validation
+        $statuses = ['pending', 'processing', 'successful', 'failed', 'refunded'];
 
-        return view('admin.payments.edit', compact('payment'));
+        return view('admin.payments.edit', compact('payment', 'statuses'));
     }
 
     /**
-     * Update payment status
+     * Update payment status and sync with Order if necessary
      */
     public function update(Request $request, string $id)
     {
@@ -71,13 +58,18 @@ class PaymentController extends Controller
             'status' => $request->status
         ]);
 
+        // Logic Sync: If payment is successful, ensure the order moves out of 'pending'
+        if ($request->status === 'successful' && $payment->order->status === 'pending') {
+            $payment->order->update(['status' => 'processing']);
+        }
+
         return redirect()
             ->route('admin.payments.show', $payment->id)
-            ->with('success', 'Payment updated successfully.');
+            ->with('success', "Payment #{$payment->id} marked as " . ucfirst($request->status));
     }
 
     /**
-     * Delete payment (optional)
+     * Delete payment
      */
     public function destroy(string $id)
     {
@@ -86,6 +78,6 @@ class PaymentController extends Controller
 
         return redirect()
             ->route('admin.payments.index')
-            ->with('success', 'Payment deleted successfully.');
+            ->with('success', 'Payment record deleted successfully.');
     }
 }
