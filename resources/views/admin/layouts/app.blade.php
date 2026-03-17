@@ -275,8 +275,8 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/spare-parts" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Parts</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/part-brands" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Part Brands</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/categories" class="nav-link"><i class="fas fa-road nav-icon"></i><p>Categories</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/part-brands" class="nav-link"><i class="nav-icon fas fa-tag"></i><p>Part Brands</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/categories" class="nav-link"><i class="nav-icon fas fa-sitemap"></i><p>Categories</p></a></li>
           </ul>
         </li>
 
@@ -348,7 +348,7 @@
             <ul class="nav nav-treeview">
                 <li class="nav-item" x-show="isVisible($el)">
                     <a href="/admin/mailbox/inbox" class="nav-link {{ request()->is('admin/mailbox/inbox') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Inbox</p>
+                        <i class="nav-icon fas fa-inbox"></i><p>Inbox</p>
                     </a>
                 </li>
                 <li class="nav-item" x-show="isVisible($el)">
