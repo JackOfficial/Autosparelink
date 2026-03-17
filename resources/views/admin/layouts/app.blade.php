@@ -83,6 +83,16 @@
         </div>
       </li>
 
+       @php $navTicketCount = \App\Models\Ticket::where('status', 'open')->count(); @endphp
+      <li class="nav-item dropdown">
+        <a class="nav-link" href="{{ route('admin.tickets.index') }}">
+          <i class="far fa-comments"></i>
+          @if($navTicketCount > 0)
+            <span class="badge badge-danger navbar-badge">{{ $navTicketCount }}</span>
+          @endif
+        </a>
+      </li>
+
       <!-- Messages Dropdown Menu -->
       <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" href="#">
@@ -367,6 +377,19 @@
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/mailbox/inbox" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Read</p></a></li>
           </ul>
         </li>
+
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="{{ route('admin.tickets.index') }}" class="nav-link {{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-headset"></i>
+              <p>
+                Support Tickets
+                @php $openTickets = \App\Models\Ticket::where('status', 'open')->count(); @endphp
+                @if($openTickets > 0)
+                  <span class="badge badge-danger right">{{ $openTickets }}</span>
+                @endif
+              </p>
+            </a>
+          </li>
 
         @if(Auth::check())
         <li class="nav-item mt-3 border-top border-secondary">
