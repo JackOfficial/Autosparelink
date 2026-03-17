@@ -37,7 +37,7 @@
         @endif
 
         <a href="{{ route('spare-parts.show', $part->sku) }}" class="d-block">
-            <img loading="lazy" src="{{ asset('storage/'.$mainPhoto) }}" alt="{{ $part->part_name }}" style="width: 100%; height: 200px; object-fit: cover;">
+            <img loading="lazy" src="{{ Storage::url($mainPhoto) }}" alt="{{ $part->part_name }}" style="width: 100%; height: 200px; object-fit: cover;">
         </a>
 
         <div class="product-action">
