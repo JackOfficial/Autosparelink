@@ -7,7 +7,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Ticket extends Model
 {
-  protected $fillable = ['category', 'subject', 'message', 'order_ref', 'status', 'priority'];
+  protected $fillable = [
+    'user_id', 
+    'category', 
+    'subject', 
+    'message', 
+    'order_ref', 
+    'priority', 
+    'status'
+];
 
   /**
      * Get the user that owns the ticket.
