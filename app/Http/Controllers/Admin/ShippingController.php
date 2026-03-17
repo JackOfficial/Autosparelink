@@ -10,11 +10,11 @@ use App\Http\Controllers\Controller;
 class ShippingController extends Controller
 {
     /**
-     * Display all shippings
+     * Display all shippings with eager loaded data
      */
     public function index()
     {
-        $shippings = Shipping::with('order.user')
+        $shippings = Shipping::with(['order.user', 'order.address'])
             ->latest()
             ->paginate(15);
 
@@ -26,13 +26,16 @@ class ShippingController extends Controller
      */
     public function create()
     {
-        $orders = Order::doesntHave('shipping')->get();
+        // Only get orders that are 'processing' and don't have shipping yet
+        $orders = Order::where('status', 'processing')
+            ->doesntHave('shipping')
+            ->get();
 
         return view('admin.shippings.create', compact('orders'));
     }
 
     /**
-     * Store new shipping record
+     * Store new shipping record and update order status
      */
     public function store(Request $request)
     {
@@ -43,41 +46,36 @@ class ShippingController extends Controller
             'status' => 'required|in:pending,shipped,in_transit,delivered,failed',
         ]);
 
-        Shipping::create([
+        $shipping = Shipping::create([
             'order_id' => $request->order_id,
             'carrier' => $request->carrier,
             'tracking_number' => $request->tracking_number,
             'status' => $request->status,
-            'shipped_at' => $request->status === 'shipped' ? now() : null,
+            'shipped_at' => in_array($request->status, ['shipped', 'in_transit']) ? now() : null,
         ]);
+
+        // Auto-update Order Status
+        if (in_array($request->status, ['shipped', 'in_transit'])) {
+            $shipping->order->update(['status' => 'shipped']);
+        }
 
         return redirect()
             ->route('admin.shippings.index')
-            ->with('success', 'Shipping created successfully.');
+            ->with('success', "Shipping for Order #{$request->order_id} has been initiated.");
     }
 
     /**
-     * Show single shipping
+     * Show single shipping details
      */
     public function show(string $id)
     {
-        $shipping = Shipping::with('order.user')->findOrFail($id);
+        $shipping = Shipping::with(['order.user', 'order.address'])->findOrFail($id);
 
         return view('admin.shippings.show', compact('shipping'));
     }
 
     /**
-     * Edit shipping
-     */
-    public function edit(string $id)
-    {
-        $shipping = Shipping::findOrFail($id);
-
-        return view('admin.shippings.edit', compact('shipping'));
-    }
-
-    /**
-     * Update shipping
+     * Update shipping and sync with Order status
      */
     public function update(Request $request, string $id)
     {
@@ -88,17 +86,30 @@ class ShippingController extends Controller
         ]);
 
         $shipping = Shipping::findOrFail($id);
-
-        $shipping->update([
+        
+        $data = [
             'carrier' => $request->carrier,
             'tracking_number' => $request->tracking_number,
             'status' => $request->status,
-            'delivered_at' => $request->status === 'delivered' ? now() : null,
-        ]);
+        ];
+
+        // Set timestamps based on status
+        if ($request->status === 'delivered') {
+            $data['delivered_at'] = now();
+        }
+
+        $shipping->update($data);
+
+        // Sync Order Status: If shipping is delivered, the order is delivered.
+        if ($request->status === 'delivered') {
+            $shipping->order->update(['status' => 'delivered']);
+        } elseif (in_array($request->status, ['shipped', 'in_transit'])) {
+            $shipping->order->update(['status' => 'shipped']);
+        }
 
         return redirect()
             ->route('admin.shippings.show', $shipping->id)
-            ->with('success', 'Shipping updated successfully.');
+            ->with('success', 'Shipping status updated and order synced.');
     }
 
     /**
@@ -111,6 +122,6 @@ class ShippingController extends Controller
 
         return redirect()
             ->route('admin.shippings.index')
-            ->with('success', 'Shipping deleted successfully.');
+            ->with('success', 'Shipping record removed.');
     }
 }
