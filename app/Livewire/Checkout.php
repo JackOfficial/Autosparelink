@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Mail\OrderCallbackAdmin;
+use App\Mail\OrderCallbackClient;
 use Livewire\Component;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use App\Models\Order;
@@ -9,6 +11,8 @@ use App\Models\OrderItem;
 use App\Models\Address;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class Checkout extends Component
 {
@@ -135,7 +139,7 @@ public function requestCallback()
         return;
     }
 
-    // 1. Validation: Ensure we have contact/delivery details
+    // 1. Validation
     if ($this->use_new_address) {
         $this->validate([
             'new_address.full_name' => 'required|string|max:255',
@@ -166,17 +170,17 @@ public function requestCallback()
             $final_address_id = $address->id;
         }
 
-        // 3. Create the Order with 'callback_requested' status
+        // 3. Create the Order
         $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
         
         $order = Order::create([
             'user_id' => Auth::id(),
             'address_id' => $final_address_id,
             'total_amount' => $subtotal,
-            'status' => 'callback_requested', // The ENUM we just updated!
+            'status' => 'callback_requested',
         ]);
 
-        // 4. Save Order Items (Crucial so you know what parts to discuss on the call)
+        // 4. Save Order Items
         foreach ($cartItems as $item) {
             OrderItem::create([
                 'order_id' => $order->id,
@@ -186,19 +190,32 @@ public function requestCallback()
             ]);
         }
 
-        // 5. Cleanup
+        // 5. Cleanup Cart
         Cart::instance('default')->destroy();
         DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
 
         DB::commit();
 
-        // 6. Redirect to success page
+        // 6. Send Emails (Outside the transaction to prevent timeout issues)
+        try {
+            // Send to you (Admin)
+            Mail::to('admin@happyfamilyrwanda.org')->send(new OrderCallbackAdmin($order));
+
+            // Send to Customer
+            Mail::to(Auth::user()->email)->send(new OrderCallbackClient($order));
+        } catch (\Exception $e) {
+            // Log the error but don't stop the user from proceeding
+            Log::error('Callback Email Failed: ' . $e->getMessage());
+        }
+
+        // 7. Redirect to success page
         return redirect()->route('order.success', ['order' => $order->id])
                          ->with('message', 'Murakoze! We will call you shortly.');
 
     } catch (\Exception $e) {
         DB::rollBack();
-        $this->dispatch('notify', message: 'Something went wrong: ' . $e->getMessage());
+        Log::error('Order Creation Failed: ' . $e->getMessage());
+        $this->dispatch('notify', message: 'Something went wrong. Please try again.');
     }
 }
 
