@@ -366,4 +366,12 @@
 
 {{-- Re-inclusion of the Modal --}}
 @include('partials.ticket-modal') 
+
+@if($errors->has('subject') || $errors->has('message'))
+    <script>
+        $(document).ready(function() {
+            $('#newTicketModal').modal('show');
+        });
+    </script>
+@endif
 @endsection
