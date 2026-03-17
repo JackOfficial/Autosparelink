@@ -63,13 +63,22 @@
                                     <td class="py-4 font-weight-bold">
                                         {{ number_format($item->subtotal, 0) }} RWF
                                     </td>
-                                    <td class="py-4 text-right px-4">
-                                        <button class="btn btn-link text-danger p-0" title="Remove Item"
-                                                wire:click="removeItem('{{ $item->rowId }}')" 
-                                                wire:loading.attr="disabled">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
+                                   <td class="py-4 text-right px-4">
+    {{-- Move to Wishlist Button --}}
+    <button class="btn btn-link text-primary p-0 mr-3" 
+            title="Move to Wishlist"
+            wire:click="moveToWishlist('{{ $item->rowId }}')"
+            wire:loading.attr="disabled">
+        <i class="far fa-heart"></i>
+    </button>
+
+    {{-- Existing Delete Button --}}
+    <button class="btn btn-link text-danger p-0" title="Remove Item"
+            wire:click="removeItem('{{ $item->rowId }}')" 
+            wire:loading.attr="disabled">
+        <i class="fas fa-trash-alt"></i>
+    </button>
+</td>
                                 </tr>
                                 @endforeach
                             </tbody>

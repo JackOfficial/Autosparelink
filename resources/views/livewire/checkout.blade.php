@@ -6,7 +6,8 @@
         </div>
     </div>
 
-    @if(empty($cartItems))
+    {{-- Check if collection is empty --}}
+    @if($cartContent->isEmpty())
         <div class="card border-0 shadow-sm text-center py-5" style="border-radius: 15px;">
             <div class="card-body">
                 <i class="fa fa-shopping-cart fa-4x text-light mb-3"></i>
@@ -17,16 +18,16 @@
     @else
         <div class="row">
             <div class="col-lg-7">
-                {{-- Shipping Section --}}
+                {{-- Delivery Section --}}
                 <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
                     <div class="card-body p-4">
                         <h5 class="font-weight-bold mb-4"><i class="fa fa-truck text-primary mr-2"></i>Delivery Information</h5>
 
                         @if(Auth::check())
-                            @if(!empty($addresses) && count($addresses) > 0)
+                            @if($addresses->isNotEmpty())
                                 <div class="form-group mb-4">
                                     <label class="small font-weight-bold text-uppercase text-muted">Saved Addresses</label>
-                                    <select class="form-control custom-select border-light bg-light rounded-lg" wire:model.live="address_id">
+                                    <select class="form-control custom-select border-light bg-light rounded-lg @error('address_id') is-invalid @enderror" wire:model.live="address_id">
                                         <option value="">-- Choose a delivery location --</option>
                                         @foreach($addresses as $address)
                                             <option value="{{ $address->id }}">
@@ -34,6 +35,7 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    @error('address_id') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
                             @endif
 
@@ -42,7 +44,7 @@
                                 <label class="custom-control-label font-weight-bold" for="useNewAddress">Deliver to a different address</label>
                             </div>
 
-                            @if($use_new_address || empty($addresses))
+                            @if($use_new_address || $addresses->isEmpty())
                                 <div class="row animate__animated animate__fadeIn">
                                     <div class="col-md-6 mb-3">
                                         <input type="text" class="form-control border-light bg-light" placeholder="Recipient Name" wire:model="new_address.full_name">
@@ -77,40 +79,31 @@
                 <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px; border-left: 5px solid #ffcc00 !important;">
                     <div class="card-body p-4">
                         <h5 class="font-weight-bold mb-3"><i class="fa fa-credit-card text-warning mr-2"></i>Payment Method</h5>
-                        
                         <div class="p-3 bg-light rounded-lg border mb-3">
                             <div class="d-flex align-items-center mb-2">
-                                <img src="{{ asset('images/momo.jpg')}}" style="width: 35px;" class="mr-2">
+                                <img src="{{ asset('images/momo.jpg')}}" style="width: 35px;" class="mr-2" alt="MoMo">
                                 <h6 class="mb-0 font-weight-bold">Mobile Money & Cards</h6>
                             </div>
-                            <p class="small text-muted mb-0">Securely pay via Flutterwave (MoMo & Cards).</p>
+                            <p class="small text-muted mb-0">Securely pay via Flutterwave.</p>
                         </div>
 
-                        @if(Auth::check())
-                            {{-- IMPORTANT: Use wire:click instead of <form> to handle order creation first --}}
-                            <button wire:click="placeOrder" wire:loading.attr="disabled" class="btn btn-primary btn-lg btn-block rounded-pill shadow-sm font-weight-bold py-3">
-                                <span wire:loading.remove>
-                                    <i class="fa fa-lock mr-2"></i>Pay {{ $total }} RWF Now
-                                </span>
-                                <span wire:loading>
-                                    <i class="fa fa-spinner fa-spin mr-2"></i>Processing Order...
-                                </span>
-                            </button>
-                        @else
-                            <button class="btn btn-secondary btn-lg btn-block rounded-pill disabled" disabled>Login to Pay</button>
-                        @endif
+                        <button wire:click="placeOrder" wire:loading.attr="disabled" class="btn btn-primary btn-lg btn-block rounded-pill shadow-sm font-weight-bold py-3">
+                            <span wire:loading.remove>
+                                <i class="fa fa-lock mr-2"></i>Pay {{ $total }} RWF Now
+                            </span>
+                            <span wire:loading>
+                                <i class="fa fa-spinner fa-spin mr-2"></i>Processing Order...
+                            </span>
+                        </button>
                     </div>
                 </div>
 
-                <div class="d-flex flex-column flex-md-row gap-3">
-                    <button class="btn btn-outline-dark btn-lg rounded-pill px-4 shadow-sm" wire:click="requestCallback">
-                        <i class="fa fa-phone-alt mr-2"></i>Request a Callback
-                    </button>
-                </div>
-                <p class="small text-muted mt-3"><i class="fa fa-shield-alt mr-1"></i> Your data is secure. A representative will contact you shortly.</p>
+                <button class="btn btn-outline-dark btn-lg rounded-pill px-4 shadow-sm" wire:click="requestCallback">
+                    <i class="fa fa-phone-alt mr-2"></i>Request a Callback
+                </button>
             </div>
 
-            {{-- Order Summary Side Bar --}}
+            {{-- Sidebar Summary --}}
             <div class="col-lg-5 mt-4 mt-lg-0">
                 <div class="sticky-top" style="top: 20px;">
                     <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
@@ -119,18 +112,25 @@
                         </div>
                         <div class="card-body p-0">
                             <ul class="list-group list-group-flush">
-                                @foreach($cartItems as $item)
+                                {{-- Loop through objects using $item->property --}}
+                                @foreach($cartContent as $item)
                                     <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                                         <div class="d-flex align-items-center">
-                                            <div class="bg-light rounded p-2 mr-3" style="width: 50px; text-align: center;">
-                                                <i class="fa fa-tools text-muted"></i>
+                                            <div class="mr-3">
+                                                @if($item->options->image)
+                                                    <img src="{{ Storage::url($item->options->image) }}" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
+                                                @else
+                                                    <div class="bg-light rounded p-2 text-center" style="width: 50px; height: 50px;">
+                                                        <i class="fa fa-tools text-muted"></i>
+                                                    </div>
+                                                @endif
                                             </div>
                                             <div>
-                                                <h6 class="mb-0 small font-weight-bold text-dark text-truncate" style="max-width: 150px;">{{ $item['name'] }}</h6>
-                                                <small class="text-muted">Qty: {{ $item['qty'] }}</small>
+                                                <h6 class="mb-0 small font-weight-bold text-dark text-truncate" style="max-width: 150px;">{{ $item->name }}</h6>
+                                                <small class="text-muted">Qty: {{ $item->qty }}</small>
                                             </div>
                                         </div>
-                                        <span class="font-weight-bold text-dark small">{{ number_format((float)$item['price'] * $item['qty'], 0) }} RWF</span>
+                                        <span class="font-weight-bold text-dark small">{{ number_format($item->price * $item->qty, 0) }} RWF</span>
                                     </li>
                                 @endforeach
                             </ul>

@@ -107,6 +107,14 @@ class Checkout extends Component
             // 5. Clear the Cart
             Cart::instance('default')->destroy();
 
+            if (Auth::check()) {
+    // This removes the saved database record so it doesn't reappear on next login
+    DB::table('shoppingcart')
+        ->where('identifier', Auth::id())
+        ->where('instance', 'default')
+        ->delete();
+}
+
             /**
              * FIX: Redirect to a GET route.
              * Instead of posting directly to initialize, we redirect to a 'processing' 
@@ -126,28 +134,15 @@ class Checkout extends Component
         $this->dispatch('notify', message: 'We have received your request. A representative will call you shortly.');
     }
 
-    public function render()
-    {
-        $cartItems = Cart::instance('default')->content()->map(function ($item) {
-            return [
-                'rowId' => $item->rowId,
-                'id' => $item->id,
-                'name' => $item->name,
-                'qty' => $item->qty,
-                'price' => $item->price,
-                'options' => $item->options,
-            ];
-        })->toArray();
+   public function render()
+{
+    // Simply grab the content as a collection of objects
+    $cartContent = Cart::instance('default')->content();
 
-        $total = Cart::instance('default')->subtotal();
-        
-        // Refresh addresses list
-        $this->addresses = Auth::check() ? Auth::user()->addresses()->get() : collect();
-
-        return view('livewire.checkout', [
-            'cartItems' => $cartItems,
-            'total' => $total,
-            'addresses' => $this->addresses
-        ]);
-    }
+    return view('livewire.checkout', [
+        'cartContent' => $cartContent,
+        'total' => Cart::instance('default')->subtotal(),
+        'addresses' => Auth::check() ? Auth::user()->addresses : collect()
+    ]);
+}
 }
