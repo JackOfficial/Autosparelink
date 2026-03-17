@@ -37,14 +37,23 @@
                                 <td class="px-4 font-weight-bold">#{{ $payment->id }}</td>
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span class="text-dark">{{ $payment->order->user->name }}</span>
-                                        <small class="text-muted">{{ $payment->order->user->email }}</small>
+                                        {{-- Safety Check: Using null-safe operator to prevent crash --}}
+                                        <span class="text-dark font-weight-bold">
+                                            {{ $payment->order?->user?->name ?? 'Deleted User' }}
+                                        </span>
+                                        <small class="text-muted">
+                                            {{ $payment->order?->user?->email ?? 'N/A' }}
+                                        </small>
                                     </div>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.orders.show', $payment->order->id) }}" class="text-primary">
-                                        Order #{{ $payment->order->id }}
-                                    </a>
+                                    @if($payment->order)
+                                        <a href="{{ route('admin.orders.show', $payment->order->id) }}" class="text-primary font-weight-bold">
+                                            Order #{{ $payment->order->id }}
+                                        </a>
+                                    @else
+                                        <span class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Order Deleted</span>
+                                    @endif
                                 </td>
                                 <td class="font-weight-bold text-dark">
                                     {{ number_format($payment->amount) }} RWF
@@ -68,7 +77,7 @@
                                         {{ ucfirst($payment->status) }}
                                     </span>
                                 </td>
-                                <td class="text-muted">
+                                <td class="text-muted small">
                                     {{ $payment->created_at->format('d M, Y') }}
                                 </td>
                                 <td class="text-center px-4">

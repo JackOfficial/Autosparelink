@@ -15,7 +15,7 @@
                 <i class="fas fa-box mr-1"></i> View Related Order
             </a>
         </div>
-    </div>
+    </div>  
 
     <div class="row">
         {{-- Payment Status Control --}}
