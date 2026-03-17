@@ -3,7 +3,7 @@
 @section('content')
 <div class="container py-5">
     <div class="mb-4 d-flex justify-content-between align-items-center">
-        <a href="{{ route('user.tickets.index') }}" class="text-decoration-none">
+        <a href="{{ route('tickets.index') }}" class="text-decoration-none">
             <i class="fa fa-arrow-left mr-1"></i> My Support Tickets
         </a>
         <span class="badge {{ $ticket->status == 'closed' ? 'badge-secondary' : 'badge-success' }} px-3 py-2 rounded-pill shadow-sm">
@@ -46,7 +46,7 @@
             @if($ticket->status != 'closed')
                 <div class="card border-0 shadow-sm rounded-xl mt-4">
                     <div class="card-body p-4">
-                        <form action="{{ route('user.tickets.reply', $ticket->id) }}" method="POST">
+                        <form action="{{ route('tickets.reply', $ticket->id) }}" method="POST">
                             @csrf
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold">SEND A REPLY</label>
