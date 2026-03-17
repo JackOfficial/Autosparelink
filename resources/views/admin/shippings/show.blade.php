@@ -57,9 +57,14 @@
                     <p class="text-muted small mb-3">{{ $shipping->order?->user?->email }}</p>
                     <hr>
                     <p class="mb-0 text-dark">
-                        <i class="fas fa-map-marker-alt text-danger mr-2"></i>
-                        {{ $shipping->order?->address ?? 'No address provided' }}
-                    </p>
+    <i class="fas fa-map-marker-alt text-danger mr-2"></i>
+    @if($shipping->order?->address)
+        {{ $shipping->order->address->street }}, 
+        {{ $shipping->order->address->city }}
+    @else
+        <span class="text-muted italic">No address provided</span>
+    @endif
+</p>
                 </div>
             </div>
         </div>
