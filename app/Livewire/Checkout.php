@@ -128,11 +128,79 @@ class Checkout extends Component
         }
     }
 
-    public function requestCallback() 
-    {
-        // Simple callback logic for the button in your blade
-        $this->dispatch('notify', message: 'We have received your request. A representative will call you shortly.');
+public function requestCallback() 
+{
+    if (!Auth::check()) {
+        $this->dispatch('notify', message: 'Please log in to request a callback.');
+        return;
     }
+
+    // 1. Validation: Ensure we have contact/delivery details
+    if ($this->use_new_address) {
+        $this->validate([
+            'new_address.full_name' => 'required|string|max:255',
+            'new_address.phone' => 'required|string|max:20',
+            'new_address.street_address' => 'required|string',
+            'new_address.city' => 'required|string',
+        ]);
+    } elseif (!$this->address_id) {
+        $this->dispatch('notify', message: 'Please select an address so we know your location.');
+        return;
+    }
+
+    $cartItems = Cart::instance('default')->content();
+    if ($cartItems->isEmpty()) {
+        $this->dispatch('notify', message: 'Your cart is empty!');
+        return;
+    }
+
+    DB::beginTransaction();
+
+    try {
+        // 2. Process Address
+        $final_address_id = $this->address_id;
+        if ($this->use_new_address) {
+            $address = Address::create(array_merge($this->new_address, [
+                'user_id' => Auth::id(),
+            ]));
+            $final_address_id = $address->id;
+        }
+
+        // 3. Create the Order with 'callback_requested' status
+        $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+        
+        $order = Order::create([
+            'user_id' => Auth::id(),
+            'address_id' => $final_address_id,
+            'total_amount' => $subtotal,
+            'status' => 'callback_requested', // The ENUM we just updated!
+        ]);
+
+        // 4. Save Order Items (Crucial so you know what parts to discuss on the call)
+        foreach ($cartItems as $item) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'part_id' => $item->id,
+                'quantity' => $item->qty,
+                'unit_price' => $item->price,
+            ]);
+        }
+
+        // 5. Cleanup
+        Cart::instance('default')->destroy();
+        DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
+
+        DB::commit();
+
+        // 6. Redirect to success page
+        return redirect()->route('order.success', ['order' => $order->id])
+                         ->with('message', 'Murakoze! We will call you shortly.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        $this->dispatch('notify', message: 'Something went wrong: ' . $e->getMessage());
+    }
+}
 
    public function render()
 {
