@@ -1,14 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Contact Us</title>
-</head>
-<body>
-   <p>Name: {{ $name }}</p>
-   <p>email: {{ $email }}</p>
-   <p>message: {{ $textMessage }}</p>
-</body>
-</html>
+<x-mail::message>
+# New Message Received
+
+You have a new inquiry from the contact form on **{{ config('app.name') }}**.
+
+<x-mail::panel>
+**From:** {{ $name }}  
+**Email:** [{{ $email }}](mailto:{{ $email }})  
+**Subject:** {{ $subjectText }}
+</x-mail::panel>
+
+### Message Content:
+{{ $messageContent }}
+
+<x-mail::button :url="config('app.url') . '/admin/mailbox/inbox'" color="primary">
+View in Admin Dashboard
+</x-mail::button>
+
+*Note: You can reply directly to this email to contact the sender.*
+
+Thanks,<br>
+{{ config('app.name') }} Notification System
+</x-mail::message>

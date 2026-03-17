@@ -27,28 +27,29 @@ class ContactComponent extends Component
         $this->validate();
 
         try {
-            // 1. Save to Database so it shows up in your Admin Mailbox
+            // 1. Save to Database
             Contact::create([
                 'name'    => $this->name,
                 'email'   => $this->email,
-                // Combines subject and message to fit your current migration
                 'message' => "Subject: " . $this->subject . "\n\n" . $this->message,
                 'status'  => 'active', 
             ]);
 
-            // 2. Optional: Send Email Notification to yourself
-            // Mail::to('admin@autosparelink.com')->send(new ContactMail(
-            //     $this->name, $this->email, $this->subject, $this->message
-            // ));
+            // 2. Notify the Admin
+            // We pass the data to your ContactMail mailable
+            Mail::to(config('mail.from.address'))->send(new ContactMail(
+                $this->name, 
+                $this->email, 
+                $this->subject, 
+                $this->message
+            ));
 
-            // 3. Reset form fields
             $this->reset(['name', 'email', 'subject', 'message']);
-
-            // 4. Show success message
             $this->successMessage = 'Your message has been sent successfully!';
 
         } catch (\Exception $e) {
-            // Handle any database errors gracefully
+            // Log the error for your own debugging
+            \Log::error("Mailbox Error: " . $e->getMessage());
             session()->flash('error', 'Something went wrong. Please try again later.');
         }
     }
