@@ -67,7 +67,7 @@
                                     {{ $ticket->updated_at->diffForHumans() }}
                                 </td>
                                 <td class="px-4 align-middle text-right">
-                                    <a href="{{ route('user.tickets.show', $ticket->id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    <a href="{{ route('tickets.show', $ticket->id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                         View Details
                                     </a>
                                 </td>
@@ -106,7 +106,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('user.tickets.store') }}" method="POST">
+            <form action="{{ route('tickets.store') }}" method="POST">
                 @csrf
                 <div class="modal-body p-4">
                     <div class="form-group mb-3">
