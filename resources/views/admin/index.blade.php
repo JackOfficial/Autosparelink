@@ -112,32 +112,33 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($recentOrders as $order)
-                            <tr>
-                                <td>#{{ $order->id }}</td>
-                                <td>{{ $order->customer_name }}</td>
-                                <td>
-                                    @if($order->status == 'callback_requested')
-                                        <span class="badge badge-danger blink_me">
-                                            <i class="fas fa-phone-alt mr-1"></i> Call Requested
-                                        </span>
-                                    @elseif($order->status == 'Pending')
-                                        <span class="badge badge-warning">Pending</span>
-                                    @elseif($order->status == 'Completed')
-                                        <span class="badge badge-success">Completed</span>
-                                    @else
-                                        <span class="badge badge-secondary">{{ $order->status }}</span>
-                                    @endif
-                                </td>
-                                <td class="font-weight-bold">{{ number_format($order->total) }} RWF</td>
-                                <td>{{ $order->created_at->diffForHumans() }}</td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-3 text-muted">No orders found.</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
+    @forelse ($recentOrders as $order)
+    <tr>
+        <td>#{{ $order->id }}</td>
+        {{-- Accessing the name through the user relationship --}}
+        <td>{{ $order->user?->name ?? 'Guest/Unknown' }}</td>
+        <td>
+            @if($order->status == 'callback_requested')
+                <span class="badge badge-danger blink_me">
+                    <i class="fas fa-phone-alt mr-1"></i> Call Requested
+                </span>
+            @elseif($order->status == 'Pending')
+                <span class="badge badge-warning">Pending</span>
+            @elseif($order->status == 'Completed')
+                <span class="badge badge-success">Completed</span>
+            @else
+                <span class="badge badge-secondary">{{ $order->status }}</span>
+            @endif
+        </td>
+        <td class="font-weight-bold">{{ number_format($order->total) }} RWF</td>
+        <td>{{ $order->created_at->diffForHumans() }}</td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="5" class="text-center py-3 text-muted">No orders found.</td>
+    </tr>
+    @endforelse
+</tbody>
                     </table>
                 </div>
             </div>
