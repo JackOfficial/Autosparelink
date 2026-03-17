@@ -18,6 +18,7 @@
             </div>
 
             @if($cartContent->count() > 0)
+            <h1>{{ $item->options->image }}</h1>
                 <div class="card shadow-sm border-0 rounded-lg">
                     <div class="table-responsive">
                         <table class="table table-borderless align-middle mb-0">
