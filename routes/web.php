@@ -185,16 +185,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile/password', 'updatePassword')->name('profile.password');
         Route::post('/garage/update', 'updateGarage')->name('garage.update');
         Route::post('/notifications/read-all', 'markAllRead')->name('notifications.readAll');
-       // 1. View the form and history list
-Route::get('/broadcast', [BroadcastController::class, 'index'])->name('broadcast.index');
-
-// 2. The missing "STORE/SEND" route (This handles the form submission)
-Route::post('/broadcast', [BroadcastController::class, 'send'])->name('broadcast.send');
-
-// 3. View details of a specific past broadcast
-Route::get('/broadcast/{broadcast}', [BroadcastController::class, 'show'])->name('broadcast.show');
-Route::delete('/broadcast/clear-all', [BroadcastController::class, 'clearAll'])->name('broadcast.clearAll');
-Route::delete('/broadcast/{broadcast}', [BroadcastController::class, 'destroy'])->name('broadcast.destroy');
+     
 // 4. User notification management
 Route::post('/notifications/read', function () {
     auth()->user()->unreadNotifications->markAsRead();
@@ -270,8 +261,16 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('addresses', AddressController::class);
     //////////////////////////////////
 
-    Route::get('/broadcast', [BroadcastController::class, 'index'])->name('broadcast.index');
-    Route::post('/broadcast', [BroadcastController::class, 'send'])->name('broadcast.send');
+    // 1. View the form and history list
+Route::get('/broadcast', [BroadcastController::class, 'index'])->name('broadcast.index');
+
+// 2. The missing "STORE/SEND" route (This handles the form submission)
+Route::post('/broadcast', [BroadcastController::class, 'send'])->name('broadcast.send');
+
+// 3. View details of a specific past broadcast
+Route::get('/broadcast/{broadcast}', [BroadcastController::class, 'show'])->name('broadcast.show');
+Route::delete('/broadcast/clear-all', [BroadcastController::class, 'clearAll'])->name('broadcast.clearAll');
+Route::delete('/broadcast/{broadcast}', [BroadcastController::class, 'destroy'])->name('broadcast.destroy');
 
     Route::resource('vehicle-brands', VehicleBrandController::class);
     Route::resource('part-brands', PartBrandController::class);
