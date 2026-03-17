@@ -1,11 +1,19 @@
 @extends('admin.layouts.app')
 @section('title', 'Dashboard | AutoSpareLink')
+
+@push('styles')
+<style>
+    .blink_me { animation: blinker 1.5s linear infinite; }
+    @keyframes blinker { 50% { opacity: 0.3; } }
+    .growth-indicator { font-size: 0.9rem; font-weight: bold; }
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid">
-    <!-- KPI Cards -->
     <div class="row">
         <div class="col-lg-3 col-6">
-            <div class="small-box bg-primary">
+            <div class="small-box bg-primary shadow-sm">
                 <div class="inner">
                     <h3>{{ $brands }}</h3>
                     <p>Total Brands</p>
@@ -16,29 +24,29 @@
         </div>
 
         <div class="col-lg-3 col-6">
-            <div class="small-box bg-success">
+            <div class="small-box bg-purple" style="background-color: #6f42c1 !important; color: white !important;">
                 <div class="inner">
-                    <h3>{{ $vehicle_models }}</h3>
-                    <p>Total Models</p>
+                    <h3>{{ $abandonedCount ?? 0 }}</h3>
+                    <p>Abandoned Carts</p>
                 </div>
-                <div class="icon"><i class="fas fa-cogs"></i></div>
-                <a href="/admin/vehicle-models" class="small-box-footer">Manage Models <i class="fas fa-arrow-circle-right"></i></a>
+                <div class="icon"><i class="fas fa-shopping-basket"></i></div>
+                <a href="/admin/carts" class="small-box-footer">Recover Sales <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
 
         <div class="col-lg-3 col-6">
-            <div class="small-box bg-warning">
+            <div class="small-box bg-warning shadow-sm">
                 <div class="inner">
                     <h3>{{ $pendingOrders }}</h3>
-                    <p>Pending Orders</p>
+                    <p>Pending / Callbacks</p>
                 </div>
-                <div class="icon"><i class="fas fa-shopping-cart"></i></div>
-                <a href="#" class="small-box-footer">View Orders <i class="fas fa-arrow-circle-right"></i></a>
+                <div class="icon"><i class="fas fa-phone"></i></div>
+                <a href="/admin/orders" class="small-box-footer">Process Orders <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
 
         <div class="col-lg-3 col-6">
-            <div class="small-box bg-danger">
+            <div class="small-box bg-danger shadow-sm">
                 <div class="inner">
                     <h3>{{ $lowStockParts }}</h3>
                     <p>Low Stock Parts</p>
@@ -49,15 +57,27 @@
         </div>
     </div>
 
-    <!-- Charts Row -->
     <div class="row">
         <div class="col-md-8">
             <div class="card card-info">
-                <div class="card-header">
-                    <h3 class="card-title">Monthly Sales Overview</h3>
+                <div class="card-header d-flex p-0">
+                    <h3 class="card-title p-3">Monthly Sales Overview</h3>
+                    <ul class="nav nav-pills ml-auto p-2">
+                        <li class="nav-item">
+                            <span class="nav-link active {{ $revenueChange >= 0 ? 'bg-success' : 'bg-danger' }}">
+                                {{ $revenueChange >= 0 ? '+' : '' }}{{ number_format($revenueChange, 1) }}% vs Last Month
+                            </span>
+                        </li>
+                    </ul>
                 </div>
                 <div class="card-body">
-                    <canvas id="salesChart"></canvas>
+                    <div class="d-flex mb-3">
+                        <p class="d-flex flex-column">
+                            <span class="text-bold text-lg">{{ number_format($thisMonthRevenue) }} RWF</span>
+                            <span>Sales This Month</span>
+                        </p>
+                    </div>
+                    <canvas id="salesChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                 </div>
             </div>
         </div>
@@ -68,15 +88,13 @@
                     <h3 class="card-title">Inventory Status</h3>
                 </div>
                 <div class="card-body">
-                    <canvas id="inventoryChart"></canvas>
+                    <canvas id="inventoryChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Orders & Shortcuts -->
     <div class="row">
-        <!-- Recent Orders -->
         <div class="col-md-8">
             <div class="card card-outline card-primary">
                 <div class="card-header">
@@ -96,21 +114,28 @@
                         <tbody>
                             @forelse ($recentOrders as $order)
                             <tr>
-                                <td>{{ $order->id }}</td>
+                                <td>#{{ $order->id }}</td>
                                 <td>{{ $order->customer_name }}</td>
                                 <td>
-                                    <span class="badge 
-                                        @if($order->status == 'Pending') badge-warning 
-                                        @elseif($order->status == 'Completed') badge-success 
-                                        @else badge-secondary @endif">
-                                        {{ $order->status }}
-                                    </span>
+                                    @if($order->status == 'callback_requested')
+                                        <span class="badge badge-danger blink_me">
+                                            <i class="fas fa-phone-alt mr-1"></i> Call Requested
+                                        </span>
+                                    @elseif($order->status == 'Pending')
+                                        <span class="badge badge-warning">Pending</span>
+                                    @elseif($order->status == 'Completed')
+                                        <span class="badge badge-success">Completed</span>
+                                    @else
+                                        <span class="badge badge-secondary">{{ $order->status }}</span>
+                                    @endif
                                 </td>
-                                <td>${{ number_format($order->total, 2) }}</td>
-                                <td>{{ $order->created_at->format('d M Y') }}</td>
+                                <td class="font-weight-bold">{{ number_format($order->total) }} RWF</td>
+                                <td>{{ $order->created_at->diffForHumans() }}</td>
                             </tr>
                             @empty
-                            <td colspan="5" class="text-center py-2">No order made at this moment</td>
+                            <tr>
+                                <td colspan="5" class="text-center py-3 text-muted">No orders found.</td>
+                            </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -118,28 +143,17 @@
             </div>
         </div>
 
-        <!-- Quick Access Shortcuts -->
         <div class="col-md-4">
             <div class="card card-outline card-secondary">
                 <div class="card-header">
                     <h3 class="card-title">Quick Access</h3>
                 </div>
                 <div class="card-body">
-                    <a href="/admin/vehicle-models" class="btn btn-app bg-info">
-                        <i class="fas fa-car"></i> Vehicles
-                    </a>
-                    <a href="/admin/spare-parts" class="btn btn-app bg-warning">
-                        <i class="fas fa-boxes"></i> Spare Parts
-                    </a>
-                    <a href="#" class="btn btn-app bg-success">
-                        <i class="fas fa-shopping-cart"></i> Orders
-                    </a>
-                    <a href="/admin/users" class="btn btn-app bg-primary">
-                        <i class="fas fa-users"></i> Users
-                    </a>
-                    <a href="#" class="btn btn-app bg-danger">
-                        <i class="fas fa-chart-pie"></i> Reports
-                    </a>
+                    <a href="/admin/vehicle-models" class="btn btn-app bg-info"><i class="fas fa-car"></i> Vehicles</a>
+                    <a href="/admin/spare-parts" class="btn btn-app bg-warning"><i class="fas fa-boxes"></i> Spare Parts</a>
+                    <a href="/admin/orders" class="btn btn-app bg-success"><i class="fas fa-shopping-cart"></i> Orders</a>
+                    <a href="/admin/users" class="btn btn-app bg-primary"><i class="fas fa-users"></i> Users</a>
+                    <a href="/admin/carts" class="btn btn-app bg-purple" style="background-color: #6f42c1; color:white;"><i class="fas fa-shopping-basket"></i> Carts</a>
                 </div>
             </div>
         </div>
@@ -157,13 +171,31 @@
         data: {
             labels: @json($salesMonths),
             datasets: [{
-                label: 'Sales',
+                label: 'Revenue (RWF)',
                 data: @json($salesData),
                 borderColor: '#007bff',
-                backgroundColor: 'rgba(0,123,255,0.2)',
+                backgroundColor: 'rgba(0,123,255,0.1)',
                 fill: true,
-                tension: 0.3
+                tension: 0.4
             }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: { 
+                    beginAtZero: true,
+                    ticks: { callback: function(value) { return value.toLocaleString() + ' RWF'; } }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Revenue: ' + context.parsed.y.toLocaleString() + ' RWF';
+                        }
+                    }
+                }
+            }
         }
     });
 
@@ -175,8 +207,13 @@
             labels: ['In Stock', 'Low Stock', 'Out of Stock'],
             datasets: [{
                 data: @json($inventoryData),
-                backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                borderWidth: 0
             }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            cutout: '70%'
         }
     });
 </script>

@@ -266,19 +266,67 @@
           </ul>
         </li>
 
-        <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-shopping-cart"></i>
-            <p>E-Commerce <i class="right fas fa-angle-left"></i></p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/carts" class="nav-link"><i class="fas fa-shopping-cart nav-icon"></i><p>Carts</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/orders" class="nav-link"><i class="fas fa-receipt nav-icon"></i><p>Orders</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/payments" class="nav-link"><i class="fas fa-credit-card nav-icon"></i><p>Payments</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/shipments" class="nav-link"><i class="fas fa-truck nav-icon"></i><p>Shippings</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/addresses" class="nav-link"><i class="fas fa-map-marker-alt nav-icon"></i><p>Addresses</p></a></li>
-          </ul>
+       <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
+    <a href="#" class="nav-link">
+        <i class="nav-icon fas fa-shopping-cart"></i>
+        <p>
+            E-Commerce 
+            <i class="right fas fa-angle-left"></i>
+            {{-- Global badge for the whole category --}}
+            @if(($abandonedCount ?? 0) > 0)
+                <span class="badge badge-warning right">{{ $abandonedCount }}</span>
+            @endif
+        </p>
+    </a>
+    <ul class="nav nav-treeview">
+        {{-- Abandoned Carts: Shows red badge because these are leads that need a call --}}
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="/admin/carts" class="nav-link">
+                <i class="fas fa-shopping-basket nav-icon"></i>
+                <p>
+                    Carts
+                    @if(($abandonedCount ?? 0) > 0)
+                        <span class="badge badge-danger right">{{ $abandonedCount }}</span>
+                    @endif
+                </p>
+            </a>
         </li>
+
+        {{-- Orders: Shows blue/info badge for pending work --}}
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="/admin/orders" class="nav-link">
+                <i class="fas fa-receipt nav-icon"></i>
+                <p>
+                    Orders
+                    @if(($pendingOrdersCount ?? 0) > 0)
+                        <span class="badge badge-info right">{{ $pendingOrdersCount }}</span>
+                    @endif
+                </p>
+            </a>
+        </li>
+
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="/admin/payments" class="nav-link">
+                <i class="fas fa-credit-card nav-icon"></i>
+                <p>Payments</p>
+            </a>
+        </li>
+
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="/admin/shipments" class="nav-link">
+                <i class="fas fa-truck nav-icon"></i>
+                <p>Shippings</p>
+            </a>
+        </li>
+
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="/admin/addresses" class="nav-link">
+                <i class="fas fa-map-marker-alt nav-icon"></i>
+                <p>Addresses</p>
+            </a>
+        </li>
+    </ul>
+</li>
 
         <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
           <a href="#" class="nav-link">

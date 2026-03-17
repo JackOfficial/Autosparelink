@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Pagination\Paginator; // Import this
 use App\Observers\SpecificationObserver;
 use App\Models\Specification;
+use Illuminate\Support\Facades\DB;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +37,19 @@ class AppServiceProvider extends ServiceProvider
 
        Paginator::useBootstrapFive(); // Add this line
        Specification::observe(SpecificationObserver::class);
+
+       view()->composer('admin.layouts.app', function ($view) {
+    // Cache the counts for 1 minute to stay fast
+    $counts = cache()->remember('admin_sidebar_counts', 60, function() {
+        return [
+            'abandoned' => DB::table('shoppingcart')->count(),
+            'pending' => \App\Models\Order::where('status', 'pending')->count(),
+        ];
+    });
+
+    $view->with('abandonedCount', $counts['abandoned']);
+    $view->with('pendingOrdersCount', $counts['pending']);
+});
 
     //    $loader = AliasLoader::getInstance();
     //   $loader->alias('Cart', \Darryldecode\Cart\Facades\CartFacade::class);
