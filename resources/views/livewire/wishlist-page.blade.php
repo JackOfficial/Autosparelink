@@ -23,17 +23,27 @@
                             <tbody>
                                 @foreach($wishlistContent as $item)
                                     <tr>
-                                        <td class="py-4 px-4">
-                                            <div class="d-flex align-items-center">
-                                                <img src="{{ asset($item->options->image) }}" 
-                                                     class="rounded shadow-sm mr-3" 
-                                                     style="width: 60px; height: 60px; object-fit: cover;">
-                                                <div>
-                                                    <h6 class="mb-0 font-weight-bold">{{ $item->name }}</h6>
-                                                    <small class="text-muted">{{ $item->options->brand ?? 'Generic' }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
+                                       <td class="py-4 px-4">
+    <div class="d-flex align-items-center">
+        @php
+            $imagePath = $item->options->image;
+            // Check if it's a static placeholder or a storage file
+            $imageUrl = str_starts_with($imagePath, 'frontend/') 
+                ? asset($imagePath) 
+                : Storage::url($imagePath);
+        @endphp
+        
+        <img src="{{ $imagePath ? $imageUrl : asset('frontend/img/placeholder.png') }}" 
+             class="rounded shadow-sm mr-3" 
+             style="width: 60px; height: 60px; object-fit: cover;"
+             alt="{{ $item->name }}"
+             onerror="this.src='{{ asset('frontend/img/placeholder.png') }}'">
+        <div>
+            <h6 class="mb-0 font-weight-bold">{{ $item->name }}</h6>
+            <small class="text-muted">{{ $item->options->brand ?? 'Generic' }}</small>
+        </div>
+    </div>
+</td>
                                         <td class="py-4 font-weight-bold text-primary">
                                             {{ number_format($item->price, 0) }} RWF
                                         </td>
