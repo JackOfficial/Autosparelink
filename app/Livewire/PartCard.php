@@ -71,6 +71,7 @@ class PartCard extends Component
         'options' => [
             'brand'       => $this->part->partBrand?->name,
             'part_number' => $this->part->part_number,
+            'image'       => $this->part->image,
         ]
     ]);
 

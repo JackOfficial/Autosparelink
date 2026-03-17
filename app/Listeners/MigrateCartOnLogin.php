@@ -5,7 +5,7 @@ namespace App\Listeners;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Auth\Events\Login;
-use Cart;
+use Gloudemans\Shoppingcart\Facades\Cart;
 
 class MigrateCartOnLogin
 {
@@ -34,5 +34,9 @@ class MigrateCartOnLogin
         // 3. Immediately store it back to ensure the 
         // session items are now persisted in the DB.
         Cart::instance('default')->store($user->id);
+
+        // Optional: Do the same for wishlist
+        Cart::instance('wishlist')->restore($user->id);
+        Cart::instance('wishlist')->store($user->id);
     }
 }

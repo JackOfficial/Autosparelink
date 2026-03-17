@@ -34,14 +34,16 @@
                                 @foreach($cartContent as $item)
                                 <tr class="border-bottom">
                                     <td class="py-4 px-4">
-                                        <div class="d-flex align-items-center">
-                                            <img src="{{ asset($item->options->image) }}" 
-                                                 class="rounded mr-3" style="width: 70px; height: 70px; object-fit: cover;">
-                                            <div>
-                                                <h6 class="mb-0 font-weight-bold">{{ $item->name }}</h6>
-                                                <small class="text-muted">{{ $item->options->brand ?? '' }}</small>
-                                            </div>
-                                        </div>
+                                       <div class="d-flex align-items-center">
+    <img src="{{ $item->options->image ? Storage::url($item->options->image) : asset('images/placeholder-part.png') }}" 
+         class="rounded mr-3" 
+         style="width: 70px; height: 70px; object-fit: cover;"
+         alt="{{ $item->name }}">
+    <div>
+        <h6 class="mb-0 font-weight-bold">{{ $item->name }}</h6>
+        <small class="text-muted">{{ $item->options->brand ?? '' }}</small>
+    </div>
+</div>
                                     </td>
                                     <td class="py-4">{{ number_format($item->price, 0) }} RWF</td>
                                     <td class="py-4">
