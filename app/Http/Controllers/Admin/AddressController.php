@@ -3,61 +3,71 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Address;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class AddressController extends Controller
 {
     /**
-     * Display user's addresses
+     * Display all addresses with their associated users
      */
     public function index()
     {
-        $addresses = Auth::user()->addresses()->latest()->get();
+        $addresses = Address::with('user')
+            ->latest()
+            ->paginate(15);
 
         return view('admin.addresses.index', compact('addresses'));
     }
 
     /**
-     * Show create form
+     * Show form to create address for a specific user
      */
     public function create()
     {
-        return view('admin.addresses.create');
+        $users = User::orderBy('name')->get();
+        return view('admin.addresses.create', compact('users'));
     }
 
     /**
-     * Store new address
+     * Store a new address
      */
     public function store(Request $request)
     {
         $request->validate([
-            'full_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
+            'user_id'        => 'required|exists:users,id',
+            'full_name'      => 'required|string|max:255',
+            'phone'          => 'required|string|max:20',
             'street_address' => 'required|string',
-            'city' => 'required|string',
-            'state' => 'nullable|string',
-            'postal_code' => 'nullable|string',
-            'country' => 'required|string',
+            'city'           => 'required|string',
+            'state'          => 'nullable|string',
+            'postal_code'    => 'nullable|string',
+            'country'        => 'required|string',
+            'is_default'     => 'boolean'
         ]);
 
-        Auth::user()->addresses()->create($request->all());
+        DB::transaction(function () use ($request) {
+            // If setting as default, remove default status from user's other addresses
+            if ($request->is_default) {
+                Address::where('user_id', $request->user_id)->update(['is_default' => false]);
+            }
+
+            Address::create($request->all());
+        });
 
         return redirect()
             ->route('admin.addresses.index')
-            ->with('success', 'Address added successfully.');
+            ->with('success', 'Address created and linked to user successfully.');
     }
 
     /**
-     * Show single address
+     * Show single address details
      */
     public function show(string $id)
     {
-        $address = Auth::user()
-            ->addresses()
-            ->findOrFail($id);
-
+        $address = Address::with('user')->findOrFail($id);
         return view('admin.addresses.show', compact('address'));
     }
 
@@ -66,33 +76,39 @@ class AddressController extends Controller
      */
     public function edit(string $id)
     {
-        $address = Auth::user()
-            ->addresses()
-            ->findOrFail($id);
+        $address = Address::findOrFail($id);
+        $users = User::orderBy('name')->get();
 
-        return view('admin.addresses.edit', compact('address'));
+        return view('admin.addresses.edit', compact('address', 'users'));
     }
 
     /**
-     * Update address
+     * Update address and handle default logic
      */
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'full_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
+            'full_name'      => 'required|string|max:255',
+            'phone'          => 'required|string|max:20',
             'street_address' => 'required|string',
-            'city' => 'required|string',
-            'state' => 'nullable|string',
-            'postal_code' => 'nullable|string',
-            'country' => 'required|string',
+            'city'           => 'required|string',
+            'state'          => 'nullable|string',
+            'postal_code'    => 'nullable|string',
+            'country'        => 'required|string',
+            'is_default'     => 'boolean'
         ]);
 
-        $address = Auth::user()
-            ->addresses()
-            ->findOrFail($id);
+        $address = Address::findOrFail($id);
 
-        $address->update($request->all());
+        DB::transaction(function () use ($request, $address) {
+            if ($request->is_default) {
+                Address::where('user_id', $address->user_id)
+                    ->where('id', '!=', $address->id)
+                    ->update(['is_default' => false]);
+            }
+
+            $address->update($request->all());
+        });
 
         return redirect()
             ->route('admin.addresses.index')
@@ -104,14 +120,11 @@ class AddressController extends Controller
      */
     public function destroy(string $id)
     {
-        $address = Auth::user()
-            ->addresses()
-            ->findOrFail($id);
-
+        $address = Address::findOrFail($id);
         $address->delete();
 
         return redirect()
             ->route('admin.addresses.index')
-            ->with('success', 'Address deleted successfully.');
+            ->with('success', 'Address removed from system.');
     }
 }
