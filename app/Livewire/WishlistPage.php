@@ -19,35 +19,47 @@ class WishlistPage extends Component
         $this->dispatch('notify', message: 'Removed from wishlist.');
     }
 
-    public function moveToCart($rowId)
-    {
-        $item = Cart::instance('wishlist')->get($rowId);
+   public function moveToCart($rowId)
+{
+    // 1. Get item from wishlist
+    $wishlist = Cart::instance('wishlist');
+    $item = $wishlist->get($rowId);
 
-        // Add to Default Cart
-        Cart::instance('default')->add([
-            'id' => $item->id,
-            'name' => $item->name,
-            'qty' => 1,
-            'price' => $item->price,
-            'weight' => $item->weight,
-            'options' => $item->options->toArray(),
-        ]);
-
-        // Remove from Wishlist
-        Cart::instance('wishlist')->remove($rowId);
-
-        $this->refreshWishlist();
-        
-        // Sync the Cart DB as well
-        if (Auth::check()) {
-            DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
-            Cart::instance('default')->store(Auth::id());
-        }
-
-        $this->dispatch('wishlistUpdated');
-        $this->dispatch('cartUpdated');
-        $this->dispatch('notify', message: 'Item moved to cart!');
+    if (!$item) {
+        $this->dispatch('notify', message: 'Item not found!');
+        return;
     }
+
+    // 2. Add to Default Cart
+    Cart::instance('default')->add([
+        'id'      => $item->id,
+        'name'    => $item->name,
+        'qty'     => 1,
+        'price'   => $item->price,
+        'weight'  => $item->weight,
+        'options' => $item->options->all(), // Using .all() is often cleaner for these objects
+    ]);
+
+    // 3. Remove from Wishlist
+    $wishlist->remove($rowId);
+
+    // 4. Critical: Sync BOTH instances to the Database
+    if (Auth::check()) {
+        $userId = Auth::id();
+        
+        // Update Default Cart in DB
+        DB::table('shoppingcart')->where('identifier', $userId)->where('instance', 'default')->delete();
+        Cart::instance('default')->store($userId);
+        
+        // Update Wishlist in DB (So the item stays gone)
+        DB::table('shoppingcart')->where('identifier', $userId . '_wishlist')->where('instance', 'wishlist')->delete();
+        Cart::instance('wishlist')->store($userId . '_wishlist');
+    }
+
+    $this->dispatch('wishlistUpdated');
+    $this->dispatch('cartUpdated');
+    $this->dispatch('notify', message: 'Item moved to cart!');
+}
 
     private function refreshWishlist()
     {
