@@ -204,7 +204,7 @@
   
   {{-- Brand Logo --}}
   <a href="/admin" class="brand-link">
-    <img src="{{ asset('frontend/img/logo.png') }}" alt="AutoSpaceLink" class="brand-image">
+    <img src="{{ asset('frontend/img/logo.png') }}" alt="AutoSpaceLink" class="brand-image" style="opacity: .8">
   </a>
 
   <div class="sidebar">
