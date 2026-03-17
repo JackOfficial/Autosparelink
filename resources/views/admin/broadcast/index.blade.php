@@ -17,7 +17,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('broadcast.send') }}" method="POST">
+                    <form action="{{ route('admin.broadcast.send') }}" method="POST">
                         @csrf
                         <div class="form-group mb-4">
                             <label class="small font-weight-bold text-uppercase text-muted">Message Content</label>
