@@ -43,18 +43,24 @@ use App\Http\Controllers\Admin\CartController as AdminCartController;
 use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\Admin\VehicleBrandController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\Compose;
 use App\Http\Controllers\Admin\DriveTypeController;
 use App\Http\Controllers\Admin\EngineTypeController;
+use App\Http\Controllers\Admin\Inbox;
+use App\Http\Controllers\Admin\InventoryReports;
 use App\Http\Controllers\Admin\ModelController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PartBrandController;
 use App\Http\Controllers\Admin\PartController;
 use App\Http\Controllers\Admin\PartFitmentController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\Read;
+use App\Http\Controllers\Admin\SalesReports;
 use App\Http\Controllers\Admin\ShippingController;
 use App\Http\Controllers\Admin\TransmissionTypeController;
 use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
+use App\Http\Controllers\Admin\SystemSettings;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ModelPartController;
@@ -262,6 +268,23 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     //pdf and excel
     Route::get('/export/excel', [PartController::class, 'exportExcel'])->name('export.excel');
     Route::get('/export/pdf', [PartController::class, 'exportPdf'])->name('export.pdf');
+
+    // --- Mailbox (Using your Contacts migration) ---
+    Route::prefix('mailbox')->group(function () {
+        Route::get('/inbox', Inbox::class)->name('admin.mailbox.inbox');
+        Route::get('/compose/{id?}', Compose::class)->name('admin.mailbox.compose'); // id optional for replies
+        Route::get('/read/{id}', Read::class)->name('admin.mailbox.read');
+    });
+
+    // --- Reports ---
+    Route::prefix('reports')->group(function () {
+        Route::get('/sales', SalesReports::class)->name('admin.reports.sales');
+        Route::get('/inventory', InventoryReports::class)->name('admin.reports.inventory');
+    });
+
+    // --- System Management ---
+    Route::get('/settings', SystemSettings::class)->name('admin.settings');
+
 });
 
 //Testing routes
