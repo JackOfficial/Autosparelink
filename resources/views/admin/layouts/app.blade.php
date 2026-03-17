@@ -363,9 +363,6 @@
 
         <li class="nav-header" x-show="search === ''">COMMUNITY & ENGAGEMENT</li>
 
-        <li class="nav-item" x-show="isVisible($el)"><a href="/admin/careers" class="nav-link"><i class="nav-icon fas fa-briefcase"></i><p>Careers</p></a></li>
-        <li class="nav-item" x-show="isVisible($el)"><a href="/admin/applications" class="nav-link"><i class="nav-icon fas fa-gear"></i><p>Applications</p></a></li>
-
       <li class="nav-item has-treeview {{ request()->is('admin/mailbox*') || request()->routeIs('admin.broadcast.*') ? 'menu-open' : '' }}" 
     x-show="isVisible($el)" 
     :class="search !== '' ? 'menu-open' : ''">
@@ -410,6 +407,11 @@
         </li>
     </ul>
 </li>
+
+<li class="nav-header" x-show="search === ''">Jobs</li>
+
+<li class="nav-item" x-show="isVisible($el)"><a href="/admin/careers" class="nav-link"><i class="nav-icon fas fa-briefcase"></i><p>Careers</p></a></li>
+<li class="nav-item" x-show="isVisible($el)"><a href="/admin/applications" class="nav-link"><i class="nav-icon fas fa-gear"></i><p>Applications</p></a></li>
 
         @if(Auth::check())
         <li class="nav-item mt-3 border-top border-secondary">
