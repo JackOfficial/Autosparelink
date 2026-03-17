@@ -345,9 +345,9 @@
             <p>Reports & Settings <i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/bloggers" class="nav-link"><i class="fas fa-chart-line nav-icon"></i><p>Sales Reports</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Inventory Reports</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/blogCategories" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>System Settings</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/reports/sales" class="nav-link"><i class="fas fa-chart-line nav-icon"></i><p>Sales Reports</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/reports/inventory" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Inventory Reports</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/settings" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>System Settings</p></a></li>
           </ul>
         </li>
 
@@ -362,9 +362,9 @@
             <p>Mailbox <i class="fas fa-angle-left right"></i></p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item" x-show="isVisible($el)"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Inbox</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Compose</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Read</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/mailbox/inbox" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Inbox</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/mailbox/inbox" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Compose</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/mailbox/inbox" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Read</p></a></li>
           </ul>
         </li>
 

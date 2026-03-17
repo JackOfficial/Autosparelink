@@ -46,7 +46,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\Compose;
 use App\Http\Controllers\Admin\DriveTypeController;
 use App\Http\Controllers\Admin\EngineTypeController;
-use App\Http\Controllers\Admin\Inbox;
+use App\Http\Controllers\Admin\InboxController;
 use App\Http\Controllers\Admin\InventoryReports;
 use App\Http\Controllers\Admin\ModelController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -55,6 +55,7 @@ use App\Http\Controllers\Admin\PartController;
 use App\Http\Controllers\Admin\PartFitmentController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\Read;
+use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\SalesReports;
 use App\Http\Controllers\Admin\ShippingController;
 use App\Http\Controllers\Admin\TransmissionTypeController;
@@ -268,19 +269,34 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     //pdf and excel
     Route::get('/export/excel', [PartController::class, 'exportExcel'])->name('export.excel');
     Route::get('/export/pdf', [PartController::class, 'exportPdf'])->name('export.pdf');
+    Route::get('/reports/sales/pdf', [ReportsController::class, 'downloadSalesPDF'])->name('admin.reports.sales.pdf');
+    Route::get('/reports/inventory/pdf', [ReportsController::class, 'downloadInventoryPDF'])->name('admin.reports.inventory.pdf');
 
     // --- Mailbox (Using your Contacts migration) ---
     Route::prefix('mailbox')->group(function () {
-        Route::get('/inbox', Inbox::class)->name('admin.mailbox.inbox');
-        Route::get('/compose/{id?}', Compose::class)->name('admin.mailbox.compose'); // id optional for replies
-        Route::get('/read/{id}', Read::class)->name('admin.mailbox.read');
+       // List all messages (Inbox)
+        Route::get('/inbox', [InboxController::class, 'index'])->name('admin.mailbox.index');
+        
+        // Read a specific message
+        Route::get('/read/{id}', [InboxController::class, 'show'])->name('admin.mailbox.read');
+        
+        // Update status (Active/Resolved/Archived)
+        Route::patch('/status/{id}', [InboxController::class, 'updateStatus'])->name('admin.mailbox.status');
+        
+        // Delete a message
+        Route::delete('/delete/{id}', [InboxController::class, 'destroy'])->name('admin.mailbox.delete');
     });
 
     // --- Reports ---
+   Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    
+    // Reports Group using Standard Controller Methods
     Route::prefix('reports')->group(function () {
-        Route::get('/sales', SalesReports::class)->name('admin.reports.sales');
-        Route::get('/inventory', InventoryReports::class)->name('admin.reports.inventory');
+        Route::get('/sales', [ReportsController::class, 'sales'])->name('admin.reports.sales');
+        Route::get('/inventory', [ReportsController::class, 'inventory'])->name('admin.reports.inventory');
     });
+
+   });
 
     // --- System Management ---
     Route::get('/settings', SystemSettings::class)->name('admin.settings');
