@@ -78,7 +78,7 @@
                 <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                     <h6 class="font-weight-bold mb-0">Notifications</h6>
                     @if(auth()->user()->unreadNotifications->count() > 0)
-                        <a href="{{ route('notifications.markAllRead') }}" class="x-small text-primary font-weight-bold">Clear</a>
+                        <a href="{{ route('notifications.readAll') }}" class="x-small text-primary font-weight-bold">Clear</a>
                     @endif
                 </div>
                 <div class="card-body p-0" style="max-height: 280px; overflow-y: auto;">
@@ -258,7 +258,7 @@
                                         <small class="text-white-50 d-block uppercase">Total</small>
                                         <h4 class="font-weight-bold mb-0 text-success">{{ number_format($cartTotal) }} <small>RWF</small></h4>
                                     </div>
-                                    <a href="{{ route('checkout') }}" class="btn btn-primary rounded-pill px-4 font-weight-bold shadow">Checkout</a>
+                                    <a href="/checkout" class="btn btn-primary rounded-pill px-4 font-weight-bold shadow">Checkout</a>
                                 </div>
                             @endif
                         </div>
