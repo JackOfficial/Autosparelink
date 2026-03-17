@@ -21,25 +21,11 @@ class OrderController extends Controller
                 'address'
             ])
             ->latest()
+            // We keep the urgent "Callback Requested" orders at the top
+            ->orderByRaw("FIELD(status, 'callback_requested') DESC")
             ->paginate(15);
 
         return view('admin.orders.index', compact('orders'));
-    }
-
-    /**
-     * Not used (orders created by users)
-     */
-    public function create()
-    {
-        abort(404);
-    }
-
-    /**
-     * Not used
-     */
-    public function store(Request $request)
-    {
-        abort(404);
     }
 
     /**
@@ -65,8 +51,11 @@ class OrderController extends Controller
     public function edit(string $id)
     {
         $order = Order::findOrFail($id);
+        
+        // Define available statuses for the view dropdown
+        $statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'callback_requested'];
 
-        return view('admin.orders.edit', compact('order'));
+        return view('admin.orders.edit', compact('order', 'statuses'));
     }
 
     /**
@@ -75,7 +64,8 @@ class OrderController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled'
+            // Added 'callback_requested' to validation
+            'status' => 'required|in:pending,processing,shipped,delivered,cancelled,callback_requested'
         ]);
 
         $order = Order::findOrFail($id);
@@ -85,11 +75,11 @@ class OrderController extends Controller
 
         return redirect()
             ->route('orders.show', $order->id)
-            ->with('success', 'Order status updated successfully.');
+            ->with('success', "Order #{$order->id} status updated to " . ucfirst($request->status));
     }
 
     /**
-     * Delete order (optional)
+     * Delete order
      */
     public function destroy(string $id)
     {
