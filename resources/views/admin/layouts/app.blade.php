@@ -322,6 +322,19 @@
           </ul>
         </li>
 
+        {{-- Reports & Settings --}}
+        <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-chart-pie"></i>
+            <p>Reports & Settings <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/reports/sales" class="nav-link"><i class="fas fa-chart-line nav-icon"></i><p>Sales Reports</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/reports/inventory" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Inventory Reports</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/settings" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>System Settings</p></a></li>
+          </ul>
+        </li>
+
         <li class="nav-header" x-show="search === ''">COMMUNITY & ENGAGEMENT</li>
 
         {{-- Communications --}}
