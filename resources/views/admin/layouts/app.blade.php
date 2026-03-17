@@ -313,7 +313,7 @@
         </li>
 
         <li class="nav-item" x-show="isVisible($el)">
-            <a href="/admin/shipments" class="nav-link">
+            <a href="/admin/shippings" class="nav-link">
                 <i class="fas fa-truck nav-icon"></i>
                 <p>Shippings</p>
             </a>
