@@ -270,8 +270,8 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     //pdf and excel
     Route::get('/export/excel', [PartController::class, 'exportExcel'])->name('export.excel');
     Route::get('/export/pdf', [PartController::class, 'exportPdf'])->name('export.pdf');
-    Route::get('/reports/sales/pdf', [ReportsController::class, 'downloadSalesPDF'])->name('admin.reports.sales.pdf');
-    Route::get('/reports/inventory/pdf', [ReportsController::class, 'downloadInventoryPDF'])->name('admin.reports.inventory.pdf');
+    Route::get('/reports/sales/pdf', [ReportsController::class, 'downloadSalesPDF'])->name('reports.sales.pdf');
+    Route::get('/reports/inventory/pdf', [ReportsController::class, 'downloadInventoryPDF'])->name('reports.inventory.pdf');
 
     // --- Mailbox (Using your Contacts migration) ---
     Route::prefix('mailbox')->group(function () {
