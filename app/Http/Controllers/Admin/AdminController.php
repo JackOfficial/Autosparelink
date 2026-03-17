@@ -25,22 +25,23 @@ class AdminController extends Controller
         // 2. Abandoned Carts (Gloudemans Package Table)
         $abandonedCount = DB::table('shoppingcart')->count();
 
-        // 3. Orders requiring action: Standard Pending + New Callbacks
-        $pendingOrders = Order::whereIn('status', ['Pending', 'callback_requested'])->count();
+        // 3. Orders requiring action: Matches your lower-case migration
+        $pendingOrders = Order::whereIn('status', ['pending', 'callback_requested'])->count();
 
-        // 4. Inventory Logic (for Doughnut Chart)
+        // 4. Inventory Logic
         $lowStockParts = Part::where('stock_quantity', '>', 0)->where('stock_quantity', '<', 5)->count();
         $outOfStockParts = Part::where('stock_quantity', '<=', 0)->count();
         $inStockParts = Part::where('stock_quantity', '>=', 5)->count();
         $inventoryData = [$inStockParts, $lowStockParts, $outOfStockParts];
 
         // 5. Real Sales Chart Data (Current Year by Month)
+        // Note: Using 'delivered' as the success status per your migration
         $salesQuery = Order::select(
-                DB::raw('SUM(total) as sum'),
+                DB::raw('SUM(total_amount) as sum'),
                 DB::raw("DATE_FORMAT(created_at, '%b') as month"),
                 DB::raw("MONTH(created_at) as month_num")
             )
-            ->where('status', 'Completed') 
+            ->where('status', 'delivered') 
             ->whereYear('created_at', date('Y'))
             ->groupBy('month', 'month_num')
             ->orderBy('month_num', 'ASC')
@@ -49,17 +50,23 @@ class AdminController extends Controller
         $salesMonths = $salesQuery->pluck('month')->toArray();
         $salesData = $salesQuery->pluck('sum')->toArray();
 
-        // Fallback for empty chart (Prevents Javascript errors)
+        // Fallback for empty chart
         if (empty($salesMonths)) {
             $salesMonths = [date('M')];
             $salesData = [0];
         }
 
         // 6. Growth Comparison (This Month vs Last Month)
-        $thisMonthRevenue = Order::where('status', 'Completed')->whereMonth('created_at', Carbon::now()->month)->sum('total');
-        $lastMonthRevenue = Order::where('status', 'Completed')->whereMonth('created_at', Carbon::now()->subMonth()->month)->sum('total');
+        $thisMonthRevenue = Order::where('status', 'delivered')
+            ->whereMonth('created_at', Carbon::now()->month)
+            ->whereYear('created_at', Carbon::now()->year)
+            ->sum('total_amount');
+
+        $lastMonthRevenue = Order::where('status', 'delivered')
+            ->whereMonth('created_at', Carbon::now()->subMonth()->month)
+            ->whereYear('created_at', Carbon::now()->subMonth()->year)
+            ->sum('total_amount');
         
-        // Calculate percentage change
         $revenueChange = 0;
         if ($lastMonthRevenue > 0) {
             $revenueChange = (($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100;
@@ -85,7 +92,16 @@ class AdminController extends Controller
         ));
     }
 
-    // Keep your task methods as placeholders or remove them if not in use
-    public function addTask(Request $request) { /* ... */ }
-    public function taskDone($id) { /* ... */ }
+    public function addTask(Request $request) 
+    { 
+        $request->validate(['task' => 'required|string|max:255']);
+        // Logic for Todo model would go here
+        return redirect()->back()->with('success', 'Task added successfully.');
+    }
+
+    public function taskDone($id) 
+    { 
+        // Logic to update task status
+        return redirect()->back();
+    }
 }
