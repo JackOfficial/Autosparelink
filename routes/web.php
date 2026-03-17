@@ -276,32 +276,27 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     // --- Mailbox (Using your Contacts migration) ---
     Route::prefix('mailbox')->group(function () {
        // List all messages (Inbox)
-        Route::get('/inbox', [InboxController::class, 'index'])->name('admin.mailbox.index');
+        Route::get('/inbox', [InboxController::class, 'index'])->name('mailbox.index');
         
         // Read a specific message
-        Route::get('/read/{id}', [InboxController::class, 'show'])->name('admin.mailbox.read');
+        Route::get('/read/{id}', [InboxController::class, 'show'])->name('mailbox.read');
         
         // Update status (Active/Resolved/Archived)
-        Route::patch('/status/{id}', [InboxController::class, 'updateStatus'])->name('admin.mailbox.status');
+        Route::patch('/status/{id}', [InboxController::class, 'updateStatus'])->name('mailbox.status');
         
         // Delete a message
-        Route::delete('/delete/{id}', [InboxController::class, 'destroy'])->name('admin.mailbox.delete');
+        Route::delete('/delete/{id}', [InboxController::class, 'destroy'])->name('mailbox.delete');
     });
 
     // --- Reports ---
-   Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    
-    // Reports Group using Standard Controller Methods
     Route::prefix('reports')->group(function () {
-        Route::get('/sales', [ReportsController::class, 'sales'])->name('admin.reports.sales');
-        Route::get('/inventory', [ReportsController::class, 'inventory'])->name('admin.reports.inventory');
+        Route::get('/sales', [ReportsController::class, 'sales'])->name('reports.sales');
+        Route::get('/inventory', [ReportsController::class, 'inventory'])->name('reports.inventory');
     });
 
-   });
-
     // System Settings
-    Route::get('/settings', [SystemSettingsController::class, 'index'])->name('admin.settings');
-    Route::post('/settings', [SystemSettingsController::class, 'update'])->name('admin.settings.update');
+    Route::get('/settings', [SystemSettingsController::class, 'index'])->name('settings');
+    Route::post('/settings', [SystemSettingsController::class, 'update'])->name('settings.update');
 
 });
 
