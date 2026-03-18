@@ -1,6 +1,13 @@
 @extends('admin.layouts.app')
 
 @section('content')
+@php
+    $order = $shipping->order;
+    $customerName = $order?->guest_name ?? $order?->user?->name ?? 'Unknown Customer';
+    $customerEmail = $order?->guest_email ?? $order?->user?->email ?? 'N/A';
+    $isGuest = $order && !($order->user_id);
+@endphp
+
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -11,9 +18,13 @@
             <a href="{{ route('admin.shippings.index') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left mr-1"></i> Back
             </a>
-            <a href="{{ route('admin.orders.show', $shipping->order?->id) }}" class="btn btn-primary">
-                <i class="fas fa-box mr-1"></i> View Order #{{ $shipping->order?->id }}
-            </a>
+            @if($order)
+                <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary">
+                    <i class="fas fa-box mr-1"></i> View Order #{{ $order->id }}
+                </a>
+            @else
+                <button class="btn btn-secondary" disabled>Order Missing</button>
+            @endif
         </div>
     </div>
 
@@ -53,18 +64,23 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white font-weight-bold text-uppercase small">Destination Address</div>
                 <div class="card-body">
-                    <h6 class="font-weight-bold mb-1">{{ $shipping->order?->user?->name ?? 'Deleted User' }}</h6>
-                    <p class="text-muted small mb-3">{{ $shipping->order?->user?->email }}</p>
+                    <h6 class="font-weight-bold mb-1">
+                        {{ $customerName }}
+                        @if($isGuest) <span class="badge badge-secondary ml-1" style="font-size: 0.6rem;">GUEST</span> @endif
+                    </h6>
+                    <p class="text-muted small mb-3">{{ $customerEmail }}</p>
                     <hr>
                     <p class="mb-0 text-dark">
-    <i class="fas fa-map-marker-alt text-danger mr-2"></i>
-    @if($shipping->order?->address)
-        {{ $shipping->order->address->street }}, 
-        {{ $shipping->order->address->city }}
-    @else
-        <span class="text-muted italic">No address provided</span>
-    @endif
-</p>
+                        <i class="fas fa-map-marker-alt text-danger mr-2"></i>
+                        {{-- Handle guest address fields on order OR a related address model --}}
+                        @if($order?->address)
+                            {{ $order->address->street }}, {{ $order->address->city }}
+                        @elseif($order?->shipping_address)
+                            {{ $order->shipping_address }}
+                        @else
+                            <span class="text-muted italic">No address provided</span>
+                        @endif
+                    </p>
                 </div>
             </div>
         </div>
@@ -79,7 +95,7 @@
                             <tbody>
                                 <tr>
                                     <td class="bg-light text-muted border-0 px-4" width="30%">Carrier</td>
-                                    <td class="border-0 font-weight-bold text-uppercase">{{ $shipping->carrier }}</td>
+                                    <td class="border-0 font-weight-bold text-uppercase">{{ $shipping->carrier ?? 'NOT SET' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="bg-light text-muted px-4">Tracking Number</td>
@@ -93,7 +109,7 @@
                                 </tr>
                                 <tr>
                                     <td class="bg-light text-muted px-4">Delivery Confirmed</td>
-                                    <td class="text-success font-weight-bold">
+                                    <td class="{{ $shipping->delivered_at ? 'text-success' : '' }} font-weight-bold">
                                         {{ $shipping->delivered_at ? $shipping->delivered_at->format('d M Y, h:i A') : 'Pending Arrival' }}
                                     </td>
                                 </tr>
@@ -108,17 +124,21 @@
                 <div class="card-header bg-white font-weight-bold text-uppercase small">Package Contents</div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
-                        @forelse($shipping->order?->orderItems ?? [] as $item)
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>
-                                    <i class="fas fa-box text-muted mr-2 small"></i>
-                                    {{ $item->part->part_name }}
-                                </span>
-                                <span class="badge badge-light border">Qty: {{ $item->quantity }}</span>
+                        @if($order && $order->orderItems->count() > 0)
+                            @foreach($order->orderItems as $item)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="fas fa-box text-muted mr-2 small"></i>
+                                        {{ $item->part?->part_name ?? 'Deleted Product' }}
+                                    </span>
+                                    <span class="badge badge-light border">Qty: {{ $item->quantity }}</span>
+                                </li>
+                            @endforeach
+                        @else
+                            <li class="list-group-item text-center text-muted py-4">
+                                <i class="fas fa-ghost mr-2"></i> No item data found for this order.
                             </li>
-                        @empty
-                            <li class="list-group-item text-center text-muted">No items found for this order.</li>
-                        @endforelse
+                        @endif
                     </ul>
                 </div>
             </div>

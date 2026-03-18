@@ -35,21 +35,35 @@
                     </thead>
                     <tbody>
                         @forelse($shippings as $shipping)
+                            @php
+                                $order = $shipping->order;
+                                // Guest-aware logic: Check guest fields first, then fallback to user profile
+                                $customerName = $order?->guest_name ?? $order?->user?->name ?? 'Unknown Customer';
+                                $customerEmail = $order?->guest_email ?? $order?->user?->email ?? 'N/A';
+                                $isGuest = $order && !($order->user_id);
+                            @endphp
                             <tr>
                                 <td class="px-4 font-weight-bold">#{{ $shipping->id }}</td>
                                 <td>
-                                    @if($shipping->order)
-                                        <a href="{{ route('admin.orders.show', $shipping->order->id) }}" class="font-weight-bold text-primary">
-                                            Order #{{ $shipping->order->id }}
+                                    @if($order)
+                                        <a href="{{ route('admin.orders.show', $order->id) }}" class="font-weight-bold text-primary">
+                                            Order #{{ $order->id }}
                                         </a>
                                     @else
-                                        <span class="badge badge-soft-danger text-danger">Order Deleted</span>
+                                        <span class="badge badge-soft-danger text-danger">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i> Orphaned
+                                        </span>
                                     @endif
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span class="text-dark">{{ $shipping->order?->user?->name ?? 'Unknown' }}</span>
-                                        <small class="text-muted">{{ $shipping->order?->user?->email ?? 'N/A' }}</small>
+                                        <span class="text-dark font-weight-bold">
+                                            {{ $customerName }}
+                                            @if($isGuest) 
+                                                <span class="badge badge-secondary ml-1" style="font-size: 0.6rem;">GUEST</span> 
+                                            @endif
+                                        </span>
+                                        <small class="text-muted">{{ $customerEmail }}</small>
                                     </div>
                                 </td>
                                 <td>
@@ -87,18 +101,18 @@
                                     </span>
                                 </td>
                                 <td class="text-center px-4">
-                                    <div class="btn-group">
-                                        <a href="{{ route('admin.shippings.show', $shipping->id) }}" class="btn btn-sm btn-outline-info" title="View Detail">
-                                            <i class="fas fa-eye"></i>
+                                    <div class="btn-group shadow-sm">
+                                        <a href="{{ route('admin.shippings.show', $shipping->id) }}" class="btn btn-sm btn-white border" title="View Detail">
+                                            <i class="fas fa-eye text-info"></i>
                                         </a>
-                                        <a href="{{ route('admin.shippings.edit', $shipping->id) }}" class="btn btn-sm btn-outline-warning" title="Edit Status">
-                                            <i class="fas fa-edit"></i>
+                                        <a href="{{ route('admin.shippings.edit', $shipping->id) }}" class="btn btn-sm btn-white border" title="Edit Status">
+                                            <i class="fas fa-edit text-warning"></i>
                                         </a>
                                         <form action="{{ route('admin.shippings.destroy', $shipping->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove shipping record?')" title="Delete">
-                                                <i class="fas fa-trash"></i>
+                                            <button class="btn btn-sm btn-white border" onclick="return confirm('Remove shipping record?')" title="Delete">
+                                                <i class="fas fa-trash text-danger"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -107,7 +121,7 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="text-center py-5 text-muted">
-                                    <i class="fas fa-box-open fa-3x mb-3 d-block"></i>
+                                    <i class="fas fa-box-open fa-3x mb-3 d-block text-light"></i>
                                     No shipping records found.
                                 </td>
                             </tr>
@@ -116,9 +130,11 @@
                 </table>
             </div>
         </div>
-        <div class="card-footer bg-white py-3">
-            {{ $shippings->links() }}
-        </div>
+        @if($shippings->hasPages())
+            <div class="card-footer bg-white py-3">
+                {{ $shippings->links() }}
+            </div>
+        @endif
     </div>
 </div>
 
@@ -127,8 +143,13 @@ function copyToClipboard(elementId) {
     var copyText = document.getElementById(elementId);
     copyText.select();
     copyText.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    alert("Tracking number copied: " + copyText.value);
+    try {
+        document.execCommand("copy");
+        // Using a more modern UI feedback would be better, but keeping your logic
+        alert("Tracking number copied: " + copyText.value);
+    } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+    }
 }
 </script>
 @endsection
