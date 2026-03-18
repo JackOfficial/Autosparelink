@@ -186,20 +186,25 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/garage/update', 'updateGarage')->name('garage.update');
         Route::post('/notifications/read-all', 'markAllRead')->name('notifications.readAll');
      
-// 4. User notification management
-Route::post('/notifications/read', function () {
-    auth()->user()->unreadNotifications->markAsRead();
-    return back();
-})->name('notifications.read');
+        // 4. User notification management
+        Route::post('/notifications/read', function () {
+        auth()->user()->unreadNotifications->markAsRead();
+        return back();
+        })->name('notifications.read');
     });
 
+     // --- Flutterwave Payment Gateway ---
+    Route::get('/payment/process/{order}', [FlutterwavePaymentController::class, 'process'])->name('payment.process');
+    Route::post('/payment/initialize', [FlutterwavePaymentController::class, 'initialize'])->name('payment.initialize');
+    Route::get('/payment/callback', [FlutterwavePaymentController::class, 'callback'])->name('payment.callback');
+    Route::get('/payment/receipt/{id}', [FlutterwavePaymentController::class, 'downloadReceipt'])->name('payment.receipt');
     // --- Support Ticket System ---
-   Route::prefix('tickets')->name('tickets.')->controller(TicketController::class)->group(function () {
+    Route::prefix('tickets')->name('tickets.')->controller(TicketController::class)->group(function () {
     Route::get('/', 'index')->name('index');           // View all tickets
     Route::post('/store', 'store')->name('store');     // Modal submission
     Route::get('/{id}', 'show')->name('show');         // View single ticket
     Route::post('/{id}/reply', 'reply')->name('reply'); // Post a reply
-});
+    });
 });
 
 /////////////////
@@ -262,15 +267,15 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     //////////////////////////////////
 
     // 1. View the form and history list
-Route::get('/broadcast', [BroadcastController::class, 'index'])->name('broadcast.index');
+    Route::get('/broadcast', [BroadcastController::class, 'index'])->name('broadcast.index');
 
-// 2. The missing "STORE/SEND" route (This handles the form submission)
-Route::post('/broadcast', [BroadcastController::class, 'send'])->name('broadcast.send');
+    // 2. The missing "STORE/SEND" route (This handles the form submission)
+    Route::post('/broadcast', [BroadcastController::class, 'send'])->name('broadcast.send');
 
-// 3. View details of a specific past broadcast
-Route::get('/broadcast/{broadcast}', [BroadcastController::class, 'show'])->name('broadcast.show');
-Route::delete('/broadcast/clear-all', [BroadcastController::class, 'clearAll'])->name('broadcast.clearAll');
-Route::delete('/broadcast/{broadcast}', [BroadcastController::class, 'destroy'])->name('broadcast.destroy');
+    // 3. View details of a specific past broadcast
+    Route::get('/broadcast/{broadcast}', [BroadcastController::class, 'show'])->name('broadcast.show');
+    Route::delete('/broadcast/clear-all', [BroadcastController::class, 'clearAll'])->name('broadcast.clearAll');
+    Route::delete('/broadcast/{broadcast}', [BroadcastController::class, 'destroy'])->name('broadcast.destroy');
 
     Route::resource('vehicle-brands', VehicleBrandController::class);
     Route::resource('part-brands', PartBrandController::class);
@@ -325,22 +330,16 @@ Route::delete('/broadcast/{broadcast}', [BroadcastController::class, 'destroy'])
 });
 
 //Testing routes
-Route::get('/test-super-admin', function () {
+ Route::get('/test-super-admin', function () {
     return 'You are super-admin!';
-})->middleware(['auth', 'role:super-admin']);
+ })->middleware(['auth', 'role:super-admin']);
 
-Route::get('/test-admin', function () {
+ Route::get('/test-admin', function () {
     return 'You are admin!';
-})->middleware(['auth', 'role:admin']);
+ })->middleware(['auth', 'role:admin']);
 
-Route::get('/checkifemailisverified', function () {
+ Route::get('/checkifemailisverified', function () {
     return "You have verified";
-})->middleware(['verified']);
+ })->middleware(['verified']);
 
-Route::post('/flw-webhook', [FlutterwavePaymentController::class, 'webhook'])->name('payment.webhook');
-Route::middleware(['auth'])->group(function () {
-    Route::get('/payment/process/{order}', [FlutterwavePaymentController::class, 'process'])->name('payment.process');
-    Route::post('/payment/initialize', [FlutterwavePaymentController::class, 'initialize'])->name('payment.initialize');
-    Route::get('/payment/callback', [FlutterwavePaymentController::class, 'callback'])->name('payment.callback');
-    Route::get('/payment/receipt/{id}', [FlutterwavePaymentController::class, 'downloadReceipt'])->name('payment.receipt');
-});
+ Route::post('/flw-webhook', [FlutterwavePaymentController::class, 'webhook'])->name('payment.webhook');
