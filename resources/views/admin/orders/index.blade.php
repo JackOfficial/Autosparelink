@@ -1,13 +1,13 @@
 @extends('admin.layouts.app')
 
-@push('styles')
+{{-- @push('styles') --}}
 <style>
     .blink_me { animation: blinker 1s linear infinite; }
     @keyframes blinker { 0% { opacity: 1.0; } 50% { opacity: 0.1; } 100% { opacity: 1.0; } }
     .user-badge { font-size: 0.7rem; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
     [x-cloak] { display: none !important; }
 </style>
-@endpush
+{{-- @endpush --}}
 
 @section('content')
 <div class="container-fluid py-4" x-data="{ 
