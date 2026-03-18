@@ -46,7 +46,7 @@
                             <tr>
                                 <td class="px-4">
                                     <span class="text-dark font-weight-bold">#{{ $payment->id }}</span>
-                                    <small class="d-block text-muted" style="font-size: 0.65rem;">TXN ID: {{ substr($payment->transaction_id ?? 'MANUAL', 0, 10) }}...</small>
+                                    <small class="d-block text-muted" style="font-size: 0.65rem;">TXN ID: {{ substr($payment->transaction_reference ?? 'MANUAL', 0, 10) }}...</small>
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column">
