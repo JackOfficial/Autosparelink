@@ -139,7 +139,7 @@ class PaymentController extends Controller
 
         if ($order && $order->status !== 'completed') {
             DB::transaction(function () use ($order, $txRef) {
-                $order->update(['status' => 'completed']);
+                $order->update(['status' => 'processing']);
 
                 Payment::updateOrCreate(
                     ['order_id' => $order->id],
