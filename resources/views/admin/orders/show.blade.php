@@ -219,7 +219,7 @@
                     <div class="mb-3">
                         <span class="info-label">Shipping Address</span>
                         <address class="info-value mb-0">
-                            <strong>{{ $order->address->full_name }}</strong><br>
+                            <strong>{{ $order->address->name }}</strong><br>
                             {{ $order->address->street_address }}<br>
                             {{ $order->address->city }}, {{ $order->address->country }}
                         </address>
