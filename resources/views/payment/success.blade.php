@@ -55,19 +55,23 @@
                     <i class="fas fa-shopping-cart mr-2"></i> Continue Shopping
                 </a>
 
-                <a href="#" class="btn btn-primary px-4 py-2">
-                    <i class="fas fa-box-open mr-2"></i> My Orders
-                </a>
+                {{-- Only show "My Orders" if the user is logged in --}}
+                @auth
+                    <a href="{{ route('dashboard.index') }}" class="btn btn-primary px-4 py-2">
+                        <i class="fas fa-box-open mr-2"></i> My Orders
+                    </a>
+                @endauth
             </div>
 
             <p class="mt-4 text-muted small">
-                A confirmation email has been sent to <strong>{{ auth()->user()->email }}</strong>
+                {{-- Show guest email from transaction if not logged in --}}
+                A confirmation email has been sent to 
+                <strong>{{ auth()->check() ? auth()->user()->email : ($data['customer']['email'] ?? 'your email') }}</strong>
             </p>
         </div>
     </div>
 </div>
 
-{{-- Adding a quick bounce animation for the success icon --}}
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 <style>
