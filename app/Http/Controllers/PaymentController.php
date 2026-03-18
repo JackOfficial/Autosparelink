@@ -38,6 +38,7 @@ class PaymentController extends Controller
 
     public function initialize(Request $request)
     {
+        dd("Hello world");
         $request->validate([
             'amount' => 'required|numeric',
             'order_id' => 'required|exists:orders,id'
