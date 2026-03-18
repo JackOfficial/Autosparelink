@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cookie; // Ensure this is imported
+use Illuminate\Support\Facades\Cookie;
 
 class Checkout extends Component
 {
@@ -28,18 +28,24 @@ class Checkout extends Component
         // Load user's addresses if logged in
         $this->addresses = Auth::check() ? Auth::user()->addresses()->get() : collect();
 
-        // Auto toggle new address if guest or no saved addresses exist
-        $this->use_new_address = !Auth::check() || $this->addresses->isEmpty();
-
         // 1. Retrieve Guest details from Cookies if they exist
-        $saved_name    = Cookie::get('guest_name');
         $saved_email   = Cookie::get('guest_email');
+        $saved_name    = Cookie::get('guest_name');
         $saved_phone   = Cookie::get('guest_phone');
         $saved_street  = Cookie::get('guest_address');
         $saved_city    = Cookie::get('guest_city');
         $saved_zip     = Cookie::get('guest_postal_code');
 
-        // 2. Default new address fields (Pre-fill with Auth data OR Cookie data)
+        // 2. Determine Initial Toggle State
+        if (!Auth::check() && $saved_email) {
+            // If they are a returning guest with data, show the "Saved" card first
+            $this->use_new_address = false;
+        } else {
+            // Otherwise, open the form if guest or no saved addresses exist
+            $this->use_new_address = !Auth::check() || $this->addresses->isEmpty();
+        }
+
+        // 3. Pre-fill address fields
         $this->new_address = [
             'full_name'      => Auth::check() ? Auth::user()->name : ($saved_name ?? ''),
             'phone'          => Auth::check() ? (Auth::user()->phone ?? '') : ($saved_phone ?? ''),
@@ -50,11 +56,21 @@ class Checkout extends Component
             'country'        => 'Rwanda',
         ];
 
-        if (Auth::check()) {
-            $this->guest_email = Auth::user()->email;
-        } else {
-            // Pre-fill guest email from cookie if available
-            $this->guest_email = $saved_email ?? '';
+        $this->guest_email = Auth::check() ? Auth::user()->email : ($saved_email ?? '');
+    }
+
+    /**
+     * Helper to remember guest info in cookies for 30 days
+     */
+    private function saveGuestCookies()
+    {
+        if (!Auth::check()) {
+            Cookie::queue('guest_email', $this->guest_email, 60 * 24 * 30);
+            Cookie::queue('guest_name', $this->new_address['full_name'], 60 * 24 * 30);
+            Cookie::queue('guest_phone', $this->new_address['phone'], 60 * 24 * 30);
+            Cookie::queue('guest_address', $this->new_address['street_address'], 60 * 24 * 30);
+            Cookie::queue('guest_city', $this->new_address['city'], 60 * 24 * 30);
+            Cookie::queue('guest_postal_code', $this->new_address['postal_code'] ?? '', 60 * 24 * 30);
         }
     }
 
@@ -74,17 +90,16 @@ class Checkout extends Component
         if ($this->use_new_address || !Auth::check()) {
             $rules = array_merge($rules, [
                 'new_address.full_name'      => 'required|string|max:255',
-                'new_address.phone'         => 'required|string|max:20',
+                'new_address.phone'          => 'required|string|max:20',
                 'new_address.street_address' => 'required|string|max:255',
                 'new_address.city'           => 'required|string|max:100',
                 'new_address.country'        => 'required|string|max:100',
             ]);
-        } else {
-            if (!$this->address_id) {
-                $this->dispatch('notify', message: 'Please select a delivery address.');
-                return;
-            }
+        } elseif (!$this->address_id) {
+            $this->dispatch('notify', message: 'Please select a delivery address.');
+            return;
         }
+
         $this->validate($rules);
 
         DB::beginTransaction();
@@ -129,6 +144,8 @@ class Checkout extends Component
 
             DB::commit();
 
+            $this->saveGuestCookies(); // Save info for next time
+
             Cart::instance('default')->destroy();
 
             if (Auth::check()) {
@@ -156,7 +173,7 @@ class Checkout extends Component
         if ($this->use_new_address || !Auth::check()) {
             $rules = array_merge($rules, [
                 'new_address.full_name'      => 'required|string|max:255',
-                'new_address.phone'         => 'required|string|max:20',
+                'new_address.phone'          => 'required|string|max:20',
                 'new_address.street_address' => 'required|string',
                 'new_address.city'           => 'required|string',
             ]);
@@ -211,12 +228,14 @@ class Checkout extends Component
                 ]);
             }
 
+            DB::commit();
+
+            $this->saveGuestCookies(); // Save info for next time
+
             Cart::instance('default')->destroy();
             if (Auth::check()) {
                 DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
             }
-
-            DB::commit();
 
             try {
                 Mail::to('admin@happyfamilyrwanda.org')->send(new OrderCallbackAdmin($order));

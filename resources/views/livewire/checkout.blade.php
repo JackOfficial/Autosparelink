@@ -23,7 +23,6 @@
                     <i class="fa fa-shopping-cart fa-4x text-light" style="opacity: 0.5;"></i>
                 </div>
                 <h4 class="text-muted">Your cart is empty!</h4>
-                <p class="text-muted small">Add some spare parts to your cart to proceed with checkout.</p>
                 <a href="/spare-parts" class="btn btn-primary rounded-pill px-5 mt-3 shadow-sm">Browse Parts</a>
             </div>
         </div>
@@ -61,34 +60,53 @@
                                 <label class="custom-control-label font-weight-bold" for="useNewAddress">Deliver to a different address</label>
                             </div>
                         @else
-                            {{-- GUEST UX: Show saved info from cookies or provide login --}}
-                            <div class="alert alert-secondary border-0 mb-4 d-flex align-items-center" style="border-radius: 12px; background-color: #f8f9fa;">
-                                <i class="fa fa-info-circle text-primary mr-3 fa-lg"></i>
-                                <small class="text-dark">Checking out as a <strong>Guest</strong>. 
-                                    <a href="{{ route('login') }}" class="text-primary font-weight-bold text-decoration-none">Login</a> to sync your history.
-                                </small>
+                            {{-- GUEST UX --}}
+                            <div class="alert alert-secondary border-0 mb-4 d-flex align-items-center justify-content-between" style="border-radius: 12px; background-color: #f8f9fa;">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-user-circle text-primary mr-3 fa-lg"></i>
+                                    <small class="text-dark">
+                                        @if(Cookie::get('guest_email')) 
+                                            Welcome back! Checking out as <strong>Guest</strong>.
+                                        @else
+                                            Checking out as a <strong>Guest</strong>.
+                                        @endif
+                                        <a href="{{ route('login') }}" class="text-primary font-weight-bold text-decoration-none ml-1">Login here</a>
+                                    </small>
+                                </div>
                             </div>
 
-                            {{-- Toggle logic for Guests with cookies --}}
+                            {{-- DEFAULT VIEW: Show saved info if cookies exist and user hasn't clicked "Change" --}}
                             @if(Cookie::get('guest_email') && !$use_new_address)
-                                <div class="p-4 border rounded-lg mb-4 bg-white shadow-sm border-primary animate__animated animate__fadeIn">
+                                <div class="p-4 border rounded-lg mb-4 bg-white shadow-sm border-primary animate__animated animate__fadeIn" style="border-left: 5px solid #007bff !important;">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h6 class="font-weight-bold text-primary mb-0"><i class="fa fa-history mr-2"></i>Using Saved Details</h6>
-                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" wire:click="$set('use_new_address', true)">
-                                            Change
+                                        <div>
+                                            <h6 class="font-weight-bold text-primary mb-1"><i class="fa fa-check-circle mr-2"></i>Using Saved Details</h6>
+                                            <p class="small text-muted mb-0">We've loaded your information from your last visit.</p>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm" wire:click="$set('use_new_address', true)">
+                                            Change Address
                                         </button>
                                     </div>
-                                    <hr>
-                                    <div class="row small">
-                                        <div class="col-6 mb-2"><strong>Name:</strong> {{ $new_address['full_name'] }}</div>
-                                        <div class="col-6 mb-2"><strong>Phone:</strong> {{ $new_address['phone'] }}</div>
-                                        <div class="col-12"><strong>Address:</strong> {{ $new_address['street_address'] }}, {{ $new_address['city'] }}</div>
+                                    <hr class="my-3">
+                                    <div class="row">
+                                        <div class="col-sm-6 mb-2">
+                                            <label class="small text-muted text-uppercase d-block mb-0">Recipient</label>
+                                            <span class="font-weight-bold">{{ $new_address['full_name'] ?? 'N/A' }}</span>
+                                        </div>
+                                        <div class="col-sm-6 mb-2">
+                                            <label class="small text-muted text-uppercase d-block mb-0">Contact</label>
+                                            <span class="font-weight-bold">{{ $new_address['phone'] ?? 'N/A' }}</span>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="small text-muted text-uppercase d-block mb-0">Delivery Spot</label>
+                                            <span class="font-weight-bold">{{ $new_address['street_address'] ?? '' }}, {{ $new_address['city'] ?? '' }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             @endif
                         @endif
 
-                        {{-- Full Form: Shown if new address requested OR guest without cookies --}}
+                        {{-- FORM VIEW: Show if New Address checkbox is checked OR guest has no cookies --}}
                         @if($use_new_address || (!Auth::check() && !Cookie::get('guest_email')))
                             <div class="row animate__animated animate__fadeIn">
                                 <div class="col-12 mb-3">
@@ -129,7 +147,9 @@
                                 
                                 @if(!Auth::check() && Cookie::get('guest_email'))
                                     <div class="col-12 text-right">
-                                        <button type="button" class="btn btn-link btn-sm text-muted" wire:click="$set('use_new_address', false)">Cancel & Use Saved</button>
+                                        <button type="button" class="btn btn-link btn-sm text-primary font-weight-bold" wire:click="$set('use_new_address', false)">
+                                            <i class="fa fa-arrow-left mr-1"></i> Use my saved information instead
+                                        </button>
                                     </div>
                                 @endif
                             </div>
@@ -147,8 +167,8 @@
                                 <div class="p-3 border rounded-lg bg-light d-flex align-items-center shadow-sm" style="border-left: 5px solid #ffcc00 !important;">
                                     <img src="{{ asset('images/momo.jpg')}}" style="width: 45px; height: 45px; object-fit: contain;" class="rounded mr-3" alt="MoMo">
                                     <div>
-                                        <h6 class="mb-0 font-weight-bold">Pay via Flutterwave</h6>
-                                        <p class="small text-muted mb-0">Supports MTN MoMo, Airtel Money, and Visa/Mastercard.</p>
+                                        <h6 class="mb-0 font-weight-bold">Mobile Money & Cards</h6>
+                                        <p class="small text-muted mb-0">Secure payment via Flutterwave.</p>
                                     </div>
                                     <i class="fa fa-check-circle text-warning ml-auto fa-lg"></i>
                                 </div>
@@ -159,7 +179,7 @@
                             <div class="col-md-6 mb-3 mb-md-0">
                                 <button wire:click="placeOrder" wire:loading.attr="disabled" class="btn btn-primary btn-lg btn-block rounded-pill shadow font-weight-bold py-3">
                                     <span wire:loading.remove wire:target="placeOrder">
-                                        <i class="fa fa-lock mr-2"></i>Pay Now
+                                        <i class="fa fa-lock mr-2"></i>Pay {{ $total }} RWF
                                     </span>
                                     <span wire:loading wire:target="placeOrder">
                                         <i class="fa fa-spinner fa-spin mr-2"></i>Processing...
@@ -230,10 +250,6 @@
                                 <h4 class="font-weight-bold text-primary mb-0">{{ $total }} RWF</h4>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="text-center mt-3">
-                        <p class="small text-muted"><i class="fa fa-shield-alt mr-1"></i> Secure Checkout Powered by Flutterwave</p>
                     </div>
                 </div>
             </div>
