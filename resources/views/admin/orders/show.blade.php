@@ -28,10 +28,10 @@
     // PRIMARY LOGIC: Check orders table first for guest data, fallback to user relation
     $customerName = $order->guest_name ?? $order->user->name ?? 'Guest Customer';
     $customerEmail = $order->guest_email ?? $order->user->email ?? 'No email provided';
-    $customerPhone = $order->phone ?? $order->address->phone ?? 'N/A';
+    $customerPhone = $order->guest_phone ?? $order->address->phone ?? 'N/A';
     
     // Address Fallback Logic
-    $street = $order->address_line ?? $order->address->street_address ?? 'No address provided';
+    $street = $order->guest_shipping_address ?? $order->address->street_address ?? 'No address provided';
     $city = $order->city ?? $order->address->city ?? '';
     $country = $order->country ?? $order->address->country ?? '';
 
