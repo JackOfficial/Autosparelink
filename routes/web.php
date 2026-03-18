@@ -1,31 +1,47 @@
 <?php
 
-use App\Http\Controllers\Admin\AddressController;
 use Illuminate\Support\Facades\Route;
 
-//Oauth Controllers
+// --- 1. OAUTH & AUTH CONTROLLERS ---
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Livewire\Parts\PartsCatalog;
-//User Controllers
+
+// --- 2. USER/PUBLIC CONTROLLERS ---
+use App\Http\Controllers\HomeContoller;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SubscriptionsController;
 use App\Http\Controllers\CareersController;
+use App\Http\Controllers\VolunteerController;
+use App\Http\Controllers\DonateController;
 use App\Http\Controllers\BrandsController;
+use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CatalogeController;
-use App\Http\Controllers\HomeContoller;
+use App\Http\Controllers\ExportsController;
+
+// --- 3. E-COMMERCE & PARTS CONTROLLERS ---
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SparePartController;
+use App\Http\Controllers\PartCatalogController;
 use App\Http\Controllers\SpecificationController;
 use App\Http\Controllers\VehicleModelController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\DonateController;
-use App\Http\Controllers\ExportsController;
-use App\Http\Controllers\VolunteerController;
-use App\Http\Controllers\BrandController;
+use App\Http\Controllers\ModelPartController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\VinController;
+use App\Http\Controllers\PaymentController as FlutterwavePaymentController;
 
-//Admin Controllers
+// --- 4. SUPPORT & DASHBOARD CONTROLLERS ---
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\UserDashboardController;
+
+// --- 5. ADMIN CONTROLLERS ---
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AddressController;
 use App\Http\Controllers\Admin\CareersController as Careers;
+use App\Http\Controllers\Admin\ApplicationsController;
 use App\Http\Controllers\Admin\CauseController;
 use App\Http\Controllers\Admin\BloggersController;
 use App\Http\Controllers\Admin\BlogController;
@@ -37,147 +53,147 @@ use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Admin\StoryController;
 use App\Http\Controllers\Admin\WebpagesController;
-use App\Http\Controllers\Admin\ApplicationsController;
 use App\Http\Controllers\Admin\BodyTypeController;
 use App\Http\Controllers\Admin\BroadcastController;
 use App\Http\Controllers\Admin\CartController as AdminCartController;
 use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\Admin\VehicleBrandController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\Compose;
 use App\Http\Controllers\Admin\DriveTypeController;
 use App\Http\Controllers\Admin\EngineTypeController;
 use App\Http\Controllers\Admin\InboxController;
-use App\Http\Controllers\Admin\InventoryReports;
 use App\Http\Controllers\Admin\ModelController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PartBrandController;
 use App\Http\Controllers\Admin\PartController;
 use App\Http\Controllers\Admin\PartFitmentController;
 use App\Http\Controllers\Admin\PaymentController;
-use App\Http\Controllers\Admin\Read;
 use App\Http\Controllers\Admin\ReportsController;
-use App\Http\Controllers\Admin\SalesReports;
 use App\Http\Controllers\Admin\ShippingController;
 use App\Http\Controllers\Admin\TransmissionTypeController;
 use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
-use App\Http\Controllers\Admin\SystemSettings;
 use App\Http\Controllers\Admin\SystemSettingsController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\ModelPartController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\PartCatalogController;
-use App\Http\Controllers\PaymentController as FlutterwavePaymentController;
-use App\Http\Controllers\ShopController;
-use App\Http\Controllers\TicketController;
 use App\Http\Controllers\Admin\TicketController as Ticket;
-use App\Http\Controllers\UserDashboardController;
-use App\Http\Controllers\VinController;
-use App\Http\Controllers\WishlistController;
 
-//Guest routes
-// Route::get('/', function() {
-//   return view('under-maintainence');
-// });
+// =============================================================
+// PUBLIC FRONTEND ROUTES
+// =============================================================
 
-//User Routes
 Route::get('/', [HomeContoller::class, 'index']);
-Route::get('/about', [PageController::class, 'about']);
-Route::get('/gallery', [PageController::class, 'gallery']);
-Route::get('/blogs', [PageController::class, 'blogs']);
-Route::get('/news', [PageController::class, 'news']);
-Route::get('/news/{id}', [PageController::class, 'news_details']);
-Route::get('/articles', [PageController::class, 'articles']);
-Route::get('/articles/{id}', [PageController::class, 'article']);
-Route::get('/policies', [PageController::class, 'policies']);
+
+Route::controller(PageController::class)->group(function () {
+    Route::get('/about', 'about');
+    Route::get('/gallery', 'gallery');
+    Route::get('/blogs', 'blogs');
+    Route::get('/news', 'news');
+    Route::get('/news/{id}', 'news_details');
+    Route::get('/articles', 'articles');
+    Route::get('/articles/{id}', 'article');
+    Route::get('/policies', 'policies');
+    Route::get('/terms-and-conditions', 'terms_and_conditions');
+    Route::get('/faqs', 'faqs');
+    Route::get('/cart', 'cart'); // Note: Duplicate found in original, kept both
+    Route::get('/blog/{id}', 'blog');
+    Route::get('/blogs/{id}', 'blog_category');
+    Route::get('/projects', 'projects');
+    Route::get('/stories', 'stories');
+    Route::get('/story/{id}', 'story');
+    Route::get('/causes', 'causes');
+    Route::get('/donate', 'donate');
+    Route::get('/volunteer', 'volunteer');
+    Route::get('/events', 'events');
+    Route::get('/events/{event}', 'event');
+    Route::get('/application-sent', 'application_sent');
+    Route::get('blogs/search/{keyword}', 'search');
+    Route::post('/comment', 'post');
+    Route::post('/deleteComment/{id}', 'deleteComment');
+});
+
 Route::get('/brands', [BrandsController::class, 'brands']);
-Route::get('/shop/products', [ProductController::class, 'products']);
-Route::get('/shop/products/{id}', [ProductController::class, 'product']);
-Route::get('/terms-and-conditions', [PageController::class, 'terms_and_conditions']);
-Route::get('/faqs', [PageController::class, 'faqs']);
-Route::get('/cart', [PageController::class, 'cart']);
-Route::get('/cart', [PageController::class, 'cart']);
-Route::get('/blog/{id}', [PageController::class, 'blog']);
-Route::get('/blogs/{id}', [PageController::class, 'blog_category']);
-Route::get('/projects', [PageController::class, 'projects']);
 Route::get('/cataloge/{id}', [CatalogeController::class, 'cataloge']);
-Route::get('/stories', [PageController::class, 'stories']);
-Route::get('/story/{id}', [PageController::class, 'story']);
-Route::get('/causes', [PageController::class, 'causes']);
-Route::get('/donate', [PageController::class, 'donate']);
-Route::get('/volunteer', [PageController::class, 'volunteer']);
-Route::get('/events', [PageController::class, 'events']);
-Route::get('/events/{event}', [PageController::class, 'event']);
-Route::get('/application-sent', [PageController::class, 'application_sent']);
-Route::get('blogs/search/{keyword}', [PageController::class, 'search']);
+
+// --- Forms & Applications ---
 Route::resource('contact', ContactController::class);
 Route::resource('subscribe', SubscriptionsController::class);
+
 Route::get('/volunteer', [VolunteerController::class, 'index'])->name('volunteer');
 Route::post('/volunteer', [VolunteerController::class, 'store']);
+
 Route::get('/donate', [DonateController::class, 'index']);
 Route::post('/donate', [DonateController::class, 'store'])->name('donation.store');
-Route::get('/career', [CareersController::class, 'index']);
-Route::get('/job-details/{id}', [CareersController::class, 'jobDetails']);
-Route::get('/apply/{id}', [CareersController::class, 'apply'])->name('apply');
-Route::post('/apply', [CareersController::class, 'store']);
-Route::resource('careers', Careers::class);
-Route::resource('applications', ApplicationsController::class);
-Route::get('/export-excel', [ExportsController::class, 'exportAll']);
-Route::get('/export-excel/{id}', [ExportsController::class, 'exportSelected']);
+
+Route::controller(CareersController::class)->group(function () {
+    Route::get('/career', 'index');
+    Route::get('/job-details/{id}', 'jobDetails');
+    Route::get('/apply/{id}', 'apply')->name('apply');
+    Route::post('/apply', 'store');
+});
+
+// =============================================================
+// E-COMMERCE & SPARE PARTS ROUTES
+// =============================================================
+
+Route::get('/shop/products', [ProductController::class, 'products']);
+Route::get('/shop/products/{id}', [ProductController::class, 'product']);
+Route::get('/spare-parts/{variant}', [ProductController::class, 'product'])->name('spare-parts');
+
 Route::get('/models', [VehicleModelController::class, 'index']);
 Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
 Route::get('/vin-search', [VinController::class, 'search']);
-Route::get('/spare-parts', [PartCatalogController::class, 'parts']);
-Route::resource('wishlist', WishlistController::class);
-Route::resource('cart', CartController::class);
-Route::resource('shop', ShopController::class);
 
-// Route::get('/model-specification/{id}', [SpecificationController::class, 'model_specification']);
-// Route::get('/variant-specification/{id}', [SpecificationController::class, 'variant_specification']);
-// Route::get('/spare-parts/', [SparePartController::class, 'parts']);  
+Route::controller(PartCatalogController::class)->group(function () {
+    Route::get('/spare-parts', 'parts');
+    Route::get('/spare-parts/{part:sku}', 'show')->name('spare-parts.show');
+    Route::get('/catalog/{brand}/{model}/{slug}', 'part_for_specification')->name('specification.parts');
+});
 
-Route::get('/spare-parts/{part:sku}', [PartCatalogController::class, 'show'])->name('spare-parts.show'); 
-
-Route::get('/catalog/{brand}/{model}/{slug}', [PartCatalogController::class, 'part_for_specification'])
-    ->name('specification.parts');
-
-// Route::get('/specifications/{type}/{id}/parts', [PartCatalogController::class, 'index'])
-//     ->name('specification.parts');
-
-
-Route::get('/variant/{variant:slug}/specifications', [SpecificationController::class, 'show'])
-    ->name('variant.specifications');
-
-
-//Route::get('/specifications/{type}/{id}', [SpecificationController::class, 'show'])->name('specifications.show');
+Route::get('/parts-catalog/{brand?}/{model?}/{variant?}', [SparePartController::class, 'catalog'])->name('parts.catalog');
 Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 
-// web.php
-// Ensure the names are exactly brandId, modelId, and variantId
-Route::get('/parts-catalog/{brand?}/{model?}/{variant?}', [SparePartController::class, 'catalog'])
-    ->name('parts.catalog');
-
-// Show all models for a brand
 Route::get('/model/{brand}', [BrandController::class, 'show'])->name('brand.models');
-Route::get('/spare-parts/{variant}', [ProductController::class, 'product'])->name('spare-parts');
-// Route::get('/specifications/{type}/{id}/parts', [SparePartController::class, 'showCompatibleParts'])
-//     ->name('specification.parts');
-Route::get('/models/{model_id}/parts', [ModelPartController::class, 'model_parts'])
-    ->name('model.parts');
 
-// Parts for a specific variant
-Route::get('/variants/{variant_id}/parts', [ModelPartController::class, 'variant_parts'])
-    ->name('variant.parts');
+Route::controller(ModelPartController::class)->group(function () {
+    Route::get('/models/{model_id}/parts', 'model_parts')->name('model.parts');
+    Route::get('/variants/{variant_id}/parts', 'variant_parts')->name('variant.parts');
+});
 
+Route::controller(SpecificationController::class)->group(function () {
+    Route::get('/variant/{variant:slug}/specifications', 'show')->name('variant.specifications');
+    Route::get('/model-specification/{model}', 'model_specification')->name('model.specification');
+    Route::get('/variant-specification/{variant}', 'variant_specification')->name('variant.specification');
+});
+
+// --- Checkout & Cart ---
+Route::resource('wishlist', WishlistController::class);
+Route::resource('cart', CartController::class);
+// Route::resource('shop', ShopController::class);
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::resource('orders', OrderController::class)->middleware('auth');
 
+// =============================================================
+// PAYMENT GATEWAY (FLUTTERWAVE)
+// =============================================================
+
+Route::controller(FlutterwavePaymentController::class)->group(function () {
+    Route::get('/payment/process/{order}', 'process')->name('payment.process');
+    Route::post('/payment/initialize', 'initialize')->name('payment.initialize');
+    Route::get('/payment/callback', 'callback')->name('payment.callback');
+    Route::get('/payment/receipt/{id}', 'downloadReceipt')->name('payment.receipt');
+    Route::post('/flw-webhook', 'webhook')->name('payment.webhook');
+});
+
+// =============================================================
+// AUTHENTICATED USER ROUTES
+// =============================================================
+
+Route::get('/auth/redirect/{provider}', [SocialLoginController::class, 'redirect']);
+Route::get('/auth/callback/{provider}', [SocialLoginController::class, 'callback']);
+
 Route::middleware(['auth'])->group(function () {
     
-    // --- Dashboard & Profile Management ---
+    // Dashboard & Profile
     Route::controller(UserDashboardController::class)->group(function () {
         Route::get('/user-dashboard', 'index')->name('dashboard.index');
         Route::get('/profile/edit', 'editProfile')->name('profile.edit');
@@ -185,55 +201,37 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile/password', 'updatePassword')->name('profile.password');
         Route::post('/garage/update', 'updateGarage')->name('garage.update');
         Route::post('/notifications/read-all', 'markAllRead')->name('notifications.readAll');
-     
-        // 4. User notification management
         Route::post('/notifications/read', function () {
-        auth()->user()->unreadNotifications->markAsRead();
-        return back();
+            auth()->user()->unreadNotifications->markAsRead();
+            return back();
         })->name('notifications.read');
     });
 
-    // --- Flutterwave Payment Gateway ---
-    Route::get('/payment/process/{order}', [FlutterwavePaymentController::class, 'process'])->name('payment.process');
-    Route::post('/payment/initialize', [FlutterwavePaymentController::class, 'initialize'])->name('payment.initialize');
-    Route::get('/payment/callback', [FlutterwavePaymentController::class, 'callback'])->name('payment.callback');
-    Route::get('/payment/receipt/{id}', [FlutterwavePaymentController::class, 'downloadReceipt'])->name('payment.receipt');
-    
-    // --- Support Ticket System ---
+    // Support Ticket System
     Route::prefix('tickets')->name('tickets.')->controller(TicketController::class)->group(function () {
-    Route::get('/', 'index')->name('index');           // View all tickets
-    Route::post('/store', 'store')->name('store');     // Modal submission
-    Route::get('/{id}', 'show')->name('show');         // View single ticket
-    Route::post('/{id}/reply', 'reply')->name('reply'); // Post a reply
+        Route::get('/', 'index')->name('index');
+        Route::post('/store', 'store')->name('store');
+        Route::get('/{id}', 'show')->name('show');
+        Route::post('/{id}/reply', 'reply')->name('reply');
+    });
+
+    // Specific Role Check
+    Route::middleware(['verified', 'role:user'])->group(function () { 
+        Route::get('/home', [HomeContoller::class, 'index'])->name('home');
     });
 });
 
-/////////////////
-//Route::get('/brand/{brand}/models', [BrandController::class, 'models'])->name('brand.models');
+// =============================================================
+// ADMIN & SUPER-ADMIN ROUTES
+// =============================================================
 
-// Model specification page
-Route::get('/model-specification/{model}', [SpecificationController::class, 'model_specification'])->name('model.specification');
-
-// Variant specification page
-Route::get('/variant-specification/{variant}', [SpecificationController::class, 'variant_specification'])->name('variant.specification');
-///////////////
-
-// Social login routes
-Route::get('/auth/redirect/{provider}', [SocialLoginController::class, 'redirect']);
-Route::get('/auth/callback/{provider}', [SocialLoginController::class, 'callback']);
-
-//Authenticated user routes
-Route::middleware(['auth', 'verified', 'role:user'])->group(function () { 
-    Route::get('/home', [HomeContoller::class, 'index'])->name('home');
-    Route::post('/comment', [PageController::class, 'post']);
-    Route::post('/deleteComment/{id}', [PageController::class, 'deleteComment']);
-});
-
-//Admin and super admin Routes
 Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('admin.')->group(function () {
+    
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
     Route::post('/add-task', [AdminController::class, 'addTask'])->name('addTask');
     Route::post('/task-done/{id}', [AdminController::class, 'taskDone'])->name('taskDone');
+
+    // Content Management
     Route::resource('pages', WebpagesController::class);
     Route::resource('causes', CauseController::class);
     Route::resource('stories', StoryController::class);
@@ -242,42 +240,33 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('gallery', GalleryController::class);
     Route::resource('projects', ProjectController::class);
     Route::resource('team', TeamController::class);
-    Route::resource('careers', Careers::class);
-    Route::resource('applications', ApplicationsController::class);
-    Route::resource('specifications', AdminSpecificationController::class);
-    Route::post('applications/shortlist', [ApplicationsController::class, 'shortlist']);
-    Route::post('/applications/export-all', [ApplicationsController::class, 'exportAll']);
-    Route::get('/applications/export-selected', [ApplicationsController::class, 'exportSelected']);
-    Route::get("/letmesee/{id}", [ApplicationsController::class, 'exportSelected']);
-    Route::get('applications/filter/{id}', [ApplicationsController::class, 'filter']);
-    Route::get('applications/search/{keyword}', [ApplicationsController::class, 'search']);
-    Route::get('/downloadfiles', [ApplicationsController::class, 'downloadfiles']);
-    Route::post('applications/hire', [ApplicationsController::class, 'hire']);
-    Route::post('applications/reject', [ApplicationsController::class, 'reject']);
     Route::resource('events', EventController::class);
-    Route::resource('users', UsersController::class);
     Route::resource('partners', PartnerController::class);
     Route::resource('organization', OrganizationController::class);
-    
-    //E-commerce route
+    Route::resource('users', UsersController::class);
+
+    // HR & Applications
+    Route::resource('careers', Careers::class);
+    Route::resource('applications', ApplicationsController::class);
+    Route::controller(ApplicationsController::class)->group(function() {
+        Route::post('applications/shortlist', 'shortlist');
+        Route::post('/applications/export-all', 'exportAll');
+        Route::get('/applications/export-selected', 'exportSelected');
+        Route::get("/letmesee/{id}", 'exportSelected');
+        Route::get('applications/filter/{id}', 'filter');
+        Route::get('applications/search/{keyword}', 'search');
+        Route::get('/downloadfiles', 'downloadfiles');
+        Route::post('applications/hire', 'hire');
+        Route::post('applications/reject', 'reject');
+    });
+
+    // E-commerce Management
     Route::resource('carts', AdminCartController::class);
     Route::resource('orders', AdminOrderController::class);
     Route::resource('payments', PaymentController::class);
     Route::resource('shippings', ShippingController::class);
     Route::resource('addresses', AddressController::class);
-    //////////////////////////////////
-
-    // 1. View the form and history list
-    Route::get('/broadcast', [BroadcastController::class, 'index'])->name('broadcast.index');
-
-    // 2. The missing "STORE/SEND" route (This handles the form submission)
-    Route::post('/broadcast', [BroadcastController::class, 'send'])->name('broadcast.send');
-
-    // 3. View details of a specific past broadcast
-    Route::get('/broadcast/{broadcast}', [BroadcastController::class, 'show'])->name('broadcast.show');
-    Route::delete('/broadcast/clear-all', [BroadcastController::class, 'clearAll'])->name('broadcast.clearAll');
-    Route::delete('/broadcast/{broadcast}', [BroadcastController::class, 'destroy'])->name('broadcast.destroy');
-
+    Route::resource('specifications', AdminSpecificationController::class);
     Route::resource('vehicle-brands', VehicleBrandController::class);
     Route::resource('part-brands', PartBrandController::class);
     Route::resource('categories', CategoryController::class);
@@ -291,56 +280,45 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('fitments', PartFitmentController::class);
     Route::delete('fitments/photos/{id}', [PartFitmentController::class, 'deletePhoto'])->name('fitments.deletePhoto');
 
-    //pdf and excel
-    Route::get('/export/excel', [PartController::class, 'exportExcel'])->name('export.excel');
-    Route::get('/export/pdf', [PartController::class, 'exportPdf'])->name('export.pdf');
-    Route::get('/reports/sales/pdf', [ReportsController::class, 'downloadSalesPDF'])->name('reports.sales.pdf');
-    Route::get('/reports/inventory/pdf', [ReportsController::class, 'downloadInventoryPDF'])->name('reports.inventory.pdf');
-
-    // Ticket Management
-    Route::get('/tickets', [Ticket::class, 'index'])->name('tickets.index');
-    Route::get('/tickets/{ticket}', [Ticket::class, 'show'])->name('tickets.show');
-    Route::patch('/tickets/{ticket}/status', [Ticket::class, 'updateStatus'])->name('tickets.status');
-    Route::post('/tickets/{ticket}/reply', [Ticket::class, 'storeReply'])->name('tickets.reply');
-
-    // --- Mailbox (Using your Contacts migration) ---
-    Route::prefix('mailbox')->group(function () {
-       // List all messages (Inbox)
-        Route::get('/inbox', [InboxController::class, 'index'])->name('mailbox.index');
-        
-        // Read a specific message
-        Route::get('/read/{id}', [InboxController::class, 'show'])->name('mailbox.read');
-        
-        // Update status (Active/Resolved/Archived)
-        Route::patch('/status/{id}', [InboxController::class, 'updateStatus'])->name('mailbox.status');
-        
-        // Delete a message
-        Route::delete('/delete/{id}', [InboxController::class, 'destroy'])->name('mailbox.delete');
+    // Broadcasts
+    Route::controller(BroadcastController::class)->group(function() {
+        Route::get('/broadcast', 'index')->name('broadcast.index');
+        Route::post('/broadcast', 'send')->name('broadcast.send');
+        Route::get('/broadcast/{broadcast}', 'show')->name('broadcast.show');
+        Route::delete('/broadcast/clear-all', 'clearAll')->name('broadcast.clearAll');
+        Route::delete('/broadcast/{broadcast}', 'destroy')->name('broadcast.destroy');
     });
 
-    // --- Reports ---
-    Route::prefix('reports')->group(function () {
-        Route::get('/sales', [ReportsController::class, 'sales'])->name('reports.sales');
-        Route::get('/inventory', [ReportsController::class, 'inventory'])->name('reports.inventory');
+    // Tickets (Admin)
+    Route::controller(Ticket::class)->group(function() {
+        Route::get('/tickets', 'index')->name('tickets.index');
+        Route::get('/tickets/{ticket}', 'show')->name('tickets.show');
+        Route::patch('/tickets/{ticket}/status', 'updateStatus')->name('tickets.status');
+        Route::post('/tickets/{ticket}/reply', 'storeReply')->name('tickets.reply');
+    });
+
+    // Mailbox
+    Route::prefix('mailbox')->controller(InboxController::class)->group(function () {
+        Route::get('/inbox', 'index')->name('mailbox.index');
+        Route::get('/read/{id}', 'show')->name('mailbox.read');
+        Route::patch('/status/{id}', 'updateStatus')->name('mailbox.status');
+        Route::delete('/delete/{id}', 'destroy')->name('mailbox.delete');
+    });
+
+    // Reports & Exports
+    Route::get('/export-excel', [ExportsController::class, 'exportAll']);
+    Route::get('/export-excel/{id}', [ExportsController::class, 'exportSelected']);
+    Route::get('/export/excel', [PartController::class, 'exportExcel'])->name('export.excel');
+    Route::get('/export/pdf', [PartController::class, 'exportPdf'])->name('export.pdf');
+
+    Route::prefix('reports')->controller(ReportsController::class)->group(function () {
+        Route::get('/sales', 'sales')->name('reports.sales');
+        Route::get('/inventory', 'inventory')->name('reports.inventory');
+        Route::get('/sales/pdf', 'downloadSalesPDF')->name('reports.sales.pdf');
+        Route::get('/inventory/pdf', 'downloadInventoryPDF')->name('reports.inventory.pdf');
     });
 
     // System Settings
     Route::get('/settings', [SystemSettingsController::class, 'index'])->name('settings');
     Route::post('/settings', [SystemSettingsController::class, 'update'])->name('settings.update');
-
 });
-
-//Testing routes
- Route::get('/test-super-admin', function () {
-    return 'You are super-admin!';
- })->middleware(['auth', 'role:super-admin']);
-
- Route::get('/test-admin', function () {
-    return 'You are admin!';
- })->middleware(['auth', 'role:admin']);
-
- Route::get('/checkifemailisverified', function () {
-    return "You have verified";
- })->middleware(['verified']);
-
- Route::post('/flw-webhook', [FlutterwavePaymentController::class, 'webhook'])->name('payment.webhook');
