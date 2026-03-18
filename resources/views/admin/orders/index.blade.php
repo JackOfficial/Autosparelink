@@ -2,16 +2,38 @@
 
 @push('styles')
 <style>
-    .blink_me { animation: blinker 1.5s linear infinite; }
-    @keyframes blinker { 50% { opacity: 0.3; } }
+    .blink_me { animation: blinker 1s linear infinite; }
+    @keyframes blinker { 0% { opacity: 1.0; } 50% { opacity: 0.1; } 100% { opacity: 1.0; } }
+    .user-badge { font-size: 0.7rem; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
+    [x-cloak] { display: none !important; }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" x-data="{ 
+    search: '',
+    showRow(rowText) {
+        return rowText.toLowerCase().includes(this.search.toLowerCase())
+    }
+}">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="h4">Order Management</h2>
-        <span class="badge badge-info">{{ $orders->total() }} Total Orders</span>
+        
+        <div class="position-relative" style="width: 300px;">
+            <span class="position-absolute" style="left: 10px; top: 8px;">
+                <i class="fas fa-search text-muted"></i>
+            </span>
+            <input 
+                type="text" 
+                x-model="search" 
+                class="form-control pl-5 shadow-sm border-0" 
+                placeholder="Search ID, Name or Email..."
+                style="border-radius: 20px;"
+            >
+            <button x-show="search.length > 0" @click="search = ''" class="btn btn-link position-absolute text-muted" style="right: 5px; top: 0;" x-cloak>
+                <i class="fas fa-times-circle"></i>
+            </button>
+        </div>
     </div>
 
     @if($orders->isEmpty())
@@ -20,10 +42,10 @@
             <p class="text-muted">No orders have been placed yet.</p>
         </div>
     @else
-        <div class="card shadow-sm">
+        <div class="card shadow-sm border-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
+                    <thead class="bg-light text-muted">
                         <tr>
                             <th class="border-0">Order ID</th>
                             <th class="border-0">Customer</th>
@@ -35,16 +57,29 @@
                     </thead>
                     <tbody>
                         @foreach($orders as $order)
-                            <tr>
-                                <td class="font-weight-bold">#{{ $order->id }}</td>
+                            @php
+                                $searchText = "#{$order->id} " . ($order->user->name ?? $order->guest_name ?? '') . " " . ($order->user->email ?? $order->guest_email ?? '');
+                            @endphp
+                            <tr x-show="showRow('{{ addslashes($searchText) }}')" x-transition>
+                                <td class="font-weight-bold text-primary">#{{ $order->id }}</td>
                                 <td>
                                     <div class="d-flex flex-column">
                                         <span class="font-weight-bold text-dark">
-                                            {{ $order->user->name ?? $order->guest_name ?? 'Guest' }}
+                                            {{ $order->user->name ?? $order->guest_name ?? 'Unknown' }}
                                         </span>
                                         <small class="text-muted">
                                             {{ $order->user->email ?? $order->guest_email ?? 'N/A' }}
                                         </small>
+                                        
+                                        @if($order->user_id)
+                                            <span class="user-badge bg-success text-white">
+                                                <i class="fas fa-user-check mr-1"></i> Auth
+                                            </span>
+                                        @else
+                                            <span class="user-badge bg-light text-secondary border border-secondary">
+                                                <i class="fas fa-user-secret mr-1"></i> Guest
+                                            </span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td>
@@ -63,29 +98,18 @@
                                 </td>
                                 <td>
                                     @if($order->status === 'callback_requested')
-                                        <span class="badge badge-danger blink_me py-2 px-3">
+                                        <span class="badge badge-danger blink_me py-2 px-3 shadow-sm">
                                             <i class="fas fa-phone-alt mr-1"></i> Call Requested
                                         </span>
-                                    @elseif($order->status === 'pending')
-                                        <span class="badge badge-warning py-2 px-3">Pending</span>
-                                    @elseif($order->status === 'processing')
-                                        <span class="badge badge-primary py-2 px-3">Processing</span>
-                                    @elseif($order->status === 'shipped')
-                                        <span class="badge badge-info py-2 px-3">Shipped</span>
-                                    @elseif($order->status === 'delivered')
-                                        <span class="badge badge-success py-2 px-3">Delivered</span>
-                                    @elseif($order->status === 'cancelled')
-                                        <span class="badge badge-danger py-2 px-3">Cancelled</span>
+                                    @else
+                                        <span class="badge badge-secondary py-2 px-3">{{ ucfirst($order->status) }}</span>
                                     @endif
                                 </td>
                                 <td class="font-weight-bold">{{ number_format($order->total_amount) }} RWF</td>
                                 <td class="text-center">
                                     <div class="btn-group">
-                                        <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary">
+                                        <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary shadow-sm">
                                             <i class="fas fa-eye"></i> View
-                                        </a>
-                                        <a href="{{ route('admin.orders.edit', $order->id) }}" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-edit"></i> Edit
                                         </a>
                                     </div>
                                 </td>
@@ -94,7 +118,11 @@
                     </tbody>
                 </table>
             </div>
-            <div class="card-footer bg-white">
+            <div x-show="search.length > 0 && document.querySelectorAll('tbody tr[style*=\'display: none\']').length === {{ count($orders) }}" class="p-5 text-center" x-cloak>
+                <p class="text-muted">No matching orders found on this page.</p>
+            </div>
+            
+            <div class="card-footer bg-white border-0">
                 {{ $orders->links() }}
             </div>
         </div>
