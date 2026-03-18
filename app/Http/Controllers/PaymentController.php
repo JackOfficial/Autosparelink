@@ -88,7 +88,7 @@ class PaymentController extends Controller
             'raw_response' => json_encode($payment)
         ]);
 
-        return redirect()->route('checkout')->with('error', 'Payment gateway unavailable.');
+        return redirect()->to('checkout')->with('error', 'Payment gateway unavailable.');
     }
 
     public function callback(Request $request)
