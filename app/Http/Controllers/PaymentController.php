@@ -26,7 +26,7 @@ class PaymentController extends Controller
 
     public function process(Order $order)
     {
-        if ($order->user_id && $order->user_id !== auth()->id()) {
+        if ($order->user_id && $order->user_id != auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
 
