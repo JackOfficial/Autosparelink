@@ -63,7 +63,7 @@ class PaymentController extends Controller
         $customerData = [
             'email' => auth()->check() ? auth()->user()->email : $order->guest_email,
             'name' => auth()->check() ? auth()->user()->name : $order->guest_name,
-            'phonenumber' => auth()->check() ? (auth()->user()->phone ?? '') : $order->guest_phone,
+            'phone_number' => auth()->check() ? (auth()->user()->phone ?? '') : $order->guest_phone,
         ];
 
         $data = [
@@ -74,9 +74,9 @@ class PaymentController extends Controller
             'redirect_url' => route('payment.callback'),
             'customer' => $customerData,
             'customizations' => [
-                'title' => 'Happy Family Rwanda',
+                'title' => 'AutoSpareLink',
                 'description' => 'Payment for Order #' . $request->order_id,
-                'logo' => asset('images/logo.png'),
+                'logo' => asset('frontend/img/logo.png'),
             ],
         ];
 
