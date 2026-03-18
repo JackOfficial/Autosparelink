@@ -193,11 +193,12 @@ Route::middleware(['auth'])->group(function () {
         })->name('notifications.read');
     });
 
-     // --- Flutterwave Payment Gateway ---
+    // --- Flutterwave Payment Gateway ---
     Route::get('/payment/process/{order}', [FlutterwavePaymentController::class, 'process'])->name('payment.process');
     Route::post('/payment/initialize', [FlutterwavePaymentController::class, 'initialize'])->name('payment.initialize');
     Route::get('/payment/callback', [FlutterwavePaymentController::class, 'callback'])->name('payment.callback');
     Route::get('/payment/receipt/{id}', [FlutterwavePaymentController::class, 'downloadReceipt'])->name('payment.receipt');
+    
     // --- Support Ticket System ---
     Route::prefix('tickets')->name('tickets.')->controller(TicketController::class)->group(function () {
     Route::get('/', 'index')->name('index');           // View all tickets
