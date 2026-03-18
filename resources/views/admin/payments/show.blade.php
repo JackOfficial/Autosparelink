@@ -6,7 +6,7 @@
     $customerName = $payment->order->guest_name ?? $payment->order->user->name ?? 'Guest Customer';
     $customerEmail = $payment->order->guest_email ?? $payment->order->user->email ?? 'N/A';
     $customerId = $payment->order->user->id ?? 'GUEST';
-    $isGuest = !$payment->order->user_id;
+    $isGuest = !($payment->order?->user_id);
 @endphp
 
 <div class="container-fluid py-4">
