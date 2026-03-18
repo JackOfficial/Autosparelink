@@ -2,11 +2,12 @@
 
 @section('content')
 @php
-    // Guest-aware logic
-    $customerName = $payment->order->guest_name ?? $payment->order->user->name ?? 'Guest Customer';
-    $customerEmail = $payment->order->guest_email ?? $payment->order->user->email ?? 'N/A';
-    $customerId = $payment->order->user->id ?? 'GUEST';
-    $isGuest = !($payment->order?->user_id);
+    // Bulletproof Guest/Null-aware logic
+    $order = $payment->order;
+    $customerName = $order?->guest_name ?? $order?->user?->name ?? 'Unknown Customer';
+    $customerEmail = $order?->guest_email ?? $order?->user?->email ?? 'N/A';
+    $customerId = $order?->user?->id ?? 'GUEST';
+    $isGuest = !($order?->user_id);
 @endphp
 
 <div class="container-fluid py-4">
@@ -30,15 +31,15 @@
             <a href="{{ route('admin.payments.index') }}" class="btn btn-white border shadow-sm mr-2">
                 <i class="fas fa-arrow-left mr-1"></i> Back to Payments
             </a>
-            @if($payment->order)
-    <a href="{{ route('admin.orders.show', $payment->order->id) }}" class="btn btn-primary shadow-sm">
-        <i class="fas fa-box mr-1"></i> View Related Order
-    </a>
-@else
-    <button class="btn btn-secondary shadow-sm" disabled title="Order record not found">
-        <i class="fas fa-exclamation-circle mr-1"></i> Order Missing
-    </button>
-@endif
+            @if($order)
+                <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary shadow-sm">
+                    <i class="fas fa-box mr-1"></i> View Related Order
+                </a>
+            @else
+                <button class="btn btn-secondary shadow-sm" disabled>
+                    <i class="fas fa-exclamation-circle mr-1"></i> Order Missing
+                </button>
+            @endif
         </div>
     </div>  
 
@@ -60,16 +61,16 @@
                                 <option value="refunded" {{ $payment->status == 'refunded' ? 'selected' : '' }}>Refunded</option>
                             </select>
                         </div>
-                       <div class="p-3 bg-light rounded">
-    <p class="small text-muted mb-0">
-        <i class="fas fa-info-circle mr-1 text-primary"></i> 
-        @if($payment->order)
-            Updating to <b>Successful</b> will automatically move Order #{{ $payment->order->id }} to <b>Processing</b>.
-        @else
-            <span class="text-danger">Warning: No linked order found for this transaction.</span>
-        @endif
-    </p>
-</div>
+                        <div class="p-3 bg-light rounded">
+                            <p class="small text-muted mb-0">
+                                <i class="fas fa-info-circle mr-1 text-primary"></i> 
+                                @if($order)
+                                    Updating to <b>Successful</b> will automatically move Order #{{ $order->id }} to <b>Processing</b>.
+                                @else
+                                    <span class="text-danger">Warning: No linked order found to update.</span>
+                                @endif
+                            </p>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -85,7 +86,7 @@
                         <div>
                             <h6 class="mb-0 font-weight-bold text-dark">
                                 {{ $customerName }}
-                                @if($isGuest) <span class="badge badge-secondary ml-1" style="font-size: 0.6rem;">GUEST</span> @endif
+                                @if($isGuest && $order) <span class="badge badge-secondary ml-1" style="font-size: 0.6rem;">GUEST</span> @endif
                             </h6>
                             <span class="text-muted small">{{ $customerEmail }}</span>
                         </div>
@@ -100,11 +101,11 @@
                             <span class="text-muted">Customer ID:</span>
                             <span class="font-weight-bold">#{{ $customerId }}</span>
                         </div>
-                        @if($payment->order->phone)
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Phone:</span>
-                            <span class="font-weight-bold">{{ $payment->order->phone }}</span>
-                        </div>
+                        @if($order?->phone)
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Phone:</span>
+                                <span class="font-weight-bold">{{ $order->phone }}</span>
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -124,7 +125,13 @@
                             <tbody>
                                 <tr>
                                     <td class="bg-light text-muted border-0 px-4" width="30%">Order Linked</td>
-                                    <td class="border-0"><a href="{{ route('admin.orders.show', $payment->order->id) }}" class="font-weight-bold text-primary">Order #{{ $payment->order->id }}</a></td>
+                                    <td class="border-0">
+                                        @if($order)
+                                            <a href="{{ route('admin.orders.show', $order->id) }}" class="font-weight-bold text-primary">Order #{{ $order->id }}</a>
+                                        @else
+                                            <span class="text-muted italic">No Order Data</span>
+                                        @endif
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td class="bg-light text-muted px-4">Amount Paid</td>
@@ -134,7 +141,7 @@
                                     <td class="bg-light text-muted px-4">Payment Method</td>
                                     <td>
                                         <span class="badge badge-light border py-2 px-3 text-uppercase">
-                                            <i class="fas fa-university mr-2 text-muted"></i> {{ $payment->method }}
+                                            <i class="fas fa-university mr-2 text-muted"></i> {{ $payment->method ?? 'UNKNOWN' }}
                                         </span>
                                     </td>
                                 </tr>
@@ -174,18 +181,24 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($payment->order->orderItems as $item)
+                                @if($order && $order->orderItems->count() > 0)
+                                    @foreach($order->orderItems as $item)
+                                        <tr>
+                                            <td class="px-4 py-3">
+                                                <span class="font-weight-bold text-dark d-block">{{ $item->part?->part_name ?? 'Product Deleted' }}</span>
+                                                <small class="text-muted">Unit: {{ number_format($item->unit_price) }} RWF</small>
+                                            </td>
+                                            <td class="text-center py-3">{{ $item->quantity }}</td>
+                                            <td class="text-right px-4 py-3 font-weight-bold text-dark">
+                                                {{ number_format($item->unit_price * $item->quantity) }} RWF
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
                                     <tr>
-                                        <td class="px-4 py-3">
-                                            <span class="font-weight-bold text-dark d-block">{{ $item->part->part_name }}</span>
-                                            <small class="text-muted">Unit: {{ number_format($item->unit_price) }} RWF</small>
-                                        </td>
-                                        <td class="text-center py-3">{{ $item->quantity }}</td>
-                                        <td class="text-right px-4 py-3 font-weight-bold text-dark">
-                                            {{ number_format($item->unit_price * $item->quantity) }} RWF
-                                        </td>
+                                        <td colspan="3" class="text-center py-4 text-muted small">No item data available for this transaction.</td>
                                     </tr>
-                                @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
