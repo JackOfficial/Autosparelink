@@ -6,6 +6,16 @@
         </div>
     </div>
 
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 10px;">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        {{ session('error') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+@endif
+
     @if($cartContent->isEmpty())
         <div class="card border-0 shadow-sm text-center py-5" style="border-radius: 15px;">
             <div class="card-body">
