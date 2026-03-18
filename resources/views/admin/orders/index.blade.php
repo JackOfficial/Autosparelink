@@ -27,7 +27,7 @@
                         <tr>
                             <th class="border-0">Order ID</th>
                             <th class="border-0">Customer</th>
-                            <th class="border-0">Date</th>
+                            <th class="border-0">Date & Time</th>
                             <th class="border-0">Status</th>
                             <th class="border-0">Total Amount</th>
                             <th class="border-0 text-center">Action</th>
@@ -39,13 +39,27 @@
                                 <td class="font-weight-bold">#{{ $order->id }}</td>
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span>{{ $order->user->name ?? 'Guest Customer' }}</span>
-                                        <small class="text-muted">{{ $order->user->email ?? '' }}</small>
+                                        <span class="font-weight-bold text-dark">
+                                            {{ $order->user->name ?? $order->guest_name ?? 'Guest' }}
+                                        </span>
+                                        <small class="text-muted">
+                                            {{ $order->user->email ?? $order->guest_email ?? 'N/A' }}
+                                        </small>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="text-muted">{{ $order->created_at->format('d M Y') }}</span><br>
-                                    <small class="text-muted">{{ $order->created_at->format('H:i') }}</small>
+                                    <div x-data="{ 
+                                        utcTime: '{{ $order->created_at->toIso8601String() }}',
+                                        formatDate(utc) {
+                                            return new Date(utc).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                                        },
+                                        formatTime(utc) {
+                                            return new Date(utc).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+                                        }
+                                    }">
+                                        <span class="text-dark" x-text="formatDate(utcTime)"></span><br>
+                                        <small class="text-muted font-weight-bold" x-text="formatTime(utcTime)"></small>
+                                    </div>
                                 </td>
                                 <td>
                                     @if($order->status === 'callback_requested')
