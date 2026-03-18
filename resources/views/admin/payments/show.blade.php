@@ -60,12 +60,16 @@
                                 <option value="refunded" {{ $payment->status == 'refunded' ? 'selected' : '' }}>Refunded</option>
                             </select>
                         </div>
-                        <div class="p-3 bg-light rounded">
-                            <p class="small text-muted mb-0">
-                                <i class="fas fa-info-circle mr-1 text-primary"></i> 
-                                Updating to <b>Successful</b> will automatically move Order #{{ $payment->order->id }} to <b>Processing</b>.
-                            </p>
-                        </div>
+                       <div class="p-3 bg-light rounded">
+    <p class="small text-muted mb-0">
+        <i class="fas fa-info-circle mr-1 text-primary"></i> 
+        @if($payment->order)
+            Updating to <b>Successful</b> will automatically move Order #{{ $payment->order->id }} to <b>Processing</b>.
+        @else
+            <span class="text-danger">Warning: No linked order found for this transaction.</span>
+        @endif
+    </p>
+</div>
                     </form>
                 </div>
             </div>
