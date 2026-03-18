@@ -12,6 +12,7 @@ use App\Models\Shipping;
 use App\Mail\OrderPaidInvoice;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -22,25 +23,19 @@ class PaymentController extends Controller
         $this->flwService = $flwService;
     }
 
-
     public function process(Order $order)
-{
-    // Safety check: Ensure the person trying to pay is the owner of the order
-    // if ($order->user_id !== auth()->id()) {
-    //     abort(403, 'Unauthorized action.');
-    // }
+    {
+        // For security, if the order belongs to a user, ensure only they can pay
+        if ($order->user_id && $order->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
 
-    // Return a view that will auto-submit a POST form to our initialize route
-    return view('payment.process', [
-        'order' => $order,
-        'amount' => $order->total_amount
-    ]);
-}
+        return view('payment.process', [
+            'order' => $order,
+            'amount' => $order->total_amount
+        ]);
+    }
 
-    /**
-     * Start the payment process and log the attempt.
-     * Triggered by the POST request after the Livewire order is saved.
-     */
     public function initialize(Request $request)
     {
         $request->validate([
@@ -48,9 +43,10 @@ class PaymentController extends Controller
             'order_id' => 'required|exists:orders,id'
         ]);
 
-        // Unique reference including Order ID for parsing later
+        $order = Order::findOrFail($request->order_id);
         $reference = 'ASL-' . $request->order_id . '-' . time(); 
 
+        // Create log (user_id will be null for guests)
         PaymentLog::create([
             'user_id' => auth()->id(),
             'tx_ref' => $reference,
@@ -59,17 +55,20 @@ class PaymentController extends Controller
             'status' => 'pending'
         ]);
 
+        // Determine customer details: Use Auth if available, otherwise use Guest data from Order
+        $customerData = [
+            'email' => auth()->check() ? auth()->user()->email : $order->guest_email,
+            'name' => auth()->check() ? auth()->user()->name : $order->guest_name,
+            'phonenumber' => auth()->check() ? (auth()->user()->phone ?? '') : $order->guest_phone,
+        ];
+
         $data = [
             'tx_ref' => $reference,
             'amount' => $request->amount,
             'currency' => 'RWF',
             'payment_options' => 'card,mobilemoneyrwanda',
             'redirect_url' => route('payment.callback'),
-            'customer' => [
-                'email' => auth()->user()->email,
-                'name' => auth()->user()->name,
-                'phonenumber' => auth()->user()->phone ?? '',
-            ],
+            'customer' => $customerData,
             'customizations' => [
                 'title' => 'Happy Family Rwanda',
                 'description' => 'Payment for Order #' . $request->order_id,
@@ -83,25 +82,21 @@ class PaymentController extends Controller
             return redirect($payment['data']['link']);
         }
 
-        // Log initialization failure
         PaymentLog::where('tx_ref', $reference)->update([
             'status' => 'failed',
             'error_message' => $payment['message'] ?? 'Gateway initialization failed',
             'raw_response' => json_encode($payment)
         ]);
 
-        return redirect()->route('checkout')->with('error', 'Payment gateway unavailable. Please try again.');
+        return redirect()->route('checkout')->with('error', 'Payment gateway unavailable.');
     }
 
-    /**
-     * Handle the return redirect from Flutterwave
-     */
     public function callback(Request $request)
     {
         $transactionId = $request->transaction_id;
         
         if (!$transactionId) {
-            return redirect()->to('/')->with('error', 'Transaction was cancelled by user.');
+            return redirect()->to('/')->with('error', 'Transaction was cancelled.');
         }
 
         $verification = $this->flwService->verifyTransaction($transactionId);
@@ -109,20 +104,17 @@ class PaymentController extends Controller
         if ($verification['status'] === 'success' && $verification['data']['status'] === 'successful') {
             $txRef = $verification['data']['tx_ref'];
             
-            // 1. Update Payment Log to Successful
             PaymentLog::where('tx_ref', $txRef)->update([
                 'status' => 'successful',
                 'transaction_id' => $transactionId,
                 'raw_response' => json_encode($verification)
             ]);
 
-            // 2. Fulfillment Logic
             $this->finalizeOrder($txRef);
 
             return view('payment.success', ['data' => $verification['data']]);
         }
 
-        // Handle Failure Logic
         $txRef = $request->tx_ref ?? ($verification['data']['tx_ref'] ?? null);
         if ($txRef) {
             PaymentLog::where('tx_ref', $txRef)->update([
@@ -136,9 +128,6 @@ class PaymentController extends Controller
         return view('payment.failed');
     }
 
-    /**
-     * Finalize the Order after successful payment
-     */
     private function finalizeOrder($txRef)
     {
         $parts = explode('-', $txRef);
@@ -150,10 +139,8 @@ class PaymentController extends Controller
 
         if ($order && $order->status !== 'completed') {
             DB::transaction(function () use ($order, $txRef) {
-                // 1. Update Order Status
                 $order->update(['status' => 'completed']);
 
-                // 2. Create/Update Payment record
                 Payment::updateOrCreate(
                     ['order_id' => $order->id],
                     [
@@ -165,26 +152,28 @@ class PaymentController extends Controller
                     ]
                 );
 
-                // 3. Inventory: Reduce stock for each part
                 foreach ($order->orderItems as $item) {
                     if ($item->part) {
                         $item->part->decrement('stock_quantity', $item->quantity);
                     }
                 }
 
-                // 4. Set up Shipping
                 Shipping::updateOrCreate(
                     ['order_id' => $order->id],
                     ['status' => 'pending']
                 );
             });
 
-            // 5. Send Invoice Email
+            // Send Invoice Email
             try {
-                Mail::to($order->user->email)->send(new OrderPaidInvoice($order));
+                // Use the guest_email if the user relation is null
+                $recipientEmail = $order->user ? $order->user->email : $order->guest_email;
+                
+                if ($recipientEmail) {
+                    Mail::to($recipientEmail)->send(new OrderPaidInvoice($order));
+                }
             } catch (\Exception $e) {
-                // Log email failure but don't stop the process
-                report($e);
+                Log::error('Invoice Email Failed: ' . $e->getMessage());
             }
         }
     }
