@@ -25,9 +25,16 @@
 
 @section('content')
 @php
-    // Logic to handle Guest vs Registered User
-    $customerName = $order->user->name ?? $order->guest_name ?? 'Guest Customer';
-    $customerEmail = $order->user->email ?? $order->guest_email ?? 'No email provided';
+    // PRIMARY LOGIC: Check orders table first for guest data, fallback to user relation
+    $customerName = $order->guest_name ?? $order->user->name ?? 'Guest Customer';
+    $customerEmail = $order->guest_email ?? $order->user->email ?? 'No email provided';
+    $customerPhone = $order->phone ?? $order->address->phone ?? 'N/A';
+    
+    // Address Fallback Logic
+    $street = $order->address_line ?? $order->address->street_address ?? 'No address provided';
+    $city = $order->city ?? $order->address->city ?? '';
+    $country = $order->country ?? $order->address->country ?? '';
+
     $initial = strtoupper(substr($customerName, 0, 1));
 @endphp
 
@@ -55,6 +62,7 @@
         </div>
     </div>
 
+    {{-- Urgent Callback Alert --}}
     @if($order->status === 'callback_requested')
         <div class="alert alert-danger blink_me d-flex align-items-center mb-4 shadow-sm border-0" style="border-radius: 12px;">
             <div class="bg-white rounded-circle p-2 mr-3 text-danger">
@@ -62,14 +70,14 @@
             </div>
             <div>
                 <h6 class="mb-0 font-weight-bold">Urgent Call Requested!</h6>
-                <span>The customer needs a callback at <strong>{{ $order->address->phone }}</strong> regarding this order.</span>
+                <span>Please call <strong>{{ $customerPhone }}</strong> immediately regarding this order.</span>
             </div>
         </div>
     @endif
 
     <div class="row">
         <div class="col-lg-8">
-            {{-- Items Table --}}
+            {{-- Order Items Table --}}
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white">
                     <i class="fas fa-shopping-cart mr-2 text-primary"></i> Order Items
@@ -94,7 +102,7 @@
                                                     <i class="fas fa-tools text-muted"></i>
                                                 </div>
                                                 <div>
-                                                    <span class="d-block font-weight-bold text-dark">{{ $item->part->part_name }}</span>
+                                                    <span class="d-block font-weight-bold text-dark">{{ $item->part->part_name ?? 'Product Deleted' }}</span>
                                                     <small class="text-muted">SKU: {{ $item->part->sku ?? 'N/A' }}</small>
                                                 </div>
                                             </div>
@@ -107,10 +115,6 @@
                             </tbody>
                             <tfoot class="total-row">
                                 <tr>
-                                    <td colspan="3" class="text-right text-muted py-3">Subtotal:</td>
-                                    <td class="text-right px-4 py-3">{{ number_format($order->total_amount) }} RWF</td>
-                                </tr>
-                                <tr>
                                     <td colspan="3" class="text-right h5 font-weight-bold py-3 border-0">Total Amount:</td>
                                     <td class="text-right px-4 h5 font-weight-bold text-primary py-3 border-0">{{ number_format($order->total_amount) }} RWF</td>
                                 </tr>
@@ -121,7 +125,7 @@
             </div>
 
             <div class="row">
-                {{-- Payment --}}
+                {{-- Payment Info --}}
                 <div class="col-md-6">
                     <div class="card shadow-sm mb-4 h-100">
                         <div class="card-header bg-white d-flex justify-content-between">
@@ -135,40 +139,39 @@
                             @if($order->payment)
                                 <div class="mb-3">
                                     <span class="info-label">Transaction ID</span>
-                                    <span class="info-value text-uppercase">{{ $order->payment->transaction_id ?? 'Manual Entry' }}</span>
+                                    <span class="info-value text-uppercase">{{ $order->payment->transaction_id ?? 'N/A' }}</span>
                                 </div>
                                 <div class="mb-3">
-                                    <span class="info-label">Payment Method</span>
+                                    <span class="info-label">Method</span>
                                     <span class="info-value"><i class="fas fa-credit-card mr-1 text-muted"></i> {{ strtoupper($order->payment->method) }}</span>
                                 </div>
                             @else
                                 <div class="text-center py-3">
                                     <i class="fas fa-exclamation-circle text-warning fa-2x mb-2"></i>
-                                    <p class="text-muted small">No payment data found.</p>
+                                    <p class="text-muted small">Pending Payment</p>
                                 </div>
                             @endif
                         </div>
                     </div>
                 </div>
 
-                {{-- Shipping --}}
+                {{-- Shipping Info --}}
                 <div class="col-md-6">
                     <div class="card shadow-sm mb-4 h-100">
-                        <div class="card-header bg-white">Logistics & Shipping</div>
+                        <div class="card-header bg-white">Logistics</div>
                         <div class="card-body">
                             @if($order->shipping)
                                 <div class="mb-3">
                                     <span class="info-label">Carrier</span>
-                                    <span class="info-value font-weight-bold text-primary">{{ $order->shipping->carrier }}</span>
+                                    <span class="info-value text-primary">{{ $order->shipping->carrier }}</span>
                                 </div>
                                 <div>
-                                    <span class="info-label">Tracking Number</span>
+                                    <span class="info-label">Tracking</span>
                                     <code class="bg-light p-1 rounded">{{ $order->shipping->tracking_number }}</code>
                                 </div>
                             @else
-                                <div class="text-center py-3">
-                                    <i class="fas fa-truck-loading text-light fa-2x mb-2"></i>
-                                    <p class="text-muted small font-italic">Logistics not yet assigned.</p>
+                                <div class="text-center py-3 text-muted italic">
+                                    <p class="small mb-0">Not Shipped Yet</p>
                                 </div>
                             @endif
                         </div>
@@ -178,10 +181,10 @@
         </div>
 
         <div class="col-lg-4">
-            {{-- Status Quick Update --}}
+            {{-- Status Update --}}
             <div class="card shadow-sm status-control-card mb-4 border-0">
                 <div class="card-body text-center p-4">
-                    <h6 class="text-uppercase mb-3 font-weight-bold" style="opacity: 0.8; font-size: 0.7rem;">Update Order Status</h6>
+                    <h6 class="text-uppercase mb-3 font-weight-bold" style="opacity: 0.8; font-size: 0.7rem;">Update Status</h6>
                     <form action="{{ route('admin.orders.update', $order->id) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -190,17 +193,14 @@
                                 <option value="{{ $stat }}" {{ $order->status == $stat ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $stat)) }}</option>
                             @endforeach
                         </select>
-                        <p class="small mb-0" style="opacity: 0.7;">
-                            <i class="fas fa-info-circle mr-1"></i> Notifications are sent instantly.
-                        </p>
                     </form>
                 </div>
             </div>
 
-            {{-- Customer Information (Null-Safe) --}}
+            {{-- Customer Data (Handling orders table fields) --}}
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    Customer Data
+                    Customer Info
                     @if(!$order->user_id)
                         <span class="badge badge-secondary badge-pill" style="font-size: 0.6rem;">GUEST</span>
                     @endif
@@ -219,16 +219,20 @@
                     <div class="mb-3">
                         <span class="info-label">Shipping Address</span>
                         <address class="info-value mb-0">
-                            <strong>{{ $order->address->name }}</strong><br>
-                            {{ $order->address->street_address }}<br>
-                            {{ $order->address->city }}, {{ $order->address->country }}
+                            <strong>{{ $customerName }}</strong><br>
+                            {{ $street }}<br>
+                            {{ $city }}{{ $city && $country ? ',' : '' }} {{ $country }}
                         </address>
                     </div>
                     <div>
                         <span class="info-label">Contact Phone</span>
-                        <a href="tel:{{ $order->address->phone }}" class="info-value font-weight-bold text-primary">
-                            <i class="fas fa-phone-alt mr-1 small"></i> {{ $order->address->phone }}
-                        </a>
+                        @if($customerPhone !== 'N/A')
+                            <a href="tel:{{ $customerPhone }}" class="info-value font-weight-bold text-primary">
+                                <i class="fas fa-phone-alt mr-1 small"></i> {{ $customerPhone }}
+                            </a>
+                        @else
+                            <span class="text-muted small">No phone provided</span>
+                        @endif
                     </div>
                 </div>
             </div>
