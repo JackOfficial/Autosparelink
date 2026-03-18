@@ -30,9 +30,15 @@
             <a href="{{ route('admin.payments.index') }}" class="btn btn-white border shadow-sm mr-2">
                 <i class="fas fa-arrow-left mr-1"></i> Back to Payments
             </a>
-            <a href="{{ route('admin.orders.show', $payment->order->id) }}" class="btn btn-primary shadow-sm">
-                <i class="fas fa-box mr-1"></i> View Related Order
-            </a>
+            @if($payment->order)
+    <a href="{{ route('admin.orders.show', $payment->order->id) }}" class="btn btn-primary shadow-sm">
+        <i class="fas fa-box mr-1"></i> View Related Order
+    </a>
+@else
+    <button class="btn btn-secondary shadow-sm" disabled title="Order record not found">
+        <i class="fas fa-exclamation-circle mr-1"></i> Order Missing
+    </button>
+@endif
         </div>
     </div>  
 
