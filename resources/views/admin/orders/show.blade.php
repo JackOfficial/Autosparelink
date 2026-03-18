@@ -24,6 +24,13 @@
 @endpush
 
 @section('content')
+@php
+    // Logic to handle Guest vs Registered User
+    $customerName = $order->user->name ?? $order->guest_name ?? 'Guest Customer';
+    $customerEmail = $order->user->email ?? $order->guest_email ?? 'No email provided';
+    $initial = strtoupper(substr($customerName, 0, 1));
+@endphp
+
 <div class="container-fluid py-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
         <div>
@@ -190,17 +197,22 @@
                 </div>
             </div>
 
-            {{-- Customer Information --}}
+            {{-- Customer Information (Null-Safe) --}}
             <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">Customer Data</div>
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    Customer Data
+                    @if(!$order->user_id)
+                        <span class="badge badge-secondary badge-pill" style="font-size: 0.6rem;">GUEST</span>
+                    @endif
+                </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-4">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 45px; height: 45px;">
-                            <span class="h5 mb-0">{{ substr($order->user->name, 0, 1) }}</span>
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 45px; height: 45px;">
+                            <span class="h5 mb-0">{{ $initial }}</span>
                         </div>
                         <div>
-                            <h6 class="mb-0 font-weight-bold text-dark">{{ $order->user->name }}</h6>
-                            <span class="text-muted small">{{ $order->user->email }}</span>
+                            <h6 class="mb-0 font-weight-bold text-dark">{{ $customerName }}</h6>
+                            <span class="text-muted small">{{ $customerEmail }}</span>
                         </div>
                     </div>
                     <hr>
