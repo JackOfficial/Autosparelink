@@ -40,7 +40,7 @@ class ShippingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'order_id' => 'required|exists:orders,id',
+            'order_id' => 'required|exists:orders,id|unique:shippings,order_id',
             'carrier' => 'required|string',
             'tracking_number' => 'nullable|string',
             'status' => 'required|in:pending,shipped,in_transit,delivered,failed',
@@ -57,6 +57,8 @@ class ShippingController extends Controller
         // Auto-update Order Status
         if (in_array($request->status, ['shipped', 'in_transit'])) {
             $shipping->order->update(['status' => 'shipped']);
+        } elseif ($request->status === 'delivered') {
+            $shipping->order->update(['status' => 'delivered']);
         }
 
         return redirect()
@@ -69,9 +71,19 @@ class ShippingController extends Controller
      */
     public function show(string $id)
     {
-        $shipping = Shipping::with(['order.user', 'order.address'])->findOrFail($id);
+        $shipping = Shipping::with(['order.user', 'order.address', 'order.orderItems.part'])->findOrFail($id);
 
         return view('admin.shippings.show', compact('shipping'));
+    }
+
+    /**
+     * Show the form for editing the specified shipping record.
+     */
+    public function edit(string $id)
+    {
+        $shipping = Shipping::with('order.user')->findOrFail($id);
+        
+        return view('admin.shippings.edit', compact('shipping'));
     }
 
     /**
@@ -93,14 +105,18 @@ class ShippingController extends Controller
             'status' => $request->status,
         ];
 
-        // Set timestamps based on status
-        if ($request->status === 'delivered') {
+        // Set timestamps based on status transitions
+        if (in_array($request->status, ['shipped', 'in_transit']) && !$shipping->shipped_at) {
+            $data['shipped_at'] = now();
+        }
+
+        if ($request->status === 'delivered' && !$shipping->delivered_at) {
             $data['delivered_at'] = now();
         }
 
         $shipping->update($data);
 
-        // Sync Order Status: If shipping is delivered, the order is delivered.
+        // Sync Order Status
         if ($request->status === 'delivered') {
             $shipping->order->update(['status' => 'delivered']);
         } elseif (in_array($request->status, ['shipped', 'in_transit'])) {
@@ -108,7 +124,7 @@ class ShippingController extends Controller
         }
 
         return redirect()
-            ->route('admin.shippings.show', $shipping->id)
+            ->route('admin.shippings.index')
             ->with('success', 'Shipping status updated and order synced.');
     }
 
