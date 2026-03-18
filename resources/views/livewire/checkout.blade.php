@@ -6,7 +6,6 @@
         </div>
     </div>
 
-    {{-- Check if collection is empty --}}
     @if($cartContent->isEmpty())
         <div class="card border-0 shadow-sm text-center py-5" style="border-radius: 15px;">
             <div class="card-body">
@@ -23,6 +22,7 @@
                     <div class="card-body p-4">
                         <h5 class="font-weight-bold mb-4"><i class="fa fa-truck text-primary mr-2"></i>Delivery Information</h5>
 
+                        {{-- Section for Logged-in Users --}}
                         @if(Auth::check())
                             @if($addresses->isNotEmpty())
                                 <div class="form-group mb-4">
@@ -43,33 +43,47 @@
                                 <input type="checkbox" class="custom-control-input" wire:model.live="use_new_address" id="useNewAddress">
                                 <label class="custom-control-label font-weight-bold" for="useNewAddress">Deliver to a different address</label>
                             </div>
-
-                            @if($use_new_address || $addresses->isEmpty())
-                                <div class="row animate__animated animate__fadeIn">
-                                    <div class="col-md-6 mb-3">
-                                        <input type="text" class="form-control border-light bg-light" placeholder="Recipient Name" wire:model="new_address.full_name">
-                                        @error('new_address.full_name') <span class="text-danger small">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <input type="text" class="form-control border-light bg-light" placeholder="Phone Number" wire:model="new_address.phone">
-                                        @error('new_address.phone') <span class="text-danger small">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div class="col-12 mb-3">
-                                        <input type="text" class="form-control border-light bg-light" placeholder="Street Address / House No." wire:model="new_address.street_address">
-                                        @error('new_address.street_address') <span class="text-danger small">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <input type="text" class="form-control border-light bg-light" placeholder="City" wire:model="new_address.city">
-                                        @error('new_address.city') <span class="text-danger small">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <input type="text" class="form-control border-light bg-light" placeholder="Postal Code (Optional)" wire:model="new_address.postal_code">
-                                    </div>
-                                </div>
-                            @endif
                         @else
-                            <div class="alert alert-info border-0 shadow-sm" style="border-radius: 10px;">
-                                <i class="fa fa-info-circle mr-2"></i> Please <a href="{{ route('login') }}" class="font-weight-bold text-primary">Log in</a> to continue.
+                            {{-- Notice for Guests --}}
+                            <div class="alert alert-secondary border-0 mb-4" style="border-radius: 10px;">
+                                <small><i class="fa fa-user-circle mr-1"></i> Checking out as a <strong>Guest</strong>. Have an account? <a href="{{ route('login') }}" class="text-primary font-weight-bold">Login here</a></small>
+                            </div>
+                        @endif
+
+                        {{-- Address Form: Visible if guest OR if user wants a new address --}}
+                        @if($use_new_address || !Auth::check())
+                            <div class="row animate__animated animate__fadeIn">
+                                {{-- Guest Email Field (Crucial for guest receipts) --}}
+                                <div class="col-12 mb-3">
+                                    <label class="small font-weight-bold text-muted text-uppercase">Email Address</label>
+                                    <input type="email" class="form-control border-light bg-light" placeholder="email@example.com" wire:model="guest_email">
+                                    @error('guest_email') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="small font-weight-bold text-muted text-uppercase">Recipient Name</label>
+                                    <input type="text" class="form-control border-light bg-light" placeholder="Full Name" wire:model="new_address.full_name">
+                                    @error('new_address.full_name') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="small font-weight-bold text-muted text-uppercase">Phone Number</label>
+                                    <input type="text" class="form-control border-light bg-light" placeholder="e.g. 078XXXXXXX" wire:model="new_address.phone">
+                                    @error('new_address.phone') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="small font-weight-bold text-muted text-uppercase">Street Address</label>
+                                    <input type="text" class="form-control border-light bg-light" placeholder="Street Address / House No. / Landmark" wire:model="new_address.street_address">
+                                    @error('new_address.street_address') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="small font-weight-bold text-muted text-uppercase">City</label>
+                                    <input type="text" class="form-control border-light bg-light" placeholder="City (e.g. Kigali)" wire:model="new_address.city">
+                                    @error('new_address.city') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="small font-weight-bold text-muted text-uppercase">Postal Code</label>
+                                    <input type="text" class="form-control border-light bg-light" placeholder="Optional" wire:model="new_address.postal_code">
+                                </div>
                             </div>
                         @endif
                     </div>
@@ -87,31 +101,27 @@
                             <p class="small text-muted mb-0">Securely pay via Flutterwave.</p>
                         </div>
 
-                        <button wire:click="placeOrder" wire:loading.attr="disabled" class="btn btn-primary btn-lg btn-block rounded-pill shadow-sm font-weight-bold py-3">
-                            <span wire:loading.remove>
+                        <button wire:click="placeOrder" wire:loading.attr="disabled" class="btn btn-primary btn-lg btn-block rounded-pill shadow-sm font-weight-bold py-3 mb-3">
+                            <span wire:loading.remove wire:target="placeOrder">
                                 <i class="fa fa-lock mr-2"></i>Pay {{ $total }} RWF Now
                             </span>
-                            <span wire:loading>
+                            <span wire:loading wire:target="placeOrder">
                                 <i class="fa fa-spinner fa-spin mr-2"></i>Processing Order...
+                            </span>
+                        </button>
+
+                        <button class="btn btn-outline-dark btn-lg btn-block rounded-pill shadow-sm font-weight-bold py-3" 
+                                wire:click="requestCallback" 
+                                wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="requestCallback">
+                                <i class="fa fa-phone-alt mr-2"></i>Request a Callback
+                            </span>
+                            <span wire:loading wire:target="requestCallback">
+                                <i class="fa fa-spinner fa-spin mr-2"></i>Processing...
                             </span>
                         </button>
                     </div>
                 </div>
-
-               <button class="btn btn-outline-dark btn-lg rounded-pill px-4 shadow-sm" 
-        wire:click="requestCallback" 
-        wire:loading.attr="disabled">
-    
-    {{-- Text shown normally --}}
-    <span wire:loading.remove wire:target="requestCallback">
-        <i class="fa fa-phone-alt mr-2"></i>Request a Callback
-    </span>
-
-    {{-- Text/Spinner shown while processing --}}
-    <span wire:loading wire:target="requestCallback">
-        <i class="fa fa-spinner fa-spin mr-2"></i>Processing...
-    </span>
-</button>
             </div>
 
             {{-- Sidebar Summary --}}
@@ -123,7 +133,6 @@
                         </div>
                         <div class="card-body p-0">
                             <ul class="list-group list-group-flush">
-                                {{-- Loop through objects using $item->property --}}
                                 @foreach($cartContent as $item)
                                     <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                                         <div class="d-flex align-items-center">

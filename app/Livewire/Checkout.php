@@ -20,36 +20,34 @@ class Checkout extends Component
     public $address_id;          // Selected existing address
     public $new_address = [];    // Array for new address
     public $use_new_address = false; // Toggle for using new address
+    public $guest_email;         // Added for guest email specifically
 
     public function mount()
     {
-        if (!Auth::check()) return;
+        // Load user's addresses if logged in
+        $this->addresses = Auth::check() ? Auth::user()->addresses()->get() : collect();
 
-        // Load user's addresses - ensure the relationship exists on User model
-        $this->addresses = Auth::user()->addresses()->get() ?? collect();
-
-        // Auto toggle new address if none exist
-        $this->use_new_address = $this->addresses->isEmpty();
+        // Auto toggle new address if guest or no saved addresses exist
+        $this->use_new_address = !Auth::check() || $this->addresses->isEmpty();
 
         // Default new address fields
         $this->new_address = [
-            'full_name' => Auth::user()->name,
-            'phone' => Auth::user()->phone ?? '',
+            'full_name' => Auth::check() ? Auth::user()->name : '',
+            'phone' => Auth::check() ? (Auth::user()->phone ?? '') : '',
             'street_address' => '',
             'city' => '',
             'state' => '',
             'postal_code' => '',
             'country' => 'Rwanda',
         ];
+
+        if (Auth::check()) {
+            $this->guest_email = Auth::user()->email;
+        }
     }
 
     public function placeOrder()
     {
-        if (!Auth::check()) {
-            $this->dispatch('notify', message: 'Please log in to place an order.');
-            return;
-        }
-
         $cartItems = Cart::instance('default')->content();
 
         if ($cartItems->isEmpty()) {
@@ -57,9 +55,13 @@ class Checkout extends Component
             return;
         }
 
-        // 1. Validation Logic
-        if ($this->use_new_address) {
-            $this->validate([
+        // 1. Validation Logic (Handles both Guests and Auth users)
+        $rules = [
+            'guest_email' => Auth::check() ? 'nullable|email' : 'required|email',
+        ];
+
+        if ($this->use_new_address || !Auth::check()) {
+            $rules = array_merge($rules, [
                 'new_address.full_name' => 'required|string|max:255',
                 'new_address.phone' => 'required|string|max:20',
                 'new_address.street_address' => 'required|string|max:255',
@@ -72,28 +74,39 @@ class Checkout extends Component
                 return;
             }
         }
+        $this->validate($rules);
 
         DB::beginTransaction();
 
         try {
             // 2. Process Address
-            $final_address_id = $this->address_id;
-            if ($this->use_new_address) {
-                $address = Address::create(array_merge($this->new_address, [
-                    'user_id' => Auth::id(),
-                ]));
-                $final_address_id = $address->id;
+            $final_address_id = null;
+            
+            // Only create an Address record if the user is logged in
+            if (Auth::check()) {
+                if ($this->use_new_address) {
+                    $address = Address::create(array_merge($this->new_address, [
+                        'user_id' => Auth::id(),
+                    ]));
+                    $final_address_id = $address->id;
+                } else {
+                    $final_address_id = $this->address_id;
+                }
             }
 
             // 3. Create the Order
-            // Remove commas from subtotal string to ensure it's a valid float
-            $subtotal = str_replace(',', '', Cart::instance('default')->subtotal());
+            $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
             
             $order = Order::create([
-                'user_id' => Auth::id(),
-                'address_id' => $final_address_id,
-                'total_amount' => (float) $subtotal,
+                'user_id' => Auth::id(), // returns null for guests
+                'address_id' => $final_address_id, // returns null for guests
+                'total_amount' => $subtotal,
                 'status' => 'pending',
+                // New Guest Fields (from migration)
+                'guest_name' => !Auth::check() ? $this->new_address['full_name'] : null,
+                'guest_email' => $this->guest_email,
+                'guest_phone' => $this->new_address['phone'],
+                'guest_shipping_address' => !Auth::check() ? ($this->new_address['street_address'] . ', ' . $this->new_address['city']) : null,
             ]);
 
             // 4. Create Order Items
@@ -112,122 +125,123 @@ class Checkout extends Component
             Cart::instance('default')->destroy();
 
             if (Auth::check()) {
-    // This removes the saved database record so it doesn't reappear on next login
-    DB::table('shoppingcart')
-        ->where('identifier', Auth::id())
-        ->where('instance', 'default')
-        ->delete();
-}
+                DB::table('shoppingcart')
+                    ->where('identifier', Auth::id())
+                    ->where('instance', 'default')
+                    ->delete();
+            }
 
-            /**
-             * FIX: Redirect to a GET route.
-             * Instead of posting directly to initialize, we redirect to a 'processing' 
-             * page that will then submit the POST form to Flutterwave/Payment Gateway.
-             */
             return redirect()->route('payment.process', ['order' => $order->id]);
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Checkout Error: ' . $e->getMessage());
             $this->dispatch('notify', message: 'Something went wrong: ' . $e->getMessage());
         }
     }
 
-public function requestCallback() 
-{
-    if (!Auth::check()) {
-        $this->dispatch('notify', message: 'Please log in to request a callback.');
-        return;
-    }
-
-    // 1. Validation
-    if ($this->use_new_address) {
-        $this->validate([
-            'new_address.full_name' => 'required|string|max:255',
-            'new_address.phone' => 'required|string|max:20',
-            'new_address.street_address' => 'required|string',
-            'new_address.city' => 'required|string',
-        ]);
-    } elseif (!$this->address_id) {
-        $this->dispatch('notify', message: 'Please select an address so we know your location.');
-        return;
-    }
-
-    $cartItems = Cart::instance('default')->content();
-    if ($cartItems->isEmpty()) {
-        $this->dispatch('notify', message: 'Your cart is empty!');
-        return;
-    }
-
-    DB::beginTransaction();
-
-    try {
-        // 2. Process Address
-        $final_address_id = $this->address_id;
-        if ($this->use_new_address) {
-            $address = Address::create(array_merge($this->new_address, [
-                'user_id' => Auth::id(),
-            ]));
-            $final_address_id = $address->id;
-        }
-
-        // 3. Create the Order
-        $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+    public function requestCallback() 
+    {
+        // Removed Auth::check() requirement
         
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'address_id' => $final_address_id,
-            'total_amount' => $subtotal,
-            'status' => 'callback_requested',
-        ]);
+        // 1. Validation
+        $rules = [
+            'guest_email' => Auth::check() ? 'nullable|email' : 'required|email',
+        ];
 
-        // 4. Save Order Items
-        foreach ($cartItems as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'part_id' => $item->id,
-                'quantity' => $item->qty,
-                'unit_price' => $item->price,
+        if ($this->use_new_address || !Auth::check()) {
+            $rules = array_merge($rules, [
+                'new_address.full_name' => 'required|string|max:255',
+                'new_address.phone' => 'required|string|max:20',
+                'new_address.street_address' => 'required|string',
+                'new_address.city' => 'required|string',
             ]);
+        } elseif (!$this->address_id) {
+            $this->dispatch('notify', message: 'Please select an address so we know your location.');
+            return;
+        }
+        $this->validate($rules);
+
+        $cartItems = Cart::instance('default')->content();
+        if ($cartItems->isEmpty()) {
+            $this->dispatch('notify', message: 'Your cart is empty!');
+            return;
         }
 
-        // 5. Cleanup Cart
-        Cart::instance('default')->destroy();
-        DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
+        DB::beginTransaction();
 
-        DB::commit();
-
-        // 6. Send Emails (Outside the transaction to prevent timeout issues)
         try {
-            // Send to you (Admin)
-            Mail::to('admin@happyfamilyrwanda.org')->send(new OrderCallbackAdmin($order));
+            // 2. Process Address (Auth only)
+            $final_address_id = null;
+            if (Auth::check()) {
+                if ($this->use_new_address) {
+                    $address = Address::create(array_merge($this->new_address, [
+                        'user_id' => Auth::id(),
+                    ]));
+                    $final_address_id = $address->id;
+                } else {
+                    $final_address_id = $this->address_id;
+                }
+            }
 
-            // Send to Customer
-            Mail::to(Auth::user()->email)->send(new OrderCallbackClient($order));
+            // 3. Create the Order
+            $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+            
+            $order = Order::create([
+                'user_id' => Auth::id(),
+                'address_id' => $final_address_id,
+                'total_amount' => $subtotal,
+                'status' => 'callback_requested',
+                'guest_name' => !Auth::check() ? $this->new_address['full_name'] : null,
+                'guest_email' => $this->guest_email,
+                'guest_phone' => $this->new_address['phone'],
+            ]);
+
+            // 4. Save Order Items
+            foreach ($cartItems as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'part_id' => $item->id,
+                    'quantity' => $item->qty,
+                    'unit_price' => $item->price,
+                ]);
+            }
+
+            Cart::instance('default')->destroy();
+            if (Auth::check()) {
+                DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
+            }
+
+            DB::commit();
+
+            // 6. Send Emails
+            try {
+                Mail::to('admin@happyfamilyrwanda.org')->send(new OrderCallbackAdmin($order));
+                
+                $targetEmail = Auth::check() ? Auth::user()->email : $this->guest_email;
+                if ($targetEmail) {
+                    Mail::to($targetEmail)->send(new OrderCallbackClient($order));
+                }
+            } catch (\Exception $e) {
+                Log::error('Callback Email Failed: ' . $e->getMessage());
+            }
+
+            return redirect()->route('order.success', ['order' => $order->id])
+                             ->with('message', 'Murakoze! We will call you shortly.');
+
         } catch (\Exception $e) {
-            // Log the error but don't stop the user from proceeding
-            Log::error('Callback Email Failed: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Order Callback Failed: ' . $e->getMessage());
+            $this->dispatch('notify', message: 'Something went wrong. Please try again.');
         }
-
-        // 7. Redirect to success page
-        return redirect()->route('order.success', ['order' => $order->id])
-                         ->with('message', 'Murakoze! We will call you shortly.');
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Order Creation Failed: ' . $e->getMessage());
-        $this->dispatch('notify', message: 'Something went wrong. Please try again.');
     }
-}
 
-   public function render()
-{
-    // Simply grab the content as a collection of objects
-    $cartContent = Cart::instance('default')->content();
-
-    return view('livewire.checkout', [
-        'cartContent' => $cartContent,
-        'total' => Cart::instance('default')->subtotal(),
-        'addresses' => Auth::check() ? Auth::user()->addresses : collect()
-    ]);
-}
+    public function render()
+    {
+        return view('livewire.checkout', [
+            'cartContent' => Cart::instance('default')->content(),
+            'total' => Cart::instance('default')->subtotal(),
+            'addresses' => Auth::check() ? Auth::user()->addresses : collect()
+        ]);
+    }
 }
