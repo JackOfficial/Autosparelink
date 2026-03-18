@@ -13,6 +13,7 @@ use App\Mail\OrderPaidInvoice;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cookie; // Added for persistence
 
 class PaymentController extends Controller
 {
@@ -25,7 +26,6 @@ class PaymentController extends Controller
 
     public function process(Order $order)
     {
-        // For security, if the order belongs to a user, ensure only they can pay
         if ($order->user_id && $order->user_id !== auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
@@ -44,9 +44,14 @@ class PaymentController extends Controller
         ]);
 
         $order = Order::findOrFail($request->order_id);
+        
+        // --- PERSIST GUEST DATA ---
+        if (!auth()->check()) {
+            $this->rememberGuestDetails($order);
+        }
+
         $reference = 'ASL-' . $request->order_id . '-' . time(); 
 
-        // Create log (user_id will be null for guests)
         PaymentLog::create([
             'user_id' => auth()->id(),
             'tx_ref' => $reference,
@@ -55,7 +60,6 @@ class PaymentController extends Controller
             'status' => 'pending'
         ]);
 
-        // Determine customer details: Use Auth if available, otherwise use Guest data from Order
         $customerData = [
             'email' => auth()->check() ? auth()->user()->email : $order->guest_email,
             'name' => auth()->check() ? auth()->user()->name : $order->guest_name,
@@ -89,6 +93,26 @@ class PaymentController extends Controller
         ]);
 
         return redirect()->to('checkout')->with('error', 'Payment gateway unavailable.');
+    }
+
+    /**
+     * Store Guest details in cookies for 30 days
+     */
+    private function rememberGuestDetails($order)
+    {
+        // 43200 minutes = 30 days
+        $expiry = 43200; 
+
+        Cookie::queue('guest_name', $order->guest_name, $expiry);
+        Cookie::queue('guest_email', $order->guest_email, $expiry);
+        Cookie::queue('guest_phone', $order->guest_phone, $expiry);
+        
+        // Storing address details if they exist on the order model
+        if (isset($order->guest_address)) {
+            Cookie::queue('guest_address', $order->guest_address, $expiry);
+            Cookie::queue('guest_city', $order->guest_city, $expiry);
+            Cookie::queue('guest_postal_code', $order->guest_postal_code, $expiry);
+        }
     }
 
     public function callback(Request $request)
@@ -164,11 +188,8 @@ class PaymentController extends Controller
                 );
             });
 
-            // Send Invoice Email
             try {
-                // Use the guest_email if the user relation is null
                 $recipientEmail = $order->user ? $order->user->email : $order->guest_email;
-                
                 if ($recipientEmail) {
                     Mail::to($recipientEmail)->send(new OrderPaidInvoice($order));
                 }
