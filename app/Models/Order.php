@@ -8,9 +8,12 @@ class Order extends Model
 {
     protected $fillable = [
         'user_id',
-        'address_id',
-        'status',
         'total_amount',
+        'address_id',
+        'guest_name',
+        'guest_email',
+        'guest_phone',
+        'status'
     ];
 
     // Relationships
