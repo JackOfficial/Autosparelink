@@ -21,7 +21,7 @@
 
 <section class="content">
     <div class="container-fluid">
-        <form action="{{ route('admin.blogs.update', $blog->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.blogs.update', $blog->id) }}" method="POST" enctype="multipart/form-data" id="editBlogForm">
             @csrf
             @method('PUT')
             
@@ -30,7 +30,7 @@
                     <div class="card card-outline card-info shadow-sm">
                         <div class="card-body">
                             <div class="form-group">
-                                <label for="title">Article Title</label>
+                                <label for="title" class="text-muted small uppercase">Article Title</label>
                                 <input type="text" name="title" id="title" 
                                        class="form-control form-control-lg @error('title') is-invalid @enderror" 
                                        placeholder="Enter title" 
@@ -41,8 +41,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="content">Full Content</label>
-                                <textarea name="content" id="editor" 
+                                <label for="myeditorinstance" class="text-muted small uppercase">Full Content</label>
+                                <textarea name="content" id="myeditorinstance" 
                                           class="form-control @error('content') is-invalid @enderror" 
                                           rows="18">{{ old('content', $blog->content) }}</textarea>
                                 @error('content')
@@ -113,7 +113,27 @@
 </section>
 
 @push('scripts')
+{{-- TinyMCE Rich Text Editor --}}
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
+    tinymce.init({
+        selector: '#myeditorinstance',
+        plugins: 'advlist autolink lists link image charmap preview anchor pagebreak',
+        toolbar_mode: 'floating',
+        height: 600,
+        branding: false,
+        setup: function (editor) {
+            editor.on('change', function () {
+                tinymce.triggerSave();
+            });
+        }
+    });
+
+    // Ensure editor content is synced on form submit
+    $('#editBlogForm').on('submit', function() {
+        tinymce.triggerSave();
+    });
+
     // Preview for replacement image
     document.getElementById('photoInput').onchange = evt => {
         const [file] = document.getElementById('photoInput').files;
@@ -139,7 +159,8 @@
 <style>
     .form-control-lg { font-weight: 700; border: none; border-bottom: 2px solid #eee; border-radius: 0; padding-left: 0; }
     .form-control-lg:focus { box-shadow: none; border-color: #007bff; }
-    .card-title { font-size: 0.75rem; color: #888; letter-spacing: 1px; }
+    .card-title { font-size: 0.75rem; color: #888; letter-spacing: 1px; text-transform: uppercase; }
     .text-xs { font-size: 0.7rem; }
+    .tox-tinymce { border-radius: 4px !important; border: 1px solid #dee2e6 !important; }
 </style>
 @endsection

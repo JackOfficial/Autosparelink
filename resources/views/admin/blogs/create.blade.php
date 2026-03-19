@@ -39,10 +39,11 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="content">Content</label>
-                                <textarea name="content" id="editor" 
+                                <label for="myeditorinstance">Content</label>
+                                {{-- Updated ID to myeditorinstance --}}
+                                <textarea name="content" id="myeditorinstance" 
                                           class="form-control @error('content') is-invalid @enderror" 
-                                          rows="15" placeholder="Start writing your story here...">{{ old('content') }}</textarea>
+                                          rows="20">{{ old('content') }}</textarea>
                                 @error('content')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -87,7 +88,7 @@
                                 <div id="preview-container" class="mt-2 text-center d-none">
                                     <img id="imagePreview" src="#" alt="Preview" class="img-fluid rounded shadow-sm border" style="max-height: 150px;">
                                 </div>
-                                <small class="text-muted d-block mt-2">Recommended: 1200x800px. Max 2MB.</small>
+                                <small class="text-muted d-block mt-2">Max 2MB. Recommended: 1200x800px.</small>
                             </div>
                         </div>
                     </div>
@@ -109,7 +110,17 @@
 </section>
 
 @push('scripts')
+{{-- Adding the Rich Text Editor Script --}}
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
+    tinymce.init({
+        selector: '#myeditorinstance',
+        plugins: 'advlist autolink lists link image charmap preview anchor pagebreak',
+        toolbar_mode: 'floating',
+        height: 500,
+        branding: false,
+    });
+
     // Simple Image Preview
     document.getElementById('photoInput').onchange = evt => {
         const [file] = document.getElementById('photoInput').files;
@@ -128,8 +139,9 @@
 @endpush
 
 <style>
-    .form-control-lg { font-weight: 600; font-size: 1.5rem; }
+    .form-control-lg { font-weight: 600; font-size: 1.5rem; border: none; border-bottom: 2px solid #eee; border-radius: 0; }
+    .form-control-lg:focus { box-shadow: none; border-color: #007bff; }
     .card-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    #editor { border-radius: 0; }
+    .tox-tinymce { border: 1px solid #eee !important; border-radius: 4px; }
 </style>
 @endsection
