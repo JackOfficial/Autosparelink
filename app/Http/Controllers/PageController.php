@@ -11,6 +11,7 @@ use App\Models\Photo;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\Event;
+use App\Models\News;
 use App\Models\Page;
 use App\Models\Partner;
 use App\Models\Story;
@@ -61,9 +62,22 @@ class PageController extends Controller
         ->paginate(6);
         return Inertia::render('Blogs', compact('blogs', 'keyword')); 
     }
-    function blogs(){
-        return view('blogs'); 
-    }
+   
+    public function blogs()
+{
+    // Fetch the 6 latest blogs with their category and photo
+    $blogs = Blog::with(['blogCategory', 'blogPhoto'])
+        ->latest()
+        ->paginate(6);
+
+    // Fetch the 3 latest news updates for a "Recent News" sidebar or section
+    $latestNews = News::with(['category', 'newsPhoto'])
+        ->latest()
+        ->limit(3)
+        ->get();
+
+    return view('blogs', compact('blogs', 'latestNews'));
+}
 
     function news(){
         return view('news'); 
