@@ -52,4 +52,8 @@ return [
     'encryption_key' => env('FLW_ENCRYPTION_KEY'),
     ],
 
+    'tinymce' => [
+    'key' => env('TINYMCE_API_KEY'),
+],
+
 ];
