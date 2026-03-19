@@ -208,7 +208,7 @@
     <span class="brand-text font-weight-light">AutoSpareLink</span>
   </a>
 
-  <div class="sidebar">
+<div class="sidebar">
     {{-- User Panel --}}
     <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
       <div class="image">
@@ -245,8 +245,8 @@
 
         {{-- Dashboard --}}
         <li class="nav-item" x-show="isVisible($el)">
-          <a href="/admin" class="nav-link">
-            <i class="nav-icon fas fa-gauge"></i>
+          <a href="/admin" class="nav-link {{ request()->is('admin') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>Dashboard</p>
           </a>
         </li>
@@ -254,7 +254,8 @@
         <li class="nav-header" x-show="search === ''">CONTENT MANAGEMENT</li>
 
         {{-- Vehicle Management --}}
-        <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
+        <li class="nav-item has-treeview {{ request()->is('admin/vehicle*') || request()->is('admin/variants*') ? 'menu-open' : '' }}" 
+            x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-car"></i>
             <p>Vehicle Management <i class="right fas fa-angle-left"></i></p>
@@ -263,25 +264,27 @@
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/vehicle-brands" class="nav-link"><i class="fas fa-tags nav-icon"></i><p>Vehicle Brands</p></a></li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/vehicle-models" class="nav-link"><i class="fas fa-car-side nav-icon"></i><p>Models</p></a></li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/variants" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Variants</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/specifications" class="nav-link"><i class="fas fa-cogs nav-icon"></i><p>Specification</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/specifications" class="nav-link"><i class="fas fa-sliders-h nav-icon"></i><p>Specification</p></a></li>
           </ul>
         </li>
 
         {{-- Spare Parts --}}
-        <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
+        <li class="nav-item has-treeview {{ request()->is('admin/spare-parts*') || request()->is('admin/part-brands*') ? 'menu-open' : '' }}" 
+            x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-boxes"></i>
             <p>Spare Parts <i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/spare-parts" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Parts</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/spare-parts" class="nav-link"><i class="fas fa-box nav-icon"></i><p>Parts</p></a></li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/part-brands" class="nav-link"><i class="nav-icon fas fa-tag"></i><p>Part Brands</p></a></li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/categories" class="nav-link"><i class="nav-icon fas fa-sitemap"></i><p>Categories</p></a></li>
           </ul>
         </li>
 
         {{-- E-Commerce --}}
-        <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
+        <li class="nav-item has-treeview {{ request()->is('admin/carts*') || request()->is('admin/orders*') ? 'menu-open' : '' }}" 
+            x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-shopping-cart"></i>
             <p>
@@ -306,80 +309,38 @@
             </li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/payments" class="nav-link"><i class="fas fa-credit-card nav-icon"></i><p>Payments</p></a></li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/shippings" class="nav-link"><i class="fas fa-truck nav-icon"></i><p>Shippings</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/addresses" class="nav-link"><i class="fas fa-map-marker-alt nav-icon"></i><p>Addresses</p></a></li>
           </ul>
         </li>
 
-        {{-- Users & Access --}}
-        <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-users"></i>
-            <p>Users & Access <i class="right fas fa-angle-left"></i></p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/users" class="nav-link"><i class="fas fa-user nav-icon"></i><p>Users</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/roles-and-permissions" class="nav-link"><i class="fas fa-user-shield nav-icon"></i><p>Roles & Permissions</p></a></li>
-          </ul>
-        </li>
+        {{-- Resources Header --}}
+        <li class="nav-header" x-show="search === ''">RESOURCES</li>
 
-        {{-- Reports & Settings --}}
-        <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-chart-pie"></i>
-            <p>Reports & Settings <i class="right fas fa-angle-left"></i></p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/reports/sales" class="nav-link"><i class="fas fa-chart-line nav-icon"></i><p>Sales Reports</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/reports/inventory" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Inventory Reports</p></a></li>
-            <li class="nav-item" x-show="isVisible($el)"><a href="/admin/settings" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>System Settings</p></a></li>
-          </ul>
-        </li>
-
- <li class="nav-header" x-show="search === ''">Resources</li>
-
-<li class="nav-header" x-show="search === ''">Resources</li>
-
-<li class="nav-item has-treeview {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'menu-open' : '' }}" 
-    x-show="isVisible($el)" 
-    :class="search !== '' ? 'menu-open' : ''">
-    
-    <a href="#" class="nav-link {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'active' : '' }}">
-        <i class="nav-icon fas fa-copy"></i>
-        <p>
-            Content Manager
-            <i class="fas fa-angle-left right"></i>
-        </p>
-    </a>
-    
-    <ul class="nav nav-treeview">
-        {{-- The actual blog posts --}}
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blogs.index') }}" 
-               class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
-                <i class="fas fa-newspaper nav-icon"></i>
-                <p>Articles / Blog</p>
+        {{-- Content Manager --}}
+        <li class="nav-item has-treeview {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'menu-open' : '' }}" 
+            x-show="isVisible($el)" 
+            :class="search !== '' ? 'menu-open' : ''">
+            <a href="#" class="nav-link {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-copy"></i>
+                <p>Content Manager <i class="fas fa-angle-left right"></i></p>
             </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item" x-show="isVisible($el)">
+                    <a href="{{ route('admin.blogs.index') }}" class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
+                        <i class="fas fa-newspaper nav-icon"></i><p>Articles / Blog</p>
+                    </a>
+                </li>
+                <li class="nav-item" x-show="isVisible($el)">
+                    <a href="{{ route('admin.blog-categories.index') }}" class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}">
+                        <i class="fas fa-tags nav-icon"></i><p>Categories</p>
+                    </a>
+                </li>
+                <li class="nav-item" x-show="isVisible($el)">
+                    <a href="{{ route('admin.news.index') }}" class="nav-link {{ request()->routeIs('admin.news.index') ? 'active' : '' }}">
+                        <i class="fas fa-bullhorn nav-icon"></i><p>News & Updates</p>
+                    </a>
+                </li>
+            </ul>
         </li>
-
-        {{-- The categories for those posts --}}
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blog-categories.index') }}" 
-               class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}">
-                <i class="fas fa-tags nav-icon"></i>
-                <p>Categories</p>
-            </a>
-        </li>
-
-        {{-- The quick updates --}}
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.news.index') }}" 
-               class="nav-link {{ request()->routeIs('admin.news.index') ? 'active' : '' }}">
-                <i class="fas fa-bullhorn nav-icon"></i>
-                <p>News & Updates</p>
-            </a>
-        </li>
-    </ul>
-</li>
 
         <li class="nav-header" x-show="search === ''">COMMUNITY & ENGAGEMENT</li>
 
@@ -387,37 +348,20 @@
         <li class="nav-item has-treeview {{ request()->is('admin/mailbox*') || request()->routeIs('admin.broadcast.*') ? 'menu-open' : '' }}" 
             x-show="isVisible($el)" 
             :class="search !== '' ? 'menu-open' : ''">
-            <a href="#" class="nav-link {{ request()->is('admin/mailbox*') || request()->routeIs('admin.broadcast.*') ? 'active' : '' }}">
+            <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-envelope"></i>
                 <p>Communications <i class="fas fa-angle-left right"></i></p>
             </a>
             <ul class="nav nav-treeview">
-                <li class="nav-item" x-show="isVisible($el)">
-                    <a href="/admin/mailbox/inbox" class="nav-link {{ request()->is('admin/mailbox/inbox') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-inbox"></i><p>Inbox</p>
-                    </a>
-                </li>
-                <li class="nav-item" x-show="isVisible($el)">
-                    <a href="{{ route('admin.tickets.index') }}" class="nav-link {{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}">
-                        <i class="fas fa-headset nav-icon"></i>
-                        <p>Support Tickets
-                            @php $openTickets = \App\Models\Ticket::where('status', 'open')->count(); @endphp
-                            @if($openTickets > 0) <span class="badge badge-danger right">{{ $openTickets }}</span> @endif
-                        </p>
-                    </a>
-                </li>
-                <li class="nav-item" x-show="isVisible($el)">
-                    <a href="{{ route('admin.broadcast.index') }}" class="nav-link {{ request()->routeIs('admin.broadcast.*') ? 'active' : '' }}">
-                        <i class="fas fa-bullhorn nav-icon"></i><p>Broadcast Message</p>
-                    </a>
-                </li>
+                <li class="nav-item" x-show="isVisible($el)"><a href="/admin/mailbox/inbox" class="nav-link"><i class="fas fa-inbox nav-icon"></i><p>Inbox</p></a></li>
+                <li class="nav-item" x-show="isVisible($el)"><a href="{{ route('admin.tickets.index') }}" class="nav-link"><i class="fas fa-headset nav-icon"></i><p>Support Tickets</p></a></li>
             </ul>
         </li>
 
-        {{-- Jobs --}}
-        <li class="nav-header" x-show="search === ''">JOBS</li>
+        {{-- Careers --}}
+        <li class="nav-header" x-show="search === ''">JOBS & SETTINGS</li>
         <li class="nav-item" x-show="isVisible($el)"><a href="/admin/careers" class="nav-link"><i class="nav-icon fas fa-briefcase"></i><p>Careers</p></a></li>
-        <li class="nav-item" x-show="isVisible($el)"><a href="/admin/applications" class="nav-link"><i class="nav-icon fas fa-file-invoice"></i><p>Applications</p></a></li>
+        <li class="nav-item" x-show="isVisible($el)"><a href="/admin/settings" class="nav-link"><i class="fas fa-cog nav-icon"></i><p>System Settings</p></a></li>
 
         {{-- Logout --}}
         @if(Auth::check())
@@ -438,8 +382,7 @@
 
       </ul>
     </nav>
-  </div>
-</aside>
+</div>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
