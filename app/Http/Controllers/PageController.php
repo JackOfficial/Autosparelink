@@ -63,20 +63,22 @@ class PageController extends Controller
         return Inertia::render('Blogs', compact('blogs', 'keyword')); 
     }
    
-    public function blogs()
+public function blogs()
 {
-    // Fetch the 6 latest blogs with their category and photo
-    $blogs = Blog::with(['blogCategory', 'blogPhoto'])
-        ->latest()
+    // Changed 'blogCategory' to 'category' to match your model
+    $blogs = Blog::with(['category', 'blogPhoto']) 
+        ->latest() 
         ->paginate(6);
 
-    // Fetch the 3 latest news updates for a "Recent News" sidebar or section
     $latestNews = News::with(['category', 'newsPhoto'])
         ->latest()
         ->limit(3)
         ->get();
 
-    return view('blogs', compact('blogs', 'latestNews'));
+    // We also need to fetch categories for the sidebar
+    $categories = BlogCategory::withCount(['blogs', 'news'])->get();
+
+    return view('blogs', compact('blogs', 'latestNews', 'categories'));
 }
 
     function news(){
