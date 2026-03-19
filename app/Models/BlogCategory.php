@@ -14,7 +14,8 @@ class BlogCategory extends Model
         'name',
         'slug',
         'photo',
-        'description'
+        'description',
+        'type'
     ];
     
     public function blogs(){
