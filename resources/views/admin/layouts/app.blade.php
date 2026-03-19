@@ -335,124 +335,47 @@
           </ul>
         </li>
 
-       <li class="nav-header" x-show="search === ''">Resources</li>
+ <li class="nav-header" x-show="search === ''">Resources</li>
 
-{{-- Blog Management --}}
-<li class="nav-item has-treeview {{ request()->is('admin/blog*') ? 'menu-open' : '' }}" 
+<li class="nav-header" x-show="search === ''">Resources</li>
+
+<li class="nav-item has-treeview {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'menu-open' : '' }}" 
     x-show="isVisible($el)" 
     :class="search !== '' ? 'menu-open' : ''">
-    <a href="#" class="nav-link {{ request()->is('admin/blog*') ? 'active' : '' }}">
-        <i class="nav-icon fas fa-blog"></i>
+    
+    <a href="#" class="nav-link {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-copy"></i>
         <p>
-            Blog Management
+            Content Manager
             <i class="fas fa-angle-left right"></i>
         </p>
     </a>
+    
     <ul class="nav nav-treeview">
+        {{-- The actual blog posts --}}
         <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blogs.index') }}" class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
-                <i class="far fa-file-alt nav-icon"></i>
-                <p>All Posts</p>
+            <a href="{{ route('admin.blogs.index') }}" 
+               class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
+                <i class="fas fa-newspaper nav-icon"></i>
+                <p>Articles / Blog</p>
             </a>
         </li>
+
+        {{-- The categories for those posts --}}
         <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blog-categories.index') }}" class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.blog-categories.index') }}" 
+               class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}">
                 <i class="fas fa-tags nav-icon"></i>
                 <p>Categories</p>
             </a>
         </li>
-    </ul>
-</li>
 
-{{-- Articles Management --}}
-<li class="nav-item has-treeview {{ request()->is('admin/blog*') ? 'menu-open' : '' }}" 
-    x-show="isVisible($el)" 
-    :class="search !== '' ? 'menu-open' : ''">
-    <a href="#" class="nav-link {{ request()->is('admin/blog*') ? 'active' : '' }}">
-        <i class="nav-icon fas fa-newspaper"></i>
-        <p>
-            Articles
-            <i class="fas fa-angle-left right"></i>
-        </p>
-    </a>
-    <ul class="nav nav-treeview">
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blog-categories.index') }}" 
-               class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}">
-                <i class="fas fa-tags nav-icon"></i>
-                <p>Blog Categories</p>
-            </a>
-        </li>
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blogs.index') }}" 
-               class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
-                <i class="fas fa-edit nav-icon"></i>
-                <p>All Articles</p>
-            </a>
-        </li>
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blogs.create') }}" 
-               class="nav-link {{ request()->routeIs('admin.blogs.create') ? 'active' : '' }}">
-                <i class="fas fa-plus-circle nav-icon"></i>
-                <p>Add New Article</p>
-            </a>
-        </li>
-    </ul>
-</li>
-
-{{-- News Management --}}
-<li class="nav-item has-treeview {{ request()->is('admin/news*') ? 'menu-open' : '' }}" 
-    x-show="isVisible($el)" 
-    :class="search !== '' ? 'menu-open' : ''">
-    <a href="#" class="nav-link {{ request()->is('admin/news*') ? 'active' : '' }}">
-        <i class="nav-icon fas fa-bullhorn"></i>
-        <p>
-            News & Updates
-            <i class="fas fa-angle-left right"></i>
-        </p>
-    </a>
-    <ul class="nav nav-treeview">
+        {{-- The quick updates --}}
         <li class="nav-item" x-show="isVisible($el)">
             <a href="{{ route('admin.news.index') }}" 
                class="nav-link {{ request()->routeIs('admin.news.index') ? 'active' : '' }}">
-                <i class="fas fa-list nav-icon"></i>
-                <p>All News</p>
-            </a>
-        </li>
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.news.create') }}" 
-               class="nav-link {{ request()->routeIs('admin.news.create') ? 'active' : '' }}">
-                <i class="fas fa-plus-circle nav-icon"></i>
-                <p>Post News</p>
-            </a>
-        </li>
-    </ul>
-</li>
-
-{{-- Articles Management --}}
-<li class="nav-item has-treeview {{ request()->is('admin/blog*') ? 'menu-open' : '' }}" 
-    x-show="isVisible($el)" 
-    :class="search !== '' ? 'menu-open' : ''">
-    <a href="#" class="nav-link {{ request()->is('admin/blog*') ? 'active' : '' }}">
-        <i class="nav-icon fas fa-newspaper"></i>
-        <p>
-            Articles
-            <i class="fas fa-angle-left right"></i>
-        </p>
-    </a>
-    <ul class="nav nav-treeview">
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blog-categories.index') }}" 
-               class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}">
-                <i class="fas fa-tags nav-icon"></i>
-                <p>Blog Categories</p>
-            </a>
-        </li>
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blogs.index') }}" 
-               class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
-                <i class="fas fa-edit nav-icon"></i>
-                <p>All Articles</p>
+                <i class="fas fa-bullhorn nav-icon"></i>
+                <p>News & Updates</p>
             </a>
         </li>
     </ul>
