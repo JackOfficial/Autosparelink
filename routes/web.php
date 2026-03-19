@@ -64,6 +64,7 @@ use App\Http\Controllers\Admin\DriveTypeController;
 use App\Http\Controllers\Admin\EngineTypeController;
 use App\Http\Controllers\Admin\InboxController;
 use App\Http\Controllers\Admin\ModelController;
+use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PartBrandController;
 use App\Http\Controllers\Admin\PartController;
@@ -239,6 +240,10 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('blog-categories', BlogCategoryController::class);
     Route::resource('bloggers', BloggersController::class);
     Route::resource('blogs', BlogController::class);
+    // Articles / Blogs
+    Route::resource('blogs', BlogController::class);
+    // News & Updates
+    Route::resource('news', NewsController::class);
     Route::resource('gallery', GalleryController::class);
     Route::resource('projects', ProjectController::class);
     Route::resource('team', TeamController::class);
