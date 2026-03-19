@@ -85,13 +85,19 @@ use App\Http\Controllers\Admin\TicketController as Ticket;
 Route::get('/', [HomeContoller::class, 'index']);
 
 Route::controller(PageController::class)->group(function () {
-    Route::get('/about', 'about');
-    Route::get('/gallery', 'gallery');
-    Route::get('/blogs', 'blogs');
-    Route::get('/news', 'news');
-    Route::get('/news/{id}', 'news_details');
-    Route::get('/articles', 'articles');
-    Route::get('/articles/{id}', 'article');
+    Route::get('/about', 'about')->name('about');
+    Route::get('/gallery', 'gallery')->name('gallery');
+    
+    // Blogs
+    Route::get('/blogs', 'blogs')->name('blogs.index');
+    Route::get('/articles/{id}', 'article')->name('blogs.show');
+    
+    // News
+    Route::get('/news', 'news')->name('news.index');
+    Route::get('/news/{id}', 'news_details')->name('news.show');
+    
+    Route::get('/articles', 'articles')->name('articles');
+    Route::get('/articles/{slug}', 'article')->name('blogs.show');
     Route::get('/policies', 'policies');
     Route::get('/terms-and-conditions', 'terms_and_conditions');
     Route::get('/faqs', 'faqs');
