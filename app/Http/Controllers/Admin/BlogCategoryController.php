@@ -17,7 +17,7 @@ class BlogCategoryController extends Controller
 {
     // We order by 'type' first, then by the latest created date
     // This effectively groups all 'blog' together and all 'news' together
-    $blogCategories = BlogCategory::withCount('posts')
+    $blogCategories = BlogCategory::withCount('blogs')
         ->orderBy('type', 'asc') // 'blog' starts with B, 'news' with N, so B comes first
         ->latest()
         ->paginate(10);
