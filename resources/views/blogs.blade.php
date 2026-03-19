@@ -2,160 +2,163 @@
 
 @section('content')
 
-<!-- Breadcrumb Start -->
 <div class="container-fluid mt-4">
     <div class="row px-xl-5">
         <div class="col-12">
-            <nav class="breadcrumb bg-light mb-30">
-                <a class="breadcrumb-item text-dark" href="#">Home</a>
-                <span class="breadcrumb-item active">Blog</span>
+            <nav class="breadcrumb bg-light mb-30 shadow-sm">
+                <a class="breadcrumb-item text-dark" href="{{ url('/') }}">Home</a>
+                <span class="breadcrumb-item active">Our Insights</span>
             </nav>
         </div>
     </div>
 </div>
-<!-- Breadcrumb End -->
-
-<!-- Blog Start -->
 <div class="container-fluid">
     <div class="row px-xl-5">
 
-        <!-- Sidebar Start -->
         <div class="col-lg-3 col-md-4">
 
-            <!-- Search Start -->
-            <div class="bg-light p-4 mb-30">
+            <div class="bg-light p-4 mb-30 shadow-sm border-top border-primary">
                 <h5 class="section-title position-relative text-uppercase mb-3">
                     <span class="bg-secondary pr-3">Search</span>
                 </h5>
-                <form action="#" method="GET">
+                <form action="{{ route('blogs.index') }}" method="GET">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search blog...">
+                        <input type="text" name="search" class="form-control" placeholder="Search articles..." value="{{ request('search') }}">
                         <div class="input-group-append">
-                            <span class="input-group-text bg-transparent text-primary">
+                            <button class="input-group-text bg-transparent text-primary border-left-0">
                                 <i class="fa fa-search"></i>
-                            </span>
+                            </button>
                         </div>
                     </div>
                 </form>
             </div>
-            <!-- Search End -->
 
-            <!-- Categories Start -->
-            <div class="bg-light p-4 mb-30">
+            <div class="bg-light p-4 mb-30 shadow-sm">
                 <h5 class="section-title position-relative text-uppercase mb-3">
                     <span class="bg-secondary pr-3">Categories</span>
                 </h5>
                 <ul class="list-unstyled mb-0">
-                    <li class="d-flex justify-content-between align-items-center mb-3">
-                        <a class="text-dark" href="#">Car Maintenance</a>
-                        <span class="badge border font-weight-normal">12</span>
+                    @foreach($categories as $cat)
+                    <li class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <a class="text-dark hover-text-primary" href="{{ route('blogs.index', ['category' => $cat->slug]) }}">
+                            {{ $cat->name }}
+                        </a>
+                        <span class="badge badge-pill badge-secondary font-weight-normal">{{ $cat->posts_count }}</span>
                     </li>
-                    <li class="d-flex justify-content-between align-items-center mb-3">
-                        <a class="text-dark" href="#">Spare Parts</a>
-                        <span class="badge border font-weight-normal">18</span>
-                    </li>
-                    <li class="d-flex justify-content-between align-items-center mb-3">
-                        <a class="text-dark" href="#">Auto Tips</a>
-                        <span class="badge border font-weight-normal">9</span>
-                    </li>
-                    <li class="d-flex justify-content-between align-items-center">
-                        <a class="text-dark" href="#">Industry News</a>
-                        <span class="badge border font-weight-normal">7</span>
-                    </li>
+                    @endforeach
                 </ul>
             </div>
-            <!-- Categories End -->
 
-            <!-- Recent Posts Start -->
-            <div class="bg-light p-4 mb-30">
+            <div class="bg-light p-4 mb-30 shadow-sm">
                 <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">Recent Posts</span>
+                    <span class="bg-secondary pr-3">Latest Updates</span>
                 </h5>
-
-                @for ($i = 1; $i <= 5; $i++)
-                <div class="media mb-3">
-                    <img src="{{ asset('frontend/img/parts.jpg') }}" class="mr-3" style="width: 80px; height: 60px; object-fit: cover;">
+                @foreach($recentPosts as $post)
+                <div class="media mb-3 align-items-center">
+                    <img src="{{ asset('storage/' . ($post->image ?? 'defaults/no-image.jpg')) }}" 
+                         class="mr-3 rounded shadow-sm" 
+                         style="width: 70px; height: 50px; object-fit: cover;">
                     <div class="media-body">
-                        <a class="text-dark" href="/blog/1">
-                            <h6 class="mt-0 text-truncate">Sample Blog Title {{ $i }}</h6>
+                        <a class="text-dark small font-weight-bold d-block text-truncate" href="{{ route('blogs.show', $post->slug) }}" style="max-width: 150px;">
+                            {{ $post->title }}
                         </a>
-                        <small><i class="fa fa-calendar text-primary mr-1"></i> 12 Dec, 2025</small>
+                        <small class="text-muted" style="font-size: 11px;">
+                            <i class="fa fa-clock mr-1"></i> {{ $post->created_at->format('M d, Y') }}
+                        </small>
                     </div>
                 </div>
-                @endfor
-
+                @endforeach
             </div>
-            <!-- Recent Posts End -->
-
         </div>
-        <!-- Sidebar End -->
 
-        <!-- Blog List Start -->
         <div class="col-lg-9 col-md-8">
             <div class="row pb-3">
 
-                @for ($i = 1; $i <= 6; $i++)
-                <!-- Blog Item -->
-                <div class="col-lg-4 col-md-6 col-sm-6 pb-4">
-                    <div class="bg-light mb-4 shadow-sm hover-shadow">
-                        <!-- Top Image -->
-                        <div class="position-relative overflow-hidden">
-                            <img class="img-fluid w-100" src="{{ asset('frontend/img/part.png') }}" alt="" style="height: 250px; object-fit: cover;">
-                        </div>
-                        <!-- Card Content -->
-                        <div class="p-4">
-                            <a class="h6 text-decoration-none d-block blog-card-title mb-2" href="#">
-                                Sample Blog Title {{ $i }} That Might Be Very Long
-                            </a>
-                            <p class="text-muted mb-3" style="font-size: 14px; line-height:1.5;">
-                                This is a short description for blog post {{ $i }}. Replace it with your actual content.
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                <small class="text-muted">
-                                    <i class="fa fa-calendar text-primary mr-1"></i> 12 Dec, 2025
+                @forelse ($posts as $post)
+                    <div class="col-lg-4 col-md-6 col-sm-6 pb-4">
+                        <div class="bg-light mb-4 shadow-sm hover-shadow border-0 card-h-100">
+                            <div class="position-relative overflow-hidden">
+                                <img class="img-fluid w-100" 
+                                     src="{{ asset('storage/' . ($post->image ?? 'defaults/no-image.jpg')) }}" 
+                                     alt="{{ $post->title }}" 
+                                     style="height: 200px; object-fit: cover;">
+                                
+                                {{-- Badge for Type --}}
+                                <div class="position-absolute px-3 py-1 text-white" 
+                                     style="top: 10px; right: 10px; border-radius: 20px; font-size: 12px; background: {{ $post->category->type == 'news' ? '#28a745' : '#ffc107' }};">
+                                    {{ ucfirst($post->category->type) }}
+                                </div>
+                            </div>
+                            
+                            <div class="p-4">
+                                <small class="text-primary font-weight-bold mb-2 d-block">
+                                    {{ $post->category->name }}
                                 </small>
-                                <a href="/blog/1" class="btn btn-sm btn-primary">Read More <i class="fa fa-angle-right"></i></a>
+                                <a class="h6 text-decoration-none d-block blog-card-title mb-3" href="{{ route('blogs.show', $post->slug) }}">
+                                    {{ $post->title }}
+                                </a>
+                                <p class="text-muted mb-3 small">
+                                    {{ Str::limit(strip_tags($post->content), 85) }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                                    <small class="text-muted">
+                                        <i class="fa fa-calendar-alt text-primary mr-1"></i> {{ $post->created_at->format('d M') }}
+                                    </small>
+                                    <a href="{{ route('blogs.show', $post->slug) }}" class="btn btn-sm btn-outline-primary px-3 rounded-pill">
+                                        Read <i class="fa fa-angle-right ml-1"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                @endfor
+                @empty
+                    <div class="col-12 text-center py-5">
+                        <i class="fa fa-newspaper fa-4x text-light mb-3"></i>
+                        <h4 class="text-muted">No articles found in this section yet.</h4>
+                        <a href="{{ route('blogs.index') }}" class="btn btn-primary mt-3">Back to All Posts</a>
+                    </div>
+                @endforelse
 
-                <!-- Pagination -->
-                <div class="col-12">
-                    <nav>
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item disabled"><a class="page-link">Previous</a></li>
-                            <li class="page-item active"><a class="page-link">1</a></li>
-                            <li class="page-item"><a class="page-link">2</a></li>
-                            <li class="page-item"><a class="page-link">3</a></li>
-                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                        </ul>
-                    </nav>
+                <div class="col-12 pt-4">
+                    {{ $posts->links('vendor.pagination.bootstrap-4') }}
                 </div>
 
             </div>
         </div>
-        <!-- Blog List End -->
-
     </div>
 </div>
-<!-- Blog End -->
 
 <style>
-    /* Truncate long titles */
+    /* UI Polish */
     .blog-card-title {
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        text-overflow: ellipsis;
+        height: 38px;
+        line-height: 1.2;
     }
 
-    /* Hover shadow effect */
+    .hover-shadow {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
     .hover-shadow:hover {
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        transition: all 0.3s ease;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    }
+
+    .hover-text-primary:hover {
+        color: #FFD333 !important; /* Matches your Autosparelink gold theme */
+        text-decoration: none;
+        padding-left: 5px;
+        transition: 0.2s;
+    }
+
+    .card-h-100 {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 </style>
 

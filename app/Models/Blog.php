@@ -21,6 +21,14 @@ class Blog extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+    // Inside App\Models\Blog.php
+
+public function category()
+{
+    // Explicitly mapping blog_category_id to the category model
+    return $this->belongsTo(BlogCategory::class, 'blog_category_id');
+}
     
     public function blogPhoto()
 {

@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Blog;
-use App\Models\Photo;
-use App\Models\Cause;
+use App\Models\BlogCategory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class BlogController extends Controller
 {
@@ -17,8 +17,9 @@ class BlogController extends Controller
      */
     public function index()
     {
-        $blogs = Blog::with(['blogPhoto', 'cause', 'user'])->latest()->get();
-        return view('admin.manage.blogs', compact('blogs'));
+        // Using paginate(10) to match your Category index style
+        $blogs = Blog::with(['blogPhoto', 'category', 'user'])->latest()->paginate(10);
+        return view('admin.blogs.index', compact('blogs'));
     }
 
     /**
@@ -26,8 +27,8 @@ class BlogController extends Controller
      */
     public function create()
     {
-        $causes = Cause::all(); // since blog belongs to cause
-        return view('admin.create.blog', compact('causes'));
+        $categories = BlogCategory::all(); 
+        return view('admin.blogs.create', compact('categories'));
     }
 
     /**
@@ -35,25 +36,30 @@ class BlogController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title'   => 'required|string|max:255',
-            'cause_id' => 'required|exists:causes,id',
-            'content' => 'required|string',
-            'photo'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        $request->validate([
+            'title'            => 'required|string|max:255',
+            'blog_category_id' => 'required|exists:blog_categories,id',
+            'content'          => 'required|string',
+            'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $validated['user_id'] = auth()->id();
-        $validated['slug'] = Str::slug($validated['title']);
+        return DB::transaction(function () use ($request) {
+            $blog = Blog::create([
+                'user_id'          => auth()->id(),
+                'blog_category_id' => $request->blog_category_id,
+                'title'            => $request->title,
+                'slug'             => Str::slug($request->title),
+                'content'          => $request->content,
+            ]);
 
-        $blog = Blog::create($validated);
+            // Handle polymorphic photo upload
+            if ($request->hasFile('photo')) {
+                $path = $request->file('photo')->store('uploads/blogs', 'public');
+                $blog->blogPhoto()->create(['file_path' => $path]);
+            }
 
-        // Handle photo upload (morph)
-        if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('uploads/blogs', 'public');
-            $blog->blogPhoto()->create(['file_path' => $path]);
-        }
-
-        return redirect()->route('admin.blogs.index')->with('success', 'Blog created successfully.');
+            return redirect()->route('admin.blogs.index')->with('success', 'Blog post published successfully.');
+        });
     }
 
     /**
@@ -61,9 +67,9 @@ class BlogController extends Controller
      */
     public function edit(Blog $blog)
     {
-        $causes = Cause::all();
+        $categories = BlogCategory::all();
         $blog->load('blogPhoto');
-        return view('admin.edit.blog', compact('blog', 'causes'));
+        return view('admin.blogs.edit', compact('blog', 'categories'));
     }
 
     /**
@@ -71,28 +77,34 @@ class BlogController extends Controller
      */
     public function update(Request $request, Blog $blog)
     {
-        $validated = $request->validate([
-            'title'   => 'required|string|max:255',
-            'cause_id' => 'required|exists:causes,id',
-            'content' => 'required|string',
-            'photo'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        $request->validate([
+            'title'            => 'required|string|max:255',
+            'blog_category_id' => 'required|exists:blog_categories,id',
+            'content'          => 'required|string',
+            'photo'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $validated['slug'] = Str::slug($validated['title']);
-        $blog->update($validated);
+        return DB::transaction(function () use ($request, $blog) {
+            $blog->update([
+                'title'            => $request->title,
+                'blog_category_id' => $request->blog_category_id,
+                'slug'             => Str::slug($request->title),
+                'content'          => $request->content,
+            ]);
 
-        // Replace photo if a new one is uploaded
-        if ($request->hasFile('photo')) {
-            if ($blog->blogPhoto) {
-                Storage::disk('public')->delete($blog->blogPhoto->file_path);
-                $blog->blogPhoto->delete();
+            if ($request->hasFile('photo')) {
+                // Delete old photo file and record
+                if ($blog->blogPhoto) {
+                    Storage::disk('public')->delete($blog->blogPhoto->file_path);
+                    $blog->blogPhoto()->delete();
+                }
+
+                $path = $request->file('photo')->store('uploads/blogs', 'public');
+                $blog->blogPhoto()->create(['file_path' => $path]);
             }
 
-            $path = $request->file('photo')->store('uploads/blogs', 'public');
-            $blog->blogPhoto()->create(['file_path' => $path]);
-        }
-
-        return redirect()->route('admin.blogs.index')->with('success', 'Blog updated successfully.');
+            return redirect()->route('admin.blogs.index')->with('success', 'Blog post updated successfully.');
+        });
     }
 
     /**
@@ -100,14 +112,15 @@ class BlogController extends Controller
      */
     public function destroy(Blog $blog)
     {
-        // Delete photo from storage
+        // Note: With SoftDeletes, we usually keep the photo. 
+        // If you want to delete the file only on Force Delete, move this logic.
         if ($blog->blogPhoto) {
             Storage::disk('public')->delete($blog->blogPhoto->file_path);
-            $blog->blogPhoto->delete();
+            $blog->blogPhoto()->delete();
         }
 
         $blog->delete();
 
-        return redirect()->route('admin.blogs.index')->with('success', 'Blog deleted successfully.');
+        return redirect()->route('admin.blogs.index')->with('success', 'Blog post moved to trash.');
     }
 }
