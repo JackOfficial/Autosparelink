@@ -113,8 +113,8 @@
 </section>
 
 @push('scripts')
-{{-- TinyMCE Rich Text Editor --}}
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+{{-- Updated TinyMCE with secure API key configuration --}}
+<script src="https://cdn.tiny.cloud/1/{{ config('services.tinymce.key') }}/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
     tinymce.init({
         selector: '#myeditorinstance',
