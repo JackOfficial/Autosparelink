@@ -337,8 +337,6 @@
 
  <li class="nav-header" x-show="search === ''">Resources</li>
 
-<li class="nav-header" x-show="search === ''">Resources</li>
-
 <li class="nav-item has-treeview {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'menu-open' : '' }}" 
     x-show="isVisible($el)" 
     :class="search !== '' ? 'menu-open' : ''">
