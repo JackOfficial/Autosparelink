@@ -43,6 +43,7 @@ use App\Http\Controllers\Admin\AddressController;
 use App\Http\Controllers\Admin\CareersController as Careers;
 use App\Http\Controllers\Admin\ApplicationsController;
 use App\Http\Controllers\Admin\CauseController;
+use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BloggersController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\GalleryController;
@@ -235,6 +236,7 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('pages', WebpagesController::class);
     Route::resource('causes', CauseController::class);
     Route::resource('stories', StoryController::class);
+    Route::resource('blog-categories', BlogCategoryController::class);
     Route::resource('bloggers', BloggersController::class);
     Route::resource('blogs', BlogController::class);
     Route::resource('gallery', GalleryController::class);

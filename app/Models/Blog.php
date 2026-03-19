@@ -12,19 +12,14 @@ class Blog extends Model
 
     protected $fillable = [
         'user_id',
-        'cause_id',
+        'blog_category_id',
         'title',
         'slug',
-        'photo',
         'content',
     ];
     
     public function user(){
         return $this->belongsTo(User::class);
-    }
-    
-    public function cause(){
-        return $this->belongsTo(Cause::class);
     }
     
     public function blogPhoto()
