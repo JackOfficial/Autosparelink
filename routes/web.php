@@ -88,34 +88,37 @@ Route::controller(PageController::class)->group(function () {
     Route::get('/about', 'about')->name('about');
     Route::get('/gallery', 'gallery')->name('gallery');
     
-    // Blogs
+    // --- BLOGS & ARTICLES ---
     Route::get('/blogs', 'blogs')->name('blogs.index');
-    Route::get('/articles/{id}', 'article')->name('blogs.show');
+    // Using {slug} is better for SEO as we discussed
+    Route::get('/articles/{slug}', 'article')->name('blogs.show'); 
+    Route::get('/blogs/category/{id}', 'blog_category')->name('blogs.category');
+    Route::get('/blogs/search/{keyword}', 'search')->name('blogs.search');
     
-    // News
+    // --- NEWS ---
     Route::get('/news', 'news')->name('news.index');
-    Route::get('/news/{id}', 'news_details')->name('news.show');
+    Route::get('/news/{slug}', 'news_details')->name('news.show');
     
-    Route::get('/articles', 'articles')->name('articles');
-    Route::get('/articles/{slug}', 'article')->name('blogs.show');
-    Route::get('/policies', 'policies');
-    Route::get('/terms-and-conditions', 'terms_and_conditions');
-    Route::get('/faqs', 'faqs');
-    Route::get('/cart', 'cart'); // Note: Duplicate found in original, kept both
-    Route::get('/blog/{id}', 'blog');
-    Route::get('/blogs/{id}', 'blog_category');
-    Route::get('/projects', 'projects');
-    Route::get('/stories', 'stories');
-    Route::get('/story/{id}', 'story');
-    Route::get('/causes', 'causes');
-    Route::get('/donate', 'donate');
-    Route::get('/volunteer', 'volunteer');
-    Route::get('/events', 'events');
-    Route::get('/events/{event}', 'event');
-    Route::get('/application-sent', 'application_sent');
-    Route::get('blogs/search/{keyword}', 'search');
-    Route::post('/comment', 'post');
-    Route::post('/deleteComment/{id}', 'deleteComment');
+    // --- OTHER PAGES ---
+    Route::get('/projects', 'projects')->name('projects');
+    Route::get('/stories', 'stories')->name('stories');
+    Route::get('/story/{id}', 'story')->name('story.show');
+    Route::get('/causes', 'causes')->name('causes');
+    Route::get('/events', 'events')->name('events');
+    Route::get('/events/{event}', 'event')->name('events.show');
+    
+    // --- FORMS & ACTIONS ---
+    Route::get('/donate', 'donate')->name('donate');
+    Route::get('/volunteer', 'volunteer')->name('volunteer');
+    Route::get('/application-sent', 'application_sent')->name('application.sent');
+    Route::post('/comment', 'post')->name('comment.store');
+    Route::post('/deleteComment/{id}', 'deleteComment')->name('comment.delete');
+
+    // --- LEGAL & E-COMMERCE ---
+    Route::get('/policies', 'policies')->name('policies');
+    Route::get('/terms-and-conditions', 'terms_and_conditions')->name('terms');
+    Route::get('/faqs', 'faqs')->name('faqs');
+    Route::get('/cart', 'cart')->name('cart');
 });
 
 Route::get('/brands', [BrandsController::class, 'brands']);
