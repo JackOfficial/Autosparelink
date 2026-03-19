@@ -1,17 +1,18 @@
 @extends('admin.layouts.app')
-@section('title', 'Blog Categories')
+@section('title', 'Categories')
 
 @section('content')
 <section class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1>Blog Categories <span class="badge badge-secondary">{{ $blogCategories->total() }}</span></h1>
+                {{-- Changed title to be more generic since it handles both types --}}
+                <h1>Content Categories <span class="badge badge-secondary">{{ $blogCategories->total() }}</span></h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Blog Categories</li>
+                    <li class="breadcrumb-item active">Categories</li>
                 </ol>
             </div>
         </div>
@@ -20,10 +21,13 @@
 
 <section class="content" x-data="{ 
     search: '',
-    {{-- This function checks if the row content matches the search string --}}
-    filterRow(name, slug) {
-        return name.toLowerCase().includes(this.search.toLowerCase()) || 
-               slug.toLowerCase().includes(this.search.toLowerCase());
+    {{-- Updated filter logic to include Type and Description --}}
+    filterRow(name, slug, type, description) {
+        let searchTerm = this.search.toLowerCase();
+        return name.toLowerCase().includes(searchTerm) || 
+               slug.toLowerCase().includes(searchTerm) ||
+               type.toLowerCase().includes(searchTerm) ||
+               (description && description.toLowerCase().includes(searchTerm));
     }
 }">
     {{-- Success Message --}}
@@ -41,9 +45,8 @@
             <h3 class="card-title">Category Management</h3>
             
             <div class="card-tools d-flex">
-                {{-- Live Search Input --}}
-                <div class="input-group input-group-sm mr-3" style="width: 200px;">
-                    <input type="text" x-model="search" class="form-control" placeholder="Search categories...">
+                <div class="input-group input-group-sm mr-3" style="width: 250px;">
+                    <input type="text" x-model="search" class="form-control" placeholder="Search name, slug, or type...">
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                     </div>
@@ -61,19 +64,26 @@
                     <tr>
                         <th style="width: 10px">#</th>
                         <th>Photo</th>
-                        <th>Category Name</th>
+                        <th>Details</th> {{-- Merged Name & Description for better layout --}}
+                        <th>Type</th>
                         <th>Slug</th>
                         <th>Posts</th>
-                        <th>Created Date</th>
+                        <th>Created</th>
                         <th class="text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($blogCategories as $blogCategory)
-                    {{-- Alpine logic to hide/show row based on search --}}
-                    <tr x-show="filterRow('{{ addslashes($blogCategory->name) }}', '{{ $blogCategory->slug }}')" 
+                    <tr x-show="filterRow(
+                            '{{ addslashes($blogCategory->name) }}', 
+                            '{{ $blogCategory->slug }}', 
+                            '{{ $blogCategory->type }}',
+                            '{{ addslashes($blogCategory->description) }}'
+                        )" 
                         x-transition.opacity>
+                        
                         <td class="align-middle">{{ $loop->iteration }}</td>
+                        
                         <td class="align-middle">
                             @if($blogCategory->photo)
                                 <a href="{{ asset('storage/' . $blogCategory->photo) }}" target="_blank">
@@ -82,20 +92,39 @@
                                          class="img-size-50 img-thumbnail shadow-sm">
                                 </a>
                             @else
-                                <span class="text-muted small">No Image</span>
+                                <div class="img-size-50 bg-light d-flex align-items-center justify-content-center border rounded">
+                                    <i class="fas fa-image text-muted"></i>
+                                </div>
                             @endif
                         </td>
+
                         <td class="align-middle">
                             <strong>{{ $blogCategory->name }}</strong>
+                            @if($blogCategory->description)
+                                <p class="text-muted small mb-0 text-truncate" style="max-width: 200px;">
+                                    {{ $blogCategory->description }}
+                                </p>
+                            @endif
                         </td>
+
+                        <td class="align-middle">
+                            @if($blogCategory->type === 'news')
+                                <span class="badge badge-success"><i class="fas fa-bullhorn mr-1"></i> News</span>
+                            @else
+                                <span class="badge badge-primary"><i class="fas fa-newspaper mr-1"></i> Blog</span>
+                            @endif
+                        </td>
+
                         <td class="align-middle"><code class="text-pink">{{ $blogCategory->slug }}</code></td>
+                        
                         <td class="align-middle">
                             <span class="badge badge-info">{{ $blogCategory->posts_count ?? 0 }}</span>
                         </td>
+
                         <td class="align-middle">
-                            {{ $blogCategory->created_at->format('M d, Y') }}<br>
-                            <small class="text-muted">{{ $blogCategory->created_at->diffForHumans() }}</small>
+                            {{ $blogCategory->created_at->format('M d, Y') }}
                         </td>
+
                         <td class="text-right align-middle">
                             <div class="btn-group">
                                 <a href="{{ route('admin.blog-categories.edit', $blogCategory->id) }}" 
@@ -119,19 +148,12 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5">
+                        <td colspan="8" class="text-center py-5">
                             <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No blog categories found.</p>
+                            <p class="text-muted">No categories found.</p>
                         </td>
                     </tr>
                     @endforelse
-                    
-                    {{-- Alpine "No Results" row --}}
-                    <tr x-show="search !== '' && document.querySelectorAll('tbody tr[style*=\'display: none\']').length === {{ count($blogCategories) }}" style="display: none;">
-                        <td colspan="7" class="text-center py-4">
-                            <p class="text-muted mb-0">No categories match "<span x-text="search"></span>"</p>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
         </div>
@@ -148,7 +170,7 @@
 
 <script>
     function deleteCategory(id) {
-        if (confirm('Are you sure you want to delete this category? It will be moved to trash.')) {
+        if (confirm('Are you sure you want to delete this category?')) {
             document.getElementById('delete-form-' + id).submit();
         }
     }
