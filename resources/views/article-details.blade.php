@@ -2,241 +2,188 @@
 
 @section('content')
 
-<!-- Reading Progress Bar -->
 <div id="reading-progress"></div>
 
-<!-- Breadcrumb Start -->
 <div class="container-fluid mt-4">
     <div class="row px-xl-5">
         <div class="col-12">
-            <nav class="breadcrumb bg-light mb-30">
-                <a class="breadcrumb-item text-dark" href="/">Home</a>
-                <a class="breadcrumb-item text-dark" href="/news">News</a>
-                <span class="breadcrumb-item active">News Details</span>
+            <nav class="breadcrumb bg-light mb-30 shadow-sm">
+                <a class="breadcrumb-item text-dark" href="{{ url('/') }}">Home</a>
+                <a class="breadcrumb-item text-dark" href="{{ route('blogs.index') }}">Insights</a>
+                <span class="breadcrumb-item active">{{ Str::limit($post->title, 30) }}</span>
             </nav>
         </div>
     </div>
 </div>
-<!-- Breadcrumb End -->
-
-<!-- News Details -->
 <div class="container-fluid">
     <div class="row px-xl-5">
 
-        <!-- INLINE SIDEBAR -->
         <div class="col-lg-3 col-md-4">
-
-            <!-- Search -->
-            <div class="bg-light p-4 mb-30">
+            <div class="bg-light p-4 mb-30 shadow-sm border-top border-primary">
                 <h5 class="section-title position-relative text-uppercase mb-3">
                     <span class="bg-secondary pr-3">Search</span>
                 </h5>
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search news...">
-                    <div class="input-group-append">
-                        <span class="input-group-text bg-transparent text-primary">
-                            <i class="fa fa-search"></i>
-                        </span>
+                <form action="{{ route('blogs.index') }}" method="GET">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Search insights...">
+                        <div class="input-group-append">
+                            <button class="input-group-text bg-transparent text-primary border-left-0">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
 
-            <!-- Categories -->
-            <div class="bg-light p-4 mb-30">
+            <div class="bg-light p-4 mb-30 shadow-sm">
                 <h5 class="section-title position-relative text-uppercase mb-3">
                     <span class="bg-secondary pr-3">Categories</span>
                 </h5>
                 <ul class="list-unstyled mb-0">
-                    <li class="mb-2"><a href="#" class="text-dark">Industry Updates</a></li>
-                    <li class="mb-2"><a href="#" class="text-dark">Auto Innovations</a></li>
-                    <li class="mb-2"><a href="#" class="text-dark">Events</a></li>
-                    <li><a href="#" class="text-dark">Safety Alerts</a></li>
+                    @foreach($categories as $cat)
+                    <li class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <a class="text-dark hover-text-primary" href="{{ route('blogs.index', ['category' => $cat->slug]) }}">
+                            {{ $cat->name }}
+                        </a>
+                        <span class="badge badge-pill badge-secondary font-weight-normal">{{ $cat->blogs_count }}</span>
+                    </li>
+                    @endforeach
                 </ul>
             </div>
 
-            <!-- Recent News -->
-            <div class="bg-light p-4 mb-30">
+            <div class="bg-light p-4 mb-30 shadow-sm">
                 <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">Recent News</span>
+                    <span class="bg-secondary pr-3">Latest Updates</span>
                 </h5>
-
-                @for ($i = 1; $i <= 4; $i++)
-                <div class="media mb-3">
-                    <img src="{{ asset('frontend/img/parts.jpg') }}"
-                         class="mr-3"
-                         style="width:80px;height:60px;object-fit:cover;">
+                @foreach($recentPosts as $recent)
+                <div class="media mb-3 align-items-center">
+                    @php
+                        $recentImg = $recent->newsPhoto ? asset('storage/' . $recent->newsPhoto->file_path) : asset('defaults/no-image.jpg');
+                    @endphp
+                    <img src="{{ $recentImg }}" class="mr-3 rounded shadow-sm" style="width:70px;height:50px;object-fit:cover;">
                     <div class="media-body">
-                        <a href="#" class="text-dark">
-                            <h6 class="mt-0 text-truncate">Recent News {{ $i }}</h6>
+                        <a href="{{ route('news.show', $recent->slug) }}" class="text-dark small font-weight-bold d-block text-truncate" style="max-width: 150px;">
+                            {{ $recent->title }}
                         </a>
-                        <small class="text-muted">
-                            <i class="fa fa-calendar text-primary mr-1"></i> 12 Dec, 2025
+                        <small class="text-muted" style="font-size: 11px;">
+                            <i class="fa fa-calendar text-primary mr-1"></i> {{ $recent->created_at->format('d M, Y') }}
                         </small>
                     </div>
                 </div>
-                @endfor
+                @endforeach
             </div>
-
         </div>
 
-        <!-- MAIN CONTENT -->
         <div class="col-lg-9 col-md-8">
-
             <article class="bg-light p-4 mb-30 shadow-sm">
+                <span class="badge badge-primary text-uppercase mb-2 px-3 py-2">
+                    {{ $post->category->name ?? 'General' }}
+                </span>
 
-                <!-- Title -->
-                <span class="badge badge-danger text-uppercase mb-2">🔥 Trending News</span>
+                <h1 class="mt-2 font-weight-bold h2 text-dark">{{ $post->title }}</h1>
 
-                <h1 class="mt-2 font-weight-bold">
-                    How the Auto Industry is Evolving in 2025
-                </h1>
-
-                <!-- Meta -->
-                <div class="d-flex flex-wrap text-muted small mb-3">
-                    <span class="mr-3">
-                        <i class="fa fa-calendar text-primary mr-1"></i> 12 Dec, 2025
+                <div class="d-flex flex-wrap text-muted small mb-4 py-2 border-top border-bottom">
+                    <span class="mr-4">
+                        <i class="fa fa-calendar text-primary mr-1"></i> {{ $post->created_at->format('M d, Y') }}
                     </span>
-                    <span class="mr-3">
-                        <i class="fa fa-user text-primary mr-1"></i> AutoSpareLink Team
+                    <span class="mr-4">
+                        <i class="fa fa-user text-primary mr-1"></i> {{ $post->user->name ?? 'Admin' }}
                     </span>
-                    <span>
-                        <i class="fa fa-clock text-primary mr-1"></i> 5 min read
+                    <span class="mr-4">
+                        <i class="fa fa-eye text-primary mr-1"></i> {{ $post->views ?? 0 }} Views
                     </span>
                 </div>
 
-                <!-- Image -->
-                <img src="{{ asset('frontend/img/part.png') }}"
-                     class="img-fluid w-100 mb-4"
-                     style="max-height:450px;object-fit:cover;"
-                     alt="Auto industry news">
+                @if($post->blogPhoto)
+                <div class="position-relative mb-4">
+                    <img src="{{ asset('storage/' . $post->blogPhoto->file_path) }}"
+                         class="img-fluid w-100 rounded shadow-sm"
+                         style="max-height:500px;object-fit:cover;"
+                         alt="{{ $post->title }}">
+                </div>
+                @endif
 
-                <!-- Share -->
-                <div class="mb-4">
-                    <strong class="mr-2">Share:</strong>
-                    <a href="#" class="btn btn-sm btn-success mr-1">
+                <div class="mb-4 d-flex align-items-center">
+                    <strong class="mr-3 small text-uppercase text-muted">Share article:</strong>
+                    <a href="https://api.whatsapp.com/send?text={{ urlencode($post->title . ' ' . url()->current()) }}" target="_blank" class="btn btn-sm btn-success mr-2 rounded-circle">
                         <i class="fab fa-whatsapp"></i>
                     </a>
-                    <a href="#" class="btn btn-sm btn-dark mr-1">
+                    <a href="https://twitter.com/intent/tweet?text={{ urlencode($post->title) }}&url={{ url()->current() }}" target="_blank" class="btn btn-sm btn-dark mr-2 rounded-circle">
                         <i class="fab fa-x-twitter"></i>
                     </a>
-                    <a href="#" class="btn btn-sm btn-primary">
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ url()->current() }}" target="_blank" class="btn btn-sm btn-primary rounded-circle">
                         <i class="fab fa-facebook-f"></i>
                     </a>
                 </div>
 
-                <!-- Content -->
-                <div class="blog-content" style="line-height:1.8;">
-                    <p>
-                        The automotive industry is rapidly changing with new technologies and innovations
-                        shaping the future of mobility. Companies are focusing on sustainability,
-                        AI-driven systems, and improved safety.
-                    </p>
-
-                    <h4 class="mt-4">AI in Vehicle Diagnostics</h4>
-                    <p>
-                        Advanced AI systems are now integrated into vehicles to predict maintenance needs,
-                        prevent breakdowns, and enhance overall reliability.
-                    </p>
-
-                    <h4 class="mt-4">Eco-Friendly Parts</h4>
-                    <p>
-                        More manufacturers are introducing eco-friendly and recycled materials in spare parts
-                        to reduce environmental impact.
-                    </p>
-
-                    <blockquote class="blockquote bg-white p-3 border-left border-primary">
-                        “Innovation drives safer, greener, and smarter vehicles.”
-                    </blockquote>
-
-                    <p>
-                        Stay informed with AutoSpareLink to get the latest industry news and updates.
-                    </p>
+                <div class="blog-content text-dark" style="line-height:1.9; font-size: 1.05rem;">
+                    {!! $post->content !!}
                 </div>
             </article>
 
-            <!-- RELATED NEWS -->
-            <div class="bg-light p-4 mb-30">
-                <h4 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">Related News</span>
+            <div class="bg-light p-4 mb-30 shadow-sm">
+                <h4 class="section-title position-relative text-uppercase mb-4">
+                    <span class="bg-secondary pr-3">You Might Also Like</span>
                 </h4>
-
-                <div class="d-flex related-scroll">
-                    @for ($i = 1; $i <= 6; $i++)
-                    <div class="card mr-3" style="min-width:260px;">
-                        <img src="{{ asset('frontend/img/parts.jpg') }}"
-                             class="card-img-top"
-                             style="height:160px;object-fit:cover;">
-                        <div class="card-body">
-                            <h6 class="card-title text-truncate">
-                                Auto News Update {{ $i }}
-                            </h6>
-                            <a href="#" class="btn btn-sm btn-primary">Read</a>
+                <div class="row">
+                    @php
+                        // Fetching 3 related items from same category excluding current
+                        $related = \App\Models\Blog::where('blog_category_id', $post->blog_category_id)
+                                    ->where('id', '!=', $post->id)
+                                    ->limit(3)->get();
+                    @endphp
+                    @foreach($related as $rel)
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            @if($rel->blogPhoto)
+                                <img src="{{ asset('storage/' . $rel->blogPhoto->file_path) }}" class="card-img-top" style="height:140px; object-fit:cover;">
+                            @endif
+                            <div class="card-body p-3">
+                                <h6 class="card-title small font-weight-bold">
+                                    <a href="{{ route('blogs.show', $rel->slug) }}" class="text-dark">{{ $rel->title }}</a>
+                                </h6>
+                            </div>
                         </div>
                     </div>
-                    @endfor
+                    @endforeach
                 </div>
             </div>
 
-            <!-- COMMENTS -->
-            <div class="bg-light p-4 mb-30">
-                <h4 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">Comments</span>
+            <div class="bg-light p-4 mb-30 shadow-sm border-top border-primary">
+                <h4 class="section-title position-relative text-uppercase mb-4">
+                    <span class="bg-secondary pr-3">Discussion</span>
                 </h4>
-
-                <div class="media mb-3">
-                    <i class="fa fa-user-circle fa-2x text-primary mr-3"></i>
-                    <div class="media-body">
-                        <h6 class="mb-1">Alice Mukami</h6>
-                        <small class="text-muted">1 day ago</small>
-                        <p class="mt-2 mb-0">
-                            Very informative news update!
-                        </p>
-                    </div>
-                </div>
-
-                <form>
+                
+                {{-- Add your existing comment loop here if you have a comments table --}}
+                
+                <form action="{{ route('comment.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="blog_id" value="{{ $post->id }}">
                     <div class="form-group">
-                        <label>Your Comment *</label>
-                        <textarea class="form-control" rows="4" required></textarea>
+                        <label class="small font-weight-bold text-uppercase">Leave a reply</label>
+                        <textarea name="comment" class="form-control border-0 shadow-sm" rows="4" placeholder="Share your thoughts..." required></textarea>
                     </div>
-                    <button class="btn btn-primary">Post Comment</button>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm text-dark">Submit Comment</button>
                 </form>
             </div>
-
         </div>
     </div>
 </div>
 
-<!-- Styles -->
 <style>
-#reading-progress{
-    position:fixed;
-    top:0;
-    left:0;
-    height:4px;
-    background:#007bff;
-    width:0;
-    z-index:9999;
-}
-.related-scroll{
-    overflow-x:auto;
-    padding-bottom:8px;
-}
-.related-scroll::-webkit-scrollbar{
-    height:6px;
-}
-.related-scroll::-webkit-scrollbar-thumb{
-    background:#ccc;
-    border-radius:10px;
-}
+    #reading-progress { position:fixed; top:0; left:0; height:4px; background:#FFD333; width:0; z-index:9999; transition: width 0.1s ease; }
+    .blog-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; }
+    .blog-content blockquote { font-style: italic; color: #666; padding: 20px; background: #f8f9fa; border-left: 5px solid #FFD333; margin: 30px 0; }
+    .hover-text-primary:hover { color: #FFD333 !important; text-decoration: none; padding-left: 5px; transition: 0.2s; }
 </style>
 
 <script>
-window.addEventListener('scroll', () => {
-    const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    document.getElementById('reading-progress').style.width =
-        (document.documentElement.scrollTop / h) * 100 + '%';
-});
+    window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        document.getElementById('reading-progress').style.width = scrolled + "%";
+    });
 </script>
 
 @endsection

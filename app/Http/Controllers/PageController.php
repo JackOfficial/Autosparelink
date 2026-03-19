@@ -109,9 +109,28 @@ public function blogs()
         return view('news-details');
     }
 
-     function article($id){
-        return view('article-details');
-    }
+ public function article($slug)
+{
+    // 1. Fetch the blog post by slug with its category and polymorphic photo
+    // We use firstOrFail() so it automatically shows a 404 if the slug is wrong
+    $post = Blog::with(['category', 'blogPhoto', 'user'])
+        ->where('slug', $slug)
+        ->firstOrFail();
+
+    // 2. Fetch categories with counts for the sidebar
+    $categories = BlogCategory::withCount(['blogs', 'news'])->get();
+
+    // 3. Fetch recent News updates for the sidebar "Latest Updates" section
+    $recentPosts = News::with(['category', 'newsPhoto'])
+        ->latest()
+        ->limit(5)
+        ->get();
+
+    // 4. Increment the view count for this specific article
+    $post->increment('views');
+
+    return view('article-details', compact('post', 'categories', 'recentPosts'));
+}
 
     function blog_category($id){
         $blogs = Blogs::join('blog_categories', 'blogs.blog_category_id', 'blog_categories.id')
