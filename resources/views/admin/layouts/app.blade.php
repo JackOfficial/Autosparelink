@@ -364,32 +364,95 @@
     </ul>
 </li>
 
-{{-- Communications --}}
-<li class="nav-item has-treeview {{ request()->is('admin/mailbox*') || request()->routeIs('admin.broadcast.*') ? 'menu-open' : '' }}" 
+{{-- Articles Management --}}
+<li class="nav-item has-treeview {{ request()->is('admin/blog*') ? 'menu-open' : '' }}" 
     x-show="isVisible($el)" 
     :class="search !== '' ? 'menu-open' : ''">
-    <a href="#" class="nav-link {{ request()->is('admin/mailbox*') || request()->routeIs('admin.broadcast.*') ? 'active' : '' }}">
-        <i class="nav-icon fas fa-envelope"></i>
-        <p>Communications <i class="fas fa-angle-left right"></i></p>
+    <a href="#" class="nav-link {{ request()->is('admin/blog*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-newspaper"></i>
+        <p>
+            Articles
+            <i class="fas fa-angle-left right"></i>
+        </p>
     </a>
     <ul class="nav nav-treeview">
         <li class="nav-item" x-show="isVisible($el)">
-            <a href="/admin/mailbox/inbox" class="nav-link {{ request()->is('admin/mailbox/inbox') ? 'active' : '' }}">
-                <i class="nav-icon fas fa-inbox"></i><p>Inbox</p>
+            <a href="{{ route('admin.blog-categories.index') }}" 
+               class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}">
+                <i class="fas fa-tags nav-icon"></i>
+                <p>Blog Categories</p>
             </a>
         </li>
         <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.tickets.index') }}" class="nav-link {{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}">
-                <i class="fas fa-headset nav-icon"></i>
-                <p>Support Tickets
-                    @php $openTickets = \App\Models\Ticket::where('status', 'open')->count(); @endphp
-                    @if($openTickets > 0) <span class="badge badge-danger right">{{ $openTickets }}</span> @endif
-                </p>
+            <a href="{{ route('admin.blogs.index') }}" 
+               class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
+                <i class="fas fa-edit nav-icon"></i>
+                <p>All Articles</p>
             </a>
         </li>
         <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.broadcast.index') }}" class="nav-link {{ request()->routeIs('admin.broadcast.*') ? 'active' : '' }}">
-                <i class="fas fa-bullhorn nav-icon"></i><p>Broadcast Message</p>
+            <a href="{{ route('admin.blogs.create') }}" 
+               class="nav-link {{ request()->routeIs('admin.blogs.create') ? 'active' : '' }}">
+                <i class="fas fa-plus-circle nav-icon"></i>
+                <p>Add New Article</p>
+            </a>
+        </li>
+    </ul>
+</li>
+
+{{-- News Management --}}
+<li class="nav-item has-treeview {{ request()->is('admin/news*') ? 'menu-open' : '' }}" 
+    x-show="isVisible($el)" 
+    :class="search !== '' ? 'menu-open' : ''">
+    <a href="#" class="nav-link {{ request()->is('admin/news*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-bullhorn"></i>
+        <p>
+            News & Updates
+            <i class="fas fa-angle-left right"></i>
+        </p>
+    </a>
+    <ul class="nav nav-treeview">
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="{{ route('admin.news.index') }}" 
+               class="nav-link {{ request()->routeIs('admin.news.index') ? 'active' : '' }}">
+                <i class="fas fa-list nav-icon"></i>
+                <p>All News</p>
+            </a>
+        </li>
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="{{ route('admin.news.create') }}" 
+               class="nav-link {{ request()->routeIs('admin.news.create') ? 'active' : '' }}">
+                <i class="fas fa-plus-circle nav-icon"></i>
+                <p>Post News</p>
+            </a>
+        </li>
+    </ul>
+</li>
+
+{{-- Articles Management --}}
+<li class="nav-item has-treeview {{ request()->is('admin/blog*') ? 'menu-open' : '' }}" 
+    x-show="isVisible($el)" 
+    :class="search !== '' ? 'menu-open' : ''">
+    <a href="#" class="nav-link {{ request()->is('admin/blog*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-newspaper"></i>
+        <p>
+            Articles
+            <i class="fas fa-angle-left right"></i>
+        </p>
+    </a>
+    <ul class="nav nav-treeview">
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="{{ route('admin.blog-categories.index') }}" 
+               class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}">
+                <i class="fas fa-tags nav-icon"></i>
+                <p>Blog Categories</p>
+            </a>
+        </li>
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="{{ route('admin.blogs.index') }}" 
+               class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
+                <i class="fas fa-edit nav-icon"></i>
+                <p>All Articles</p>
             </a>
         </li>
     </ul>
