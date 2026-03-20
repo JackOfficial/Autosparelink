@@ -94,7 +94,7 @@ public function blogs()
     $categories = BlogCategory::withCount(['blogs', 'news'])->get();
 
     // 3. Fetch recent News updates for the sidebar "Latest Updates" section
-    $recentPosts = News::with(['category', 'newsPhoto'])
+    $recentPosts = News::with(['category', 'blogPhoto'])
         ->latest()
         ->limit(5)
         ->get();
