@@ -65,6 +65,21 @@
     border-left: 3px solid #007bff; /* Highlight comment on hover */
 }
 
+.share-link {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff !important;
+    transition: transform 0.2s;
+}
+.share-link:hover { transform: scale(1.1); }
+.whatsapp { background-color: #25D366; }
+.x-twitter { background-color: #000; }
+.facebook { background-color: #1877F2; }
+
 </style>
 
 @section('content')
