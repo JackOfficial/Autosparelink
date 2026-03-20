@@ -115,7 +115,7 @@
     width: 5px;
 }
 .sticky-sidebar::-webkit-scrollbar-thumb {
-    background: #0d6efd;
+    background: #ddd;
     border-radius: 10px;
 }
 </style>
