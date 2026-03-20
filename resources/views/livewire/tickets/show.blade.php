@@ -163,9 +163,7 @@
             </div>
         </div>
     </div>
-</div>
-
-<style>
+    <style>
     .ls-1 { letter-spacing: 0.5px; }
     .bg-danger-light { background-color: #fff5f5; border-color: #feb2b2; }
     .bg-info-light { background-color: #f0f9ff; border-color: #bae6fd; }
@@ -174,6 +172,7 @@
     #chat-container::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 10px; }
     .opacity-85 { opacity: 0.85; }
 </style>
+</div>
 
 @script
 <script>
