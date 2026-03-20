@@ -43,30 +43,40 @@ class Show extends Component
             ->findOrFail($this->ticketId);
     }
 
-    public function sendReply()
-    {
-        $this->validate();
+ public function sendReply()
+{
+    $this->validate();
 
-        // Now $this->ticketProperty will work perfectly
-        $ticket = $this->ticketProperty;
+    // Get the ticket from the computed property
+    $ticket = $this->ticketProperty;
 
-        if ($ticket->status === 'closed') {
-            session()->flash('error', 'This ticket is closed.');
-            return;
-        }
-
-        $ticket->replies()->create([
-            'user_id' => Auth::id(),
-            'message' => $this->message,
-        ]);
-
-        $ticket->update(['status' => 'open']);
-
-        $this->reset('message');
-        $this->dispatch('reply-sent');
-
-        session()->flash('success', 'Your reply has been sent.');
+    if ($ticket->status === 'closed') {
+        session()->flash('error', 'This ticket is closed.');
+        return;
     }
+
+    // Create the new reply
+    $ticket->replies()->create([
+        'user_id' => Auth::id(),
+        'message' => $this->message,
+    ]);
+
+    // Update ticket status
+    $ticket->update(['status' => 'open']);
+
+    /**
+     * CRITICAL FIX: Unset the computed property cache.
+     * This forces Livewire to run the database query again 
+     * during render() so your new message appears instantly.
+     */
+    unset($this->ticketProperty);
+
+    // Clear input and trigger scroll
+    $this->reset('message');
+    $this->dispatch('reply-sent');
+
+    session()->flash('success', 'Your reply has been sent.');
+}
 
     public function render()
     {
