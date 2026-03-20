@@ -2,12 +2,14 @@
 
 namespace App\Livewire;
 
+use App\Events\CommentCreated;
 use Livewire\Component;
 use App\Models\Blog;
 use App\Models\Comment;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Livewire\Attributes\On;
 
 class BlogComments extends Component
 {
@@ -15,7 +17,7 @@ class BlogComments extends Component
 
     public $post;
     public $newComment = '';
-    public $replyingTo = null; // Track which comment is being replied to
+    public $replyingTo = null; 
     public $perPage = 10;
     public $sortBy = 'latest';
 
@@ -31,66 +33,58 @@ class BlogComments extends Component
     }
 
     public function updatedSortBy()
-{
-    $this->resetPage();
-}
-
-    /**
-     * Set the comment ID the user wants to reply to.
-     */
-   public function setReply($commentId)
-{
-    $this->replyingTo = $commentId;
-    
-    // Find the comment and its author
-    $parentComment = Comment::find($commentId);
-    
-    if ($parentComment && $parentComment->user) {
-        // Pre-fill the textarea with "@Username "
-        $this->newComment = "@" . $parentComment->user->name . " ";
+    {
+        $this->resetPage();
     }
-}
 
-    /**
-     * Cancel the reply mode.
-     */
+    public function setReply($commentId)
+    {
+        $this->replyingTo = $commentId;
+        $parentComment = Comment::find($commentId);
+        
+        if ($parentComment && $parentComment->user) {
+            $this->newComment = "@" . $parentComment->user->name . " ";
+        }
+    }
+
     public function cancelReply()
     {
         $this->replyingTo = null;
         $this->reset('newComment');
     }
 
+    #[On('echo:comments.{post.id},CommentCreated')]
+    public function handleCommentCreated($event)
+    {
+        // Automatically re-renders when other users post
+        $this->post->refresh();
+    }
+
     public function updateComment($commentId, $content)
-{
-    // 1. Find the comment
-    $comment = Comment::findOrFail($commentId);
+    {
+        $comment = Comment::findOrFail($commentId);
 
-    // 2. Validate the user owns the comment
-    if ($comment->user_id != auth()->id()) {
-        session()->flash('error', 'Unauthorized action.');
-        return;
+        if ($comment->user_id != auth()->id()) {
+            session()->flash('error', 'Unauthorized action.');
+            return;
+        }
+
+        if ($comment->created_at->diffInMinutes(now()) >= 15) {
+            session()->flash('error', 'The time limit to edit this comment has expired.');
+            return;
+        }
+
+        $validatedData = Validator::make(
+            ['comment' => $content],
+            ['comment' => 'required|string|max:500']
+        )->validate();
+
+        $comment->update([
+            'comment' => $validatedData['comment']
+        ]);
+
+        session()->flash('message', 'Comment updated successfully.');
     }
-
-    // 3. Check the "WhatsApp Style" time limit (15 minutes)
-    if ($comment->created_at->diffInMinutes(now()) >= 15) {
-        session()->flash('error', 'The time limit to edit this comment has expired.');
-        return;
-    }
-
-    // 4. Validate the content length (matches your charLimit)
-    $validatedData = Validator::make(
-        ['comment' => $content],
-        ['comment' => 'required|string|max:500']
-    )->validate();
-
-    // 5. Update the comment
-    $comment->update([
-        'comment' => $validatedData['comment']
-    ]);
-
-    // Optional: Log the edit or notify the UI
-    session()->flash('message', 'Comment updated successfully.');
-}
 
     public function postComment()
     {
@@ -104,8 +98,11 @@ class BlogComments extends Component
             'user_id' => Auth::id(),
             'comment' => $this->newComment,
             'status' => 1, 
-            'parent_id' => $this->replyingTo, // Link to parent if replying
+            'parent_id' => $this->replyingTo,
         ]);
+
+        // broadcast to others only to avoid double-refreshing the sender
+        broadcast(new CommentCreated($this->post->id))->toOthers();
 
         $this->reset(['newComment', 'replyingTo']);
         $this->post->refresh();
@@ -121,7 +118,6 @@ class BlogComments extends Component
 
         $comment = Comment::findOrFail($commentId);
         $userId = Auth::id();
-
         $existing = $comment->likes()->where('user_id', $userId)->first();
 
         if ($existing) {
@@ -148,26 +144,24 @@ class BlogComments extends Component
         }
     }
 
-  public function render()
-{
-    $query = $this->post->comments()
-        ->whereNull('parent_id')
-        ->with(['user', 'likes', 'replies.user', 'replies.likes']);
+    public function render()
+    {
+        $query = $this->post->comments()
+            ->whereNull('parent_id')
+            ->with(['user', 'likes', 'replies.user', 'replies.likes']);
 
-    // Apply Sorting Logic
-    if ($this->sortBy === 'oldest') {
-        $query->oldest();
-    } elseif ($this->sortBy === 'popular') {
-        // Sort by the count of likes (polymorphic relationship)
-        $query->withCount(['likes' => function ($q) {
-            $q->where('is_like', true);
-        }])->orderBy('likes_count', 'desc');
-    } else {
-        $query->latest(); // Default: Newest first
+        if ($this->sortBy === 'oldest') {
+            $query->oldest();
+        } elseif ($this->sortBy === 'popular') {
+            $query->withCount(['likes' => function ($q) {
+                $q->where('is_like', true);
+            }])->orderBy('likes_count', 'desc');
+        } else {
+            $query->latest();
+        }
+
+        return view('livewire.blog-comments', [
+            'comments' => $query->paginate($this->perPage) // Updated to use dynamic perPage
+        ]);
     }
-
-    return view('livewire.blog-comments', [
-        'comments' => $query->paginate(10)
-    ]);
-}
 }
