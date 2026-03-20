@@ -99,6 +99,25 @@
     border: 1px solid #dee2e6 !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
+
+.sticky-sidebar {
+    position: -webkit-sticky; /* Safari support */
+    position: sticky;
+    top: 20px; /* Space from the top of the screen when scrolling */
+    z-index: 100; /* Ensures it stays above background elements */
+    height: fit-content; /* Prevents the sidebar from stretching to the full page height */
+    max-height: calc(100vh - 40px); /* Keeps it within the viewport */
+    overflow-y: auto; /* Allows internal scrolling if the sidebar content is too long */
+}
+
+/* Optional: Custom scrollbar for a cleaner look */
+.sticky-sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+.sticky-sidebar::-webkit-scrollbar-thumb {
+    background: #0d6efd;
+    border-radius: 10px;
+}
 </style>
 
 @section('content')
@@ -109,7 +128,7 @@
     <div class="row px-xl-5">
         
         {{-- Sidebar: Navigation & Discovery --}}
-        <aside class="col-lg-3 col-md-4">
+     kkk   <aside class="col-lg-3 col-md-4">
             <div class="sticky-sidebar">
                 {{-- Search --}}
                 <div class="bg-white p-4 mb-4 shadow-sm border-top border-primary rounded">
