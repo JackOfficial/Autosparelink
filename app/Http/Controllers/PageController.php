@@ -114,22 +114,33 @@ public function blogs()
         return view('blog'); 
     }
 
-    function post(Request $request){
-        $request->validate([
-          'comment' => 'required|string'
-        ]);
-        $comment = Comment::create([
-            'user_id' => auth()->user()->id,
-            'comment' => $request->comment,
-            'blog_id' => $request->blog_id,
-        ]);
-        if($comment){
-           redirect()->back()->with('message', 'Your comment has been Posted!');
-        }
-        else{
-            redirect()->back()->with('message', 'Your comment could not be posted!');
-        }
+  public function post(Request $request)
+{
+    // 1. Validate both the comment and the blog existence
+    $request->validate([
+        'comment' => 'required|string|max:1000',
+        'blog_id' => 'required|exists:blogs,id' 
+    ]);
+
+    // 2. Check if user is logged in to prevent 'id on null' errors
+    if (!auth()->check()) {
+        return redirect()->back()->with('error', 'You must be logged in to comment.');
     }
+
+    // 3. Create the comment
+    $comment = Comment::create([
+        'user_id' => auth()->id(), // Shorter way to get the ID
+        'comment' => $request->comment,
+        'blog_id' => $request->blog_id,
+    ]);
+
+    // 4. IMPORTANT: You MUST return the redirect
+    if ($comment) {
+        return redirect()->back()->with('message', 'Your comment has been posted!');
+    }
+
+    return redirect()->back()->with('error', 'Your comment could not be posted!');
+}
 
     function application_sent(){
         return Inertia::render('ApplicationSent');  
