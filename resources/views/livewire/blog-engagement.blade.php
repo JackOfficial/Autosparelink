@@ -43,9 +43,10 @@
                    <i class="fab fa-whatsapp"></i>
                 </a>
 
-                <a href="https://twitter.com/intent/tweet?url={{ url()->current() }}&text={{ urlencode($post->title) }}" 
-                   target="_blank" class="share-link x-twitter shadow-sm">
-                   <i class="fab fa-x-twitter"></i>
+               <a href="https://twitter.com/intent/tweet?url={{ url()->current() }}&text={{ urlencode($post->title) }}" 
+                 target="_blank" class="share-link x-twitter shadow-sm">
+                   {{-- Changed x-twitter to just twitter --}}
+                 <i class="fab fa-twitter"></i> 
                 </a>
 
                 <a href="https://www.facebook.com/sharer/sharer.php?u={{ url()->current() }}" 
