@@ -1,4 +1,4 @@
-<div class="container py-5">
+<div wire:poll.15s="ticketProperty" class="container py-5">
     <div class="mb-4 d-flex justify-content-between align-items-center">
         <a href="{{ route('tickets.index') }}" class="text-decoration-none text-muted">
             <i class="fa fa-arrow-left mr-1"></i> My Support Tickets
