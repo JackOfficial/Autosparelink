@@ -26,15 +26,6 @@ class PageController extends Controller
     function about(){
         return view('about'); 
     }
-
-    function search($keyword){
-        $blogs = Blog::join('blog_categories', 'blogs.blog_category_id', 'blog_categories.id')
-        ->join('bloggers', 'blogs.blogger_id', 'bloggers.id')
-        ->select('blogs.*', 'blog_categories.blog_category', 'bloggers.first_name', 'bloggers.last_name')
-        ->where('blogs.title', 'like', '%' . $keyword .'%')
-        ->paginate(6);
-        return Inertia::render('Blogs', compact('blogs', 'keyword')); 
-    }
    
 public function blogs()
 {
@@ -215,7 +206,6 @@ public function post(Request $request)
 }
 
     function application_sent(){
-        return Inertia::render('ApplicationSent');  
     }
     
 }
