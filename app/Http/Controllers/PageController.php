@@ -54,9 +54,23 @@ public function blogs()
     return view('blogs', compact('blogs', 'latestNews', 'categories'));
 }
 
-    function news(){
-        return view('news'); 
-    }
+ public function news()
+{
+    // 1. Fetch published news with polymorphic photos and categories
+    // We paginate(9) to create a clean 3x3 grid on the frontend
+    $newsList = News::with(['newsPhoto', 'category', 'user'])
+        ->where('status', 'published')
+        ->latest()
+        ->paginate(9);
+
+    // 2. Fetch categories specifically for News to show in a sidebar or filter
+    $categories = BlogCategory::where('type', 'news')
+        ->withCount('news')
+        ->get();
+
+    // 3. Pass the data to the view
+    return view('news', compact('newsList', 'categories'));
+}
 
      function articles(){
         return view('articles'); 
