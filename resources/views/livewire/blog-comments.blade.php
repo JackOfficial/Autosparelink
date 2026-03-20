@@ -67,7 +67,7 @@
                         
                         <div class="mr-3" style="flex-shrink:0;">
                             @if($comment->user && $comment->user->avatar)
-                                <img src="{{ asset('storage/' . $comment->user->avatar) }}" 
+                                <img src="{{ $comment->user->avatar }}" 
                                      class="rounded-circle border border-primary shadow-sm" 
                                      style="width: 50px; height: 50px; object-fit: cover;">
                             @else
