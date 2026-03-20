@@ -1,4 +1,4 @@
-<div wire:poll.15s class="container py-4 py-lg-5" x-data="{ now: Date.now() }" x-init="setInterval(() => now = Date.now(), 10000)">
+<div wire:poll.15s class="container py-4 py-lg-5" style="overflow-x: hidden;" x-data="{ now: Date.now() }" x-init="setInterval(() => now = Date.now(), 10000)">
     {{-- Top Navigation & Status --}}
     <div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
         <a href="{{ route('tickets.index') }}" class="text-decoration-none text-secondary d-inline-flex align-items-center fw-medium">
@@ -46,7 +46,7 @@
             </div>
 
             {{-- Message History --}}
-            <div id="chat-container" wire:ignore.self class="px-1 mb-4" style="max-height: 600px; overflow-y: auto; scroll-behavior: smooth;">
+            <div id="chat-container" wire:ignore.self class="px-2 mb-4" style="max-height: 600px; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth;">
                 @foreach($ticket->replies as $reply)
                     <div class="d-flex mb-4 {{ $reply->user_id == auth()->id() ? 'justify-content-end' : 'justify-content-start' }}" 
                          wire:key="reply-{{ $reply->id }}">
@@ -55,19 +55,20 @@
                                 sentAt: {{ $reply->created_at->timestamp * 1000 }},
                                 get canDelete() { return (now - this.sentAt) < (15 * 60 * 1000) }
                              }"
+                             {{-- Increased padding-right for user messages to make room for button --}}
                              class="position-relative p-3 shadow-sm rounded-4 {{ $reply->user_id == auth()->id() ? 'bg-primary text-white ms-5' : 'bg-white border text-dark me-5' }}" 
-                             style="min-width: 140px; max-width: 90%;">
+                             style="min-width: 140px; max-width: 85%;">
                             
-                            {{-- Floating Delete Action --}}
+                            {{-- Floating Delete Action - Adjusted right: 0 to prevent overflow --}}
                             @if($reply->user_id == auth()->id())
                                 <button x-show="canDelete" 
                                         x-transition 
                                         wire:click="deleteReply({{ $reply->id }})" 
                                         wire:confirm="Remove this message?"
                                         class="btn btn-sm btn-danger p-0 position-absolute shadow shadow-sm border-white border-2"
-                                        style="top: -10px; right: -10px; width: 24px; height: 24px; border-radius: 50%;"
+                                        style="top: -8px; right: -8px; width: 22px; height: 22px; border-radius: 50%; z-index: 10;"
                                         title="Delete">
-                                    <i class="fa fa-times" style="font-size: 10px;"></i>
+                                    <i class="fa fa-times" style="font-size: 9px;"></i>
                                 </button>
                             @endif
 
@@ -85,8 +86,8 @@
                             @if($reply->user_id == auth()->id())
                                 <template x-if="canDelete">
                                     <div class="text-white-50 mt-2 d-flex align-items-center" style="font-size: 10px;">
-                                        <div class="spinner-grow spinner-grow-sm me-1" style="width: 6px; height: 6px;"></div>
-                                        Editable for <span class="mx-1" x-text="Math.ceil((15 * 60 * 1000 - (now - sentAt)) / 60000)"></span> mins
+                                        <i class="fa fa-clock-o me-1"></i>
+                                        <span x-text="Math.ceil((15 * 60 * 1000 - (now - sentAt)) / 60000)"></span>m left to edit
                                     </div>
                                 </template>
                             @endif
@@ -107,79 +108,58 @@
                             
                             <div class="bg-light px-4 py-3 d-flex justify-content-between align-items-center">
                                 <div class="text-muted small">
-                                    @error('message') <span class="text-danger"><i class="fa fa-warning"></i> Too short</span> @enderror
+                                    @error('message') <span class="text-danger"><i class="fa fa-warning"></i> Message is too short</span> @enderror
                                 </div>
                                 <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" wire:loading.attr="disabled">
                                     <span wire:loading.remove wire:target="sendReply">Send Reply <i class="fa fa-paper-plane ms-2"></i></span>
-                                    <span wire:loading wire:target="sendReply">Sending...</span>
+                                    <span wire:loading wire:target="sendReply"><i class="fa fa-spinner fa-spin"></i></span>
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
-            @else
-                <div class="alert bg-white border border-dashed rounded-4 text-center py-4 shadow-sm">
-                    <i class="fa fa-lock fs-3 text-muted mb-2 d-block"></i>
-                    <p class="mb-0 fw-medium text-secondary">This conversation was archived on {{ $ticket->updated_at->format('M d, Y') }}</p>
-                </div>
             @endif
         </div>
 
-        {{-- Info Sidebar --}}
+        {{-- Sidebar --}}
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 24px;">
                 <div class="card-body p-4">
                     <h6 class="fw-bold text-dark mb-4 d-flex align-items-center">
                         <i class="fa fa-info-circle text-primary me-2"></i> Ticket Details
                     </h6>
-                    
                     <div class="mb-3">
-                        <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Order Reference</label>
+                        <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Order Ref</label>
                         <div class="fw-bold text-primary">{{ $ticket->order_ref ?? 'N/A' }}</div>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Department</label>
-                        <div class="text-dark text-capitalize">{{ str_replace('_', ' ', $ticket->category) }}</div>
-                    </div>
-
                     <div class="mb-0">
-                        <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Priority Level</label>
+                        <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Priority</label>
                         <div>
                             <span class="badge {{ $ticket->priority == 'high' ? 'bg-danger-light text-danger' : 'bg-info-light text-info' }} rounded-pill border">
                                 {{ ucfirst($ticket->priority) }}
                             </span>
                         </div>
                     </div>
-
-                    <hr class="my-4 opacity-5">
-
-                    <div class="d-grid">
-                        <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="window.print()">
-                            <i class="fa fa-print me-2"></i> Print Transcript
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <style>
-    .ls-1 { letter-spacing: 0.5px; }
-    .bg-danger-light { background-color: #fff5f5; border-color: #feb2b2; }
-    .bg-info-light { background-color: #f0f9ff; border-color: #bae6fd; }
-    .rounded-4 { border-radius: 1rem !important; }
-    #chat-container::-webkit-scrollbar { width: 6px; }
-    #chat-container::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 10px; }
-    .opacity-85 { opacity: 0.85; }
-</style>
-</div>
 
-@script
-<script>
-    const chatContainer = document.getElementById('chat-container');
-    const goToBottom = () => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; };
-    
-    goToBottom();
-    $wire.on('reply-sent', () => { setTimeout(goToBottom, 150); });
-</script>
-@endscript
+    <style>
+        .ls-1 { letter-spacing: 0.5px; }
+        .bg-danger-light { background-color: #fff5f5; border-color: #feb2b2; }
+        .bg-info-light { background-color: #f0f9ff; border-color: #bae6fd; }
+        .rounded-4 { border-radius: 1rem !important; }
+        #chat-container::-webkit-scrollbar { width: 5px; }
+        #chat-container::-webkit-scrollbar-thumb { background: #dcdcdc; border-radius: 10px; }
+    </style>
+
+    @script
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const goToBottom = () => { if(chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; };
+        goToBottom();
+        $wire.on('reply-sent', () => { setTimeout(goToBottom, 150); });
+    </script>
+    @endscript
+</div>
