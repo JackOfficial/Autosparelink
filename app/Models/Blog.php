@@ -47,14 +47,11 @@ class Blog extends Model
     {
         return $this->morphOne(Photo::class, 'imageable');
     }
-    
-    /**
-     * Get the likes for the blog post.
-     */
-    public function likes(): HasMany
-    {
-        return $this->hasMany(Like::class);
-    }
+
+    public function likes()
+{
+    return $this->morphMany(Like::class, 'likeable');
+}
 
     /**
      * Get all of the blog's comments (Polymorphic).

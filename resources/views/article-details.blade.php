@@ -45,6 +45,8 @@
     .hover-grow { transition: transform 0.3s ease; }
     .hover-grow:hover { transform: translateY(-5px); }
     .breadcrumb-custom { background: #f8f9fa; border-radius: 50px; padding: 12px 25px; border: 1px solid #eee; }
+    .vote-btn { background: none; border: none; padding: 0; cursor: pointer; transition: 0.2s; }
+    .vote-btn:hover { transform: scale(1.2); }
 </style>
 
 <div class="container-fluid mt-4">
@@ -82,7 +84,6 @@
                     <h6 class="text-uppercase font-weight-bold mb-3">Blog Categories</h6>
                     @foreach($categories as $cat)
                         @if($cat->type !== 'blog') @continue @endif
-
                         <a href="{{ route('blogs.index', ['category' => $cat->slug]) }}" 
                            class="d-flex justify-content-between align-items-center mb-2 text-dark text-decoration-none py-1 border-bottom">
                             <span>{{ $cat->name }}</span>
@@ -95,7 +96,6 @@
                     <h6 class="text-uppercase font-weight-bold mb-3">Latest Updates</h6>
                     @foreach($recentPosts as $recent)
                         @if(isset($post) && $recent->id === $post->id) @continue @endif
-
                         <div class="d-flex align-items-center mb-3">
                             <a href="{{ route('blogs.show', $recent->slug) }}" class="flex-shrink-0">
                                 @php
@@ -162,8 +162,33 @@
 
                 <footer class="mt-5 pt-4 border-top">
                     <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        {{-- Polymorphic Blog Likes --}}
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="font-weight-bold mr-3 text-muted">WAS THIS HELPFUL?</span>
+                            <div class="d-flex align-items-center bg-light px-3 py-2 rounded-pill shadow-sm">
+                                <form action="{{ route('like.toggle') }}" method="POST" class="mr-3">
+                                    @csrf
+                                    <input type="hidden" name="id" value="{{ $post->id }}">
+                                    <input type="hidden" name="type" value="blog">
+                                    <input type="hidden" name="vote" value="like">
+                                    <button type="submit" class="vote-btn {{ $post->likes()->where(['user_id' => auth()->id(), 'is_like' => true])->exists() ? 'text-primary' : 'text-muted' }}">
+                                        <i class="fa fa-thumbs-up fa-lg"></i> <small class="font-weight-bold">{{ $post->likes()->where('is_like', true)->count() }}</small>
+                                    </button>
+                                </form>
+                                <form action="{{ route('like.toggle') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="id" value="{{ $post->id }}">
+                                    <input type="hidden" name="type" value="blog">
+                                    <input type="hidden" name="vote" value="dislike">
+                                    <button type="submit" class="vote-btn {{ $post->likes()->where(['user_id' => auth()->id(), 'is_like' => false])->exists() ? 'text-danger' : 'text-muted' }}">
+                                        <i class="fa fa-thumbs-down fa-lg"></i> <small class="font-weight-bold">{{ $post->likes()->where('is_like', false)->count() }}</small>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
-                            <span class="font-weight-bold mr-3 text-muted">SHARE THIS INSIGHT:</span>
+                            <span class="font-weight-bold mr-3 text-muted">SHARE:</span>
                             <a href="https://api.whatsapp.com/send?text={{ urlencode($post->title . ' ' . url()->current()) }}" target="_blank" class="share-btn btn btn-success rounded-circle mr-2"><i class="fab fa-whatsapp"></i></a>
                             <a href="https://twitter.com/intent/tweet?url={{ url()->current() }}" target="_blank" class="share-btn btn btn-dark rounded-circle mr-2"><i class="fab fa-x-twitter"></i></a>
                             <a href="https://www.facebook.com/sharer/sharer.php?u={{ url()->current() }}" target="_blank" class="share-btn btn btn-primary rounded-circle"><i class="fab fa-facebook-f"></i></a>
@@ -190,26 +215,13 @@
                 </div>
             </div>
 
-            {{-- Join the Conversation --}}
-            {{-- Success Message --}}
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
-        <i class="fa fa-check-circle mr-2"></i> {{ session('success') }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-@endif
-
-{{-- Error Message --}}
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
-        <i class="fa fa-exclamation-triangle mr-2"></i> {{ session('error') }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-@endif
+            {{-- Notifications --}}
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+                    <i class="fa fa-check-circle mr-2"></i> {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+            @endif
 
             <div class="bg-white p-4 p-lg-5 shadow-sm rounded border-top border-primary">
                 <h4 class="font-weight-bold mb-4">Join the Conversation</h4>
@@ -219,53 +231,54 @@
                         <div class="media p-4 mb-3 bg-light rounded comment-bubble">
                             <div class="mr-3 shadow-sm" style="flex-shrink:0;">
                                 @if($comment->user && $comment->user->avatar)
-                                    <img src="{{ $comment->user->avatar }}" 
-                                         alt="{{ $comment->user->name }}" 
-                                         class="rounded-circle" 
-                                         style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #FFD333;">
+                                    <img src="{{ $comment->user->avatar }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #FFD333;">
                                 @else
-                                    <div class="rounded-circle bg-primary text-dark d-flex align-items-center justify-content-center" 
-                                         style="width: 50px; height: 50px;">
-                                        <strong>
-                                            {{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}
-                                        </strong>
+                                    <div class="rounded-circle bg-primary text-dark d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <strong>{{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}</strong>
                                     </div>
                                 @endif
                             </div>
 
-                           <div class="media-body">
-    <div class="d-flex justify-content-between mb-1">
-        <h6 class="font-weight-bold mb-0">{{ $comment->user->name ?? 'Anonymous' }}</h6>
-        <div class="d-flex align-items-center">
-            <small class="text-muted mr-3">
-                <i class="far fa-clock mr-1"></i> {{ $comment->created_at->diffForHumans() }}
-            </small>
+                            <div class="media-body">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <h6 class="font-weight-bold mb-0">{{ $comment->user->name ?? 'Anonymous' }}</h6>
+                                    <div class="d-flex align-items-center">
+                                        {{-- Polymorphic Comment Likes --}}
+                                        <div class="bg-white px-2 py-1 rounded border mr-3 d-flex align-items-center shadow-sm">
+                                            <form action="{{ route('like.toggle') }}" method="POST" class="mr-2">
+                                                @csrf
+                                                <input type="hidden" name="id" value="{{ $comment->id }}">
+                                                <input type="hidden" name="type" value="comment">
+                                                <input type="hidden" name="vote" value="like">
+                                                <button type="submit" class="vote-btn {{ $comment->likes()->where(['user_id' => auth()->id(), 'is_like' => true])->exists() ? 'text-primary' : 'text-muted' }}">
+                                                    <i class="fa fa-thumbs-up"></i> <small>{{ $comment->likes()->where('is_like', true)->count() }}</small>
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('like.toggle') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="id" value="{{ $comment->id }}">
+                                                <input type="hidden" name="type" value="comment">
+                                                <input type="hidden" name="vote" value="dislike">
+                                                <button type="submit" class="vote-btn {{ $comment->likes()->where(['user_id' => auth()->id(), 'is_like' => false])->exists() ? 'text-danger' : 'text-muted' }}">
+                                                    <i class="fa fa-thumbs-down"></i> <small>{{ $comment->likes()->where('is_like', false)->count() }}</small>
+                                                </button>
+                                            </form>
+                                        </div>
 
-            {{-- DELETE FEATURE START --}}
-           @auth
-    @if(auth()->id() == $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']))
-        <form action="{{ route('comment.delete', $comment->id) }}" 
-              method="POST" 
-              class="d-inline ml-2" 
-              onsubmit="return confirm('Delete this comment permanently?');">
-            @csrf
-            @method('DELETE') {{-- This tells Laravel to treat the POST as a DELETE --}}
-            
-            <button type="submit" 
-                    class="btn btn-link text-danger p-0 border-0 align-baseline" 
-                    style="vertical-align: middle;"
-                    title="Delete Comment">
-                <i class="fa fa-trash-alt" style="font-size: 0.85rem;"></i>
-            </button>
-        </form>
-    @endif
-@endauth
-            {{-- DELETE FEATURE END --}}
-            
-        </div>
-    </div>
-    <p class="mb-0 text-muted">{{ $comment->comment }}</p>
-</div>
+                                        <small class="text-muted mr-2"><i class="far fa-clock mr-1"></i> {{ $comment->created_at->diffForHumans() }}</small>
+
+                                        @auth
+                                            @if(auth()->id() == $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']))
+                                                <form action="{{ route('comment.delete', $comment->id) }}" method="POST" class="d-inline ml-2" onsubmit="return confirm('Delete this comment permanently?');">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="btn btn-link text-danger p-0 border-0 align-baseline" title="Delete Comment"><i class="fa fa-trash-alt"></i></button>
+                                                </form>
+                                            @endif
+                                        @endauth
+                                    </div>
+                                </div>
+                                <p class="mb-0 text-muted">{{ $comment->comment }}</p>
+                            </div>
                         </div>
                     @empty
                         <div class="text-center py-5">
@@ -278,7 +291,6 @@
                 @auth
                     <form action="{{ route('comment.store') }}" method="POST">
                         @csrf
-                        {{-- Identifying the blog post for polymorphic storage --}}
                         <input type="hidden" name="blog_id" value="{{ $post->id }}">
                         <textarea name="comment" class="form-control border-light shadow-sm mb-3" rows="5" placeholder="Your message..." required></textarea>
                         <button class="btn btn-primary px-5 py-2 font-weight-bold shadow-sm text-dark">Submit Post</button>
@@ -298,12 +310,10 @@
     const progress = document.getElementById('reading-progress');
 
     window.onscroll = function() {
-        // Progress Bar logic
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         if (progress) progress.style.width = (winScroll / height * 100) + "%";
 
-        // Back to Top visibility logic
         if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
             btt.style.display = "block";
         } else {

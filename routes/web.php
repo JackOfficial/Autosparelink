@@ -77,6 +77,7 @@ use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\TicketController as Ticket;
+use App\Http\Controllers\LikeController;
 
 // =============================================================
 // PUBLIC FRONTEND ROUTES
@@ -225,6 +226,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}', 'show')->name('show');
         Route::post('/{id}/reply', 'reply')->name('reply');
     });
+
+    Route::post('/like/toggle', [LikeController::class, 'toggle'])->name('like.toggle');
 
     // Specific Role Check
     Route::middleware(['verified', 'role:user'])->group(function () { 
