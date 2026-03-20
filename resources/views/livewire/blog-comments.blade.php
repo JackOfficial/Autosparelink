@@ -1,6 +1,7 @@
 <div class="bg-white p-4 p-lg-5 shadow-sm rounded border-top border-primary mt-4"
      x-data="{ 
         scrolled: false,
+        charLimit: 500,
         scrollToForm() {
             $refs.commentForm.scrollIntoView({ behavior: 'smooth' });
             $refs.commentArea.focus();
@@ -29,7 +30,7 @@
         </div>
     </div>
     
-    {{-- 1. Display Comments List with Hover-Only Scrollbar --}}
+    {{-- 1. Display Comments List with Neutral Scrollbar --}}
     <div class="position-relative">
         <div class="comments-scroll-container mb-4 pr-2" 
              x-ref="scrollContainer"
@@ -37,37 +38,24 @@
              style="max-height: 600px; overflow-y: auto; scroll-behavior: smooth;">
             
             <style>
-                /* Default State: Scrollbar is invisible */
-                .comments-scroll-container::-webkit-scrollbar { 
-                    width: 6px; 
-                }
-                .comments-scroll-container::-webkit-scrollbar-track { 
-                    background: transparent; 
-                }
+                /* Neutral Scrollbar Logic */
+                .comments-scroll-container::-webkit-scrollbar { width: 6px; }
+                .comments-scroll-container::-webkit-scrollbar-track { background: transparent; }
                 .comments-scroll-container::-webkit-scrollbar-thumb { 
                     background: transparent; 
                     border-radius: 10px; 
                     transition: background 0.3s ease;
                 }
 
-                /* Hover State: Reveal scrollbar colors */
-                .comments-scroll-container:hover::-webkit-scrollbar-track { 
-                    background: #f8f9fa; 
-                }
-                .comments-scroll-container:hover::-webkit-scrollbar-thumb { 
-                    background: #007bff; 
-                }
-                .comments-scroll-container:hover::-webkit-scrollbar-thumb:hover { 
-                    background: #0056b3; 
-                }
+                .comments-scroll-container:hover::-webkit-scrollbar-track { background: #f8f9fa; }
+                .comments-scroll-container:hover::-webkit-scrollbar-thumb { background: #ccc; }
+                .comments-scroll-container:hover::-webkit-scrollbar-thumb:hover { background: #999; }
 
                 /* Firefox Compatibility */
-                .comments-scroll-container {
-                    scrollbar-width: none;
-                }
+                .comments-scroll-container { scrollbar-width: none; }
                 .comments-scroll-container:hover {
                     scrollbar-width: thin;
-                    scrollbar-color: #007bff transparent;
+                    scrollbar-color: #ccc transparent;
                 }
             </style>
 
@@ -77,7 +65,6 @@
                          wire:key="comment-{{ $comment->id }}"
                          style="border-left: 5px solid #007bff !important;">
                         
-                        {{-- User Avatar --}}
                         <div class="mr-3" style="flex-shrink:0;">
                             @if($comment->user && $comment->user->avatar)
                                 <img src="{{ asset('storage/' . $comment->user->avatar) }}" 
@@ -103,7 +90,6 @@
                                 {{ $comment->comment }}
                             </p>
 
-                            {{-- Actions Bar --}}
                             <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
                                 <div class="d-flex align-items-center">
                                     <button wire:click="toggleCommentLike({{ $comment->id }}, true)" 
@@ -119,16 +105,6 @@
                                         </button>
                                     @endauth
                                 </div>
-
-                                @auth
-                                    @if(auth()->id() == $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']))
-                                        <button wire:click="deleteComment({{ $comment->id }})" 
-                                                wire:confirm="Are you sure you want to delete this comment?"
-                                                class="btn btn-sm btn-link text-danger p-0 border-0 text-decoration-none opacity-75">
-                                            <i class="fa fa-trash-alt mr-1"></i> Remove
-                                        </button>
-                                    @endif
-                                @endauth
                             </div>
 
                             {{-- Nested Replies --}}
@@ -155,12 +131,9 @@
                 @endforelse
             </div>
 
-            {{-- Load More Button inside scrollable area --}}
             @if($comments->hasMorePages())
                 <div class="text-center my-4">
-                    <button wire:click="$set('perPage', {{ $perPage + 10 }})" 
-                            class="btn btn-outline-primary px-5 py-2 font-weight-bold shadow-sm" 
-                            style="border-radius: 30px;">
+                    <button wire:click="$set('perPage', {{ $perPage + 10 }})" class="btn btn-outline-primary px-5 py-2 font-weight-bold shadow-sm" style="border-radius: 30px;">
                         <span wire:loading.remove wire:target="perPage">Load More</span>
                         <span wire:loading wire:target="perPage"><i class="fa fa-circle-notch fa-spin mr-2"></i> Loading...</span>
                     </button>
@@ -168,10 +141,7 @@
             @endif
         </div>
 
-        {{-- Scroll to Top Floating Button (Alpine) --}}
-        <button x-show="scrolled" 
-                x-transition 
-                @click="scrollTop()"
+        <button x-show="scrolled" x-transition @click="scrollTop()"
                 class="btn btn-primary btn-sm rounded-circle position-absolute shadow" 
                 style="bottom: 20px; right: 20px; width: 40px; height: 40px; z-index: 10;">
             <i class="fa fa-arrow-up text-dark"></i>
@@ -180,7 +150,7 @@
 
     <hr class="my-5 border-light">
 
-    {{-- 3. Reply/Comment Form --}}
+    {{-- 3. Reply/Comment Form with Character Counter --}}
     <div class="reply-section" x-ref="commentForm">
         @if($replyingTo)
             <div class="alert alert-primary py-2 px-3 d-flex justify-content-between align-items-center mb-3 shadow-sm border-0" style="border-radius: 10px;">
@@ -195,20 +165,30 @@
         
         @auth
             <form wire:submit.prevent="postComment">
-                <div class="form-group mb-3">
+                <div class="form-group mb-2">
                     <textarea x-ref="commentArea"
                               id="comment-textarea"
-                              wire:model="newComment" 
+                              wire:model.live="newComment" 
                               class="form-control shadow-sm text-dark @error('newComment') is-invalid @enderror" 
                               rows="4" 
                               placeholder="Add to the discussion..."
                               style="resize: none; border-radius: 12px; background-color: #fff; border: 1px solid #ced4da; font-size: 1rem; color: #000 !important;"></textarea>
-                    @error('newComment') <span class="invalid-feedback px-2">{{ $message }}</span> @enderror
+                    
+                    {{-- Character Counter --}}
+                    <div class="d-flex justify-content-end mt-1">
+                        <small class="font-weight-bold" :class="$wire.newComment.length > charLimit ? 'text-danger' : 'text-muted'">
+                            <span x-text="$wire.newComment.length"></span> / <span x-text="charLimit"></span> characters
+                        </small>
+                    </div>
+
+                    @error('newComment') <span class="invalid-feedback px-2 d-block">{{ $message }}</span> @enderror
                 </div>
                 
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="small text-muted font-weight-bold">Posting as <span class="text-primary">{{ auth()->user()->name }}</span></div>
-                    <button type="submit" class="btn btn-primary px-4 py-2 font-weight-bold text-dark shadow hover-grow">
+                    <button type="submit" 
+                            class="btn btn-primary px-4 py-2 font-weight-bold text-dark shadow hover-grow"
+                            :disabled="$wire.newComment.length > charLimit || $wire.newComment.length === 0">
                         <span wire:loading.remove wire:target="postComment">{{ $replyingTo ? 'Post Reply' : 'Post Comment' }}</span>
                         <span wire:loading wire:target="postComment"><i class="fa fa-circle-notch fa-spin"></i></span>
                     </button>
