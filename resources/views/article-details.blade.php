@@ -79,15 +79,21 @@
                 </div>
 
                 <div class="bg-white p-4 mb-4 shadow-sm rounded">
-                    <h6 class="text-uppercase font-weight-bold mb-3">Categories</h6>
-                    @foreach($categories as $cat)
-                        <a href="{{ route('blogs.index', ['category' => $cat->slug]) }}" 
-                           class="d-flex justify-content-between align-items-center mb-2 text-dark text-decoration-none py-1 border-bottom">
-                            <span>{{ $cat->name }}</span>
-                            <span class="badge badge-pill badge-light border">{{ $cat->blogs_count }}</span>
-                        </a>
-                    @endforeach
-                </div>
+    <h6 class="text-uppercase font-weight-bold mb-3">Blog Categories</h6>
+    @foreach($categories as $cat)
+        {{-- Only show categories where type is 'blog' --}}
+        @if($cat->type !== 'blog')
+            @continue
+        @endif
+
+        <a href="{{ route('blogs.index', ['category' => $cat->slug]) }}" 
+           class="d-flex justify-content-between align-items-center mb-2 text-dark text-decoration-none py-1 border-bottom">
+            <span>{{ $cat->name }}</span>
+            {{-- Displaying only the blog count --}}
+            <span class="badge badge-pill badge-light border text-primary">{{ $cat->blogs_count }}</span>
+        </a>
+    @endforeach
+</div>
 
 <div class="bg-white p-4 mb-4 shadow-sm rounded">
     <h6 class="text-uppercase font-weight-bold mb-3">Latest Updates</h6>
