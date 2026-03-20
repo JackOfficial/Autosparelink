@@ -37,7 +37,7 @@
     #backToTop { position: fixed; bottom: 30px; right: 30px; display: none; z-index: 99; border-radius: 50%; width: 50px; height: 50px; transition: 0.3s; }
     #backToTop:hover { transform: scale(1.1); background: #333; color: #FFD333; }
 
-    .sticky-sidebar { position: sticky; top: 25px; }
+    .sticky-sidebar { position: sticky; top: 40px; }
     .blog-content { line-height: 2; font-size: 1.1rem; color: #333; }
     .blog-content p { margin-bottom: 1.5rem; }
     .blog-content img { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 2rem 0; transition: transform 0.3s ease; }
