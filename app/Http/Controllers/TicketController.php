@@ -50,7 +50,6 @@ class TicketController extends Controller
      */
     public function show($id)
     {
-        dd("Hello");
         // Eager load replies and the user who wrote them
         $ticket = Auth::user()->tickets()
             ->with(['replies.user'])
