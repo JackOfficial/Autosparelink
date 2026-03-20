@@ -12,62 +12,52 @@ class Show extends Component
     public $message = '';
 
     /**
-     * Captures the ID and performs an initial security check.
+     * Using Route Model Binding directly in mount.
+     * This prevents 'undefined variable' issues if passed correctly from the route.
      */
-    public function mount($id)
+    public function mount(Ticket $ticket)
     {
-        $this->ticketId = $id;
-        
-        // Ensure the ticket exists and belongs to the user
-        $this->getTicket();
+        // Security Check: Ensure this ticket belongs to the logged-in user
+        if ($ticket->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $this->ticketId = $ticket->id;
     }
 
-    /**
-     * Validation rules for replies
-     */
     protected $rules = [
         'message' => 'required|string|min:2|max:5000',
     ];
 
     /**
-     * Helper method to fetch the ticket with replies and users.
-     * Uses eager loading to keep the SMM panel fast.
+     * Helper method to fetch ticket with eager-loaded replies
      */
-    public function getTicket()
+    public function getTicketProperty()
     {
         return Auth::user()->tickets()
             ->with(['replies.user'])
             ->findOrFail($this->ticketId);
     }
 
-    /**
-     * Handle sending a new reply and triggering the scroll event.
-     */
     public function sendReply()
     {
         $this->validate();
 
-        $ticket = $this->getTicket();
+        $ticket = $this->getTicketProperty();
 
-        // Security check: Don't allow replies to closed tickets
         if ($ticket->status === 'closed') {
-            $this->addError('message', 'This ticket is closed and cannot receive further replies.');
+            session()->flash('error', 'This ticket is closed and cannot receive replies.');
             return;
         }
 
-        // Create the reply record
         $ticket->replies()->create([
             'user_id' => Auth::id(),
             'message' => $this->message,
         ]);
 
-        // Automatically set ticket to 'open' so admin sees activity
         $ticket->update(['status' => 'open']);
 
-        // Clear the textarea
         $this->reset('message');
-
-        // Dispatch browser event to trigger the "Scroll to Bottom" JS
         $this->dispatch('reply-sent');
 
         session()->flash('success', 'Your reply has been sent.');
@@ -76,7 +66,7 @@ class Show extends Component
     public function render()
     {
         return view('livewire.tickets.show', [
-            'ticket' => $this->getTicket()
+            'ticket' => $this->getTicketProperty()
         ]);
     }
 }
