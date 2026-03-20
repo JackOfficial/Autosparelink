@@ -54,4 +54,14 @@ class News extends Model
     {
         return $this->morphOne(Photo::class, 'imageable');
     }
+
+    public function comments()
+{
+    // If using a standard one-to-many:
+    return $this->hasMany(Comment::class);
+    
+    // OR if using polymorphic (sharing comments with Blog):
+    // return $this->morphMany(Comment::class, 'commentable');
+}
+
 }
