@@ -151,7 +151,7 @@ public function deleteComment($id)
     $comment = Comment::findOrFail($id);
 
     // 2. Security Check: Allow if user is the owner OR has administrative roles
-    $isAuthorized = auth()->id() === $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']);
+    $isAuthorized = auth()->id() == $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']);
 
     if (!$isAuthorized) {
         return redirect()->back()->with('error', 'Unauthorized action.');
