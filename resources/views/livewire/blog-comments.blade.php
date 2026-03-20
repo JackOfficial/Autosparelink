@@ -1,24 +1,25 @@
 <div class="bg-white p-4 p-lg-5 shadow-sm rounded border-top border-primary mt-4">
-   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 border-bottom pb-3">
-    <div class="mb-3 mb-md-0">
-        <h4 class="font-weight-bold text-dark mb-0">Join the Conversation</h4>
-        <span class="badge badge-primary px-3 py-2 text-dark font-weight-bold mt-2">
-            {{ $this->post->comments()->count() }} Comments
-        </span>
+    {{-- Header with Sorting --}}
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 border-bottom pb-3">
+        <div class="mb-3 mb-md-0">
+            <h4 class="font-weight-bold text-dark mb-0">Join the Conversation</h4>
+            <span class="badge badge-primary px-3 py-2 text-dark font-weight-bold mt-2">
+                {{ $this->post->comments()->count() }} Comments
+            </span>
+        </div>
+        
+        <div class="d-flex align-items-center">
+            <label class="mr-2 mb-0 small font-weight-bold text-muted">Sort by:</label>
+            <select wire:model.live="sortBy" class="form-control form-control-sm shadow-sm border-0 bg-light text-dark font-weight-bold" style="width: 140px; border-radius: 8px; cursor: pointer;">
+                <option value="latest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="popular">Most Liked</option>
+            </select>
+        </div>
     </div>
-    
-    <div class="d-flex align-items-center">
-        <label class="mr-2 mb-0 small font-weight-bold text-muted">Sort by:</label>
-        <select wire:model.live="sortBy" class="form-control form-control-sm shadow-sm border-0 bg-light text-dark font-weight-bold" style="width: 140px; border-radius: 8px; cursor: pointer;">
-            <option value="latest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="popular">Most Liked</option>
-        </select>
-    </div>
-</div>
     
     {{-- 1. Display Comments List --}}
-    <div class="comments-container mb-5">
+    <div class="comments-container mb-4">
         @forelse($comments as $comment)
             <div class="media p-4 mb-3 bg-white rounded comment-bubble shadow-sm transition-all border" 
                  wire:key="comment-{{ $comment->id }}"
@@ -53,7 +54,6 @@
                     {{-- Actions Bar --}}
                     <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
                         <div class="d-flex align-items-center">
-                            {{-- Like Button --}}
                             <button wire:click="toggleCommentLike({{ $comment->id }}, true)" 
                                     wire:loading.attr="disabled"
                                     class="btn btn-sm btn-link p-0 mr-3 text-decoration-none transition-all {{ $comment->isLikedBy(auth()->id()) ? 'text-primary' : 'text-dark' }}">
@@ -61,7 +61,6 @@
                                 <span class="font-weight-bold">{{ $comment->likes()->where('is_like', true)->count() }}</span>
                             </button>
 
-                            {{-- Dislike Button --}}
                             <button wire:click="toggleCommentLike({{ $comment->id }}, false)" 
                                     wire:loading.attr="disabled"
                                     class="btn btn-sm btn-link p-0 mr-3 text-decoration-none transition-all {{ $comment->isDislikedBy(auth()->id()) ? 'text-danger' : 'text-dark' }}">
@@ -69,7 +68,6 @@
                                 <span class="font-weight-bold">{{ $comment->likes()->where('is_like', false)->count() }}</span>
                             </button>
 
-                            {{-- Reply Button --}}
                             @auth
                                 <button wire:click="setReply({{ $comment->id }})" 
                                         onclick="document.getElementById('comment-textarea').focus()"
@@ -90,7 +88,7 @@
                         @endauth
                     </div>
 
-                    {{-- 1b. Display Nested Replies --}}
+                    {{-- Nested Replies --}}
                     @if($comment->replies->count() > 0)
                         <div class="replies-container mt-3 pl-3 border-left" style="border-left: 2px solid #e9ecef !important;">
                             @foreach($comment->replies as $reply)
@@ -118,10 +116,6 @@
                     @endif
                 </div>
             </div>
-            {{-- Pagination Links --}}
-   <button wire:click="$set('perPage', {{ $perPage + 10 }})" class="btn btn-outline-primary">
-    Load More Comments
-</button>
         @empty
             <div class="text-center py-5 border rounded bg-light border-dashed">
                 <i class="fa fa-comments fa-3x text-muted mb-3 d-block" style="opacity: 0.3;"></i>
@@ -131,11 +125,24 @@
         @endforelse
     </div>
 
+    {{-- 2. Load More Button (Corrected Placement) --}}
+    @if($comments->hasMorePages())
+        <div class="text-center mb-5">
+            <button wire:click="$set('perPage', {{ $perPage + 10 }})" 
+                    class="btn btn-outline-primary px-5 py-2 font-weight-bold shadow-sm hover-grow" 
+                    style="border-radius: 30px;">
+                <span wire:loading.remove wire:target="perPage">Load More Comments</span>
+                <span wire:loading wire:target="perPage">
+                    <i class="fa fa-circle-notch fa-spin mr-2"></i> Loading...
+                </span>
+            </button>
+        </div>
+    @endif
+
     <hr class="my-5 border-light">
 
-    {{-- 2. Reply/Comment Form --}}
+    {{-- 3. Reply/Comment Form --}}
     <div class="reply-section">
-        {{-- Show Replying To Header --}}
         @if($replyingTo)
             <div class="alert alert-primary py-2 px-3 d-flex justify-content-between align-items-center mb-3 shadow-sm border-0" style="border-radius: 10px;">
                 <span class="small font-weight-bold">
