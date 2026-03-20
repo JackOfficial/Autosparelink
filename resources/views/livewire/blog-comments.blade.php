@@ -67,116 +67,51 @@
             <div class="comments-container">
                 @forelse($comments as $comment)
                     {{-- Added 'new-comment-highlight' dynamic class here --}}
-                    <div class="media p-4 mb-3 rounded comment-bubble shadow-sm transition-all border {{ $newCommentId == $comment->id ? 'new-comment-highlight' : 'bg-white' }}" 
-                         wire:key="comment-{{ $comment->id }}"
-                         style="border-left: 5px solid #007bff !important;">
-                        
-                        {{-- User Avatar --}}
-                        <div class="mr-3" style="flex-shrink:0;">
-                            @if($comment->user && $comment->user->avatar)
-                                <img src="{{ $comment->user->avatar }}" 
-                                     class="rounded-circle border border-primary shadow-sm" 
-                                     style="width: 50px; height: 50px; object-fit: cover;">
-                            @else
-                                <div class="rounded-circle bg-primary text-dark d-flex align-items-center justify-content-center font-weight-bold shadow-sm" 
-                                     style="width: 50px; height: 50px; font-size: 1.2rem;">
-                                    {{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}
-                                </div>
-                            @endif
-                        </div>
+                    {{-- Added x-data to manage the "new" state locally --}}
+<div class="media p-4 mb-3 rounded comment-bubble shadow-sm transition-all border" 
+     wire:key="comment-{{ $comment->id }}"
+     x-data="{ isNew: {{ $newCommentId == $comment->id ? 'true' : 'false' }} }"
+     x-init="if(isNew) setTimeout(() => isNew = false, 5000)"
+     :class="isNew ? 'new-comment-highlight' : 'bg-white'"
+     style="border-left: 5px solid #007bff !important;">
+    
+    {{-- User Avatar --}}
+    <div class="mr-3" style="flex-shrink:0;">
+        @if($comment->user && $comment->user->avatar)
+            <img src="{{ $comment->user->avatar }}" 
+                 class="rounded-circle border border-primary shadow-sm" 
+                 style="width: 50px; height: 50px; object-fit: cover;">
+        @else
+            <div class="rounded-circle bg-primary text-dark d-flex align-items-center justify-content-center font-weight-bold shadow-sm" 
+                 style="width: 50px; height: 50px; font-size: 1.2rem;">
+                {{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}
+            </div>
+        @endif
+    </div>
 
-                        <div class="media-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="d-flex align-items-center">
-                                    <h6 class="font-weight-bold mb-0 text-dark mr-2" style="font-size: 1.1rem;">{{ $comment->user->name ?? 'Anonymous' }}</h6>
-                                    {{-- Pulsing NEW Badge for Real-time events --}}
-                                    @if($newCommentId == $comment->id)
-                                        <span class="badge badge-success animate-pulse">NEW</span>
-                                    @endif
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    @if($comment->updated_at > $comment->created_at)
-                                        <small class="text-muted font-italic mr-2" style="font-size: 0.75rem;">(edited)</small>
-                                    @endif
-                                    <small class="text-muted font-weight-bold px-2 py-1 rounded border bg-light">
-                                        <i class="far fa-clock mr-1 text-primary"></i> {{ $comment->created_at->diffForHumans() }}
-                                    </small>
-                                </div>
-                            </div>
-                            
-                            {{-- Edit Mode Textarea --}}
-                            <div x-show="editingCommentId === {{ $comment->id }}" x-cloak class="mb-3">
-                                <textarea x-model="editContent" 
-                                          class="form-control shadow-sm text-dark mb-2" 
-                                          rows="3" 
-                                          style="border-radius: 10px; font-size: 0.95rem; resize: none;"></textarea>
-                                <div class="d-flex justify-content-end">
-                                    <button @click="editingCommentId = null" class="btn btn-sm btn-light border mr-2 font-weight-bold px-3">Cancel</button>
-                                    <button wire:click="updateComment({{ $comment->id }}, editContent); editingCommentId = null" 
-                                            class="btn btn-sm btn-primary text-dark font-weight-bold px-3 shadow-sm">
-                                        Update
-                                    </button>
-                                </div>
-                            </div>
-
-                            {{-- Static Comment Display --}}
-                            <div x-show="editingCommentId !== {{ $comment->id }}">
-                                <p class="mb-2 text-dark" style="line-height: 1.7; font-size: 1rem;">
-                                    {{ $comment->comment }}
-                                </p>
-
-                                {{-- Actions Bar --}}
-                                <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
-                                    <div class="d-flex align-items-center">
-                                        <button wire:click="toggleCommentLike({{ $comment->id }}, true)" 
-                                                class="btn btn-sm btn-link p-0 mr-3 text-decoration-none transition-all {{ $comment->isLikedBy(auth()->id()) ? 'text-primary' : 'text-dark' }}">
-                                            <i class="fa{{ $comment->isLikedBy(auth()->id()) ? 's' : 'r' }} fa-thumbs-up mr-1"></i> 
-                                            <span class="font-weight-bold">{{ $comment->likes()->where('is_like', true)->count() }}</span>
-                                        </button>
-
-                                        @auth
-                                            <button @click="scrollToForm(); $wire.setReply({{ $comment->id }})" 
-                                                    class="btn btn-sm btn-link text-primary p-0 border-0 text-decoration-none font-weight-bold mr-3">
-                                                <i class="fa fa-reply mr-1"></i> Reply
-                                            </button>
-
-                                            @if(auth()->id() == $comment->user_id && $comment->created_at->diffInMinutes(now()) < 15)
-                                                <button @click="editingCommentId = {{ $comment->id }}; editContent = '{{ addslashes($comment->comment) }}'" 
-                                                        class="btn btn-sm btn-link text-info p-0 border-0 text-decoration-none font-weight-bold mr-3">
-                                                    <i class="fa fa-edit mr-1"></i> Edit
-                                                </button>
-                                            @endif
-                                        @endauth
-                                    </div>
-                                    
-                                    @auth
-                                        @if(auth()->id() == $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']))
-                                            <button wire:click="deleteComment({{ $comment->id }})" 
-                                                    wire:confirm="Are you sure?"
-                                                    class="btn btn-sm btn-link text-danger p-0 border-0 text-decoration-none opacity-75">
-                                                <i class="fa fa-trash-alt mr-1"></i> Remove
-                                            </button>
-                                        @endif
-                                    @endauth
-                                </div>
-                            </div>
-
-                            {{-- Nested Replies --}}
-                            @if($comment->replies->count() > 0)
-                                <div class="replies-container mt-3 pl-3 border-left" style="border-left: 2px solid #e9ecef !important;">
-                                    @foreach($comment->replies as $reply)
-                                        <div class="p-3 mb-2 bg-light rounded shadow-sm border" wire:key="reply-{{ $reply->id }}">
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <strong class="text-dark small">{{ $reply->user->name ?? 'Anonymous' }}</strong>
-                                                <span class="text-muted small" style="font-size: 0.7rem;">{{ $reply->created_at->diffForHumans() }}</span>
-                                            </div>
-                                            <p class="mb-0 text-dark small" style="line-height: 1.5;">{{ $reply->comment }}</p>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+    <div class="media-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex align-items-center">
+                <h6 class="font-weight-bold mb-0 text-dark mr-2" style="font-size: 1.1rem;">{{ $comment->user->name ?? 'Anonymous' }}</h6>
+                
+                {{-- Updated Badge to use Alpine's x-show --}}
+                <span x-show="isNew" x-transition.opacity.duration.500ms class="badge badge-success animate-pulse">
+                    NEW
+                </span>
+            </div>
+            <div class="d-flex align-items-center">
+                @if($comment->updated_at > $comment->created_at)
+                    <small class="text-muted font-italic mr-2" style="font-size: 0.75rem;">(edited)</small>
+                @endif
+                <small class="text-muted font-weight-bold px-2 py-1 rounded border bg-light">
+                    <i class="far fa-clock mr-1 text-primary"></i> {{ $comment->created_at->diffForHumans() }}
+                </small>
+            </div>
+        </div>
+        
+        {{-- ... rest of your code (Edit mode, Static display, etc.) ... --}}
+    </div>
+</div>
                 @empty
                     <div class="text-center py-5 border rounded bg-light border-dashed">
                         <i class="fa fa-comments fa-3x text-muted mb-3 d-block opacity-25"></i>
@@ -254,14 +189,4 @@
             </div>
         @endauth
     </div>
-
-    <script>
-    document.addEventListener('livewire:init', () => {
-        Livewire.on('clear-highlight', () => {
-            setTimeout(() => {
-                @this.set('newCommentId', null);
-            }, 5000); 
-        });
-    });
-    </script>
 </div>

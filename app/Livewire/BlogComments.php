@@ -62,7 +62,6 @@ class BlogComments extends Component
         }
         // Automatically re-renders when other users post
         $this->post->refresh();
-        $this->dispatch('clear-highlight');
     }
 
     public function updateComment($commentId, $content)
