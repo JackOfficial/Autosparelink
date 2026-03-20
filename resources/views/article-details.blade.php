@@ -12,6 +12,59 @@
     background: #007bff; /* Use your primary theme color */
     z-index: 9999; transition: width 0.1s ease;
 }
+
+.vote-btn {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    outline: none !important;
+}
+
+.vote-btn:hover {
+    transform: scale(1.15);
+    opacity: 0.8;
+}
+
+.vote-btn:active {
+    transform: scale(0.95);
+}
+
+.share-btn {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.share-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Animation for the Submit Button */
+.hover-grow {
+    transition: all 0.3s ease;
+}
+.hover-grow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Styling for the Empty State */
+.border-dashed {
+    border-style: dashed !important;
+    border-width: 2px !important;
+}
+
+/* Smooth transition for new comments appearing */
+.comment-bubble {
+    transition: all 0.4s ease-in-out;
+    border-left: 3px solid transparent;
+}
+.comment-bubble:hover {
+    border-left: 3px solid #007bff; /* Highlight comment on hover */
+}
+
 </style>
 
 @section('content')
