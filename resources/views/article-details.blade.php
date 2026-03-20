@@ -80,6 +80,25 @@
 .x-twitter { background-color: #000; }
 .facebook { background-color: #1877F2; }
 
+/* Force high contrast for comment text */
+.comment-bubble p {
+    color: #1a1a1a !important; /* Deep charcoal black */
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+/* Ensure names stand out */
+.comment-bubble h6 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+/* Add a subtle "paper" effect to make the bubble distinct from the page */
+.comment-bubble {
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
 </style>
 
 @section('content')
