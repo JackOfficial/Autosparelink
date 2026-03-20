@@ -15,7 +15,7 @@ class BlogComments extends Component
     public $post;
     public $newComment = '';
     public $replyingTo = null; // Track which comment is being replied to
-    public $perPage = 1;
+    public $perPage = 10;
     public $sortBy = 'latest';
 
     protected $paginationTheme = 'bootstrap';
