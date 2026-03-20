@@ -53,7 +53,7 @@ class BlogComments extends Component
         $this->reset('newComment');
     }
 
-    #[On('echo:comments.{post.id},CommentCreated')]
+    #[On('echo:comments.{post.id},.CommentCreated')]
     public function handleCommentCreated($event)
     {
         // Automatically re-renders when other users post
