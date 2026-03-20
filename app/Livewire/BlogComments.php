@@ -41,7 +41,7 @@ class BlogComments extends Component
         $this->post->comments()->create([
             'user_id' => Auth::id(),
             'comment' => $this->newComment,
-            'status' => 'approved', // Or default status based on your model
+            'status' => 1, // Or default status based on your model
         ]);
 
         $this->reset('newComment');
