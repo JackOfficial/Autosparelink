@@ -31,17 +31,33 @@
                     <p class="mb-2 text-secondary" style="line-height: 1.6;">{{ $comment->comment }}</p>
 
                     {{-- Actions: Only show Delete if authorized --}}
-                    <div class="d-flex align-items-center justify-content-end">
-                        @auth
-                            @if(auth()->id() == $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']))
-                                <button wire:click="deleteComment({{ $comment->id }})" 
-                                        wire:confirm="Are you sure you want to delete this comment?"
-                                        class="btn btn-link text-danger p-0 border-0 small text-decoration-none">
-                                    <i class="fa fa-trash-alt mr-1"></i> Delete
-                                </button>
-                            @endif
-                        @endauth
-                    </div>
+<div class="d-flex align-items-center justify-content-between mt-3">
+    <div class="d-flex align-items-center">
+        {{-- Like Comment --}}
+        <button wire:click="toggleCommentLike({{ $comment->id }}, true)" 
+                class="btn btn-link p-0 mr-3 text-decoration-none {{ $comment->isLikedBy(auth()->id()) ? 'text-primary' : 'text-muted' }}" 
+                style="font-size: 0.85rem;">
+            <i class="fa fa-thumbs-up mr-1"></i> {{ $comment->likes_count ?? $comment->likes()->where('is_like', true)->count() }}
+        </button>
+
+        {{-- Dislike Comment --}}
+        <button wire:click="toggleCommentLike({{ $comment->id }}, false)" 
+                class="btn btn-link p-0 text-decoration-none {{ $comment->isDislikedBy(auth()->id()) ? 'text-danger' : 'text-muted' }}" 
+                style="font-size: 0.85rem;">
+            <i class="fa fa-thumbs-down mr-1"></i> {{ $comment->dislikes_count ?? $comment->likes()->where('is_like', false)->count() }}
+        </button>
+    </div>
+
+    @auth
+        @if(auth()->id() == $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']))
+            <button wire:click="deleteComment({{ $comment->id }})" 
+                    wire:confirm="Are you sure you want to delete this comment?"
+                    class="btn btn-link text-danger p-0 border-0 small text-decoration-none">
+                <i class="fa fa-trash-alt mr-1"></i> Delete
+            </button>
+        @endif
+    @endauth
+</div>
                 </div>
             </div>
         @empty

@@ -53,6 +53,32 @@ class BlogComments extends Component
         session()->flash('message', 'Comment posted successfully!');
     }
 
+    public function toggleCommentLike($commentId, $isLike)
+{
+    if (!auth()->check()) return redirect()->route('login');
+
+    $comment = Comment::findOrFail($commentId);
+    $userId = auth()->id();
+
+    // Check for existing vote on this specific comment
+    $existing = $comment->likes()->where('user_id', $userId)->first();
+
+    if ($existing) {
+        if ($existing->is_like == $isLike) {
+            $existing->delete(); // Undo
+        } else {
+            $existing->update(['is_like' => $isLike]); // Change vote
+        }
+    } else {
+        $comment->likes()->create([
+            'user_id' => $userId,
+            'is_like' => $isLike,
+        ]);
+    }
+
+    // No need to refresh the whole post, just re-render
+}
+
     /**
      * Delete a specific comment.
      */
