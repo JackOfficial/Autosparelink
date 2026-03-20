@@ -5,13 +5,20 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Blog;
 use App\Models\Comment;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 
 class BlogComments extends Component
 {
+    use WithPagination;
+
     public $post;
     public $newComment = '';
     public $replyingTo = null; // Track which comment is being replied to
+    public $perPage = 10;
+    public $sortBy = 'latest';
+
+    protected $paginationTheme = 'bootstrap';
 
     protected $rules = [
         'newComment' => 'required|min:3|max:2000',
@@ -21,6 +28,11 @@ class BlogComments extends Component
     {
         $this->post = $post;
     }
+
+    public function updatedSortBy()
+{
+    $this->resetPage();
+}
 
     /**
      * Set the comment ID the user wants to reply to.
@@ -103,16 +115,26 @@ class BlogComments extends Component
         }
     }
 
-    public function render()
-    {
-        return view('livewire.blog-comments', [
-            'comments' => $this->post->comments()
-                // IMPORTANT: Only fetch top-level comments for the main list
-                ->whereNull('parent_id') 
-                // Eager load replies and their users to stay fast
-                ->with(['user', 'likes', 'replies.user', 'replies.likes']) 
-                ->latest()
-                ->get()
-        ]);
+  public function render()
+{
+    $query = $this->post->comments()
+        ->whereNull('parent_id')
+        ->with(['user', 'likes', 'replies.user', 'replies.likes']);
+
+    // Apply Sorting Logic
+    if ($this->sortBy === 'oldest') {
+        $query->oldest();
+    } elseif ($this->sortBy === 'popular') {
+        // Sort by the count of likes (polymorphic relationship)
+        $query->withCount(['likes' => function ($q) {
+            $q->where('is_like', true);
+        }])->orderBy('likes_count', 'desc');
+    } else {
+        $query->latest(); // Default: Newest first
     }
+
+    return view('livewire.blog-comments', [
+        'comments' => $query->paginate(10)
+    ]);
+}
 }

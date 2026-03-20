@@ -1,8 +1,21 @@
 <div class="bg-white p-4 p-lg-5 shadow-sm rounded border-top border-primary mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 border-bottom pb-3">
+    <div class="mb-3 mb-md-0">
         <h4 class="font-weight-bold text-dark mb-0">Join the Conversation</h4>
-        <span class="badge badge-primary px-3 py-2 text-dark font-weight-bold">{{ $comments->count() }} Comments</span>
+        <span class="badge badge-primary px-3 py-2 text-dark font-weight-bold mt-2">
+            {{ $this->post->comments()->count() }} Comments
+        </span>
     </div>
+    
+    <div class="d-flex align-items-center">
+        <label class="mr-2 mb-0 small font-weight-bold text-muted">Sort by:</label>
+        <select wire:model.live="sortBy" class="form-control form-control-sm shadow-sm border-0 bg-light text-dark font-weight-bold" style="width: 140px; border-radius: 8px; cursor: pointer;">
+            <option value="latest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="popular">Most Liked</option>
+        </select>
+    </div>
+</div>
     
     {{-- 1. Display Comments List --}}
     <div class="comments-container mb-5">
@@ -105,6 +118,10 @@
                     @endif
                 </div>
             </div>
+            {{-- Pagination Links --}}
+   <button wire:click="$set('perPage', {{ $perPage + 10 }})" class="btn btn-outline-primary">
+    Load More Comments
+</button>
         @empty
             <div class="text-center py-5 border rounded bg-light border-dashed">
                 <i class="fa fa-comments fa-3x text-muted mb-3 d-block" style="opacity: 0.3;"></i>
