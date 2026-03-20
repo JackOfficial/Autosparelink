@@ -45,7 +45,7 @@ public function sendReply()
 {
     // 1. Validation matching your store() controller logic
     $validated = $this->validate([
-        'message' => 'required|string|min:10',
+        'message' => 'required|string',
     ]);
 
     $ticket = $this->ticket;
