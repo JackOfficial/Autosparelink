@@ -3,10 +3,13 @@
 
 <head>
     <meta charset="utf-8">
-    <title>@yield('title')</title>
+    <title>@yield('title', 'AutoSpare Link | Original Parts & Accessories')</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="AutoSpare Parts E-commerce" name="keywords">
-    <meta content="Buy original auto parts, accessories, and tools online" name="description">
+    @if(!View::hasSection('meta_tags'))
+        <meta content="Buy original auto parts, accessories, and tools online" name="description">
+    @endif
+    @yield('meta_tags')
 
     <!-- Favicon -->
     <link href="{{ asset('frontend/img/logo.png') }}" rel="icon">
