@@ -101,22 +101,40 @@
 }
 
 .sticky-sidebar {
-    position: -webkit-sticky; /* Safari support */
+    position: -webkit-sticky;
     position: sticky;
-    top: 20px; /* Space from the top of the screen when scrolling */
-    z-index: 100; /* Ensures it stays above background elements */
-    height: fit-content; /* Prevents the sidebar from stretching to the full page height */
-    max-height: calc(100vh - 40px); /* Keeps it within the viewport */
-    overflow-y: auto; /* Allows internal scrolling if the sidebar content is too long */
+    top: 20px;
+    z-index: 100;
+    height: fit-content;
+    max-height: calc(100vh - 40px);
+    
+    /* Set overflow to auto so it can scroll, but hide the bar initially */
+    overflow-y: auto;
+    
+    /* Smooth transition for the hover effect */
+    transition: all 0.3s ease;
 }
 
-/* Optional: Custom scrollbar for a cleaner look */
+/* 1. The Scrollbar Track (invisible by default) */
 .sticky-sidebar::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
 }
+
+/* 2. The Scrollbar Thumb (transparent by default) */
 .sticky-sidebar::-webkit-scrollbar-thumb {
-    background: #ddd;
+    background-color: transparent;
     border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+/* 3. The Hover Effect: Show the scrollbar when mouse enters the area */
+.sticky-sidebar:hover::-webkit-scrollbar-thumb {
+    background-color: #ddd; /* Use your primary Blue or #ddd as before */
+}
+
+/* Optional: Add a subtle track background on hover for better visibility */
+.sticky-sidebar:hover::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
 }
 </style>
 
