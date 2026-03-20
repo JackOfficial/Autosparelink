@@ -14,13 +14,12 @@ class Show extends Component
 
     public function mount($id)
     {
-        // Security Check
         $ticket = Ticket::where('id', $id)
                         ->where('user_id', Auth::id())
                         ->first();
 
         if (!$ticket) {
-            abort(403, 'Unauthorized access to this ticket.');
+            abort(403);
         }
 
         $this->ticketId = $id;
@@ -31,8 +30,8 @@ class Show extends Component
     ];
 
     /**
-     * The Computed Property.
-     * We use $this->ticket to access it internally.
+     * Computed Property: ticket
+     * Access as $this->ticket in PHP and $ticket in Blade.
      */
     #[Computed]
     public function ticket()
@@ -46,7 +45,7 @@ class Show extends Component
     {
         $this->validate();
 
-        // Access via $this->ticket (Computed property)
+        // 1. Get the ticket (using the computed property)
         $ticket = $this->ticket;
 
         if ($ticket->status === 'closed') {
@@ -54,6 +53,7 @@ class Show extends Component
             return;
         }
 
+        // 2. Save the reply
         $ticket->replies()->create([
             'user_id' => Auth::id(),
             'message' => $this->message,
@@ -62,11 +62,11 @@ class Show extends Component
         $ticket->update(['status' => 'open']);
 
         /**
-         * THE RELIABLE FIX:
-         * Instead of unset(), use Livewire's built-in reset.
-         * This clears the cache of the computed 'ticket' property.
+         * 3. REFRESH THE CACHE
+         * This is the standard way to clear a computed property.
+         * We use unset() on the property name.
          */
-        $this->resetComputed('ticket');
+        unset($this->ticket);
 
         $this->reset('message');
         $this->dispatch('reply-sent');
