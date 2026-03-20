@@ -74,7 +74,7 @@
                     {{ $recent->category->name ?? 'General' }}
                 </small>
                 <h6 class="mb-0" style="line-height: 1.4;">
-                    <a href="{{ route('article.details', $recent->slug) }}" class="text-dark font-weight-bold text-decoration-none small">
+                    <a href="{{ route('blogs.show', $recent->slug) }}" class="text-dark font-weight-bold text-decoration-none small">
                         {{ Str::limit($recent->title, 45) }}
                     </a>
                 </h6>
