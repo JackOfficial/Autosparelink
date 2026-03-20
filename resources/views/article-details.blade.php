@@ -205,17 +205,35 @@
                 <div class="comments-container mb-5">
                     @forelse($post->comments->sortByDesc('created_at') as $comment)
                         <div class="media p-4 mb-3 bg-light rounded comment-bubble">
-                            <div class="rounded-circle bg-primary text-dark d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 50px; height: 50px; flex-shrink:0;">
-                                <strong>{{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}</strong>
-                            </div>
-                            <div class="media-body">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <h6 class="font-weight-bold mb-0">{{ $comment->user->name ?? 'Anonymous' }}</h6>
-                                    <small class="text-muted"><i class="far fa-clock mr-1"></i> {{ $comment->created_at->diffForHumans() }}</small>
-                                </div>
-                                <p class="mb-0 text-muted">{{ $comment->comment }}</p>
-                            </div>
-                        </div>
+    {{-- Avatar Section --}}
+    <div class="mr-3 shadow-sm" style="flex-shrink:0;">
+        @if($comment->user && $comment->user->avatar)
+            {{-- Display Google/Stored Avatar --}}
+            <img src="{{ $comment->user->avatar }}" 
+                 alt="{{ $comment->user->name }}" 
+                 class="rounded-circle" 
+                 style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #FFD333;">
+        @else
+            {{-- Fallback to Initials Circle --}}
+            <div class="rounded-circle bg-primary text-dark d-flex align-items-center justify-content-center" 
+                 style="width: 50px; height: 50px;">
+                <strong style="font-size: 1.2rem;">
+                    {{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}
+                </strong>
+            </div>
+        @endif
+    </div>
+
+    <div class="media-body">
+        <div class="d-flex justify-content-between mb-1">
+            <h6 class="font-weight-bold mb-0">{{ $comment->user->name ?? 'Anonymous' }}</h6>
+            <small class="text-muted">
+                <i class="far fa-clock mr-1"></i> {{ $comment->created_at->diffForHumans() }}
+            </small>
+        </div>
+        <p class="mb-0 text-muted">{{ $comment->comment }}</p>
+    </div>
+</div>
                     @empty
                         <div class="text-center py-5">
                             <p class="text-muted italic">No comments yet. Start the discussion!</p>
