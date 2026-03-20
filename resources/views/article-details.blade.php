@@ -128,7 +128,7 @@
     <div class="row px-xl-5">
         
         {{-- Sidebar: Navigation & Discovery --}}
-     kkk   <aside class="col-lg-3 col-md-4">
+     <aside class="col-lg-3 col-md-4">
             <div class="sticky-sidebar">
                 {{-- Search --}}
                 <div class="bg-white p-4 mb-4 shadow-sm border-top border-primary rounded">
