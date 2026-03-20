@@ -5,35 +5,41 @@ namespace App\Livewire\Tickets;
 use Livewire\Component;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Computed; // <--- 1. Add this import
+use Livewire\Attributes\Computed;
 
 class Show extends Component
 {
     public $ticketId;
     public $message = '';
 
+    /**
+     * mount() runs once when the component is loaded.
+     * We accept $id from the Blade view.
+     */
     public function mount($id)
     {
-        // Security Check
+        // Security Check: Verify ownership and existence
         $ticket = Ticket::where('id', $id)
                         ->where('user_id', Auth::id())
                         ->first();
 
         if (!$ticket) {
-            abort(403);
+            abort(403, 'Unauthorized access to this ticket.');
         }
 
         $this->ticketId = $id;
     }
 
+    /**
+     * Validation rules for the message input.
+     */
     protected $rules = [
         'message' => 'required|string|min:2|max:5000',
     ];
 
     /**
-     * 2. Add the #[Computed] attribute here.
-     * This allows you to call $this->ticketProperty in PHP 
-     * or $ticketProperty in your Blade file.
+     * The Computed Property caches the ticket query.
+     * Access it as $this->ticketProperty (PHP) or $ticketProperty (Blade).
      */
     #[Computed]
     public function ticketProperty()
@@ -43,45 +49,50 @@ class Show extends Component
             ->findOrFail($this->ticketId);
     }
 
- public function sendReply()
-{
-    $this->validate();
-
-    // Get the ticket from the computed property
-    $ticket = $this->ticketProperty;
-
-    if ($ticket->status === 'closed') {
-        session()->flash('error', 'This ticket is closed.');
-        return;
-    }
-
-    // Create the new reply
-    $ticket->replies()->create([
-        'user_id' => Auth::id(),
-        'message' => $this->message,
-    ]);
-
-    // Update ticket status
-    $ticket->update(['status' => 'open']);
-
     /**
-     * CRITICAL FIX: Unset the computed property cache.
-     * This forces Livewire to run the database query again 
-     * during render() so your new message appears instantly.
+     * Handles the submission of a new reply.
      */
-    unset($this->ticketProperty);
+    public function sendReply()
+    {
+        $this->validate();
 
-    // Clear input and trigger scroll
-    $this->reset('message');
-    $this->dispatch('reply-sent');
+        // Access computed property (no parentheses)
+        $ticket = $this->ticketProperty;
 
-    session()->flash('success', 'Your reply has been sent.');
-}
+        if ($ticket->status === 'closed') {
+            session()->flash('error', 'This ticket is closed and cannot receive replies.');
+            return;
+        }
+
+        // Create the new reply record
+        $ticket->replies()->create([
+            'user_id' => Auth::id(),
+            'message' => $this->message,
+        ]);
+
+        // Re-open ticket if it was pending or answered
+        $ticket->update(['status' => 'open']);
+
+        /**
+         * CLEAR CACHE: 
+         * This forces the #[Computed] method to re-run during render()
+         * so the user sees their new message immediately.
+         */
+        unset($this->ticketProperty);
+
+        // Reset the textarea input
+        $this->reset('message');
+
+        // Dispatch browser event for JS scrolling
+        $this->dispatch('reply-sent');
+
+        session()->flash('success', 'Your reply has been sent.');
+    }
 
     public function render()
     {
         return view('livewire.tickets.show', [
-            // Use the computed property here
+            // Pass the computed property to the view
             'ticket' => $this->ticketProperty 
         ]);
     }
