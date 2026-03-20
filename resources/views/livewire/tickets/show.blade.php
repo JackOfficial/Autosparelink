@@ -1,4 +1,5 @@
 <div wire:poll.15s class="container py-4 py-lg-5" style="overflow-x: hidden;" x-data="{ now: Date.now() }" x-init="setInterval(() => now = Date.now(), 10000)">
+    
     {{-- Top Navigation & Status --}}
     <div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
         <a href="{{ route('tickets.index') }}" class="text-decoration-none text-secondary d-inline-flex align-items-center fw-medium">
@@ -20,6 +21,7 @@
     @endif
 
     <div class="row g-4">
+        {{-- Left Column: Messages --}}
         <div class="col-lg-8">
             {{-- Initial Issue Card --}}
             <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
@@ -48,26 +50,20 @@
             {{-- Message History --}}
             <div id="chat-container" wire:ignore.self class="px-2 mb-4" style="max-height: 600px; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth;">
                 @foreach($ticket->replies as $reply)
-                    <div class="d-flex mb-4 {{ $reply->user_id == auth()->id() ? 'justify-content-end' : 'justify-content-start' }}" 
-                         wire:key="reply-{{ $reply->id }}">
+                    <div class="d-flex mb-4 {{ $reply->user_id == auth()->id() ? 'justify-content-end' : 'justify-content-start' }}" wire:key="reply-{{ $reply->id }}">
                         
                         <div x-data="{ 
                                 sentAt: {{ $reply->created_at->timestamp * 1000 }},
                                 get canDelete() { return (now - this.sentAt) < (15 * 60 * 1000) }
                              }"
-                             {{-- Increased padding-right for user messages to make room for button --}}
                              class="position-relative p-3 shadow-sm rounded-4 {{ $reply->user_id == auth()->id() ? 'bg-primary text-white ms-5' : 'bg-white border text-dark me-5' }}" 
                              style="min-width: 140px; max-width: 85%;">
                             
-                            {{-- Floating Delete Action - Adjusted right: 0 to prevent overflow --}}
+                            {{-- Floating Delete Action --}}
                             @if($reply->user_id == auth()->id())
-                                <button x-show="canDelete" 
-                                        x-transition 
-                                        wire:click="deleteReply({{ $reply->id }})" 
-                                        wire:confirm="Remove this message?"
+                                <button x-show="canDelete" x-transition wire:click="deleteReply({{ $reply->id }})" wire:confirm="Remove this message?"
                                         class="btn btn-sm btn-danger p-0 position-absolute shadow shadow-sm border-white border-2"
-                                        style="top: -8px; right: -8px; width: 22px; height: 22px; border-radius: 50%; z-index: 10;"
-                                        title="Delete">
+                                        style="top: -8px; right: -8px; width: 22px; height: 22px; border-radius: 50%; z-index: 10;">
                                     <i class="fa fa-times" style="font-size: 9px;"></i>
                                 </button>
                             @endif
@@ -87,7 +83,7 @@
                                 <template x-if="canDelete">
                                     <div class="text-white-50 mt-2 d-flex align-items-center" style="font-size: 10px;">
                                         <i class="fa fa-clock-o me-1"></i>
-                                        <span x-text="Math.ceil((15 * 60 * 1000 - (now - sentAt)) / 60000)"></span>m left to edit
+                                        <span x-text="Math.ceil((15 * 60 * 1000 - (now - sentAt)) / 60000)"></span>m left to delete
                                     </div>
                                 </template>
                             @endif
@@ -101,14 +97,11 @@
                 <div class="card border-0 shadow-lg rounded-4 overflow-hidden mt-2">
                     <div class="card-body p-0">
                         <form wire:submit.prevent="sendReply">
-                            <textarea wire:model="message" rows="3" 
-                                      class="form-control border-0 px-4 py-3 shadow-none @error('message') is-invalid @enderror" 
-                                      placeholder="Write your message here..." 
-                                      style="resize: none; border-bottom: 1px solid #f0f0f0 !important;"></textarea>
-                            
+                            <textarea wire:model="message" rows="3" class="form-control border-0 px-4 py-3 shadow-none @error('message') is-invalid @enderror" 
+                                      placeholder="Write your message here..." style="resize: none; border-bottom: 1px solid #f0f0f0 !important;"></textarea>
                             <div class="bg-light px-4 py-3 d-flex justify-content-between align-items-center">
                                 <div class="text-muted small">
-                                    @error('message') <span class="text-danger"><i class="fa fa-warning"></i> Message is too short</span> @enderror
+                                    @error('message') <span class="text-danger small"><i class="fa fa-warning"></i> Message is too short</span> @enderror
                                 </div>
                                 <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" wire:loading.attr="disabled">
                                     <span wire:loading.remove wire:target="sendReply">Send Reply <i class="fa fa-paper-plane ms-2"></i></span>
@@ -121,65 +114,55 @@
             @endif
         </div>
 
-        {{-- Sidebar --}}
-      <div class="col-lg-4">
-    {{-- Main Sticky Wrapper --}}
-    <div class="sticky-top" style="top: 2rem; z-index: 10;">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-4">
-                <h6 class="fw-bold text-dark mb-4 d-flex align-items-center">
-                    <i class="fa fa-info-circle text-primary me-2"></i> Ticket Details
-                </h6>
-                
-                <div class="mb-3">
-                    <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Order Reference</label>
-                    <div class="fw-bold text-primary">{{ $ticket->order_ref ?? 'N/A' }}</div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Department</label>
-                    <div class="text-dark text-capitalize">{{ str_replace('_', ' ', $ticket->category) }}</div>
-                </div>
-
-                <div class="mb-0">
-                    <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Priority Level</label>
-                    <div>
-                        <span class="badge {{ $ticket->priority == 'high' ? 'bg-danger-light text-danger' : 'bg-info-light text-info' }} rounded-pill border">
-                            {{ ucfirst($ticket->priority) }}
-                        </span>
+        {{-- Right Column: Sticky Sidebar --}}
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top: 2rem; z-index: 10;">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-dark mb-4 d-flex align-items-center">
+                            <i class="fa fa-info-circle text-primary me-2"></i> Ticket Details
+                        </h6>
+                        <div class="mb-3">
+                            <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Order Ref</label>
+                            <div class="fw-bold text-primary">{{ $ticket->order_ref ?? 'N/A' }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Department</label>
+                            <div class="text-dark text-capitalize small">{{ str_replace('_', ' ', $ticket->category) }}</div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Priority</label>
+                            <div>
+                                <span class="badge {{ $ticket->priority == 'high' ? 'bg-danger-light text-danger' : 'bg-info-light text-info' }} rounded-pill border">
+                                    {{ ucfirst($ticket->priority) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="window.print()">
+                                <i class="fa fa-print me-2"></i> Print Transcript
+                            </button>
+                            @if($ticket->status !== 'closed')
+                                <button wire:click="closeTicket" wire:confirm="Close this ticket?" class="btn btn-light btn-sm rounded-pill text-danger border-0">
+                                    <i class="fa fa-lock me-2"></i> Close Ticket
+                                </button>
+                            @endif
+                        </div>
                     </div>
                 </div>
-
-                <hr class="my-4 opacity-5">
-
-                <div class="d-grid gap-2">
-                    <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="window.print()">
-                        <i class="fa fa-print me-2"></i> Print Transcript
-                    </button>
-                    
-                    {{-- Quick Action: Close Ticket (Optional UI addition) --}}
-                    @if($ticket->status !== 'closed')
-                        <button wire:click="closeTicket" wire:confirm="Are you sure you want to close this ticket?" class="btn btn-light btn-sm rounded-pill text-danger border-0">
-                            <i class="fa fa-lock me-2"></i> Close Ticket
-                        </button>
-                    @endif
+                <div class="card border-0 shadow-sm rounded-4 mt-3 bg-primary text-white">
+                    <div class="card-body p-3 text-center">
+                        <small class="d-block opacity-75">Need urgent help?</small>
+                        <a href="#" class="text-white fw-bold text-decoration-none small">
+                            <i class="fa fa-whatsapp"></i> Contact Support
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-
-        {{-- Optional: Add a second small card for Support Hours or FAQ below the sticky info --}}
-        <div class="card border-0 shadow-sm rounded-4 mt-3 bg-primary text-white">
-            <div class="card-body p-3 text-center">
-                <small class="d-block opacity-75">Need urgent help?</small>
-                <a href="https://wa.me/yournumber" class="text-white fw-bold text-decoration-none small">
-                    <i class="fa fa-whatsapp"></i> Chat on WhatsApp
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
     </div>
 
+    {{-- CSS Styles --}}
     <style>
         .ls-1 { letter-spacing: 0.5px; }
         .bg-danger-light { background-color: #fff5f5; border-color: #feb2b2; }
@@ -187,8 +170,10 @@
         .rounded-4 { border-radius: 1rem !important; }
         #chat-container::-webkit-scrollbar { width: 5px; }
         #chat-container::-webkit-scrollbar-thumb { background: #dcdcdc; border-radius: 10px; }
+        .opacity-85 { opacity: 0.85; }
     </style>
 
+    {{-- Script Section --}}
     @script
     <script>
         const chatContainer = document.getElementById('chat-container');
