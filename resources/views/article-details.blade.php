@@ -151,8 +151,74 @@
 
             <div class="bg-light p-4 mb-30 shadow-sm border-top border-primary">
                 <h4 class="section-title position-relative text-uppercase mb-4">
-                    <span class="bg-secondary pr-3">Discussion</span>
+                    <span class="bg-secondary pr-3">Discussion ({{ $post->comments->count() }})</span>
                 </h4>
+
+                @if(session('message'))
+                    <div class="alert alert-success small py-2 shadow-sm">{{ session('message') }}</div>
+                @endif
+                @if(session('error'))
+                    <div class="alert alert-danger small py-2 shadow-sm">{{ session('error') }}</div>
+                @endif
+
+                <div class="comments-list mb-4">
+                    @forelse($post->comments->sortByDesc('created_at') as $comment)
+                        <div class="media mb-4 p-3 bg-white rounded shadow-sm border-left border-primary">
+                            <div class="rounded-circle bg-secondary text-primary d-flex align-items-center justify-content-center mr-3" style="width: 45px; height: 45px; font-weight: bold;">
+                                {{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}
+                            </div>
+                            <div class="media-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 font-weight-bold">{{ $comment->user->name ?? 'Anonymous' }}</h6>
+                                    <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
+                                </div>
+                                <p class="mt-2 mb-0 text-dark" style="font-size: 0.95rem;">
+                                    {{ $comment->comment }}
+                                </p>
+                                
+                                {{-- Show Delete Button only if the user owns the comment --}}
+                                @if(auth()->check() && auth()->id() == $comment->user_id)
+                                    <form action="{{ route('comment.delete', $comment->id) }}" method="POST" class="mt-2 text-right">
+                                        @csrf
+                                        <button type="submit" class="btn btn-link text-danger p-0 small" onclick="return confirm('Delete this comment?')">
+                                            <i class="fa fa-trash-alt mr-1"></i> Delete
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-4 text-muted">
+                            <i class="fa fa-comments fa-2x mb-2 d-block opacity-5"></i>
+                            <p>No comments yet. Be the first to share your thoughts!</p>
+                        </div>
+                    @endforelse
+                </div>
+
+                <hr class="my-4">
+
+                @auth
+                    <form action="{{ route('comment.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="blog_id" value="{{ $post->id }}">
+                        <div class="form-group">
+                            <label class="small font-weight-bold text-uppercase">Leave a reply</label>
+                            <textarea name="comment" class="form-control border-0 shadow-sm" rows="4" placeholder="Share your thoughts..." required></textarea>
+                            @error('comment')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+                        <button type="submit" class="btn btn-primary px-4 shadow-sm text-dark font-weight-bold">
+                            Post Comment <i class="fa fa-paper-plane ml-2"></i>
+                        </button>
+                    </form>
+                @else
+                    <div class="text-center p-4 bg-white rounded border border-dashed">
+                        <p class="mb-2">You must be logged in to join the discussion.</p>
+                        <a href="{{ route('login') }}" class="btn btn-sm btn-primary px-4">Login Now</a>
+                    </div>
+                @endauth
+            </div>
                 
                 {{-- Add your existing comment loop here if you have a comments table --}}
                 
