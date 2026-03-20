@@ -121,7 +121,7 @@ public function blogs()
         $comment = Comment::create([
             'user_id' => auth()->user()->id,
             'comment' => $request->comment,
-            'blog_id' => $request->blogId,
+            'blog_id' => $request->blog_id,
         ]);
         if($comment){
            session()->flash('message', 'Your comment has been Posted!');
