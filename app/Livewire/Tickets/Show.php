@@ -83,6 +83,21 @@ public function sendReply()
     session()->flash('success', "Your message has been sent. Our team will review it shortly.");
 }
 
+public function closeTicket()
+{
+    // 1. Update the ticket status in the database
+    $this->ticket->update([
+        'status' => 'closed'
+    ]);
+
+    // 2. Optional: Add a success message
+    session()->flash('success', 'Ticket has been closed successfully.');
+
+    // 3. Optional: Redirect or refresh
+    // If you stay on the same page, the UI will automatically update 
+    // because $ticket->status is now 'closed'
+}
+
     /**
      * Delete a specific reply if it belongs to the authenticated user.
      */
