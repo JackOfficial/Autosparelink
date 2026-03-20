@@ -20,6 +20,7 @@ class BlogComments extends Component
     public $replyingTo = null; 
     public $perPage = 10;
     public $sortBy = 'latest';
+    public $newCommentId = null;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -56,8 +57,12 @@ class BlogComments extends Component
     #[On('echo:comments.{post.id},.CommentCreated')]
     public function handleCommentCreated($event)
     {
+        if (isset($event['commentId'])) {
+        $this->newCommentId = $event['commentId'];
+        }
         // Automatically re-renders when other users post
         $this->post->refresh();
+        $this->dispatch('clear-highlight');
     }
 
     public function updateComment($commentId, $content)
@@ -86,29 +91,31 @@ class BlogComments extends Component
         session()->flash('message', 'Comment updated successfully.');
     }
 
-    public function postComment()
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
-        $this->validate();
-
-        $this->post->comments()->create([
-            'user_id' => Auth::id(),
-            'comment' => $this->newComment,
-            'status' => 1, 
-            'parent_id' => $this->replyingTo,
-        ]);
-
-        // broadcast to others only to avoid double-refreshing the sender
-        broadcast(new CommentCreated($this->post->id))->toOthers();
-
-        $this->reset(['newComment', 'replyingTo']);
-        $this->post->refresh();
-        
-        session()->flash('message', 'Comment posted successfully!');
+public function postComment()
+{
+    if (!Auth::check()) {
+        return redirect()->route('login');
     }
+
+    $this->validate();
+
+    // 1. Capture the newly created comment in a variable
+    $comment = $this->post->comments()->create([
+        'user_id' => Auth::id(),
+        'comment' => $this->newComment,
+        'status' => 1, 
+        'parent_id' => $this->replyingTo,
+    ]);
+
+    // 2. Pass the $comment object to the broadcast event
+    // This allows Pusher to send the commentId and userName to other users
+    broadcast(new CommentCreated($this->post->id, $comment))->toOthers();
+
+    $this->reset(['newComment', 'replyingTo']);
+    $this->post->refresh();
+    
+    session()->flash('message', 'Comment posted successfully!');
+}
 
     public function toggleCommentLike($commentId, $isLike)
     {

@@ -13,14 +13,16 @@ class CommentCreated implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $postId;
+    public $comment; // Add this property
 
     /**
      * Create a new event instance.
-     * We pass the postId so the frontend knows which "room" to listen to.
+     * We pass the postId and the newly created Comment model.
      */
-    public function __construct($postId)
+    public function __construct($postId, $comment = null)
     {
         $this->postId = $postId;
+        $this->comment = $comment;
     }
 
     /**
@@ -28,15 +30,27 @@ class CommentCreated implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        // Using a public channel: comments.{id}
         return [
             new Channel('comments.' . $this->postId),
         ];
     }
 
     /**
-     * Optional: Define the name the frontend is listening for.
-     * If you don't define this, it defaults to 'CommentCreated'.
+     * Specify the data to be broadcasted.
+     * This keeps the payload small and fast for Pusher.
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'postId' => $this->postId,
+            'commentId' => $this->comment ? $this->comment->id : null,
+            'userName' => $this->comment && $this->comment->user ? $this->comment->user->name : 'A user',
+            'message' => $this->comment ? $this->comment->comment : '',
+        ];
+    }
+
+    /**
+     * Keep the explicit name for the frontend listener.
      */
     public function broadcastAs(): string
     {

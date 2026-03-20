@@ -47,11 +47,27 @@
                 .comments-scroll-container:hover::-webkit-scrollbar-thumb { background: #ccc; }
                 .comments-scroll-container { scrollbar-width: none; }
                 .comments-scroll-container:hover { scrollbar-width: thin; scrollbar-color: #ccc transparent; }
+
+                /* Real-time Highlight CSS */
+                .new-comment-highlight {
+                    background-color: #f0fff4 !important; /* Very light green */
+                    border: 2px solid #28a745 !important;
+                    transition: all 0.5s ease;
+                }
+                .animate-pulse {
+                    animation: pulse-green 2s infinite;
+                }
+                @keyframes pulse-green {
+                    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+                    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+                    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+                }
             </style>
 
             <div class="comments-container">
                 @forelse($comments as $comment)
-                    <div class="media p-4 mb-3 bg-white rounded comment-bubble shadow-sm transition-all border" 
+                    {{-- Added 'new-comment-highlight' dynamic class here --}}
+                    <div class="media p-4 mb-3 rounded comment-bubble shadow-sm transition-all border {{ $newCommentId == $comment->id ? 'new-comment-highlight' : 'bg-white' }}" 
                          wire:key="comment-{{ $comment->id }}"
                          style="border-left: 5px solid #007bff !important;">
                         
@@ -71,9 +87,14 @@
 
                         <div class="media-body">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="font-weight-bold mb-0 text-dark" style="font-size: 1.1rem;">{{ $comment->user->name ?? 'Anonymous' }}</h6>
                                 <div class="d-flex align-items-center">
-                                    {{-- Edited Indicator --}}
+                                    <h6 class="font-weight-bold mb-0 text-dark mr-2" style="font-size: 1.1rem;">{{ $comment->user->name ?? 'Anonymous' }}</h6>
+                                    {{-- Pulsing NEW Badge for Real-time events --}}
+                                    @if($newCommentId == $comment->id)
+                                        <span class="badge badge-success animate-pulse">NEW</span>
+                                    @endif
+                                </div>
+                                <div class="d-flex align-items-center">
                                     @if($comment->updated_at > $comment->created_at)
                                         <small class="text-muted font-italic mr-2" style="font-size: 0.75rem;">(edited)</small>
                                     @endif
@@ -119,7 +140,6 @@
                                                 <i class="fa fa-reply mr-1"></i> Reply
                                             </button>
 
-                                            {{-- WhatsApp Style Edit Button (15 min limit) --}}
                                             @if(auth()->id() == $comment->user_id && $comment->created_at->diffInMinutes(now()) < 15)
                                                 <button @click="editingCommentId = {{ $comment->id }}; editContent = '{{ addslashes($comment->comment) }}'" 
                                                         class="btn btn-sm btn-link text-info p-0 border-0 text-decoration-none font-weight-bold mr-3">
@@ -234,4 +254,14 @@
             </div>
         @endauth
     </div>
+
+    <script>
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('clear-highlight', () => {
+            setTimeout(() => {
+                @this.set('newCommentId', null);
+            }, 5000); 
+        });
+    });
+    </script>
 </div>
