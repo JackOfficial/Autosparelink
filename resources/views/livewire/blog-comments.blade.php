@@ -29,7 +29,7 @@
         </div>
     </div>
     
-    {{-- 1. Display Comments List with Alpine Scroll Control --}}
+    {{-- 1. Display Comments List with Hover-Only Scrollbar --}}
     <div class="position-relative">
         <div class="comments-scroll-container mb-4 pr-2" 
              x-ref="scrollContainer"
@@ -37,11 +37,38 @@
              style="max-height: 600px; overflow-y: auto; scroll-behavior: smooth;">
             
             <style>
-                /* Custom Scrollbar */
-                .comments-scroll-container::-webkit-scrollbar { width: 6px; }
-                .comments-scroll-container::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 10px; }
-                .comments-scroll-container::-webkit-scrollbar-thumb { background: #007bff; border-radius: 10px; }
-                .comments-scroll-container::-webkit-scrollbar-thumb:hover { background: #0056b3; }
+                /* Default State: Scrollbar is invisible */
+                .comments-scroll-container::-webkit-scrollbar { 
+                    width: 6px; 
+                }
+                .comments-scroll-container::-webkit-scrollbar-track { 
+                    background: transparent; 
+                }
+                .comments-scroll-container::-webkit-scrollbar-thumb { 
+                    background: transparent; 
+                    border-radius: 10px; 
+                    transition: background 0.3s ease;
+                }
+
+                /* Hover State: Reveal scrollbar colors */
+                .comments-scroll-container:hover::-webkit-scrollbar-track { 
+                    background: #f8f9fa; 
+                }
+                .comments-scroll-container:hover::-webkit-scrollbar-thumb { 
+                    background: #007bff; 
+                }
+                .comments-scroll-container:hover::-webkit-scrollbar-thumb:hover { 
+                    background: #0056b3; 
+                }
+
+                /* Firefox Compatibility */
+                .comments-scroll-container {
+                    scrollbar-width: none;
+                }
+                .comments-scroll-container:hover {
+                    scrollbar-width: thin;
+                    scrollbar-color: #007bff transparent;
+                }
             </style>
 
             <div class="comments-container">
@@ -128,7 +155,7 @@
                 @endforelse
             </div>
 
-            {{-- 2. Load More Button --}}
+            {{-- Load More Button inside scrollable area --}}
             @if($comments->hasMorePages())
                 <div class="text-center my-4">
                     <button wire:click="$set('perPage', {{ $perPage + 10 }})" 
@@ -175,7 +202,7 @@
                               class="form-control shadow-sm text-dark @error('newComment') is-invalid @enderror" 
                               rows="4" 
                               placeholder="Add to the discussion..."
-                              style="resize: none; border-radius: 12px; background-color: #fff; border: 1px solid #ced4da; font-size: 1rem;"></textarea>
+                              style="resize: none; border-radius: 12px; background-color: #fff; border: 1px solid #ced4da; font-size: 1rem; color: #000 !important;"></textarea>
                     @error('newComment') <span class="invalid-feedback px-2">{{ $message }}</span> @enderror
                 </div>
                 
