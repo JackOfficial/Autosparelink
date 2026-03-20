@@ -82,7 +82,7 @@
     <h6 class="text-uppercase font-weight-bold mb-3">Blog Categories</h6>
     @foreach($categories as $cat)
         {{-- Only show categories where type is 'blog' --}}
-        @if($cat->type !== 'Blog')
+        @if($cat->type !== 'blog')
             @continue
         @endif
 
