@@ -89,21 +89,32 @@
                     @endforeach
                 </div>
 
-                <div class="bg-white p-4 mb-4 shadow-sm rounded">
-                    <h6 class="text-uppercase font-weight-bold mb-3">Latest Updates</h6>
-                    @foreach($recentPosts as $recent)
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="{{ $recent->blogPhoto ? asset('storage/' . $recent->blogPhoto->file_path) : asset('defaults/no-image.jpg') }}" 
-                                 class="rounded shadow-sm mr-3" style="width:60px; height:60px; object-fit:cover;">
-                            <div class="overflow-hidden">
-                                <a href="{{ route('blogs.show', $recent->slug) }}" class="text-dark small font-weight-bold text-truncate d-block">
-                                    {{ $recent->title }}
-                                </a>
-                                <small class="text-muted"><i class="far fa-clock mr-1"></i> {{ $recent->created_at->format('M d') }}</small>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
+               <div class="bg-white p-4 mb-4 shadow-sm rounded">
+    <h6 class="text-uppercase font-weight-bold mb-3">Latest Updates</h6>
+    @foreach($recentPosts as $recent)
+        <div class="d-flex align-items-center mb-3">
+            {{-- Link wrapping the image for better UX --}}
+            <a href="{{ route('blogs.show', $recent->slug) }}" class="flex-shrink-0">
+                <img src="{{ ($recent->blogPhoto && $recent->blogPhoto->file_path) ? asset('storage/' . $recent->blogPhoto->file_path) : asset('defaults/no-photo.jpg') }}" 
+                     class="rounded shadow-sm mr-3" 
+                     style="width:60px; height:60px; object-fit:cover;"
+                     onerror="this.onerror=null;this.src='{{ asset('defaults/no-photo.jpg') }}';"
+                     alt="Thumbnail">
+            </a>
+            
+            <div class="overflow-hidden">
+                <a href="{{ route('blogs.show', $recent->slug) }}" 
+                   class="text-dark small font-weight-bold text-truncate d-block mb-0 text-decoration-none" 
+                   title="{{ $recent->title }}">
+                    {{ $recent->title }}
+                </a>
+                <small class="text-muted d-block" style="font-size: 0.75rem;">
+                    <i class="far fa-clock mr-1 text-primary"></i> {{ $recent->created_at->format('M d, Y') }}
+                </small>
+            </div>
+        </div>
+    @endforeach
+</div>
             </div>
         </div>
 
