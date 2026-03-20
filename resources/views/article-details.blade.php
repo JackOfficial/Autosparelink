@@ -93,18 +93,25 @@
     <h6 class="text-uppercase font-weight-bold mb-3">Latest Updates</h6>
     @foreach($recentPosts as $recent)
         <div class="d-flex align-items-center mb-3">
-            {{-- Link wrapping the image for better UX --}}
+            {{-- Wrap image in link for better navigation --}}
             <a href="{{ route('blogs.show', $recent->slug) }}" class="flex-shrink-0">
-                <img src="{{ ($recent->blogPhoto && $recent->blogPhoto->file_path) ? asset('storage/' . $recent->blogPhoto->file_path) : asset('defaults/no-photo.jpg') }}" 
+                @php
+                    // Check for the polymorphic 'photo' relationship
+                    $photoPath = ($recent->photo && $recent->photo->file_path) 
+                        ? asset('storage/' . $recent->photo->file_path) 
+                        : asset('defaults/no-photo.jpg');
+                @endphp
+                
+                <img src="{{ $photoPath }}" 
                      class="rounded shadow-sm mr-3" 
                      style="width:60px; height:60px; object-fit:cover;"
                      onerror="this.onerror=null;this.src='{{ asset('defaults/no-photo.jpg') }}';"
-                     alt="Thumbnail">
+                     alt="{{ $recent->title }}">
             </a>
             
             <div class="overflow-hidden">
                 <a href="{{ route('blogs.show', $recent->slug) }}" 
-                   class="text-dark small font-weight-bold text-truncate d-block mb-0 text-decoration-none" 
+                   class="text-dark small font-weight-bold text-truncate d-block mb-0 text-decoration-none"
                    title="{{ $recent->title }}">
                     {{ $recent->title }}
                 </a>
