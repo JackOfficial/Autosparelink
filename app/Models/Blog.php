@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Blog extends Model
 {
@@ -20,7 +19,7 @@ class Blog extends Model
         'title',
         'slug',
         'content',
-        'status', // Added this to prevent the "Unknown column 'status'" error
+        'status', 
     ];
     
     /**
@@ -36,7 +35,6 @@ class Blog extends Model
      */
     public function category(): BelongsTo
     {
-        // Explicitly mapping blog_category_id to the category model
         return $this->belongsTo(BlogCategory::class, 'blog_category_id');
     }
     
@@ -48,18 +46,45 @@ class Blog extends Model
         return $this->morphOne(Photo::class, 'imageable');
     }
 
-    public function likes()
-{
-    return $this->morphMany(Like::class, 'likeable');
-}
+    /**
+     * Get all of the blog's likes (Polymorphic).
+     */
+    public function likes(): MorphMany
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
 
     /**
      * Get all of the blog's comments (Polymorphic).
-     * This fixes the "Unknown column 'blog_id'" error by looking for 
-     * 'commentable_id' and 'commentable_type' instead.
      */
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    /**
+     * Check if the blog is liked by a specific user.
+     */
+    public function isLikedBy($userId): bool
+    {
+        if (!$userId) return false;
+
+        return $this->likes()
+            ->where('user_id', $userId)
+            ->where('is_like', true)
+            ->exists();
+    }
+
+    /**
+     * Check if the blog is disliked by a specific user.
+     */
+    public function isDislikedBy($userId): bool
+    {
+        if (!$userId) return false;
+
+        return $this->likes()
+            ->where('user_id', $userId)
+            ->where('is_like', false)
+            ->exists();
     }
 }
