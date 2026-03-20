@@ -2,6 +2,8 @@
      x-data="{ 
         scrolled: false,
         charLimit: 500,
+        editingCommentId: null,
+        editContent: '',
         scrollToForm() {
             $refs.commentForm.scrollIntoView({ behavior: 'smooth' });
             $refs.commentArea.focus();
@@ -30,7 +32,7 @@
         </div>
     </div>
     
-    {{-- 1. Display Comments List with Neutral Scrollbar --}}
+    {{-- 1. Display Comments List --}}
     <div class="position-relative">
         <div class="comments-scroll-container mb-4 pr-2" 
              x-ref="scrollContainer"
@@ -38,25 +40,13 @@
              style="max-height: 600px; overflow-y: auto; scroll-behavior: smooth;">
             
             <style>
-                /* Neutral Scrollbar Logic */
                 .comments-scroll-container::-webkit-scrollbar { width: 6px; }
                 .comments-scroll-container::-webkit-scrollbar-track { background: transparent; }
-                .comments-scroll-container::-webkit-scrollbar-thumb { 
-                    background: transparent; 
-                    border-radius: 10px; 
-                    transition: background 0.3s ease;
-                }
-
+                .comments-scroll-container::-webkit-scrollbar-thumb { background: transparent; border-radius: 10px; transition: background 0.3s ease; }
                 .comments-scroll-container:hover::-webkit-scrollbar-track { background: #f8f9fa; }
                 .comments-scroll-container:hover::-webkit-scrollbar-thumb { background: #ccc; }
-                .comments-scroll-container:hover::-webkit-scrollbar-thumb:hover { background: #999; }
-
-                /* Firefox Compatibility */
                 .comments-scroll-container { scrollbar-width: none; }
-                .comments-scroll-container:hover {
-                    scrollbar-width: thin;
-                    scrollbar-color: #ccc transparent;
-                }
+                .comments-scroll-container:hover { scrollbar-width: thin; scrollbar-color: #ccc transparent; }
             </style>
 
             <div class="comments-container">
@@ -65,9 +55,10 @@
                          wire:key="comment-{{ $comment->id }}"
                          style="border-left: 5px solid #007bff !important;">
                         
+                        {{-- User Avatar --}}
                         <div class="mr-3" style="flex-shrink:0;">
                             @if($comment->user && $comment->user->avatar)
-                                <img src="{{ $comment->user->avatar }}" 
+                                <img src="{{ asset('storage/' . $comment->user->avatar) }}" 
                                      class="rounded-circle border border-primary shadow-sm" 
                                      style="width: 50px; height: 50px; object-fit: cover;">
                             @else
@@ -81,28 +72,71 @@
                         <div class="media-body">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="font-weight-bold mb-0 text-dark" style="font-size: 1.1rem;">{{ $comment->user->name ?? 'Anonymous' }}</h6>
-                                <small class="text-muted font-weight-bold px-2 py-1 rounded border bg-light">
-                                    <i class="far fa-clock mr-1 text-primary"></i> {{ $comment->created_at->diffForHumans() }}
-                                </small>
+                                <div class="d-flex align-items-center">
+                                    {{-- Edited Indicator --}}
+                                    @if($comment->updated_at > $comment->created_at)
+                                        <small class="text-muted font-italic mr-2" style="font-size: 0.75rem;">(edited)</small>
+                                    @endif
+                                    <small class="text-muted font-weight-bold px-2 py-1 rounded border bg-light">
+                                        <i class="far fa-clock mr-1 text-primary"></i> {{ $comment->created_at->diffForHumans() }}
+                                    </small>
+                                </div>
                             </div>
                             
-                            <p class="mb-2 text-dark" style="line-height: 1.7; font-size: 1rem;">
-                                {{ $comment->comment }}
-                            </p>
-
-                            <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
-                                <div class="d-flex align-items-center">
-                                    <button wire:click="toggleCommentLike({{ $comment->id }}, true)" 
-                                            class="btn btn-sm btn-link p-0 mr-3 text-decoration-none transition-all {{ $comment->isLikedBy(auth()->id()) ? 'text-primary' : 'text-dark' }}">
-                                        <i class="fa{{ $comment->isLikedBy(auth()->id()) ? 's' : 'r' }} fa-thumbs-up mr-1"></i> 
-                                        <span class="font-weight-bold">{{ $comment->likes()->where('is_like', true)->count() }}</span>
+                            {{-- Edit Mode Textarea --}}
+                            <div x-show="editingCommentId === {{ $comment->id }}" x-cloak class="mb-3">
+                                <textarea x-model="editContent" 
+                                          class="form-control shadow-sm text-dark mb-2" 
+                                          rows="3" 
+                                          style="border-radius: 10px; font-size: 0.95rem; resize: none;"></textarea>
+                                <div class="d-flex justify-content-end">
+                                    <button @click="editingCommentId = null" class="btn btn-sm btn-light border mr-2 font-weight-bold px-3">Cancel</button>
+                                    <button wire:click="updateComment({{ $comment->id }}, editContent); editingCommentId = null" 
+                                            class="btn btn-sm btn-primary text-dark font-weight-bold px-3 shadow-sm">
+                                        Update
                                     </button>
+                                </div>
+                            </div>
 
-                                    @auth
-                                        <button @click="scrollToForm(); $wire.setReply({{ $comment->id }})" 
-                                                class="btn btn-sm btn-link text-primary p-0 border-0 text-decoration-none font-weight-bold">
-                                            <i class="fa fa-reply mr-1"></i> Reply
+                            {{-- Static Comment Display --}}
+                            <div x-show="editingCommentId !== {{ $comment->id }}">
+                                <p class="mb-2 text-dark" style="line-height: 1.7; font-size: 1rem;">
+                                    {{ $comment->comment }}
+                                </p>
+
+                                {{-- Actions Bar --}}
+                                <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
+                                    <div class="d-flex align-items-center">
+                                        <button wire:click="toggleCommentLike({{ $comment->id }}, true)" 
+                                                class="btn btn-sm btn-link p-0 mr-3 text-decoration-none transition-all {{ $comment->isLikedBy(auth()->id()) ? 'text-primary' : 'text-dark' }}">
+                                            <i class="fa{{ $comment->isLikedBy(auth()->id()) ? 's' : 'r' }} fa-thumbs-up mr-1"></i> 
+                                            <span class="font-weight-bold">{{ $comment->likes()->where('is_like', true)->count() }}</span>
                                         </button>
+
+                                        @auth
+                                            <button @click="scrollToForm(); $wire.setReply({{ $comment->id }})" 
+                                                    class="btn btn-sm btn-link text-primary p-0 border-0 text-decoration-none font-weight-bold mr-3">
+                                                <i class="fa fa-reply mr-1"></i> Reply
+                                            </button>
+
+                                            {{-- WhatsApp Style Edit Button (15 min limit) --}}
+                                            @if(auth()->id() == $comment->user_id && $comment->created_at->diffInMinutes(now()) < 15)
+                                                <button @click="editingCommentId = {{ $comment->id }}; editContent = '{{ addslashes($comment->comment) }}'" 
+                                                        class="btn btn-sm btn-link text-info p-0 border-0 text-decoration-none font-weight-bold mr-3">
+                                                    <i class="fa fa-edit mr-1"></i> Edit
+                                                </button>
+                                            @endif
+                                        @endauth
+                                    </div>
+                                    
+                                    @auth
+                                        @if(auth()->id() == $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']))
+                                            <button wire:click="deleteComment({{ $comment->id }})" 
+                                                    wire:confirm="Are you sure?"
+                                                    class="btn btn-sm btn-link text-danger p-0 border-0 text-decoration-none opacity-75">
+                                                <i class="fa fa-trash-alt mr-1"></i> Remove
+                                            </button>
+                                        @endif
                                     @endauth
                                 </div>
                             </div>
@@ -150,7 +184,7 @@
 
     <hr class="my-5 border-light">
 
-    {{-- 3. Reply/Comment Form with Character Counter --}}
+    {{-- 3. Reply/Comment Form --}}
     <div class="reply-section" x-ref="commentForm">
         @if($replyingTo)
             <div class="alert alert-primary py-2 px-3 d-flex justify-content-between align-items-center mb-3 shadow-sm border-0" style="border-radius: 10px;">
@@ -174,7 +208,6 @@
                               placeholder="Add to the discussion..."
                               style="resize: none; border-radius: 12px; background-color: #fff; border: 1px solid #ced4da; font-size: 1rem; color: #000 !important;"></textarea>
                     
-                    {{-- Character Counter --}}
                     <div class="d-flex justify-content-end mt-1">
                         <small class="font-weight-bold" :class="$wire.newComment.length > charLimit ? 'text-danger' : 'text-muted'">
                             <span x-text="$wire.newComment.length"></span> / <span x-text="charLimit"></span> characters

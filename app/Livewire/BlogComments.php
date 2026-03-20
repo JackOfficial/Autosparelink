@@ -7,6 +7,7 @@ use App\Models\Blog;
 use App\Models\Comment;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class BlogComments extends Component
 {
@@ -58,6 +59,38 @@ class BlogComments extends Component
         $this->replyingTo = null;
         $this->reset('newComment');
     }
+
+    public function updateComment($commentId, $content)
+{
+    // 1. Find the comment
+    $comment = Comment::findOrFail($commentId);
+
+    // 2. Validate the user owns the comment
+    if ($comment->user_id != auth()->id()) {
+        session()->flash('error', 'Unauthorized action.');
+        return;
+    }
+
+    // 3. Check the "WhatsApp Style" time limit (15 minutes)
+    if ($comment->created_at->diffInMinutes(now()) >= 15) {
+        session()->flash('error', 'The time limit to edit this comment has expired.');
+        return;
+    }
+
+    // 4. Validate the content length (matches your charLimit)
+    $validatedData = Validator::make(
+        ['comment' => $content],
+        ['comment' => 'required|string|max:500']
+    )->validate();
+
+    // 5. Update the comment
+    $comment->update([
+        'comment' => $validatedData['comment']
+    ]);
+
+    // Optional: Log the edit or notify the UI
+    session()->flash('message', 'Comment updated successfully.');
+}
 
     public function postComment()
     {
