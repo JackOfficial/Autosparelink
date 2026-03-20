@@ -124,10 +124,10 @@ public function blogs()
             'blog_id' => $request->blog_id,
         ]);
         if($comment){
-           session()->flash('message', 'Your comment has been Posted!');
+           redirect()->back()->with('message', 'Your comment has been Posted!');
         }
         else{
-            session()->flash('message', 'Your comment could not be posted!');
+            redirect()->back()->with('message', 'Your comment could not be posted!');
         }
     }
 
