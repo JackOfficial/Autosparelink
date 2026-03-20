@@ -74,6 +74,31 @@ class Show extends Component
         session()->flash('success', 'Your reply has been sent.');
     }
 
+    /**
+     * Delete a specific reply if it belongs to the authenticated user.
+     */
+  public function deleteReply($replyId)
+{
+    // Find the reply AND ensure it's less than 15 minutes old
+    $reply = $this->ticket->replies()
+        ->where('id', $replyId)
+        ->where('user_id', Auth::id())
+        ->where('created_at', '>=', now()->subMinutes(15))
+        ->first();
+
+    if ($reply) {
+        $reply->delete();
+        
+        // Refresh the computed property cache to update the UI instantly
+        unset($this->ticket);
+        
+        session()->flash('success', 'Message deleted successfully.');
+    } else {
+        // This handles cases where the user tries to delete after the 15-min window
+        session()->flash('error', 'You can no longer delete this message (time limit exceeded).');
+    }
+}
+
     public function render()
     {
         return view('livewire.tickets.show', [
