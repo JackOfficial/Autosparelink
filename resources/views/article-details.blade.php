@@ -219,18 +219,6 @@
                     </div>
                 @endauth
             </div>
-                
-                {{-- Add your existing comment loop here if you have a comments table --}}
-                
-                <form action="{{ route('comment.store') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="blog_id" value="{{ $post->id }}">
-                    <div class="form-group">
-                        <label class="small font-weight-bold text-uppercase">Leave a reply</label>
-                        <textarea name="comment" class="form-control border-0 shadow-sm" rows="4" placeholder="Share your thoughts..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary px-4 shadow-sm text-dark">Submit Comment</button>
-                </form>
             </div>
         </div>
     </div>
