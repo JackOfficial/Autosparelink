@@ -18,7 +18,7 @@ class Show extends Component
     public function mount(Ticket $ticket)
     {
         // Security Check: Ensure this ticket belongs to the logged-in user
-        if ($ticket->user_id !== Auth::id()) {
+        if ($ticket->user_id != Auth::id()) {
             abort(403);
         }
 
