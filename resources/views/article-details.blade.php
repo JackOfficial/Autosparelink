@@ -89,14 +89,17 @@
                     @endforeach
                 </div>
 
-               <div class="bg-white p-4 mb-4 shadow-sm rounded">
+<div class="bg-white p-4 mb-4 shadow-sm rounded">
     <h6 class="text-uppercase font-weight-bold mb-3">Latest Updates</h6>
     @foreach($recentPosts as $recent)
+        {{-- Check if the current sidebar item is the article being read --}}
+        @if(isset($post) && $recent->id === $post->id)
+            @continue
+        @endif
+
         <div class="d-flex align-items-center mb-3">
-            {{-- Wrap image in link for better navigation --}}
             <a href="{{ route('blogs.show', $recent->slug) }}" class="flex-shrink-0">
                 @php
-                    // Using 'blogPhoto' relationship as seen in your Controller
                     $photoPath = ($recent->blogPhoto && $recent->blogPhoto->file_path) 
                         ? asset('storage/' . $recent->blogPhoto->file_path) 
                         : asset('defaults/no-photo.jpg');
