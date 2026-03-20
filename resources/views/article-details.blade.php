@@ -96,9 +96,9 @@
             {{-- Wrap image in link for better navigation --}}
             <a href="{{ route('blogs.show', $recent->slug) }}" class="flex-shrink-0">
                 @php
-                    // Check for the polymorphic 'photo' relationship
-                    $photoPath = ($recent->photo && $recent->photo->file_path) 
-                        ? asset('storage/' . $recent->photo->file_path) 
+                    // Using 'blogPhoto' relationship as seen in your Controller
+                    $photoPath = ($recent->blogPhoto && $recent->blogPhoto->file_path) 
+                        ? asset('storage/' . $recent->blogPhoto->file_path) 
                         : asset('defaults/no-photo.jpg');
                 @endphp
                 
@@ -122,6 +122,7 @@
         </div>
     @endforeach
 </div>
+
             </div>
         </div>
 
