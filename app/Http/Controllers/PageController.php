@@ -92,9 +92,32 @@ public function blogs()
         return view('cart'); 
     }
 
-    function news_details($id){
-        return view('news-details');
-    }
+public function news_details($slug)
+{
+    // 1. Fetch the news item with polymorphic photo, category, and author
+    $news = News::with(['newsPhoto', 'category', 'user'])
+        ->where('slug', $slug)
+        ->where('status', 'published')
+        ->firstOrFail();
+
+    // 2. Fetch News Categories (filtered by type) for the sidebar
+    $categories = BlogCategory::where('type', 'news')
+        ->withCount('news')
+        ->get();
+
+    // 3. Fetch Recent News (excluding the current one) for the "Latest Updates"
+    $recentPosts = News::with(['newsPhoto as blogPhoto']) // Alias for Blade consistency
+        ->where('id', '!=', $news->id)
+        ->where('status', 'published')
+        ->latest()
+        ->limit(5)
+        ->get();
+
+    // 4. Increment view count
+    $news->increment('views');
+
+    return view('news-details', compact('news', 'categories', 'recentPosts'));
+}
 
  public function article($slug)
 {

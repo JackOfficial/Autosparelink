@@ -1,14 +1,59 @@
 @extends('layouts.app')
 
+{{-- 1. SEO & SOCIAL MEDIA META TAGS --}}
+@section('meta_tags')
+    @php
+        $title = $news->title . ' | News & Updates';
+        $description = Str::limit(strip_tags($news->content), 160);
+        $url = url()->current();
+        $image = $news->newsPhoto ? asset('storage/' . $news->newsPhoto->file_path) : asset('defaults/no-image.jpg');
+    @endphp
+    <title>{{ $title }}</title>
+    <meta name="description" content="{{ $description }}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ $url }}">
+    <meta property="og:title" content="{{ $title }}">
+    <meta property="og:description" content="{{ $description }}">
+    <meta property="og:image" content="{{ $image }}">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="{{ $title }}">
+    <meta property="twitter:image" content="{{ $image }}">
+@endsection
+
 @section('content')
+
+{{-- Reading Progress Bar --}}
+<div id="reading-progress"></div>
+
+{{-- Back to Top Button --}}
+<button id="backToTop" class="btn btn-primary shadow" style="position: fixed; bottom: 30px; right: 30px; display: none; z-index: 99; border-radius: 50%; width: 50px; height: 50px; transition: 0.3s;" title="Go to top">
+    <i class="fa fa-chevron-up text-dark"></i>
+</button>
+
+<style>
+    #reading-progress { position:fixed; top:0; left:0; height:4px; background:#FFD333; width:0; z-index:9999; transition: width 0.1s ease; }
+    #backToTop:hover { transform: scale(1.1); background: #333 !important; color: #FFD333 !important; }
+    .sticky-sidebar { position: sticky; top: 20px; }
+    .news-content { line-height: 2; font-size: 1.1rem; color: #333; }
+    .news-content p { margin-bottom: 1.5rem; }
+    .news-content img { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 2rem 0; width: 100%; height: auto; }
+    .comment-bubble { transition: all 0.3s ease; border: 1px solid transparent; }
+    .comment-bubble:hover { border-color: #FFD333; background: #fff !important; }
+    .share-btn { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; transition: 0.3s; color: white !important; }
+    .share-btn:hover { transform: translateY(-3px); opacity: 0.9; }
+    .breadcrumb-custom { background: #f8f9fa; border-radius: 50px; padding: 12px 25px; border: 1px solid #eee; }
+    .hover-grow { transition: transform 0.3s ease; }
+    .hover-grow:hover { transform: translateY(-5px); }
+</style>
 
 <div class="container-fluid mt-4">
     <div class="row px-xl-5">
         <div class="col-12">
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-white shadow-sm rounded-pill px-4">
+                <ol class="breadcrumb breadcrumb-custom shadow-sm">
                     <li class="breadcrumb-item"><a class="text-primary font-weight-bold" href="{{ url('/') }}">Home</a></li>
-                    <li class="breadcrumb-item active text-muted" aria-current="page">News & Updates</li>
+                    <li class="breadcrumb-item"><a class="text-primary font-weight-bold" href="{{ route('news.index') }}">News</a></li>
+                    <li class="breadcrumb-item active text-muted" aria-current="page">{{ Str::limit($news->title, 40) }}</li>
                 </ol>
             </nav>
         </div>
@@ -17,124 +62,164 @@
 
 <div class="container-fluid mb-5">
     <div class="row px-xl-5">
+        {{-- Sidebar --}}
         <div class="col-lg-3 col-md-4">
-            {{-- Search --}}
-            <div class="bg-white p-4 mb-4 shadow-sm rounded border-top border-primary">
-                <h6 class="text-uppercase font-weight-bold mb-3">Search News</h6>
-                <form action="{{ route('news.index') }}" method="GET">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control border-secondary" placeholder="Keywords...">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary text-dark"><i class="fa fa-search"></i></button>
+            <div class="sticky-sidebar">
+                <div class="bg-white p-4 mb-4 shadow-sm border-top border-primary rounded">
+                    <h6 class="text-uppercase font-weight-bold mb-3">Search News</h6>
+                    <form action="{{ route('news.index') }}" method="GET">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control border-secondary" placeholder="Keywords...">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary text-dark"><i class="fa fa-search"></i></button>
+                            </div>
                         </div>
-                    </div>
-                </form>
-            </div>
+                    </form>
+                </div>
 
-            {{-- Categories --}}
-            <div class="bg-white p-4 mb-4 shadow-sm rounded">
-                <h6 class="text-uppercase font-weight-bold mb-3">News Categories</h6>
-                @foreach($categories as $cat)
-                    <a href="{{ route('news.index', ['category' => $cat->slug]) }}" 
-                       class="d-flex justify-content-between align-items-center mb-2 text-dark text-decoration-none py-1 border-bottom hover-link">
-                        <span>{{ $cat->name }}</span>
-                        <span class="badge badge-pill badge-light border text-primary">{{ $cat->news_count }}</span>
-                    </a>
-                @endforeach
-            </div>
+                <div class="bg-white p-4 mb-4 shadow-sm rounded">
+                    <h6 class="text-uppercase font-weight-bold mb-3">News Categories</h6>
+                    @foreach($categories as $cat)
+                        <a href="{{ route('news.index', ['category' => $cat->slug]) }}" 
+                           class="d-flex justify-content-between align-items-center mb-2 text-dark text-decoration-none py-1 border-bottom">
+                            <span>{{ $cat->name }}</span>
+                            <span class="badge badge-pill badge-light border text-primary">{{ $cat->news_count }}</span>
+                        </a>
+                    @endforeach
+                </div>
 
-            {{-- Latest Updates (Recent News) --}}
-            <div class="bg-white p-4 mb-4 shadow-sm rounded">
-                <h6 class="text-uppercase font-weight-bold mb-3">Recent Highlights</h6>
-                @foreach($newsList->take(5) as $recent)
-                    <div class="d-flex align-items-center mb-3">
-                        @php
-                            $sidePath = ($recent->newsPhoto && $recent->newsPhoto->file_path) 
-                                ? asset('storage/' . $recent->newsPhoto->file_path) 
-                                : asset('defaults/no-photo.jpg');
-                        @endphp
-                        <img src="{{ $sidePath }}" class="rounded shadow-sm mr-3" style="width:60px; height:60px; object-fit:cover;">
-                        <div class="overflow-hidden">
-                            <a href="{{ route('news.show', $recent->slug) }}" class="text-dark small font-weight-bold text-truncate d-block">
-                                {{ $recent->title }}
+                <div class="bg-white p-4 mb-4 shadow-sm rounded">
+                    <h6 class="text-uppercase font-weight-bold mb-3">Recent News</h6>
+                    @foreach($recentPosts as $recent)
+                        <div class="d-flex align-items-center mb-3">
+                            <a href="{{ route('news.show', $recent->slug) }}" class="flex-shrink-0">
+                                @php
+                                    $photoPath = ($recent->newsPhoto && $recent->newsPhoto->file_path) 
+                                        ? asset('storage/' . $recent->newsPhoto->file_path) 
+                                        : asset('defaults/no-photo.jpg');
+                                @endphp
+                                <img src="{{ $photoPath }}" class="rounded shadow-sm mr-3" style="width:60px; height:60px; object-fit:cover;">
                             </a>
-                            <small class="text-muted"><i class="far fa-clock mr-1 text-primary"></i> {{ $recent->created_at->format('M d') }}</small>
+                            <div class="overflow-hidden">
+                                <a href="{{ route('news.show', $recent->slug) }}" class="text-dark small font-weight-bold text-truncate d-block mb-0 text-decoration-none">
+                                    {{ $recent->title }}
+                                </a>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                    <i class="far fa-clock mr-1 text-primary"></i> {{ $recent->created_at->format('M d, Y') }}
+                                </small>
+                            </div>
                         </div>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
             </div>
         </div>
 
+        {{-- Main Article --}}
         <div class="col-lg-9 col-md-8">
-            <div class="row">
-                @forelse($newsList as $item)
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="card h-100 border-0 shadow-sm hover-grow bg-white">
-                            {{-- News Image --}}
-                            <div class="position-relative overflow-hidden">
-                                @php
-                                    $imagePath = ($item->newsPhoto && $item->newsPhoto->file_path) 
-                                        ? asset('storage/' . $item->newsPhoto->file_path) 
-                                        : asset('defaults/no-photo.jpg');
-                                @endphp
-                                <img class="card-img-top" src="{{ $imagePath }}" alt="{{ $item->title }}" style="height: 200px; object-fit: cover;">
-                                <div class="badge badge-primary position-absolute px-3 py-2" style="top: 15px; left: 15px; border-radius: 50px;">
-                                    {{ $item->category->name ?? 'Update' }}
-                                </div>
-                            </div>
+            <article class="bg-white p-4 p-lg-5 mb-4 shadow-sm rounded">
+                <header class="mb-4 text-center text-md-left">
+                    <span class="badge badge-primary px-3 py-2 text-uppercase mb-3">{{ $news->category->name ?? 'Update' }}</span>
+                    <h1 class="display-5 font-weight-bold text-dark">{{ $news->title }}</h1>
+                    
+                    <div class="d-flex flex-wrap justify-content-center justify-content-md-start text-muted mt-3 py-3 border-top border-bottom">
+                        <div class="mr-4 mb-2"><i class="fa fa-calendar-alt text-primary mr-2"></i> {{ $news->created_at->format('M d, Y') }}</div>
+                        <div class="mr-4 mb-2"><i class="fa fa-user text-primary mr-2"></i> By {{ $news->user->name ?? 'Admin' }}</div>
+                        <div class="mr-4 mb-2"><i class="fa fa-eye text-primary mr-2"></i> {{ number_format($news->views) }} Views</div>
+                        <div class="mb-2"><i class="fa fa-comments text-primary mr-2"></i> {{ $news->comments->count() }} Comments</div>
+                    </div>
+                </header>
 
-                            {{-- Card Body --}}
-                            <div class="card-body p-4">
-                                <a class="h6 text-dark font-weight-bold d-block mb-3 news-card-title text-decoration-none" href="{{ route('news.show', $item->slug) }}">
-                                    {{ $item->title }}
-                                </a>
-                                <div class="text-muted mb-3" style="font-size: 0.9rem; line-height: 1.6;">
-                                    {!! Str::limit(strip_tags($item->content), 90) !!}
-                                </div>
-                            </div>
+                @if($news->newsPhoto)
+                    <div class="mb-5">
+                        <img src="{{ asset('storage/' . $news->newsPhoto->file_path) }}" 
+                             class="img-fluid w-100 rounded shadow" alt="{{ $news->title }}">
+                    </div>
+                @endif
 
-                            {{-- Card Footer --}}
-                            <div class="card-footer bg-white border-top-0 p-4 pt-0 d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="far fa-calendar-alt text-primary mr-1"></i> {{ $item->created_at->format('M d, Y') }}
-                                </small>
-                                <a href="{{ route('news.show', $item->slug) }}" class="btn btn-sm btn-outline-primary px-3 rounded-pill">Read News</a>
-                            </div>
+                <div class="news-content">
+                    {!! $news->content !!}
+                </div>
+
+                <footer class="mt-5 pt-4 border-top">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        <div class="mb-3">
+                            <span class="font-weight-bold mr-3 text-muted">SHARE THIS NEWS:</span>
+                            <a href="https://api.whatsapp.com/send?text={{ urlencode($news->title . ' ' . url()->current()) }}" target="_blank" class="share-btn btn btn-success rounded-circle mr-2"><i class="fab fa-whatsapp"></i></a>
+                            <a href="https://twitter.com/intent/tweet?url={{ url()->current() }}" target="_blank" class="share-btn btn btn-dark rounded-circle mr-2"><i class="fab fa-x-twitter"></i></a>
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ url()->current() }}" target="_blank" class="share-btn btn btn-primary rounded-circle"><i class="fab fa-facebook-f"></i></a>
                         </div>
                     </div>
-                @empty
-                    <div class="col-12 text-center py-5">
-                        <img src="{{ asset('defaults/no-results.png') }}" style="width: 150px; opacity: 0.5;">
-                        <h4 class="text-muted mt-3">No news articles found.</h4>
-                    </div>
-                @endforelse
+                </footer>
+            </article>
 
-                {{-- Pagination --}}
-                <div class="col-12 mt-4">
-                    <div class="d-flex justify-content-center custom-pagination">
-                        {{ $newsList->links() }}
-                    </div>
+            {{-- Join the Conversation --}}
+            <div class="bg-white p-4 p-lg-5 shadow-sm rounded border-top border-primary">
+                <h4 class="font-weight-bold mb-4">Comments</h4>
+                
+                <div class="comments-container mb-5">
+                    @forelse($news->comments->sortByDesc('created_at') as $comment)
+                        <div class="media p-4 mb-3 bg-light rounded comment-bubble">
+                            <div class="mr-3 shadow-sm" style="flex-shrink:0;">
+                                @if($comment->user && $comment->user->avatar)
+                                    <img src="{{ $comment->user->avatar }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #FFD333;">
+                                @else
+                                    <div class="rounded-circle bg-primary text-dark d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <strong style="font-size: 1.2rem;">{{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}</strong>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="media-body">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <h6 class="font-weight-bold mb-0">{{ $comment->user->name ?? 'Anonymous' }}</h6>
+                                    <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
+                                </div>
+                                <p class="mb-0 text-muted">{{ $comment->comment }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-4">
+                            <p class="text-muted italic">No comments yet. Start the discussion!</p>
+                        </div>
+                    @endforelse
                 </div>
+
+                <h5 class="font-weight-bold mb-3">Leave a Reply</h5>
+                @auth
+                    <form action="{{ route('comment.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="news_id" value="{{ $news->id }}">
+                        <textarea name="comment" class="form-control border-light shadow-sm mb-3" rows="5" placeholder="Your message..." required></textarea>
+                        <button class="btn btn-primary px-5 py-2 font-weight-bold shadow-sm text-dark">Submit Post</button>
+                    </form>
+                @else
+                    <div class="alert alert-light border text-center py-4">
+                        Please <a href="{{ route('login') }}" class="font-weight-bold text-primary">Login</a> to share your thoughts.
+                    </div>
+                @endauth
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .news-card-title {
-        transition: color 0.3s ease;
-        height: 3rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    .news-card-title:hover { color: #FFD333 !important; }
-    .hover-grow { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .hover-grow:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; }
-    .hover-link:hover { padding-left: 5px; color: #FFD333 !important; transition: 0.3s; }
-    .custom-pagination .page-item.active .page-link { background-color: #FFD333; border-color: #FFD333; color: #333; }
-    .custom-pagination .page-link { color: #333; border-radius: 5px; margin: 0 2px; }
-</style>
+<script>
+    const btt = document.getElementById("backToTop");
+    const progress = document.getElementById('reading-progress');
+
+    window.onscroll = function() {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        if (progress) progress.style.width = (winScroll / height * 100) + "%";
+
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            btt.style.display = "block";
+        } else {
+            btt.style.display = "none";
+        }
+    };
+
+    btt.onclick = function() {
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+</script>
 
 @endsection
