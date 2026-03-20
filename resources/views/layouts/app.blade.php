@@ -150,13 +150,10 @@
                         </a>
                         <div class="dropdown-menu shadow-sm" aria-labelledby="resourcesDropdown">
                             <a class="dropdown-item d-flex align-items-center" href="/blogs">
-                                <i class="fas fa-newspaper mr-2 text-primary"></i> Blogs
-                            </a>
-                            <a class="dropdown-item d-flex align-items-center" href="/articles">
-                                <i class="fas fa-file-alt mr-2 text-primary"></i> Articles
+                                <i class="fas fa-newspaper mr-2 text-primary"></i> Blogs & Articles
                             </a>
                             <a class="dropdown-item d-flex align-items-center" href="/news">
-                                <i class="fas fa-bullhorn mr-2 text-primary"></i> News
+                                <i class="fas fa-bullhorn mr-2 text-primary"></i> News & Updates
                             </a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item d-flex align-items-center" href="/terms-and-conditions">

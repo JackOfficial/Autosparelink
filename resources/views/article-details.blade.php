@@ -25,11 +25,6 @@
 {{-- Reading Progress Bar --}}
 <div id="reading-progress"></div>
 
-{{-- Back to Top Button --}}
-<button id="backToTop" class="btn btn-primary shadow" style="position: fixed; bottom: 30px; right: 30px; display: none; z-index: 99; border-radius: 50%; width: 50px; height: 50px; transition: 0.3s;" title="Go to top">
-    <i class="fa fa-chevron-up"></i>
-</button>
-
 <style>
     #reading-progress { position:fixed; top:0; left:0; height:4px; background:#FFD333; width:0; z-index:9999; transition: width 0.1s ease; }
     #backToTop:hover { transform: scale(1.1); background: #333 !important; color: #FFD333 !important; }
@@ -306,23 +301,12 @@
 </div>
 
 <script>
-    const btt = document.getElementById("backToTop");
     const progress = document.getElementById('reading-progress');
 
     window.onscroll = function() {
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         if (progress) progress.style.width = (winScroll / height * 100) + "%";
-
-        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
-            btt.style.display = "block";
-        } else {
-            btt.style.display = "none";
-        }
-    };
-
-    btt.onclick = function() {
-        window.scrollTo({top: 0, behavior: 'smooth'});
     };
 </script>
 
