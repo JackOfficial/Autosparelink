@@ -112,7 +112,7 @@ Route::controller(PageController::class)->group(function () {
     Route::get('/volunteer', 'volunteer')->name('volunteer');
     Route::get('/application-sent', 'application_sent')->name('application.sent');
     Route::post('/comment', 'post')->name('comment.store');
-    Route::post('/deleteComment/{id}', 'deleteComment')->name('comment.delete');
+    Route::delete('/comment/{id}', 'deleteComment')->name('comment.delete');
 
     // --- LEGAL & E-COMMERCE ---
     Route::get('/policies', 'policies')->name('policies');

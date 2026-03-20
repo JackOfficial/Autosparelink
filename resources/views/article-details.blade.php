@@ -213,15 +213,39 @@
                                 @endif
                             </div>
 
-                            <div class="media-body">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <h6 class="font-weight-bold mb-0">{{ $comment->user->name ?? 'Anonymous' }}</h6>
-                                    <small class="text-muted">
-                                        <i class="far fa-clock mr-1"></i> {{ $comment->created_at->diffForHumans() }}
-                                    </small>
-                                </div>
-                                <p class="mb-0 text-muted">{{ $comment->comment }}</p>
-                            </div>
+                           <div class="media-body">
+    <div class="d-flex justify-content-between mb-1">
+        <h6 class="font-weight-bold mb-0">{{ $comment->user->name ?? 'Anonymous' }}</h6>
+        <div class="d-flex align-items-center">
+            <small class="text-muted mr-3">
+                <i class="far fa-clock mr-1"></i> {{ $comment->created_at->diffForHumans() }}
+            </small>
+
+            {{-- DELETE FEATURE START --}}
+           @auth
+    @if(auth()->id() == $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']))
+        <form action="{{ route('comment.delete', $comment->id) }}" 
+              method="POST" 
+              class="d-inline ml-2" 
+              onsubmit="return confirm('Delete this comment permanently?');">
+            @csrf
+            @method('DELETE') {{-- This tells Laravel to treat the POST as a DELETE --}}
+            
+            <button type="submit" 
+                    class="btn btn-link text-danger p-0 border-0 align-baseline" 
+                    style="vertical-align: middle;"
+                    title="Delete Comment">
+                <i class="fa fa-trash-alt" style="font-size: 0.85rem;"></i>
+            </button>
+        </form>
+    @endif
+@endauth
+            {{-- DELETE FEATURE END --}}
+            
+        </div>
+    </div>
+    <p class="mb-0 text-muted">{{ $comment->comment }}</p>
+</div>
                         </div>
                     @empty
                         <div class="text-center py-5">
