@@ -12,13 +12,9 @@ class Show extends Component
     public $ticketId;
     public $message = '';
 
-    /**
-     * mount() runs once when the component is loaded.
-     * We accept $id from the Blade view.
-     */
     public function mount($id)
     {
-        // Security Check: Verify ownership and existence
+        // Security Check
         $ticket = Ticket::where('id', $id)
                         ->where('user_id', Auth::id())
                         ->first();
@@ -30,60 +26,49 @@ class Show extends Component
         $this->ticketId = $id;
     }
 
-    /**
-     * Validation rules for the message input.
-     */
     protected $rules = [
         'message' => 'required|string|min:2|max:5000',
     ];
 
     /**
-     * The Computed Property caches the ticket query.
-     * Access it as $this->ticketProperty (PHP) or $ticketProperty (Blade).
+     * The Computed Property.
+     * We use $this->ticket to access it internally.
      */
     #[Computed]
-    public function ticketProperty()
+    public function ticket()
     {
         return Auth::user()->tickets()
             ->with(['replies.user'])
             ->findOrFail($this->ticketId);
     }
 
-    /**
-     * Handles the submission of a new reply.
-     */
     public function sendReply()
     {
         $this->validate();
 
-        // Access computed property (no parentheses)
-        $ticket = $this->ticketProperty;
+        // Access via $this->ticket (Computed property)
+        $ticket = $this->ticket;
 
         if ($ticket->status === 'closed') {
-            session()->flash('error', 'This ticket is closed and cannot receive replies.');
+            session()->flash('error', 'This ticket is closed.');
             return;
         }
 
-        // Create the new reply record
         $ticket->replies()->create([
             'user_id' => Auth::id(),
             'message' => $this->message,
         ]);
 
-        // Re-open ticket if it was pending or answered
         $ticket->update(['status' => 'open']);
 
         /**
-         * CLEAR CACHE: 
-         * This forces the #[Computed] method to re-run during render()
-         * so the user sees their new message immediately.
+         * THE RELIABLE FIX:
+         * Instead of unset(), use Livewire's built-in reset.
+         * This clears the cache of the computed 'ticket' property.
          */
-        unset($this->ticketProperty);
+        $this->resetComputed('ticket');
 
-        // Reset the textarea input
         $this->reset('message');
-
-        // Dispatch browser event for JS scrolling
         $this->dispatch('reply-sent');
 
         session()->flash('success', 'Your reply has been sent.');
@@ -92,8 +77,7 @@ class Show extends Component
     public function render()
     {
         return view('livewire.tickets.show', [
-            // Pass the computed property to the view
-            'ticket' => $this->ticketProperty 
+            'ticket' => $this->ticket 
         ]);
     }
 }
