@@ -122,27 +122,62 @@
         </div>
 
         {{-- Sidebar --}}
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 24px;">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold text-dark mb-4 d-flex align-items-center">
-                        <i class="fa fa-info-circle text-primary me-2"></i> Ticket Details
-                    </h6>
-                    <div class="mb-3">
-                        <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Order Ref</label>
-                        <div class="fw-bold text-primary">{{ $ticket->order_ref ?? 'N/A' }}</div>
+      <div class="col-lg-4">
+    {{-- Main Sticky Wrapper --}}
+    <div class="sticky-top" style="top: 2rem; z-index: 10;">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold text-dark mb-4 d-flex align-items-center">
+                    <i class="fa fa-info-circle text-primary me-2"></i> Ticket Details
+                </h6>
+                
+                <div class="mb-3">
+                    <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Order Reference</label>
+                    <div class="fw-bold text-primary">{{ $ticket->order_ref ?? 'N/A' }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Department</label>
+                    <div class="text-dark text-capitalize">{{ str_replace('_', ' ', $ticket->category) }}</div>
+                </div>
+
+                <div class="mb-0">
+                    <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Priority Level</label>
+                    <div>
+                        <span class="badge {{ $ticket->priority == 'high' ? 'bg-danger-light text-danger' : 'bg-info-light text-info' }} rounded-pill border">
+                            {{ ucfirst($ticket->priority) }}
+                        </span>
                     </div>
-                    <div class="mb-0">
-                        <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Priority</label>
-                        <div>
-                            <span class="badge {{ $ticket->priority == 'high' ? 'bg-danger-light text-danger' : 'bg-info-light text-info' }} rounded-pill border">
-                                {{ ucfirst($ticket->priority) }}
-                            </span>
-                        </div>
-                    </div>
+                </div>
+
+                <hr class="my-4 opacity-5">
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="window.print()">
+                        <i class="fa fa-print me-2"></i> Print Transcript
+                    </button>
+                    
+                    {{-- Quick Action: Close Ticket (Optional UI addition) --}}
+                    @if($ticket->status !== 'closed')
+                        <button wire:click="closeTicket" wire:confirm="Are you sure you want to close this ticket?" class="btn btn-light btn-sm rounded-pill text-danger border-0">
+                            <i class="fa fa-lock me-2"></i> Close Ticket
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
+
+        {{-- Optional: Add a second small card for Support Hours or FAQ below the sticky info --}}
+        <div class="card border-0 shadow-sm rounded-4 mt-3 bg-primary text-white">
+            <div class="card-body p-3 text-center">
+                <small class="d-block opacity-75">Need urgent help?</small>
+                <a href="https://wa.me/yournumber" class="text-white fw-bold text-decoration-none small">
+                    <i class="fa fa-whatsapp"></i> Chat on WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
     </div>
 
     <style>
