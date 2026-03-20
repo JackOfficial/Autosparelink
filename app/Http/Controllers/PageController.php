@@ -145,13 +145,15 @@ public function article($slug)
     return view('article-details', compact('post', 'categories', 'recentPosts'));
 }
 
-   public function deleteComment($id)
+public function deleteComment($id)
 {
     // 1. Find the comment or fail with a 404
     $comment = Comment::findOrFail($id);
 
-    // 2. Security Check: Only the owner or an admin can delete
-    if (auth()->id() !== $comment->user_id && !auth()->user()->is_admin) {
+    // 2. Security Check: Allow if user is the owner OR has administrative roles
+    $isAuthorized = auth()->id() === $comment->user_id || auth()->user()->hasAnyRole(['admin', 'super admin']);
+
+    if (!$isAuthorized) {
         return redirect()->back()->with('error', 'Unauthorized action.');
     }
 
