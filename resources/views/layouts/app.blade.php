@@ -109,6 +109,9 @@
     </style>
   {{-- Page-specific scripts --}}
     @stack('styles')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @livewireStyles
 </head>
 
 <body>
@@ -306,6 +309,7 @@
     </script>
 
     @stack('scripts')
+    @livewireScripts
 </body>
 
 </html>
