@@ -14,6 +14,7 @@ class Comment extends Model
 
     protected $fillable = [
         'user_id',
+        'parent_id',
         'commentable_id',   // The ID of the Blog or News
         'commentable_type', // The Class name (App\Models\Blog or App\Models\News)
         'comment',
@@ -43,6 +44,16 @@ class Comment extends Model
     {
         return $this->morphMany(Like::class, 'likeable');
     }
+
+    public function replies()
+{
+    return $this->hasMany(Comment::class, 'parent_id')->orderBy('created_at', 'asc');
+}
+
+public function parent()
+{
+    return $this->belongsTo(Comment::class, 'parent_id');
+}
 
     /**
      * Check if the given user has liked this specific comment.

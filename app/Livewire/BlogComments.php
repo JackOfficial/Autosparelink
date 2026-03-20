@@ -11,25 +11,42 @@ class BlogComments extends Component
 {
     public $post;
     public $newComment = '';
+    public $replyingTo = null; // Track which comment is being replied to
 
-    /**
-     * Validation rules for the comment field.
-     */
     protected $rules = [
         'newComment' => 'required|min:3|max:2000',
     ];
 
-    /**
-     * Initialize the component.
-     */
     public function mount(Blog $post)
     {
         $this->post = $post;
     }
 
     /**
-     * Store a new comment in the database.
+     * Set the comment ID the user wants to reply to.
      */
+   public function setReply($commentId)
+{
+    $this->replyingTo = $commentId;
+    
+    // Find the comment and its author
+    $parentComment = Comment::find($commentId);
+    
+    if ($parentComment && $parentComment->user) {
+        // Pre-fill the textarea with "@Username "
+        $this->newComment = "@" . $parentComment->user->name . " ";
+    }
+}
+
+    /**
+     * Cancel the reply mode.
+     */
+    public function cancelReply()
+    {
+        $this->replyingTo = null;
+        $this->reset('newComment');
+    }
+
     public function postComment()
     {
         if (!Auth::check()) {
@@ -41,18 +58,16 @@ class BlogComments extends Component
         $this->post->comments()->create([
             'user_id' => Auth::id(),
             'comment' => $this->newComment,
-            'status' => 1, // Or default status based on your model
+            'status' => 1, 
+            'parent_id' => $this->replyingTo, // Link to parent if replying
         ]);
 
-        $this->reset('newComment');
+        $this->reset(['newComment', 'replyingTo']);
         $this->post->refresh();
         
         session()->flash('message', 'Comment posted successfully!');
     }
 
-    /**
-     * Toggle the Like/Dislike status for a specific comment.
-     */
     public function toggleCommentLike($commentId, $isLike)
     {
         if (!Auth::check()) {
@@ -62,48 +77,40 @@ class BlogComments extends Component
         $comment = Comment::findOrFail($commentId);
         $userId = Auth::id();
 
-        // Check for existing polymorphic vote on this comment
         $existing = $comment->likes()->where('user_id', $userId)->first();
 
         if ($existing) {
             if ($existing->is_like == $isLike) {
-                $existing->delete(); // Undo vote
+                $existing->delete();
             } else {
-                $existing->update(['is_like' => $isLike]); // Flip vote
+                $existing->update(['is_like' => $isLike]);
             }
         } else {
-            // Create new polymorphic like record
             $comment->likes()->create([
                 'user_id' => $userId,
                 'is_like' => $isLike,
             ]);
         }
-        
-        // No full refresh needed; render() will pick up the change
     }
 
-    /**
-     * Delete a specific comment.
-     */
     public function deleteComment($commentId)
     {
         $comment = Comment::findOrFail($commentId);
 
-        // Security check
         if (Auth::id() == $comment->user_id || Auth::user()->hasAnyRole(['admin', 'super admin'])) {
             $comment->delete();
             $this->post->refresh();
         }
     }
 
-    /**
-     * Render the view with the latest comments.
-     */
     public function render()
     {
         return view('livewire.blog-comments', [
             'comments' => $this->post->comments()
-                ->with(['user', 'likes']) // Eager load to prevent N+1 queries
+                // IMPORTANT: Only fetch top-level comments for the main list
+                ->whereNull('parent_id') 
+                // Eager load replies and their users to stay fast
+                ->with(['user', 'likes', 'replies.user', 'replies.likes']) 
                 ->latest()
                 ->get()
         ]);
