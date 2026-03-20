@@ -41,38 +41,49 @@ class Show extends Component
             ->findOrFail($this->ticketId);
     }
 
-    public function sendReply()
-    {
-        $this->validate();
+public function sendReply()
+{
+    // 1. Validation: Exact match to your Controller's requirements
+    $validated = $this->validate([
+        'message' => 'required|string|min:10',
+    ]);
 
-        // 1. Get the ticket (using the computed property)
-        $ticket = $this->ticket;
+    $ticket = $this->ticket;
 
-        if ($ticket->status === 'closed') {
-            session()->flash('error', 'This ticket is closed.');
-            return;
-        }
-
-        // 2. Save the reply
-        $ticket->replies()->create([
-            'user_id' => Auth::id(),
-            'message' => $this->message,
-        ]);
-
-        $ticket->update(['status' => 'open']);
-
-        /**
-         * 3. REFRESH THE CACHE
-         * This is the standard way to clear a computed property.
-         * We use unset() on the property name.
-         */
-        unset($this->ticket);
-
-        $this->reset('message');
-        $this->dispatch('reply-sent');
-
-        session()->flash('success', 'Your reply has been sent.');
+    if ($ticket->status === 'closed') {
+        session()->flash('error', 'This ticket is closed.');
+        return;
     }
+
+    // 2. Create the Reply (The "Conversation" part)
+    $ticket->replies()->create([
+        'user_id' => Auth::id(),
+        'message' => $validated['message'],
+    ]);
+
+    /**
+     * 3. Update the Parent Ticket
+     * We use the exact same field array from your store() method 
+     * to keep the data synchronized.
+     */
+    $ticket->update([
+        'category'  => $ticket->category,  // Kept from original store()
+        'subject'   => $ticket->subject,   // Kept from original store()
+        'message'   => $ticket->message,   // Kept from original store()
+        'order_ref' => $ticket->order_ref, // Kept from original store()
+        'status'    => 'open',             // Exact match to controller default
+        'priority'  => 'medium',           // Exact match to controller default
+    ]);
+
+    // 4. Refresh & UI Reset
+    unset($this->ticket); 
+    $this->reset('message');
+    
+    // Trigger Alpine.js scroll down
+    $this->dispatch('reply-sent');
+
+    session()->flash('success', "Your message has been sent. Our team will review it shortly.");
+}
 
     /**
      * Delete a specific reply if it belongs to the authenticated user.
