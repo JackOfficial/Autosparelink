@@ -26,33 +26,24 @@
 <div id="reading-progress"></div>
 
 {{-- Back to Top Button --}}
-<button id="backToTop" class="btn btn-primary shadow" title="Go to top">
+<button id="backToTop" class="btn btn-primary shadow" style="position: fixed; bottom: 30px; right: 30px; display: none; z-index: 99; border-radius: 50%; width: 50px; height: 50px; transition: 0.3s;" title="Go to top">
     <i class="fa fa-chevron-up"></i>
 </button>
 
 <style>
     #reading-progress { position:fixed; top:0; left:0; height:4px; background:#FFD333; width:0; z-index:9999; transition: width 0.1s ease; }
-    
-    /* Back to top styles */
-    #backToTop { position: fixed; bottom: 30px; right: 30px; display: none; z-index: 99; border-radius: 50%; width: 50px; height: 50px; transition: 0.3s; }
-    #backToTop:hover { transform: scale(1.1); background: #333; color: #FFD333; }
-
-    .sticky-sidebar { position: sticky; top: 40px; }
+    #backToTop:hover { transform: scale(1.1); background: #333 !important; color: #FFD333 !important; }
+    .sticky-sidebar { position: sticky; top: 20px; }
     .blog-content { line-height: 2; font-size: 1.1rem; color: #333; }
     .blog-content p { margin-bottom: 1.5rem; }
-    .blog-content img { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 2rem 0; transition: transform 0.3s ease; }
+    .blog-content img { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 2rem 0; transition: transform 0.3s ease; width: 100%; height: auto; }
     .blog-content img:hover { transform: scale(1.01); }
-    
     .comment-bubble { transition: all 0.3s ease; border: 1px solid transparent; }
     .comment-bubble:hover { border-color: #FFD333; background: #fff !important; }
-    
     .share-btn { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; transition: 0.3s; color: white !important; }
     .share-btn:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); opacity: 0.9; }
-    
     .hover-grow { transition: transform 0.3s ease; }
     .hover-grow:hover { transform: translateY(-5px); }
-
-    /* Breadcrumb update to match your "pill" UI */
     .breadcrumb-custom { background: #f8f9fa; border-radius: 50px; padding: 12px 25px; border: 1px solid #eee; }
 </style>
 
@@ -75,7 +66,6 @@
         {{-- Sidebar --}}
         <div class="col-lg-3 col-md-4">
             <div class="sticky-sidebar">
-                {{-- Search Widget --}}
                 <div class="bg-white p-4 mb-4 shadow-sm border-top border-primary rounded">
                     <h6 class="text-uppercase font-weight-bold mb-3">Search Insights</h6>
                     <form action="{{ route('blogs.index') }}" method="GET">
@@ -88,7 +78,6 @@
                     </form>
                 </div>
 
-                {{-- Categories Widget --}}
                 <div class="bg-white p-4 mb-4 shadow-sm rounded">
                     <h6 class="text-uppercase font-weight-bold mb-3">Categories</h6>
                     @foreach($categories as $cat)
@@ -99,10 +88,26 @@
                         </a>
                     @endforeach
                 </div>
+
+                <div class="bg-white p-4 mb-4 shadow-sm rounded">
+                    <h6 class="text-uppercase font-weight-bold mb-3">Latest Updates</h6>
+                    @foreach($recentPosts as $recent)
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{{ $recent->blogPhoto ? asset('storage/' . $recent->blogPhoto->file_path) : asset('defaults/no-image.jpg') }}" 
+                                 class="rounded shadow-sm mr-3" style="width:60px; height:60px; object-fit:cover;">
+                            <div class="overflow-hidden">
+                                <a href="{{ route('blogs.show', $recent->slug) }}" class="text-dark small font-weight-bold text-truncate d-block">
+                                    {{ $recent->title }}
+                                </a>
+                                <small class="text-muted"><i class="far fa-clock mr-1"></i> {{ $recent->created_at->format('M d') }}</small>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
 
-        {{-- Main Content --}}
+        {{-- Main Article --}}
         <div class="col-lg-9 col-md-8">
             <article class="bg-white p-4 p-lg-5 mb-4 shadow-sm rounded">
                 <header class="mb-4 text-center text-md-left">
@@ -112,17 +117,14 @@
                     <div class="d-flex flex-wrap justify-content-center justify-content-md-start text-muted mt-3 py-3 border-top border-bottom">
                         <div class="mr-4 mb-2"><i class="fa fa-calendar-alt text-primary mr-2"></i> {{ $post->created_at->format('M d, Y') }}</div>
                         <div class="mr-4 mb-2"><i class="fa fa-user text-primary mr-2"></i> By {{ $post->user->name ?? 'Admin' }}</div>
-                        
-                        {{-- Read Time Estimator --}}
                         <div class="mr-4 mb-2">
                             <i class="fa fa-clock text-primary mr-2"></i>
                             @php
-                                $words = str_word_count(strip_tags($post->content));
-                                $readTime = ceil($words / 200); 
+                                $wordCount = str_word_count(strip_tags($post->content));
+                                $readTime = ceil($wordCount / 200) ?: 1;
                             @endphp
                             {{ $readTime }} min read
                         </div>
-                        
                         <div class="mb-2"><i class="fa fa-comments text-primary mr-2"></i> {{ $post->comments->count() }} Comments</div>
                     </div>
                 </header>
@@ -138,7 +140,6 @@
                     {!! $post->content !!}
                 </div>
 
-                {{-- Enhanced Share Footer --}}
                 <footer class="mt-5 pt-4 border-top">
                     <div class="d-flex align-items-center justify-content-between flex-wrap">
                         <div class="mb-3">
@@ -151,7 +152,7 @@
                 </footer>
             </article>
 
-            {{-- Related Posts Section --}}
+            {{-- Related Insights --}}
             <div class="bg-white p-4 mb-4 shadow-sm rounded">
                 <h5 class="font-weight-bold text-uppercase mb-4 border-left border-primary pl-3">Related Insights</h5>
                 <div class="row">
@@ -161,7 +162,7 @@
                                 <img src="{{ $rel->blogPhoto ? asset('storage/' . $rel->blogPhoto->file_path) : asset('defaults/no-image.jpg') }}" 
                                      class="card-img-top" style="height:150px; object-fit:cover;">
                                 <div class="card-body p-3 text-center">
-                                    <h6 class="mb-0"><a href="{{ route('blogs.show', $rel->slug) }}" class="text-dark stretched-link font-weight-bold">{{ Str::limit($rel->title, 40) }}</a></h6>
+                                    <h6 class="mb-0"><a href="{{ route('blogs.show', $rel->slug) }}" class="text-dark stretched-link font-weight-bold">{{ Str::limit($rel->title, 45) }}</a></h6>
                                 </div>
                             </div>
                         </div>
@@ -169,10 +170,44 @@
                 </div>
             </div>
 
-            {{-- Comments Section (Forelse logic preserved) --}}
+            {{-- Join the Conversation --}}
             <div class="bg-white p-4 p-lg-5 shadow-sm rounded border-top border-primary">
                 <h4 class="font-weight-bold mb-4">Join the Conversation</h4>
-                {{-- ... Your existing comments loop and form ... --}}
+                
+                <div class="comments-container mb-5">
+                    @forelse($post->comments->sortByDesc('created_at') as $comment)
+                        <div class="media p-4 mb-3 bg-light rounded comment-bubble">
+                            <div class="rounded-circle bg-primary text-dark d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 50px; height: 50px; flex-shrink:0;">
+                                <strong>{{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}</strong>
+                            </div>
+                            <div class="media-body">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <h6 class="font-weight-bold mb-0">{{ $comment->user->name ?? 'Anonymous' }}</h6>
+                                    <small class="text-muted"><i class="far fa-clock mr-1"></i> {{ $comment->created_at->diffForHumans() }}</small>
+                                </div>
+                                <p class="mb-0 text-muted">{{ $comment->comment }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-5">
+                            <p class="text-muted italic">No comments yet. Start the discussion!</p>
+                        </div>
+                    @endforelse
+                </div>
+
+                <h5 class="font-weight-bold mb-3">Leave a Reply</h5>
+                @auth
+                    <form action="{{ route('comment.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="blog_id" value="{{ $post->id }}">
+                        <textarea name="comment" class="form-control border-light shadow-sm mb-3" rows="5" placeholder="Your message..." required></textarea>
+                        <button class="btn btn-primary px-5 py-2 font-weight-bold shadow-sm text-dark">Submit Post</button>
+                    </form>
+                @else
+                    <div class="alert alert-light border text-center py-4">
+                        Please <a href="{{ route('login') }}" class="font-weight-bold text-primary">Login</a> to share your thoughts.
+                    </div>
+                @endauth
             </div>
         </div>
     </div>
@@ -183,12 +218,12 @@
     const progress = document.getElementById('reading-progress');
 
     window.onscroll = function() {
-        // Handle Progress Bar
+        // Progress Bar
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        progress.style.width = (winScroll / height * 100) + "%";
+        if (progress) progress.style.width = (winScroll / height * 100) + "%";
 
-        // Handle Back to Top visibility
+        // Back to Top visibility
         if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
             btt.style.display = "block";
         } else {
@@ -196,7 +231,6 @@
         }
     };
 
-    // Scroll to top execution
     btt.onclick = function() {
         window.scrollTo({top: 0, behavior: 'smooth'});
     };
