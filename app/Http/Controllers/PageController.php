@@ -94,19 +94,19 @@ public function blogs()
 
 public function news_details($slug)
 {
-    // 1. Fetch the news item with polymorphic photo, category, and author
-    $news = News::with(['newsPhoto', 'category', 'user'])
+    // 1. Added 'comments' to eager loading to prevent "null" errors and N+1 issues
+    $news = News::with(['newsPhoto', 'category', 'user', 'comments']) 
         ->where('slug', $slug)
         ->where('status', 'published')
         ->firstOrFail();
 
-    // 2. Fetch News Categories (filtered by type) for the sidebar
+    // 2. Fetch News Categories (filtered by type)
     $categories = BlogCategory::where('type', 'news')
         ->withCount('news')
         ->get();
 
-    // 3. Fetch Recent News (excluding the current one) for the "Latest Updates"
-    $recentPosts = News::with(['newsPhoto as blogPhoto']) // Alias for Blade consistency
+    // 3. Fetch Recent News (Aliasing newsPhoto as blogPhoto for the sidebar Blade)
+    $recentPosts = News::with(['newsPhoto as blogPhoto']) 
         ->where('id', '!=', $news->id)
         ->where('status', 'published')
         ->latest()
@@ -119,59 +119,85 @@ public function news_details($slug)
     return view('news-details', compact('news', 'categories', 'recentPosts'));
 }
 
- public function article($slug)
+public function article($slug)
 {
-    // 1. Fetch the blog post by slug with its category and polymorphic photo
-    // We use firstOrFail() so it automatically shows a 404 if the slug is wrong
-    $post = Blog::with(['category', 'blogPhoto', 'user'])
+    // 1. Added 'comments' to eager loading to support the polymorphic relationship
+    $post = Blog::with(['category', 'blogPhoto', 'user', 'comments'])
         ->where('slug', $slug)
+        ->where('status', 'published') // Ensure only published posts are visible
         ->firstOrFail();
 
-    // 2. Fetch categories with counts for the sidebar
-    $categories = BlogCategory::withCount('blogs')->get();
+    // 2. Filter categories by 'blog' type so the sidebar is relevant
+    $categories = BlogCategory::where('type', 'blog')
+        ->withCount('blogs')
+        ->get();
 
-    // 3. Fetch recent News updates for the sidebar "Latest Updates" section
+    // 3. Recent posts (excluding the current one)
     $recentPosts = Blog::with(['category', 'blogPhoto'])
+        ->where('id', '!=', $post->id)
         ->latest()
         ->limit(5)
         ->get();
 
-    // 4. Increment the view count for this specific article
+    // 4. Increment the view count
     $post->increment('views');
 
     return view('article-details', compact('post', 'categories', 'recentPosts'));
 }
 
-    function deleteComment($id){
-        Comment::where('id', $id)->delete();
-        return redirect()->back();
+   public function deleteComment($id)
+{
+    // 1. Find the comment or fail with a 404
+    $comment = Comment::findOrFail($id);
+
+    // 2. Security Check: Only the owner or an admin can delete
+    if (auth()->id() !== $comment->user_id && !auth()->user()->is_admin) {
+        return redirect()->back()->with('error', 'Unauthorized action.');
     }
+
+    // 3. Delete
+    $comment->delete();
+
+    return redirect()->back()->with('success', 'Comment deleted successfully.');
+}
+
     function blog($title){
 
         return view('blog'); 
     }
 
-  public function post(Request $request)
+public function post(Request $request)
 {
-    // 1. Validate both the comment and the blog existence
+    // 1. Validate - We check for blog_id OR news_id depending on where the user is
     $request->validate([
         'comment' => 'required|string|max:1000',
-        'blog_id' => 'required|exists:blogs,id' 
+        'blog_id' => 'nullable|exists:blogs,id',
+        'news_id' => 'nullable|exists:news,id',
     ]);
 
-    // 2. Check if user is logged in to prevent 'id on null' errors
+    // 2. Check Auth (You can also use the 'auth' middleware on the route instead)
     if (!auth()->check()) {
         return redirect()->back()->with('error', 'You must be logged in to comment.');
     }
 
-    // 3. Create the comment
-    $comment = Comment::create([
-        'user_id' => auth()->id(), // Shorter way to get the ID
+    // 3. Determine which model we are commenting on
+    if ($request->has('blog_id')) {
+        $model = \App\Models\Blog::find($request->blog_id);
+    } elseif ($request->has('news_id')) {
+        $model = \App\Models\News::find($request->news_id);
+    }
+
+    if (!$model) {
+        return redirect()->back()->with('error', 'Target content not found.');
+    }
+
+    // 4. Use the relationship to create the comment
+    // This automatically sets commentable_id and commentable_type
+    $comment = $model->comments()->create([
+        'user_id' => auth()->id(),
         'comment' => $request->comment,
-        'blog_id' => $request->blog_id,
     ]);
 
-    // 4. IMPORTANT: You MUST return the redirect
     if ($comment) {
         return redirect()->back()->with('message', 'Your comment has been posted!');
     }

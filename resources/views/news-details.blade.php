@@ -36,11 +36,12 @@
     .sticky-sidebar { position: sticky; top: 20px; }
     .news-content { line-height: 2; font-size: 1.1rem; color: #333; }
     .news-content p { margin-bottom: 1.5rem; }
-    .news-content img { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 2rem 0; width: 100%; height: auto; }
+    .news-content img { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 2rem 0; width: 100%; height: auto; transition: transform 0.3s ease; }
+    .news-content img:hover { transform: scale(1.01); }
     .comment-bubble { transition: all 0.3s ease; border: 1px solid transparent; }
     .comment-bubble:hover { border-color: #FFD333; background: #fff !important; }
     .share-btn { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; transition: 0.3s; color: white !important; }
-    .share-btn:hover { transform: translateY(-3px); opacity: 0.9; }
+    .share-btn:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); opacity: 0.9; }
     .breadcrumb-custom { background: #f8f9fa; border-radius: 50px; padding: 12px 25px; border: 1px solid #eee; }
     .hover-grow { transition: transform 0.3s ease; }
     .hover-grow:hover { transform: translateY(-5px); }
@@ -83,7 +84,7 @@
                         <a href="{{ route('news.index', ['category' => $cat->slug]) }}" 
                            class="d-flex justify-content-between align-items-center mb-2 text-dark text-decoration-none py-1 border-bottom">
                             <span>{{ $cat->name }}</span>
-                            <span class="badge badge-pill badge-light border text-primary">{{ $cat->news_count }}</span>
+                            <span class="badge badge-pill badge-light border text-primary">{{ $cat->news_count ?? 0 }}</span>
                         </a>
                     @endforeach
                 </div>
@@ -125,7 +126,11 @@
                         <div class="mr-4 mb-2"><i class="fa fa-calendar-alt text-primary mr-2"></i> {{ $news->created_at->format('M d, Y') }}</div>
                         <div class="mr-4 mb-2"><i class="fa fa-user text-primary mr-2"></i> By {{ $news->user->name ?? 'Admin' }}</div>
                         <div class="mr-4 mb-2"><i class="fa fa-eye text-primary mr-2"></i> {{ number_format($news->views) }} Views</div>
-                        <div class="mb-2"><i class="fa fa-comments text-primary mr-2"></i> {{ $news->comments->count() }} Comments</div>
+                        <div class="mb-2">
+                            <i class="fa fa-comments text-primary mr-2"></i> 
+                            {{-- Null-safe count for polymorphic relationship --}}
+                            {{ $news->comments ? $news->comments->count() : 0 }} Comments
+                        </div>
                     </div>
                 </header>
 
@@ -157,7 +162,7 @@
                 <h4 class="font-weight-bold mb-4">Comments</h4>
                 
                 <div class="comments-container mb-5">
-                    @forelse($news->comments->sortByDesc('created_at') as $comment)
+                    @forelse(($news->comments ?? collect())->sortByDesc('created_at') as $comment)
                         <div class="media p-4 mb-3 bg-light rounded comment-bubble">
                             <div class="mr-3 shadow-sm" style="flex-shrink:0;">
                                 @if($comment->user && $comment->user->avatar)
@@ -187,6 +192,7 @@
                 @auth
                     <form action="{{ route('comment.store') }}" method="POST">
                         @csrf
+                        {{-- Pass news_id so the controller knows this is a News comment --}}
                         <input type="hidden" name="news_id" value="{{ $news->id }}">
                         <textarea name="comment" class="form-control border-light shadow-sm mb-3" rows="5" placeholder="Your message..." required></textarea>
                         <button class="btn btn-primary px-5 py-2 font-weight-bold shadow-sm text-dark">Submit Post</button>

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
 class News extends Model
@@ -22,7 +23,9 @@ class News extends Model
         'views'
     ];
 
-    // Auto-generate slug when creating news
+    /**
+     * Auto-generate slug when creating news
+     */
     protected static function boot()
     {
         parent::boot();
@@ -48,20 +51,19 @@ class News extends Model
     }
 
     /**
-     * Polymorphic Relationship for the Featured Image (blogPhoto)
+     * Polymorphic Relationship for the Featured Image
      */
     public function newsPhoto(): MorphOne
     {
         return $this->morphOne(Photo::class, 'imageable');
     }
 
-    public function comments()
-{
-    // If using a standard one-to-many:
-    return $this->hasMany(Comment::class);
-    
-    // OR if using polymorphic (sharing comments with Blog):
-    // return $this->morphMany(Comment::class, 'commentable');
-}
-
+    /**
+     * Shared Polymorphic Relationship for Comments
+     * This replaces the hasMany('news_id') logic that was causing your SQL error.
+     */
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
 }

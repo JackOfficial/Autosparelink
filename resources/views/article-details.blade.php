@@ -79,59 +79,48 @@
                 </div>
 
                 <div class="bg-white p-4 mb-4 shadow-sm rounded">
-    <h6 class="text-uppercase font-weight-bold mb-3">Blog Categories</h6>
-    @foreach($categories as $cat)
-        {{-- Only show categories where type is 'blog' --}}
-        @if($cat->type !== 'blog')
-            @continue
-        @endif
+                    <h6 class="text-uppercase font-weight-bold mb-3">Blog Categories</h6>
+                    @foreach($categories as $cat)
+                        @if($cat->type !== 'blog') @continue @endif
 
-        <a href="{{ route('blogs.index', ['category' => $cat->slug]) }}" 
-           class="d-flex justify-content-between align-items-center mb-2 text-dark text-decoration-none py-1 border-bottom">
-            <span>{{ $cat->name }}</span>
-            {{-- Displaying only the blog count --}}
-            <span class="badge badge-pill badge-light border text-primary">{{ $cat->blogs_count }}</span>
-        </a>
-    @endforeach
-</div>
+                        <a href="{{ route('blogs.index', ['category' => $cat->slug]) }}" 
+                           class="d-flex justify-content-between align-items-center mb-2 text-dark text-decoration-none py-1 border-bottom">
+                            <span>{{ $cat->name }}</span>
+                            <span class="badge badge-pill badge-light border text-primary">{{ $cat->blogs_count ?? 0 }}</span>
+                        </a>
+                    @endforeach
+                </div>
 
-<div class="bg-white p-4 mb-4 shadow-sm rounded">
-    <h6 class="text-uppercase font-weight-bold mb-3">Latest Updates</h6>
-    @foreach($recentPosts as $recent)
-        {{-- Check if the current sidebar item is the article being read --}}
-        @if(isset($post) && $recent->id === $post->id)
-            @continue
-        @endif
+                <div class="bg-white p-4 mb-4 shadow-sm rounded">
+                    <h6 class="text-uppercase font-weight-bold mb-3">Latest Updates</h6>
+                    @foreach($recentPosts as $recent)
+                        @if(isset($post) && $recent->id === $post->id) @continue @endif
 
-        <div class="d-flex align-items-center mb-3">
-            <a href="{{ route('blogs.show', $recent->slug) }}" class="flex-shrink-0">
-                @php
-                    $photoPath = ($recent->blogPhoto && $recent->blogPhoto->file_path) 
-                        ? asset('storage/' . $recent->blogPhoto->file_path) 
-                        : asset('defaults/no-photo.jpg');
-                @endphp
-                
-                <img src="{{ $photoPath }}" 
-                     class="rounded shadow-sm mr-3" 
-                     style="width:60px; height:60px; object-fit:cover;"
-                     onerror="this.onerror=null;this.src='{{ asset('defaults/no-photo.jpg') }}';"
-                     alt="{{ $recent->title }}">
-            </a>
-            
-            <div class="overflow-hidden">
-                <a href="{{ route('blogs.show', $recent->slug) }}" 
-                   class="text-dark small font-weight-bold text-truncate d-block mb-0 text-decoration-none"
-                   title="{{ $recent->title }}">
-                    {{ $recent->title }}
-                </a>
-                <small class="text-muted d-block" style="font-size: 0.75rem;">
-                    <i class="far fa-clock mr-1 text-primary"></i> {{ $recent->created_at->format('M d, Y') }}
-                </small>
-            </div>
-        </div>
-    @endforeach
-</div>
-
+                        <div class="d-flex align-items-center mb-3">
+                            <a href="{{ route('blogs.show', $recent->slug) }}" class="flex-shrink-0">
+                                @php
+                                    $recentPhoto = ($recent->blogPhoto && $recent->blogPhoto->file_path) 
+                                        ? asset('storage/' . $recent->blogPhoto->file_path) 
+                                        : asset('defaults/no-photo.jpg');
+                                @endphp
+                                <img src="{{ $recentPhoto }}" 
+                                     class="rounded shadow-sm mr-3" 
+                                     style="width:60px; height:60px; object-fit:cover;"
+                                     alt="{{ $recent->title }}">
+                            </a>
+                            <div class="overflow-hidden">
+                                <a href="{{ route('blogs.show', $recent->slug) }}" 
+                                   class="text-dark small font-weight-bold text-truncate d-block mb-0 text-decoration-none"
+                                   title="{{ $recent->title }}">
+                                    {{ $recent->title }}
+                                </a>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                    <i class="far fa-clock mr-1 text-primary"></i> {{ $recent->created_at->format('M d, Y') }}
+                                </small>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
 
@@ -153,7 +142,10 @@
                             @endphp
                             {{ $readTime }} min read
                         </div>
-                        <div class="mb-2"><i class="fa fa-comments text-primary mr-2"></i> {{ $post->comments->count() }} Comments</div>
+                        <div class="mb-2">
+                            <i class="fa fa-comments text-primary mr-2"></i> 
+                            {{ $post->comments ? $post->comments->count() : 0 }} Comments
+                        </div>
                     </div>
                 </header>
 
@@ -188,7 +180,7 @@
                         <div class="col-md-4 mb-3">
                             <div class="card h-100 border-0 shadow-sm hover-grow">
                                 <img src="{{ $rel->blogPhoto ? asset('storage/' . $rel->blogPhoto->file_path) : asset('defaults/no-image.jpg') }}" 
-                                     class="card-img-top" style="height:150px; object-fit:cover;">
+                                     class="card-img-top" style="height:150px; object-fit:cover;" alt="{{ $rel->title }}">
                                 <div class="card-body p-3 text-center">
                                     <h6 class="mb-0"><a href="{{ route('blogs.show', $rel->slug) }}" class="text-dark stretched-link font-weight-bold">{{ Str::limit($rel->title, 45) }}</a></h6>
                                 </div>
@@ -203,37 +195,34 @@
                 <h4 class="font-weight-bold mb-4">Join the Conversation</h4>
                 
                 <div class="comments-container mb-5">
-                    @forelse($post->comments->sortByDesc('created_at') as $comment)
+                    @forelse(($post->comments ?? collect())->sortByDesc('created_at') as $comment)
                         <div class="media p-4 mb-3 bg-light rounded comment-bubble">
-    {{-- Avatar Section --}}
-    <div class="mr-3 shadow-sm" style="flex-shrink:0;">
-        @if($comment->user && $comment->user->avatar)
-            {{-- Display Google/Stored Avatar --}}
-            <img src="{{ $comment->user->avatar }}" 
-                 alt="{{ $comment->user->name }}" 
-                 class="rounded-circle" 
-                 style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #FFD333;">
-        @else
-            {{-- Fallback to Initials Circle --}}
-            <div class="rounded-circle bg-primary text-dark d-flex align-items-center justify-content-center" 
-                 style="width: 50px; height: 50px;">
-                <strong style="font-size: 1.2rem;">
-                    {{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}
-                </strong>
-            </div>
-        @endif
-    </div>
+                            <div class="mr-3 shadow-sm" style="flex-shrink:0;">
+                                @if($comment->user && $comment->user->avatar)
+                                    <img src="{{ $comment->user->avatar }}" 
+                                         alt="{{ $comment->user->name }}" 
+                                         class="rounded-circle" 
+                                         style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #FFD333;">
+                                @else
+                                    <div class="rounded-circle bg-primary text-dark d-flex align-items-center justify-content-center" 
+                                         style="width: 50px; height: 50px;">
+                                        <strong>
+                                            {{ strtoupper(substr($comment->user->name ?? 'A', 0, 1)) }}
+                                        </strong>
+                                    </div>
+                                @endif
+                            </div>
 
-    <div class="media-body">
-        <div class="d-flex justify-content-between mb-1">
-            <h6 class="font-weight-bold mb-0">{{ $comment->user->name ?? 'Anonymous' }}</h6>
-            <small class="text-muted">
-                <i class="far fa-clock mr-1"></i> {{ $comment->created_at->diffForHumans() }}
-            </small>
-        </div>
-        <p class="mb-0 text-muted">{{ $comment->comment }}</p>
-    </div>
-</div>
+                            <div class="media-body">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <h6 class="font-weight-bold mb-0">{{ $comment->user->name ?? 'Anonymous' }}</h6>
+                                    <small class="text-muted">
+                                        <i class="far fa-clock mr-1"></i> {{ $comment->created_at->diffForHumans() }}
+                                    </small>
+                                </div>
+                                <p class="mb-0 text-muted">{{ $comment->comment }}</p>
+                            </div>
+                        </div>
                     @empty
                         <div class="text-center py-5">
                             <p class="text-muted italic">No comments yet. Start the discussion!</p>
@@ -245,6 +234,7 @@
                 @auth
                     <form action="{{ route('comment.store') }}" method="POST">
                         @csrf
+                        {{-- Identifying the blog post for polymorphic storage --}}
                         <input type="hidden" name="blog_id" value="{{ $post->id }}">
                         <textarea name="comment" class="form-control border-light shadow-sm mb-3" rows="5" placeholder="Your message..." required></textarea>
                         <button class="btn btn-primary px-5 py-2 font-weight-bold shadow-sm text-dark">Submit Post</button>
@@ -264,12 +254,12 @@
     const progress = document.getElementById('reading-progress');
 
     window.onscroll = function() {
-        // Progress Bar
+        // Progress Bar logic
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         if (progress) progress.style.width = (winScroll / height * 100) + "%";
 
-        // Back to Top visibility
+        // Back to Top visibility logic
         if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
             btt.style.display = "block";
         } else {

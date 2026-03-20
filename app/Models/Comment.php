@@ -11,16 +11,25 @@ class Comment extends Model
 
     protected $fillable = [
         'user_id',
-        'blog_id',
+        'commentable_id',   // The ID of the Blog or News
+        'commentable_type', // The Class name (App\Models\Blog or App\Models\News)
         'comment',
         'status',
     ];
-    
-    public function user(){
-        return $this->belongsTo(User::class);
+
+    /**
+     * Get the parent commentable model (Blog or News).
+     */
+    public function commentable()
+    {
+        return $this->morphTo();
     }
-    
-    public function blog(){
-        return $this->belongsTo(Blog::class);
+
+    /**
+     * Get the user who wrote the comment.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
