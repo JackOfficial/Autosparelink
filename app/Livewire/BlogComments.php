@@ -32,52 +32,55 @@ class BlogComments extends Component
      */
     public function postComment()
     {
-        // 1. Ensure user is logged in
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        // 2. Run validation
         $this->validate();
 
-        // 3. Create the comment using the relationship
         $this->post->comments()->create([
             'user_id' => Auth::id(),
             'comment' => $this->newComment,
+            'status' => 'approved', // Or default status based on your model
         ]);
 
-        // 4. Reset the input field and refresh the post to show the new comment
         $this->reset('newComment');
         $this->post->refresh();
         
         session()->flash('message', 'Comment posted successfully!');
     }
 
+    /**
+     * Toggle the Like/Dislike status for a specific comment.
+     */
     public function toggleCommentLike($commentId, $isLike)
-{
-    if (!auth()->check()) return redirect()->route('login');
-
-    $comment = Comment::findOrFail($commentId);
-    $userId = auth()->id();
-
-    // Check for existing vote on this specific comment
-    $existing = $comment->likes()->where('user_id', $userId)->first();
-
-    if ($existing) {
-        if ($existing->is_like == $isLike) {
-            $existing->delete(); // Undo
-        } else {
-            $existing->update(['is_like' => $isLike]); // Change vote
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
         }
-    } else {
-        $comment->likes()->create([
-            'user_id' => $userId,
-            'is_like' => $isLike,
-        ]);
-    }
 
-    // No need to refresh the whole post, just re-render
-}
+        $comment = Comment::findOrFail($commentId);
+        $userId = Auth::id();
+
+        // Check for existing polymorphic vote on this comment
+        $existing = $comment->likes()->where('user_id', $userId)->first();
+
+        if ($existing) {
+            if ($existing->is_like == $isLike) {
+                $existing->delete(); // Undo vote
+            } else {
+                $existing->update(['is_like' => $isLike]); // Flip vote
+            }
+        } else {
+            // Create new polymorphic like record
+            $comment->likes()->create([
+                'user_id' => $userId,
+                'is_like' => $isLike,
+            ]);
+        }
+        
+        // No full refresh needed; render() will pick up the change
+    }
 
     /**
      * Delete a specific comment.
@@ -86,7 +89,7 @@ class BlogComments extends Component
     {
         $comment = Comment::findOrFail($commentId);
 
-        // Security: Ensure user owns the comment or is an admin
+        // Security check
         if (Auth::id() == $comment->user_id || Auth::user()->hasAnyRole(['admin', 'super admin'])) {
             $comment->delete();
             $this->post->refresh();
@@ -99,7 +102,10 @@ class BlogComments extends Component
     public function render()
     {
         return view('livewire.blog-comments', [
-            'comments' => $this->post->comments()->latest()->get()
+            'comments' => $this->post->comments()
+                ->with(['user', 'likes']) // Eager load to prevent N+1 queries
+                ->latest()
+                ->get()
         ]);
     }
 }
