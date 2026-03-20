@@ -43,43 +43,41 @@ class Show extends Component
 
 public function sendReply()
 {
-    // 1. Validation: Exact match to your Controller's requirements
+    // 1. Validation matching your store() controller logic
     $validated = $this->validate([
         'message' => 'required|string|min:10',
     ]);
 
     $ticket = $this->ticket;
 
-    if ($ticket->status === 'closed') {
+    // Security check: ensure ticket isn't closed
+    if ($ticket->status == 'closed') {
         session()->flash('error', 'This ticket is closed.');
         return;
     }
 
-    // 2. Create the Reply (The "Conversation" part)
+    // 2. Create the Reply (using the relationship defined in your Ticket model)
     $ticket->replies()->create([
-        'user_id' => Auth::id(),
+        'user_id' => auth()->id(),
         'message' => $validated['message'],
     ]);
 
-    /**
-     * 3. Update the Parent Ticket
-     * We use the exact same field array from your store() method 
-     * to keep the data synchronized.
-     */
+    // 3. Update the Parent Ticket (Mirroring the store() controller defaults)
+    // This ensures order_ref and other metadata stay linked and the ticket stays 'open'
     $ticket->update([
-        'category'  => $ticket->category,  // Kept from original store()
-        'subject'   => $ticket->subject,   // Kept from original store()
-        'message'   => $ticket->message,   // Kept from original store()
-        'order_ref' => $ticket->order_ref, // Kept from original store()
-        'status'    => 'open',             // Exact match to controller default
-        'priority'  => 'medium',           // Exact match to controller default
+        'category'  => $ticket->category,
+        'subject'   => $ticket->subject,
+        'message'   => $ticket->message,
+        'order_ref' => $ticket->order_ref,
+        'status'    => 'open',   // Reset to open so support sees the new reply
+        'priority'  => 'medium', // Keep the default medium priority
     ]);
 
-    // 4. Refresh & UI Reset
+    // 4. Cleanup
     unset($this->ticket); 
     $this->reset('message');
     
-    // Trigger Alpine.js scroll down
+    // Dispatch event for Alpine.js auto-scroll
     $this->dispatch('reply-sent');
 
     session()->flash('success', "Your message has been sent. Our team will review it shortly.");
