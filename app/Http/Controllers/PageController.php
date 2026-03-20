@@ -121,13 +121,19 @@ public function news_details($slug)
 
 public function article($slug)
 {
-    // 1. Added 'comments' to eager loading to support the polymorphic relationship
-    $post = Blog::with(['category', 'blogPhoto', 'user', 'comments'])
+    // 1. Added 'comments.user' to eager loading to prevent N+1 queries in the Livewire component
+    $post = Blog::with([
+            'category', 
+            'blogPhoto', 
+            'user', 
+            'comments.user', // Eager load the user who wrote the comment
+            'likes'          // Eager load likes for the engagement component
+        ])
         ->where('slug', $slug)
-        ->where('status', 'published') // Ensure only published posts are visible
+        ->where('status', 'published') 
         ->firstOrFail();
 
-    // 2. Filter categories by 'blog' type so the sidebar is relevant
+    // 2. Filter categories for the sidebar
     $categories = BlogCategory::where('type', 'blog')
         ->withCount('blogs')
         ->get();
@@ -135,6 +141,7 @@ public function article($slug)
     // 3. Recent posts (excluding the current one)
     $recentPosts = Blog::with(['category', 'blogPhoto'])
         ->where('id', '!=', $post->id)
+        ->where('status', 'published') // Safety check
         ->latest()
         ->limit(5)
         ->get();
