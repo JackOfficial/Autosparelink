@@ -191,6 +191,26 @@
             </div>
 
             {{-- Join the Conversation --}}
+            {{-- Success Message --}}
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+        <i class="fa fa-check-circle mr-2"></i> {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+@endif
+
+{{-- Error Message --}}
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+        <i class="fa fa-exclamation-triangle mr-2"></i> {{ session('error') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+@endif
+
             <div class="bg-white p-4 p-lg-5 shadow-sm rounded border-top border-primary">
                 <h4 class="font-weight-bold mb-4">Join the Conversation</h4>
                 
