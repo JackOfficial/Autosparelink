@@ -38,17 +38,55 @@
                 </div>
 
                 {{-- Categories --}}
-                <div class="bg-white p-4 mb-4 shadow-sm rounded">
-                    <h6 class="text-uppercase font-weight-bold mb-3">Blog Categories</h6>
-                    @foreach($categories as $cat)
-                        @continue($cat->type !== 'blog')
-                        <a href="{{ route('blogs.index', ['category' => $cat->slug]) }}" 
-                           class="d-flex justify-content-between align-items-center mb-2 text-dark text-decoration-none py-1 border-bottom">
-                            <span>{{ $cat->name }}</span>
-                            <span class="badge badge-pill badge-light border text-primary">{{ $cat->blogs_count ?? 0 }}</span>
-                        </a>
-                    @endforeach
+               {{-- Categories --}}
+<div class="bg-white p-4 mb-4 shadow-sm rounded border-top border-primary">
+    <h6 class="text-uppercase font-weight-bold mb-3">Blog Categories</h6>
+    @foreach($categories as $cat)
+        @continue($cat->type !== 'blog')
+        <a href="{{ route('blogs.index', ['category' => $cat->slug]) }}" 
+           class="d-flex justify-content-between align-items-center mb-2 text-dark text-decoration-none py-1 border-bottom">
+            <span>{{ $cat->name }}</span>
+            <span class="badge badge-pill badge-light border text-primary">{{ $cat->blogs_count ?? 0 }}</span>
+        </a>
+    @endforeach
+</div>
+
+{{-- Recent Posts Section --}}
+<div class="bg-white p-4 mb-4 shadow-sm rounded border-top border-primary">
+    <h6 class="text-uppercase font-weight-bold mb-4">Recent Insights</h6>
+    
+    @forelse($recentPosts as $recent)
+        <div class="media mb-4 align-items-center pb-3 border-bottom last-child-no-border">
+            @if($recent->blogPhoto)
+                <img src="{{ asset('storage/' . $recent->blogPhoto->file_path) }}" 
+                     class="mr-3 rounded shadow-sm" 
+                     style="width: 65px; height: 65px; object-fit: cover;" 
+                     alt="{{ $recent->title }}">
+            @else
+                <div class="mr-3 rounded bg-light d-flex align-items-center justify-content-center border" 
+                     style="width: 65px; height: 65px;">
+                    <i class="fa fa-image text-muted small"></i>
                 </div>
+            @endif
+            
+            <div class="media-body">
+                <small class="text-primary font-weight-bold text-uppercase d-block mb-1" style="font-size: 10px;">
+                    {{ $recent->category->name ?? 'General' }}
+                </small>
+                <h6 class="mb-0" style="line-height: 1.4;">
+                    <a href="{{ route('article.details', $recent->slug) }}" class="text-dark font-weight-bold text-decoration-none small">
+                        {{ Str::limit($recent->title, 45) }}
+                    </a>
+                </h6>
+                <small class="text-muted" style="font-size: 11px;">
+                    <i class="far fa-calendar-alt mr-1"></i> {{ $recent->created_at->format('M d') }}
+                </small>
+            </div>
+        </div>
+    @empty
+        <p class="text-muted small italic">No other posts yet.</p>
+    @endforelse
+</div>
             </div>
         </aside>
 
