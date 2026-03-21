@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 
 // --- 1. OAUTH & AUTH CONTROLLERS ---
 use App\Http\Controllers\Auth\SocialLoginController;
-use App\Livewire\Parts\PartsCatalog;
 
 // --- 2. USER/PUBLIC CONTROLLERS ---
 use App\Http\Controllers\HomeContoller;
@@ -12,8 +11,6 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SubscriptionsController;
 use App\Http\Controllers\CareersController;
-use App\Http\Controllers\VolunteerController;
-use App\Http\Controllers\DonateController;
 use App\Http\Controllers\BrandsController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CatalogeController;
@@ -21,7 +18,6 @@ use App\Http\Controllers\ExportsController;
 
 // --- 3. E-COMMERCE & PARTS CONTROLLERS ---
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SparePartController;
 use App\Http\Controllers\PartCatalogController;
 use App\Http\Controllers\SpecificationController;
 use App\Http\Controllers\VehicleModelController;
@@ -42,17 +38,10 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AddressController;
 use App\Http\Controllers\Admin\CareersController as Careers;
 use App\Http\Controllers\Admin\ApplicationsController;
-use App\Http\Controllers\Admin\CauseController;
 use App\Http\Controllers\Admin\BlogCategoryController;
-use App\Http\Controllers\Admin\BloggersController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\GalleryController;
-use App\Http\Controllers\Admin\ProjectController;
-use App\Http\Controllers\Admin\TeamController;
-use App\Http\Controllers\Admin\EventController;
-use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\UsersController;
-use App\Http\Controllers\Admin\StoryController;
 use App\Http\Controllers\Admin\WebpagesController;
 use App\Http\Controllers\Admin\BodyTypeController;
 use App\Http\Controllers\Admin\BroadcastController;
@@ -87,7 +76,6 @@ Route::get('/', [HomeContoller::class, 'index']);
 
 Route::controller(PageController::class)->group(function () {
     Route::get('/about', 'about')->name('about');
-    Route::get('/gallery', 'gallery')->name('gallery');
     
     // --- BLOGS & ARTICLES ---
     Route::get('/blogs', 'blogs')->name('blogs.index');
@@ -100,17 +88,7 @@ Route::controller(PageController::class)->group(function () {
     Route::get('/news', 'news')->name('news.index');
     Route::get('/news/{slug}', 'news_details')->name('news.show');
     
-    // --- OTHER PAGES ---
-    Route::get('/projects', 'projects')->name('projects');
-    Route::get('/stories', 'stories')->name('stories');
-    Route::get('/story/{id}', 'story')->name('story.show');
-    Route::get('/causes', 'causes')->name('causes');
-    Route::get('/events', 'events')->name('events');
-    Route::get('/events/{event}', 'event')->name('events.show');
-    
     // --- FORMS & ACTIONS ---
-    Route::get('/donate', 'donate')->name('donate');
-    Route::get('/volunteer', 'volunteer')->name('volunteer');
     Route::get('/application-sent', 'application_sent')->name('application.sent');
     Route::post('/comment', 'post')->name('comment.store');
     Route::delete('/comment/{id}', 'deleteComment')->name('comment.delete');
@@ -128,12 +106,6 @@ Route::get('/cataloge/{id}', [CatalogeController::class, 'cataloge']);
 // --- Forms & Applications ---
 Route::resource('contact', ContactController::class);
 Route::resource('subscribe', SubscriptionsController::class);
-
-Route::get('/volunteer', [VolunteerController::class, 'index'])->name('volunteer');
-Route::post('/volunteer', [VolunteerController::class, 'store']);
-
-Route::get('/donate', [DonateController::class, 'index']);
-Route::post('/donate', [DonateController::class, 'store'])->name('donation.store');
 
 Route::controller(CareersController::class)->group(function () {
     Route::get('/career', 'index');
@@ -158,8 +130,8 @@ Route::controller(PartCatalogController::class)->group(function () {
     Route::get('/catalog/{brand}/{model}/{slug}', 'part_for_specification')->name('specification.parts');
 });
 
-Route::get('/parts-catalog/{brand?}/{model?}/{variant?}', [SparePartController::class, 'catalog'])->name('parts.catalog');
-Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
+// Route::get('/parts-catalog/{brand?}/{model?}/{variant?}', [SparePartController::class, 'catalog'])->name('parts.catalog');
+// Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 
 Route::get('/model/{brand}', [BrandController::class, 'show'])->name('brand.models');
 
@@ -245,20 +217,12 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
 
     // Content Management
     Route::resource('pages', WebpagesController::class);
-    Route::resource('causes', CauseController::class);
-    Route::resource('stories', StoryController::class);
     Route::resource('blog-categories', BlogCategoryController::class);
-    Route::resource('bloggers', BloggersController::class);
-    Route::resource('blogs', BlogController::class);
     // Articles / Blogs
     Route::resource('blogs', BlogController::class);
     // News & Updates
     Route::resource('news', NewsController::class);
     Route::resource('gallery', GalleryController::class);
-    Route::resource('projects', ProjectController::class);
-    Route::resource('team', TeamController::class);
-    Route::resource('events', EventController::class);
-    Route::resource('partners', PartnerController::class);
     Route::resource('organization', OrganizationController::class);
     Route::resource('users', UsersController::class);
 
@@ -269,7 +233,6 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
         Route::post('applications/shortlist', 'shortlist');
         Route::post('/applications/export-all', 'exportAll');
         Route::get('/applications/export-selected', 'exportSelected');
-        Route::get("/letmesee/{id}", 'exportSelected');
         Route::get('applications/filter/{id}', 'filter');
         Route::get('applications/search/{keyword}', 'search');
         Route::get('/downloadfiles', 'downloadfiles');
