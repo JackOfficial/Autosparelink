@@ -153,23 +153,23 @@ public function part_for_specification($brand, $model, $slug)
     }
 
    public function show($sku) {
-    $part = Part::where('sku', $sku)->first();
-    dd("Hello");
-    // 1. Unified Eager Loading
-    $part->load([
-        'partBrand', 
-        'photos', 
-        'fitments.vehicleModel.brand',
-        'fitments.variant', // Added this
-        'substitutions.partBrand'
-    ]);
+    // $part = Part::where('sku', $sku)->first();
+    // dd("Hello");
+    // // 1. Unified Eager Loading
+    // $part->load([
+    //     'partBrand', 
+    //     'photos', 
+    //     'fitments.vehicleModel.brand',
+    //     'fitments.variant', // Added this
+    //     'substitutions.partBrand'
+    // ]);
 
-    // 2. Use Collection methods for safety
-    return view('parts.show', [
-        'part' => $part,
-        'photos' => $part->photos ?? collect(),
-        'substitutions' => $part->substitutions ?? collect(),
-        'compatibilities' => $part->fitments ?? collect(),
-    ]);
+    // // 2. Use Collection methods for safety
+    // return view('parts.show', [
+    //     'part' => $part,
+    //     'photos' => $part->photos ?? collect(),
+    //     'substitutions' => $part->substitutions ?? collect(),
+    //     'compatibilities' => $part->fitments ?? collect(),
+    // ]);
 }
 }
