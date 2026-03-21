@@ -85,12 +85,6 @@ use App\Http\Controllers\LikeController;
 
 Route::get('/', [HomeContoller::class, 'index']);
 
-Route::controller(PartCatalogController::class)->group(function () {
-    Route::get('/spare-parts', 'parts')->name('spare-parts.index');
-    Route::get('/spare-parts/{part:sku}', 'show')->name('spare-parts.show');
-    Route::get('/catalog/{brand}/{model}/{slug}', 'part_for_specification')->name('specification.parts');
-});
-
 Route::controller(PageController::class)->group(function () {
     Route::get('/about', 'about')->name('about');
     Route::get('/gallery', 'gallery')->name('gallery');
@@ -154,11 +148,17 @@ Route::controller(CareersController::class)->group(function () {
 
 Route::get('/shop/products', [ProductController::class, 'products']);
 Route::get('/shop/products/{id}', [ProductController::class, 'product']);
-Route::get('/spare-parts/{variant}', [ProductController::class, 'product'])->name('spare-parts');
+Route::get('/spare-parts/v/{variant}', [ProductController::class, 'product'])->name('spare-parts');
 
 Route::get('/models', [VehicleModelController::class, 'index']);
 Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
 Route::get('/vin-search', [VinController::class, 'search']);
+
+Route::controller(PartCatalogController::class)->group(function () {
+    Route::get('/spare-parts', 'parts')->name('spare-parts.index');
+    Route::get('/spare-parts/p/{part:sku}', 'show')->name('spare-parts.show');
+    Route::get('/catalog/{brand}/{model}/{slug}', 'part_for_specification')->name('specification.parts');
+});
 
 Route::get('/parts-catalog/{brand?}/{model?}/{variant?}', [SparePartController::class, 'catalog'])->name('parts.catalog');
 Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
