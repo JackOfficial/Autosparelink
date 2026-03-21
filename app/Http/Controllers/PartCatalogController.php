@@ -152,8 +152,7 @@ public function part_for_specification($brand, $model, $slug)
         ]);
     }
 
-   public function show($sku) {
-    $part = Part::where('sku', $sku)->first();
+   public function show(Part $part) {
     // 1. Unified Eager Loading
     $part->load([
         'partBrand', 
