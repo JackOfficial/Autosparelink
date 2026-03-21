@@ -153,6 +153,7 @@ public function part_for_specification($brand, $model, $slug)
     }
 
    public function show(Part $part) {
+    dd("Hello");
     // 1. Unified Eager Loading
     $part->load([
         'partBrand', 
