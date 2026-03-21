@@ -147,8 +147,6 @@ Route::controller(CareersController::class)->group(function () {
 // =============================================================
 
 Route::get('/shop/products', [ProductController::class, 'products']);
-Route::get('/shop/products/{id}', [ProductController::class, 'product']);
-Route::get('/spare-parts/v/{variant}', [ProductController::class, 'product'])->name('spare-parts');
 
 Route::get('/models', [VehicleModelController::class, 'index']);
 Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
