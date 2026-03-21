@@ -155,7 +155,7 @@ Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);
 Route::get('/vin-search', [VinController::class, 'search']);
 
 Route::controller(PartCatalogController::class)->group(function () {
-    Route::get('/spare-parts', 'parts');
+    Route::get('/spare-parts', 'parts')->name('spare-parts.index');
     Route::get('/spare-parts/{part:sku}', 'show')->name('spare-parts.show');
     Route::get('/catalog/{brand}/{model}/{slug}', 'part_for_specification')->name('specification.parts');
 });
