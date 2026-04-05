@@ -94,6 +94,11 @@ public function substitutedFor()
     );
 }
 
+public function shop()
+{
+    return $this->belongsTo(Shop::class);
+}
+
      /**
      * Generate SKU for a part
      */

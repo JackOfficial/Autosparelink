@@ -115,4 +115,9 @@ public function tickets()
     return $this->hasMany(Ticket::class);
 }
 
+public function shop()
+{
+    return $this->hasOne(Shop::class);
+}
+
 }
