@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Part extends Model
 {
     protected $fillable = [
         'sku',
+        'shop_id',
         'part_number',
         'part_name',
         'category_id',
@@ -94,7 +96,7 @@ public function substitutedFor()
     );
 }
 
-public function shop()
+public function shop(): BelongsTo
 {
     return $this->belongsTo(Shop::class);
 }
