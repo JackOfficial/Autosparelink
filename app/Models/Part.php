@@ -127,4 +127,26 @@ public function isAvailable($requestedQuantity = 1)
     return $this->status === 'active' && $this->stock_quantity >= $requestedQuantity;
 }
 
+protected static function booted()
+{
+    // 1. Automated Slug Generation (from earlier)
+    static::creating(function ($part) {
+        if (auth()->check() && auth()->user()->hasRole('seller')) {
+            $part->shop_id = auth()->user()->shop->id;
+        }
+    });
+
+    // 2. The Global Scope for Sellers
+    static::addGlobalScope('sellerParts', function ($builder) {
+        if (auth()->check() && auth()->user()->hasRole('seller')) {
+            $builder->where('shop_id', auth()->user()->shop->id);
+        }
+        
+        // Note: We don't apply this to 'admin' or 'super-admin' 
+        // so they can still see everything on the platform.
+    });
+
+    //$allParts = Part::withoutGlobalScope('sellerParts')->get(); this will be used to see all parts
+}
+
 }
