@@ -1,5 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
+const sidebar = document.getElementById('sidebar');
     const content = document.getElementById('content');
     const topbar = document.getElementById('topbar');
     const toggleBtn = document.getElementById('toggleBtn');
@@ -23,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Click outside to close
+    // 🔥 Click outside to close
     if (overlay) {
       overlay.addEventListener('click', () => {
         if (sidebar) sidebar.classList.remove('mobile-show');
@@ -31,17 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Active Link Logic
-    const currentPage = window.location.pathname; 
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     const navLinks = document.querySelectorAll('.sidebar .nav-link');
 
-    navLinks.forEach(link => {
-        // More robust check: does the current path include the link's href?
-        const href = link.getAttribute('href');
-        if (href && currentPage.includes(href) && href !== '#') {
-            link.classList.add('active');
-        } else {
-            link.classList.remove('active');
+    if (navLinks.length > 0) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === currentPage) {
+          link.classList.add('active');
         }
-    });
-});
+      });
+    }
