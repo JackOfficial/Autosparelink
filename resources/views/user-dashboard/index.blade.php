@@ -185,108 +185,144 @@
     </div>
 </nav>
 
-        <main id="content" class="content d-flex flex-column">
-            <div class="container-fluid p-4 flex-grow-1">
-                <div class="row align-items-center mb-4 g-3">
-                    <div class="col-12 col-md">
-                        <h1 class="h3 mb-1 fw-bold text-dark">Business Overview</h1>
-                        <p class="text-muted small mb-0">Managing <strong>{{ $shop->name }}</strong>.</p>
-                    </div>
-                    <div class="col-12 col-md-auto">
-                        <button class="btn btn-primary rounded-pill shadow-sm px-4 py-2">
-                            <i class="ti ti-plus me-1"></i> Add Part
-                        </button>
-                    </div>
-                </div>
+     <main id="content" class="content d-flex flex-column">
+    <div class="container-fluid p-4 flex-grow-1">
+        <div class="row align-items-center mb-4 g-3">
+            <div class="col-12 col-md">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1 smaller">
+                        <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Overview</li>
+                    </ol>
+                </nav>
+                <h1 class="h3 mb-1 fw-bold text-dark">Business Overview</h1>
+                <p class="text-muted small mb-0">Live updates for <strong>{{ $shop->name }}</strong> in Kigali.</p>
+            </div>
+            <div class="col-12 col-md-auto d-flex gap-2">
+                <button class="btn btn-white border rounded-pill shadow-sm px-3 py-2 small">
+                    <i class="ti ti-download me-1"></i> Export
+                </button>
+                <button class="btn btn-primary rounded-pill shadow-sm px-4 py-2">
+                    <i class="ti ti-plus me-1"></i> Add Part
+                </button>
+            </div>
+        </div>
 
-                <div class="row g-3 mb-4">
-                    @php
-                        $stats_items = [
-                            ['Revenue', number_format($stats['total_revenue'] ?? 0).' RWF', 'ti-cash', 'success'],
-                            ['Total Parts', $stats['total_inventory'] ?? 0, 'ti-package', 'primary'],
-                            ['Pending', $stats['pending_pickup'] ?? 0, 'ti-truck', 'warning'],
-                            ['Low Stock', $stats['low_stock'] ?? 0, 'ti-alert-triangle', 'danger']
-                        ];
-                    @endphp
-                    @foreach($stats_items as $item)
-                    <div class="col-12 col-sm-6 col-xl-3">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body d-flex align-items-center">
-                                <div class="icon-shape bg-{{ $item[3] }}-subtle text-{{ $item[3] }} rounded-3 me-3 p-3">
-                                    <i class="ti {{ $item[2] }} fs-4"></i>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block fw-medium">{{ $item[0] }}</small>
-                                    <h4 class="mb-0 fw-bold">{{ $item[1] }}</h4>
-                                </div>
+        <div class="row g-3 mb-4">
+            @php
+                $stats_items = [
+                    ['Revenue', number_format($stats['total_revenue'] ?? 0).' RWF', 'ti-cash', 'success', '+12.5%'],
+                    ['Inventory', $stats['total_inventory'] ?? 0, 'ti-package', 'primary', 'Active'],
+                    ['Pending', $stats['pending_pickup'] ?? 0, 'ti-truck', 'warning', '3 urgent'],
+                    ['Low Stock', $stats['low_stock'] ?? 0, 'ti-alert-triangle', 'danger', 'Restock soon']
+                ];
+            @endphp
+            @foreach($stats_items as $item)
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 transition-hover">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="icon-shape bg-{{ $item[3] }}-subtle text-{{ $item[3] }} rounded-3 p-3">
+                                <i class="ti {{ $item[2] }} fs-4"></i>
                             </div>
+                            <span class="badge bg-{{ $item[3] }}-subtle text-{{ $item[3] }} border border-{{ $item[3] }} smaller">
+                                {{ $item[4] }}
+                            </span>
                         </div>
-                    </div>
-                    @endforeach
-                </div>
-
-                <div class="row g-4 mb-4">
-                    <div class="col-12 col-xl-8">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-transparent border-0 pt-4 px-4">
-                                <h6 class="fw-bold mb-0">Performance Analytics</h6>
-                            </div>
-                            <div class="card-body">
-                                <div id="salesPurchaseChart" style="min-height: 350px;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-xl-4">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-transparent border-0 pt-4 px-4">
-                                <h6 class="fw-bold mb-0">Recent Sales</h6>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <tbody>
-                                            @forelse($recentSales ?? [] as $sale)
-                                            <tr class="border-bottom">
-                                                <td class="ps-4">
-                                                    <div class="avatar avatar-xs bg-light text-primary fw-bold rounded text-center" style="width:32px; height:32px; line-height:32px;">
-                                                        {{ substr($sale->part_name, 0, 1) }}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="small fw-bold text-truncate" style="max-width: 120px;">{{ $sale->part_name }}</div>
-                                                    <div class="smaller text-muted">#{{ $sale->order_id }}</div>
-                                                </td>
-                                                <td class="text-end pe-4">
-                                                    <div class="small fw-bold">{{ number_format($sale->unit_price) }}</div>
-                                                    <span class="badge bg-success-subtle text-success smaller">Paid</span>
-                                                </td>
-                                            </tr>
-                                            @empty
-                                            <tr><td colspan="3" class="text-center py-5 text-muted">No sales yet.</td></tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                        <div>
+                            <small class="text-muted d-block fw-medium mb-1">{{ $item[0] }}</small>
+                            <h3 class="mb-0 fw-bold">{{ $item[1] }}</h3>
                         </div>
                     </div>
                 </div>
             </div>
+            @endforeach
+        </div>
 
-            <footer class="footer mt-auto py-3 bg-white border-top">
-                <div class="container-fluid px-4">
-                    <div class="row align-items-center justify-content-between small">
-                        <div class="col-md-6 text-muted">
-                            &copy; {{ date('Y') }} <span class="fw-bold text-primary">AutoSpareLink</span>. All rights reserved.
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-xl-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0">Performance Analytics</h6>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm border dropdown-toggle" data-bs-toggle="dropdown">Last 7 Days</button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                <li><a class="dropdown-item small" href="#">Last 30 Days</a></li>
+                                <li><a class="dropdown-item small" href="#">This Year</a></li>
+                            </ul>
                         </div>
-                        <div class="col-md-6 text-md-end">
-                            <a href="#" class="text-muted text-decoration-none me-3">Privacy Policy</a>
-                            <a href="#" class="text-muted text-decoration-none">Terms of Service</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="salesPurchaseChart" style="min-height: 350px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0">Recent Sales</h6>
+                        <a href="/sales" class="smaller text-primary text-decoration-none fw-bold">View All</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 border-0 smaller text-muted text-uppercase py-3">Item</th>
+                                        <th class="border-0 smaller text-muted text-uppercase py-3 text-end pe-4">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($recentSales ?? [] as $sale)
+                                    <tr>
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm bg-primary-subtle text-primary fw-bold rounded-circle d-flex align-items-center justify-content-center me-3" style="width:38px; height:38px;">
+                                                    <i class="ti ti-settings fs-6"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="small fw-bold text-dark">{{ $sale->part_name }}</div>
+                                                    <div class="smaller text-muted">ID: #{{ $sale->order_id }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-end pe-4 py-3">
+                                            <div class="small fw-bold">{{ number_format($sale->unit_price) }}</div>
+                                            <div class="smaller text-success">
+                                                <i class="ti ti-circle-check-filled me-1"></i>Completed
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr><td colspan="2" class="text-center py-5 text-muted small">No recent transactions found.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </footer>
-        </main>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-auto py-4 bg-white border-top">
+        <div class="container-fluid px-4">
+            <div class="row align-items-center g-3">
+                <div class="col-md-6 text-center text-md-start">
+                    <span class="smaller text-muted">&copy; {{ date('Y') }} <strong>AutoSpareLink</strong>. Engineered for efficiency.</span>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="d-inline-flex gap-4">
+                        <a href="#" class="smaller text-muted text-decoration-none transition-color">Support</a>
+                        <a href="#" class="smaller text-muted text-decoration-none transition-color">Documentation</a>
+                        <a href="#" class="smaller text-muted text-decoration-none transition-color">Privacy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</main>
     </div>
 </body>
 </html>
