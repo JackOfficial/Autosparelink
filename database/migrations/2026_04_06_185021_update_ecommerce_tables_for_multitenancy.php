@@ -20,7 +20,7 @@ return new class extends Migration
                 $table->string('part_name')->after('unit_price');
             }
             if (!Schema::hasColumn('order_items', 'status')) {
-                $table->enum('fulfillment_status', ['pending', 'packed', 'ready_for_pickup', 'collected', 'at_hub'])
+                $table->enum('status', ['pending', 'packed', 'ready_for_pickup', 'collected', 'at_hub'])
                       ->default('pending')
                       ->after('part_name')->change();
             }
