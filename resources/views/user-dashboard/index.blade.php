@@ -8,10 +8,9 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/userdashboard/favicon_io/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/userdashboard/favicon_io/favicon-32x32.png') }}">
     
-    <link rel="stylesheet" href="{{ asset('css/vendor-dashboard.css') }}">
+    <link rel="stylesheet" href="https://happyfamilyrwanda.org/path-to-your-css.css">
 
     <script>
-        // High-speed theme check to prevent flickering
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-bs-theme', savedTheme);
 
@@ -75,8 +74,9 @@
             </div>
         </aside>
 
-        <div class="content-wrapper">
-            <nav id="topbar" class="navbar topbar bg-body px-3">
+        <div id="layout-content" class="content-wrapper d-flex flex-column">
+            
+            <nav id="topbar" class="navbar topbar bg-body px-3 border-bottom">
                 <div class="d-flex align-items-center w-100 h-100">
                     <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm me-3 border">
                         <i class="ti ti-menu-2"></i>
@@ -106,19 +106,10 @@
                             </button>
                         </li>
 
-                        <li class="dropdown">
-                            <a class="position-relative btn-icon btn-sm btn-light btn rounded-circle border" data-bs-toggle="dropdown" href="#">
-                                <i class="ti ti-bell fs-5"></i>
-                                @if(($stats['low_stock'] ?? 0) > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-                                @endif
-                            </a>
-                        </li>
-
                         <li class="dropdown border-start ps-3 ms-2">
                             <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
-                                <img src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?background=0D6EFD&color=fff&name='.urlencode(auth()->user()->name) }}" 
-                                     alt="User" class="avatar avatar-sm rounded-circle shadow-sm border border-2 border-white me-2" />
+                                <img src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name) }}" 
+                                     alt="User" class="avatar avatar-sm rounded-circle border me-2" />
                                 <div class="d-none d-xl-block">
                                     <p class="mb-0 fw-bold small text-dark line-height-1" style="font-size: 0.85rem;">{{ explode(' ', auth()->user()->name)[0] }}</p>
                                     <p class="mb-0 smaller text-muted" style="font-size: 0.75rem;">{{ $shop->name ?? 'Vendor' }}</p>
@@ -129,7 +120,7 @@
                 </div>
             </nav>
 
-            <main id="content" class="p-4 flex-grow-1 content">
+            <main id="content" class="p-4 flex-grow-1">
                 <div class="container-fluid p-0">
                     <div class="row align-items-center mb-4 g-3">
                         <div class="col-12 col-md">
@@ -171,7 +162,7 @@
                     <div class="row g-4 mb-4">
                         <div class="col-12 col-xl-8">
                             <div class="card border-0 shadow-sm h-100">
-                                <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                                <div class="card-header bg-transparent border-0 pt-4 px-4">
                                     <h6 class="fw-bold mb-0">Performance Analytics</h6>
                                 </div>
                                 <div class="card-body">
@@ -181,7 +172,7 @@
                         </div>
                         <div class="col-12 col-xl-4">
                             <div class="card border-0 shadow-sm h-100">
-                                <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between">
+                                <div class="card-header bg-transparent border-0 pt-4 px-4">
                                     <h6 class="fw-bold mb-0">Recent Sales</h6>
                                 </div>
                                 <div class="card-body p-0">
@@ -201,7 +192,7 @@
                                                     </td>
                                                     <td class="text-end pe-4">
                                                         <div class="small fw-bold">{{ number_format($sale->unit_price) }}</div>
-                                                        <span class="badge bg-success-subtle text-success smaller border border-success-subtle">Paid</span>
+                                                        <span class="badge bg-success-subtle text-success smaller">Paid</span>
                                                     </td>
                                                 </tr>
                                                 @empty
