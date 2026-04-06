@@ -22,7 +22,7 @@ return new class extends Migration
             if (!Schema::hasColumn('order_items', 'status')) {
                 $table->enum('status', ['pending', 'packed', 'ready_for_pickup', 'collected', 'at_hub'])
                       ->default('pending')
-                      ->after('part_name')->change();
+                      ->after('part_name');
             }
         });
 
