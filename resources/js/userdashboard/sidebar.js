@@ -1,4 +1,5 @@
-const sidebar = document.getElementById('sidebar');
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
     const content = document.getElementById('content');
     const topbar = document.getElementById('topbar');
     const toggleBtn = document.getElementById('toggleBtn');
@@ -22,7 +23,7 @@ const sidebar = document.getElementById('sidebar');
       });
     }
 
-    // 🔥 Click outside to close
+    // Click outside to close
     if (overlay) {
       overlay.addEventListener('click', () => {
         if (sidebar) sidebar.classList.remove('mobile-show');
@@ -30,14 +31,17 @@ const sidebar = document.getElementById('sidebar');
       });
     }
 
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    // Active Link Logic
+    const currentPage = window.location.pathname; 
     const navLinks = document.querySelectorAll('.sidebar .nav-link');
 
-    if (navLinks.length > 0) {
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === currentPage) {
-          link.classList.add('active');
+    navLinks.forEach(link => {
+        // More robust check: does the current path include the link's href?
+        const href = link.getAttribute('href');
+        if (href && currentPage.includes(href) && href !== '#') {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
         }
-      });
-    }
+    });
+});
