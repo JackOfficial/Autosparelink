@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
+use App\Models\Order;
+// use App\Models\Purchase;
+use Carbon\Carbon;
+
 class UserDashboardController extends Controller
 {
     /**
@@ -59,6 +63,27 @@ public function index()
         'tickets'
     ));
 }
+
+public function dashboard()
+    {
+        // Get last 7 days of sales
+        $salesData = Order::where('created_at', '>=', Carbon::now()->subDays(7))
+            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total');
+
+        // Get last 7 days of purchases
+        $purchaseData = Purchase::where('created_at', '>=', Carbon::now()->subDays(7))
+            ->selectRaw('DATE(created_at) as date, SUM(cost_amount) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total');
+
+        return view('user-dashoard.index', compact('salesData', 'purchaseData'));
+    }
+
+
     /**
      * Show Profile Edit Form
      */

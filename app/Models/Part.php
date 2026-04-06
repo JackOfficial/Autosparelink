@@ -136,6 +136,16 @@ protected static function booted()
         }
     });
 
+    // Auto-generate SKU if empty
+        if (empty($part->sku)) {
+            // You might need to load these names if they aren't in the request
+            $part->sku = self::generateSku(
+                $part->partBrand->name ?? 'GEN', 
+                $part->category->name ?? 'CAT', 
+                $part->part_name
+            );
+        }
+
     // 2. The Global Scope for Sellers
     static::addGlobalScope('sellerParts', function ($builder) {
         if (auth()->check() && auth()->user()->hasRole('seller')) {

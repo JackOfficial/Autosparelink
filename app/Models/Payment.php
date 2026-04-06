@@ -15,6 +15,11 @@ class Payment extends Model
         'paid_at',
     ];
 
+      protected $casts = [
+    'paid_at' => 'datetime',
+    'amount'  => 'decimal:2',
+];
+
     // Relationship
     public function order()
     {

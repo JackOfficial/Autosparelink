@@ -303,6 +303,5 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::post('/settings', [SystemSettingsController::class, 'update'])->name('settings.update');
 });
 
-Route::get('/userdashboard', function(){
-    return view('user-dashoard.index');
+Route::get('/userdashboard', [UserDashboardController::class, 'dashboard']);
 });

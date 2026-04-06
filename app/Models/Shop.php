@@ -40,10 +40,17 @@ public function parts(): HasMany
     return $this->hasMany(Part::class);
 }
 
+public function orders()
+{
+    return $this->hasManyThrough(OrderItem::class, Part::class);
+}
+
 protected static function booted()
 {
-    static::creating(function ($shop) {
-        $shop->slug = \Illuminate\Support\Str::slug($shop->name);
+    static::saving(function ($shop) {
+        if ($shop->isDirty('name')) {
+            $shop->slug = \Illuminate\Support\Str::slug($shop->name);
+        }
     });
 }
 

@@ -69,6 +69,22 @@ class User extends Authenticatable implements MustVerifyEmail
     return $this->hasMany(Comment::class);
 }
 
+/**
+ * Quick check if the user actually has an active shop.
+ */
+public function hasActiveShop(): bool
+{
+    return $this->shop()->where('is_active', true)->exists();
+}
+
+/**
+ * Access the shop's parts directly from the user.
+ */
+public function shopParts()
+{
+    return $this->hasManyThrough(Part::class, Shop::class);
+}
+
 public function addresses()
 {
     return $this->hasMany(Address::class);

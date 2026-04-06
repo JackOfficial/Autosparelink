@@ -19,7 +19,6 @@ class Variant extends Model
         'trim_level',
         'is_default',
         'status',
-        // chassis_code and model_code removed as they are now in specifications
     ];
 
     /**

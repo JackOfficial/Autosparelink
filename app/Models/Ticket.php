@@ -12,7 +12,7 @@ class Ticket extends Model
     'category', 
     'subject', 
     'message', 
-    'order_ref', 
+    'order_id', // Changed from order_ref to order_id for a direct link
     'priority', 
     'status'
 ];
@@ -29,4 +29,15 @@ class Ticket extends Model
 {
     return $this->hasMany(TicketReply::class);
 }
+
+public function order(): BelongsTo
+{
+    return $this->belongsTo(Order::class);
+}
+
+public function photos()
+{
+    return $this->morphMany(Photo::class, 'imageable');
+}
+
 }

@@ -8,13 +8,6 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/userdashboard/favicon_io/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/userdashboard/favicon_io/favicon-32x32.png') }}">
     
-    <script>
-    window.dashboardData = {
-        sales: @json($salesData ?? [0,0,0,0,0,0,0]),
-        purchases: @json($purchaseData ?? [0,0,0,0,0,0,0])
-    };
-</script>
-
     @vite(['resources/js/userdashboard/main.js'])
 </head>
 
