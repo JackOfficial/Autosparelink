@@ -304,4 +304,3 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
 });
 
 Route::get('/userdashboard', [UserDashboardController::class, 'dashboard']);
-});
