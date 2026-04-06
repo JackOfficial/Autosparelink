@@ -241,6 +241,32 @@
                 </div>
             </div>
         </main>
+
+        <footer class="content mt-auto border-top bg-white py-4">
+            <div class="container-fluid">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="text-muted small mb-0">
+                            &copy; {{ date('Y') }} <strong>AutoSpareLink</strong>. All rights reserved.
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <ul class="list-inline mb-0">
+                            <li class="list-inline-item">
+                                <a href="#" class="text-muted small text-decoration-none me-3">Privacy Policy</a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a href="#" class="text-muted small text-decoration-none me-3">Terms of Service</a>
+                            </li>
+                            <li class="list-inline-item">
+                                <span class="text-muted small">v1.2.0 (Laravel 12)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        
     </div>
 </body>
 </html>
