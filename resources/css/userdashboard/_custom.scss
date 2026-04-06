@@ -13,10 +13,9 @@
 
 .sidebar {
     width: 240px;
-    // USE CSS VARIABLES INSTEAD OF $WHITE
     background-color: var(--bs-body-bg); 
     transition: width .3s, left .3s;
-    border-right: 1px solid var(--bs-border-color); // Dynamic border
+    border-right: 1px solid var(--bs-border-color);
     height: 100vh;
     position: fixed;
     top: 0;
@@ -25,15 +24,15 @@
     z-index: 1030;
 
     .nav-link {
-        color: var(--bs-body-color); // Dynamic text color
-        padding: 8px 10px;
+        color: var(--bs-body-color);
+        padding: 10px 15px; // BUMPED: Makes the "lines" taller
         display: flex;
         align-items: center;
-        font-size: 14px;
-        font-weight: 400;
+        font-size: 0.9rem;  // BUMPED: Slightly larger text
+        font-weight: 500;   // BUMPED: Better readability
         gap: 12px;
         white-space: nowrap;
-        margin: 1px 12px;
+        margin: 4px 12px;   // BUMPED: More vertical breathing room
         border-radius: 8px;
 
         &:hover, &.active {
@@ -42,36 +41,24 @@
         }
 
         .ti {
-            font-size: 18px;
+            font-size: 20px; // BUMPED: Clearer icons
         }
     }
+}
 
-    .nav-text {
-        transition: opacity .2s;
-    }
-
-    .logo-area {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 60px;
-        width: 100%;
-        background-color: var(--bs-body-bg); // Dynamic background
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding-left: 17px;
-        color: var(--bs-body-color);
-        border-bottom: 1px solid var(--bs-border-color);
-    }
+// Logic for when sidebar is shrunk
+.sidebar.collapsed ~ .topbar,
+.sidebar.collapsed ~ .content {
+    margin-left: 60px;
+    width: calc(100% - 60px);
 }
 
 .sidebar.collapsed {
     width: 60px;
     .nav-link {
-        margin: 0 0px;
-        background-color: transparent;
-        padding: 8px 18px;
+        margin: 4px 6px; 
+        padding: 10px;
+        justify-content: center;
     }
     .nav-text, .logo-text {
         display: none;
@@ -79,17 +66,25 @@
 }
 
 .topbar {
-    background-color: var(--bs-body-bg); // Add this to ensure topbar flips
+    position: fixed; // Ensures it stays at the top
+    top: 0;
+    right: 0;
+    z-index: 1020;
+    height: 60px;    // Match your logo-area height
+    background-color: var(--bs-body-bg);
     border-bottom: 1px solid var(--bs-border-color);
-}
-
-.topbar.full, .content.full {
-    margin-left: 60px;
+    margin-left: 240px; 
+    width: calc(100% - 240px);
+    transition: margin-left .3s, width .3s;
+    display: flex;
+    align-items: center;
 }
 
 .content {
     margin-left: 240px;
+    padding-top: 80px; // Extra padding so content doesn't hide under fixed topbar
     min-height: 100vh;
+    transition: margin-left .3s;
 }
 
 @media (max-width: 992px) {
