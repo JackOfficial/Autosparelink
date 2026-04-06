@@ -129,34 +129,32 @@ public function isAvailable($requestedQuantity = 1)
 
 protected static function booted()
 {
-    // 1. Automated Slug Generation (from earlier)
+    // 1. Logic to run BEFORE a part is created in the database
     static::creating(function ($part) {
+        // Automatically assign the Shop ID for Sellers
         if (auth()->check() && auth()->user()->hasRole('seller')) {
             $part->shop_id = auth()->user()->shop->id;
         }
-    });
 
-    // Auto-generate SKU if empty
+        // Auto-generate SKU if it wasn't manually entered
         if (empty($part->sku)) {
-            // You might need to load these names if they aren't in the request
             $part->sku = self::generateSku(
                 $part->partBrand->name ?? 'GEN', 
                 $part->category->name ?? 'CAT', 
-                $part->part_name
+                $part->part_name ?? 'Part-name'
             );
         }
+    });
 
     // 2. The Global Scope for Sellers
     static::addGlobalScope('sellerParts', function ($builder) {
         if (auth()->check() && auth()->user()->hasRole('seller')) {
-            $builder->where('shop_id', auth()->user()->shop->id);
+            // Check if user has a shop to avoid null errors
+            if (auth()->user()->shop) {
+                $builder->where('shop_id', auth()->user()->shop->id);
+            }
         }
-        
-        // Note: We don't apply this to 'admin' or 'super-admin' 
-        // so they can still see everything on the platform.
     });
-
-    //$allParts = Part::withoutGlobalScope('sellerParts')->get(); this will be used to see all parts
 }
 
 }
