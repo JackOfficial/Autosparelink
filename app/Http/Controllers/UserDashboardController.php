@@ -89,7 +89,7 @@ public function dashboard()
         'total_inventory' => Part::count(), // Global scope handles shop isolation
         'low_stock'       => Part::where('stock_quantity', '<', 5)->count(),
         'pending_pickup'  => OrderItem::where('shop_id', $shop->id)
-                                ->where('fulfillment_status', 'ready_for_pickup')
+                                ->where('status', 'ready_for_pickup')
                                 ->count(),
         'total_revenue'   => OrderItem::where('shop_id', $shop->id)
                                 ->whereHas('order.payment', function($q){
