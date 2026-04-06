@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8" />
     <title>{{ $shop->name ?? 'Shop' }} | Dashboard</title>
@@ -14,12 +14,16 @@
             sales: @json($salesData ?? []),
             purchases: @json($purchaseData ?? []) 
         };
+
+        // Inline script to prevent white flash on dark mode reload
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
     </script>
 
     @vite(['resources/js/userdashboard/main.js'])
 </head>
 
-<body class="bg-light">
+<body class="bg-body-tertiary">
     <div id="overlay" class="overlay"></div>
 
     <div class="layout-wrapper">
@@ -73,7 +77,7 @@
             </div>
         </aside>
 
-        <nav id="topbar" class="navbar topbar bg-white border-bottom sticky-top px-3">
+        <nav id="topbar" class="navbar topbar bg-body border-bottom sticky-top px-3">
             <div class="d-flex align-items-center w-100">
                 <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm me-3">
                     <i class="ti ti-menu-2"></i>
@@ -84,12 +88,19 @@
 
                 <div class="d-none d-md-block flex-grow-0" style="width: 300px;">
                     <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-light border-0"><i class="ti ti-search text-muted"></i></span>
-                        <input type="text" class="form-control bg-light border-0" placeholder="Search parts...">
-                    </div>
+    <span class="input-group-text bg-body-tertiary border-0">
+        <i class="ti ti-search text-muted"></i>
+    </span>
+    <input type="text" class="form-control bg-body-tertiary border-0" placeholder="Search parts...">
+</div>
                 </div>
 
                 <ul class="list-unstyled d-flex align-items-center mb-0 ms-auto gap-3">
+                    <li class="nav-item me-2">
+                      <button id="themeToggler" class="btn btn-light btn-icon btn-sm rounded-circle">
+                        <i id="themeIcon" class="ti ti-sun fs-5"></i>
+                       </button>
+                      </li>
                     {{-- Notifications --}}
                     <li class="dropdown">
                         <a class="position-relative btn-icon btn-sm btn-light btn rounded-circle" data-bs-toggle="dropdown" href="#">
@@ -266,7 +277,7 @@
                 </div>
             </div>
         </footer>
-        
+
     </div>
 </body>
 </html>

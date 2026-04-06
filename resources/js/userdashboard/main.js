@@ -1,7 +1,10 @@
 // 1. Import Bootstrap JS (This makes dropdowns/tooltips work)
 import * as bootstrap from 'bootstrap';
 
-// 2. Import your custom logic (which pulls in sidebar and charts)
+// 2. Light/Dark modes
+import './modes.js';
+
+// 3. Import your custom logic (which pulls in sidebar and charts)
 import './custom.js';
 
 // 3. Import SCSS (Corrected path to your style.scss)
