@@ -1,10 +1,15 @@
+// Variables for easy maintenance
+$sidebar-width: 240px;
+$sidebar-collapsed-width: 70px; // Slightly wider for better icon centering
+$topbar-height: 60px;
+
 .overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, .45);
-    backdrop-filter: blur(1px);
+    backdrop-filter: blur(4px); // Increased blur for a premium feel
     display: none;
-    z-index: 1030;
+    z-index: 1040; // Under sidebar, over content
 }
 
 .overlay.show {
@@ -12,92 +17,111 @@
 }
 
 .sidebar {
-    width: 240px;
+    width: $sidebar-width;
     background-color: var(--bs-body-bg); 
-    transition: width .3s, left .3s;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1); // Smoother easing
     border-right: 1px solid var(--bs-border-color);
     height: 100vh;
     position: fixed;
     top: 0;
     left: 0;
-    padding-top: 60px;
-    z-index: 1030;
+    z-index: 1050;
+
+    // Logo Area centering
+    .logo-area {
+        height: $topbar-height;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        border-bottom: 1px solid var(--bs-border-color);
+    }
 
     .nav-link {
         color: var(--bs-body-color);
-        padding: 10px 15px; // BUMPED: Makes the "lines" taller
+        padding: 12px 15px;
         display: flex;
         align-items: center;
-        font-size: 0.9rem;  // BUMPED: Slightly larger text
-        font-weight: 500;   // BUMPED: Better readability
+        font-size: 0.9rem;
+        font-weight: 500;
         gap: 12px;
         white-space: nowrap;
-        margin: 4px 12px;   // BUMPED: More vertical breathing room
+        margin: 4px 12px;
         border-radius: 8px;
+        transition: background-color 0.2s;
 
         &:hover, &.active {
-            color: $primary;
-            background-color: rgba($primary, 0.1);
+            color: var(--bs-primary);
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
         }
 
         .ti {
-            font-size: 20px; // BUMPED: Clearer icons
+            font-size: 1.25rem;
         }
     }
 }
 
-// Logic for when sidebar is shrunk
-.sidebar.collapsed ~ .topbar,
-.sidebar.collapsed ~ .content {
-    margin-left: 60px;
-    width: calc(100% - 60px);
-}
-
+// Collapsed State
 .sidebar.collapsed {
-    width: 60px;
+    width: $sidebar-collapsed-width;
+    
     .nav-link {
-        margin: 4px 6px; 
-        padding: 10px;
+        margin: 4px 10px; 
+        padding: 12px;
         justify-content: center;
+        
+        .ti { margin: 0; }
     }
-    .nav-text, .logo-text {
+    
+    .nav-text, .logo-text, .smaller {
         display: none;
     }
 }
 
+// Topbar Logic
 .topbar {
-    position: fixed; // Ensures it stays at the top
+    position: fixed;
     top: 0;
     right: 0;
+    left: $sidebar-width; // Use left instead of margin
     z-index: 1020;
-    height: 60px;    // Match your logo-area height
+    height: $topbar-height;
     background-color: var(--bs-body-bg);
     border-bottom: 1px solid var(--bs-border-color);
-    margin-left: 240px; 
-    width: calc(100% - 240px);
-    transition: margin-left .3s, width .3s;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
 }
 
-.content {
-    margin-left: 240px;
-    padding-top: 80px; // Extra padding so content doesn't hide under fixed topbar
-    min-height: 100vh;
-    transition: margin-left .3s;
+.sidebar.collapsed ~ .topbar {
+    left: $sidebar-collapsed-width;
 }
 
+// Content area logic
+.content {
+    margin-left: $sidebar-width;
+    padding-top: calc(#{$topbar-height} + 20px); 
+    min-height: 100vh;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed ~ .content {
+    margin-left: $sidebar-collapsed-width;
+}
+
+// Mobile Responsiveness
 @media (max-width: 992px) {
     .sidebar {
-        left: -240px;
+        left: -$sidebar-width;
     }
+    
     .sidebar.mobile-show {
         left: 0;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
+    
     .topbar, .content {
+        left: 0 !important;
         margin-left: 0 !important;
-    }
-    .topbar {
         width: 100% !important;
     }
 }
