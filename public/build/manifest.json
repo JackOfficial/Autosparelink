@@ -1,16 +1,53 @@
 {
+  "_bootstrap.esm-CiZvvyki.js": {
+    "file": "assets/bootstrap.esm-CiZvvyki.js",
+    "name": "bootstrap.esm"
+  },
+  "node_modules/@tabler/icons-webfont/dist/fonts/tabler-icons.ttf": {
+    "file": "assets/tabler-icons-Ch1I3Ab1.ttf",
+    "src": "node_modules/@tabler/icons-webfont/dist/fonts/tabler-icons.ttf"
+  },
+  "node_modules/@tabler/icons-webfont/dist/fonts/tabler-icons.woff": {
+    "file": "assets/tabler-icons-BJo9LE_l.woff",
+    "src": "node_modules/@tabler/icons-webfont/dist/fonts/tabler-icons.woff"
+  },
+  "node_modules/@tabler/icons-webfont/dist/fonts/tabler-icons.woff2": {
+    "file": "assets/tabler-icons-BXBbaLXc.woff2",
+    "src": "node_modules/@tabler/icons-webfont/dist/fonts/tabler-icons.woff2"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-9gCz7JBy.css",
+    "file": "assets/app-tn0RQdqM.css",
     "src": "resources/css/app.css",
     "isEntry": true,
+    "name": "app",
     "names": [
       "app.css"
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-Bb8gwOfs.js",
+    "file": "assets/app-D-AjJZXU.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "imports": [
+      "_bootstrap.esm-CiZvvyki.js"
+    ]
+  },
+  "resources/js/userdashboard/main.js": {
+    "file": "assets/main-BtWblAF_.js",
+    "name": "main",
+    "src": "resources/js/userdashboard/main.js",
+    "isEntry": true,
+    "imports": [
+      "_bootstrap.esm-CiZvvyki.js"
+    ],
+    "css": [
+      "assets/main-qbtE9SSX.css"
+    ],
+    "assets": [
+      "assets/tabler-icons-BXBbaLXc.woff2",
+      "assets/tabler-icons-BJo9LE_l.woff",
+      "assets/tabler-icons-Ch1I3Ab1.ttf"
+    ]
   }
 }
