@@ -83,12 +83,12 @@
     <div class="layout-wrapper">
         
         <aside id="sidebar" class="sidebar shadow-sm">
-            <div class="logo-area border-bottom">
-                <a href="/" class="d-flex align-items-center text-decoration-none">
-                    <i class="ti ti-settings-automation fs-3 text-primary me-2"></i>
-                    <span class="fw-bold fs-5 text-dark logo-text">AutoSpare<span class="text-primary">Link</span></span>
-                </a>
-            </div>
+            <div class="logo-area border-bottom d-flex align-items-center px-4" style="height: 70px;">
+    <a href="/" class="d-flex align-items-center text-decoration-none">
+        <i class="ti ti-settings-automation fs-3 text-primary me-2"></i>
+        <span class="fw-bold fs-5 text-dark logo-text">AutoSpare<span class="text-primary">Link</span></span>
+    </a>
+</div>
             
             <div class="sidebar-nav">
                 <ul class="nav flex-column">
@@ -134,93 +134,62 @@
         </aside>
 
         <div class="content-wrapper">
-            <nav id="topbar" class="navbar topbar bg-body border-bottom sticky-top px-3">
-                <div class="d-flex align-items-center w-100">
-                    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm me-3 border">
-                        <i class="ti ti-menu-2"></i>
-                    </button>
-                    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2 border">
-                        <i class="ti ti-menu-2"></i>
-                    </button>
+           <nav id="topbar" class="navbar topbar bg-body border-bottom sticky-top px-3" style="height: 70px;">
+    <div class="d-flex align-items-center w-100 h-100">
+        <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm me-3 border">
+            <i class="ti ti-menu-2"></i>
+        </button>
+        
+        <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2 border">
+            <i class="ti ti-menu-2"></i>
+        </button>
 
-                    <div class="d-none d-md-block" style="width: 350px;">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-body-tertiary border-0 px-3">
-                                <i class="ti ti-search text-muted"></i>
-                            </span>
-                            <input type="text" class="form-control bg-body-tertiary border-0 py-2" placeholder="Search spare parts in Kigali...">
-                        </div>
+        <div class="d-lg-none d-flex align-items-center me-auto">
+            <span class="fw-bold text-dark mb-0">AS<span class="text-primary">L</span></span>
+        </div>
+
+        <div class="d-none d-md-block ms-2" style="width: 350px;">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-body-tertiary border-0 px-3">
+                    <i class="ti ti-search text-muted"></i>
+                </span>
+                <input type="text" class="form-control bg-body-tertiary border-0 py-2" placeholder="Search spare parts in Kigali...">
+            </div>
+        </div>
+
+        <ul class="list-unstyled d-flex align-items-center mb-0 ms-auto gap-2 gap-md-3">
+            <li>
+                <button id="themeToggler" class="btn btn-light btn-icon btn-sm rounded-circle border">
+                    <i id="themeIcon" class="ti ti-sun fs-5"></i>
+                </button>
+            </li>
+
+            <li class="dropdown">
+                <a class="position-relative btn-icon btn-sm btn-light btn rounded-circle border" data-bs-toggle="dropdown" href="#">
+                    <i class="ti ti-bell fs-5"></i>
+                    @if(($stats['pending_pickup'] ?? 0) > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+                    @endif
+                </a>
+                </li>
+
+            <li class="dropdown border-start ps-3 ms-2">
+                <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
+                    <img src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?background=0D6EFD&color=fff&name='.urlencode(auth()->user()->name) }}" 
+                         alt="User" 
+                         class="avatar avatar-sm rounded-circle shadow-sm border border-2 border-white me-2" 
+                         style="width: 32px; height: 32px; object-fit: cover;"/>
+                    <div class="d-none d-xl-block">
+                        <p class="mb-0 fw-bold small text-dark line-height-1" style="font-size: 0.85rem;">
+                            {{ explode(' ', auth()->user()->name)[0] }}
+                        </p>
+                        <p class="mb-0 smaller text-muted" style="font-size: 0.75rem;">{{ $shop->name ?? 'Vendor' }}</p>
                     </div>
-
-                    <ul class="list-unstyled d-flex align-items-center mb-0 ms-auto gap-2 gap-md-3">
-                        <li>
-                            <button id="themeToggler" class="btn btn-light btn-icon btn-sm rounded-circle border">
-                                <i id="themeIcon" class="ti ti-sun fs-5"></i>
-                            </button>
-                        </li>
-
-                        <li class="dropdown">
-                            <a class="position-relative btn-icon btn-sm btn-light btn rounded-circle border" data-bs-toggle="dropdown" href="#">
-                                <i class="ti ti-bell fs-5"></i>
-                                @if($stats['pending_pickup'] > 0 || $stats['low_stock'] > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                                        <span class="visually-hidden">New alerts</span>
-                                    </span>
-                                @endif
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-0" style="width: 320px;">
-                                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
-                                    <h6 class="mb-0 fw-bold">Shop Alerts</h6>
-                                    <span class="badge bg-primary">{{ $stats['pending_pickup'] + $stats['low_stock'] }} New</span>
-                                </div>
-                                <div class="notification-list" style="max-height: 300px; overflow-y: auto;">
-                                    @if($stats['pending_pickup'] > 0)
-                                        <a href="#" class="dropdown-item p-3 border-bottom d-flex gap-3 text-wrap">
-                                            <div class="icon-shape bg-warning-subtle text-warning rounded-circle flex-shrink-0"><i class="ti ti-truck"></i></div>
-                                            <div>
-                                                <p class="mb-0 small fw-bold">{{ $stats['pending_pickup'] }} ready for pickup</p>
-                                                <small class="text-muted">Orders awaiting Kigali Hub dispatch</small>
-                                            </div>
-                                        </a>
-                                    @endif
-                                    @if($stats['low_stock'] > 0)
-                                        <a href="#" class="dropdown-item p-3 border-bottom d-flex gap-3 text-wrap">
-                                            <div class="icon-shape bg-danger-subtle text-danger rounded-circle flex-shrink-0"><i class="ti ti-alert-triangle"></i></div>
-                                            <div>
-                                                <p class="mb-0 small fw-bold">Inventory Alert</p>
-                                                <small class="text-muted">{{ $stats['low_stock'] }} items are running low.</small>
-                                            </div>
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-                        </li>
-
-                        <li class="dropdown border-start ps-3">
-                            <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
-                                <img src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?background=0D6EFD&color=fff&name='.urlencode(auth()->user()->name) }}" alt="User" class="avatar avatar-sm rounded-circle shadow-sm border border-2 border-white me-2" />
-                                <div class="d-none d-xl-block">
-                                    <p class="mb-0 fw-bold small text-dark line-height-1">{{ explode(' ', auth()->user()->name)[0] }}</p>
-                                    <p class="mb-0 smaller text-muted">{{ $shop->name }}</p>
-                                </div>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3" style="min-width: 240px;">
-                                <div class="px-4 py-3 border-bottom bg-light">
-                                    <p class="mb-0 fw-bold small">{{ auth()->user()->name }}</p>
-                                    <p class="mb-0 text-muted smaller">{{ auth()->user()->email }}</p>
-                                </div>
-                                <a class="dropdown-item py-2 px-4 small" href="#"><i class="ti ti-user me-2"></i>My Profile</a>
-                                <a class="dropdown-item py-2 px-4 small" href="#"><i class="ti ti-settings me-2"></i>Account Settings</a>
-                                <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item py-2 px-4 small text-danger fw-bold"><i class="ti ti-logout me-2"></i>Sign Out</button>
-                                </form>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+                </a>
+                </li>
+        </ul>
+    </div>
+</nav>
 
             <main id="content" class="p-4 flex-grow-1">
                 <div class="container-fluid p-0">
