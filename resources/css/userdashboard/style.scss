@@ -10,7 +10,7 @@
 @import "./variables";
 
 // 4. Import the rest of Bootstrap from node_modules
-@use "bootstrap/scss/bootstrap";
+@import "bootstrap/scss/bootstrap";
 
 // 5. Your local custom styles (Ensure this file exists in resources/css/userdashboard/)
 @import "./custom";

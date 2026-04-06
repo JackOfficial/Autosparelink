@@ -10,8 +10,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Part;
 // use App\Models\Purchase;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UserDashboardController extends Controller
 {
@@ -65,23 +68,56 @@ public function index()
 }
 
 public function dashboard()
-    {
-        // Get last 7 days of sales
-        $salesData = Order::where('created_at', '>=', Carbon::now()->subDays(7))
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('total');
+{
+    $shop = auth()->user()->shop;
 
-        // Get last 7 days of purchases
-        $purchaseData = Purchase::where('created_at', '>=', Carbon::now()->subDays(7))
-            ->selectRaw('DATE(created_at) as date, SUM(cost_amount) as total')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('total');
+    // 1. Get last 7 days of sales (Specific to THIS Shop)
+    // We calculate sum from OrderItem to get only this shop's portion of a multi-vendor order
+    $salesData = OrderItem::where('shop_id', $shop->id)
+        ->where('created_at', '>=', now()->subDays(7))
+        ->whereHas('order.payment', function ($query) {
+            $query->where('status', 'successful'); // Only count money actually paid
+        })
+        ->selectRaw('DATE(created_at) as date, SUM(quantity * unit_price) as total')
+        ->groupBy('date')
+        ->orderBy('date')
+        ->get()
+        ->pluck('total', 'date');
 
-        return view('user-dashoard.index', compact('salesData', 'purchaseData'));
-    }
+    // 2. High-Value Dashboard Metrics (The "Top Cards")
+    $stats = [
+        'total_inventory' => Part::count(), // Global scope handles shop isolation
+        'low_stock'       => Part::where('stock_quantity', '<', 5)->count(),
+        'pending_pickup'  => OrderItem::where('shop_id', $shop->id)
+                                ->where('fulfillment_status', 'ready_for_pickup')
+                                ->count(),
+        'total_revenue'   => OrderItem::where('shop_id', $shop->id)
+                                ->whereHas('order.payment', function($q){
+                                    $q->where('status', 'successful');
+                                })->sum(DB::raw('quantity * unit_price')),
+    ];
+
+    // 3. Recent Shop Activity (The "Latest Sales" Table)
+    $recentSales = OrderItem::with(['order.user', 'part'])
+        ->where('shop_id', $shop->id)
+        ->latest()
+        ->take(5)
+        ->get();
+
+    // Ensure we have 0s for days with no sales (Optional but better for Charts)
+    $formattedSales = collect(range(0, 6))->mapWithKeys(function($days) {
+        $date = now()->subDays($days)->format('Y-m-d');
+        return [$date => 0];
+    })->merge($salesData)->reverse();
+
+    return view('user-dashboard.index', [
+        'salesData'   => $formattedSales->values(),
+        'salesLabels' => $formattedSales->keys(),
+        'stats'       => $stats,
+        'recentSales' => $recentSales,
+        'shop'        => $shop
+    ]);
+}
 
 
     /**
