@@ -56,7 +56,7 @@ return new class extends Migration
         // Reverse the changes if needed
         Schema::table('order_items', function (Blueprint $table) {
             $table->dropForeign(['shop_id']);
-            $table->dropColumn(['shop_id', 'part_name', 'fulfillment_status']);
+            $table->dropColumn(['shop_id', 'part_name', 'status']);
         });
         
         Schema::table('shippings', function (Blueprint $table) {
