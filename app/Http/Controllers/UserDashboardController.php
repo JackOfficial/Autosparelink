@@ -72,11 +72,10 @@ public function dashboard()
     $shop = auth()->user()->shop;
 
     // 1. Get last 7 days of sales (Specific to THIS Shop)
-    // We calculate sum from OrderItem to get only this shop's portion of a multi-vendor order
     $salesData = OrderItem::where('shop_id', $shop->id)
         ->where('created_at', '>=', now()->subDays(7))
         ->whereHas('order.payment', function ($query) {
-            $query->where('status', 'successful'); // Only count money actually paid
+            $query->where('status', 'successful');
         })
         ->selectRaw('DATE(created_at) as date, SUM(quantity * unit_price) as total')
         ->groupBy('date')
@@ -84,10 +83,37 @@ public function dashboard()
         ->get()
         ->pluck('total', 'date');
 
-    // 2. High-Value Dashboard Metrics (The "Top Cards")
+    // 2. NEW: Fetch Low Stock Items for the UI Table
+    // Adjust 'stock_quantity' and 'min_threshold' to match your 'parts' table columns
+    $lowStockItems = Part::where('shop_id', $shop->id)
+        ->whereColumn('stock_quantity', '<=', 'min_threshold')
+        ->orWhere('stock_quantity', '<', 5) // Fallback for items without a specific threshold
+        ->where('shop_id', $shop->id)
+        ->limit(5)
+        ->get();
+
+    // 3. NEW: Fetch Pending Pickups for the Blue Card
+    $pendingPickups = OrderItem::with(['order.user'])
+        ->where('shop_id', $shop->id)
+        ->where('status', 'ready_for_pickup')
+        ->latest()
+        ->limit(3)
+        ->get()
+        ->map(function($item) {
+            return (object)[
+                'customer_name' => $item->order->user->name ?? 'Guest Customer',
+                'scheduled_at'  => $item->updated_at, // Use the time it was marked 'ready'
+                'items_count'   => $item->quantity,
+                'location'      => $item->order->shipping_address ?? 'Kigali Store'
+            ];
+        });
+
+    // 4. High-Value Dashboard Metrics
     $stats = [
-        'total_inventory' => Part::count(), // Global scope handles shop isolation
-        'low_stock'       => Part::where('stock_quantity', '<', 5)->count(),
+        'total_inventory' => Part::where('shop_id', $shop->id)->count(),
+        'low_stock'       => Part::where('shop_id', $shop->id)
+                                ->whereColumn('stock_quantity', '<=', 'min_threshold')
+                                ->count(),
         'pending_pickup'  => OrderItem::where('shop_id', $shop->id)
                                 ->where('status', 'ready_for_pickup')
                                 ->count(),
@@ -97,25 +123,27 @@ public function dashboard()
                                 })->sum(DB::raw('quantity * unit_price')),
     ];
 
-    // 3. Recent Shop Activity (The "Latest Sales" Table)
+    // 5. Recent Activity
     $recentSales = OrderItem::with(['order.user', 'part'])
         ->where('shop_id', $shop->id)
         ->latest()
         ->take(5)
         ->get();
 
-    // Ensure we have 0s for days with no sales (Optional but better for Charts)
+    // Chart Formatting
     $formattedSales = collect(range(0, 6))->mapWithKeys(function($days) {
         $date = now()->subDays($days)->format('Y-m-d');
         return [$date => 0];
     })->merge($salesData)->reverse();
 
     return view('user-dashboard.index', [
-        'salesData'   => $formattedSales->values(),
-        'salesLabels' => $formattedSales->keys(),
-        'stats'       => $stats,
-        'recentSales' => $recentSales,
-        'shop'        => $shop
+        'salesData'      => $formattedSales->values(),
+        'salesLabels'    => $formattedSales->keys(),
+        'stats'          => $stats,
+        'recentSales'    => $recentSales,
+        'lowStockItems'  => $lowStockItems,
+        'pendingPickups' => $pendingPickups,
+        'shop'           => $shop
     ]);
 }
 

@@ -254,6 +254,102 @@
                     </div>
                     <div class="card-body">
                         <div id="salesPurchaseChart" style="min-height: 350px;"></div>
+
+                        <div class="row g-4 mb-4">
+    <div class="col-12 col-xl-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold mb-0 text-dark">Low Stock Inventory</h6>
+                    <small class="text-muted smaller">Items requiring immediate restock</small>
+                </div>
+                <button class="btn btn-outline-primary btn-sm rounded-pill px-3">Restock All</button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4 border-0 smaller text-muted py-3">Part Name</th>
+                                <th class="border-0 smaller text-muted py-3">In Stock</th>
+                                <th class="border-0 smaller text-muted py-3">Status</th>
+                                <th class="border-0 smaller text-muted py-3 text-end pe-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($lowStockItems ?? [] as $item)
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <div class="fw-bold small text-dark">{{ $item->name }}</div>
+                                    <div class="smaller text-muted">{{ $item->sku ?? 'SKU-0012' }}</div>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-danger">{{ $item->quantity }}</span>
+                                    <span class="smaller text-muted">/ {{ $item->min_threshold ?? 10 }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger smaller rounded-pill">Critical</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-light btn-sm border rounded-circle" title="Edit Stock">
+                                        <i class="ti ti-edit text-primary"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted small">
+                                    <i class="ti ti-circle-check text-success fs-2 d-block mb-2"></i>
+                                    All inventory levels are healthy.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-5">
+        <div class="card border-0 shadow-sm h-100 bg-primary text-white border-primary" style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);">
+            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                <h6 class="fw-bold mb-0 text-white">Pending Pickups</h6>
+                <small class="text-white-50 smaller">Scheduled for today in Kigali</small>
+            </div>
+            <div class="card-body">
+                <div class="timeline-task-list">
+                    @forelse($pendingPickups ?? [] as $pickup)
+                    <div class="d-flex align-items-center p-3 mb-3 bg-white bg-opacity-10 rounded-3 border border-white border-opacity-10">
+                        <div class="bg-white text-primary rounded-3 p-2 me-3 text-center" style="min-width: 50px;">
+                            <div class="smaller fw-bold text-uppercase">{{ \Carbon\Carbon::parse($pickup->scheduled_at)->format('M') }}</div>
+                            <div class="h5 mb-0 fw-bold">{{ \Carbon\Carbon::parse($pickup->scheduled_at)->format('d') }}</div>
+                        </div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="small fw-bold text-truncate">{{ $pickup->customer_name }}</div>
+                            <div class="smaller text-white-50">{{ $pickup->items_count }} parts • {{ $pickup->location ?? 'Kacyiru' }}</div>
+                        </div>
+                        <div class="ms-2">
+                            <button class="btn btn-white btn-sm rounded-circle shadow-sm">
+                                <i class="ti ti-chevron-right text-primary"></i>
+                            </button>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="text-center py-4 text-white-50 small">
+                        No pickups scheduled for today.
+                    </div>
+                    @endforelse
+                </div>
+                
+                <div class="mt-4 p-3 bg-white bg-opacity-10 rounded-4 text-center">
+                    <p class="smaller mb-2 text-white-50">Need to arrange a local courier?</p>
+                    <button class="btn btn-light btn-sm fw-bold px-4 rounded-pill">Call Logistics</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                     </div>
                 </div>
             </div>
