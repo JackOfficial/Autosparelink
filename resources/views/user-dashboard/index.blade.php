@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 
     <script>
-        // High-speed theme check
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-bs-theme', savedTheme);
         
@@ -61,7 +60,6 @@
                             <span class="nav-text">My Sales</span>
                         </a>
                     </li>
-                    
                     <li class="px-4 mb-2 mt-4 nav-text">
                         <small class="text-uppercase text-muted fw-bold smaller">Support</small>
                     </li>
@@ -80,7 +78,6 @@
                 <button id="toggleBtn" class="btn btn-light btn-sm border d-none d-lg-inline-flex me-3">
                     <i class="ti ti-menu-2"></i>
                 </button>
-                
                 <button id="mobileBtn" class="btn btn-light btn-sm border d-lg-none me-2">
                     <i class="ti ti-menu-2"></i>
                 </button>
@@ -114,8 +111,8 @@
             </div>
         </nav>
 
-        <main id="content" class="content p-4">
-            <div class="container-fluid p-0">
+        <main id="content" class="content d-flex flex-column">
+            <div class="container-fluid p-4 flex-grow-1">
                 <div class="row align-items-center mb-4 g-3">
                     <div class="col-12 col-md">
                         <h1 class="h3 mb-1 fw-bold text-dark">Business Overview</h1>
@@ -201,6 +198,20 @@
                     </div>
                 </div>
             </div>
+
+            <footer class="footer mt-auto py-3 bg-white border-top">
+                <div class="container-fluid px-4">
+                    <div class="row align-items-center justify-content-between small">
+                        <div class="col-md-6 text-muted">
+                            &copy; {{ date('Y') }} <span class="fw-bold text-primary">AutoSpareLink</span>. All rights reserved.
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <a href="#" class="text-muted text-decoration-none me-3">Privacy Policy</a>
+                            <a href="#" class="text-muted text-decoration-none">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </main>
     </div>
 </body>
