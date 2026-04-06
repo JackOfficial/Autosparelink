@@ -83,16 +83,17 @@ public function dashboard()
         ->get()
         ->pluck('total', 'date');
 
-    // 2. NEW: Fetch Low Stock Items for the UI Table
-    // Adjust 'stock_quantity' and 'min_threshold' to match your 'parts' table columns
+    // 2. Fetch Low Stock Items (Logic Fixed for Shop Isolation)
     $lowStockItems = Part::where('shop_id', $shop->id)
-        ->whereColumn('stock_quantity', '<=', 'min_threshold')
-        ->orWhere('stock_quantity', '<', 5) // Fallback for items without a specific threshold
-        ->where('shop_id', $shop->id)
+        ->where(function($query) {
+            $query->where('stock_quantity', '<', 5);
+            // If you add min_threshold later, uncomment the line below:
+            // ->orWhereColumn('stock_quantity', '<=', 'min_threshold');
+        })
         ->limit(5)
         ->get();
 
-    // 3. NEW: Fetch Pending Pickups for the Blue Card
+    // 3. Fetch Pending Pickups for the Blue Card
     $pendingPickups = OrderItem::with(['order.user'])
         ->where('shop_id', $shop->id)
         ->where('status', 'ready_for_pickup')
@@ -102,7 +103,7 @@ public function dashboard()
         ->map(function($item) {
             return (object)[
                 'customer_name' => $item->order->user->name ?? 'Guest Customer',
-                'scheduled_at'  => $item->updated_at, // Use the time it was marked 'ready'
+                'scheduled_at'  => $item->updated_at,
                 'items_count'   => $item->quantity,
                 'location'      => $item->order->shipping_address ?? 'Kigali Store'
             ];
@@ -112,7 +113,7 @@ public function dashboard()
     $stats = [
         'total_inventory' => Part::where('shop_id', $shop->id)->count(),
         'low_stock'       => Part::where('shop_id', $shop->id)
-                                ->whereColumn('stock_quantity', '<=', 'min_threshold')
+                                ->where('stock_quantity', '<', 5)
                                 ->count(),
         'pending_pickup'  => OrderItem::where('shop_id', $shop->id)
                                 ->where('status', 'ready_for_pickup')
