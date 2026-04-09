@@ -20,6 +20,7 @@
     @stack('styles')
 
     @vite(['resources/js/userdashboard/main.js'])
+    @livewireStyles
 </head>
 
 <body class="bg-body-tertiary">
@@ -34,5 +35,6 @@
         </main>
     </div>
     @stack('scripts')
+    @livewireScripts
 </body>
 </html>

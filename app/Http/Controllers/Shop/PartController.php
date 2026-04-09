@@ -13,23 +13,28 @@ class PartController extends Controller
     /**
      * Display a listing of the shop's parts.
      */
-    public function index(Request $request)
-    {
-        $parts = Part::with(['category:id,category_name', 'partBrand:id,name', 'photos'])
-            ->where('shop_id', auth()->user()->shop_id)
-            ->when($request->search, function($query, $search) {
-                $query->where(function($q) use ($search) {
-                    $q->where('part_name', 'like', "%{$search}%")
-                      ->orWhere('sku', 'like', "%{$search}%")
-                      ->orWhere('part_number', 'like', "%{$search}%");
-                });
-            })
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
+   public function index(Request $request)
+{
+    $parts = auth()->user()->shopParts()
+        ->with([
+            'category:id,category_name', 
+            'partBrand:id,name', 
+            'photos', 
+            'fitments.vehicleModel.brand'
+        ])
+        ->when($request->search, function($query, $search) {
+            $query->where(function($q) use ($search) {
+                $q->where('part_name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%")
+                  ->orWhere('part_number', 'like', "%{$search}%");
+            });
+        })
+        ->latest()
+        ->paginate(15)
+        ->withQueryString();
 
-        return view('shop.parts.index', compact('parts'));
-    }
+    return view('shop.parts.index', compact('parts'));
+}
 
     /**
      * Show the form for creating a new part.
