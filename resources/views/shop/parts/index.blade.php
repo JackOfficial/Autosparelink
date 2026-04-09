@@ -141,92 +141,117 @@
                         <th class="text-end pe-4">Control</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse($parts as $part)
-                    <tr class="part-row" 
-                        x-show="filterType === 'all' || 
-                               (filterType === 'active' && {{ $part->status ? 1 : 0 }} == 1) || 
-                               (filterType === 'low' && {{ $part->stock_quantity }} < 5)">
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center">
-                                <div class="photo-stack me-4">
-                                    @forelse($part->photos->take(3) as $index => $photo)
-                                        <img src="{{ asset('storage/' . $photo->file_path) }}" class="stack-img" style="left: {{ $index * 10 }}px; z-index: {{ 10 - $index }};">
-                                    @empty
-                                        <div class="bg-light rounded border d-flex align-items-center justify-content-center text-muted" style="width:40px; height:40px"><i class="fa fa-image small"></i></div>
-                                    @endforelse
-                                </div>
-                                <div>
-                                    <div class="fw-bold text-dark mb-0">{{ $part->part_name }}</div>
-                                    <div class="d-flex align-items-center mt-1">
-                                        <span class="badge bg-light text-dark border sku-copy me-2" 
-                                              @click="copyToClipboard('{{ $part->sku }}')"
-                                              :class="copiedSku === '{{ $part->sku }}' && 'sku-copied'">
-                                            <span x-text="copiedSku === '{{ $part->sku }}' ? 'Copied!' : '{{ $part->sku }}'"></span>
-                                        </span>
-                                        <small class="text-muted border-start ps-2">PN: {{ $part->part_number }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="small text-dark fw-bold mb-1">{{ $part->category->category_name ?? 'Spare Part' }}</div>
-                            <div class="d-flex flex-wrap" style="max-width: 220px;">
-                                @forelse($part->fitments->take(2) as $fitment)
-                                    <span class="compat-pill">
-                                        {{ $fitment->specification->variant->name ?? '' }} {{ $fitment->vehicleModel->model_name ?? '' }}
-                                    </span>
-                                @empty
-                                    <span class="text-muted small fst-italic">Universal</span>
-                                @endforelse
-                                @if($part->fitments->count() > 2)
-                                    <span class="text-primary small mt-1">+{{ $part->fitments->count() - 2 }}</span>
-                                @endif
-                            </div>
-                        </td>
-                        <td>
-                            @php
-                                $stockClass = $part->stock_quantity <= 0 ? 'badge-soft-danger' : ($part->stock_quantity < 5 ? 'badge-soft-warning' : 'badge-soft-success');
-                            @endphp
-                            <span class="badge {{ $stockClass }} px-2 py-1">
-                                {{ $part->stock_quantity }} units
-                            </span>
-                        </td>
-                        <td>
-                            <div class="fw-bold text-dark">{{ number_format($part->price, 0) }} RWF</div>
-                            <small class="text-muted">{{ $part->partBrand->name ?? 'Genuine' }}</small>
-                        </td>
-                        <td>
-                            @if($part->status)
-                                <span class="badge rounded-pill bg-success" style="font-size: 0.6rem;">LIVE</span>
-                            @else
-                                <span class="badge rounded-pill bg-secondary" style="font-size: 0.6rem;">HIDDEN</span>
-                            @endif
-                        </td>
-                        <td class="text-end pe-4">
-                            <div class="btn-group shadow-none">
-                                <a href="{{ route('shop.parts.edit', $part->id) }}" class="btn btn-sm btn-outline-warning border-0" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('shop.parts.destroy', $part->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this part?');">
-                                    @csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger border-0">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
+               <tbody>
+    @forelse($parts as $part)
+    <tr class="part-row" 
+        x-show="filterType === 'all' || 
+                (filterType === 'active' && {{ $part->status ? 'true' : 'false' }}) || 
+                (filterType === 'low' && {{ $part->stock_quantity }} < 5)"
+        x-transition> {{-- Added a smooth transition for the filter --}}
+        
+        <td class="ps-4">
+            <div class="d-flex align-items-center">
+                <div class="photo-stack me-4">
+                    @forelse($part->photos->take(3) as $index => $photo)
+                        <img src="{{ asset('storage/' . $photo->file_path) }}" 
+                             class="stack-img" 
+                             style="left: {{ $index * 10 }}px; z-index: {{ 10 - $index }};"
+                             alt="Part image">
                     @empty
-                    <tr>
-                        <td colspan="6" class="text-center py-5">
-                            <div class="mb-3 text-muted opacity-50"><i class="fas fa-box-open fa-4x"></i></div>
-                            <h5 class="text-muted">No parts found</h5>
-                            <a href="{{ route('shop.parts.create') }}" class="btn btn-primary btn-sm mt-2">Add New Part</a>
-                        </td>
-                    </tr>
+                        <div class="bg-light rounded border d-flex align-items-center justify-content-center text-muted" style="width:40px; height:40px">
+                            <i class="fa fa-image small"></i>
+                        </div>
                     @endforelse
-                </tbody>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark mb-0">{{ $part->part_name }}</div>
+                    <div class="d-flex align-items-center mt-1">
+                        <span class="badge bg-light text-dark border sku-copy me-2" 
+                              @click="copyToClipboard('{{ $part->sku }}')"
+                              :class="copiedSku === '{{ $part->sku }}' && 'sku-copied'">
+                            <span x-text="copiedSku === '{{ $part->sku }}' ? 'Copied!' : '{{ $part->sku }}'"></span>
+                        </span>
+                        <small class="text-muted border-start ps-2">PN: {{ $part->part_number }}</small>
+                    </div>
+                </div>
+            </div>
+        </td>
+
+        <td>
+            <div class="small text-dark fw-bold mb-1">{{ $part->category->category_name ?? 'Spare Part' }}</div>
+            <div class="d-flex flex-wrap" style="max-width: 220px;">
+                @forelse($part->fitments->take(2) as $fitment)
+                    <span class="compat-pill">
+                        {{-- Fixed potential naming conflict with model_name/name --}}
+                        {{ $fitment->specification->variant->name ?? '' }} {{ $fitment->vehicleModel->name ?? '' }}
+                    </span>
+                @empty
+                    <span class="text-muted small fst-italic">Universal</span>
+                @endforelse
+                
+                @if($part->fitments->count() > 2)
+                    <span class="text-primary small mt-1">+{{ $part->fitments->count() - 2 }}</span>
+                @endif
+            </div>
+        </td>
+
+        <td>
+            @php
+                $stockClass = $part->stock_quantity <= 0 ? 'badge-soft-danger' : ($part->stock_quantity < 5 ? 'badge-soft-warning' : 'badge-soft-success');
+            @endphp
+            <div class="d-flex flex-column">
+                <span class="badge {{ $stockClass }} px-2 py-1 mb-1">
+                    {{ $part->stock_quantity }} units
+                </span>
+                <small class="text-muted" style="font-size: 0.7rem;">{{ $part->partBrand->name ?? 'Genuine' }}</small>
+            </div>
+        </td>
+
+        <td>
+            <div class="fw-bold text-dark">{{ number_format($part->price, 0) }} RWF</div>
+            <div class="mt-1">
+                @forelse($part->substitutions->take(3) as $sub)
+                    <span class="badge bg-light text-muted border-0 p-0 me-1" style="font-size: 0.7rem;" title="Alternative Part SKU">
+                        <i class="fas fa-sync-alt me-1" style="font-size: 0.6rem;"></i>{{ $sub->sku }}
+                    </span>
+                @empty
+                    <small class="text-muted fst-italic" style="font-size: 0.7rem;">No alternatives</small>
+                @endforelse
+            </div>
+        </td>
+
+        <td>
+            @if($part->status)
+                <span class="badge rounded-pill bg-success" style="font-size: 0.6rem;">LIVE</span>
+            @else
+                <span class="badge rounded-pill bg-secondary" style="font-size: 0.6rem;">HIDDEN</span>
+            @endif
+        </td>
+
+        <td class="text-end pe-4">
+            <div class="btn-group shadow-none">
+                <a href="{{ route('shop.parts.edit', $part->id) }}" class="btn btn-sm btn-outline-warning border-0" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <form action="{{ route('shop.parts.destroy', $part->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this part?');">
+                    @csrf @method('DELETE')
+                    <button class="btn btn-sm btn-outline-danger border-0">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="6" class="text-center py-5">
+            <div class="mb-3 text-muted opacity-50"><i class="fas fa-box-open fa-4x"></i></div>
+            <h5 class="text-muted">No parts found</h5>
+            <a href="{{ route('shop.parts.create') }}" class="btn btn-primary btn-sm mt-2">Add New Part</a>
+        </td>
+    </tr>
+    @endforelse
+</tbody>
             </table>
         </div>
         
