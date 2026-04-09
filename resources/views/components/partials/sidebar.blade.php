@@ -32,7 +32,7 @@
                 <small class="text-uppercase text-muted fw-bold smaller">Parts Management</small>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}" href="/inventory">
+                <a class="nav-link {{ request()->routeIs('shop.parts.index') ? 'active' : '' }}" href="{{ route('shop.parts.index') }}">
                     <i class="ti ti-package"></i>
                     <span class="nav-text">All Spare Parts</span>
                 </a>
