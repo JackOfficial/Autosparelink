@@ -203,7 +203,7 @@
                 <span class="badge {{ $stockClass }} text-dark px-2 py-1 mb-1">
                     {{ $part->stock_quantity }} units
                 </span>
-                <small class="text-muted" style="font-size: 0.7rem;">{{ $part->partBrand->name ?? 'Genuine' }}</small>
+                <small class="text-muted text-center" style="font-size: 0.7rem;">{{ $part->partBrand->name ?? 'Genuine' }}</small>
             </div>
         </td>
 
