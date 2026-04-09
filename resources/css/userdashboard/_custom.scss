@@ -26,7 +26,9 @@ $topbar-height: 60px;
     z-index: 1050;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden; // Fixes the horizontal scroll
+    
+    // CRITICAL: Stop horizontal scroll
+    overflow-x: hidden !important; 
 
     .logo-area {
         height: $topbar-height;
@@ -37,13 +39,13 @@ $topbar-height: 60px;
         flex-shrink: 0;
     }
 
-    // Scrollable Nav Area
     .sidebar-nav {
         flex-grow: 1;
-        overflow-y: auto; // Changed to auto for better cross-browser compatibility
-        overflow-x: hidden;
-        
-        // Hide scrollbar by default, show on hover
+        overflow-y: auto;
+        overflow-x: hidden !important; // Force hidden
+        width: 100%; // Ensure it stays within sidebar bounds
+
+        // Hide scrollbar thumb by default
         &::-webkit-scrollbar {
             width: 5px;
         }
@@ -53,17 +55,22 @@ $topbar-height: 60px;
         &::-webkit-scrollbar-thumb {
             background-color: transparent; 
             border-radius: 10px;
-            transition: background-color 0.3s;
         }
 
+        // Show scrollbar thumb only on hover
         &:hover {
             &::-webkit-scrollbar-thumb {
                 background-color: #e0e0e0;
             }
         }
+
+        // Fix Bootstrap expansion
+        .nav {
+            width: 100%;
+            flex-wrap: nowrap; // Prevent items from wrapping/stretching
+        }
     }
 
-    // Fixed bottom area (Moved outside sidebar-nav)
     .sidebar-footer {
         padding: 20px;
         border-top: 1px solid var(--bs-border-color);
@@ -82,15 +89,17 @@ $topbar-height: 60px;
         margin: 4px 12px;
         border-radius: 8px;
         transition: background-color 0.2s;
-        width: auto; 
-        max-width: calc(#{$sidebar-width} - 24px);
+        
+        // CRITICAL: Force link width to stay inside
+        width: calc(100% - 24px); 
+        overflow: hidden; 
 
         &:hover, &.active {
             color: var(--bs-primary);
             background-color: rgba(var(--bs-primary-rgb), 0.1);
         }
 
-        .ti { font-size: 1.25rem; }
+        .ti { font-size: 1.25rem; flex-shrink: 0; }
     }
 }
 
