@@ -174,7 +174,7 @@
                             <div class="d-flex flex-wrap" style="max-width: 220px;">
                                 @forelse($part->fitments->take(2) as $fitment)
                                     <span class="compat-pill">
-                                        {{ $fitment->vehicleModel->brand->name ?? '' }} {{ $fitment->vehicleModel->name ?? '' }}
+                                        {{ $fitment->specification->variant->name ?? '' }} {{ $fitment->vehicleModel->model_name ?? '' }}
                                     </span>
                                 @empty
                                     <span class="text-muted small fst-italic">Universal</span>
