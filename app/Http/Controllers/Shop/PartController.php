@@ -73,7 +73,7 @@ class PartController extends Controller
     {
         dd($part->id);
         // Security Check: Ensure the part belongs to this shop
-        if ($part->shop_id !== auth()->user()->shop_id) {
+        if ($part->shop_id != auth()->user()->shop_id) {
             abort(403, 'Unauthorized action.');
         }
         
