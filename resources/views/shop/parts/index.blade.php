@@ -165,7 +165,7 @@
                 </div>
                 <div>
                     <div class="fw-bold text-dark mb-0">{{ $part->part_name }}</div>
-                    <div class="d-flex align-items-center mt-1">
+                    <div class="mt-1">
                         <span class="badge bg-light text-dark border sku-copy me-2" 
                               @click="copyToClipboard('{{ $part->sku }}')"
                               :class="copiedSku === '{{ $part->sku }}' && 'sku-copied'">
