@@ -18,6 +18,7 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^7.2.0",
         "@tabler/icons-webfont": "^3.36.0",
         "apexcharts": "^5.10.4",
         "bootstrap": "^5.3.8"

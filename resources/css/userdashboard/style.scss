@@ -12,5 +12,7 @@
 // 4. Import the rest of Bootstrap from node_modules
 @import "bootstrap/scss/bootstrap";
 
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
 // 5. Your local custom styles (Ensure this file exists in resources/css/userdashboard/)
 @import "./custom";
