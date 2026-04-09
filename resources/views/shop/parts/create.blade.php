@@ -20,11 +20,11 @@
     </section>
 
     {{-- Main Content Section --}}
-    <section class="content">
+   
         <div class="container-fluid">
-            <div>Hello there</div>
+            <livewire:shop.parts.parts-component />
         </div>
-    </section>
+  
 
     @push('styles')
     <style>
