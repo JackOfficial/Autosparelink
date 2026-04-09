@@ -137,7 +137,7 @@ public function dashboard()
         return [$date => 0];
     })->merge($salesData)->reverse();
 
-    return view('user-dashboard.index', [
+    return view('shop-dashboard.index', [
         'salesData'      => $formattedSales->values(),
         'salesLabels'    => $formattedSales->keys(),
         'stats'          => $stats,

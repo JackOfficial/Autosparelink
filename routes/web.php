@@ -187,6 +187,7 @@ Route::middleware(['auth'])->group(function () {
             auth()->user()->unreadNotifications->markAsRead();
             return back();
         })->name('notifications.read');
+        Route::get('/shop-dashboard', 'dashboard')->name('shop-dashboard');
     });
 
     // Support Ticket System
@@ -302,5 +303,3 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::get('/settings', [SystemSettingsController::class, 'index'])->name('settings');
     Route::post('/settings', [SystemSettingsController::class, 'update'])->name('settings.update');
 });
-
-Route::get('/userdashboard', [UserDashboardController::class, 'dashboard']);
