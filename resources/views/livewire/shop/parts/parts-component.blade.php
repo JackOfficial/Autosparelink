@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div>
     <style>
         /* Professional Search Styles */
         .search-container { position: relative; }

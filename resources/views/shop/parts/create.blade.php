@@ -22,23 +22,7 @@
     {{-- Main Content Section --}}
     <section class="content">
         <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card border-0 shadow-sm rounded-3">
-                        {{-- Professional Card Header --}}
-                        <div class="card-header bg-white border-bottom py-3">
-                            <h5 class="card-title mb-0 fw-bold">
-                                <i class="fas fa-info-circle me-2 text-muted"></i>Part Specifications
-                            </h5>
-                        </div>
-                         <livewire:shop.parts.parts-component />
-                        {{-- Card Body --}}
-                        <div class="card-body p-4">
-                           
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <livewire:shop.parts.parts-component />
         </div>
     </section>
 
