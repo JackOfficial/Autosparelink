@@ -207,7 +207,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group(function () {
-  Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+  Route::get('/shop/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 });
 
 // =============================================================
