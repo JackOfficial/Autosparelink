@@ -1,5 +1,5 @@
-<aside id="sidebar" class="sidebar shadow-sm">
-    <div class="logo-area border-bottom px-4 py-3">
+<aside id="sidebar" class="sidebar shadow-sm d-flex flex-column">
+    <div class="logo-area border-bottom px-4 py-3 flex-shrink-0">
         <a href="/" class="d-flex align-items-center text-decoration-none">
             @if($shop && $shop->logo)
                 <img src="{{ asset('storage/' . $shop->logo) }}" 
@@ -16,7 +16,7 @@
         </a>
     </div>
     
-    <div class="sidebar-nav">
+    <div class="sidebar-nav flex-grow-1 overflow-y-auto custom-scrollbar">
         <ul class="nav flex-column mt-3">
             <li class="px-4 mb-2 nav-text">
                 <small class="text-uppercase text-muted fw-bold smaller">Analytics</small>
@@ -101,11 +101,11 @@
                 </a>
             </li>
         </ul>
+    </div>
 
-        <div class="mt-auto p-4">
-            <a href="/" class="btn btn-light w-100 rounded-pill border shadow-sm btn-sm">
-                <i class="ti ti-arrow-left me-1"></i> Back to Market
-            </a>
-        </div>
+    <div class="sidebar-footer mt-auto p-4 flex-shrink-0 border-top">
+        <a href="/" class="btn btn-light w-100 rounded-pill border shadow-sm btn-sm">
+            <i class="ti ti-arrow-left me-1"></i> Back to Market
+        </a>
     </div>
 </aside>
