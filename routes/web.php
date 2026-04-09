@@ -183,11 +183,11 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile/password', 'updatePassword')->name('profile.password');
         Route::post('/garage/update', 'updateGarage')->name('garage.update');
         Route::post('/notifications/read-all', 'markAllRead')->name('notifications.readAll');
+        Route::get('/shop-dashboard', 'dashboard')->name('shop-dashboard');
         Route::post('/notifications/read', function () {
             auth()->user()->unreadNotifications->markAsRead();
             return back();
         })->name('notifications.read');
-        Route::get('/shop-dashboard', 'dashboard')->name('shop-dashboard');
     });
 
     // Support Ticket System
