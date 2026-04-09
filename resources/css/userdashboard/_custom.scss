@@ -1,20 +1,18 @@
 // Variables for easy maintenance
 $sidebar-width: 250px;
-$sidebar-collapsed-width: 70px; // Slightly wider for better icon centering
+$sidebar-collapsed-width: 70px;
 $topbar-height: 60px;
 
 .overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, .45);
-    backdrop-filter: blur(4px); // Increased blur for a premium feel
+    backdrop-filter: blur(4px);
     display: none;
-    z-index: 1040; // Under sidebar, over content
+    z-index: 1040;
 }
 
-.overlay.show {
-    display: block;
-}
+.overlay.show { display: block; }
 
 .sidebar {
     width: $sidebar-width;
@@ -26,10 +24,9 @@ $topbar-height: 60px;
     top: 0;
     left: 0;
     z-index: 1050;
-    
-    // NEW: Enable Flexbox to separate Logo, Nav, and Footer
     display: flex;
     flex-direction: column;
+    overflow-x: hidden; // Fixes the horizontal scroll
 
     .logo-area {
         height: $topbar-height;
@@ -37,16 +34,16 @@ $topbar-height: 60px;
         align-items: center;
         padding: 0 20px;
         border-bottom: 1px solid var(--bs-border-color);
-        flex-shrink: 0; // Don't let logo squish
+        flex-shrink: 0;
     }
 
-    // NEW: Scrollable Nav Area
+    // Scrollable Nav Area
     .sidebar-nav {
         flex-grow: 1;
-        overflow-y: auto;
+        overflow-y: auto; // Changed to auto for better cross-browser compatibility
         overflow-x: hidden;
         
-        // Apply your custom scrollbar here
+        // Hide scrollbar by default, show on hover
         &::-webkit-scrollbar {
             width: 5px;
         }
@@ -54,17 +51,23 @@ $topbar-height: 60px;
             background: transparent;
         }
         &::-webkit-scrollbar-thumb {
-            background: #e0e0e0;
+            background-color: transparent; 
             border-radius: 10px;
-            &:hover { background: #cccccc; }
+            transition: background-color 0.3s;
+        }
+
+        &:hover {
+            &::-webkit-scrollbar-thumb {
+                background-color: #e0e0e0;
+            }
         }
     }
 
-    // NEW: Fixed bottom area
+    // Fixed bottom area (Moved outside sidebar-nav)
     .sidebar-footer {
         padding: 20px;
         border-top: 1px solid var(--bs-border-color);
-        flex-shrink: 0; // Don't let footer squish
+        flex-shrink: 0;
     }
 
     .nav-link {
@@ -79,6 +82,8 @@ $topbar-height: 60px;
         margin: 4px 12px;
         border-radius: 8px;
         transition: background-color 0.2s;
+        width: auto; 
+        max-width: calc(#{$sidebar-width} - 24px);
 
         &:hover, &.active {
             color: var(--bs-primary);
@@ -92,18 +97,17 @@ $topbar-height: 60px;
 // Collapsed State
 .sidebar.collapsed {
     width: $sidebar-collapsed-width;
+
+    .sidebar-nav { overflow-x: hidden; }
     
     .nav-link {
         margin: 4px 10px; 
         padding: 12px;
         justify-content: center;
-        
         .ti { margin: 0; }
     }
     
-    .nav-text, .logo-text, .smaller {
-        display: none;
-    }
+    .nav-text, .logo-text, .smaller { display: none; }
 }
 
 // Topbar Logic
@@ -111,7 +115,7 @@ $topbar-height: 60px;
     position: fixed;
     top: 0;
     right: 0;
-    left: $sidebar-width; // Use left instead of margin
+    left: $sidebar-width;
     z-index: 1020;
     height: $topbar-height;
     background-color: var(--bs-body-bg);
@@ -139,15 +143,11 @@ $topbar-height: 60px;
 
 // Mobile Responsiveness
 @media (max-width: 992px) {
-    .sidebar {
-        left: -$sidebar-width;
-    }
-    
+    .sidebar { left: -$sidebar-width; }
     .sidebar.mobile-show {
         left: 0;
         box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
-    
     .topbar, .content {
         left: 0 !important;
         margin-left: 0 !important;
