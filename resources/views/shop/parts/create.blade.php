@@ -22,11 +22,7 @@
     {{-- Main Content Section --}}
     <section class="content">
         <div class="container-fluid">
-            <div class="row"> {{-- Add this wrapper --}}
-            <div class="col-12">
-            <livewire:shop.parts.parts-component />
-            </div>
-        </div>
+            <div>Hello there</div>
         </div>
     </section>
 
