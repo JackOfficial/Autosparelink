@@ -200,7 +200,7 @@
                 $stockClass = $part->stock_quantity <= 0 ? 'badge-soft-danger' : ($part->stock_quantity < 5 ? 'badge-soft-warning' : 'badge-soft-success');
             @endphp
             <div class="d-flex flex-column">
-                <span class="badge {{ $stockClass }} px-2 py-1 mb-1">
+                <span class="badge {{ $stockClass }} text-dark px-2 py-1 mb-1">
                     {{ $part->stock_quantity }} units
                 </span>
                 <small class="text-muted" style="font-size: 0.7rem;">{{ $part->partBrand->name ?? 'Genuine' }}</small>
