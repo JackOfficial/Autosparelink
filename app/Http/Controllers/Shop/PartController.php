@@ -75,11 +75,8 @@ class PartController extends Controller
         if ($part->shop_id !== auth()->user()->shop_id) {
             abort(403, 'Unauthorized action.');
         }
-
-        $categories = Category::all();
-        $brands = PartBrand::all();
         
-        return view('shop.parts.edit', compact('part', 'categories', 'brands'));
+        return view('shop.parts.edit', compact('part'));
     }
 
     /**
