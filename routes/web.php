@@ -67,6 +67,7 @@ use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationCont
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\TicketController as Ticket;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\Shop\DashboardController;
 
 // =============================================================
 // PUBLIC FRONTEND ROUTES
@@ -183,7 +184,6 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile/password', 'updatePassword')->name('profile.password');
         Route::post('/garage/update', 'updateGarage')->name('garage.update');
         Route::post('/notifications/read-all', 'markAllRead')->name('notifications.readAll');
-        Route::get('/shop-dashboard', 'dashboard')->name('shop-dashboard');
         Route::post('/notifications/read', function () {
             auth()->user()->unreadNotifications->markAsRead();
             return back();
@@ -204,6 +204,10 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['verified', 'role:user'])->group(function () { 
         Route::get('/home', [HomeContoller::class, 'index'])->name('home');
     });
+});
+
+Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group(function () {
+  Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 });
 
 // =============================================================

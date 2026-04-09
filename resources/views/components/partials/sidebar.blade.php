@@ -22,7 +22,7 @@
                 <small class="text-uppercase text-muted fw-bold smaller">Analytics</small>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('shop-dashboard') ? 'active' : '' }}" href="{{ route('shop-dashboard') }}">
+                <a class="nav-link {{ request()->routeIs('shop.dashboard') ? 'active' : '' }}" href="{{ route('shop.dashboard') }}">
                     <i class="ti ti-chart-pie"></i>
                     <span class="nav-text">Overview</span>
                 </a>
