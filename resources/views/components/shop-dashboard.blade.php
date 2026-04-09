@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <title>{{ $title ?? 'Dashboard' }} | {{ $shop->name ?? 'Shop' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Manage your shop inventory, sales, and analytics on the {{ $shop->name }} dashboard.">
+    <meta name="description" content="Manage your shop inventory, sales, and analytics on the {{ $shop->name ?? 'Shop' }} dashboard.">
     <meta name="robots" content="noindex, nofollow"> <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('frontend/img/logo.png') }}">
@@ -16,7 +16,7 @@
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-bs-theme', savedTheme);
     </script>
-    
+
     @stack('styles')
 
     @vite(['resources/js/userdashboard/main.js'])

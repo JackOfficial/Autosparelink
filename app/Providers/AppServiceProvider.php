@@ -13,6 +13,8 @@ use Illuminate\Pagination\Paginator; // Import this
 use App\Observers\SpecificationObserver;
 use App\Models\Specification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,6 +36,10 @@ class AppServiceProvider extends ServiceProvider
         Login::class,
         MigrateCartOnLogin::class,
        );
+
+       View::composer(['components.shop-dashboard', 'components.partials.*'], function ($view) {
+        $view->with('shop', Auth::user()->shop ?? null);
+       });
 
        Paginator::useBootstrapFive(); // Add this line
        Specification::observe(SpecificationObserver::class);
