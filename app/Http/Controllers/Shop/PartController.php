@@ -71,9 +71,9 @@ class PartController extends Controller
      */
     public function edit(Part $part)
     {
-        dd($part->shop_id . ' = ' . auth()->user()->shop_id);
+        dd($part->shop_id . ' = ' . auth()->user()->shop);
         // Security Check: Ensure the part belongs to this shop
-        if ($part->shop_id != auth()->user()->shop_id) {
+        if ($part->shop_id != auth()->user()->shop) {
             abort(403, 'Unauthorized action.');
         }
         
