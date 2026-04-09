@@ -13,19 +13,21 @@
     }
     .photo-stack:hover .stack-img { transform: translateX(10px) rotate(5deg); }
     
-    .table thead th { border-top: none; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #8898aa; background-color: #f8f9fe; }
+    /* Table styling - BS5 specific refinements */
+    .table thead th { border-top: none; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #8898aa; background-color: #f8f9fe; border-bottom: 1px solid #e9ecef; }
     .part-row { transition: background-color 0.2s ease-in-out; }
     .part-row:hover { background-color: #fcfdfe !important; }
     
+    /* Keep these for custom branding color control */
     .badge-soft-success { background: #e6fffa; color: #38b2ac; border: 1px solid #b2f5ea; }
     .badge-soft-danger { background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; }
     .badge-soft-warning { background: #fffaf0; color: #dd6b20; border: 1px solid #fbd38d; }
 
     .sku-copy { cursor: pointer; border-style: dashed !important; transition: 0.2s; font-family: monospace; font-size: 0.75rem; }
-    .sku-copy:hover { background: #f1f5f9; color: #3b82f6; border-color: #3b82f6 !important; }
-    .sku-copied { background: #38b2ac !important; color: white !important; border-color: #38b2ac !important; }
+    .sku-copy:hover { background: #f1f5f9; color: #0d6efd; border-color: #0d6efd !important; }
+    .sku-copied { background: #198754 !important; color: white !important; border-color: #198754 !important; }
 
-    .compat-pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: #f8f9fe; color: #525f7f; border: 1px solid #e9ecef; margin-right: 4px; margin-bottom: 4px; display: inline-block; font-weight: 500; }
+    .compat-pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: #f8f9fe; color: #525f7f; border: 1px solid #e9ecef; margin-inline-end: 4px; margin-bottom: 4px; display: inline-block; font-weight: 500; }
     
     [x-cloak] { display: none !important; }
 </style>
@@ -53,15 +55,15 @@
         <div class="col-md-6">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb bg-transparent p-0 mb-1">
-                    <li class="breadcrumb-item"><a href="#" class="text-muted">Shop</a></li>
+                    <li class="breadcrumb-item"><a href="#" class="text-muted text-decoration-none">Shop</a></li>
                     <li class="breadcrumb-item active text-primary">Inventory</li>
                 </ol>
             </nav>
             <h2 class="fw-bold mb-0">Parts Inventory</h2>
         </div>
-        <div class="col-md-6 text-md-right mt-3 mt-md-0">
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
             <a href="{{ route('shop.parts.create') }}" class="btn btn-primary px-4 shadow-sm">
-                <i class="fa fa-plus-circle mr-2"></i>Add New Part
+                <i class="fa fa-plus-circle me-2"></i>Add New Part
             </a>
         </div>
     </div>
@@ -71,10 +73,10 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-3 d-flex align-items-center">
-                    <div class="bg-primary-subtle p-3 rounded mr-3 text-primary"><i class="fas fa-boxes"></i></div>
+                    <div class="bg-primary-subtle p-3 rounded me-3 text-primary"><i class="fas fa-boxes"></i></div>
                     <div>
-                        <small class="text-muted d-block text-uppercase font-weight-bold" style="font-size: 0.65rem;">Total Items</small>
-                        <span class="h5 mb-0 font-weight-bold">{{ $parts->total() }}</span>
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Total Items</small>
+                        <span class="h5 mb-0 fw-bold">{{ $parts->total() }}</span>
                     </div>
                 </div>
             </div>
@@ -82,10 +84,10 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-3 d-flex align-items-center">
-                    <div class="bg-danger-subtle p-3 rounded mr-3 text-danger"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="bg-danger-subtle p-3 rounded me-3 text-danger"><i class="fas fa-exclamation-triangle"></i></div>
                     <div>
-                        <small class="text-muted d-block text-uppercase font-weight-bold" style="font-size: 0.65rem;">Out of Stock</small>
-                        <span class="h5 mb-0 font-weight-bold text-danger">{{ $parts->where('stock_quantity', '<=', 0)->count() }}</span>
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Out of Stock</small>
+                        <span class="h5 mb-0 fw-bold text-danger">{{ $parts->where('stock_quantity', '<=', 0)->count() }}</span>
                     </div>
                 </div>
             </div>
@@ -93,17 +95,17 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-3 d-flex align-items-center">
-                    <div class="bg-success-subtle p-3 rounded mr-3 text-success"><i class="fas fa-globe"></i></div>
+                    <div class="bg-success-subtle p-3 rounded me-3 text-success"><i class="fas fa-globe"></i></div>
                     <div>
-                        <small class="text-muted d-block text-uppercase font-weight-bold" style="font-size: 0.65rem;">Live Listings</small>
-                        <span class="h5 mb-0 font-weight-bold text-success">{{ $parts->where('status', 1)->count() }}</span>
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Live Listings</small>
+                        <span class="h5 mb-0 fw-bold text-success">{{ $parts->where('status', 1)->count() }}</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-lg">
+    <div class="card border-0 shadow-sm rounded-3">
         {{-- Search and Filter Bar --}}
         <div class="card-header bg-white border-0 py-3">
             <div class="row align-items-center">
@@ -111,15 +113,13 @@
                     <form @submit.prevent="submitSearch">
                         <div class="input-group border rounded-pill px-3 py-1 bg-light">
                             <input type="text" x-model="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Press Enter to search SKU or Name...">
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-transparent p-0 text-muted">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                            </div>
+                            <button type="submit" class="btn btn-transparent p-0 text-muted">
+                                <i class="fa fa-search"></i>
+                            </button>
                         </div>
                     </form>
                 </div>
-                <div class="col-md-7 text-md-right mt-3 mt-md-0">
+                <div class="col-md-7 text-md-end mt-3 mt-md-0">
                     <div class="btn-group shadow-none">
                         <button class="btn btn-light btn-sm px-3" :class="filterType === 'all' && 'active border-primary'" @click="filterType = 'all'">All</button>
                         <button class="btn btn-light btn-sm px-3" :class="filterType === 'active' && 'active border-primary'" @click="filterType = 'active'">Live</button>
@@ -133,12 +133,12 @@
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th class="pl-4">Part Info</th>
+                        <th class="ps-4">Part Info</th>
                         <th>Compatibility</th>
                         <th>Inventory</th>
                         <th>Price</th>
                         <th>Status</th>
-                        <th class="text-right pr-4">Control</th>
+                        <th class="text-end pe-4">Control</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -147,9 +147,9 @@
                         x-show="filterType === 'all' || 
                                (filterType === 'active' && {{ $part->status ? 1 : 0 }} == 1) || 
                                (filterType === 'low' && {{ $part->stock_quantity }} < 5)">
-                        <td class="pl-4">
+                        <td class="ps-4">
                             <div class="d-flex align-items-center">
-                                <div class="photo-stack mr-4">
+                                <div class="photo-stack me-4">
                                     @forelse($part->photos->take(3) as $index => $photo)
                                         <img src="{{ asset('storage/' . $photo->file_path) }}" class="stack-img" style="left: {{ $index * 10 }}px; z-index: {{ 10 - $index }};">
                                     @empty
@@ -157,14 +157,14 @@
                                     @endforelse
                                 </div>
                                 <div>
-                                    <div class="font-weight-bold text-dark mb-0">{{ $part->part_name }}</div>
+                                    <div class="fw-bold text-dark mb-0">{{ $part->part_name }}</div>
                                     <div class="d-flex align-items-center mt-1">
-                                        <span class="badge badge-light border sku-copy mr-2" 
+                                        <span class="badge bg-light text-dark border sku-copy me-2" 
                                               @click="copyToClipboard('{{ $part->sku }}')"
                                               :class="copiedSku === '{{ $part->sku }}' && 'sku-copied'">
                                             <span x-text="copiedSku === '{{ $part->sku }}' ? 'Copied!' : '{{ $part->sku }}'"></span>
                                         </span>
-                                        <small class="text-muted border-left pl-2">PN: {{ $part->part_number }}</small>
+                                        <small class="text-muted border-start ps-2">PN: {{ $part->part_number }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -177,7 +177,7 @@
                                         {{ $fitment->vehicleModel->brand->name ?? '' }} {{ $fitment->vehicleModel->name ?? '' }}
                                     </span>
                                 @empty
-                                    <span class="text-muted small italic">Universal</span>
+                                    <span class="text-muted small fst-italic">Universal</span>
                                 @endforelse
                                 @if($part->fitments->count() > 2)
                                     <span class="text-primary small mt-1">+{{ $part->fitments->count() - 2 }}</span>
@@ -193,18 +193,18 @@
                             </span>
                         </td>
                         <td>
-                            <div class="font-weight-bold text-dark">{{ number_format($part->price, 0) }} RWF</div>
+                            <div class="fw-bold text-dark">{{ number_format($part->price, 0) }} RWF</div>
                             <small class="text-muted">{{ $part->partBrand->name ?? 'Genuine' }}</small>
                         </td>
                         <td>
                             @if($part->status)
-                                <span class="badge badge-pill badge-success" style="font-size: 0.6rem;">LIVE</span>
+                                <span class="badge rounded-pill bg-success" style="font-size: 0.6rem;">LIVE</span>
                             @else
-                                <span class="badge badge-pill badge-secondary" style="font-size: 0.6rem;">HIDDEN</span>
+                                <span class="badge rounded-pill bg-secondary" style="font-size: 0.6rem;">HIDDEN</span>
                             @endif
                         </td>
-                        <td class="text-right pr-4">
-                            <div class="btn-group">
+                        <td class="text-end pe-4">
+                            <div class="btn-group shadow-none">
                                 <a href="{{ route('shop.parts.edit', $part->id) }}" class="btn btn-sm btn-outline-warning border-0" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
@@ -220,7 +220,7 @@
                     @empty
                     <tr>
                         <td colspan="6" class="text-center py-5">
-                            <div class="mb-3 text-muted opacity-50"><i class="fas fa-box-open fa-4xl"></i></div>
+                            <div class="mb-3 text-muted opacity-50"><i class="fas fa-box-open fa-4x"></i></div>
                             <h5 class="text-muted">No parts found</h5>
                             <a href="{{ route('shop.parts.create') }}" class="btn btn-primary btn-sm mt-2">Add New Part</a>
                         </td>
@@ -236,7 +236,7 @@
                     Showing <strong>{{ $parts->firstItem() ?? 0 }}</strong> to <strong>{{ $parts->lastItem() ?? 0 }}</strong> of {{ $parts->total() }} parts
                 </div>
                 <div>
-                    {{ $parts->links('pagination::bootstrap-4') }}
+                    {{ $parts->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>
