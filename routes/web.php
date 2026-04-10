@@ -73,6 +73,7 @@ use App\Http\Controllers\Shop\Part;
 use App\Http\Controllers\Shop\PartController as ShopPartController;
 use App\Http\Controllers\Shop\PayoutController;
 use App\Http\Controllers\Shop\SaleController;
+use App\Http\Controllers\Shop\ShopProfileController;
 
 // =============================================================
 // PUBLIC FRONTEND ROUTES
@@ -215,6 +216,11 @@ Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group
    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
    Route::resource('/parts', ShopPartController::class);
    Route::resource('/orders', ShopOrderController::class);
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+          Route::get('/profile', [ShopProfileController::class, 'edit'])->name('edit');
+          Route::put('/profile', [ShopProfileController::class, 'update'])->name('update');
+    });
 
    Route::prefix('sales')->name('sales.')->group(function () {
         // Main sales history list

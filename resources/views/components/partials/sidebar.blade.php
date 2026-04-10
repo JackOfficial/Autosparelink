@@ -83,7 +83,7 @@
                 <small class="text-uppercase text-muted fw-bold smaller">Configuration</small>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('shop-settings*') ? 'active' : '' }}" href="/shop-settings">
+                <a class="nav-link {{ request()->routeIs('shop.profile.edit') ? 'active' : '' }}" href="{{ route('shop.profile.edit') }}">
                     <i class="ti ti-settings"></i>
                     <span class="nav-text">Shop Profile</span>
                 </a>

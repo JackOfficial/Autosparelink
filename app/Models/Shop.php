@@ -6,16 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 
 class Shop extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'name',
@@ -30,28 +26,55 @@ class Shop extends Model
         'is_verified',
     ];
 
-   public function user(): BelongsTo
-{
-    return $this->belongsTo(User::class);
-}
+    /**
+     * Ensure data types are consistent
+     */
+    protected $casts = [
+        'is_active' => 'boolean',
+        'is_verified' => 'boolean',
+        'commission_rate' => 'decimal:2',
+    ];
 
-public function parts(): HasMany
-{
-    return $this->hasMany(Part::class);
-}
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
-public function orders()
-{
-    return $this->hasManyThrough(OrderItem::class, Part::class);
-}
+    public function parts(): HasMany
+    {
+        return $this->hasMany(Part::class);
+    }
 
-protected static function booted()
-{
-    static::saving(function ($shop) {
-        if ($shop->isDirty('name')) {
-            $shop->slug = \Illuminate\Support\Str::slug($shop->name);
-        }
-    });
-}
+    /**
+     * Connects Shop directly to OrderItems sold
+     */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 
+    /**
+     * Track payout history for this shop
+     */
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(Payout::class);
+    }
+
+    /**
+     * Helper to get the public logo URL or a default placeholder
+     */
+    public function getLogoUrlAttribute()
+    {
+        return $this->logo ? asset('storage/' . $this->logo) : asset('images/default-shop-logo.png');
+    }
+
+    protected static function booted()
+    {
+        static::saving(function ($shop) {
+            if ($shop->isDirty('name')) {
+                $shop->slug = Str::slug($shop->name);
+            }
+        });
+    }
 }
