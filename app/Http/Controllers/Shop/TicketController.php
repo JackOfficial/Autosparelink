@@ -29,30 +29,22 @@ class TicketController extends Controller
 
    public function index()
 {
-    $user = Auth::user();
+    // Only paginate the tickets for the Support Page
+    $tickets = Auth::user()->tickets()->latest()->paginate(10);
     
-    // 1. Get the Tickets for the list
-    $tickets = $user->tickets()->latest()->paginate(10);
-
-    // 2. Get the Shop's Orders for the "Create Ticket" dropdown/modal
-    // We use your custom logic here to ensure they only see their own sales
-    $shopId = $user->shop->id;
-    $orders = Order::whereHas('orderItems.part', function ($query) use ($shopId) {
-            $query->where('shop_id', $shopId);
-        })
-        ->latest()
-        ->take(20) // We only need a few for the dropdown
-        ->get();
+    // If you need a dropdown for a "New Ticket" modal on the index page:
+    $orders = $this->shopOrders()->latest()->take(10)->get();
 
     return view('shop.support.index', compact('tickets', 'orders'));
 }
 
-    public function create()
-    {
-        // Fetch the shop's orders so they can link a ticket to a specific sale
-        $orders = Auth::user()->shop->orders()->latest()->take(20)->get();
-        return view('shop.support.create', compact('orders'));
-    }
+public function create()
+{
+    // Use your custom logic here to ensure they only see their specific orders
+    $orders = $this->shopOrders()->latest()->take(20)->get();
+    
+    return view('shop.support.create', compact('orders'));
+}
 
     public function store(Request $request)
     {
