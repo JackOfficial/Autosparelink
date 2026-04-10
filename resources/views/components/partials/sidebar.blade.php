@@ -73,7 +73,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('payouts*') ? 'active' : '' }}" href="/payouts">
+                <a class="nav-link {{ request()->routeIs('shop.payouts.index') ? 'active' : '' }}" href="{{ route('shop.payouts.index') }}">
                     <i class="ti ti-wallet"></i>
                     <span class="nav-text">Earnings & Payouts</span>
                 </a>

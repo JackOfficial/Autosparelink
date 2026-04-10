@@ -71,6 +71,7 @@ use App\Http\Controllers\Shop\DashboardController;
 use App\Http\Controllers\Shop\OrderController as ShopOrderController;
 use App\Http\Controllers\Shop\Part;
 use App\Http\Controllers\Shop\PartController as ShopPartController;
+use App\Http\Controllers\Shop\PayoutController;
 use App\Http\Controllers\Shop\SaleController;
 
 // =============================================================
@@ -227,6 +228,14 @@ Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group
         
         // Quick action to finalize a sale
         Route::post('/{id}/finalize', [SaleController::class, 'finalize'])->name('finalize');
+    });
+
+    // Payout & Earnings Routes
+    Route::prefix('payouts')->name('payouts.')->group(function () {
+        Route::get('/', [PayoutController::class, 'index'])->name('index');
+        Route::post('/request', [PayoutController::class, 'store'])->name('store');
+        // Optional: Route to view specific payout details
+        Route::get('/{id}', [PayoutController::class, 'show'])->name('show');
     });
 
 });
