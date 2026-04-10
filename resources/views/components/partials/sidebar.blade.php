@@ -54,7 +54,7 @@
                 <small class="text-uppercase text-muted fw-bold smaller">Sales & Orders</small>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('orders*') ? 'active' : '' }}" href="/orders">
+                <a class="nav-link {{ request()->routeIs('orders') ? 'active' : '' }}" href="{{ route('shop.orders.index') }}">
                     <i class="ti ti-shopping-cart"></i>
                     <span class="nav-text">Recent Orders</span>
                     @if(isset($pendingOrdersCount) && $pendingOrdersCount > 0)
