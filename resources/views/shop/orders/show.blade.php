@@ -223,8 +223,8 @@
         {{-- Avatar & Identity Section --}}
         <div class="d-flex align-items-center mb-4">
             <div class="me-3 position-relative">
-                @if($order->user && $order->user->profile_photo_path)
-                    <img src="{{ asset('storage/' . $order->user->profile_photo_path) }}" 
+                @if($order->user && $order->user->avatar)
+                    <img src="{{ $order->user->avatar }}" 
                          alt="{{ $customerName }}" 
                          class="rounded-circle shadow-sm object-fit-cover" 
                          style="width: 55px; height: 55px; border: 2px solid #fff;">
