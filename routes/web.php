@@ -180,7 +180,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Dashboard & Profile
     Route::controller(UserDashboardController::class)->group(function () {
-        Route::get('/user-dashboard', 'index')->name('dashboard.index');
+        Route::get('/user-dashboard', 'index')->name('dashboard.index')->name('user.dashboard');
         Route::get('/profile/edit', 'editProfile')->name('profile.edit');
         Route::patch('/profile/update', 'updateProfile')->name('profile.update');
         Route::put('/profile/password', 'updatePassword')->name('profile.password');
