@@ -194,8 +194,19 @@
                             @endforeach
                         </select>
                     </form>
+
+                    @if($order->status !== 'delivered' && $order->status !== 'cancelled')
+    <form action="{{ route('shop.sales.finalize', $order->id) }}" method="POST" class="d-inline">
+        @csrf
+        <button type="submit" class="btn btn-sm btn-soft-success border-success-subtle" title="Mark as Delivered">
+            <i class="fas fa-check-double text-success"></i>
+        </button>
+    </form>
+     @endif
+
                 </div>
             </div>
+            
 
             {{-- Customer Data (Handling orders table fields) --}}
             <div class="card shadow-sm mb-4">
