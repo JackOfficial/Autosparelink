@@ -16,9 +16,9 @@
                 <button class="btn btn-white border rounded-pill shadow-sm px-3 py-2 small">
                     <i class="ti ti-download me-1"></i> Export
                 </button>
-                <button class="btn btn-primary rounded-pill shadow-sm px-4 py-2">
+                <a href="{{ route('shop.parts.create') }}" class="btn btn-primary rounded-pill shadow-sm px-4 py-2">
                     <i class="ti ti-plus me-1"></i> Add Part
-                </button>
+                </a>
             </div>
         </div>
 
