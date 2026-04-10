@@ -23,6 +23,27 @@
             .card { border: 1px solid #ddd !important; shadow: none !important; }
             .container-fluid { padding: 0 !important; }
         }
+
+        .img-stack-container {
+    position: relative;
+    width: 65px; /* Adjust based on your take(3) and offset */
+    height: 45px;
+}
+
+.stack-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #fff;
+    position: absolute;
+    transition: transform 0.2s;
+}
+
+.stack-img:hover {
+    transform: translateY(-5px);
+    z-index: 20 !important;
+}
     </style>
     @endpush
 
@@ -94,39 +115,39 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($order->orderItems as $item)
-                        <tr>
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    {{-- Part Image Logic --}}
-                                    <div class="me-3">
-                                        @if($item->part && $item->part->image)
-                                            <img src="{{ asset('storage/' . $item->part->image) }}" 
-                                                 alt="{{ $item->part->part_name }}" 
-                                                 class="rounded border shadow-sm object-fit-cover" 
-                                                 style="width: 50px; height: 50px;">
-                                        @else
-                                            <div class="bg-light rounded d-flex align-items-center justify-content-center border shadow-sm" 
-                                                 style="width: 50px; height: 50px;">
-                                                <i class="fas fa-tools text-muted opacity-50"></i>
-                                            </div>
-                                        @endif
-                                    </div>
-                                    
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ $item->part->part_name ?? 'Product Deleted' }}</div>
-                                        <div class="text-muted" style="font-size: 0.75rem;">
-                                            <span class="badge bg-light text-dark border-0 fw-normal">SKU: {{ $item->part->sku ?? 'N/A' }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="text-center fw-bold">{{ $item->quantity }}</td>
-                            <td class="text-end">{{ number_format($item->unit_price) }} <span class="small text-muted">RWF</span></td>
-                            <td class="text-end pe-4 fw-bold text-dark">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
-                        </tr>
-                    @endforeach
-                </tbody>
+    @foreach($order->orderItems as $item)
+        <tr>
+            <td class="ps-4">
+                <div class="d-flex align-items-center">
+                    {{-- Part Image Logic --}}
+                    <div class="me-4 img-stack-container">
+                        @forelse($item->part->photos->take(3) as $index => $photo)
+                            <img src="{{ asset('storage/' . $photo->file_path) }}" 
+                                 class="stack-img shadow-sm" 
+                                 style="left: {{ $index * 12 }}px; z-index: {{ 10 - $index }};"
+                                 alt="Part Image">
+                        @empty
+                            <div class="bg-light rounded border d-flex align-items-center justify-content-center text-muted shadow-sm" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fa fa-image small opacity-50"></i>
+                            </div>
+                        @endforelse
+                    </div>
+                    
+                    <div>
+                        <div class="fw-bold text-dark">{{ $item->part->part_name ?? 'Product Deleted' }}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">
+                            <span class="badge bg-light text-dark border-0 fw-normal">SKU: {{ $item->part->sku ?? 'N/A' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td class="text-center fw-bold">{{ $item->quantity }}</td>
+            <td class="text-end text-nowrap">{{ number_format($item->unit_price) }} <span class="small text-muted">RWF</span></td>
+            <td class="text-end pe-4 fw-bold text-dark text-nowrap">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
+        </tr>
+    @endforeach
+</tbody>
                 <tfoot class="bg-light-soft">
                     <tr>
                         <td colspan="3" class="text-end fw-bold py-3 border-0">Total Amount:</td>

@@ -20,7 +20,7 @@ class Part extends Model
         'price',
         'stock_quantity',
         'status',
-    ];
+    ];  
 
     public function category()
     {
