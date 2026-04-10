@@ -44,7 +44,7 @@ class ShopProfileController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit()
     {
        $shop = Auth::user()->shop;
         return view('shop.profile.edit', compact('shop'));
