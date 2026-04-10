@@ -1,88 +1,241 @@
 <x-shop-dashboard>
-    <x-slot:title>Update Order #{{ $order->id }}</x-slot:title>
+    <x-slot:title>Order #{{ $order->id }} - Details</x-slot:title>
+
+    @push('styles')
+    <style>
+        /* Logic: Blinking for Call Requests */
+        .blink_me { animation: blinker 0.8s cubic-bezier(.45,.05,.55,.95) infinite; }
+        @keyframes blinker { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+
+        .card { border-radius: 15px; border: none; }
+        .info-label { font-size: 0.7rem; text-transform: uppercase; color: #95aac9; font-weight: 700; margin-bottom: 2px; display: block; }
+        .info-value { font-size: 0.95rem; color: #12263f; font-weight: 500; }
+        
+        /* Status Control UI */
+        .status-control-card { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; border-radius: 15px; }
+        .status-select { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 10px; font-weight: bold; }
+        .status-select option { color: #333; }
+
+        .bg-light-soft { background-color: #f8f9fa; }
+        
+        @media print {
+            .btn, .status-control-card, nav, .breadcrumb { display: none !important; }
+            .card { border: 1px solid #ddd !important; shadow: none !important; }
+            .container-fluid { padding: 0 !important; }
+        }
+    </style>
+    @endpush
+
+    @php
+        // PRIMARY LOGIC: Fallbacks for Guest vs Member
+        $customerName = $order->guest_name ?? $order->user->name ?? 'Guest Customer';
+        $customerEmail = $order->guest_email ?? $order->user->email ?? 'No email provided';
+        $customerPhone = $order->guest_phone ?? $order->address->phone ?? 'N/A';
+        
+        $street = $order->guest_shipping_address ?? $order->address->street_address ?? 'No address provided';
+        $city = $order->city ?? $order->address->city ?? '';
+        $country = $order->country ?? $order->address->country ?? '';
+        $initial = strtoupper(substr($customerName, 0, 1));
+    @endphp
 
     <div class="container-fluid py-4">
-        {{-- Header & Back Button --}}
-        <div class="d-flex align-items-center justify-content-between mb-4">
+        {{-- Header Section --}}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
             <div>
-                <h1 class="h3 fw-bold text-dark mb-1">Update Order Status</h1>
-                <p class="text-muted small">Modifying status for Order <span class="text-primary fw-bold">#{{ $order->id }}</span></p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-2">
+                        <li class="breadcrumb-item"><a href="{{ route('shop.orders.index') }}" class="text-decoration-none">Orders</a></li>
+                        <li class="breadcrumb-item active">#{{ $order->id }}</li>
+                    </ol>
+                </nav>
+                <h2 class="h3 mb-0 fw-bold">Order Details</h2>
             </div>
-            <a href="{{ route('shop.orders.index') }}" class="btn btn-light border shadow-sm px-3" style="border-radius: 10px;">
-                <i class="fas fa-arrow-left me-2"></i> Back to List
-            </a>
+            <div class="mt-3 mt-md-0 d-flex gap-2">
+                <button onclick="window.print()" class="btn btn-white border shadow-sm">
+                    <i class="fas fa-print me-1 text-muted"></i> Print Invoice
+                </button>
+                <a href="{{ route('shop.orders.edit', $order->id) }}" class="btn btn-primary shadow-sm px-4">
+                    <i class="fas fa-edit me-1"></i> Edit Status
+                </a>
+            </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm" style="border-radius: 15px;">
-                    <div class="card-body p-4">
-                        <form action="{{ route('shop.orders.update', $order->id) }}" method="POST">
-                            @csrf
-                            @method('PUT')
+        {{-- Urgent Callback Alert --}}
+        @if($order->status === 'callback_requested')
+            <div class="alert alert-danger blink_me d-flex align-items-center mb-4 shadow-sm border-0 p-3" style="border-radius: 12px;">
+                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 text-danger" style="width: 40px; height: 40px;">
+                    <i class="fas fa-phone-alt"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold">Urgent Call Requested!</h6>
+                    <span class="small">Customer is waiting for a response at <strong>{{ $customerPhone }}</strong>.</span>
+                </div>
+            </div>
+        @endif
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold text-muted small text-uppercase">Current Status</label>
-                                <select name="status" class="form-select form-select-lg border-0 bg-light" style="border-radius: 12px; font-size: 1rem;">
-                                    @foreach(['pending','processing','shipped','delivered','cancelled', 'callback_requested'] as $status)
-                                        <option value="{{ $status }}" {{ $order->status == $status ? 'selected' : '' }}>
-                                            {{ ucfirst(str_replace('_', ' ', $status)) }}
-                                        </option>
+        <div class="row g-4">
+            <div class="col-lg-8">
+                {{-- Items Table --}}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h6 class="mb-0 fw-bold text-uppercase small text-muted">
+                            <i class="fas fa-shopping-basket me-2 text-primary"></i> Cart Items
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="bg-light-soft">
+                                    <tr>
+                                        <th class="ps-4 border-0 small text-muted">Product</th>
+                                        <th class="text-center border-0 small text-muted">Qty</th>
+                                        <th class="text-end border-0 small text-muted">Unit Price</th>
+                                        <th class="text-end pe-4 border-0 small text-muted">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($order->orderItems as $item)
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-light rounded p-2 me-3">
+                                                        <i class="fas fa-box text-muted"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold text-dark">{{ $item->part->part_name ?? 'Product Deleted' }}</div>
+                                                        <div class="text-muted" style="font-size: 0.75rem;">SKU: {{ $item->part->sku ?? 'N/A' }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center fw-bold">{{ $item->quantity }}</td>
+                                            <td class="text-end">{{ number_format($item->unit_price) }} <span class="small text-muted">RWF</span></td>
+                                            <td class="text-end pe-4 fw-bold">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
+                                        </tr>
                                     @endforeach
-                                </select>
-                                <div class="form-text mt-2 small">
-                                    <i class="fas fa-info-circle me-1"></i> Changing the status will notify the customer via email.
-                                </div>
-                            </div>
+                                </tbody>
+                                <tfoot class="bg-light-soft">
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold py-3 border-0">Total Amount:</td>
+                                        <td class="text-end pe-4 fw-bold text-primary h5 py-3 border-0">{{ number_format($order->total_amount) }} RWF</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg shadow-sm" style="border-radius: 12px; font-weight: 600;">
-                                    <i class="fas fa-save me-2"></i> Save Changes
-                                </button>
+                <div class="row g-4">
+                    {{-- Payment Status --}}
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold text-uppercase small text-muted mb-3">Payment Info</h6>
+                                @if($order->payment)
+                                    <div class="mb-3">
+                                        <span class="info-label">Transaction ID</span>
+                                        <span class="info-value text-break">{{ $order->payment->transaction_id }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                        <span class="small fw-bold">{{ strtoupper($order->payment->method) }}</span>
+                                        <span class="badge {{ $order->payment->status === 'completed' ? 'bg-success' : 'bg-warning' }}">
+                                            {{ ucfirst($order->payment->status) }}
+                                        </span>
+                                    </div>
+                                @else
+                                    <div class="text-center py-2">
+                                        <i class="fas fa-hourglass-half text-warning mb-2"></i>
+                                        <p class="small text-muted mb-0">No payment record found.</p>
+                                    </div>
+                                @endif
                             </div>
-                        </form>
+                        </div>
+                    </div>
+
+                    {{-- Shipping Status --}}
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold text-uppercase small text-muted mb-3">Logistics</h6>
+                                @if($order->shipping)
+                                    <div class="mb-3">
+                                        <span class="info-label">Carrier</span>
+                                        <span class="info-value">{{ $order->shipping->carrier }}</span>
+                                    </div>
+                                    <div class="p-2 border rounded border-dashed text-center">
+                                        <span class="small text-muted me-2">Tracking:</span>
+                                        <span class="fw-bold text-primary">{{ $order->shipping->tracking_number }}</span>
+                                    </div>
+                                @else
+                                    <div class="text-center py-2">
+                                        <i class="fas fa-truck-loading text-muted mb-2"></i>
+                                        <p class="small text-muted mb-0">Shipping not initialized.</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Summary Sidebar --}}
-            <div class="col-lg-4 mt-4 mt-lg-0">
-                <div class="card border-0 shadow-sm bg-primary text-white" style="border-radius: 15px;">
+            <div class="col-lg-4">
+                {{-- Quick Status Toggle --}}
+                <div class="card shadow-sm status-control-card mb-4 border-0">
+                    <div class="card-body text-center p-4">
+                        <h6 class="text-uppercase mb-3 fw-bold opacity-75 small">Change Status</h6>
+                        <form action="{{ route('shop.orders.update', $order->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <select name="status" class="form-select form-select-lg status-select shadow-none mb-0" onchange="this.form.submit()">
+                                @foreach(['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'callback_requested'] as $stat)
+                                    <option value="{{ $stat }}" {{ $order->status == $stat ? 'selected' : '' }}>
+                                        {{ ucfirst(str_replace('_', ' ', $stat)) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- Customer Profile Card --}}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between">
+                        <span class="fw-bold small text-muted">CUSTOMER PROFILE</span>
+                        @if(!$order->user_id)
+                            <span class="badge bg-secondary rounded-pill" style="font-size: 0.6rem;">GUEST</span>
+                        @endif
+                    </div>
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3">Order Summary</h5>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Customer:</span>
-                            <span class="fw-bold">{{ $order->user->name ?? $order->guest_name }}</span>
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 50px; height: 50px;">
+                                <span class="h5 mb-0 fw-bold">{{ $initial }}</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">{{ $customerName }}</h6>
+                                <span class="text-muted small">{{ $customerEmail }}</span>
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Total Amount:</span>
-                            <span class="fw-bold text-white">{{ number_format($order->total_amount) }} RWF</span>
+                        
+                        <div class="mb-3">
+                            <span class="info-label">Shipping To:</span>
+                            <div class="info-value small lh-base">
+                                {{ $street }}<br>
+                                {{ $city }}{{ $city && $country ? ',' : '' }} {{ $country }}
+                            </div>
                         </div>
-                        <hr class="bg-white opacity-25">
-                        <div class="text-center">
-                            <a href="{{ route('shop.orders.show', $order->id) }}" class="text-white text-decoration-none small fw-bold">
-                                View Full Details <i class="fas fa-external-link-alt ms-1"></i>
-                            </a>
+
+                        <div class="mt-4">
+                            <span class="info-label">Phone Connection</span>
+                            @if($customerPhone !== 'N/A')
+                                <a href="tel:{{ $customerPhone }}" class="btn btn-outline-primary w-100 btn-sm mt-1" style="border-radius: 8px;">
+                                    <i class="fas fa-phone-alt me-2"></i> {{ $customerPhone }}
+                                </a>
+                            @else
+                                <span class="text-muted small italic">No contact provided</span>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    @push('styles')
-    <style>
-        .form-select:focus {
-            box-shadow: none;
-            border: 1px solid #0d6efd !important;
-        }
-        .btn-primary {
-            background-color: #0d6efd;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: #0b5ed7;
-        }
-    </style>
-    @endpush
 </x-shop-dashboard>

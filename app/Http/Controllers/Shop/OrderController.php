@@ -59,8 +59,17 @@ class OrderController extends Controller
     public function show(string $id)
     {
         $order = $this->shopOrders()
-            ->with(['user', 'orderItems.part', 'payment', 'shipping', 'address'])
-            ->findOrFail($id);
+        ->with([
+        'user', 
+        'orderItems' => function($query) {
+            $query->orderBy('id', 'asc'); // Keep items in order
+        },
+        'orderItems.part', 
+        'payment', 
+        'shipping', 
+        'address'
+        ])
+        ->findOrFail($id);
 
         return view('shop.orders.show', compact('order'));
     }
