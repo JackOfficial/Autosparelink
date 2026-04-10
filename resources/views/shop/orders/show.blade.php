@@ -206,14 +206,80 @@
                     </div>
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center mb-4">
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 50px; height: 50px;">
-                                <span class="h5 mb-0 fw-bold">{{ $initial }}</span>
-                            </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold text-dark">{{ $customerName }}</h6>
-                                <span class="text-muted small">{{ $customerEmail }}</span>
-                            </div>
-                        </div>
+    {{-- Avatar / Initial Logic --}}
+    <div class="me-3 position-relative">
+        @if($order->user && $order->user->profile_photo_path)
+            <img src="{{ asset('storage/' . $order->user->profile_photo_path) }}" 
+                 alt="{{ $customerName }}" 
+                 class="rounded-circle shadow-sm object-fit-cover" 
+                 style="width: 55px; height: 55px; border: 2px solid #fff;">
+        @else
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                 style="width: 55px; height: 55px; font-size: 1.2rem; border: 2px solid #fff;">
+                <span class="fw-bold">{{ $initial }}</span>
+            </div>
+        @endif
+        
+        {{-- Small Dot Indicator (Optional: Blue for member, Gray for guest) --}}
+        <span class="position-absolute bottom-0 end-0 p-1 {{ $order->user_id ? 'bg-success' : 'bg-secondary' }} border border-white rounded-circle" 
+              style="width: 12px; height: 12px;" 
+              title="{{ $order->user_id ? 'Registered Member' : 'Guest' }}">
+        </span>
+    </div>
+
+    <div>
+        <div class="d-flex align-items-center">
+            <h6 class="mb-0 fw-bold text-dark me-2">{{ $customerName }}</h6>
+            @if($order->user_id)
+                <span class="badge bg-soft-primary text-primary border border-primary-subtle rounded-pill" style="font-size: 0.65rem; padding: 0.25em 0.6em;">
+                    <i class="fas fa-user-check me-1"></i> MEMBER
+                </span>
+            @else
+                <span class="badge bg-light text-muted border rounded-pill" style="font-size: 0.65rem; padding: 0.25em 0.6em;">
+                    <i class="fas fa-user-secret me-1"></i> GUEST
+                </span>
+            @endif
+        </div>
+        <span class="text-muted small">{{ $customerEmail }}</span>
+    </div>
+</div><div class="d-flex align-items-center mb-4">
+    {{-- Avatar / Initial Logic --}}
+    <div class="me-3 position-relative">
+        @if($order->user && $order->user->profile_photo_path)
+            <img src="{{ asset('storage/' . $order->user->profile_photo_path) }}" 
+                 alt="{{ $customerName }}" 
+                 class="rounded-circle shadow-sm object-fit-cover" 
+                 style="width: 55px; height: 55px; border: 2px solid #fff;">
+        @else
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                 style="width: 55px; height: 55px; font-size: 1.2rem; border: 2px solid #fff;">
+                <span class="fw-bold">{{ $initial }}</span>
+            </div>
+        @endif
+        
+        {{-- Small Dot Indicator (Optional: Blue for member, Gray for guest) --}}
+        <span class="position-absolute bottom-0 end-0 p-1 {{ $order->user_id ? 'bg-success' : 'bg-secondary' }} border border-white rounded-circle" 
+              style="width: 12px; height: 12px;" 
+              title="{{ $order->user_id ? 'Registered Member' : 'Guest' }}">
+        </span>
+    </div>
+
+    <div>
+        <div class="d-flex align-items-center">
+            <h6 class="mb-0 fw-bold text-dark me-2">{{ $customerName }}</h6>
+            @if($order->user_id)
+                <span class="badge bg-soft-primary text-primary border border-primary-subtle rounded-pill" style="font-size: 0.65rem; padding: 0.25em 0.6em;">
+                    <i class="fas fa-user-check me-1"></i> MEMBER
+                </span>
+            @else
+                <span class="badge bg-light text-muted border rounded-pill" style="font-size: 0.65rem; padding: 0.25em 0.6em;">
+                    <i class="fas fa-user-secret me-1"></i> GUEST
+                </span>
+            @endif
+        </div>
+        <span class="text-muted small">{{ $customerEmail }}</span>
+    </div>
+</div>
                         
                         <div class="mb-3">
                             <span class="info-label">Shipping To:</span>
