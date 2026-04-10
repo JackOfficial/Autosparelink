@@ -76,53 +76,67 @@
         <div class="row g-4">
             <div class="col-lg-8">
                 {{-- Items Table --}}
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h6 class="mb-0 fw-bold text-uppercase small text-muted">
-                            <i class="fas fa-shopping-basket me-2 text-primary"></i> Cart Items
-                        </h6>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table align-middle mb-0">
-                                <thead class="bg-light-soft">
-                                    <tr>
-                                        <th class="ps-4 border-0 small text-muted">Product</th>
-                                        <th class="text-center border-0 small text-muted">Qty</th>
-                                        <th class="text-end border-0 small text-muted">Unit Price</th>
-                                        <th class="text-end pe-4 border-0 small text-muted">Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($order->orderItems as $item)
-                                        <tr>
-                                            <td class="ps-4">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-light rounded p-2 me-3">
-                                                        <i class="fas fa-box text-muted"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-bold text-dark">{{ $item->part->part_name ?? 'Product Deleted' }}</div>
-                                                        <div class="text-muted" style="font-size: 0.75rem;">SKU: {{ $item->part->sku ?? 'N/A' }}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-center fw-bold">{{ $item->quantity }}</td>
-                                            <td class="text-end">{{ number_format($item->unit_price) }} <span class="small text-muted">RWF</span></td>
-                                            <td class="text-end pe-4 fw-bold">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                                <tfoot class="bg-light-soft">
-                                    <tr>
-                                        <td colspan="3" class="text-end fw-bold py-3 border-0">Total Amount:</td>
-                                        <td class="text-end pe-4 fw-bold text-primary h5 py-3 border-0">{{ number_format($order->total_amount) }} RWF</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h6 class="mb-0 fw-bold text-uppercase small text-muted">
+            <i class="fas fa-shopping-basket me-2 text-primary"></i> Cart Items
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="bg-light-soft">
+                    <tr>
+                        <th class="ps-4 border-0 small text-muted">Product</th>
+                        <th class="text-center border-0 small text-muted">Qty</th>
+                        <th class="text-end border-0 small text-muted">Unit Price</th>
+                        <th class="text-end pe-4 border-0 small text-muted">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($order->orderItems as $item)
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    {{-- Part Image Logic --}}
+                                    <div class="me-3">
+                                        @if($item->part && $item->part->image)
+                                            <img src="{{ asset('storage/' . $item->part->image) }}" 
+                                                 alt="{{ $item->part->part_name }}" 
+                                                 class="rounded border shadow-sm object-fit-cover" 
+                                                 style="width: 50px; height: 50px;">
+                                        @else
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center border shadow-sm" 
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="fas fa-tools text-muted opacity-50"></i>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ $item->part->part_name ?? 'Product Deleted' }}</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">
+                                            <span class="badge bg-light text-dark border-0 fw-normal">SKU: {{ $item->part->sku ?? 'N/A' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center fw-bold">{{ $item->quantity }}</td>
+                            <td class="text-end">{{ number_format($item->unit_price) }} <span class="small text-muted">RWF</span></td>
+                            <td class="text-end pe-4 fw-bold text-dark">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot class="bg-light-soft">
+                    <tr>
+                        <td colspan="3" class="text-end fw-bold py-3 border-0">Total Amount:</td>
+                        <td class="text-end pe-4 fw-bold text-primary h5 py-3 border-0">{{ number_format($order->total_amount) }} RWF</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
 
                 <div class="row g-4">
                     {{-- Payment Status --}}
@@ -242,7 +256,8 @@
         </div>
         <span class="text-muted small">{{ $customerEmail }}</span>
     </div>
-</div><div class="d-flex align-items-center mb-4">
+</div>
+<div class="d-flex align-items-center mb-4">
     {{-- Avatar / Initial Logic --}}
     <div class="me-3 position-relative">
         @if($order->user && $order->user->profile_photo_path)
