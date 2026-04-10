@@ -51,7 +51,7 @@ class EditComponent extends Component
 
         // Load Relationships
         $this->selectedSpecs = $part->fitments()->pluck('specification_id')->toArray();
-        $this->substitution_part_ids = $part->substitutions()->pluck('related_part_id')->toArray();
+        $this->substitution_part_ids = $part->substitutions()->pluck('substitution_part_id')->toArray();
         $this->existingPhotos = $part->photos;
     }
 
