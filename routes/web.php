@@ -71,6 +71,7 @@ use App\Http\Controllers\Shop\DashboardController;
 use App\Http\Controllers\Shop\OrderController as ShopOrderController;
 use App\Http\Controllers\Shop\Part;
 use App\Http\Controllers\Shop\PartController as ShopPartController;
+use App\Http\Controllers\Shop\SaleController;
 
 // =============================================================
 // PUBLIC FRONTEND ROUTES
@@ -213,6 +214,21 @@ Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group
    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
    Route::resource('/parts', ShopPartController::class);
    Route::resource('/orders', ShopOrderController::class);
+
+   Route::prefix('sales')->name('sales.')->group(function () {
+        // Main sales history list
+        Route::get('/', [SaleController::class, 'index'])->name('index');
+        
+        // Financial charts and data trends
+        Route::get('/analytics', [SaleController::class, 'analytics'])->name('analytics');
+        
+        // Printable invoice view
+        Route::get('/{id}/invoice', [SaleController::class, 'printInvoice'])->name('invoice');
+        
+        // Quick action to finalize a sale
+        Route::post('/{id}/finalize', [SaleController::class, 'finalize'])->name('finalize');
+    });
+
 });
 
 // =============================================================

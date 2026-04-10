@@ -43,18 +43,12 @@
                     <span class="nav-text">Add New Part</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->is('categories*') ? 'active' : '' }}" href="/categories">
-                    <i class="ti ti-category"></i>
-                    <span class="nav-text">Categories</span>
-                </a>
-            </li>
 
             <li class="px-4 mb-2 mt-3 nav-text">
                 <small class="text-uppercase text-muted fw-bold smaller">Sales & Orders</small>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('orders') ? 'active' : '' }}" href="{{ route('shop.orders.index') }}">
+                <a class="nav-link {{ request()->routeIs('shop.orders.index') ? 'active' : '' }}" href="{{ route('shop.orders.index') }}">
                     <i class="ti ti-shopping-cart"></i>
                     <span class="nav-text">Recent Orders</span>
                     @if(isset($pendingOrdersCount) && $pendingOrdersCount > 0)
@@ -63,7 +57,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('sales-history*') ? 'active' : '' }}" href="/sales-history">
+                <a class="nav-link {{ request()->routeIs('shop.sales.index') ? 'active' : '' }}" href="{{ route('shop.sales.index') }}">
                     <i class="ti ti-receipt"></i>
                     <span class="nav-text">Sales History</span>
                 </a>
