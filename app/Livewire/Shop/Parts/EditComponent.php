@@ -140,7 +140,7 @@ class EditComponent extends Component
         }
 
         session()->flash('success', 'Part updated successfully!');
-        return redirect()->route('admin.spare-parts.index');
+        return redirect()->route('shop.parts.index');
     }
 
     public function render()
