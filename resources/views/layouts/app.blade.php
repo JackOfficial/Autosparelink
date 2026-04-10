@@ -178,39 +178,49 @@
                     <livewire:cart-icon />
 
                     <!-- Authentication Links -->
-                    @guest
-                        <a href="{{ route('login') }}" class="btn btn-primary btn-pill ml-2">Login / Register</a>
-                    @else
-                        <div class="dropdown">
-                            <a href="#" class="btn btn-outline-primary btn-pill dropdown-toggle d-flex align-items-center" id="userDropdown" data-toggle="dropdown">
-                                <i class="fas fa-user-circle fa-lg mr-2"></i> {{ Auth::user()->name }}
-                            </a>
-                           <div class="dropdown-menu dropdown-menu-right shadow-sm p-0" aria-labelledby="userDropdown" style="min-width: 200px; border-radius: 12px; overflow: hidden;">
-
-    @if(auth()->user()->hasAnyRole(['admin', 'super-admin']))
-        <a class="dropdown-item d-flex align-items-center py-2 px-3" href="/admin">
-            <i class="fas fa-cogs mr-2 text-primary"></i> Admin Panel
+                  @guest
+    <a href="{{ route('login') }}" class="btn btn-primary btn-pill ml-2">Login / Register</a>
+@else
+    <div class="dropdown">
+        <a href="#" class="btn btn-outline-primary btn-pill dropdown-toggle d-flex align-items-center" id="userDropdown" data-toggle="dropdown">
+            <i class="fas fa-user-circle fa-lg mr-2"></i> {{ Auth::user()->name }}
         </a>
-    @else
-        <a class="dropdown-item d-flex align-items-center py-2 px-3" href="/user-dashboard">
-            <i class="fas fa-user mr-2 text-primary"></i> Dashboard
-        </a>
-    @endif
+        <div class="dropdown-menu dropdown-menu-right shadow-sm p-0" aria-labelledby="userDropdown" style="min-width: 200px; border-radius: 12px; overflow: hidden;">
 
-    <div class="dropdown-divider m-0"></div>
+            {{-- Super Admin & Admin View --}}
+            @if(auth()->user()->hasAnyRole(['super-admin', 'admin']))
+                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('admin.dashboard') }}">
+                    <i class="fas fa-shield-alt mr-2 text-primary"></i> Admin Panel
+                </a>
+            @endif
 
-    <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('logout') }}"
-       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-        <i class="fas fa-sign-out-alt mr-2 text-danger"></i> Logout
-    </a>
+            {{-- Seller View --}}
+            @if(auth()->user()->hasRole('seller'))
+                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('shop.dashboard') }}">
+                    <i class="fas fa-store mr-2 text-success"></i> Seller Hub
+                </a>
+            @endif
 
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-        @csrf
-    </form>
-</div>
+            {{-- Regular User View --}}
+            @if(auth()->user()->hasRole('user'))
+                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('user.dashboard') }}">
+                    <i class="fas fa-user mr-2 text-info"></i> My Account
+                </a>
+            @endif
 
-                        </div>
-                    @endguest
+            <div class="dropdown-divider m-0"></div>
+
+            <a class="dropdown-item d-flex align-items-center py-2 px-3 text-danger" href="{{ route('logout') }}"
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </a>
+
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                @csrf
+            </form>
+        </div>
+    </div>
+@endguest
                 </div>
             </div>
         </div>
