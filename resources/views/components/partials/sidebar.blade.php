@@ -38,7 +38,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routerIs('shop.parts.index') ? 'active' : '' }}" href="{{ route('shop.parts.index') }}">
+                <a class="nav-link {{ request()->routeIs('shop.parts.index') ? 'active' : '' }}" href="{{ route('shop.parts.index') }}">
                     <i class="ti ti-circle-plus"></i>
                     <span class="nav-text">Add New Part</span>
                 </a>
