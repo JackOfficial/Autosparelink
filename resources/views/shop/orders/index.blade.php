@@ -1,21 +1,38 @@
 <x-shop-dashboard>
-    <x-slot:title>My Inventory</x-slot:title>
+    <x-slot:title>Order Management</x-slot:title>
+
+    @push('styles')
+    <style>
+        /* Logic: Blinking for 'callback_requested' status */
+        .blink_me { animation: blinker 0.8s cubic-bezier(.45,.05,.55,.95) infinite; }
+        @keyframes blinker { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+
+        .status-badge { font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border-radius: 8px; }
+        
+        /* Soft UI Colors */
+        .bg-warning-soft { background: #fff9db; color: #fcc419; border: 1px solid #ffe066; }
+        .bg-success-soft { background: #ebfbee; color: #40c057; border: 1px solid #8ce99a; }
+        .bg-primary-soft { background: #e7f5ff; color: #228be6; border: 1px solid #74c0fc; }
+        .bg-danger-soft  { background: #fff5f5; color: #fa5252; border: 1px solid #ffa8a8; }
+
+        [x-cloak] { display: none !important; }
+    </style>
+    @endpush
 
     <div class="container-fluid py-4" x-data="{ 
         search: '',
-        showRow(name, sku) {
-            const term = this.search.toLowerCase();
-            return name.toLowerCase().includes(term) || sku.toLowerCase().includes(term);
+        showRow(rowText) {
+            return rowText.toLowerCase().includes(this.search.toLowerCase())
         }
     }">
         {{-- Header Section --}}
         <div class="row align-items-center mb-4">
             <div class="col-md-6">
-                <h1 class="h3 fw-bold text-dark mb-1">My Inventory</h1>
-                <p class="text-muted small">Manage your spare parts, stock levels, and pricing.</p>
+                <h1 class="h3 fw-bold text-dark mb-1">Order Management</h1>
+                <p class="text-muted small mb-0">Manage and track your shop orders in real-time.</p>
             </div>
-            <div class="col-md-6 d-flex justify-content-md-end gap-3 mt-3 mt-md-0">
-                <div class="position-relative w-100" style="max-width: 300px;">
+            <div class="col-md-6 d-flex justify-content-md-end mt-3 mt-md-0">
+                <div class="position-relative w-100" style="max-width: 350px;">
                     <span class="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">
                         <i class="fas fa-search"></i>
                     </span>
@@ -23,92 +40,80 @@
                         type="text" 
                         x-model="search" 
                         class="form-control ps-5 border-0 shadow-sm" 
-                        placeholder="Search parts or SKU..."
-                        style="border-radius: 10px; height: 42px;"
+                        placeholder="Search by ID, Name, or Email..."
+                        style="border-radius: 12px; height: 45px;"
                     >
                 </div>
-                <a href="{{ route('shop.parts.create') }}" class="btn btn-primary d-flex align-items-center px-3" style="border-radius: 10px;">
-                    <i class="fas fa-plus me-2"></i> Add Part
-                </a>
             </div>
         </div>
 
-        {{-- Stats Overview --}}
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-lg-3">
-                <div class="card border-0 shadow-sm p-3" style="border-radius: 12px;">
-                    <div class="text-muted small fw-bold text-uppercase">Total Parts</div>
-                    <div class="h4 fw-bold mb-0">{{ $parts->total() }}</div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="card border-0 shadow-sm p-3" style="border-radius: 12px;">
-                    <div class="text-muted small fw-bold text-uppercase">Out of Stock</div>
-                    <div class="h4 fw-bold mb-0 text-danger">{{ $parts->where('stock', 0)->count() }}</div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Inventory Table --}}
+        {{-- Orders Table --}}
         <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="ps-4 py-3 border-0 text-muted small fw-bold text-uppercase">Part Info</th>
-                            <th class="py-3 border-0 text-muted small fw-bold text-uppercase">Category</th>
-                            <th class="py-3 border-0 text-muted small fw-bold text-uppercase">Price</th>
-                            <th class="py-3 border-0 text-muted small fw-bold text-uppercase">Stock</th>
-                            <th class="pe-4 py-3 border-0 text-center text-muted small fw-bold text-uppercase">Actions</th>
+                            <th class="ps-4 py-3 border-0 text-muted small fw-bold text-uppercase">Order ID</th>
+                            <th class="py-3 border-0 text-muted small fw-bold text-uppercase">Customer</th>
+                            <th class="py-3 border-0 text-muted small fw-bold text-uppercase">Status</th>
+                            <th class="py-3 border-0 text-muted small fw-bold text-uppercase text-center">Date</th>
+                            <th class="py-3 border-0 text-muted small fw-bold text-uppercase">Amount</th>
+                            <th class="pe-4 py-3 border-0 text-end text-muted small fw-bold text-uppercase">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($parts as $part)
-                            <tr x-show="showRow('{{ addslashes($part->name) }}', '{{ $part->sku ?? '' }}')" x-transition>
+                        @forelse($orders as $order)
+                            @php
+                                $customerName = $order->user->name ?? $order->guest_name ?? 'Guest';
+                                $customerEmail = $order->user->email ?? $order->guest_email ?? 'N/A';
+                                $searchText = "#{$order->id} {$customerName} {$customerEmail}";
+                            @endphp
+                            <tr x-show="showRow('{{ addslashes($searchText) }}')" x-transition>
                                 <td class="ps-4">
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-light rounded p-2 me-3 d-none d-sm-block">
-                                            <i class="fas fa-tools text-primary"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold text-dark">{{ $part->name }}</div>
-                                            <div class="text-muted small">SKU: {{ $part->sku ?? 'N/A' }}</div>
-                                        </div>
-                                    </div>
+                                    <span class="fw-bold text-primary">#{{ $order->id }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-soft-info text-info px-2 py-1">
-                                        {{ $part->category->name ?? 'Uncategorized' }}
-                                    </span>
-                                </td>
-                                <td class="fw-bold">
-                                    {{ number_format($part->price) }} <span class="small text-muted">RWF</span>
+                                    <div class="fw-bold text-dark">{{ $customerName }}</div>
+                                    <div class="text-muted small">{{ $customerEmail }}</div>
                                 </td>
                                 <td>
-                                    @if($part->stock <= 5)
-                                        <span class="text-danger fw-bold"><i class="fas fa-exclamation-triangle me-1"></i> {{ $part->stock }}</span>
+                                    @php
+                                        $statusClasses = [
+                                            'pending' => 'bg-warning-soft',
+                                            'delivered' => 'bg-success-soft',
+                                            'processing' => 'bg-primary-soft',
+                                            'cancelled' => 'bg-danger-soft',
+                                        ];
+                                        $class = $statusClasses[$order->status] ?? 'bg-light';
+                                    @endphp
+
+                                    @if($order->status === 'callback_requested')
+                                        <span class="status-badge bg-danger text-white blink_me">
+                                            <i class="fas fa-phone-alt me-1"></i> Urgent Call
+                                        </span>
                                     @else
-                                        <span class="text-dark">{{ $part->stock }}</span>
+                                        <span class="status-badge {{ $class }}">
+                                            {{ ucfirst($order->status) }}
+                                        </span>
                                     @endif
                                 </td>
-                                <td class="pe-4 text-center">
-                                    <div class="btn-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
-                                        <a href="{{ route('shop.parts.edit', $part->id) }}" class="btn btn-white btn-sm border-end" title="Edit">
-                                            <i class="fas fa-edit text-muted"></i>
-                                        </a>
-                                        <form action="{{ route('shop.parts.destroy', $part->id) }}" method="POST" onsubmit="return confirm('Delete this part?')">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="btn btn-white btn-sm" title="Delete">
-                                                <i class="fas fa-trash text-danger"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+                                <td class="text-center">
+                                    <div class="text-dark small fw-bold">{{ $order->created_at->format('d M, Y') }}</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">{{ $order->created_at->format('H:i') }}</div>
+                                </td>
+                                <td class="fw-bold">
+                                    {{ number_format($order->total_amount) }} <span class="small text-muted">RWF</span>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <a href="{{ route('shop.orders.show', $order->id) }}" class="btn btn-outline-primary btn-sm px-3" style="border-radius: 8px;">
+                                        Details
+                                    </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-5 text-center text-muted">
-                                    No parts found in your inventory.
+                                <td colspan="6" class="py-5 text-center text-muted">
+                                    No orders found for your shop.
                                 </td>
                             </tr>
                         @endforelse
@@ -116,19 +121,15 @@
                 </table>
             </div>
 
+            {{-- Empty Search State Logic --}}
+            <div x-show="search.length > 0 && document.querySelectorAll('tbody tr[style*=\'display: none\']').length === {{ count($orders) }}" class="p-5 text-center bg-white" x-cloak>
+                <i class="fas fa-search fa-2x text-light mb-3"></i>
+                <p class="text-muted">No orders match your current search on this page.</p>
+            </div>
+
             <div class="card-footer bg-white border-0 py-3">
-                {{ $parts->links() }}
+                {{ $orders->links() }}
             </div>
         </div>
     </div>
-
-    @push('styles')
-    <style>
-        .bg-soft-info { background-color: #e0f7fa; }
-        .btn-white { background: #fff; border: 1px solid #edf2f7; }
-        .btn-white:hover { background: #f8fafc; }
-        /* Smooth transitions for Alpine x-show */
-        [x-cloak] { display: none !important; }
-    </style>
-    @endpush
 </x-shop-dashboard>
