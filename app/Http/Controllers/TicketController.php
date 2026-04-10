@@ -18,7 +18,7 @@ class TicketController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('tickets.index', compact('tickets'));
+        return view('shop.tickets.index', compact('tickets'));
     }
 
     /**
@@ -55,7 +55,7 @@ class TicketController extends Controller
             ->with(['replies.user'])
             ->findOrFail($id);
         
-        return view('tickets.show', compact('ticket'));
+        return view('shop.tickets.show', compact('ticket'));
     }
 
     /**

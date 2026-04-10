@@ -89,7 +89,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/support">
+                <a class="nav-link" href="{{ route('shop.support.index') }}">
                     <i class="ti ti-help"></i>
                     <span class="nav-text">Help Center</span>
                 </a>

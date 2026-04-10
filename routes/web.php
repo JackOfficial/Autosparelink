@@ -74,6 +74,7 @@ use App\Http\Controllers\Shop\PartController as ShopPartController;
 use App\Http\Controllers\Shop\PayoutController;
 use App\Http\Controllers\Shop\SaleController;
 use App\Http\Controllers\Shop\ShopProfileController;
+use App\Http\Controllers\Shop\TicketController as ShopTicketController;
 
 // =============================================================
 // PUBLIC FRONTEND ROUTES
@@ -220,6 +221,14 @@ Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group
     Route::prefix('profile')->name('profile.')->group(function () {
           Route::get('/profile', [ShopProfileController::class, 'edit'])->name('edit');
           Route::put('/profile', [ShopProfileController::class, 'update'])->name('update');
+    });
+
+    Route::prefix('support')->name('support.')->group(function () {
+    Route::get('/', [ShopTicketController::class, 'index'])->name('index');
+    Route::get('/create', [TicketController::class, 'create'])->name('create');
+    Route::post('/', [TicketController::class, 'store'])->name('store');
+    Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
+    Route::post('/{ticket}/reply', [TicketController::class, 'reply'])->name('reply');
     });
 
    Route::prefix('sales')->name('sales.')->group(function () {
