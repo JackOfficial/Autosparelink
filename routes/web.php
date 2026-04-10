@@ -68,6 +68,7 @@ use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\TicketController as Ticket;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\Shop\DashboardController;
+use App\Http\Controllers\Shop\OrderController as ShopOrderController;
 use App\Http\Controllers\Shop\Part;
 use App\Http\Controllers\Shop\PartController as ShopPartController;
 
@@ -209,8 +210,9 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group(function () {
-  Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
-  Route::resource('/parts', ShopPartController::class);
+   Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+   Route::resource('/parts', ShopPartController::class);
+   Route::resource('/orders', ShopOrderController::class);
 });
 
 // =============================================================
