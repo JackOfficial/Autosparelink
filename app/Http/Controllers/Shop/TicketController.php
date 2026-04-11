@@ -40,7 +40,6 @@ class TicketController extends Controller
 
 public function create()
 {
-    dd("Here");
     // Use your custom logic here to ensure they only see their specific orders
     $orders = $this->shopOrders()->latest()->take(20)->get();
     
