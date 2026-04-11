@@ -24,13 +24,13 @@ use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\ModelPartController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\VinController;
 use App\Http\Controllers\PaymentController as FlutterwavePaymentController;
 
 // --- 4. SUPPORT & DASHBOARD CONTROLLERS ---
-use App\Http\Controllers\TicketController;
+use App\Http\Controllers\User\TicketController;
 
 // --- 5. ADMIN CONTROLLERS ---
 use App\Http\Controllers\Admin\AdminController;
@@ -160,7 +160,7 @@ Route::resource('cart', CartController::class);
 // Route::resource('shop', ShopController::class);
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-Route::resource('orders', OrderController::class)->middleware('auth');
+
 
 // =============================================================
 // PAYMENT GATEWAY (FLUTTERWAVE)
@@ -207,6 +207,7 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
     });
 
     Route::post('/like/toggle', [LikeController::class, 'toggle'])->name('like.toggle');
+    Route::resource('orders', OrderController::class);
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group(function () {
