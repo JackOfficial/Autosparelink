@@ -79,7 +79,7 @@ public function create()
     public function show(Ticket $ticket)
     {
         // Safety: Ensure shop only sees their own ticket
-        if ($ticket->user_id !== Auth::id()) { abort(403); }
+        if ($ticket->user_id != Auth::id()) { abort(403); }
 
         $ticket->load(['replies.user', 'photos', 'order']);
         return view('shop.support.show', compact('ticket'));
