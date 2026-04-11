@@ -15,7 +15,7 @@
                     <div class="badge bg-soft-primary rounded-pill mt-2 px-3 py-2">Customer Account</div>
                 </div>
                 <div class="list-group list-group-flush small fw-bold">
-                    <a href="{{ route('dashboard') }}" class="list-group-item list-group-item-action py-3 border-0">
+                    <a href="{{ route('dashboard.index') }}" class="list-group-item list-group-item-action py-3 border-0">
                         <i class="fas fa-arrow-left me-2 text-primary"></i> Back to Dashboard
                     </a>
                 </div>
