@@ -1,7 +1,15 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('content')
 <div class="container py-4">
+
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-transparent p-0 small">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+  </ol>
+</nav>
+
     {{-- Welcome Header --}}
     <div class="row mb-4">
         <div class="col-12">
