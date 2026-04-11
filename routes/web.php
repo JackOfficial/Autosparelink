@@ -187,7 +187,7 @@ Route::middleware(['auth'])->group(function () {
     Route::controller(UserDashboardController::class)->group(function () {
         Route::get('/dashboard', 'index')->name('dashboard.index');
         Route::get('/profile/edit', 'editProfile')->name('profile.edit');
-        Route::patch('/profile/update', 'updateProfile')->name('profile.update');
+        Route::put('/profile/update', 'updateProfile')->name('profile.update');
         Route::put('/profile/password', 'updatePassword')->name('profile.password');
         Route::post('/garage/update', 'updateGarage')->name('garage.update');
         Route::post('/notifications/read-all', 'markAllRead')->name('notifications.readAll');
