@@ -10,7 +10,7 @@
         {{-- Avatar / Initial Circle --}}
         <div class="mb-3">
             @if($user->avatar)
-                <img src="{{ $user->avatar }}" 
+                <img src="{{ $user->avatar ?? '' }}" 
                      class="rounded-circle shadow" 
                      style="width: 80px; height: 80px; object-fit: cover; border: 3px solid white;" 
                      alt="{{ $user->name }}">
