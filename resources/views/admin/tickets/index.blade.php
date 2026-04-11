@@ -5,18 +5,16 @@
     <div class="row mb-4 align-items-center">
         <div class="col-md-6">
             <h3 class="font-weight-bold">Support Tickets</h3>
-            <p class="text-muted small mb-0">Manage customer inquiries and technical support requests.</p>
+            <p class="text-muted small mb-0">Managing support for Customers & Shop Vendors.</p>
         </div>
         <div class="col-md-6 text-right">
             <div class="btn-group shadow-sm rounded-pill bg-white p-1">
-                <a href="{{ route('admin.tickets.index', ['status' => 'open']) }}" 
-                   class="btn btn-sm rounded-pill px-3 {{ $status == 'open' ? 'btn-primary' : 'btn-light' }}">Open</a>
-                <a href="{{ route('admin.tickets.index', ['status' => 'pending']) }}" 
-                   class="btn btn-sm rounded-pill px-3 {{ $status == 'pending' ? 'btn-primary' : 'btn-light' }}">Pending</a>
-                <a href="{{ route('admin.tickets.index', ['status' => 'closed']) }}" 
-                   class="btn btn-sm rounded-pill px-3 {{ $status == 'closed' ? 'btn-primary' : 'btn-light' }}">Closed</a>
-                <a href="{{ route('admin.tickets.index', ['status' => 'all']) }}" 
-                   class="btn btn-sm rounded-pill px-3 {{ $status == 'all' ? 'btn-primary' : 'btn-light' }}">All</a>
+                @foreach(['open', 'pending', 'closed', 'all'] as $st)
+                <a href="{{ route('admin.tickets.index', ['status' => $st]) }}" 
+                   class="btn btn-sm rounded-pill px-3 {{ $status == $st ? 'btn-primary' : 'btn-light' }}">
+                   {{ ucfirst($st) }}
+                </a>
+                @endforeach
             </div>
         </div>
     </div>
@@ -33,12 +31,13 @@
                 <table class="table table-hover mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="border-0 px-4 py-3 small text-uppercase font-weight-bold">Ticket ID</th>
-                            <th class="border-0 py-3 small text-uppercase font-weight-bold">Customer</th>
+                            <th class="border-0 px-4 py-3 small text-uppercase font-weight-bold">ID</th>
+                            <th class="border-0 py-3 small text-uppercase font-weight-bold">Source / Type</th>
+                            <th class="border-0 py-3 small text-uppercase font-weight-bold">User/Sender</th>
                             <th class="border-0 py-3 small text-uppercase font-weight-bold">Subject</th>
                             <th class="border-0 py-3 small text-uppercase font-weight-bold text-center">Priority</th>
                             <th class="border-0 py-3 small text-uppercase font-weight-bold text-center">Status</th>
-                            <th class="border-0 py-3 small text-uppercase font-weight-bold">Created</th>
+                            <th class="border-0 py-3 small text-uppercase font-weight-bold">Last Update</th>
                             <th class="border-0 px-4 py-3 small text-uppercase font-weight-bold text-right">Action</th>
                         </tr>
                     </thead>
@@ -46,61 +45,73 @@
                         @forelse($tickets as $ticket)
                             <tr>
                                 <td class="px-4 align-middle">
-                                    <span class="font-weight-bold text-primary">#TK-{{ str_pad($ticket->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                    <span class="font-weight-bold text-dark">#{{ str_pad($ticket->id, 4, '0', STR_PAD_LEFT) }}</span>
+                                </td>
+                                <td class="align-middle">
+                                    @if($ticket->user->shop)
+                                        <span class="badge badge-info-soft text-info rounded-pill px-2">
+                                            <i class="fa fa-store mr-1"></i> Shop
+                                        </span>
+                                        <div class="small font-weight-bold mt-1 text-truncate" style="max-width: 120px;">
+                                            {{ $ticket->user->shop->name }}
+                                        </div>
+                                    @else
+                                        <span class="badge badge-secondary-soft text-secondary rounded-pill px-2">
+                                            <i class="fa fa-user mr-1"></i> Customer
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="align-middle">
                                     <div class="d-flex align-items-center">
-                                        <div class="rounded-circle bg-soft-primary text-primary d-flex align-items-center justify-content-center mr-2" style="width: 35px; height: 35px; font-size: 12px;">
+                                        <div class="rounded-circle bg-soft-primary text-primary d-flex align-items-center justify-content-center mr-2" style="width: 32px; height: 32px; font-size: 11px; font-weight: bold;">
                                             {{ strtoupper(substr($ticket->user->name, 0, 2)) }}
                                         </div>
-                                        <div>
+                                        <div style="line-height: 1.2;">
                                             <div class="font-weight-bold small">{{ $ticket->user->name }}</div>
-                                            <div class="text-muted" style="font-size: 11px;">{{ $ticket->user->email }}</div>
+                                            <div class="text-muted" style="font-size: 10px;">{{ $ticket->user->email }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="align-middle">
-                                    <div class="small text-truncate" style="max-width: 200px;">{{ $ticket->subject }}</div>
+                                    <div class="small font-weight-bold text-truncate" style="max-width: 180px;">{{ $ticket->subject }}</div>
+                                    @if($ticket->order_id)
+                                        <div class="badge badge-light border small text-muted font-weight-normal">
+                                            Order #{{ $ticket->order->order_number ?? $ticket->order_id }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="align-middle text-center">
                                     @php
-                                        $priorityClass = [
-                                            'high' => 'badge-danger',
-                                            'medium' => 'badge-warning',
-                                            'low' => 'badge-info'
-                                        ][$ticket->priority] ?? 'badge-secondary';
+                                        $pClass = ['high' => 'bg-danger', 'medium' => 'bg-warning', 'low' => 'bg-info'][$ticket->priority] ?? 'bg-secondary';
                                     @endphp
-                                    <span class="badge {{ $priorityClass }} px-3 py-2 rounded-pill small text-uppercase" style="font-size: 10px;">
-                                        {{ $ticket->priority }}
+                                    <span class="badge {{ $pClass }} text-white px-2 py-1 rounded-pill small" style="font-size: 9px;">
+                                        {{ strtoupper($ticket->priority) }}
                                     </span>
                                 </td>
                                 <td class="align-middle text-center">
-                                    @php
-                                        $statusClass = [
-                                            'open' => 'text-success',
-                                            'pending' => 'text-warning',
-                                            'closed' => 'text-muted'
-                                        ][$ticket->status] ?? 'text-dark';
-                                    @endphp
-                                    <span class="small font-weight-bold {{ $statusClass }}">
+                                    <span @class([
+                                        'small font-weight-bold',
+                                        'text-success' => $ticket->status == 'open',
+                                        'text-warning' => $ticket->status == 'pending',
+                                        'text-muted' => $ticket->status == 'closed'
+                                    ])>
                                         <i class="fa fa-circle mr-1" style="font-size: 8px;"></i> {{ ucfirst($ticket->status) }}
                                     </span>
                                 </td>
                                 <td class="align-middle small">
-                                    {{ $ticket->created_at->format('M d, Y') }}<br>
-                                    <span class="text-muted">{{ $ticket->created_at->diffForHumans() }}</span>
+                                    <span class="text-dark">{{ $ticket->updated_at->diffForHumans() }}</span><br>
+                                    <span class="text-muted" style="font-size: 10px;">{{ $ticket->updated_at->format('M d, H:i') }}</span>
                                 </td>
                                 <td class="px-4 align-middle text-right">
-                                    <a href="{{ route('admin.tickets.show', $ticket) }}" class="btn btn-sm btn-light border rounded-pill px-3 shadow-sm">
-                                        View Details
+                                    <a href="{{ route('admin.tickets.show', $ticket) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
+                                        Manage
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-5">
-                                    <img src="{{ asset('frontend/img/no-data.png') }}" alt="No Tickets" style="width: 80px;" class="mb-3 opacity-50">
-                                    <p class="text-muted">No {{ $status }} tickets found at the moment.</p>
+                                <td colspan="8" class="text-center py-5">
+                                    <p class="text-muted">No tickets found in this category.</p>
                                 </td>
                             </tr>
                         @endforelse
@@ -118,7 +129,10 @@
 
 <style>
     .bg-soft-primary { background-color: rgba(0, 123, 255, 0.1); }
-    .table-hover tbody tr:hover { background-color: #fbfbfb; cursor: pointer; }
-    .rounded-xl { border-radius: 1rem !important; }
+    .badge-info-soft { background-color: rgba(23, 162, 184, 0.1); }
+    .badge-secondary-soft { background-color: rgba(108, 117, 125, 0.1); }
+    .table-hover tbody tr:hover { background-color: #f8f9fa; }
+    .rounded-xl { border-radius: 0.75rem !important; }
+    .table td { border-top: 1px solid #f2f2f2; }
 </style>
 @endsection
