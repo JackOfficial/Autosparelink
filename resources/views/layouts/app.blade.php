@@ -203,7 +203,7 @@
 
             {{-- Regular User View --}}
             @if(auth()->user()->hasRole('user'))
-                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('user.index') }}">
+                <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('dashboard.index') }}">
                     <i class="fas fa-user mr-2 text-info"></i> My Account
                 </a>
             @endif
