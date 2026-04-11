@@ -34,9 +34,14 @@ public function attachments()
 protected static function booted()
 {
     static::created(function ($reply) {
+        // Logic: 
+        // 1. If Admin/Staff replies -> Status becomes 'pending' (waiting for User)
+        // 2. If User/Shop owner replies -> Status becomes 'open' (waiting for Admin)
+        $newStatus = $reply->isFromStaff() ? 'pending' : 'open';
+
         $reply->ticket->update([
-            'updated_at' => now(), // Keeps the ticket at the top of the list
-            'status' => $reply->user_id !== $reply->ticket->user_id ? 'answered' : 'pending'
+            'updated_at' => now(),
+            'status'     => $newStatus
         ]);
     });
 }
