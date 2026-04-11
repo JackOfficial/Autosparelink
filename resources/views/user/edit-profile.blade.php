@@ -68,40 +68,66 @@
                 </div>
 
                 {{-- Default Shipping Address Card --}}
-                <div class="card border-0 shadow-sm mb-4 rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="fw-bold mb-0 text-success"><i class="fas fa-truck me-2"></i> Default Shipping Address</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="small fw-bold text-muted mb-2">Phone Number</label>
-                                <input type="text" name="phone" class="form-control rounded-pill bg-light border-0 px-3 py-2" 
-                                    value="{{ old('phone', $address->phone ?? '') }}" 
-                                    placeholder="e.g. 078XXXXXXX">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="small fw-bold text-muted mb-2">City</label>
-                                <select name="city" class="form-select rounded-pill bg-light border-0 px-3 py-2">
-                                    @php $currentCity = old('city', $address->city ?? ''); @endphp
-                                    <option value="Kigali" {{ $currentCity == 'Kigali' ? 'selected' : '' }}>Kigali</option>
-                                    <option value="Musanze" {{ $currentCity == 'Musanze' ? 'selected' : '' }}>Musanze</option>
-                                    <option value="Rubavu" {{ $currentCity == 'Rubavu' ? 'selected' : '' }}>Rubavu</option>
-                                    <option value="Other" {{ $currentCity == 'Other' ? 'selected' : '' }}>Other</option>
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <label class="small fw-bold text-muted mb-2">Street / Neighborhood Address</label>
-                                <textarea name="street_address" rows="3" class="form-control bg-light border-0 px-3 py-2" style="border-radius: 15px;">{{ old('street_address', $address->street_address ?? '') }}</textarea>
-                            </div>
-                        </div>
-                        <div class="text-end mt-4">
-                            <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold">
-                                Save Profile Changes
-                            </button>
-                        </div>
-                    </div>
-                </div>
+<div class="card border-0 shadow-sm mb-4 rounded-4">
+    <div class="card-header bg-white border-0 pt-4 px-4">
+        <h5 class="fw-bold mb-0 text-success"><i class="fas fa-truck me-2"></i> Default Shipping Address</h5>
+        <p class="small text-muted mb-0">Help us ensure your parts arrive at the right garage.</p>
+    </div>
+    <div class="card-body p-4">
+        <div class="row g-3">
+            {{-- Phone Number --}}
+            <div class="col-md-6">
+                <label class="small fw-bold text-muted mb-2">Phone Number</label>
+                <input type="text" name="phone" class="form-control rounded-pill bg-light border-0 px-3 py-2" 
+                    value="{{ old('phone', $address->phone ?? '') }}" 
+                    placeholder="e.g. 078XXXXXXX">
+            </div>
+
+            {{-- Province (New) --}}
+            <div class="col-md-6">
+                <label class="small fw-bold text-muted mb-2">Province</label>
+                <select name="province" class="form-select rounded-pill bg-light border-0 px-3 py-2">
+                    @php $currentProv = old('province', $address->province ?? ''); @endphp
+                    <option value="Kigali City" {{ $currentProv == 'Kigali City' ? 'selected' : '' }}>Kigali City</option>
+                    <option value="East" {{ $currentProv == 'East' ? 'selected' : '' }}>East</option>
+                    <option value="West" {{ $currentProv == 'West' ? 'selected' : '' }}>West</option>
+                    <option value="North" {{ $currentProv == 'North' ? 'selected' : '' }}>North</option>
+                    <option value="South" {{ $currentProv == 'South' ? 'selected' : '' }}>South</option>
+                </select>
+            </div>
+
+            {{-- District (New) --}}
+            <div class="col-md-6">
+                <label class="small fw-bold text-muted mb-2">District / City</label>
+                <input type="text" name="city" class="form-control rounded-pill bg-light border-0 px-3 py-2" 
+                    value="{{ old('city', $address->city ?? '') }}" 
+                    placeholder="e.g. Nyarugenge or Musanze">
+            </div>
+
+            {{-- Street Address --}}
+            <div class="col-md-6">
+                <label class="small fw-bold text-muted mb-2">Neighborhood / Sector</label>
+                <input type="text" name="neighborhood" class="form-control rounded-pill bg-light border-0 px-3 py-2" 
+                    value="{{ old('neighborhood', $address->neighborhood ?? '') }}" 
+                    placeholder="e.g. Kimironko">
+            </div>
+
+            {{-- Full Directions --}}
+            <div class="col-12">
+                <label class="small fw-bold text-muted mb-2">Detailed Street Address / House Number / Landmarks</label>
+                <textarea name="street_address" rows="3" class="form-control bg-light border-0 px-3 py-2" 
+                    style="border-radius: 15px;" 
+                    placeholder="e.g. KN 78 St, near the polyclinic...">{{ old('street_address', $address->street_address ?? '') }}</textarea>
+            </div>
+        </div>
+        
+        <div class="text-end mt-4">
+            <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold">
+                Save Profile Changes
+            </button>
+        </div>
+    </div>
+</div>
             </form>
 
             {{-- FORM 2: Security --}}
