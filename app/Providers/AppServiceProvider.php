@@ -4,14 +4,13 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\AliasLoader;
-
 use Illuminate\Auth\Events\Login;
 use App\Listeners\MigrateCartOnLogin;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Pagination\Paginator; // Import this
+use Illuminate\Pagination\Paginator;
 use App\Observers\SpecificationObserver;
 use App\Models\Specification;
+use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
@@ -31,33 +30,55 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-       Schema::defaultStringLength(191);
-       Event::listen(
-        Login::class,
-        MigrateCartOnLogin::class,
-       );
+        Schema::defaultStringLength(191);
+        
+        Paginator::useBootstrapFive();
+        
+        Event::listen(
+            Login::class,
+            MigrateCartOnLogin::class,
+        );
 
-       View::composer(['components.shop-dashboard', 'components.partials.*'], function ($view) {
-        $view->with('shop', Auth::user()->shop ?? null);
-       });
+        // Sidebar/Layout Stats for the User Dashboard
+        View::composer('layouts.dashboard', function ($view) {
+            if (Auth::check()) {
+                $user = Auth::user();
+                
+                // Fetch Ticket stats in one go
+                $ticketStats = $user->tickets()
+                    ->selectRaw("status, count(*) as total")
+                    ->groupBy('status')
+                    ->pluck('total', 'status');
 
-       Paginator::useBootstrapFive(); // Add this line
-       Specification::observe(SpecificationObserver::class);
+                // Passing as 'stats' to match your sidebar variable: {{ $stats['total_orders'] }}
+                $view->with('stats', [
+                    'total_orders'    => $user->orders()->count(),
+                    'pending_tickets' => $ticketStats['pending'] ?? 0,
+                    'open_tickets'    => $ticketStats['open'] ?? 0,
+                    'closed_tickets'  => $ticketStats['closed'] ?? 0,
+                ]);
+            }
+        });
 
-       view()->composer('admin.layouts.app', function ($view) {
-    // Cache the counts for 1 minute to stay fast
-    $counts = cache()->remember('admin_sidebar_counts', 60, function() {
-        return [
-            'abandoned' => DB::table('shoppingcart')->count(),
-            'pending' => \App\Models\Order::where('status', 'pending')->count(),
-        ];
-    });
+        // Shop Context for components
+        View::composer(['components.shop-dashboard', 'components.partials.*'], function ($view) {
+            $view->with('shop', Auth::user()->shop ?? null);
+        });
 
-    $view->with('abandonedCount', $counts['abandoned']);
-    $view->with('pendingOrdersCount', $counts['pending']);
-});
+        // Specification Observer
+        Specification::observe(SpecificationObserver::class);
 
-    //    $loader = AliasLoader::getInstance();
-    //   $loader->alias('Cart', \Darryldecode\Cart\Facades\CartFacade::class);
+        // Admin Layout Counts (with simple caching)
+        view()->composer('admin.layouts.app', function ($view) {
+            $counts = cache()->remember('admin_sidebar_counts', 60, function() {
+                return [
+                    'abandoned' => DB::table('shoppingcart')->count(),
+                    'pending'   => Order::where('status', 'pending')->count(),
+                ];
+            });
+
+            $view->with('abandonedCount', $counts['abandoned']);
+            $view->with('pendingOrdersCount', $counts['pending']);
+        });
     }
 }

@@ -51,9 +51,9 @@
                 <li class="nav-item mb-1">
                     <a class="nav-link py-2 px-3 d-flex justify-content-between align-items-center {{ request()->is('user/tickets*') ? 'active' : 'text-dark' }}" href="{{ route('tickets.index') }}">
                         <span><i class="fas fa-headset me-2"></i> Help Tickets</span>
-                        @if(($stats['pending_tickets'] ?? 0) > 0)
-                            <span class="badge rounded-pill bg-warning text-dark">{{ $stats['pending_tickets'] }}</span>
-                        @endif
+                      @if(($stats['pending_tickets'] ?? 0) > 0)
+            <span class="badge rounded-pill bg-warning text-dark">{{ $stats['pending_tickets'] }}</span>
+        @endif
                     </a>
                 </li>
                 <li class="nav-item mb-1">

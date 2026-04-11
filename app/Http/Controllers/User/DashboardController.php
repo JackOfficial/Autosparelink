@@ -11,72 +11,65 @@ use Illuminate\Validation\Rules\Password;
 
 class DashboardController extends Controller
 {
+    /**
+     * Main Dashboard View
+     */
     public function index()
     {
         $user = Auth::user();
 
-        // 1. Fetch Orders 
+        // 1. Fetch Orders (Paginated)
         $allOrders = $user->orders()
-            ->with(['orderItems.part', 'payment', 'shipping', 'addresses']) // Fixed relationship name if plural
+            ->with(['orderItems.part', 'payment', 'shipping', 'addresses'])
             ->latest()
             ->paginate(10);
 
-        // 2. Fetch Tickets 
+        // 2. Fetch Tickets (Paginated)
         $tickets = $user->tickets()->latest()->paginate(5);
 
-        // 3. Optimized Statistics Queries
-        // Grouping by status in one query is smart—added 'pending_tickets' logic
-        $ticketStats = $user->tickets()
-            ->selectRaw("status, count(*) as total")
-            ->groupBy('status')
-            ->pluck('total', 'status')
-            ->all();
-
+        // 3. Page-Specific Stats 
+        // We only keep 'total_spent' and 'active_orders' here if they 
+        // are used ONLY in the dashboard body and not the global sidebar.
         $orderQuery = $user->orders();
-
-        $stats = [
-            'total_orders'    => $orderQuery->count(),
-            'active_orders'   => (clone $orderQuery)->whereIn('status', ['pending', 'shipped', 'processing'])->count(),
-            'total_spent'     => (float) (clone $orderQuery)->where('status', 'completed')->sum('total_amount'),
-            'last_order'      => $allOrders->first(),
-            
-            'open_tickets'    => $ticketStats['open'] ?? 0,
-            'pending_tickets' => $ticketStats['pending'] ?? 0, // Used for the red badge in your nav
-            'closed_tickets'  => $ticketStats['closed'] ?? 0,
+        $pageStats = [
+            'active_orders' => (clone $orderQuery)->whereIn('status', ['pending', 'shipped', 'processing'])->count(),
+            'total_spent'   => (float) (clone $orderQuery)->where('status', 'completed')->sum('total_amount'),
+            'last_order'    => $allOrders->first(),
         ];
 
-        // 4. Cart & Wishlist
+        // 4. Cart & Wishlist Content
         $wishlistItems = Cart::instance('wishlist')->content();
         $cartItems     = Cart::instance('default')->content();
         $cartTotal     = (float) str_replace(',', '', Cart::instance('default')->subtotal());
 
         return view('user.index', compact(
-            'user', 'allOrders', 'stats', 'wishlistItems', 'cartItems', 'cartTotal', 'tickets'
+            'user', 
+            'allOrders', 
+            'pageStats', 
+            'wishlistItems', 
+            'cartItems', 
+            'cartTotal', 
+            'tickets'
         ));
     }
 
+    /**
+     * Show Profile Edit Form
+     */
     public function editProfile()
-{
-    $user = Auth::user();
-    $address = $user->addresses()->first(); 
+    {
+        $user = Auth::user();
+        
+        // Return a single instance. If no address exists, we pass null 
+        // and the Blade '??' will handle the empty fields.
+        $address = $user->addresses()->first(); 
 
-    // Fetch stats so the sidebar/layout doesn't crash
-    $ticketStats = $user->tickets()
-        ->selectRaw("status, count(*) as total")
-        ->groupBy('status')
-        ->pluck('total', 'status')
-        ->all();
+        return view('user.edit-profile', compact('user', 'address'));
+    }
 
-    $stats = [
-        'open_tickets'    => $ticketStats['open'] ?? 0,
-        'pending_tickets' => $ticketStats['pending'] ?? 0,
-        'closed_tickets'  => $ticketStats['closed'] ?? 0,
-        // Add other keys if your sidebar uses them (e.g., total_orders)
-    ];
-
-    return view('user.edit-profile', compact('user', 'address', 'stats'));
-}
-
+    /**
+     * Update User Profile and Address
+     */
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
@@ -84,7 +77,7 @@ class DashboardController extends Controller
         $request->validate([
             'name'           => 'required|string|max:255',
             'email'          => 'required|email|unique:users,email,' . $user->id,
-            'phone'          => 'nullable|string|regex:/^([0-9\s\-\+\(\)]*)$/|min:10', // Added phone validation
+            'phone'          => 'nullable|string|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'street_address' => 'required|string|max:500',
             'city'           => 'required|string|max:100',
         ]);
@@ -93,19 +86,22 @@ class DashboardController extends Controller
 
         // Logic: update the first address found or create a new one
         $user->addresses()->updateOrCreate(
-            ['user_id' => $user->id], // Match by user_id
+            ['user_id' => $user->id], 
             [
-                'full_name'      => $user->name, // Keeping model consistent
+                'full_name'      => $user->name,
                 'phone'          => $request->phone,
                 'street_address' => $request->street_address,
                 'city'           => $request->city,
-                'country'        => 'Rwanda' // Defaulting for your local market
+                'country'        => 'Rwanda'
             ]
         );
 
         return back()->with('success', 'Profile and shipping details updated!');
     }
 
+    /**
+     * Change User Password
+     */
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -121,9 +117,11 @@ class DashboardController extends Controller
         return back()->with('success', 'Security updated: Your password has been changed.');
     }
 
+    /**
+     * Update Vehicle Garage Details
+     */
     public function updateGarage(Request $request)
     {
-        // Added 'vin' to validation since you mentioned VIN is important for your platform
         $request->validate([
             'make'  => 'required|string',
             'model' => 'required|string',
@@ -132,7 +130,7 @@ class DashboardController extends Controller
         ]);
 
         Auth::user()->vehicles()->updateOrCreate(
-            ['user_id' => Auth::id(), 'is_primary' => true], 
+            ['user_id' => Auth::id()], 
             $request->only('make', 'model', 'year', 'engine', 'vin')
         );
 

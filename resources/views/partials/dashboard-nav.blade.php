@@ -68,15 +68,15 @@
                 <li class="nav-item dropdown ms-3">
                     <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="me-2">
-                            @if($user->avatar)
-                                <img src="{{ $user->avatar }}" class="rounded-circle border" width="35" height="35" alt="User">
+                            @if(auth()->user()->avatar)
+                                <img src="{{ auth()->user()->avatar }}" class="rounded-circle border" width="35" height="35" alt="User">
                             @else
                                 <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 35px; height: 35px; font-size: 12px;">
-                                    {{ strtoupper(substr($user->name, 0, 2)) }}
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                             @endif
                         </div>
-                        <span class="d-none d-md-inline text-dark small fw-bold">{{ $user->name }}</span>
+                        <span class="d-none d-md-inline text-dark small fw-bold">{{ auth()->user()->name }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item py-2" href="{{ route('profile.edit') }}"><i class="fas fa-user-circle me-2 text-muted"></i> Account Settings</a></li>
