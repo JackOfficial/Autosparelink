@@ -40,8 +40,8 @@
                         @if($ticket->photos->count() > 0)
                         <div class="d-flex gap-2 mt-3">
                             @foreach($ticket->photos as $photo)
-                                <a href="{{ asset('storage/' . $photo->path) }}" target="_blank">
-                                    <img src="{{ asset('storage/' . $photo->path) }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;">
+                                <a href="{{ asset('storage/' . $photo->file_path) }}" target="_blank">
+                                    <img src="{{ asset('storage/' . $photo->file_path) }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;">
                                 </a>
                             @endforeach
                         </div>
