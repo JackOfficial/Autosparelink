@@ -76,7 +76,7 @@ public function index()
         $user = Auth::user();
         $address = $user->addresses; 
 
-        return view('dashboard.edit-profile', compact('user', 'address'));
+        return view('user.edit-profile', compact('user', 'address'));
     }
 
     /**
