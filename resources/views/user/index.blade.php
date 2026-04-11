@@ -160,7 +160,7 @@
                 <div class="card-body p-4 text-center">
                     <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
                         @if($user->avatar)
-                            <img src="{{ asset('storage/'.$user->avatar) }}" class="img-fluid rounded-circle" alt="Avatar">
+                            <img src="{{ $user->avatar }}" class="img-fluid rounded-circle" alt="Avatar">
                         @else
                             <h4 class="mb-0 font-weight-bold text-primary">{{ strtoupper(substr($user->name, 0, 2)) }}</h4>
                         @endif
