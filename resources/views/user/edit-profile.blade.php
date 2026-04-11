@@ -98,17 +98,17 @@
 
             {{-- District (New) --}}
             <div class="col-md-6">
-                <label class="small fw-bold text-muted mb-2">District / City</label>
-                <input type="text" name="city" class="form-control rounded-pill bg-light border-0 px-3 py-2" 
-                    value="{{ old('city', $address->city ?? '') }}" 
+                <label class="small fw-bold text-muted mb-2">District</label>
+                <input type="text" name="district" class="form-control rounded-pill bg-light border-0 px-3 py-2" 
+                    value="{{ old('district', $address->district ?? '') }}" 
                     placeholder="e.g. Nyarugenge or Musanze">
             </div>
 
             {{-- Street Address --}}
             <div class="col-md-6">
-                <label class="small fw-bold text-muted mb-2">Neighborhood / Sector</label>
-                <input type="text" name="neighborhood" class="form-control rounded-pill bg-light border-0 px-3 py-2" 
-                    value="{{ old('neighborhood', $address->neighborhood ?? '') }}" 
+                <label class="small fw-bold text-muted mb-2">Sector</label>
+                <input type="text" name="sector" class="form-control rounded-pill bg-light border-0 px-3 py-2" 
+                    value="{{ old('sector', $address->sector ?? '') }}" 
                     placeholder="e.g. Kimironko">
             </div>
 

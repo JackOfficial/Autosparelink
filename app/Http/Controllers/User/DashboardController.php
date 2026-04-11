@@ -70,34 +70,40 @@ class DashboardController extends Controller
     /**
      * Update User Profile and Address
      */
-    public function updateProfile(Request $request)
-    {
-        $user = Auth::user();
-        
-        $request->validate([
-            'name'           => 'required|string|max:255',
-            'email'          => 'required|email|unique:users,email,' . $user->id,
-            'phone'          => 'nullable|string|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
-            'street_address' => 'required|string|max:500',
-            'city'           => 'required|string|max:100',
-        ]);
+  public function updateProfile(Request $request)
+{
+    $user = Auth::user();
+    
+    $request->validate([
+        'name'           => 'required|string|max:255',
+        'email'          => 'required|email|unique:users,email,' . $user->id,
+        'phone'          => 'nullable|string|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+        'province'       => 'required|string',
+        'district'       => 'required|string',
+        'sector'         => 'required|string',
+        'street_address' => 'required|string|max:500',
+    ]);
 
-        $user->update($request->only('name', 'email'));
+    // Update basic user info
+    $user->update($request->only('name', 'email'));
 
-        // Logic: update the first address found or create a new one
-        $user->addresses()->updateOrCreate(
-            ['user_id' => $user->id], 
-            [
-                'full_name'      => $user->name,
-                'phone'          => $request->phone,
-                'street_address' => $request->street_address,
-                'city'           => $request->city,
-                'country'        => 'Rwanda'
-            ]
-        );
+    // Update or create the address with Rwandan geography
+    $user->addresses()->updateOrCreate(
+        ['user_id' => $user->id], 
+        [
+            'full_name'      => $user->name,
+            'phone'          => $request->phone,
+            'province'       => $request->province,
+            'district'       => $request->district,
+            'sector'         => $request->sector,
+            'street_address' => $request->street_address,
+            'city'           => $request->district, // Mirrored for compatibility
+            'country'        => 'Rwanda'
+        ]
+    );
 
-        return back()->with('success', 'Profile and shipping details updated!');
-    }
+    return back()->with('success', 'Profile and shipping details updated!');
+}
 
     /**
      * Change User Password
