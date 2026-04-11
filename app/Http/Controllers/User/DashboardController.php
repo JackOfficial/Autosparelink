@@ -57,7 +57,7 @@ public function index()
     // Clean up cart total
     $cartTotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
 
-    return view('dashboard.index', compact(
+    return view('user.index', compact(
         'user', 
         'allOrders', 
         'stats', 
