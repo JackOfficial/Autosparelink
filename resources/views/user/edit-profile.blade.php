@@ -99,7 +99,7 @@
                     <p class="small text-muted mb-0 fw-bold">Update your password to keep your account safe.</p>
                 </div>
                 <div class="card-body p-4">
-                    <form action="{{ route('profile.password.update') }}" method="POST">
+                    <form action="{{ route('profile.password') }}" method="POST">
                         @csrf
                         @method('PUT')
                         
