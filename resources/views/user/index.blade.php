@@ -116,7 +116,9 @@
                                         </td>
                                         <td class="align-middle">
                                             @if($ticket->status == 'pending')
-                                                <span class="badge badge-warning">Admin Replied</span>
+                                           <span class="badge badge-warning">Waiting for You</span>
+                                            @elseif($ticket->status == 'replied')
+                                            <span class="badge badge-info">Admin Replied</span>
                                             @elseif($ticket->status == 'open')
                                                 <span class="badge badge-success">Open</span>
                                             @else

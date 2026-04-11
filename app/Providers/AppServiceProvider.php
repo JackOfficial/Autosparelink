@@ -40,25 +40,25 @@ class AppServiceProvider extends ServiceProvider
         );
 
         // Sidebar/Layout Stats for the User Dashboard
-        View::composer('layouts.dashboard', function ($view) {
-            if (Auth::check()) {
-                $user = Auth::user();
-                
-                // Fetch Ticket stats in one go
-                $ticketStats = $user->tickets()
-                    ->selectRaw("status, count(*) as total")
-                    ->groupBy('status')
-                    ->pluck('total', 'status');
+        View::composer(['layouts.dashboard', 'user.*'], function ($view) {
+    if (Auth::check()) {
+        $user = Auth::user();
+        
+        $ticketStats = $user->tickets()
+            ->selectRaw("status, count(*) as total")
+            ->groupBy('status')
+            ->pluck('total', 'status');
 
-                // Passing as 'stats' to match your sidebar variable: {{ $stats['total_orders'] }}
-                $view->with('stats', [
-                    'total_orders'    => $user->orders()->count(),
-                    'pending_tickets' => $ticketStats['pending'] ?? 0,
-                    'open_tickets'    => $ticketStats['open'] ?? 0,
-                    'closed_tickets'  => $ticketStats['closed'] ?? 0,
-                ]);
-            }
-        });
+        $view->with('stats', [
+            'total_orders'   => $user->orders()->count(),
+            'active_orders'  => $user->orders()->whereIn('status', ['pending', 'processing', 'shipped'])->count(),
+            'total_spent'    => (float) $user->orders()->where('status', 'completed')->sum('total_amount'),
+            'pending_tickets'=> $ticketStats['pending'] ?? 0,
+            'open_tickets'   => $ticketStats['open'] ?? 0,
+            'closed_tickets' => $ticketStats['closed'] ?? 0,
+        ]);
+    }
+});
 
         // Shop Context for components
         View::composer(['components.shop-dashboard', 'components.partials.*'], function ($view) {

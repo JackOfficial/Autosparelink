@@ -14,44 +14,39 @@ class DashboardController extends Controller
     /**
      * Main Dashboard View
      */
-    public function index()
-    {
-        $user = Auth::user();
+   public function index()
+{
+    $user = Auth::user();
 
-        // 1. Fetch Orders (Paginated)
-        $allOrders = $user->orders()
-            ->with(['orderItems.part', 'payment', 'shipping', 'addresses'])
-            ->latest()
-            ->paginate(10);
+    // 1. Fetch Orders (Paginated)
+    $allOrders = $user->orders()
+        ->with(['orderItems.part', 'payment', 'shipping', 'addresses'])
+        ->latest()
+        ->paginate(10);
 
-        // 2. Fetch Tickets (Paginated)
-        $tickets = $user->tickets()->latest()->paginate(5);
+    // 2. Fetch Tickets (Paginated)
+    $tickets = $user->tickets()->latest()->paginate(5);
 
-        // 3. Page-Specific Stats 
-        // We only keep 'total_spent' and 'active_orders' here if they 
-        // are used ONLY in the dashboard body and not the global sidebar.
-        $orderQuery = $user->orders();
-        $pageStats = [
-            'active_orders' => (clone $orderQuery)->whereIn('status', ['pending', 'shipped', 'processing'])->count(),
-            'total_spent'   => (float) (clone $orderQuery)->where('status', 'completed')->sum('total_amount'),
-            'last_order'    => $allOrders->first(),
-        ];
+    // 3. Page-Specific Data
+    // We only pass 'last_order' because the other stats are now 
+    // globally available via the View Composer in AppServiceProvider.
+    $lastOrder = $allOrders->first();
 
-        // 4. Cart & Wishlist Content
-        $wishlistItems = Cart::instance('wishlist')->content();
-        $cartItems     = Cart::instance('default')->content();
-        $cartTotal     = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+    // 4. Cart & Wishlist Content
+    $wishlistItems = Cart::instance('wishlist')->content();
+    $cartItems     = Cart::instance('default')->content();
+    $cartTotal     = (float) str_replace(',', '', Cart::instance('default')->subtotal());
 
-        return view('user.index', compact(
-            'user', 
-            'allOrders', 
-            'pageStats', 
-            'wishlistItems', 
-            'cartItems', 
-            'cartTotal', 
-            'tickets'
-        ));
-    }
+    return view('user.index', compact(
+        'user', 
+        'allOrders', 
+        'lastOrder', 
+        'wishlistItems', 
+        'cartItems', 
+        'cartTotal', 
+        'tickets'
+    ));
+}
 
     /**
      * Show Profile Edit Form
