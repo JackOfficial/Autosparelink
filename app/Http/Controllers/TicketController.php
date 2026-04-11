@@ -16,7 +16,7 @@ class TicketController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('shop.support.index', compact('tickets'));
+        return view('tickets.index', compact('tickets'));
     }
 
     /**
@@ -30,7 +30,7 @@ class TicketController extends Controller
             ->take(20)
             ->get();
 
-        return view('shop.support.create', compact('orders'));
+        return view('tickets.create', compact('orders'));
     }
 
     /**
@@ -68,7 +68,7 @@ class TicketController extends Controller
             }
         }
 
-        return redirect()->route('shop.support.index')
+        return redirect()->route('tickets.index')
             ->with('success', "Ticket #{$ticket->id} has been opened successfully.");
     }
 
@@ -78,7 +78,7 @@ class TicketController extends Controller
             ->with(['replies.user', 'photos', 'order'])
             ->findOrFail($id);
         
-        return view('shop.support.show', compact('ticket'));
+        return view('tickets.show', compact('ticket'));
     }
 
     public function reply(Request $request, $id)

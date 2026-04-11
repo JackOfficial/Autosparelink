@@ -225,10 +225,10 @@ Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group
 
     Route::prefix('support')->name('support.')->group(function () {
     Route::get('/', [ShopTicketController::class, 'index'])->name('index');
-    Route::get('/create', [TicketController::class, 'create'])->name('create');
-    Route::post('/', [TicketController::class, 'store'])->name('store');
-    Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
-    Route::post('/{ticket}/reply', [TicketController::class, 'reply'])->name('reply');
+    Route::get('/create', [ShopTicketController::class, 'create'])->name('create');
+    Route::post('/', [ShopTicketController::class, 'store'])->name('store');
+    Route::get('/{ticket}', [ShopTicketController::class, 'show'])->name('show');
+    Route::post('/{ticket}/reply', [ShopTicketController::class, 'reply'])->name('reply');
     });
 
    Route::prefix('sales')->name('sales.')->group(function () {
