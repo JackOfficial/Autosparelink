@@ -22,16 +22,19 @@ class TicketController extends Controller
     /**
      * Show the form for creating a new ticket.
      */
-    public function create()
-    {
-        // Get orders linked to this shop so the vendor can select one
-        $orders = Auth::user()->shop->orders()
-            ->latest()
-            ->take(20)
-            ->get();
+public function create()
+{
+    // Ensure we only get orders belonging to the authenticated user
+    $orders = Auth::user()->orders()
+        ->select('id', 'order_number', 'status', 'created_at') // Optimization: don't pull heavy columns
+        ->latest()
+        ->limit(20)
+        ->get();
 
-        return view('user.tickets.create', compact('orders'));
-    }
+    return view('user.tickets.create', [
+        'orders' => $orders
+    ]);
+}
 
     /**
      * Store a newly created ticket.
@@ -78,7 +81,7 @@ class TicketController extends Controller
             ->with(['replies.user', 'photos', 'order'])
             ->findOrFail($id);
         
-        return view('tickets.show', compact('ticket'));
+        return view('user.tickets.show', compact('ticket'));
     }
 
     public function reply(Request $request, $id)
