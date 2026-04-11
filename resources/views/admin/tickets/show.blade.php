@@ -157,27 +157,67 @@
             @endif
 
             {{-- User/Shop Contact Card --}}
-            <div class="card border-0 shadow-sm rounded-xl">
-                <div class="card-body p-4">
-                    <h6 class="font-weight-bold mb-3 text-muted small text-uppercase">
-                        {{ $ticket->user->shop ? 'Shop Information' : 'User Information' }}
-                    </h6>
-                    @if($ticket->user->shop)
-                        <div class="text-center mb-3">
-                            <h5 class="font-weight-bold text-primary mb-0">{{ $ticket->user->shop->name }}</h5>
-                            <span class="small text-muted">Active Vendor</span>
-                        </div>
-                    @endif
-                    <div class="mb-3">
-                        <small class="text-muted d-block mb-1">Contact Name</small>
-                        <span class="font-weight-bold">{{ $ticket->user->name }}</span>
-                    </div>
-                    <div class="mb-3">
-                        <small class="text-muted d-block mb-1">Email</small>
-                        <a href="mailto:{{ $ticket->user->email }}" class="font-weight-bold text-primary text-break">{{ $ticket->user->email }}</a>
-                    </div>
+           {{-- User/Shop Contact Card --}}
+<div class="card border-0 shadow-sm rounded-xl">
+    <div class="card-body p-4">
+        <h6 class="font-weight-bold mb-3 text-muted small text-uppercase">
+            {{ $ticket->user->shop ? 'Shop Information' : 'User Information' }}
+        </h6>
+
+        <div class="text-center mb-4">
+            @if($ticket->user->shop && $ticket->user->shop->logo)
+                {{-- Show Shop Logo --}}
+                <img src="{{ asset('storage/' . $ticket->user->shop->logo) }}" 
+                     alt="{{ $ticket->user->shop->name }}" 
+                     class="img-fluid rounded-circle border shadow-sm mb-3" 
+                     style="width: 80px; height: 80px; object-fit: cover;">
+                <h5 class="font-weight-bold text-primary mb-0">{{ $ticket->user->shop->name }}</h5>
+                <span class="badge badge-info-soft text-info px-3 py-1 rounded-pill small mt-2">Active Vendor</span>
+            
+            @elseif($ticket->user->avatar)
+                {{-- Show User Avatar --}}
+                <img src="{{ asset('storage/' . $ticket->user->avatar) }}" 
+                     alt="{{ $ticket->user->name }}" 
+                     class="img-fluid rounded-circle border shadow-sm mb-3" 
+                     style="width: 80px; height: 80px; object-fit: cover;">
+                <h5 class="font-weight-bold mb-0">{{ $ticket->user->name }}</h5>
+                <span class="badge badge-light border px-3 py-1 rounded-pill small mt-2">Customer</span>
+
+            @else
+                {{-- Fallback: Large Initials --}}
+                <div class="rounded-circle bg-soft-primary text-primary d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" 
+                     style="width: 80px; height: 80px; font-size: 24px; font-weight: bold;">
+                    {{ strtoupper(substr($ticket->user->name, 0, 2)) }}
                 </div>
+                <h5 class="font-weight-bold mb-0">{{ $ticket->user->name }}</h5>
+                <span class="badge badge-light border px-3 py-1 rounded-pill small mt-2">
+                    {{ $ticket->user->shop ? 'Vendor' : 'Customer' }}
+                </span>
+            @endif
+        </div>
+
+        <hr class="my-4 opacity-50">
+
+        <div class="mb-3">
+            <small class="text-muted d-block mb-1">Contact Name</small>
+            <span class="font-weight-bold">{{ $ticket->user->name }}</span>
+        </div>
+        
+        <div class="mb-3">
+            <small class="text-muted d-block mb-1">Email Address</small>
+            <a href="mailto:{{ $ticket->user->email }}" class="font-weight-bold text-primary text-break">
+                {{ $ticket->user->email }}
+            </a>
+        </div>
+
+        @if($ticket->user->shop)
+            <div class="mb-0 mt-3 p-3 bg-light rounded-lg">
+                <small class="text-muted d-block mb-1">Shop Support Status</small>
+                <span class="small font-weight-bold"><i class="fa fa-check-circle text-success mr-1"></i> Verified Merchant</span>
             </div>
+        @endif
+    </div>
+</div>
         </div>
     </div>
 </div>
@@ -187,5 +227,8 @@
     .border-left-primary { border-left: 5px solid #007bff !important; }
     .border-right-primary { border-right: 5px solid #007bff !important; }
     .shadow-inner { box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+    .bg-soft-primary { background-color: rgba(0, 123, 255, 0.1); }
+    .badge-info-soft { background-color: rgba(23, 162, 184, 0.1); }
+    .rounded-lg { border-radius: 0.75rem; }
 </style>
 @endsection
