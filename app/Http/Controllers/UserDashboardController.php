@@ -25,37 +25,45 @@ public function index()
 {
     $user = Auth::user();
 
-    // 1. Fetch Orders with relationships for the UI
+    // 1. Fetch Orders (Paginated for the table)
     $allOrders = $user->orders()
         ->with(['orderItems.part', 'payment', 'shipping', 'address'])
         ->latest()
         ->paginate(10);
 
-    // 2. Fetch Tickets
-    // We fetch the latest 5 to show on the dashboard table
-    $tickets = $user->tickets()->latest()->latest()->paginate(5);
+    // 2. Fetch Tickets (Paginated for the dashboard table)
+    $tickets = $user->tickets()->latest()->paginate(5);
 
-    // 3. Dashboard Statistics
+    // 3. Optimized Statistics Queries
+    // Use a single query for tickets to avoid multiple database hits
+    $ticketStats = $user->tickets()
+        ->selectRaw("status, count(*) as total")
+        ->groupBy('status')
+        ->pluck('total', 'status')
+        ->all();
+
+    // Fix: We need a raw query for total stats because $allOrders is paginated
+    $orderQuery = $user->orders();
+
     $stats = [
-        'total_orders'     => $allOrders->count(),
-        'active_orders'    => $allOrders->whereIn('status', ['pending', 'shipped', 'processing'])->count(),
-        'total_spent'      => $allOrders->where('status', 'completed')->sum('total_amount'),
-        'last_order'       => $allOrders->first(),
+        'total_orders'    => $orderQuery->count(),
+        'active_orders'   => (clone $orderQuery)->whereIn('status', ['pending', 'shipped', 'processing'])->count(),
+        'total_spent'     => (float) (clone $orderQuery)->where('status', 'completed')->sum('total_amount'),
+        'last_order'      => $allOrders->first(), // This is fine from the paginated collection
         
-        // Ticket Stats for your new Summary Cards
-        'open_tickets'     => $user->tickets()->where('status', 'open')->count(),    // User waiting for Admin
-        'pending_tickets'  => $user->tickets()->where('status', 'pending')->count(), // Admin has replied!
-        'closed_tickets'   => $user->tickets()->where('status', 'closed')->count(),  // Resolved
+        // Ticket Stats using the grouped collection above
+        'open_tickets'    => $ticketStats['open'] ?? 0,
+        'pending_tickets' => $ticketStats['pending'] ?? 0,
+        'closed_tickets'  => $ticketStats['closed'] ?? 0,
     ];
 
     // 4. Cart & Wishlist Content
     $wishlistItems = Cart::instance('wishlist')->content();
     $cartItems     = Cart::instance('default')->content();
     
-    // Clean up cart total to ensure it's numeric for number_format
-    $cartTotal     = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+    // Clean up cart total
+    $cartTotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
 
-    // 5. Return View
     return view('dashboard.index', compact(
         'user', 
         'allOrders', 
