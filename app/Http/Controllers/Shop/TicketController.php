@@ -69,7 +69,7 @@ public function create()
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
                 $path = $photo->store('tickets/attachments', 'public');
-                $ticket->photos()->create(['path' => $path]);
+                $ticket->photos()->create(['file_path' => $path]);
             }
         }
 
