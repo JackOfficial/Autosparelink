@@ -208,6 +208,7 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
 
     Route::post('/like/toggle', [LikeController::class, 'toggle'])->name('like.toggle');
     Route::resource('orders', OrderController::class);
+    //Route::get('/parts/search', [SparePartController::class, 'search'])->name('parts.search');
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group(function () {

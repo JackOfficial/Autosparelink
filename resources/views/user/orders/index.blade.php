@@ -15,7 +15,7 @@
             <button @click="showFilters = !showFilters" class="btn btn-light rounded-pill px-3 border shadow-sm">
                 <i class="fas fa-filter me-1"></i> Filter
             </button>
-            <a href="{{ route('parts.search') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+            <a href="/" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
                 New Order
             </a>
         </div>
@@ -128,7 +128,7 @@
                                 </div>
                                 <h6 class="text-muted">No orders found.</h6>
                                 <p class="small text-muted">When you place an order, it will appear here.</p>
-                                <a href="{{ route('parts.search') }}" class="btn btn-primary btn-sm rounded-pill px-4 mt-2">Start Shopping</a>
+                                <a href="/" class="btn btn-primary btn-sm rounded-pill px-4 mt-2">Start Shopping</a>
                             </td>
                         </tr>
                     @endforelse
