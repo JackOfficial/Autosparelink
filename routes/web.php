@@ -181,8 +181,8 @@ Route::controller(FlutterwavePaymentController::class)->group(function () {
 Route::get('/auth/redirect/{provider}', [SocialLoginController::class, 'redirect']);
 Route::get('/auth/callback/{provider}', [SocialLoginController::class, 'callback']);
 
-Route::middleware(['auth'])->group(function () {
-    
+Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
+    Route::get('/home', [HomeContoller::class, 'index'])->name('home');
     // Dashboard & Profile
     Route::controller(UserDashboardController::class)->group(function () {
         Route::get('/dashboard', 'index')->name('dashboard.index');
@@ -207,11 +207,6 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::post('/like/toggle', [LikeController::class, 'toggle'])->name('like.toggle');
-
-    // Specific Role Check
-    Route::middleware(['verified', 'role:user'])->group(function () { 
-        Route::get('/home', [HomeContoller::class, 'index'])->name('home');
-    });
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group(function () {

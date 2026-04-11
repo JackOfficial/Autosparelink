@@ -16,7 +16,7 @@ class TicketController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('tickets.index', compact('tickets'));
+        return view('user.tickets.index', compact('tickets'));
     }
 
     /**
@@ -30,7 +30,7 @@ class TicketController extends Controller
             ->take(20)
             ->get();
 
-        return view('tickets.create', compact('orders'));
+        return view('user.tickets.create', compact('orders'));
     }
 
     /**
