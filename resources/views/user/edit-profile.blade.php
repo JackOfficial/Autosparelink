@@ -5,22 +5,34 @@
     <div class="row">
         {{-- Profile Summary Card --}}
         <div class="col-lg-3 mb-4">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden sticky-top" style="top: 80px;">
-                <div class="card-body text-center bg-light py-5">
-                    <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 80px; height: 80px;">
-                        <span class="h2 mb-0 text-white fw-bold">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
-                    </div>
-                    <h5 class="fw-bold mb-1">{{ $user->name }}</h5>
-                    <p class="text-muted small mb-0">{{ $user->email }}</p>
-                    <div class="badge bg-soft-primary rounded-pill mt-2 px-3 py-2">Customer Account</div>
+           <div class="card border-0 shadow-sm rounded-4 overflow-hidden sticky-top" style="top: 80px;">
+    <div class="card-body text-center bg-light py-5">
+        {{-- Avatar / Initial Circle --}}
+        <div class="mb-3">
+            @if($user->avatar)
+                <img src="{{ asset('storage/' . $user->avatar) }}" 
+                     class="rounded-circle shadow" 
+                     style="width: 80px; height: 80px; object-fit: cover; border: 3px solid white;" 
+                     alt="{{ $user->name }}">
+            @else
+                <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center shadow" 
+                     style="width: 80px; height: 80px;">
+                    <span class="h2 mb-0 text-white fw-bold">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                 </div>
-                <div class="list-group list-group-flush small fw-bold">
-                    {{-- Updated to match your DashboardController@index route --}}
-                    <a href="{{ route('dashboard.index') }}" class="list-group-item list-group-item-action py-3 border-0">
-                        <i class="fas fa-arrow-left me-2 text-primary"></i> Back to Dashboard
-                    </a>
-                </div>
-            </div>
+            @endif
+        </div>
+
+        <h5 class="fw-bold mb-1">{{ $user->name }}</h5>
+        <p class="text-muted small mb-0">{{ $user->email }}</p>
+        <div class="badge bg-soft-primary rounded-pill mt-2 px-3 py-2">Customer Account</div>
+    </div>
+    
+    <div class="list-group list-group-flush small fw-bold">
+        <a href="{{ route('dashboard.index') }}" class="list-group-item list-group-item-action py-3 border-0">
+            <i class="fas fa-arrow-left me-2 text-primary"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
         </div>
 
         {{-- Edit Forms --}}
