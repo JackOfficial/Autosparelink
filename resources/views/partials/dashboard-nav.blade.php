@@ -69,7 +69,7 @@
                     <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="me-2">
                             @if($user->avatar)
-                                <img src="{{ asset('storage/'.$user->avatar) }}" class="rounded-circle border" width="35" height="35" alt="User">
+                                <img src="{{ $user->avatar }}" class="rounded-circle border" width="35" height="35" alt="User">
                             @else
                                 <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 35px; height: 35px; font-size: 12px;">
                                     {{ strtoupper(substr($user->name, 0, 2)) }}
