@@ -56,14 +56,26 @@ class DashboardController extends Controller
     }
 
     public function editProfile()
-    {
-        $user = Auth::user();
-        
-        // FIX: Use first() instead of just $user->addresses to avoid the Collection error
-        $address = $user->addresses()->first(); 
+{
+    $user = Auth::user();
+    $address = $user->addresses()->first(); 
 
-        return view('user.edit-profile', compact('user', 'address'));
-    }
+    // Fetch stats so the sidebar/layout doesn't crash
+    $ticketStats = $user->tickets()
+        ->selectRaw("status, count(*) as total")
+        ->groupBy('status')
+        ->pluck('total', 'status')
+        ->all();
+
+    $stats = [
+        'open_tickets'    => $ticketStats['open'] ?? 0,
+        'pending_tickets' => $ticketStats['pending'] ?? 0,
+        'closed_tickets'  => $ticketStats['closed'] ?? 0,
+        // Add other keys if your sidebar uses them (e.g., total_orders)
+    ];
+
+    return view('user.edit-profile', compact('user', 'address', 'stats'));
+}
 
     public function updateProfile(Request $request)
     {
