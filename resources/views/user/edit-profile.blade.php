@@ -15,6 +15,7 @@
                     <div class="badge bg-soft-primary rounded-pill mt-2 px-3 py-2">Customer Account</div>
                 </div>
                 <div class="list-group list-group-flush small fw-bold">
+                    {{-- Updated to match your DashboardController@index route --}}
                     <a href="{{ route('dashboard.index') }}" class="list-group-item list-group-item-action py-3 border-0">
                         <i class="fas fa-arrow-left me-2 text-primary"></i> Back to Dashboard
                     </a>
@@ -64,21 +65,22 @@
                             <div class="col-md-6">
                                 <label class="small fw-bold text-muted mb-2">Phone Number</label>
                                 <input type="text" name="phone" class="form-control rounded-pill bg-light border-0 px-3 py-2" 
-       value="{{ old('phone', $address->phone ?? '') }}" 
-       placeholder="e.g. 078XXXXXXX">
+                                    value="{{ old('phone', $address->phone ?? '') }}" 
+                                    placeholder="e.g. 078XXXXXXX">
                             </div>
                             <div class="col-md-6">
                                 <label class="small fw-bold text-muted mb-2">City</label>
                                 <select name="city" class="form-select rounded-pill bg-light border-0 px-3 py-2">
-                                    <option value="Kigali" {{ $address->city == 'Kigali' ? 'selected' : '' }}>Kigali</option>
-                                    <option value="Musanze" {{ $address->city == 'Musanze' ? 'selected' : '' }}>Musanze</option>
-                                    <option value="Rubavu" {{ $address->city == 'Rubavu' ? 'selected' : '' }}>Rubavu</option>
-                                    <option value="Other" {{ $address->city == 'Other' ? 'selected' : '' }}>Other</option>
+                                    @php $currentCity = old('city', $address->city ?? ''); @endphp
+                                    <option value="Kigali" {{ $currentCity == 'Kigali' ? 'selected' : '' }}>Kigali</option>
+                                    <option value="Musanze" {{ $currentCity == 'Musanze' ? 'selected' : '' }}>Musanze</option>
+                                    <option value="Rubavu" {{ $currentCity == 'Rubavu' ? 'selected' : '' }}>Rubavu</option>
+                                    <option value="Other" {{ $currentCity == 'Other' ? 'selected' : '' }}>Other</option>
                                 </select>
                             </div>
                             <div class="col-12">
                                 <label class="small fw-bold text-muted mb-2">Street / Neighborhood Address</label>
-                                <textarea name="street_address" rows="3" class="form-control bg-light border-0 px-3 py-2" style="border-radius: 15px;">{{ old('street_address', $address->street_address) }}</textarea>
+                                <textarea name="street_address" rows="3" class="form-control bg-light border-0 px-3 py-2" style="border-radius: 15px;">{{ old('street_address', $address->street_address ?? '') }}</textarea>
                             </div>
                         </div>
                         <div class="text-end mt-4">
@@ -90,7 +92,7 @@
                 </div>
             </form>
 
-            {{-- FORM 2: Security (Separated to avoid nested form conflict) --}}
+            {{-- FORM 2: Security --}}
             <div class="card border-0 shadow-sm mb-4 rounded-4">
                 <div class="card-header bg-white border-0 pt-4 px-4">
                     <h5 class="fw-bold mb-0 text-danger"><i class="fas fa-shield-alt me-2"></i> Account Security</h5>
