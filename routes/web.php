@@ -200,6 +200,7 @@ Route::middleware(['auth'])->group(function () {
     // Support Ticket System
     Route::prefix('tickets')->name('tickets.')->controller(TicketController::class)->group(function () {
         Route::get('/', 'index')->name('index');
+        Route::get('/create', 'index')->name('create');
         Route::post('/store', 'store')->name('store');
         Route::get('/{id}', 'show')->name('show');
         Route::post('/{id}/reply', 'reply')->name('reply');
