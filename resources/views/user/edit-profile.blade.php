@@ -63,7 +63,9 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="small fw-bold text-muted mb-2">Phone Number</label>
-                                <input type="text" name="phone" class="form-control rounded-pill bg-light border-0 px-3 py-2" value="{{ old('phone', $address->phone) }}" placeholder="e.g. 078XXXXXXX">
+                                <input type="text" name="phone" class="form-control rounded-pill bg-light border-0 px-3 py-2" 
+       value="{{ old('phone', $address->phone ?? '') }}" 
+       placeholder="e.g. 078XXXXXXX">
                             </div>
                             <div class="col-md-6">
                                 <label class="small fw-bold text-muted mb-2">City</label>
