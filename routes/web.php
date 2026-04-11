@@ -31,7 +31,6 @@ use App\Http\Controllers\PaymentController as FlutterwavePaymentController;
 
 // --- 4. SUPPORT & DASHBOARD CONTROLLERS ---
 use App\Http\Controllers\TicketController;
-use App\Http\Controllers\UserDashboardController;
 
 // --- 5. ADMIN CONTROLLERS ---
 use App\Http\Controllers\Admin\AdminController;
@@ -75,6 +74,7 @@ use App\Http\Controllers\Shop\PayoutController;
 use App\Http\Controllers\Shop\SaleController;
 use App\Http\Controllers\Shop\ShopProfileController;
 use App\Http\Controllers\Shop\TicketController as ShopTicketController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
 
 // =============================================================
 // PUBLIC FRONTEND ROUTES
