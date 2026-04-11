@@ -93,7 +93,7 @@ class TicketController extends Controller
 
     public function reply(Request $request, Ticket $ticket)
     {
-        if ($ticket->user_id !== Auth::id()) { 
+        if ($ticket->user_id != Auth::id()) { 
             abort(403); 
         }
 
