@@ -66,7 +66,7 @@
     <a class="nav-link py-2 px-3 rounded-3 {{ request()->is('addresses*') ? 'bg-primary text-white shadow-sm' : 'text-dark hover-bg-light' }}" 
        href="{{ route('addresses.index') }}">
         <i class="fas fa-map-marker-alt me-2 {{ request()->is('addresses*') ? 'text-white' : 'text-primary' }}"></i> 
-        <span>Shipping Addresses</span>
+        <span>My Addresses</span>
     </a>
 </li>
             </ul>
