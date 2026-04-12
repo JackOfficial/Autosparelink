@@ -31,11 +31,6 @@
                         <span class="badge badge-soft-primary rounded-pill">{{ $stats['total_orders'] ?? 0 }}</span>
                     </a>
                 </li>
-                <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 text-dark" href="/user/quotes">
-                        <i class="fas fa-file-invoice-dollar me-2"></i> Requested Quotes
-                    </a>
-                </li>
             </ul>
         </div>
 
