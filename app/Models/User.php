@@ -119,7 +119,7 @@ public function orders()
 }
 
 public function vehicles() {
-    return $this->hasMany(UserVehicle::class);
+    return $this->hasMany(ClientVehicle::class);
 }
 
 public function primaryVehicle() {
