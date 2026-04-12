@@ -16,7 +16,7 @@ return new class extends Migration
             $table->renameColumn('name', 'shop_name');
 
             // 2. Add 'shop_email' after the renamed shop_name
-            $table->string('shop_email')->after('name')->nullable(); 
+            $table->string('shop_email')->after('shop_name')->nullable(); 
             
             // Note: If 'name' is already renamed, use 'shop_name' in the 'after' method
         });
