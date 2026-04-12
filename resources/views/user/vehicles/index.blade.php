@@ -37,14 +37,13 @@
                         </div>
                     @endif
 
-                    <div class="card-body p-4">
+                    <div class="card-body p-4 d-flex flex-column">
                         {{-- Vehicle Title & Icon --}}
                         <div class="d-flex align-items-start mb-4">
                             <div class="bg-primary bg-opacity-10 text-primary rounded-4 p-3 me-3">
                                 <i class="fas fa-car fa-2x"></i>
                             </div>
                             <div class="flex-grow-1 overflow-hidden">
-                                {{-- Using null-safe operator to prevent crashes --}}
                                 <h5 class="fw-bold mb-0 text-truncate">
                                     {{ $vehicle->brand?->brand_name ?? 'Unknown Brand' }}
                                 </h5>
@@ -52,6 +51,9 @@
                                     {{ $vehicle->vehicleModel?->model_name ?? 'General Model' }} 
                                     <span class="badge bg-light text-dark border ms-1">{{ $vehicle->production_start }}</span>
                                 </p>
+                                @if($vehicle->trim_level)
+                                    <small class="text-muted d-block mt-1">{{ $vehicle->trim_level }}</small>
+                                @endif
                             </div>
                         </div>
 
@@ -116,9 +118,9 @@
         transform: translateY(-8px);
         box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
     }
-    .x-small { font-size: 0.6rem; }
+    .x-small { font-size: 0.65rem; }
     .ls-1 { letter-spacing: 0.5px; }
-    .rounded-4 { border-radius: 1.2rem !important; }
+    .rounded-4 { border-radius: 1.25rem !important; }
     
     .primary-badge {
         position: absolute;
@@ -127,11 +129,12 @@
         background: #0d6efd;
         color: white;
         padding: 6px 16px;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 800;
         text-transform: uppercase;
-        border-bottom-left-radius: 1.2rem;
+        border-bottom-left-radius: 1.25rem;
         box-shadow: -2px 2px 5px rgba(0,0,0,0.1);
+        z-index: 10;
     }
 
     .border-dashed {
