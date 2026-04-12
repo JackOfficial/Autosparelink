@@ -77,9 +77,9 @@
     <div class="px-4 mt-2 mb-4">
         <div class="p-3 rounded-3 bg-light border text-center">
             <p class="small text-muted mb-2">Wrong parts are a pain.</p>
-            <button class="btn btn-sm btn-primary w-100 rounded-pill shadow-sm">
+            <a href="vehicles" class="btn btn-sm btn-primary w-100 rounded-pill shadow-sm">
                 <i class="fas fa-plus me-1 small"></i> Add a Vehicle
-            </button>
+            </a>
         </div>
     </div>
 </aside>
