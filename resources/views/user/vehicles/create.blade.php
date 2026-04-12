@@ -3,9 +3,17 @@
 @section('title', 'Add New Vehicle')
 
 @section('content')
+{{-- Added photoPreview and fileSelected to x-data --}}
 <div class="container py-4 py-lg-5" x-data="{ 
     selectedBrand: '{{ old('brand_id') }}', 
-    selectedModel: '{{ old('vehicle_model_id') }}' 
+    selectedModel: '{{ old('vehicle_model_id') }}',
+    photoPreview: null,
+    previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            this.photoPreview = URL.createObjectURL(file);
+        }
+    }
 }">
     
     {{-- Breadcrumb --}}
@@ -19,11 +27,10 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                {{-- Header with clear intent --}}
                 <div class="card-header bg-white border-0 pt-4 px-4">
                     <div class="d-flex align-items-center">
                         <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
-                            <i class="fas fa-car-side fa-lg"></i>
+                            <i class="fas fa-plus fa-lg"></i>
                         </div>
                         <div>
                             <h2 class="h4 fw-bold text-dark mb-0">Add to Garage</h2>
@@ -33,13 +40,54 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <form action="{{ route('vehicles.store') }}" method="POST">
+                    {{-- Added enctype for file uploads --}}
+                    <form action="{{ route('vehicles.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        {{-- Section 1: Basic Identity --}}
+                        {{-- Section: Vehicle Photo (New) --}}
                         <div class="mb-5">
                             <h6 class="text-primary fw-bold mb-4 d-flex align-items-center">
                                 <span class="badge rounded-pill bg-primary me-2">1</span> 
+                                Vehicle Photo
+                            </h6>
+                            <div class="row justify-content-center">
+                                <div class="col-md-8">
+                                    <div class="upload-container border-dashed rounded-4 p-4 text-center bg-light position-relative" 
+                                         :class="photoPreview ? 'p-2' : 'p-5'">
+                                        
+                                        <input type="file" name="vehicle_photo" id="vehicle_photo" 
+                                               class="d-none" accept="image/*" @change="previewImage">
+                                        
+                                        <label for="vehicle_photo" class="mb-0 cursor-pointer d-block">
+                                            <template x-if="!photoPreview">
+                                                <div>
+                                                    <i class="fas fa-camera fa-3x text-primary mb-3 opacity-50"></i>
+                                                    <h6 class="fw-bold text-dark">Upload Car Photo</h6>
+                                                    <p class="text-muted small mb-0">Click to browse your gallery (Max 2MB)</p>
+                                                </div>
+                                            </template>
+                                            
+                                            <template x-if="photoPreview">
+                                                <div class="position-relative">
+                                                    <img :src="photoPreview" class="rounded-4 img-fluid shadow-sm" style="max-height: 250px; width: 100%; object-fit: cover;">
+                                                    <div class="position-absolute top-0 end-0 m-2">
+                                                        <span class="btn btn-dark btn-sm rounded-pill px-3">
+                                                            <i class="fas fa-sync-alt me-1"></i> Change
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </label>
+                                    </div>
+                                    @error('vehicle_photo') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Section 2: Basic Identity --}}
+                        <div class="mb-5">
+                            <h6 class="text-primary fw-bold mb-4 d-flex align-items-center">
+                                <span class="badge rounded-pill bg-primary me-2">2</span> 
                                 Basic Identity
                             </h6>
                             <div class="row g-3">
@@ -79,10 +127,10 @@
                             </div>
                         </div>
 
-                        {{-- Section 2: Personalization & Specs --}}
+                        {{-- Section 3: Specifications --}}
                         <div class="mb-5">
                             <h6 class="text-primary fw-bold mb-4 d-flex align-items-center">
-                                <span class="badge rounded-pill bg-primary me-2">2</span> 
+                                <span class="badge rounded-pill bg-primary me-2">3</span> 
                                 Specifications
                             </h6>
                             <div class="row g-3">
@@ -147,7 +195,7 @@
                             </div>
                         </div>
 
-                        {{-- Section 3: Extra Info --}}
+                        {{-- Section 4: Extra Info --}}
                         <div class="bg-light rounded-4 p-4 mb-4 border border-opacity-10">
                             <div class="row align-items-center g-3">
                                 <div class="col-md-7">
@@ -183,6 +231,10 @@
 <style>
     .rounded-4 { border-radius: 1.25rem !important; }
     .bg-light { background-color: #f8f9fa !important; }
+    .cursor-pointer { cursor: pointer; }
+    .border-dashed { border: 2px dashed #dee2e6 !important; transition: all 0.3s ease; }
+    .border-dashed:hover { border-color: #0d6efd !important; background-color: #f1f7ff !important; }
+    
     .form-select, .form-control { transition: all 0.2s; border: 1px solid transparent !important; }
     .form-select:focus, .form-control:focus {
         background-color: #fff !important;

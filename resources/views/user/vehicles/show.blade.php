@@ -16,25 +16,38 @@
     <div class="row g-4">
         {{-- Left Column: Main Info --}}
         <div class="col-lg-8">
+            {{-- Vehicle Hero Photo Card --}}
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-4 p-3 me-3">
-                            <i class="fas fa-car fa-2x"></i>
+                <div class="position-relative">
+                    @if($vehicle->vehicle_photo)
+                        <img src="{{ asset('storage/' . $vehicle->vehicle_photo) }}" class="img-fluid w-100" style="height: 350px; object-fit: cover;" alt="Vehicle Image">
+                    @else
+                        <div class="bg-light d-flex flex-column align-items-center justify-content-center" style="height: 300px;">
+                            <i class="fas fa-car fa-4x text-primary opacity-25 mb-3"></i>
+                            <p class="text-muted small fw-bold">No photo available</p>
+                        </div>
+                    @endif
+                    
+                    @if($vehicle->is_primary)
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-primary rounded-pill px-3 py-2 shadow-sm">
+                                <i class="fas fa-star me-1"></i> Default Vehicle
+                            </span>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3 me-3">
+                            <i class="fas fa-info-circle fa-lg"></i>
                         </div>
                         <div>
                             <h2 class="h4 fw-bold text-dark mb-0">{{ $vehicle->brand?->brand_name }} {{ $vehicle->vehicleModel?->model_name }}</h2>
                             <p class="text-muted small mb-0">Registered Technical Specifications</p>
                         </div>
                     </div>
-                    @if($vehicle->is_primary)
-                        <span class="badge bg-primary rounded-pill px-3 py-2">
-                            <i class="fas fa-star me-1"></i> Default Vehicle
-                        </span>
-                    @endif
-                </div>
 
-                <div class="card-body p-4">
                     <div class="row g-4">
                         {{-- Technical Specs Grid --}}
                         <div class="col-sm-6 col-md-4">
@@ -130,5 +143,6 @@
     .bg-light { background-color: #f8f9fa !important; }
     .btn-white { background: #fff; color: #0d6efd; }
     .btn-white:hover { background: #f8f9fa; color: #0a58ca; }
+    code { font-size: 0.9em; letter-spacing: 1px; }
 </style>
 @endsection

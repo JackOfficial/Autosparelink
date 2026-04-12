@@ -38,11 +38,22 @@
                     @endif
 
                     <div class="card-body p-4 d-flex flex-column">
-                        {{-- Vehicle Title & Icon --}}
+                        {{-- Vehicle Title & Photo/Icon --}}
                         <div class="d-flex align-items-start mb-4">
-                            <div class="bg-primary bg-opacity-10 text-primary rounded-4 p-3 me-3">
-                                <i class="fas fa-car fa-2x"></i>
+                            {{-- Dynamic Photo Handling --}}
+                            <div class="rounded-4 overflow-hidden me-3 shadow-sm bg-light" style="width: 70px; height: 70px; min-width: 70px;">
+                                @if($vehicle->photo)
+                                    <img src="{{ asset('storage/' . $vehicle->photo->file_path) }}" 
+                                         alt="{{ $vehicle->brand?->brand_name }}" 
+                                         class="w-100 h-100" 
+                                         style="object-fit: cover;">
+                                @else
+                                    <div class="d-flex align-items-center justify-content-center h-100 text-primary bg-primary bg-opacity-10">
+                                        <i class="fas fa-car fa-2x"></i>
+                                    </div>
+                                @endif
                             </div>
+
                             <div class="flex-grow-1 overflow-hidden">
                                 <h5 class="fw-bold mb-0 text-truncate">
                                     {{ $vehicle->brand?->brand_name ?? 'Unknown Brand' }}
@@ -52,7 +63,7 @@
                                     <span class="badge bg-light text-dark border ms-1">{{ $vehicle->production_start }}</span>
                                 </p>
                                 @if($vehicle->trim_level)
-                                    <small class="text-muted d-block mt-1">{{ $vehicle->trim_level }}</small>
+                                    <small class="text-muted d-block mt-1 text-truncate">{{ $vehicle->trim_level }}</small>
                                 @endif
                             </div>
                         </div>

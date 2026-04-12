@@ -41,6 +41,11 @@ class ClientVehicle extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function photo()
+{
+    return $this->morphOne(Photo::class, 'imageable');
+}
+
     /**
      * Get the brand of the vehicle.
      */
