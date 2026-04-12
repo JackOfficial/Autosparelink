@@ -6,29 +6,30 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('shops', function (Blueprint $table) {
-            // 1. Rename 'name' to 'shop_name'
-            $table->renameColumn('name', 'shop_name');
+        // 1. Handle the rename only if 'name' still exists
+        if (Schema::hasColumn('shops', 'name')) {
+            Schema::table('shops', function (Blueprint $table) {
+                $table->renameColumn('name', 'shop_name');
+            });
+        }
 
-            // 2. Add 'shop_email' after the renamed shop_name
-            $table->string('shop_email')->after('shop_name')->nullable(); 
-            
-            // Note: If 'name' is already renamed, use 'shop_name' in the 'after' method
-        });
+        // 2. Handle the email addition only if it doesn't exist yet
+        if (!Schema::hasColumn('shops', 'shop_email')) {
+            Schema::table('shops', function (Blueprint $table) {
+                // We use 'after' conditionally or just add it
+                $table->string('shop_email')->nullable()->after('shop_name');
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('shops', function (Blueprint $table) {
-            $table->renameColumn('shop_name', 'name');
+            if (Schema::hasColumn('shops', 'shop_name')) {
+                $table->renameColumn('shop_name', 'name');
+            }
             $table->dropColumn('shop_email');
         });
     }
