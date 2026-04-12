@@ -88,18 +88,29 @@
                         <div class="row">
                             {{-- Variant --}}
                             <div class="col-md-4 mb-3">
-                                <label for="variant_id" class="form-label small fw-bold text-muted text-uppercase">Trim Level</label>
-                                <select name="variant_id" id="variant_id" class="form-select border-0 bg-light rounded-3" :disabled="!selectedModel">
-                                    <option value="">Select Trim...</option>
-                                    @foreach($variants as $variant)
-                                        <template x-if="selectedModel == '{{ $variant->vehicle_model_id }}'">
-                                            <option value="{{ $variant->id }}" {{ old('variant_id') == $variant->id ? 'selected' : '' }}>
-                                                {{ $variant->trim_level }}
-                                            </option>
-                                        </template>
-                                    @endforeach
-                                </select>
-                            </div>
+    <label for="trim_level" class="form-label small fw-bold text-muted text-uppercase">Trim Level</label>
+    
+    {{-- We change the name to 'trim_level' and use an input instead of a select --}}
+    <input type="text" 
+           name="trim_level" 
+           id="trim_level" 
+           list="trimOptions"
+           value="{{ old('trim_level', $vehicle->trim_level ?? '') }}"
+           class="form-control border-0 bg-light rounded-3 @error('trim_level') is-invalid @enderror" 
+           placeholder="e.g. LE, XLE, Sport"
+           :disabled="!selectedModel">
+
+    {{-- This creates the 'suggested' list based on the selected model --}}
+    <datalist id="trimOptions">
+        @foreach($variants as $variant)
+            <template x-if="selectedModel == '{{ $variant->vehicle_model_id }}'">
+                <option value="{{ $variant->trim_level }}">
+            </template>
+        @endforeach
+    </datalist>
+    
+    @error('trim_level') <div class="invalid-feedback">{{ $message }}</div> @enderror
+</div>
 
                             {{-- Body Type --}}
                             <div class="col-md-4 mb-3">
