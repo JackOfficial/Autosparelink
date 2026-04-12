@@ -5,68 +5,81 @@
 @section('content')
 <div class="container py-4 py-lg-5">
     {{-- Header Section --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-5">
         <div>
-            <h2 class="h4 fw-bold text-dark mb-1">My Garage</h2>
-            <p class="text-muted small">Manage your saved vehicles for personalized part recommendations.</p>
+            <h2 class="h3 fw-bold text-dark mb-1">My Garage</h2>
+            <p class="text-muted mb-0">Manage your vehicles for precise parts and service recommendations.</p>
         </div>
-        <a href="{{ route('vehicles.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
-            <i class="fas fa-plus me-2"></i> Add Vehicle
+        <a href="{{ route('vehicles.create') }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center justify-content-center">
+            <i class="fas fa-plus-circle me-2"></i> 
+            <span>Add New Vehicle</span>
         </a>
     </div>
 
+    {{-- Success Message --}}
     @if(session('success'))
-        <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4">
-            {{ session('success') }}
+        <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
+            <i class="fas fa-check-circle me-3 fa-lg"></i>
+            <div>{{ session('success') }}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     <div class="row g-4">
         @forelse($vehicles as $vehicle)
             <div class="col-md-6 col-xl-4">
-                <div class="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden">
-                    {{-- Primary Badge --}}
+                <div class="card border-0 shadow-sm rounded-4 h-100 position-relative transition-hover overflow-hidden">
+                    
+                    {{-- Primary Ribbon --}}
                     @if($vehicle->is_primary)
-                        <span class="position-absolute top-0 end-0 bg-primary text-white px-3 py-1 small fw-bold rounded-start-pill mt-3 shadow-sm">
-                            <i class="fas fa-star me-1"></i> Primary
-                        </span>
+                        <div class="primary-badge">
+                            <i class="fas fa-star me-1"></i> Default
+                        </div>
                     @endif
 
                     <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-light rounded-circle p-3 me-3">
-                                <i class="fas fa-car-side fa-lg text-primary"></i>
+                        {{-- Vehicle Title & Icon --}}
+                        <div class="d-flex align-items-start mb-4">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-4 p-3 me-3">
+                                <i class="fas fa-car fa-2x"></i>
                             </div>
-                            <div>
-                                <h5 class="fw-bold mb-0">{{ $vehicle->brand->brand_name }}</h5>
-                                <span class="text-muted small">{{ $vehicle->vehicleModel->model_name }} ({{ $vehicle->production_start }})</span>
+                            <div class="flex-grow-1 overflow-hidden">
+                                {{-- Using null-safe operator to prevent crashes --}}
+                                <h5 class="fw-bold mb-0 text-truncate">
+                                    {{ $vehicle->brand?->brand_name ?? 'Unknown Brand' }}
+                                </h5>
+                                <p class="text-secondary mb-0 text-truncate">
+                                    {{ $vehicle->vehicleModel?->model_name ?? 'General Model' }} 
+                                    <span class="badge bg-light text-dark border ms-1">{{ $vehicle->production_start }}</span>
+                                </p>
                             </div>
                         </div>
 
+                        {{-- Specs Grid --}}
                         <div class="row g-2 mb-4">
                             <div class="col-6">
-                                <div class="bg-light p-2 rounded-3">
-                                    <label class="d-block text-muted x-small fw-bold text-uppercase">Body</label>
-                                    <span class="small fw-semibold">{{ $vehicle->bodyType->name ?? 'N/A' }}</span>
+                                <div class="bg-light p-2 px-3 rounded-3 border-start border-primary border-3">
+                                    <label class="d-block text-muted x-small fw-bold text-uppercase ls-1">Body</label>
+                                    <span class="small fw-semibold text-dark">{{ $vehicle->bodyType?->name ?? 'N/A' }}</span>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="bg-light p-2 rounded-3">
-                                    <label class="d-block text-muted x-small fw-bold text-uppercase">Fuel</label>
-                                    <span class="small fw-semibold">{{ $vehicle->engineType->name ?? 'N/A' }}</span>
+                                <div class="bg-light p-2 px-3 rounded-3 border-start border-info border-3">
+                                    <label class="d-block text-muted x-small fw-bold text-uppercase ls-1">Fuel</label>
+                                    <span class="small fw-semibold text-dark">{{ $vehicle->engineType?->name ?? 'N/A' }}</span>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Action Buttons --}}
-                        <div class="d-flex gap-2 border-top pt-3">
-                            <a href="{{ route('vehicles.edit', $vehicle->id) }}" class="btn btn-outline-secondary btn-sm rounded-pill flex-grow-1">
+                        {{-- Action Footer --}}
+                        <div class="d-flex gap-2 pt-3 border-top mt-auto">
+                            <a href="{{ route('vehicles.edit', $vehicle->id) }}" class="btn btn-light border btn-sm rounded-pill flex-grow-1 fw-bold text-secondary">
                                 <i class="fas fa-edit me-1"></i> Edit
                             </a>
-                            <form action="{{ route('vehicles.destroy', $vehicle->id) }}" method="POST" class="flex-grow-1" onsubmit="return confirm('Remove this vehicle from your garage?')">
+                            <form action="{{ route('vehicles.destroy', $vehicle->id) }}" method="POST" class="flex-grow-1" onsubmit="return confirm('Permanently remove this vehicle?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill w-100">
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill w-100 fw-bold">
                                     <i class="fas fa-trash-alt me-1"></i> Remove
                                 </button>
                             </form>
@@ -76,14 +89,18 @@
             </div>
         @empty
             <div class="col-12">
-                <div class="text-center py-5 bg-white rounded-4 shadow-sm">
-                    <div class="mb-3">
-                        <i class="fas fa-car-crash fa-3x text-light"></i>
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-dashed">
+                    <div class="mb-4">
+                        <div class="bg-light d-inline-block rounded-circle p-4">
+                            <i class="fas fa-car-side fa-4x text-muted opacity-25"></i>
+                        </div>
                     </div>
-                    <h5 class="fw-bold">Your garage is empty</h5>
-                    <p class="text-muted small">Add your first vehicle to get started.</p>
-                    <a href="{{ route('vehicles.create') }}" class="btn btn-primary rounded-pill px-4 mt-2">
-                        Add New Vehicle
+                    <h4 class="fw-bold text-dark">Your garage is looking a bit empty</h4>
+                    <p class="text-muted mx-auto mb-4" style="max-width: 400px;">
+                        Add your vehicle today to see parts that fit your specific make and model.
+                    </p>
+                    <a href="{{ route('vehicles.create') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">
+                        Add My First Vehicle
                     </a>
                 </div>
             </div>
@@ -92,10 +109,33 @@
 </div>
 
 <style>
-    .x-small { font-size: 0.65rem; }
-    .rounded-4 { border-radius: 1rem !important; }
-    .btn-sm { padding: 0.4rem 1rem; }
-    .card { transition: transform 0.2s ease; }
-    .card:hover { transform: translateY(-5px); }
+    .transition-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .transition-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+    }
+    .x-small { font-size: 0.6rem; }
+    .ls-1 { letter-spacing: 0.5px; }
+    .rounded-4 { border-radius: 1.2rem !important; }
+    
+    .primary-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: #0d6efd;
+        color: white;
+        padding: 6px 16px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        border-bottom-left-radius: 1.2rem;
+        box-shadow: -2px 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .border-dashed {
+        border: 2px dashed #dee2e6 !important;
+    }
 </style>
 @endsection
