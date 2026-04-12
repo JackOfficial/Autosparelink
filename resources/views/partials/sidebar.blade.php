@@ -73,17 +73,23 @@
         </div>
     </div>
 
-   {{-- Seller Promotion Card --}}
+{{-- Seller Promotion Card --}}
 <div class="px-4 mt-2 mb-4">
-    <div class="p-3 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-25 text-center">
-        <div class="mb-2">
-            <span class="badge bg-primary rounded-pill mb-2">Seller Hub</span>
-            <p class="small fw-bold text-dark mb-1">Turn Parts into Cash</p>
-            <p class="text-muted mb-3" style="font-size: 0.75rem;">Have spare parts or a car to sell? Reach thousands of buyers today.</p>
+    <div class="p-3 rounded-4 bg-dark text-white border-0 shadow-sm text-center position-relative overflow-hidden">
+        {{-- Subtle decorative background icon --}}
+        <i class="fas fa-handshake position-absolute opacity-10" style="font-size: 4rem; right: -10px; bottom: -10px;"></i>
+        
+        <div class="position-relative">
+            <span class="badge bg-primary rounded-pill mb-2 px-3" style="font-size: 0.65rem;">PARTNER WITH US</span>
+            <p class="small fw-bold mb-1">Launch Your Auto Shop</p>
+            <p class="text-white-50 mb-3" style="font-size: 0.75rem; line-height: 1.2;">
+                Join our multivendor marketplace and reach thousands of buyers searching for spare parts.
+            </p>
+            
+            <a href="#" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
+                <i class="fas fa-rocket me-1 small"></i> Become a Vendor
+            </a>
         </div>
-        <a href="#" class="btn btn-sm btn-primary w-100 rounded-pill shadow-sm fw-bold">
-            <i class="fas fa-store me-1 small"></i> Start Selling
-        </a>
     </div>
 </div>
 </aside>
