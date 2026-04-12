@@ -76,6 +76,7 @@ use App\Http\Controllers\Shop\ShopProfileController;
 use App\Http\Controllers\Shop\TicketController as ShopTicketController;
 use App\Http\Controllers\User\AddressController as UserAddressController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\User\VehicleController;
 
 // =============================================================
 // PUBLIC FRONTEND ROUTES
@@ -210,6 +211,7 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
     Route::post('/like/toggle', [LikeController::class, 'toggle'])->name('like.toggle');
     Route::resource('orders', OrderController::class);
     Route::resource('addresses', UserAddressController::class);
+    Route::resource('vehicles', VehicleController::class);
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group(function () {
