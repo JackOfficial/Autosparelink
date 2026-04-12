@@ -74,7 +74,17 @@ class User extends Authenticatable implements MustVerifyEmail
  */
 public function hasActiveShop(): bool
 {
-    return $this->shop()->where('is_active', true)->exists();
+    // This is faster if the relationship is already loaded
+    return $this->shop && $this->shop->is_active;
+}
+
+/**
+ * Helper to check if they should see the "Become a Seller" CTA.
+ */
+public function canBecomeVendor(): bool
+{
+    // Show only to regular 'user' roles who don't have a shop yet
+    return $this->hasRole('user') && !$this->shop()->exists();
 }
 
 /**
@@ -123,7 +133,16 @@ public function vehicles() {
 }
 
 public function primaryVehicle() {
-    return $this->hasOne(UserVehicle::class)->where('is_primary', true);
+    return $this->hasOne(ClientVehicle::class)
+        ->where('is_primary', true)
+        ->latest(); // Safety: always take the newest if multiple exist
+}
+/**
+ * Orders received as a seller (from other buyers)
+ */
+public function vendorOrders()
+{
+    return $this->hasManyThrough(Order::class, Shop::class);
 }
 
 public function tickets()

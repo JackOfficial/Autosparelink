@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
@@ -14,8 +15,9 @@ class Shop extends Model
 
     protected $fillable = [
         'user_id',
-        'name',
+        'shop_name', // Matches your Controller & Form
         'slug',
+        'shop_email', // Matches your Controller
         'description',
         'logo',
         'tin_number',
@@ -34,6 +36,15 @@ class Shop extends Model
         'is_verified' => 'boolean',
         'commission_rate' => 'decimal:2',
     ];
+
+    /**
+     * Polymorphic relationship for verification documents
+     * (RDB Certificate, IDs, etc.)
+     */
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
 
     public function user(): BelongsTo
     {
@@ -64,16 +75,25 @@ class Shop extends Model
     /**
      * Helper to get the public logo URL or a default placeholder
      */
-    public function getLogoUrlAttribute()
+    public function getLogoUrlAttribute(): string
     {
         return $this->logo ? asset('storage/' . $this->logo) : asset('images/default-shop-logo.png');
+    }
+
+    /**
+     * Helper to check if the shop is ready for business
+     */
+    public function isOperational(): bool
+    {
+        return $this->is_active && $this->is_verified;
     }
 
     protected static function booted()
     {
         static::saving(function ($shop) {
-            if ($shop->isDirty('name')) {
-                $shop->slug = Str::slug($shop->name);
+            // Updated to reference 'shop_name'
+            if ($shop->isDirty('shop_name')) {
+                $shop->slug = Str::slug($shop->shop_name);
             }
         });
     }

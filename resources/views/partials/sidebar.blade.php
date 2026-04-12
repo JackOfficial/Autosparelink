@@ -73,23 +73,75 @@
         </div>
     </div>
 
-{{-- Seller Promotion Card --}}
-<div class="px-4 mt-2 mb-4">
-    <div class="p-3 rounded-4 bg-dark text-white border-0 shadow-sm text-center position-relative overflow-hidden">
-        {{-- Subtle decorative background icon --}}
-        <i class="fas fa-handshake position-absolute opacity-10" style="font-size: 4rem; right: -10px; bottom: -10px;"></i>
-        
-        <div class="position-relative">
-            <span class="badge bg-primary rounded-pill mb-2 px-3" style="font-size: 0.65rem;">PARTNER WITH US</span>
-            <p class="small fw-bold mb-1">Launch Your Auto Shop</p>
-            <p class="text-white-50 mb-3" style="font-size: 0.75rem; line-height: 1.2;">
-                Join our multivendor marketplace and reach thousands of buyers searching for spare parts.
-            </p>
+{{-- Logic: Only show to regular users who haven't started a shop journey yet --}}
+@if(auth()->user()->canBecomeVendor())
+    <div class="px-4 mt-2 mb-4">
+        <div class="p-3 rounded-4 bg-dark text-white border-0 shadow-sm text-center position-relative overflow-hidden">
+            {{-- Subtle decorative background icon --}}
+            <i class="fas fa-handshake position-absolute opacity-10" style="font-size: 4rem; right: -10px; bottom: -10px;"></i>
             
-            <a href="#" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
-                <i class="fas fa-rocket me-1 small"></i> Become a Vendor
+            <div class="position-relative">
+                <span class="badge bg-primary rounded-pill mb-2 px-3" style="font-size: 0.65rem;">PARTNER WITH US</span>
+                <p class="small fw-bold mb-1">Launch Your Auto Shop</p>
+                <p class="text-white-50 mb-3" style="font-size: 0.75rem; line-height: 1.2;">
+                    Join our multivendor marketplace and reach thousands of buyers searching for spare parts.
+                </p>
+                
+                {{-- Update the href to your registration route --}}
+                <a href="{{ route('vendor.register') }}" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
+                    <i class="fas fa-rocket me-1 small"></i> Become a Vendor
+                </a>
+            </div>
+        </div>
+    </div>
+@endif
+
+{{-- Seller Area: Switch between Promotion and Management --}}
+@if(auth()->user()->canBecomeVendor())
+    {{-- Promotion Card for regular users --}}
+    <div class="px-4 mt-2 mb-4">
+        <div class="p-3 rounded-4 bg-dark text-white border-0 shadow-sm text-center position-relative overflow-hidden">
+            <i class="fas fa-handshake position-absolute opacity-10" style="font-size: 4rem; right: -10px; bottom: -10px;"></i>
+            
+            <div class="position-relative">
+                <span class="badge bg-primary rounded-pill mb-2 px-3" style="font-size: 0.65rem;">PARTNER WITH US</span>
+                <p class="small fw-bold mb-1">Launch Your Auto Shop</p>
+                <p class="text-white-50 mb-3" style="font-size: 0.75rem; line-height: 1.2;">
+                    Join our marketplace and reach thousands of buyers searching for parts.
+                </p>
+                
+                <a href="{{ route('shop.register') }}" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
+                    <i class="fas fa-rocket me-1 small"></i> Become a Vendor
+                </a>
+            </div>
+        </div>
+    </div>
+
+@elseif(auth()->user()->hasActiveShop())
+    {{-- Management Card for Shop Owners --}}
+    <div class="px-4 mt-2 mb-4">
+        <div class="p-3 rounded-4 bg-light border text-center shadow-sm">
+            <div class="d-flex align-items-center mb-3">
+                <div class="flex-shrink-0">
+                    {{-- Display Shop Logo or Initials --}}
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fas fa-store"></i>
+                    </div>
+                </div>
+                <div class="flex-grow-1 ms-3 text-start">
+                    <p class="small fw-bold mb-0 text-truncate" style="max-width: 120px;">
+                        {{ auth()->user()->shop->shop_name }}
+                    </p>
+                    <span class="text-success" style="font-size: 0.7rem;">
+                        <i class="fas fa-check-circle me-1"></i>Active Shop
+                    </span>
+                </div>
+            </div>
+
+            <a href="{{ route('vendor.dashboard') }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill fw-bold">
+                <i class="fas fa-external-link-alt me-1 small"></i> Merchant Panel
             </a>
         </div>
     </div>
-</div>
+@endif
 </aside>

@@ -67,6 +67,7 @@ use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\TicketController as Ticket;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\Shop\DashboardController;
+use App\Http\Controllers\Shop\OnboardingController;
 use App\Http\Controllers\Shop\OrderController as ShopOrderController;
 use App\Http\Controllers\Shop\Part;
 use App\Http\Controllers\Shop\PartController as ShopPartController;
@@ -217,7 +218,11 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
 Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group(function () {
    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
    Route::resource('/parts', ShopPartController::class);
-   Route::resource('/orders', ShopOrderController::class);
+   Route::resource('/orders', ShopOrderController::class); 
+
+   Route::get('/become-a-vendor', [OnboardingController::class, 'showRegistrationForm'])->name('register');
+   Route::post('/become-a-vendor', [OnboardingController::class, 'store'])->name('register.store');
+   Route::get('/vendor-registration', [OnboardingController::class, 'registration_status'])->name('register.success');
 
     Route::prefix('profile')->name('profile.')->group(function () {
           Route::get('/profile', [ShopProfileController::class, 'edit'])->name('edit');
