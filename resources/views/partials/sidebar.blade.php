@@ -73,13 +73,17 @@
         </div>
     </div>
 
-    {{-- Promotion/Action Card --}}
-    <div class="px-4 mt-2 mb-4">
-        <div class="p-3 rounded-3 bg-light border text-center">
-            <p class="small text-muted mb-2">Wrong parts are a pain.</p>
-            <a href="/vehicles/create" class="btn btn-sm btn-primary w-100 rounded-pill shadow-sm">
-                <i class="fas fa-plus me-1 small"></i> Add a Vehicle
-            </a>
+   {{-- Seller Promotion Card --}}
+<div class="px-4 mt-2 mb-4">
+    <div class="p-3 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-25 text-center">
+        <div class="mb-2">
+            <span class="badge bg-primary rounded-pill mb-2">Seller Hub</span>
+            <p class="small fw-bold text-dark mb-1">Turn Parts into Cash</p>
+            <p class="text-muted mb-3" style="font-size: 0.75rem;">Have spare parts or a car to sell? Reach thousands of buyers today.</p>
         </div>
+        <a href="#" class="btn btn-sm btn-primary w-100 rounded-pill shadow-sm fw-bold">
+            <i class="fas fa-store me-1 small"></i> Start Selling
+        </a>
     </div>
+</div>
 </aside>
