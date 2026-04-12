@@ -15,8 +15,7 @@
                 <li class="nav-item mb-1">
                     <a class="nav-link py-2 px-3 {{ request()->is('user/vehicles*') ? 'active' : 'text-dark' }}" href="/user/vehicles">
                         <i class="fas fa-car me-2"></i> Saved Vehicles
-                        <span class="badge rounded-pill bg-light text-dark border ms-1 fw-normal" style="font-size: 0.7rem;">VIN</span>
-                    </a>
+                     </a>
                 </li>
             </ul>
         </div>
