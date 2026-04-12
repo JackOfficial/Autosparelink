@@ -5,16 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Photo extends Model
 {
-  use HasFactory, SoftDeletes;
-  
-  protected $fillable = ['file_path', 'caption'];
+    use HasFactory, SoftDeletes;
+    
+    // Add imageable_id and imageable_type to allow mass assignment
+    protected $fillable = [
+        'file_path', 
+        'caption', 
+        'imageable_id', 
+        'imageable_type'
+    ];
 
-    public function imageable() {
+    /**
+     * Get the parent imageable model (ClientVehicle, User, etc.).
+     */
+    public function imageable(): MorphTo
+    {
         return $this->morphTo();
     }
 }
-
- 

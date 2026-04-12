@@ -3,25 +3,13 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\Brand;
-use App\Models\ClientVehicle;
-use App\Models\Variant;
-use App\Models\VehicleModel;
-use App\Models\BodyType;
-use App\Models\EngineType;
-use App\Models\TransmissionType;
-use App\Models\DriveType;
+use App\Models\{Brand, ClientVehicle, Variant, VehicleModel, BodyType, EngineType, TransmissionType, DriveType};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\{Auth, DB, Storage};
 use Illuminate\Validation\Rule;
 
 class VehicleController extends Controller
 {
-    /**
-     * Display a listing of the user's vehicles.
-     */
     public function index()
     {
         $vehicles = Auth::user()->vehicles()
@@ -37,108 +25,114 @@ class VehicleController extends Controller
         return view('user.vehicles.create', $this->getFormData());
     }
 
-    /**
-     * Store a newly created vehicle in storage.
-     */
     public function store(Request $request)
     {
         $validated = $this->validateVehicle($request);
 
         DB::transaction(function () use ($validated, $request) {
             if ($validated['is_primary']) {
-                ClientVehicle::where('user_id', Auth::id())->update(['is_primary' => false]);
+                $this->resetPrimaryVehicles();
             }
 
             $vehicle = ClientVehicle::create($validated);
-
-            // Handle Photo Upload
-            if ($request->hasFile('vehicle_photo')) {
-                $path = $request->file('vehicle_photo')->store('vehicles', 'public');
-                
-                $vehicle->photo()->create([
-                    'file_path' => $path,
-                    'caption'   => $vehicle->brand?->brand_name . ' ' . $vehicle->vehicleModel?->model_name
-                ]);
-            }
+            $this->handlePhotoUpload($request, $vehicle);
         });
 
-        return redirect()->route('vehicles.index')
-            ->with('success', 'Vehicle added to your garage.');
+        return redirect()->route('vehicles.index')->with('success', 'Vehicle added to your garage.');
     }
 
-    public function show(string $id)
+    public function show(ClientVehicle $vehicle)
     {
-        $vehicle = ClientVehicle::where('user_id', Auth::id())->with('photo')->findOrFail($id);
+        $this->authorizeOwner($vehicle);
+        $vehicle->load(['brand', 'vehicleModel', 'photo', 'bodyType', 'engineType', 'transmissionType']);
+        
         return view('user.vehicles.show', compact('vehicle'));
     }
 
-    public function edit(string $id)
+    public function edit(ClientVehicle $vehicle)
     {
-        $vehicle = ClientVehicle::where('user_id', Auth::id())->with('photo')->findOrFail($id);
-        $data = array_merge($this->getFormData(), ['vehicle' => $vehicle]);
-
-        return view('user.vehicles.edit', $data);
+        $this->authorizeOwner($vehicle);
+        $vehicle->load('photo');
+        
+        return view('user.vehicles.edit', array_merge($this->getFormData(), ['vehicle' => $vehicle]));
     }
 
-    /**
-     * Update the specified vehicle in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, ClientVehicle $vehicle)
     {
-        $vehicle = ClientVehicle::where('user_id', Auth::id())->findOrFail($id);
+        $this->authorizeOwner($vehicle);
         $validated = $this->validateVehicle($request, $vehicle->id);
 
         DB::transaction(function () use ($validated, $vehicle, $request) {
             if ($validated['is_primary']) {
-                ClientVehicle::where('user_id', Auth::id())
-                    ->where('id', '!=', $vehicle->id)
-                    ->update(['is_primary' => false]);
+                $this->resetPrimaryVehicles($vehicle->id);
             }
 
             $vehicle->update($validated);
-
-            // Handle Photo Update (Replace existing)
-            if ($request->hasFile('vehicle_photo')) {
-                // Delete old file from storage
-                if ($vehicle->photo) {
-                    Storage::disk('public')->delete($vehicle->photo->file_path);
-                    $vehicle->photo->delete();
-                }
-
-                $path = $request->file('vehicle_photo')->store('vehicles', 'public');
-                $vehicle->photo()->create([
-                    'file_path' => $path,
-                    'caption'   => $vehicle->brand?->brand_name . ' ' . $vehicle->vehicleModel?->model_name
-                ]);
-            }
+            $this->handlePhotoUpload($request, $vehicle);
         });
 
-        return redirect()->route('vehicles.index')
-            ->with('success', 'Vehicle updated successfully.');
+        return redirect()->route('vehicles.index')->with('success', 'Vehicle updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(ClientVehicle $vehicle)
     {
-        $vehicle = ClientVehicle::where('user_id', Auth::id())->findOrFail($id);
-        
-        // Clean up photo storage before deleting record
-        if ($vehicle->photo) {
-            Storage::disk('public')->delete($vehicle->photo->file_path);
-            $vehicle->photo->delete();
-        }
+        $this->authorizeOwner($vehicle);
 
-        $vehicle->delete();
+        DB::transaction(function () use ($vehicle) {
+            if ($vehicle->photo) {
+                Storage::disk('public')->delete($vehicle->photo->file_path);
+                $vehicle->photo->delete();
+            }
+            $vehicle->delete();
+        });
 
-        return redirect()->route('vehicles.index')
-            ->with('success', 'Vehicle removed from garage.');
+        return redirect()->route('vehicles.index')->with('success', 'Vehicle removed from garage.');
     }
 
     /**
-     * Internal Validation Logic
+     * Helper: Handle Polymorphic Photo Upload
      */
+    private function handlePhotoUpload(Request $request, ClientVehicle $vehicle)
+    {
+        if ($request->hasFile('vehicle_photo')) {
+            // Delete old file if it exists
+            if ($vehicle->photo) {
+                Storage::disk('public')->delete($vehicle->photo->file_path);
+            }
+
+            $path = $request->file('vehicle_photo')->store('vehicles', 'public');
+
+            $vehicle->photo()->updateOrCreate(
+                ['imageable_id' => $vehicle->id, 'imageable_type' => ClientVehicle::class],
+                [
+                    'file_path' => $path,
+                    'caption'   => "{$vehicle->brand?->brand_name} {$vehicle->vehicleModel?->model_name}"
+                ]
+            );
+        }
+    }
+
+    /**
+     * Helper: Reset primary status for other vehicles
+     */
+    private function resetPrimaryVehicles($excludeId = null)
+    {
+        Auth::user()->vehicles()
+            ->where('is_primary', true)
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->update(['is_primary' => false]);
+    }
+
+    /**
+     * Helper: Security Check
+     */
+    private function authorizeOwner(ClientVehicle $vehicle)
+    {
+        if ($vehicle->user_id !== Auth::id()) {
+            abort(403);
+        }
+    }
+
     protected function validateVehicle(Request $request, $ignoreId = null)
     {
         $rules = [
@@ -156,13 +150,12 @@ class VehicleController extends Controller
                 'nullable', 'string', 'size:17',
                 Rule::unique('client_vehicles')->where('user_id', Auth::id())->ignore($ignoreId)
             ],
-            'is_primary'           => 'nullable|boolean',
-            'vehicle_photo'        => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // 2MB limit
+            'is_primary'           => 'sometimes|boolean',
+            'vehicle_photo'        => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ];
 
         $validated = $request->validate($rules);
-
-        $validated['is_primary'] = $request->has('is_primary');
+        $validated['is_primary'] = $request->boolean('is_primary'); // Cleaner boolean conversion
         $validated['user_id'] = Auth::id();
 
         return $validated;
