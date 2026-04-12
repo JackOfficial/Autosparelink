@@ -58,7 +58,7 @@
                                 <h5 class="fw-bold mb-0 text-truncate">
                                     {{ $vehicle->brand?->brand_name ?? 'Unknown Brand' }}
                                 </h5>
-                                <p class="text-secondary mb-0 text-truncate">
+                                <p class="text-dark mb-0 text-truncate">
                                     {{ $vehicle->vehicleModel?->model_name ?? 'General Model' }} 
                                     <span class="badge bg-light text-dark border ms-1">{{ $vehicle->production_start }}</span>
                                 </p>
