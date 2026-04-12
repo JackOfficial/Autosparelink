@@ -86,7 +86,7 @@
 
                         {{-- Action Footer --}}
                         <div class="d-flex gap-2 pt-3 border-top mt-auto">
-                            <a href="{{ route('vehicles.edit', $vehicle->id) }}" class="btn btn-primary border btn-sm rounded-pill flex-grow-1 fw-bold text-secondary">
+                            <a href="{{ route('vehicles.edit', $vehicle->id) }}" class="btn btn-light border btn-sm rounded-pill flex-grow-1 fw-bold text-secondary">
                                 <i class="fas fa-edit me-1"></i> Edit
                             </a>
                             <form action="{{ route('vehicles.destroy', $vehicle->id) }}" method="POST" class="flex-grow-1" onsubmit="return confirm('Permanently remove this vehicle?')">
