@@ -18,38 +18,37 @@ class OnboardingController extends Controller
     {
         $user = Auth::user();
 
-        // If they already have a shop record, redirect them based on status
+        // If they already have a shop record, redirect to status or dashboard
         if ($user->shop) {
-            if ($user->shop->is_active) {
-                return redirect()->route('shop.dashboard');
-            }
-            return view('user.onboarding.pending'); // A "waiting for approval" view
+            return $user->hasActiveShop() 
+                ? redirect()->route('shop.dashboard') 
+                : redirect()->route('shop.register.success');
         }
 
         return view('shop.index');
     }
 
-    // App\Http\Controllers\Shop\OnboardingController.php
+    /**
+     * Show the pending status page.
+     */
+    public function registration_status()
+    {
+        $user = Auth::user();
 
-public function registration_status()
-{
-    $user = auth()->user();
+        if (!$user->shop) {
+            return redirect()->route('shop.register');
+        }
 
-    // Safety: If they don't have a shop record, they shouldn't be here
-    if (!$user->shop) {
-        return redirect()->route('shop.register');
+        if ($user->hasActiveShop()) {
+            return redirect()->route('shop.dashboard');
+        }
+
+        // Updated view path to match your structure
+        return view('user.onboarding.pending');
     }
-
-    // If already active, send to dashboard
-    if ($user->hasActiveShop()) {
-        return redirect()->route('shop.dashboard');
-    }
-
-    return view('user.onboarding.pending');
-}
 
     /**
-     * Handle the shop registration submission.
+     * Handle the shop registration submission including document uploads.
      */
     public function store(Request $request)
     {
@@ -59,6 +58,10 @@ public function registration_status()
             'phone_number' => 'required|string|max:20',
             'address'      => 'required|string|max:255',
             'description'  => 'nullable|string|max:500',
+            'tin_number'   => 'required|string|max:50',
+            // Document Validation
+            'rdb_certificate' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'owner_id'        => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         try {
@@ -66,32 +69,54 @@ public function registration_status()
                 $user = Auth::user();
 
                 // 1. Create the Shop record
-                // We use updateOrCreate just in case a soft-deleted record exists
-                $user->shop()->create([
+                $shop = $user->shop()->create([
                     'shop_name'    => $request->shop_name,
                     'slug'         => Str::slug($request->shop_name),
                     'shop_email'   => $request->shop_email,
                     'phone_number' => $request->phone_number,
                     'address'      => $request->address,
                     'description'  => $request->description,
-                    'is_active'    => false, // Pending admin approval
+                    'tin_number'   => $request->tin_number,
+                    'is_active'    => false, 
                 ]);
 
-                // 2. Assign the 'shop' role via Spatie
-                // This allows them to access the shop-specific areas but 
-                // your middleware should still check 'is_active' for the dashboard
+                // 2. Handle File Uploads (Polymorphic)
+                if ($request->hasFile('rdb_certificate')) {
+                    $this->uploadDocument($request->file('rdb_certificate'), 'RDB Certificate', $shop);
+                }
+
+                if ($request->hasFile('owner_id')) {
+                    $this->uploadDocument($request->file('owner_id'), 'Owner ID / Passport', $shop);
+                }
+
+                // 3. Assign the 'shop' role via Spatie
                 if (!$user->hasRole('shop')) {
                     $user->assignRole('shop');
                 }
             });
 
-            // Redirect to the dedicated success/pending status page
-            return redirect()->route('shop.register.success')
+            return redirect()->route('register.success')
                 ->with('success', 'Application submitted successfully.');
 
         } catch (\Exception $e) {
-            // Log the error if needed: \Log::error($e->getMessage());
-            return back()->withInput()->with('error', 'Something went wrong while processing your application. Please try again.');
+            return back()->withInput()->with('error', 'Something went wrong. Please check your files and try again.');
         }
+    }
+
+    /**
+     * Private helper to process polymorphic document uploads.
+     */
+    private function uploadDocument($file, $title, $shop)
+    {
+        // Store in a 'private' folder for security
+        $path = $file->store('shop_verification/' . $shop->id, 'local');
+
+        $shop->documents()->create([
+            'title'       => $title,
+            'file_path'   => $path,
+            'file_type'   => $file->getClientOriginalExtension(),
+            'file_size'   => $file->getSize(),
+            'uploaded_by' => Auth::id(),
+        ]);
     }
 }
