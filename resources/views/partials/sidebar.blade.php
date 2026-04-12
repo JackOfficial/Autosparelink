@@ -138,7 +138,7 @@
                 </div>
             </div>
 
-            <a href="{{ route('vendor.dashboard') }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill fw-bold">
+            <a href="{{ route('shop.dashboard') }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill fw-bold">
                 <i class="fas fa-external-link-alt me-1 small"></i> Merchant Panel
             </a>
         </div>
