@@ -88,7 +88,7 @@
                 </p>
                 
                 {{-- Update the href to your registration route --}}
-                <a href="{{ route('vendor.register') }}" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
+                <a href="{{ route('shop.register') }}" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
                     <i class="fas fa-rocket me-1 small"></i> Become a Vendor
                 </a>
             </div>
