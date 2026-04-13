@@ -53,7 +53,7 @@
             <div class="mt-5">
                 <p class="text-muted">Verification usually takes <strong>12 to 24 hours</strong>.</p>
                 <div class="d-flex justify-content-center">
-                    <a href="mailto:vendors@autosparelink.com" class="btn btn-outline-primary px-4 btn-pill mr-2">
+                    <a href="{{ asset('tickets.index') }}" class="btn btn-outline-primary px-4 btn-pill mr-2">
                         <i class="fas fa-envelope mr-1"></i> Contact Support
                     </a>
                     <a href="/" class="btn btn-link text-dark">
