@@ -44,11 +44,18 @@ class ShopProfileController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit()
-    {
-       $shop = Auth::user()->shop;
-        return view('shop.profile.edit', compact('shop'));
+public function edit()
+{
+    $shop = auth()->user()->shop;
+
+    // Safety check: Redirect if no shop exists
+    if (!$shop) {
+        return redirect()->route('shop.index')
+            ->with('error', 'You need to create a shop before editing profile settings.');
     }
+
+    return view('shop.profile.edit', compact('shop'));
+}
 
     /**
      * Update the specified resource in storage.

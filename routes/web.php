@@ -247,8 +247,8 @@ Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group
    Route::resource('/orders', ShopOrderController::class); 
 
     Route::prefix('profile')->name('profile.')->group(function () {
-          Route::get('/profile', [ShopProfileController::class, 'edit'])->name('edit');
-          Route::put('/profile', [ShopProfileController::class, 'update'])->name('update');
+          Route::get('/edit', [ShopProfileController::class, 'edit'])->name('edit');
+          Route::put('/update', [ShopProfileController::class, 'update'])->name('update');
     });
 
     Route::prefix('support')->name('support.')->group(function () {

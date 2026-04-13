@@ -30,15 +30,17 @@
                                 </div>
 
                                 <div class="col-md-8">
-                                    <div class="mb-3">
-                                        <label class="small fw-bold text-muted">Business Name</label>
-                                        <input type="text" name="name" class="form-control" value="{{ $shop->name }}" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="small fw-bold text-muted">TIN Number (RRA)</label>
-                                        <input type="text" name="tin_number" class="form-control" value="{{ $shop->tin_number }}" placeholder="e.g. 123456789">
-                                    </div>
-                                </div>
+    <div class="mb-3">
+        <label class="small fw-bold text-muted">Business Name</label>
+        <input type="text" name="shop_name" class="form-control @error('shop_name') is-invalid @enderror" value="{{ old('shop_name', $shop->shop_name) }}" required>
+        @error('shop_name') <span class="text-danger small">{{ $message }}</span> @enderror
+    </div>
+    <div class="mb-3">
+        <label class="small fw-bold text-muted">TIN Number (RRA)</label>
+        <input type="text" name="tin_number" class="form-control @error('tin_number') is-invalid @enderror" value="{{ old('tin_number', $shop->tin_number) }}" placeholder="e.g. 123456789">
+        @error('tin_number') <span class="text-danger small">{{ $message }}</span> @enderror
+    </div>
+</div>
                             </div>
 
                             <hr class="my-4">
@@ -63,15 +65,16 @@
                                 <div class="card-body py-3 d-flex justify-content-between align-items-center">
                                     <div>
                                         <span class="small fw-bold text-muted d-block text-uppercase">Current Status</span>
-                                        @if($shop->is_verified)
-                                            <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Verified Merchant</span>
-                                        @else
-                                            <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Verification Pending</span>
-                                        @endif
+                                        @if($shop->is_active)
+                                    <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Verified Merchant</span>
+                                     @else
+                                   <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Verification Pending</span>
+                                    @endif
                                     </div>
                                     <div class="text-end">
                                         <span class="small fw-bold text-muted d-block text-uppercase">Platform Fee</span>
-                                        <span class="h5 fw-bold text-dark mb-0">{{ number_format($shop->commission_rate) }}%</span>
+                                    <span class="h5 fw-bold text-dark mb-0">{{ $shop->commission_rate ? number_format($shop->commission_rate) . '%' : 'Standard' }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
