@@ -41,20 +41,21 @@
         font-size: 24px;
     }
 
-    .stat-badge {
-        background: #ffc107;
-        padding: 12px 20px;
-        border-radius: 12px;
-        position: absolute; bottom: -20px; left: 25px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    .mt-overlap { margin-top: -80px; }
+    
+    .step-number {
+        width: 40px; height: 40px;
+        background: var(--accent-blue);
+        color: white;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 15px;
+        font-weight: bold;
     }
 
-    .mt-overlap { margin-top: -80px; }
-
     @media (max-width: 768px) {
-        .hero-wrapper { padding: 70px 0 100px; clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%); }
+        .hero-wrapper { padding: 70px 0 100px; }
         .mt-overlap { margin-top: -40px; }
-        .display-4 { font-size: 2.2rem; }
     }
 </style>
 @endpush
@@ -66,7 +67,7 @@
         <div class="container" x-show="loaded" x-transition.duration.800ms>
             <h1 class="display-4 font-weight-bold mb-3">Rwanda's Trusted Auto Marketplace</h1>
             <p class="lead opacity-75 mx-auto px-3" style="max-width: 750px;">
-                Connecting you to certified vendors for premium spare parts with nationwide safe delivery.
+                The bridge between certified spare part vendors and vehicle owners. Quality parts, verified shops, and nationwide delivery.
             </p>
         </div>
     </header>
@@ -75,62 +76,86 @@
         <div class="row align-items-center mb-5 bg-white shadow-lg rounded p-4 p-md-5 mx-0 no-gutters">
             <div class="col-lg-6 mb-4 mb-lg-0 pr-lg-4 position-relative">
                 <img src="{{ asset('frontend/img/part.png') }}" class="img-fluid rounded shadow-sm" alt="Auto Spare Marketplace">
-                <div class="stat-badge d-none d-lg-block">
-                    <h4 class="font-weight-bold mb-0 text-dark">Verified</h4>
-                    <p class="small text-uppercase font-weight-bold mb-0 text-dark">Vendors Only</p>
-                </div>
             </div>
             <div class="col-lg-6 pl-lg-4">
-                <span class="badge badge-primary px-3 py-2 text-uppercase mb-3">The Smart Way to Shop</span>
-                <h2 class="font-weight-bold mb-4" style="color: var(--primary-dark);">Your Gateway to Quality Parts</h2>
+                <span class="badge badge-primary px-3 py-2 text-uppercase mb-3">One Platform, Endless Options</span>
+                <h2 class="font-weight-bold mb-4" style="color: var(--primary-dark);">The Smartest Way to Source Parts</h2>
                 <p class="text-muted mb-4">
-                    At <strong>AutoSpareLink</strong>, we host a curated network of reliable spare part shops. We verify every vendor to ensure you only get premium, durable components delivered directly to your door anywhere in Rwanda.
+                    Why spend hours visiting different shops? <strong>AutoSpareLink</strong> brings together Rwanda's most reputable auto shops under one roof. Whether you are a car owner needing a specific engine part or a shop owner wanting to expand your reach, we provide the infrastructure to make it happen safely.
                 </p>
                 <div class="row">
-                    @php $features = ['Verified Shops', 'Nationwide Delivery', 'Buyer Protection', 'Expert Support']; @endphp
-                    @foreach($features as $feature)
-                        <div class="col-6 mb-2">
-                            <i class="fa fa-check-circle text-success mr-2"></i> {{ $feature }}
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <div class="py-5" x-data="{ tab: 'mission' }">
-            <div class="text-center mb-5">
-                <div class="btn-group p-1 bg-light rounded-pill border shadow-sm">
-                    <button type="button" class="btn rounded-pill px-5 py-2 transition" :class="tab === 'mission' ? 'btn-primary shadow' : 'btn-light'" @click="tab = 'mission'">Our Mission</button>
-                    <button type="button" class="btn rounded-pill px-5 py-2 transition" :class="tab === 'vision' ? 'btn-primary shadow' : 'btn-light'" @click="tab = 'vision'">Our Vision</button>
-                </div>
-            </div>
-            
-            <div class="row justify-content-center">
-                <div class="col-lg-8 text-center" x-show="tab === 'mission'" x-transition.fade>
-                    <h3 class="font-weight-bold">Bridging the Gap</h3>
-                    <p class="text-muted lead">To empower local shops and vehicle owners through a secure, transparent marketplace that guarantees quality and convenience.</p>
-                </div>
-                <div class="col-lg-8 text-center" x-show="tab === 'vision'" x-transition.fade x-cloak>
-                    <h3 class="font-weight-bold">A Digital Automotive Hub</h3>
-                    <p class="text-muted lead">To be the #1 destination for automotive needs in East Africa, known for trust, speed, and vendor excellence.</p>
+                    <div class="col-6 mb-2"><i class="fa fa-store text-primary mr-2"></i> Verified Vendors</div>
+                    <div class="col-6 mb-2"><i class="fa fa-truck text-primary mr-2"></i> Nationwide Delivery</div>
+                    <div class="col-6 mb-2"><i class="fa fa-check-double text-primary mr-2"></i> Quality Checks</div>
+                    <div class="col-6 mb-2"><i class="fa fa-shield-alt text-primary mr-2"></i> Buyer Protection</div>
                 </div>
             </div>
         </div>
 
         <div class="py-5">
-            <h2 class="font-weight-bold text-center mb-5">Why Choose Our Marketplace?</h2>
+            <h2 class="font-weight-bold text-center mb-5">Buying Made Simple</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4 text-center px-4">
+                    <div class="step-number mx-auto">1</div>
+                    <h5 class="font-weight-bold">Search & Compare</h5>
+                    <p class="small text-muted">Browse thousands of parts from different shops. Filter by car model, year, and price.</p>
+                </div>
+                <div class="col-md-4 mb-4 text-center px-4">
+                    <div class="step-number mx-auto">2</div>
+                    <h5 class="font-weight-bold">Secure Order</h5>
+                    <p class="small text-muted">Pay securely through local gateways. We hold your funds until you receive the correct part.</p>
+                </div>
+                <div class="col-md-4 mb-4 text-center px-4">
+                    <div class="step-number mx-auto">3</div>
+                    <h5 class="font-weight-bold">Fast Delivery</h5>
+                    <p class="small text-muted">Our logistics team picks up the part from the vendor and delivers it to you, anywhere in Rwanda.</p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-5">
+
+        <div class="py-5 bg-light rounded-xl p-4 p-md-5">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h2 class="font-weight-bold mb-4">Grow Your Shop with Us</h2>
+                    <p class="text-muted mb-4">Are you a spare parts vendor? Join the digital revolution. Reach customers in provinces you've never reached before and let us handle the logistics while you focus on your inventory.</p>
+                    <div class="row mb-4">
+                        <div class="col-sm-6 mb-3">
+                            <h6 class="font-weight-bold"><i class="fa fa-chart-line text-success mr-2"></i> Increased Sales</h6>
+                            <p class="small text-muted">Get exposure to thousands of daily visitors across the country.</p>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <h6 class="font-weight-bold"><i class="fa fa-box text-success mr-2"></i> Easy Inventory</h6>
+                            <p class="small text-muted">Simple dashboard to upload and manage your parts list.</p>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-primary btn-lg rounded-pill px-5">Register Your Shop</a>
+                </div>
+                <div class="col-lg-5 text-center d-none d-lg-block">
+                    <div class="p-4 bg-white shadow rounded-lg">
+                        <i class="fa fa-store-alt fa-5x text-primary mb-3"></i>
+                        <h4 class="font-weight-bold">Become a Vendor</h4>
+                        <p class="small text-muted">Join the network of trusted Rwandan auto shops.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="py-5">
+            <h2 class="font-weight-bold text-center mb-5">Why People Trust Us</h2>
             <div class="row">
                 @php 
                     $values = [
-                        ['icon' => 'store', 'title' => 'Vetted Vendors', 'desc' => 'We only partner with shops that share our commitment to high-quality parts.', 'active' => false],
-                        ['icon' => 'truck', 'title' => 'Safe Logistics', 'desc' => 'Real-time tracking and secure handling across all Rwandan provinces.', 'active' => true],
-                        ['icon' => 'shield-check', 'title' => 'Quality Guarantee', 'desc' => 'Every part sold through our platform is backed by our strict quality inspection.', 'active' => false]
+                        ['icon' => 'certificate', 'title' => 'Vetted Excellence', 'desc' => 'We physically visit and verify every shop before they list on our platform.'],
+                        ['icon' => 'hand-holding-usd', 'title' => 'Fair Pricing', 'desc' => 'Competitive market prices with no hidden fees for the buyer.'],
+                        ['icon' => 'headset', 'title' => '24/7 Assistance', 'desc' => 'Our experts help you match the right part to your VIN number.']
                     ];
                 @endphp
                 @foreach($values as $v)
                 <div class="col-md-4 mb-4">
-                    <div class="value-box text-center shadow-sm h-100 {{ $v['active'] ? 'border-primary' : '' }}">
-                        <div class="icon-wrapper {{ $v['active'] ? 'bg-primary text-white' : '' }}"><i class="fa fa-{{ $v['icon'] }}"></i></div>
+                    <div class="value-box text-center shadow-sm h-100">
+                        <div class="icon-wrapper"><i class="fa fa-{{ $v['icon'] }}"></i></div>
                         <h5 class="font-weight-bold">{{ $v['title'] }}</h5>
                         <p class="small text-muted mb-0">{{ $v['desc'] }}</p>
                     </div>
@@ -138,6 +163,7 @@
                 @endforeach
             </div>
         </div>
+
     </div>
 </div>
 @endsection
