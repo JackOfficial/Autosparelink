@@ -18,16 +18,26 @@
                             @method('PUT')
 
                             <div class="row mb-4">
-                                <div class="col-md-4 text-center border-end">
-                                    <label class="small fw-bold text-muted d-block mb-3">Shop Logo</label>
-                                    <div class="mb-3">
-                                        <img src="{{ $shop->logo ? asset('storage/' . $shop->logo) : asset('images/default-shop.png') }}" 
-                                             class="rounded-circle border p-1 shadow-sm" 
-                                             style="width: 120px; height: 120px; object-fit: cover;">
-                                    </div>
-                                    <input type="file" name="logo" class="form-control form-control-sm">
-                                    <div class="small text-muted mt-2">Recommended: 500x500px</div>
-                                </div>
+                                <div class="col-md-4 text-center border-end" 
+     x-data="imageViewer('{{ $shop->logo ? asset('storage/' . $shop->logo) : asset('images/default-shop.png') }}')">
+    
+    <label class="small fw-bold text-muted d-block mb-3">Shop Logo</label>
+    
+    <div class="mb-3">
+        <img :src="imageUrl" 
+             class="rounded-circle border p-1 shadow-sm" 
+             style="width: 120px; height: 120px; object-fit: cover;"
+             alt="Shop Logo Preview">
+    </div>
+
+    <input type="file" 
+           name="logo" 
+           class="form-control form-control-sm" 
+           accept="image/*"
+           @change="fileChosen">
+    
+    <div class="small text-muted mt-2">Recommended: 500x500px</div>
+</div>
 
                                 <div class="col-md-8">
     <div class="mb-3">
@@ -90,4 +100,28 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+    function imageViewer(defaultUrl) {
+        return {
+            imageUrl: defaultUrl,
+
+            fileChosen(event) {
+                this.fileToDataUrl(event, src => this.imageUrl = src)
+            },
+
+            fileToDataUrl(event, callback) {
+                if (! event.target.files.length) return
+
+                let file = event.target.files[0],
+                    reader = new FileReader()
+
+                reader.readAsDataURL(file)
+                reader.onload = e => callback(e.target.result)
+            }
+        }
+    }
+</script>
+    @endpush
 </x-shop-dashboard>
