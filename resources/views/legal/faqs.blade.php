@@ -12,16 +12,19 @@
         </div>
     </div>
 </div>
+
 <div class="container-fluid mb-5" 
      x-data="{ 
         search: '', 
         category: 'All',
         faqs: [
-            { cat: 'Shipping', q: 'How long does shipping to Kigali take?', a: 'Stock items usually ship within 1-3 working days. International delivery varies by courier.' },
-            { cat: 'Payments', q: 'Do you accept Mobile Money?', a: 'Yes, we accept MoMo, bank transfers, and major credit cards for all spare parts orders.' },
-            { cat: 'Returns', q: 'What is the restocking fee?', a: 'A 20% restocking fee (minimum $10) applies to all approved returns.' },
-            { cat: 'Account', q: 'How do I track my order?', a: 'Once your order is dispatched, a tracking number from DHL, FedEx, or TNT will be emailed to you.' },
-            { cat: 'Products', q: 'Are the parts original (OEM)?', a: 'We supply both genuine OEM parts and high-quality aftermarket substitutions.' }
+            { cat: 'Shipping', q: 'How long does delivery within Rwanda take?', a: 'For Kigali, we offer same-day or next-day delivery. For other provinces, it typically takes 2-3 working days after the vendor hands the item to our logistics team.' },
+            { cat: 'Payments', q: 'Is my payment secure?', a: 'Yes. We use an escrow system. Your payment is held securely by AutoSpareLink and only released to the vendor after you receive and inspect your part.' },
+            { cat: 'Vendors', q: 'How can I sell my spare parts on AutoSpareLink?', a: 'Simply click on \'Launch a Shop\' or register as a vendor. Once our team verifies your business documents and shop location in Rwanda, you can start listing parts.' },
+            { cat: 'Returns', q: 'What happens if a vendor sends the wrong part?', a: 'If the part does not match the description or your VIN, you are protected by our Safe Delivery Guarantee. We will collect the part and issue a full refund.' },
+            { cat: 'Products', q: 'How do I know if a part fits my car?', a: 'We recommend using our VIN Decoder tool or messaging the vendor directly via the product page to confirm compatibility before purchasing.' },
+            { cat: 'Payments', q: 'What payment methods do you support?', a: 'We support MTN MoMo, Airtel Money, Bank Transfers, and all major Credit/Debit cards via our secure gateway.' },
+            { cat: 'Vendors', q: 'What are the fees for selling?', a: 'Registration is free. We only charge a small commission fee on successful sales to cover logistics, payment processing, and marketing.' }
         ],
         get filteredFaqs() {
             return this.faqs.filter(i => {
@@ -49,26 +52,27 @@
             <div class="bg-white p-4 mb-30 shadow-sm rounded border-top border-primary" style="border-top-width: 3px !important;">
                 <h5 class="font-weight-bold mb-3 text-uppercase small">Categories</h5>
                 <div class="list-group list-group-flush">
-                    <button @click="category = 'All'" :class="category === 'All' ? 'text-primary font-weight-bold' : ''" class="list-group-item list-group-item-action bg-transparent border-0 px-0">All Categories</button>
-                    <button @click="category = 'Shipping'" :class="category === 'Shipping' ? 'text-primary font-weight-bold' : ''" class="list-group-item list-group-item-action bg-transparent border-0 px-0">Orders & Shipping</button>
-                    <button @click="category = 'Payments'" :class="category === 'Payments' ? 'text-primary font-weight-bold' : ''" class="list-group-item list-group-item-action bg-transparent border-0 px-0">Payments</button>
-                    <button @click="category = 'Products'" :class="category === 'Products' ? 'text-primary font-weight-bold' : ''" class="list-group-item list-group-item-action bg-transparent border-0 px-0">Products & Returns</button>
-                    <button @click="category = 'Account'" :class="category === 'Account' ? 'text-primary font-weight-bold' : ''" class="list-group-item list-group-item-action bg-transparent border-0 px-0">Account & Login</button>
+                    <button @click="category = 'All'" :class="category === 'All' ? 'text-primary font-weight-bold' : ''" class="list-group-item list-group-item-action bg-transparent border-0 px-0">All Questions</button>
+                    <button @click="category = 'Vendors'" :class="category === 'Vendors' ? 'text-primary font-weight-bold' : ''" class="list-group-item list-group-item-action bg-transparent border-0 px-0">Selling & Shops</button>
+                    <button @click="category = 'Shipping'" :class="category === 'Shipping' ? 'text-primary font-weight-bold' : ''" class="list-group-item list-group-item-action bg-transparent border-0 px-0">Delivery & Logistics</button>
+                    <button @click="category = 'Payments'" :class="category === 'Payments' ? 'text-primary font-weight-bold' : ''" class="list-group-item list-group-item-action bg-transparent border-0 px-0">Secure Payments</button>
+                    <button @click="category = 'Returns'" :class="category === 'Returns' ? 'text-primary font-weight-bold' : ''" class="list-group-item list-group-item-action bg-transparent border-0 px-0">Returns & Refunds</button>
                 </div>
             </div>
         </div>
+
         <div class="col-lg-9 col-md-8">
             <div class="bg-white p-4 p-md-5 mb-4 shadow-sm rounded">
                 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                    <h3 class="font-weight-bold mb-0">Frequently Asked Questions</h3>
-                    <span class="badge badge-primary badge-pill px-3 py-2" x-text="filteredFaqs.length + ' Results'"></span>
+                    <h3 class="font-weight-bold mb-0">Help Center</h3>
+                    <span class="badge badge-primary badge-pill px-3 py-2" x-text="filteredFaqs.length + ' FAQs Found'"></span>
                 </div>
 
                 <template x-if="filteredFaqs.length === 0">
                     <div class="text-center py-5">
                         <i class="fa fa-search fa-3x text-muted mb-3"></i>
                         <p class="lead text-muted">No questions found matching "<span x-text="search"></span>"</p>
-                        <button @click="search = ''; category = 'All'" class="btn btn-primary btn-pill px-4">Clear All Filters</button>
+                        <button @click="search = ''; category = 'All'" class="btn btn-primary btn-pill px-4">View All FAQs</button>
                     </div>
                 </template>
 
@@ -97,22 +101,21 @@
                     </template>
                 </div>
 
-                <div class="mt-5 p-4 bg-primary text-white rounded-lg d-flex align-items-center justify-content-between flex-wrap">
+                <div class="mt-5 p-4 bg-dark text-white rounded-lg d-flex align-items-center justify-content-between flex-wrap shadow">
                     <div>
-                        <h5 class="mb-1 font-weight-bold">Didn't find what you need?</h5>
-                        <p class="mb-0 opacity-75">Our Kigali-based team is ready to help you find the right part.</p>
+                        <h5 class="mb-1 font-weight-bold text-primary">Own a Spare Parts Shop?</h5>
+                        <p class="mb-0 opacity-75">Join Rwanda's largest automotive network and start selling today.</p>
                     </div>
-                    <a href="mailto:help@autosparelink.com" class="btn btn-light text-primary font-weight-bold btn-pill px-4 mt-3 mt-md-0">
-                        Contact Support
+                    <a href="{{ route('register') }}" class="btn btn-primary font-weight-bold btn-pill px-4 mt-3 mt-md-0">
+                        Become a Vendor
                     </a>
                 </div>
             </div>
         </div>
-        </div>
+    </div>
 </div>
 
 <style>
-    /* Professional UI Enhancements */
     .faq-card {
         transition: all 0.3s ease;
         border: 1px solid #eef0f2 !important;
@@ -137,8 +140,6 @@
         border-radius: 50px;
     }
     .opacity-75 { opacity: 0.75; }
-    
-    /* Animation for filtered items */
     [x-cloak] { display: none !important; }
 </style>
 

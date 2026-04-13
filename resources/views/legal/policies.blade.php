@@ -13,6 +13,7 @@
         border-left: 3px solid transparent;
         transition: all 0.2s ease;
         cursor: pointer;
+        padding: 15px 20px;
     }
     .sidebar-link.active {
         background-color: #f8f9fa;
@@ -28,121 +29,127 @@
         transition: transform 0.2s;
     }
     .policy-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+    .market-note {
+        background: #f0f7ff;
+        border-radius: 8px;
+        padding: 15px;
+        border-left: 4px solid #007bff;
+    }
 </style>
 
 <div class="container-fluid mt-4" x-data="{ section: 'privacy' }">
     <div class="row px-xl-5">
         
         <div class="col-12">
-            <nav class="breadcrumb bg-light mb-4 shadow-sm">
+            <nav class="breadcrumb bg-light mb-4 shadow-sm rounded">
                 <a class="breadcrumb-item text-dark" href="/">Home</a>
                 <span class="breadcrumb-item active">Company Policies</span>
             </nav>
         </div>
 
-        <div class="col-lg-3">
-            <div class="bg-white shadow-sm rounded-lg sticky-top sticky-offset">
+        <div class="col-lg-3 mb-4">
+            <div class="bg-white shadow-sm rounded-lg sticky-top sticky-offset border">
                 <div class="p-3 bg-dark text-white rounded-top">
-                    <h6 class="mb-0 text-uppercase small font-weight-bold">Policy Navigation</h6>
+                    <h6 class="mb-0 text-uppercase small font-weight-bold">Policy Hub</h6>
                 </div>
                 <div class="list-group list-group-flush">
                     <a @click="section = 'privacy'" :class="{ 'active': section === 'privacy' }" class="list-group-item list-group-item-action sidebar-link">
-                        <i class="fa fa-shield-alt mr-2"></i> Privacy Policy
+                        <i class="fa fa-user-lock mr-2"></i> Privacy & Data
                     </a>
                     <a @click="section = 'returns'" :class="{ 'active': section === 'returns' }" class="list-group-item list-group-item-action sidebar-link">
-                        <i class="fa fa-undo mr-2"></i> Return & Refunds
+                        <i class="fa fa-sync-alt mr-2"></i> Marketplace Returns
                     </a>
                     <a @click="section = 'shipping'" :class="{ 'active': section === 'shipping' }" class="list-group-item list-group-item-action sidebar-link">
-                        <i class="fa fa-truck mr-2"></i> Shipping & Delivery
+                        <i class="fa fa-truck-moving mr-2"></i> Shipping & Logistics
                     </a>
                     <a @click="section = 'cancellation'" :class="{ 'active': section === 'cancellation' }" class="list-group-item list-group-item-action sidebar-link">
-                        <i class="fa fa-times-circle mr-2"></i> Cancellation
+                        <i class="fa fa-ban mr-2"></i> Order Cancellation
                     </a>
-                    <a @click="section = 'legal'" :class="{ 'active': section === 'legal' }" class="list-group-item list-group-item-action sidebar-link">
-                        <i class="fa fa-gavel mr-2"></i> Legal & Jurisdiction
+                    <a @click="section = 'dispute'" :class="{ 'active': section === 'dispute' }" class="list-group-item list-group-item-action sidebar-link">
+                        <i class="fa fa-gavel mr-2"></i> Dispute Resolution
                     </a>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-9">
-            <div class="bg-white p-4 p-md-5 shadow-sm rounded-lg policy-content">
+            <div class="bg-white p-4 p-md-5 shadow-sm rounded-lg policy-content border">
                 
                 <div x-show="section === 'privacy'" x-transition:enter.duration.300ms>
-                    <h3 class="text-primary mb-4">Privacy Policy</h3>
-                    <p class="lead">How we handle your data at AutoSpareLink.</p>
+                    <h3 class="text-primary mb-4">Privacy & Data Policy</h3>
+                    <p class="lead">Your trust is our priority. Here is how we manage your information within our marketplace ecosystem.</p>
                     <hr>
-                    <h5>Information Collection</h5>
-                    <p>We collect essential data to process your orders and improve your experience. This includes your name, contact details, and vehicle preferences.</p>
-                    <div class="alert alert-light border small">
-                        <strong>Pro Tip:</strong> You can manage your cookie preferences through your browser settings at any time.
+                    <h5>Vendor-Buyer Data Sharing</h5>
+                    <p>To facilitate delivery, we share your contact and address details only with the specific vendor you purchased from and our logistics partners. We never sell your data to third-party advertisers.</p>
+                    <div class="market-note mt-3">
+                        <i class="fa fa-info-circle mr-2"></i>
+                        <strong>Secure Payments:</strong> We use Flutterwave and MTN MoMo for encrypted transactions. AutoSpareLink does not store your bank or card PINs.
                     </div>
-                    <h5>Data Security</h5>
-                    <p>All sensitive transactions are processed through <strong>SSL-encrypted</strong> channels. We do not store credit card details on our local servers in Kigali.</p>
                 </div>
 
                 <div x-show="section === 'returns'" x-cloak x-transition:enter.duration.300ms>
-                    <h3 class="text-primary mb-4">Return & Refund Policy</h3>
+                    <h3 class="text-primary mb-4">Marketplace Return & Refund</h3>
                     <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="text-center p-3 border rounded">
-                                <span class="text-muted small d-block">Window</span>
-                                <strong class="h5">14 Days</strong>
+                        <div class="col-md-4 mb-2">
+                            <div class="text-center p-3 border rounded bg-light">
+                                <span class="text-muted small d-block">Inspection Window</span>
+                                <strong class="h5">48 Hours</strong>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="text-center p-3 border rounded">
-                                <span class="text-muted small d-block">Condition</span>
-                                <strong class="h5">Unused</strong>
+                        <div class="col-md-4 mb-2">
+                            <div class="text-center p-3 border rounded bg-light">
+                                <span class="text-muted small d-block">Refund Processing</span>
+                                <strong class="h5">3-5 Days</strong>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="text-center p-3 border rounded">
-                                <span class="text-muted small d-block">Restocking</span>
-                                <strong class="h5">20% Fee</strong>
+                        <div class="col-md-4 mb-2">
+                            <div class="text-center p-3 border rounded bg-light">
+                                <span class="text-muted small d-block">Admin Fee</span>
+                                <strong class="h5">15%</strong>
                             </div>
                         </div>
                     </div>
-                    <h5>Eligibility</h5>
-                    <p>Parts must be returned in original packaging with manufacturer labels intact. Returns after 30 days are strictly not accepted.</p>
-                    <h5>How to Return</h5>
+                    <h5>Return Eligibility</h5>
+                    <p>As a marketplace, returns are accepted if the part is <strong>defective, wrongly described by the vendor, or incorrect for your VIN</strong>. "Change of mind" returns are subject to the individual vendor's approval.</p>
+                    <h5>The Refund Process</h5>
                     <ul>
-                        <li>Initiate a request via <a href="mailto:help@autosparelink.com">help@autosparelink.com</a>.</li>
-                        <li>Ship using the original carrier to simplify customs/duty reclaims.</li>
-                        <li>A refund (minus 20% restocking fee) will be issued upon inspection.</li>
+                        <li>Report a problem within 48 hours of delivery.</li>
+                        <li>Our logistics team will verify the part condition at the pickup point.</li>
+                        <li>Refunds are credited to your <strong>AutoSpareLink Wallet</strong> or original payment method.</li>
                     </ul>
                 </div>
 
                 <div x-show="section === 'shipping'" x-cloak x-transition:enter.duration.300ms>
-                    <h3 class="text-primary mb-4">Shipping & Delivery</h3>
-                    <p>We partner with <strong>FedEx, DHL, and TNT</strong> to deliver to nearly 180 countries.</p>
-                    <h5>Estimated Timelines</h5>
-                    <p>Stocked items usually ship within <strong>1-3 working days</strong>. Glass or heavy freight items may require additional handling time and special packaging fees.</p>
-                    <div class="card bg-light border-0">
-                        <div class="card-body py-3">
-                            <i class="fa fa-info-circle text-primary mr-2"></i>
-                            <strong>Note:</strong> Customers are responsible for tracking shipments and completing local customs formalities.
-                        </div>
+                    <h3 class="text-primary mb-4">Shipping & Logistics</h3>
+                    <p>We provide unified logistics for all vendors on our platform to ensure a consistent experience for you.</p>
+                    <h5>Delivery Timelines (Rwanda)</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fa fa-map-marker-alt text-primary mr-2"></i> <strong>Kigali:</strong> Same day or Next day.</li>
+                        <li><i class="fa fa-road text-primary mr-2"></i> <strong>Upcountry:</strong> 2-3 Working days.</li>
+                    </ul>
+                    <div class="alert alert-warning border-0 small mt-3">
+                        <i class="fa fa-exclamation-triangle mr-2"></i>
+                        <strong>Heavy Items:</strong> Engines and gearboxes require specialized handling and may take an additional 24 hours for secure crating.
                     </div>
                 </div>
 
                 <div x-show="section === 'cancellation'" x-cloak x-transition:enter.duration.300ms>
-                    <h3 class="text-primary mb-4">Cancellation Policy</h3>
-                    <h5>Standard Orders</h5>
-                    <p>You may cancel any order that has not yet entered the shipping phase. Once the status moves to "Shipped," our <strong>Return Policy</strong> applies.</p>
-                    <h5>Non-Cancellable Items</h5>
-                    <p class="text-danger">Special orders for "Remote Dealer Branch" items cannot be cancelled once the payment is processed.</p>
+                    <h3 class="text-primary mb-4">Order Cancellation</h3>
+                    <h5>Before Dispatch</h5>
+                    <p>You can cancel your order for a full refund as long as the status is "Processing." Once the vendor has handed the item to our courier, it is considered dispatched.</p>
+                    <h5>Vendor Cancellations</h5>
+                    <p>Occasionally, a vendor may report an item out of stock. In this case, AutoSpareLink will notify you immediately and issue a <strong>100% refund</strong> plus a discount voucher for your next purchase.</p>
                 </div>
 
-                <div x-show="section === 'legal'" x-cloak x-transition.duration.300ms>
-                    <h3 class="text-primary mb-4">Legal & Jurisdiction</h3>
-                    <h5>Governing Law</h5>
-                    <p>These terms are governed by the laws of <strong>Dubai, United Arab Emirates</strong>. By using this platform, you consent to UAE jurisdiction for all legal disputes.</p>
+                <div x-show="section === 'dispute'" x-cloak x-transition.duration.300ms>
+                    <h3 class="text-primary mb-4">Dispute Resolution</h3>
+                    <p>These terms are governed by the laws of the <strong>Republic of Rwanda</strong>. Any disputes between buyers and vendors that cannot be settled via our support team will be mediated by AutoSpareLink Legal.</p>
                     
                     <div class="mt-5 p-4 border rounded bg-light">
-                        <h6 class="font-weight-bold">Contact Legal Team</h6>
-                        <p class="mb-1 small">AutoSpareLink - Legal Department</p>
-                        <p class="mb-0 small"><i class="fa fa-envelope mr-1"></i> privacy@autosparelink.com</p>
+                        <h6 class="font-weight-bold"><i class="fa fa-headset mr-2"></i>Resolution Center</h6>
+                        <p class="mb-1 small">Email: support@autosparelink.com</p>
+                        <p class="mb-0 small text-muted">Response Time: Within 12 working hours.</p>
                     </div>
                 </div>
 
@@ -152,21 +159,21 @@
                 <div class="col-md-6 mb-3">
                     <a href="/terms-and-conditions" class="card policy-card text-decoration-none p-3 h-100">
                         <div class="d-flex align-items-center">
-                            <i class="fa fa-file-contract fa-2x text-primary mr-3"></i>
+                            <i class="fa fa-file-invoice fa-2x text-primary mr-3"></i>
                             <div>
-                                <h6 class="mb-0 text-dark">Terms of Service</h6>
-                                <small class="text-muted">General usage rules</small>
+                                <h6 class="mb-0 text-dark">Terms of Sale</h6>
+                                <small class="text-muted">Agreement between you and vendors</small>
                             </div>
                         </div>
                     </a>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <a href="/faqs" class="card policy-card text-decoration-none p-3 h-100">
+                    <a href="/contact" class="card policy-card text-decoration-none p-3 h-100">
                         <div class="d-flex align-items-center">
-                            <i class="fa fa-question-circle fa-2x text-primary mr-3"></i>
+                            <i class="fa fa-shield-check fa-2x text-success mr-3"></i>
                             <div>
-                                <h6 class="mb-0 text-dark">Help Center</h6>
-                                <small class="text-muted">Common questions</small>
+                                <h6 class="mb-0 text-dark">Buyer Protection</h6>
+                                <small class="text-muted">How we keep your money safe</small>
                             </div>
                         </div>
                     </a>
