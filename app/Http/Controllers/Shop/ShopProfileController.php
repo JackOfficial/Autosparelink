@@ -60,34 +60,37 @@ public function edit()
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request)
-    {
-       $shop = Auth::user()->shop;
+   public function update(Request $request)
+{
+    $shop = auth()->user()->shop;
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'phone_number' => 'required|string|max:20',
-            'address' => 'required|string|max:255',
-            'tin_number' => 'nullable|digits:9', // Rwanda RRA TIN is 9 digits
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
+    $request->validate([
+        // Ensure name is unique but ignore the current shop ID
+        'shop_name'    => 'required|string|max:255|unique:shops,shop_name,' . $shop->id,
+        'description'  => 'nullable|string|max:1000',
+        'phone_number' => 'required|string|max:20',
+        'address'      => 'required|string|max:255',
+        'tin_number'   => 'nullable|digits:9', 
+        'logo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+    ]);
 
-        $data = $request->only(['name', 'description', 'phone_number', 'address', 'tin_number']);
+    // Use specific keys to prevent mass-assignment vulnerabilities
+    $data = $request->only(['shop_name', 'description', 'phone_number', 'address', 'tin_number']);
 
-        // Handle Logo Upload
-        if ($request->hasFile('logo')) {
-            // Delete old logo if it exists
-            if ($shop->logo) {
-                Storage::disk('public')->delete($shop->logo);
-            }
-            $data['logo'] = $request->file('logo')->store('shops/logos', 'public');
+    // Handle Logo Upload
+    if ($request->hasFile('logo')) {
+        // Delete old logo from storage if it exists to save disk space
+        if ($shop->logo && Storage::disk('public')->exists($shop->logo)) {
+            Storage::disk('public')->delete($shop->logo);
         }
+        
+        $data['logo'] = $request->file('logo')->store('shops/logos', 'public');
+    }
 
-        $shop->update($data);
+    $shop->update($data);
 
-        return back()->with('success', 'Shop profile updated successfully.');
-      }
+    return back()->with('success', 'Shop profile updated successfully.');
+}
 
     /**
      * Remove the specified resource from storage.
