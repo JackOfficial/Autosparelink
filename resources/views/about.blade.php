@@ -130,7 +130,7 @@
                             <p class="small text-muted">Simple dashboard to upload and manage your parts list.</p>
                         </div>
                     </div>
-                    <a href="#" class="btn btn-primary btn-lg rounded-pill px-5">Register Your Shop</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary btn-lg rounded-pill px-5">Register Today!</a>
                 </div>
                 <div class="col-lg-5 text-center d-none d-lg-block">
                     <div class="p-4 bg-white shadow rounded-lg">
