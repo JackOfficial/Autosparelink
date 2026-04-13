@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             PartBrandsSeeder::class,
             PartSeeder::class,
             CountriesSeeder::class,
+            PageSeeder::class,
         ]);
     }
 }
