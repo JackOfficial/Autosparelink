@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Document; // Or whatever your model name is
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 class ShopController extends Controller
 {
@@ -30,6 +33,34 @@ class ShopController extends Controller
         
         return view('admin.shops.show', compact('shop'));
     }
+
+    public function viewDocument(Document $document)
+{
+    // Check if file exists on the 'local' or 'public' disk
+    if (!Storage::disk('local')->exists($document->file_path)) {
+        abort(404, 'Document not found on server.');
+    }
+
+    $path = storage_path('app/' . $document->file_path);
+
+    // This displays the file in the browser (PDFs and Images)
+    return response()->file($path, [
+        'Content-Type' => $document->file_type,
+        'Content-Disposition' => 'inline; filename="'.$document->title.'"'
+    ]);
+}
+
+public function downloadDocument(Document $document)
+{
+    if (!Storage::disk('local')->exists($document->file_path)) {
+        abort(404);
+    }
+
+    $path = storage_path('app/' . $document->file_path);
+
+    // This forces the browser to download the file
+    return response()->download($path, $document->title . '.' . $document->file_type);
+}
 
     /**
      * Approve a shop and make it live on the marketplace.

@@ -246,6 +246,14 @@ Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group
    Route::resource('/parts', ShopPartController::class);
    Route::resource('/orders', ShopOrderController::class); 
 
+   // Route for viewing/streaming the document
+    Route::get('/view-doc/{document}', [ShopController::class, 'viewDocument'])
+        ->name('admin.shops.view-doc');
+
+    // Route for downloading the document
+    Route::get('/download-doc/{document}', [ShopController::class, 'downloadDocument'])
+        ->name('admin.shops.download-doc');
+
     Route::prefix('profile')->name('profile.')->group(function () {
           Route::get('/edit', [ShopProfileController::class, 'edit'])->name('edit');
           Route::put('/update', [ShopProfileController::class, 'update'])->name('update');
