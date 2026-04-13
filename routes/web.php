@@ -214,7 +214,7 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
     Route::resource('addresses', UserAddressController::class);
     Route::resource('vehicles', VehicleController::class);
 
-   Route::get('/become-a-vendor', [OnboardingController::class, 'index'])->name('shop.register');
+   Route::get('/become-a-vendor', [OnboardingController::class, 'index'])->name('shop.register.form');
    Route::post('/become-a-vendor', [OnboardingController::class, 'store'])->name('shop.register.store');
    Route::get('/vendor-registration', [OnboardingController::class, 'registration_status'])->name('shop.register.success');
 });
