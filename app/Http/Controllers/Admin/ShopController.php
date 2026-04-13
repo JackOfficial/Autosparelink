@@ -34,19 +34,24 @@ class ShopController extends Controller
         return view('admin.shops.show', compact('shop'));
     }
 
-    public function viewDocument(Document $document)
+public function viewDocument(Document $document)
 {
-    // Check if file exists on the 'local' or 'public' disk
+    // Use the Storage facade to get the absolute path
+    // This is safer than manual string concatenation
     if (!Storage::disk('local')->exists($document->file_path)) {
         abort(404, 'Document not found on server.');
     }
 
-    $path = storage_path('app/' . $document->file_path);
+    $path = Storage::disk('local')->path($document->file_path);
 
-    // This displays the file in the browser (PDFs and Images)
+    // Automatically detect MIME type if file_type isn't a full MIME (e.g., 'pdf' vs 'application/pdf')
+    $mimeType = str_contains($document->file_type, '/') 
+                ? $document->file_type 
+                : $this->getMimeType($document->file_path);
+
     return response()->file($path, [
-        'Content-Type' => $document->file_type,
-        'Content-Disposition' => 'inline; filename="'.$document->title.'"'
+        'Content-Type' => $mimeType,
+        'Content-Disposition' => 'inline; filename="' . $document->title . '"'
     ]);
 }
 
@@ -56,10 +61,20 @@ public function downloadDocument(Document $document)
         abort(404);
     }
 
-    $path = storage_path('app/' . $document->file_path);
+    $path = Storage::disk('local')->path($document->file_path);
+    
+    // Get the original extension from the path to ensure the download works correctly
+    $extension = pathinfo($path, PATHINFO_EXTENSION);
 
-    // This forces the browser to download the file
-    return response()->download($path, $document->title . '.' . $document->file_type);
+    return response()->download($path, $document->title . '.' . $extension);
+}
+
+/**
+ * Helper to ensure we have a valid MIME type for the browser
+ */
+private function getMimeType($path)
+{
+    return Storage::disk('local')->mimeType($path) ?? 'application/octet-stream';
 }
 
     /**
