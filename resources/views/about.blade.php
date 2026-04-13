@@ -8,7 +8,6 @@
         --accent-blue: #007bff;
     }
 
-    /* Hero Section with modern curve */
     .hero-wrapper {
         background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
         padding: 100px 0 140px;
@@ -18,7 +17,6 @@
 
     [x-cloak] { display: none !important; }
 
-    /* Value Box Hover Effects */
     .value-box {
         padding: 30px;
         border: 2px solid transparent;
@@ -43,15 +41,6 @@
         font-size: 24px;
     }
 
-    /* Team & Avatar Improvements */
-    .team-avatar {
-        width: 100%; height: 350px;
-        object-fit: cover; border-radius: 20px;
-        transition: transform 0.6s ease;
-    }
-
-    .team-item:hover .team-avatar { transform: scale(1.05); }
-
     .stat-badge {
         background: #ffc107;
         padding: 12px 20px;
@@ -60,13 +49,12 @@
         box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
 
-    /* Bootstrap 4 Negative Margin Hack for Overlap */
     .mt-overlap { margin-top: -80px; }
 
     @media (max-width: 768px) {
         .hero-wrapper { padding: 70px 0 100px; clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%); }
         .mt-overlap { margin-top: -40px; }
-        .display-4 { font-size: 2.5rem; }
+        .display-4 { font-size: 2.2rem; }
     }
 </style>
 @endpush
@@ -76,9 +64,9 @@
 
     <header class="hero-wrapper text-center">
         <div class="container" x-show="loaded" x-transition.duration.800ms>
-            <h1 class="display-4 font-weight-bold mb-3">Our Identity & Mission</h1>
+            <h1 class="display-4 font-weight-bold mb-3">Rwanda's Trusted Auto Marketplace</h1>
             <p class="lead opacity-75 mx-auto px-3" style="max-width: 750px;">
-                Providing Rwanda's automotive industry with precision-engineered parts and world-class service.
+                Connecting you to certified vendors for premium spare parts with nationwide safe delivery.
             </p>
         </div>
     </header>
@@ -86,20 +74,20 @@
     <div class="container mt-overlap">
         <div class="row align-items-center mb-5 bg-white shadow-lg rounded p-4 p-md-5 mx-0 no-gutters">
             <div class="col-lg-6 mb-4 mb-lg-0 pr-lg-4 position-relative">
-                <img src="{{ asset('frontend/img/part.png') }}" class="img-fluid rounded shadow-sm" alt="Genuine Auto Parts">
+                <img src="{{ asset('frontend/img/part.png') }}" class="img-fluid rounded shadow-sm" alt="Auto Spare Marketplace">
                 <div class="stat-badge d-none d-lg-block">
-                    <h4 class="font-weight-bold mb-0 text-dark">100%</h4>
-                    <p class="small text-uppercase font-weight-bold mb-0 text-dark">Genuine</p>
+                    <h4 class="font-weight-bold mb-0 text-dark">Verified</h4>
+                    <p class="small text-uppercase font-weight-bold mb-0 text-dark">Vendors Only</p>
                 </div>
             </div>
             <div class="col-lg-6 pl-lg-4">
-                <span class="badge badge-primary px-3 py-2 text-uppercase mb-3">Established in Kigali</span>
-                <h2 class="font-weight-bold mb-4" style="color: var(--primary-dark);">Your Partner for Every Mile</h2>
+                <span class="badge badge-primary px-3 py-2 text-uppercase mb-3">The Smart Way to Shop</span>
+                <h2 class="font-weight-bold mb-4" style="color: var(--primary-dark);">Your Gateway to Quality Parts</h2>
                 <p class="text-muted mb-4">
-                    At <strong>AutoSpareLink</strong>, we bridge the gap between global manufacturers and local vehicle owners. Our goal is to ensure your vehicle stays on the road longer.
+                    At <strong>AutoSpareLink</strong>, we host a curated network of reliable spare part shops. We verify every vendor to ensure you only get premium, durable components delivered directly to your door anywhere in Rwanda.
                 </p>
                 <div class="row">
-                    @php $features = ['Fast Shipping', 'Expert Help', 'Secure Payments', 'Easy Returns']; @endphp
+                    @php $features = ['Verified Shops', 'Nationwide Delivery', 'Buyer Protection', 'Expert Support']; @endphp
                     @foreach($features as $feature)
                         <div class="col-6 mb-2">
                             <i class="fa fa-check-circle text-success mr-2"></i> {{ $feature }}
@@ -112,31 +100,31 @@
         <div class="py-5" x-data="{ tab: 'mission' }">
             <div class="text-center mb-5">
                 <div class="btn-group p-1 bg-light rounded-pill border shadow-sm">
-                    <button type="button" class="btn rounded-pill px-5 py-2 transition" :class="tab === 'mission' ? 'btn-primary shadow' : 'btn-light'" @click="tab = 'mission'">Mission</button>
-                    <button type="button" class="btn rounded-pill px-5 py-2 transition" :class="tab === 'vision' ? 'btn-primary shadow' : 'btn-light'" @click="tab = 'vision'">Vision</button>
+                    <button type="button" class="btn rounded-pill px-5 py-2 transition" :class="tab === 'mission' ? 'btn-primary shadow' : 'btn-light'" @click="tab = 'mission'">Our Mission</button>
+                    <button type="button" class="btn rounded-pill px-5 py-2 transition" :class="tab === 'vision' ? 'btn-primary shadow' : 'btn-light'" @click="tab = 'vision'">Our Vision</button>
                 </div>
             </div>
             
-            <div class="row justify-content-center min-vh-20">
+            <div class="row justify-content-center">
                 <div class="col-lg-8 text-center" x-show="tab === 'mission'" x-transition.fade>
-                    <h3 class="font-weight-bold">Empowering Mobility</h3>
-                    <p class="text-muted lead">To provide a seamless, transparent online shopping experience for auto spare parts in Rwanda.</p>
+                    <h3 class="font-weight-bold">Bridging the Gap</h3>
+                    <p class="text-muted lead">To empower local shops and vehicle owners through a secure, transparent marketplace that guarantees quality and convenience.</p>
                 </div>
                 <div class="col-lg-8 text-center" x-show="tab === 'vision'" x-transition.fade x-cloak>
-                    <h3 class="font-weight-bold">The Future of Spare Parts</h3>
-                    <p class="text-muted lead">To become Africa’s most trusted and innovative auto parts marketplace.</p>
+                    <h3 class="font-weight-bold">A Digital Automotive Hub</h3>
+                    <p class="text-muted lead">To be the #1 destination for automotive needs in East Africa, known for trust, speed, and vendor excellence.</p>
                 </div>
             </div>
         </div>
 
         <div class="py-5">
-            <h2 class="font-weight-bold text-center mb-5">Our Core Values</h2>
+            <h2 class="font-weight-bold text-center mb-5">Why Choose Our Marketplace?</h2>
             <div class="row">
                 @php 
                     $values = [
-                        ['icon' => 'award', 'title' => 'Unyielding Quality', 'desc' => 'Multi-point inspection protocol for safety.', 'active' => false],
-                        ['icon' => 'shipping-fast', 'title' => 'Precision Delivery', 'desc' => 'Logistics network optimized for speed.', 'active' => true],
-                        ['icon' => 'headset', 'title' => 'Dedicated Care', 'desc' => 'Experts ready to assist with VIN decoding.', 'active' => false]
+                        ['icon' => 'store', 'title' => 'Vetted Vendors', 'desc' => 'We only partner with shops that share our commitment to high-quality parts.', 'active' => false],
+                        ['icon' => 'truck', 'title' => 'Safe Logistics', 'desc' => 'Real-time tracking and secure handling across all Rwandan provinces.', 'active' => true],
+                        ['icon' => 'shield-check', 'title' => 'Quality Guarantee', 'desc' => 'Every part sold through our platform is backed by our strict quality inspection.', 'active' => false]
                     ];
                 @endphp
                 @foreach($values as $v)
