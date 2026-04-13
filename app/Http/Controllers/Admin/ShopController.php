@@ -34,29 +34,46 @@ class ShopController extends Controller
     /**
      * Approve a shop and make it live on the marketplace.
      */
-    public function approve(Shop $shop)
-    {
+public function approve(Shop $shop)
+{
+    DB::transaction(function () use ($shop) {
         $shop->update([
             'is_active' => true,
-            'approved_at' => now(), // If you have this column
+            'approved_at' => now(),
         ]);
 
-        return back()->with('success', "Shop '{$shop->shop_name}' has been approved successfully.");
-    }
+        $owner = $shop->user;
+
+        // Consistent role name: 'seller'
+        if (!$owner->hasRole('seller')) {
+            $owner->assignRole('seller');
+        }
+    });
+
+    return back()->with('success', "Shop '{$shop->shop_name}' approved. Owner is now a seller.");
+}
 
     /**
      * Toggle the active status (Suspending or Activating a shop).
      */
-    public function toggleStatus(Shop $shop)
-    {
-        $shop->update([
-            'is_active' => !$shop->is_active
-        ]);
+   public function toggleStatus(Shop $shop)
+{
+    $shop->update([
+        'is_active' => !$shop->is_active
+    ]);
 
-        $status = $shop->is_active ? 'activated' : 'suspended';
-        
-        return back()->with('success', "Shop has been {$status}.");
+    $owner = $shop->user;
+
+    if ($shop->is_active) {
+        $owner->assignRole('seller');
+        $status = 'activated';
+    } else {
+        $owner->removeRole('seller');
+        $status = 'suspended';
     }
+    
+    return back()->with('success', "Shop has been {$status}.");
+}
 
     /**
      * Show the form for editing the shop details.
@@ -88,20 +105,20 @@ class ShopController extends Controller
     /**
      * Remove the shop and potentially revoke the vendor role.
      */
-    public function destroy(Shop $shop)
-    {
-        DB::transaction(function () use ($shop) {
-            $user = $shop->user;
-            
-            // Optional: Remove vendor role if they no longer have a shop
-            if ($user->hasRole('shop')) {
-                $user->removeRole('shop');
-            }
+ public function destroy(Shop $shop)
+{
+    DB::transaction(function () use ($shop) {
+        $user = $shop->user;
+        
+        // Match the role name used in approve()
+        if ($user->hasRole('seller')) {
+            $user->removeRole('seller');
+        }
 
-            $shop->delete();
-        });
+        $shop->delete();
+    });
 
-        return redirect()->route('admin.shops.index')
-            ->with('success', 'Shop and related records removed.');
-    }
+    return redirect()->route('admin.shops.index')
+        ->with('success', 'Shop removed and seller role revoked.');
+}
 }
