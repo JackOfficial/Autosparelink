@@ -23,13 +23,13 @@
         </div>
 
         <div id="benefits" class="row g-4 py-5">
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm p-3 text-center rounded-4">
-                    <div class="mb-3 text-primary"><i class="fas fa-users fa-3x"></i></div>
-                    <h5 class="fw-bold">Wider Reach</h5>
-                    <p class="small text-muted">Don't wait for walk-in customers. Sell to buyers in Kigali, Musanze, and beyond.</p>
-                </div>
-            </div>
+           <div class="col-md-4">
+    <div class="card h-100 border-0 shadow-sm p-3 text-center rounded-4">
+        <div class="mb-3 text-primary"><i class="fas fa-users fa-3x"></i></div>
+        <h5 class="fw-bold">Wider Reach</h5>
+        <p class="small text-muted">Don't wait for walk-in customers. Expand your reach from Kigali to every province across Rwanda and beyond.</p>
+    </div>
+</div>
             <div class="col-md-4">
                 <div class="card h-100 border-0 shadow-sm p-3 text-center rounded-4">
                     <div class="mb-3 text-success"><i class="fas fa-percentage fa-3x"></i></div>
