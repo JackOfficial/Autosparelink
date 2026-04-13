@@ -20,7 +20,7 @@
                 <p class="lead text-muted mb-5">Join the most trusted marketplace for auto parts. Reach thousands of mechanics and car owners across the country.</p>
                 
                 <div class="d-flex">
-                    <a href="{{ route('shop.register.form') }}" class="btn btn-primary btn-lg btn-pill px-4 font-weight-bold shadow mr-3">
+                    <a href="{{ route('shop.create') }}" class="btn btn-primary btn-lg btn-pill px-4 font-weight-bold shadow mr-3">
                         Start Selling Now
                     </a>
                     <a href="#benefits" class="btn btn-secondary btn-lg btn-pill px-4">
