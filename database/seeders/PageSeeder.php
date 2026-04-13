@@ -13,7 +13,14 @@ class PageSeeder extends Seeder
             [
                 'title' => 'Terms & Conditions',
                 'slug'  => 'terms-and-conditions',
-                'content' => '<h3>1. Introduction</h3><p>Welcome to AutoSpareLink...</p>',
+                'content' => '
+    <p>Customers take full responsibility for ordering items and all associated substitutions. Information regarding spare parts and substitutions is for reference purposes only.</p>
+    <div class="legal-alert mt-3">
+        <strong>Substitution Policy:</strong> If a customer orders a discontinued part, AutoSpareLink reserves the right to supply an <strong>OEM substitution</strong> part number.
+    </div>
+    <br>
+    <p>By placing an order, the customer confirms full responsibility for the correctness and suitability of the part numbers selected.</p>
+',
             ],
             [
                 'title' => 'Privacy Policies',
