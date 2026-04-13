@@ -280,7 +280,6 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::post('/task-done/{id}', [AdminController::class, 'taskDone'])->name('taskDone');
 
     // Content Management
-    Route::resource('pages', WebpagesController::class);
     Route::resource('blog-categories', BlogCategoryController::class);
     // Articles / Blogs
     Route::resource('blogs', BlogController::class);
