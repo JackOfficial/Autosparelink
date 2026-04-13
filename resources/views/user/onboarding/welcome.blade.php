@@ -76,4 +76,29 @@
         </div>
     </div>
 </div>
+
+<div class="row mt-5">
+            <div class="col-12">
+                <div class="card bg-primary text-white border-0 rounded-4 shadow p-4 p-md-5 text-center">
+                    <h2 class="fw-bold mb-3">Ready to boost your sales?</h2>
+                    <p class="lead mb-4 opacity-75">Join dozens of successful spare parts dealers in Rwanda already selling with us.</p>
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                        <a href="{{ route('shop.register.form') }}" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary">
+                            Create Your Shop Account
+                        </a>
+                        <a href="/terms" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                            View Partner Terms
+                        </a>
+                    </div>
+                    <p class="mt-4 small opacity-50">Registration usually takes less than 5 minutes if you have your documents ready.</p>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center mt-5 text-muted small">
+            &copy; {{ date('Y') }} AutoSpareLink Rwanda. All rights reserved.
+        </p>
+    </div>
+</div>
+
 @endsection
