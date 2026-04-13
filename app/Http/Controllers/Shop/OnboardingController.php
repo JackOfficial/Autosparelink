@@ -25,8 +25,16 @@ class OnboardingController extends Controller
                 : redirect()->route('shop.register.success');
         }
 
-        return view('user.onboarding.registration');
+        return view('user.onboarding.welcome');
     }
+
+    /**
+ * New method to show the actual form
+ */
+public function showForm()
+{
+    return view('user.onboarding.registration');
+}
 
     /**
      * Show the pending status page.
