@@ -22,7 +22,7 @@ class OnboardingController extends Controller
         if ($user->shop) {
             return $user->hasActiveShop() 
                 ? redirect()->route('shop.dashboard') 
-                : redirect()->route('shop.register.success');
+                : redirect()->route('register.success');
         }
 
         return view('shop.index');
