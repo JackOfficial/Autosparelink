@@ -25,7 +25,7 @@ class OnboardingController extends Controller
                 : redirect()->route('shop.register.success');
         }
 
-        return view('shop.index');
+        return view('user.onboarding.registration');
     }
 
     /**
