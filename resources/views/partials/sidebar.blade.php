@@ -73,8 +73,8 @@
         </div>
     </div>
 
-{{-- Seller Area: Switch between Promotion and Management --}}
-@if(auth()->user()->canBecomeVendor())
+{{-- Seller Area: Switch between Promotion, Pending, and Management --}}
+@if(auth()->user()->canBecomeVendor() && !auth()->user()->shop)
     {{-- Promotion Card for regular users --}}
     <div class="px-4 mt-2 mb-4">
         <div class="p-3 rounded-4 bg-dark text-white border-0 shadow-sm text-center position-relative overflow-hidden">
@@ -87,10 +87,30 @@
                     Join our marketplace and reach thousands of buyers searching for parts.
                 </p>
                 
-                <a href="{{ route('shop.register') }}" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
+                {{-- Updated to shop.index (The Landing/Welcome route) --}}
+                <a href="{{ route('shop.index') }}" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
                     <i class="fas fa-rocket me-1 small"></i> Become a Vendor
                 </a>
             </div>
+        </div>
+    </div>
+
+@elseif(auth()->user()->shop && !auth()->user()->hasActiveShop())
+    {{-- Pending Verification Card --}}
+    <div class="px-4 mt-2 mb-4">
+        <div class="p-3 rounded-4 bg-white border border-warning text-center shadow-sm">
+            <div class="mb-2">
+                <i class="fas fa-user-shield text-warning mb-2" style="font-size: 1.5rem;"></i>
+                <p class="small fw-bold mb-1 text-dark">Verification in Progress</p>
+                <p class="text-muted mb-3" style="font-size: 0.7rem; line-height: 1.2;">
+                    Our team is reviewing your RDB documents. We'll notify you once your shop is live.
+                </p>
+            </div>
+            
+            {{-- Updated to shop.status --}}
+            <a href="{{ route('shop.status') }}" class="btn btn-sm btn-warning w-100 rounded-pill fw-bold text-white">
+                <i class="fas fa-clock me-1 small"></i> Check Status
+            </a>
         </div>
     </div>
 
@@ -100,7 +120,6 @@
         <div class="p-3 rounded-4 bg-light border text-center shadow-sm">
             <div class="d-flex align-items-center mb-3">
                 <div class="flex-shrink-0">
-                    {{-- Display Shop Logo or Initials --}}
                     <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                         <i class="fas fa-store"></i>
                     </div>
@@ -115,6 +134,7 @@
                 </div>
             </div>
 
+            {{-- Merchant Panel remains the same, ensure this route exists elsewhere --}}
             <a href="{{ route('shop.dashboard') }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill fw-bold">
                 <i class="fas fa-external-link-alt me-1 small"></i> Merchant Panel
             </a>
