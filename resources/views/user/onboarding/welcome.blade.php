@@ -99,8 +99,8 @@
                         <h2 class="font-weight-bold mb-3">Ready to boost your sales?</h2>
                         <p class="lead mb-4 opacity-75">Join dozens of successful spare parts dealers in Rwanda already selling with us.</p>
                         <div class="d-flex flex-column flex-sm-row justify-content-center">
-                            <a href="{{ route('shop.register.form') }}" class="btn btn-light btn-lg btn-pill px-5 font-weight-bold text-primary m-2">
-                                Create Your Shop Account
+                            <a href="{{ route('shop.create') }}" class="btn btn-light btn-lg btn-pill px-5 font-weight-bold text-primary m-2">
+                              Create Your Shop Account
                             </a>
                             <a href="{{ route('terms') }}" class="btn btn-outline-light btn-lg btn-pill px-4 m-2">
                                 View Partner Terms
