@@ -130,22 +130,29 @@
                             <p class="small text-muted">Simple dashboard to upload and manage your parts list.</p>
                         </div>
                     </div>
-                    <div class="mt-4">
+                   <div class="mt-4">
     @guest
         {{-- Show this to visitors who are not logged in --}}
         <a href="{{ route('register') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
             Register Today!
         </a>
     @else
-    @if(auth()->user()->hasActiveShop() && auth()->user()->shop)
-           <a href="{{ route('shop.dashboard') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
-            <i class="fas fa-tachometer-alt mr-1"></i> Go into {{ auth()->user()->shop->shop_name }}
-        </a>
-    @else
-      <a href="{{ route('shop.register.form') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
-            <i class="fa fa-plus-circle mr-2"></i> Launch Your Shop
-        </a>
-    @endif
+        @if(auth()->user()->hasActiveShop() && auth()->user()->shop)
+            {{-- User has an approved, active shop --}}
+            <a href="{{ route('shop.dashboard') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                <i class="fas fa-tachometer-alt mr-1"></i> Go into {{ auth()->user()->shop->shop_name }}
+            </a>
+        @elseif(auth()->user()->shop)
+            {{-- User has a shop record but it is NOT active (Pending Verification) --}}
+            <a href="{{ route('shop.status') }}" class="btn btn-warning btn-lg rounded-pill px-5 shadow-sm text-white">
+                <i class="fas fa-clock mr-1"></i> View Application Status
+            </a>
+        @else
+            {{-- User has no shop at all --}}
+            <a href="{{ route('shop.index') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                <i class="fa fa-plus-circle mr-2"></i> Launch Your Shop
+            </a>
+        @endif
     @endguest
 </div>
                 </div>
