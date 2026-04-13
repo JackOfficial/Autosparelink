@@ -281,17 +281,31 @@
         </li>
 
         {{-- E-Commerce --}}
-        <li class="nav-item has-treeview" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
-          <a href="#" class="nav-link">
+        <li class="nav-item has-treeview {{ request()->is('admin/shops*') ? 'menu-open' : '' }}" x-show="isVisible($el)" :class="search !== '' ? 'menu-open' : ''">
+          <a href="#" class="nav-link {{ request()->is('admin/shops*') ? 'active' : '' }}">
             <i class="nav-icon fas fa-shopping-cart"></i>
             <p>
               E-Commerce <i class="right fas fa-angle-left"></i>
-              @if(($abandonedCount ?? 0) > 0)
-                <span class="badge badge-warning right">{{ $abandonedCount }}</span>
+              @php 
+                $pendingShops = \App\Models\Shop::where('is_active', false)->count();
+                $totalEcommerceAlerts = ($abandonedCount ?? 0) + $pendingShops;
+              @endphp
+              @if($totalEcommerceAlerts > 0)
+                <span class="badge badge-warning right">{{ $totalEcommerceAlerts }}</span>
               @endif
             </p>
           </a>
           <ul class="nav nav-treeview">
+            {{-- Shops Management --}}
+            <li class="nav-item" x-show="isVisible($el)">
+              <a href="{{ route('admin.shops.index') }}" class="nav-link {{ request()->routeIs('admin.shops.*') ? 'active' : '' }}">
+                <i class="fas fa-store nav-icon"></i>
+                <p>
+                  Manage Shops 
+                  @if($pendingShops > 0) <span class="badge badge-warning right">{{ $pendingShops }}</span> @endif
+                </p>
+              </a>
+            </li>
             <li class="nav-item" x-show="isVisible($el)">
               <a href="/admin/carts" class="nav-link">
                 <i class="fas fa-shopping-basket nav-icon"></i>
@@ -335,58 +349,57 @@
           </ul>
         </li>
 
- <li class="nav-header" x-show="search === ''">Resources</li>
+        <li class="nav-header" x-show="search === ''">Resources</li>
 
-<li class="nav-item has-treeview {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'menu-open' : '' }}" 
-    x-show="isVisible($el)" 
-    :class="search !== '' ? 'menu-open' : ''">
-    
-    <a href="#" class="nav-link {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'active' : '' }}">
-        <i class="nav-icon fas fa-copy"></i>
-        <p>
-            Content Manager
-            <i class="fas fa-angle-left right"></i>
-        </p>
-    </a>
-    
-    <ul class="nav nav-treeview">
-        {{-- The actual blog posts --}}
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blogs.index') }}" 
-               class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
-                <i class="fas fa-newspaper nav-icon"></i>
-                <p>Articles / Blog</p>
+        <li class="nav-item has-treeview {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'menu-open' : '' }}" 
+            x-show="isVisible($el)" 
+            :class="search !== '' ? 'menu-open' : ''">
+            
+            <a href="#" class="nav-link {{ request()->is('admin/blog*') || request()->is('admin/news*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-copy"></i>
+                <p>
+                    Content Manager
+                    <i class="fas fa-angle-left right"></i>
+                </p>
             </a>
-        </li>
+            
+            <ul class="nav nav-treeview">
+                {{-- The actual blog posts --}}
+                <li class="nav-item" x-show="isVisible($el)">
+                    <a href="{{ route('admin.blogs.index') }}" 
+                       class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
+                        <i class="fas fa-newspaper nav-icon"></i>
+                        <p>Articles / Blog</p>
+                    </a>
+                </li>
 
-        {{-- The categories for those posts --}}
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.blog-categories.index') }}" 
-               class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}">
-                <i class="fas fa-tags nav-icon"></i>
-                <p>Categories</p>
-            </a>
-        </li>
+                {{-- The categories for those posts --}}
+                <li class="nav-item" x-show="isVisible($el)">
+                    <a href="{{ route('admin.blog-categories.index') }}" 
+                       class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}">
+                        <i class="fas fa-tags nav-icon"></i>
+                        <p>Categories</p>
+                    </a>
+                </li>
 
-        {{-- The quick updates --}}
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.news.index') }}" 
-               class="nav-link {{ request()->routeIs('admin.news.index') ? 'active' : '' }}">
-                <i class="fas fa-bullhorn nav-icon"></i>
-                <p>News & Updates</p>
-            </a>
-        </li>
+                {{-- The quick updates --}}
+                <li class="nav-item" x-show="isVisible($el)">
+                    <a href="{{ route('admin.news.index') }}" 
+                       class="nav-link {{ request()->routeIs('admin.news.index') ? 'active' : '' }}">
+                        <i class="fas fa-bullhorn nav-icon"></i>
+                        <p>News & Updates</p>
+                    </a>
+                </li>
 
-        <li class="nav-item" x-show="isVisible($el)">
-            <a href="{{ route('admin.pages.index') }}" 
-               class="nav-link {{ request()->is('admin/pages*') ? 'active' : '' }}">
-                <i class="fas fa-file-contract nav-icon"></i>
-                <p>Legal & FAQ Pages</p>
-            </a>
+                <li class="nav-item" x-show="isVisible($el)">
+                    <a href="{{ route('admin.pages.index') }}" 
+                       class="nav-link {{ request()->is('admin/pages*') ? 'active' : '' }}">
+                        <i class="fas fa-file-contract nav-icon"></i>
+                        <p>Legal & FAQ Pages</p>
+                    </a>
+                </li>
+            </ul>
         </li>
-        
-    </ul>
-</li>
 
         <li class="nav-header" x-show="search === ''">COMMUNITY & ENGAGEMENT</li>
 

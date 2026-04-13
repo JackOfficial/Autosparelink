@@ -61,6 +61,7 @@ use App\Http\Controllers\Admin\PartFitmentController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\ShippingController;
+use App\Http\Controllers\Admin\ShopController;
 use App\Http\Controllers\Admin\TransmissionTypeController;
 use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
@@ -301,6 +302,9 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('gallery', GalleryController::class);
     Route::resource('organization', OrganizationController::class);
     Route::resource('users', UsersController::class);
+    Route::resource('shops', ShopController::class);
+    Route::put('shops/{shop}/approve', [ShopController::class, 'approve'])->name('shops.approve');
+    Route::put('shops/{shop}/toggle', [ShopController::class, 'toggleStatus'])->name('shops.toggle');
 
     // HR & Applications
     Route::resource('careers', Careers::class);
