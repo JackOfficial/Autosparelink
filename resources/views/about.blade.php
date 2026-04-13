@@ -130,7 +130,24 @@
                             <p class="small text-muted">Simple dashboard to upload and manage your parts list.</p>
                         </div>
                     </div>
-                    <a href="{{ route('register') }}" class="btn btn-primary btn-lg rounded-pill px-5">Register Today!</a>
+                    <div class="mt-4">
+    @guest
+        {{-- Show this to visitors who are not logged in --}}
+        <a href="{{ route('register') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+            Register Today!
+        </a>
+    @else
+    @if(auth()->user()->hasActiveShop() && auth()->user()->shop)
+           <a href="{{ route('register') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+            <i class="fas fa-tachometer-alt mr-1"></i> Go into {{ auth()->user()->shop->shop_name }}
+        </a>
+    @else
+      <a href="{{ url('/vendor/register') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+            <i class="fa fa-plus-circle mr-2"></i> Launch Your Shop
+        </a>
+    @endif
+    @endguest
+</div>
                 </div>
                 <div class="col-lg-5 text-center d-none d-lg-block">
                     <div class="p-4 bg-white shadow rounded-lg">
