@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\OrderItem;
 use App\Models\WalletTransaction;
+use App\Models\Commission;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -45,10 +46,10 @@ class OrderItemObserver
             return;
         }
 
-        // 3. Financial Calculations
-        // Note: In a production environment, '10.00' should be a dynamic setting 
-        // from a database or a $shop->commission_rate column.
-        $feePercentage = 10.00; 
+        // 3. Dynamic Financial Calculations
+        // Fetching the rate via the Commission model (Shop-specific > Global > Default 10%)
+        $feePercentage = Commission::getRateForShop($shop->id); 
+        
         $itemSubtotal = $orderItem->price * $orderItem->quantity;
         $adminServiceFee = ($itemSubtotal * $feePercentage) / 100;
         $vendorNetEarnings = $itemSubtotal - $adminServiceFee;
@@ -81,7 +82,7 @@ class OrderItemObserver
      */
     public function created(OrderItem $orderItem): void
     {
-        // Optional: Logic for when an item is first added to an order
+        //
     }
 
     /**
@@ -90,7 +91,7 @@ class OrderItemObserver
     public function deleted(OrderItem $orderItem): void
     {
         // Safety check: If an item is deleted after being paid, 
-        // you might want to log it for admin review.
+        // logic should be added here to handle reversals or log for admin review.
     }
 
     /**
