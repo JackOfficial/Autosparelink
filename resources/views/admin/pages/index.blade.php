@@ -2,6 +2,26 @@
 
 @section('content')
 <div class="container-fluid py-4">
+    
+    {{-- ALERT SECTION --}}
+    @if(session('success'))
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fa fa-check-circle mr-3 fa-lg"></i>
+                    <div>
+                        <strong>Success!</strong> {{ session('success') }}
+                    </div>
+                </div>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm border-0">
@@ -63,7 +83,7 @@
                 </div>
                 @endif
                 
-                <div class="card-footer bg-white py-3">
+                <div class="card-footer bg-white py-3 text-center">
                     <p class="mb-0 small text-muted">
                         <i class="fa fa-info-circle mr-1 text-info"></i> 
                         <strong>Note:</strong> Policies and Terms use HTML/CKEditor, while FAQs use the Dynamic Builder.
@@ -75,7 +95,13 @@
 </div>
 
 <style>
-    /* Styling to match your premium marketplace theme */
+    /* Premium Alert Styling */
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border-left: 5px solid #28a745 !important;
+    }
+    
     .table thead th {
         text-transform: uppercase;
         font-size: 11px;

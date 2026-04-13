@@ -29,6 +29,6 @@ class PageController extends Controller
         }
 
         $page->save();
-        return back()->with('success', 'Page updated successfully!');
+        return redirect()->route('admin.pages.index')->with('success', 'Page updated successfully!');
     }
 }
