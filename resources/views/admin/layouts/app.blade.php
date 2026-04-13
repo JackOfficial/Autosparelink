@@ -376,6 +376,15 @@
                 <p>News & Updates</p>
             </a>
         </li>
+
+        <li class="nav-item" x-show="isVisible($el)">
+            <a href="{{ route('admin.pages.index') }}" 
+               class="nav-link {{ request()->is('admin/pages*') ? 'active' : '' }}">
+                <i class="fas fa-file-contract nav-icon"></i>
+                <p>Legal & FAQ Pages</p>
+            </a>
+        </li>
+        
     </ul>
 </li>
 

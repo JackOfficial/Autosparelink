@@ -23,7 +23,7 @@
                     <a href="{{ route('shop.register.form') }}" class="btn btn-primary btn-lg btn-pill px-4 font-weight-bold shadow mr-3">
                         Start Selling Now
                     </a>
-                    <a href="#benefits" class="btn btn-outline-secondary btn-lg btn-pill px-4">
+                    <a href="#benefits" class="btn btn-secondary btn-lg btn-pill px-4">
                         Learn More
                     </a>
                 </div>
@@ -102,7 +102,7 @@
                             <a href="{{ route('shop.register.form') }}" class="btn btn-light btn-lg btn-pill px-5 font-weight-bold text-primary m-2">
                                 Create Your Shop Account
                             </a>
-                            <a href="/terms" class="btn btn-outline-light btn-lg btn-pill px-4 m-2">
+                            <a href="{{ route('terms') }}" class="btn btn-outline-light btn-lg btn-pill px-4 m-2">
                                 View Partner Terms
                             </a>
                         </div>

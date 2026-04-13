@@ -54,6 +54,7 @@ use App\Http\Controllers\Admin\InboxController;
 use App\Http\Controllers\Admin\ModelController;
 use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\PartBrandController;
 use App\Http\Controllers\Admin\PartController;
 use App\Http\Controllers\Admin\PartFitmentController;
@@ -65,6 +66,7 @@ use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\TicketController as Ticket;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\Shop\DashboardController;
 use App\Http\Controllers\Shop\OnboardingController;
@@ -105,10 +107,16 @@ Route::controller(PageController::class)->group(function () {
     Route::delete('/comment/{id}', 'deleteComment')->name('comment.delete');
 
     // --- LEGAL & E-COMMERCE ---
-    Route::get('/policies', 'policies')->name('policies');
-    Route::get('/terms-and-conditions', 'terms_and_conditions')->name('terms');
-    Route::get('/faqs', 'faqs')->name('faqs');
+    // Route::get('/policies', 'policies')->name('policies');
+    // Route::get('/terms-and-conditions', 'terms_and_conditions')->name('terms');
+    // Route::get('/faqs', 'faqs')->name('faqs');
     Route::get('/cart', 'cart')->name('cart');
+});
+
+Route::controller(LegalController::class)->group(function () {
+    Route::get('/policies', 'policies')->defaults('slug', 'policies')->name('policies');
+    Route::get('/terms-and-conditions', 'terms_and_conditions')->defaults('slug', 'terms-and-conditions')->name('terms');
+    Route::get('/faqs', 'faqs')->defaults('slug', 'faqs')->name('faqs');
 });
 
 Route::get('/brands', [BrandsController::class, 'brands']);
@@ -323,6 +331,13 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
         Route::get('/broadcast/{broadcast}', 'show')->name('broadcast.show');
         Route::delete('/broadcast/clear-all', 'clearAll')->name('broadcast.clearAll');
         Route::delete('/broadcast/{broadcast}', 'destroy')->name('broadcast.destroy');
+    });
+
+    // Admin Pages
+    Route::controller(AdminPageController::class)->group(function() {
+        Route::get('/pages', 'index')->name('pages.index');
+        Route::get('/pages/{id}/edit', 'edit')->name('pages.edit');
+        Route::put('/pages/{id}', 'update')->name('pages.update');
     });
 
     // Tickets (Admin)
