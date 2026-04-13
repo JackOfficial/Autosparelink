@@ -222,9 +222,22 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
     Route::resource('addresses', UserAddressController::class);
     Route::resource('vehicles', VehicleController::class);
 
-   Route::get('/become-a-vendor', [OnboardingController::class, 'index'])->name('shop.register.form');
-   Route::post('/become-a-vendor', [OnboardingController::class, 'store'])->name('shop.register.store');
-   Route::get('/vendor-registration', [OnboardingController::class, 'registration_status'])->name('shop.register.success');
+// OnBoarding Routes
+Route::prefix('shop')->name('shop.')->controller(OnboardingController::class)->group(function () {
+    
+    // 1. Landing / Welcome page -> route('shop.index')
+    Route::get('/become-a-partner', 'index')->name('index');
+
+    // 2. The registration form view -> route('shop.create')
+    Route::get('/register', 'create')->name('create');
+
+    // 3. Handling the form submission -> route('shop.store')
+    Route::post('/register', 'store')->name('store');
+
+    // 4. Success / Application Status page -> route('shop.status')
+    Route::get('/status', 'status')->name('status');
+});
+
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group(function () {
