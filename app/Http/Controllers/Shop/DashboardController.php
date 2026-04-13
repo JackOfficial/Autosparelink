@@ -12,6 +12,7 @@ class DashboardController extends Controller
 {
     public function dashboard()
 {
+    dd("Shop");
     $shop = auth()->user()->shop;
 
     // 1. Get last 7 days of sales (Specific to THIS Shop)
