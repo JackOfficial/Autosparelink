@@ -21,7 +21,7 @@
             </div>
 
             {{-- Modal Body --}}
-            <form action="{{ route('tickets.store') }}" method="POST" id="ticketForm">
+            <form action="{{ route('user.tickets.store') }}" method="POST" id="ticketForm">
                 @csrf
                 <div class="modal-body p-4" style="background-color: #f8fafc;">
                     
