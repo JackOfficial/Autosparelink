@@ -278,7 +278,7 @@
     }
 
     // This will now produce: /parts-catalog/kia/k5/kia-k5-hybrid...
-    $catalogUrl = route('parts.catalog', $params);
+    // $catalogUrl = route('parts.catalog', $params);
 @endphp
                         <tr class="hover-row"> 
                             {{-- 1. Brand --}}
@@ -319,7 +319,7 @@
 
                             {{-- 5. Updated Interactive Button --}}
                             <td class="text-center">
-                                <a href="{{ $catalogUrl }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm font-weight-bold">
+                                <a href="#" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm font-weight-bold">
                                     <i class="fas fa-search-plus mr-1"></i> See All Parts
                                 </a>
                             </td>
