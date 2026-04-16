@@ -209,21 +209,15 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
         })->name('notifications.read');
     });
 
-    // Support Ticket System
-    Route::prefix('tickets')->name('tickets.')->controller(TicketController::class)->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('/create', 'index')->name('create');
-        Route::post('/store', 'store')->name('store');
-        Route::get('/{id}', 'show')->name('show');
-        Route::post('/{id}/reply', 'reply')->name('reply');
-    });
-
     Route::post('/like/toggle', [LikeController::class, 'toggle'])->name('like.toggle');
 
     Route::prefix('user')->name('user.')->group(function () {
          Route::resource('orders', OrderController::class);
          Route::resource('addresses', UserAddressController::class);
          Route::resource('vehicles', VehicleController::class);
+
+         Route::resource('tickets', TicketController::class);
+        Route::post('tickets/{ticket}/reply', [TicketController::class, 'reply'])->name('tickets.reply');
     });
 
     // OnBoarding Routes
