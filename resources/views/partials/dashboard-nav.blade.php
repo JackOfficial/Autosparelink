@@ -43,7 +43,7 @@
                         </div>
                         <div style="max-height: 300px; overflow-y: auto;">
                             @if($stats['pending_tickets'] > 0)
-                                <a class="dropdown-item d-flex align-items-center py-3 border-bottom" href="{{ route('tickets.index') }}">
+                                <a class="dropdown-item d-flex align-items-center py-3 border-bottom" href="{{ route('user.tickets.index') }}">
                                     <div class="flex-shrink-0 me-3">
                                         <div class="bg-soft-warning p-2 rounded-circle text-warning">
                                             <i class="fas fa-envelope-open-text"></i>
