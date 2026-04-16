@@ -14,6 +14,7 @@ class Order extends Model
         'guest_name',
         'guest_email',
         'guest_phone',
+        'is_guest',
         'status'
     ];
 

@@ -55,4 +55,10 @@ class Wallet extends Model
     {
         return $this->balance >= $amount;
     }
+
+    public function getTotalEarningsAttribute()
+{
+    return $this->balance + $this->withdrawn_balance;
+}
+
 }

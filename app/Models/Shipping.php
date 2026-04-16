@@ -8,6 +8,7 @@ class Shipping extends Model
 {
     protected $fillable = [
         'order_id',
+        'shop_id',
         'carrier', // e.g., 'GIG Logistics', 'Local Courier'
         'shipping_method', // e.g., 'Pickup', 'Home Delivery'
         'shipping_cost',
