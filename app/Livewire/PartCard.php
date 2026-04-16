@@ -25,6 +25,8 @@ class PartCard extends Component
             return;
         }
 
+        $mainPhoto = $this->part->photos->first()?->file_path ?? $this->part->image ?? 'frontend/img/placeholder.png';
+        
         Cart::instance('default')->add([
             'id'      => $this->part->id,
             'name'    => $this->part->part_name,
@@ -33,6 +35,7 @@ class PartCard extends Component
             'weight'  => 0,
             'options' => [
                 'brand'         => $this->part->partBrand?->name,
+                'image'         => $mainPhoto,
                 'part_number'   => $this->part->part_number,
                 'shop_name'     => $this->part->shop?->shop_name,
                 'shop_id'       => $this->part->shop_id,

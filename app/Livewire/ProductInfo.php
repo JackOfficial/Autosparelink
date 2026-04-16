@@ -47,6 +47,8 @@ class ProductInfo extends Component
             return;
         }
 
+        $mainPhoto = $this->part->photos->first()?->file_path ?? $this->part->image ?? 'frontend/img/placeholder.png';
+
         Cart::instance('default')->add([
             'id'    => $this->part->id,
             'name'  => $this->part->part_name,
@@ -55,11 +57,17 @@ class ProductInfo extends Component
             'weight'=> 0,
             'options' => [
                 'brand'         => $this->part->partBrand?->name,
+                'image'         => $mainPhoto,
                 'part_number'   => $this->part->part_number,
                 'shop_name'     => $this->part->shop?->shop_name, // Added Shop Name
+                'shop_id'       => $this->part->shop_id,
                 'shop_location' => $this->part->shop?->address,   // Direct column access
             ]
         ]);
+
+        //
+
+        //
 
         if (auth()->check()) {
             $this->syncCartWithDatabase('default');
