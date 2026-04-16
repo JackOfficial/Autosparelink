@@ -67,6 +67,7 @@ use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SpecificationController as AdminSpecificationController;
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\TicketController as Ticket;
+use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\Shop\DashboardController;
@@ -302,6 +303,7 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('organization', OrganizationController::class);
     Route::resource('users', UsersController::class);
     Route::resource('shops', ShopController::class);
+    Route::resource('wallets', WalletController::class);
     Route::put('shops/{shop}/approve', [ShopController::class, 'approve'])->name('shops.approve');
     Route::put('shops/{shop}/toggle', [ShopController::class, 'toggleStatus'])->name('shops.toggle');
 
