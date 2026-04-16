@@ -1,65 +1,6 @@
 <aside class="sidebar border-end bg-white" 
     :class="sidebarOpen ? 'd-block' : 'd-none d-md-block'"
     style="min-width: 280px; height: calc(100vh - 60px); position: sticky; top: 60px; overflow-y: auto;">
-
-    {{-- NEW: Wallet Section with Animated Counter --}}
-@if(auth()->user()->hasActiveShop())
-    <div class="px-4 pt-4 mb-2" 
-         x-data="{ 
-            showBalance: true, 
-            currentBalance: 0, 
-            targetBalance: {{ auth()->user()->shop->wallet->balance ?? 0 }},
-            init() {
-                let start = 0;
-                let duration = 1000; // 1 second animation
-                let startTime = null;
-
-                const animate = (timestamp) => {
-                    if (!startTime) startTime = timestamp;
-                    let progress = Math.min((timestamp - startTime) / duration, 1);
-                    this.currentBalance = Math.floor(progress * this.targetBalance);
-                    if (progress < 1) {
-                        requestAnimationFrame(animate);
-                    }
-                };
-                requestAnimationFrame(animate);
-            }
-         }">
-        <div class="p-3 rounded-4 border-0 shadow-sm text-white" 
-             style="background: linear-gradient(45deg, #0d6efd, #0a58ca); position: relative; overflow: hidden; transition: all 0.3s ease;">
-            
-            <i class="fas fa-wallet position-absolute opacity-10" style="font-size: 3rem; right: -5px; top: -5px;"></i>
-            
-            <div class="position-relative">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="small fw-bold opacity-75 text-uppercase" style="letter-spacing: 0.5px; font-size: 0.65rem;">Total Earnings</span>
-                    <button @click="showBalance = !showBalance" class="btn btn-link btn-sm p-0 text-white opacity-75 border-0">
-                        <i class="fas" :class="showBalance ? 'fa-eye-slash' : 'fa-eye'"></i>
-                    </button>
-                </div>
-                
-                <div class="d-flex align-items-baseline">
-                    {{-- Animated Balance --}}
-                    <h4 class="fw-bold mb-0" x-show="showBalance" x-transition.opacity>
-                        <span x-text="new Intl.NumberFormat().format(currentBalance)"></span>
-                    </h4>
-                    {{-- Hidden Balance --}}
-                    <h4 class="fw-bold mb-0" x-show="!showBalance" x-transition.opacity>******</h4>
-                    <span class="ms-2 small opacity-75">RWF</span>
-                </div>
-
-                @if((auth()->user()->shop->wallet->pending_balance ?? 0) > 0)
-                    <div class="mt-2 pt-2 border-top border-white border-opacity-10">
-                        <p class="mb-0 opacity-75" style="font-size: 0.7rem;">
-                            <i class="fas fa-clock me-1"></i> Pending: 
-                            <strong>{{ number_format(auth()->user()->shop->wallet->pending_balance) }}</strong>
-                        </p>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-@endif
     
     <div class="py-4">
         {{-- Section 1: Fleet Management --}}

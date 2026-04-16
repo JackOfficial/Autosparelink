@@ -15,8 +15,64 @@
             </span>
         </a>
     </div>
+
+    {{-- NEW: Animated Wallet Balance Card --}}
+    @if($shop && $shop->wallet)
+        <div class="px-3 pt-3 flex-shrink-0" 
+             x-data="{ 
+                showBalance: true, 
+                currentBalance: 0, 
+                targetBalance: {{ $shop->wallet->balance ?? 0 }},
+                init() {
+                    let start = 0;
+                    let duration = 1200; 
+                    let startTime = null;
+
+                    const animate = (timestamp) => {
+                        if (!startTime) startTime = timestamp;
+                        let progress = Math.min((timestamp - startTime) / duration, 1);
+                        this.currentBalance = Math.floor(progress * this.targetBalance);
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
+                        }
+                    };
+                    requestAnimationFrame(animate);
+                }
+             }">
+            <div class="p-3 rounded-3 border-0 shadow-sm text-white" 
+                 style="background: linear-gradient(135deg, #0d6efd, #0d6efd); position: relative; overflow: hidden;">
+                
+                <i class="ti ti-wallet position-absolute opacity-10" style="font-size: 2.5rem; right: -5px; top: -5px;"></i>
+                
+                <div class="position-relative">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small opacity-75 text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Current Balance</span>
+                        <button @click="showBalance = !showBalance" class="btn btn-link btn-sm p-0 text-white opacity-75 border-0 shadow-none">
+                            <i class="ti" :class="showBalance ? 'ti-eye-off' : 'ti-eye'"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="d-flex align-items-baseline">
+                        <h5 class="fw-bold mb-0" x-show="showBalance" x-transition.opacity>
+                            <span x-text="new Intl.NumberFormat().format(currentBalance)"></span>
+                        </h5>
+                        <h5 class="fw-bold mb-0" x-show="!showBalance" x-transition.opacity>******</h5>
+                        <span class="ms-1 small opacity-75" style="font-size: 0.7rem;">RWF</span>
+                    </div>
+
+                    @if(($shop->wallet->pending_balance ?? 0) > 0)
+                        <div class="mt-2 pt-2 border-top border-white border-opacity-10 d-flex justify-content-between align-items-center">
+                            <span class="opacity-75" style="font-size: 0.65rem;"><i class="ti ti-clock-hour-4 me-1"></i>Pending</span>
+                            <span class="fw-bold" style="font-size: 0.65rem;">{{ number_format($shop->wallet->pending_balance) }}</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
     
     <div class="sidebar-nav flex-grow-1 overflow-y-auto custom-scrollbar">
+        
         <ul class="nav flex-column mt-3">
             <li class="px-4 mb-2 nav-text">
                 <small class="text-uppercase text-muted fw-bold smaller">Analytics</small>
