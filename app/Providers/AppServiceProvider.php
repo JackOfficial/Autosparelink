@@ -11,6 +11,10 @@ use Illuminate\Pagination\Paginator;
 use App\Observers\SpecificationObserver;
 use App\Models\Specification;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Shop;
+use App\Observers\OrderItemObserver;
+use App\Observers\ShopObserver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +35,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        // Registering your observers
+        Shop::observe(ShopObserver::class);
+        OrderItem::observe(OrderItemObserver::class);
         
         Paginator::useBootstrapFive();
         

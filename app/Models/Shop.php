@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Shop extends Model
@@ -79,6 +80,11 @@ class Shop extends Model
     {
         return $this->logo ? asset('storage/' . $this->logo) : asset('images/default-shop-logo.png');
     }
+
+    public function wallet(): HasOne
+   {
+    return $this->hasOne(Wallet::class);
+   }
 
     /**
      * Helper to check if the shop is ready for business

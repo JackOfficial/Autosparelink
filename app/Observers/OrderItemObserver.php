@@ -12,7 +12,6 @@ class OrderItemObserver
 {
     /**
      * Handle the OrderItem "updated" event.
-     * We monitor the status change to trigger vendor payments.
      */
     public function updated(OrderItem $orderItem): void
     {
@@ -27,9 +26,9 @@ class OrderItemObserver
      */
     private function processVendorPayment(OrderItem $orderItem): void
     {
+        // Use the relationship to get the shop and wallet
         $shop = $orderItem->shop;
         
-        // Ensure shop and wallet exist before proceeding
         if (!$shop || !$shop->wallet) {
             Log::error("Payment failed for OrderItem #{$orderItem->id}: Shop or Wallet missing.");
             return;
@@ -47,10 +46,10 @@ class OrderItemObserver
         }
 
         // 3. Dynamic Financial Calculations
-        // Fetching the rate via the Commission model (Shop-specific > Global > Default 10%)
         $feePercentage = Commission::getRateForShop($shop->id); 
         
-        $itemSubtotal = $orderItem->price * $orderItem->quantity;
+        // MATCHED TO MODEL: Changed 'price' to 'unit_price'
+        $itemSubtotal = $orderItem->unit_price * $orderItem->quantity;
         $adminServiceFee = ($itemSubtotal * $feePercentage) / 100;
         $vendorNetEarnings = $itemSubtotal - $adminServiceFee;
 
@@ -68,7 +67,8 @@ class OrderItemObserver
                 'fee_percentage' => $feePercentage,
                 'reference_type' => OrderItem::class,
                 'reference_id' => $orderItem->id,
-                'description' => "Earnings for item: {$orderItem->product_name} (Order #{$orderItem->order->order_number})",
+                // MATCHED TO MODEL: Changed 'product_name' to 'part_name'
+                'description' => "Earnings for item: {$orderItem->part_name} (Order #{$orderItem->order->order_number})",
                 'status' => 'completed',
             ]);
 
@@ -77,34 +77,21 @@ class OrderItemObserver
         });
     }
 
-    /**
-     * Handle the OrderItem "created" event.
-     */
     public function created(OrderItem $orderItem): void
     {
         //
     }
 
-    /**
-     * Handle the OrderItem "deleted" event.
-     */
     public function deleted(OrderItem $orderItem): void
     {
-        // Safety check: If an item is deleted after being paid, 
-        // logic should be added here to handle reversals or log for admin review.
+        //
     }
 
-    /**
-     * Handle the OrderItem "restored" event.
-     */
     public function restored(OrderItem $orderItem): void
     {
         //
     }
 
-    /**
-     * Handle the OrderItem "force deleted" event.
-     */
     public function forceDeleted(OrderItem $orderItem): void
     {
         //

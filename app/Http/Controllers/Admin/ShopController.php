@@ -77,46 +77,40 @@ private function getMimeType($path)
     return Storage::disk('local')->mimeType($path) ?? 'application/octet-stream';
 }
 
-    /**
-     * Approve a shop and make it live on the marketplace.
-     */
+/**
+ * Approve a shop and make it live on the marketplace.
+ */
 public function approve(Shop $shop)
 {
     DB::transaction(function () use ($shop) {
         $shop->update([
-            'is_active' => true,
+            'is_verified' => true, // This triggers the Wallet creation
+            'is_active'   => true, // Make it visible
             'approved_at' => now(),
         ]);
 
         $owner = $shop->user;
-
-        // Consistent role name: 'seller'
         if (!$owner->hasRole('seller')) {
             $owner->assignRole('seller');
         }
     });
 
-    return back()->with('success', "Shop '{$shop->shop_name}' approved. Owner is now a seller.");
+    return back()->with('success', "Shop '{$shop->shop_name}' is now verified and active.");
 }
 
     /**
      * Toggle the active status (Suspending or Activating a shop).
      */
-   public function toggleStatus(Shop $shop)
+/**
+ * Toggle the active status (Banning/Suspending vs Activating).
+ */
+public function toggleStatus(Shop $shop)
 {
     $shop->update([
         'is_active' => !$shop->is_active
     ]);
 
-    $owner = $shop->user;
-
-    if ($shop->is_active) {
-        $owner->assignRole('seller');
-        $status = 'activated';
-    } else {
-        $owner->removeRole('seller');
-        $status = 'suspended';
-    }
+    $status = $shop->is_active ? 'activated' : 'suspended/held';
     
     return back()->with('success', "Shop has been {$status}.");
 }
