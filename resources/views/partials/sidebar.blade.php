@@ -46,7 +46,7 @@
                     </a>
                 </li>
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 text-dark" href="/faq">
+                    <a class="nav-link py-2 px-3 text-dark" href="/faqs">
                         <i class="fas fa-info-circle me-2"></i> Return Policy
                     </a>
                 </li>
