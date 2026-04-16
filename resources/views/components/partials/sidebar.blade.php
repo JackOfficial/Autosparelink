@@ -18,6 +18,7 @@
 
 {{-- Wallet Sidebar Component --}}
 @if($shop && $shop->is_verified)
+    {{-- Verified Shop: Show Wallet Always --}}
     <div class="px-3 pt-3 flex-shrink-0" 
          x-data="{ 
             showBalance: true, 
@@ -38,21 +39,17 @@
             }
          }">
         <div class="p-3 rounded-3 border-0 shadow-sm text-white" 
-             style="background: linear-gradient(135deg, #0d6efd, #0b5ed7); position: relative; overflow: hidden;">
+             style="background: linear-gradient(135deg, #0d6efd, #0b5ed7); position: relative;">
             
-            {{-- IMPROVED: Moved icon to bottom-right and rotated it to stay away from the toggle --}}
-            <i class="ti ti-wallet position-absolute opacity-10" 
-               style="font-size: 3.5rem; right: -10px; bottom: -15px; transform: rotate(-15deg); z-index: 0; pointer-events: none;"></i>
-            
-            <div class="position-relative" style="z-index: 1;">
+            <div class="position-relative">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <span class="small opacity-75 text-uppercase fw-bold" style="font-size: 0.55rem; letter-spacing: 0.8px;">Available Balance</span>
                     
-                    {{-- Toggle Button with a slight background to separate it from any noise --}}
+                    {{-- Toggle Button --}}
                     <button @click="showBalance = !showBalance" 
-                            class="btn btn-sm p-1 text-white border-0 shadow-none d-flex align-items-center justify-content-center" 
-                            style="background: rgba(255,255,255,0.1); border-radius: 6px; width: 24px; height: 24px;">
-                        <i class="ti" :class="showBalance ? 'ti-eye-off' : 'ti-eye'" style="font-size: 0.9rem;"></i>
+                            class="btn btn-sm p-0 text-white border-0 shadow-none d-flex align-items-center justify-content-center" 
+                            style="background: rgba(255,255,255,0.15); border-radius: 4px; width: 22px; height: 22px;">
+                        <i class="ti" :class="showBalance ? 'ti-eye-off' : 'ti-eye'" style="font-size: 0.85rem;"></i>
                     </button>
                 </div>
                 
@@ -78,6 +75,7 @@
         </div>
     </div>
 @elseif($shop && !$shop->is_verified)
+    {{-- Unverified Shop: Placeholder --}}
     <div class="px-3 pt-3 flex-shrink-0">
         <div class="p-3 rounded-3 shadow-sm bg-light text-muted border" style="border-style: dashed !important;">
             <div class="d-flex align-items-center">
