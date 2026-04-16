@@ -74,7 +74,7 @@ class OrderController extends Controller
         ]);
 
         return redirect()
-            ->route('orders.show', $order->id)
+            ->route('admin.orders.show', $order->id)
             ->with('success', "Order #{$order->id} status updated to " . ucfirst($request->status));
     }
 
@@ -87,7 +87,7 @@ class OrderController extends Controller
         $order->delete();
 
         return redirect()
-            ->route('orders.index')
+            ->route('admin.orders.index')
             ->with('success', 'Order deleted successfully.');
     }
 }
