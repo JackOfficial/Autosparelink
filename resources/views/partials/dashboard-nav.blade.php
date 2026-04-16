@@ -6,8 +6,8 @@
         </button>
 
         {{-- Brand / Logo --}}
-        <a class="navbar-brand fw-bold text-primary" href="{{ url('/') }}">
-            <i class="fas fa-tools me-2"></i> AutoSpare <span class="text-dark">Link</span>
+        <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
+          <img src="{{ asset('frontend/img/logo.png') }}" alt="AutoSpare Link Logo" style="max-height: 40px;" class="me-2">
         </a>
 
         {{-- Standard BS5 Navbar Toggle (for the nav links themselves on mobile) --}}
