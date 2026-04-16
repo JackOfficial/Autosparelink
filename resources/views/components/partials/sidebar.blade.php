@@ -18,70 +18,28 @@
 
 {{-- Wallet Sidebar Component --}}
 @if($shop && $shop->is_verified)
-    {{-- Verified Shop: Show Wallet Always --}}
     <div class="px-3 pt-3 flex-shrink-0" 
-         x-data="{ 
-            showBalance: true, 
-            currentBalance: 0, 
-            targetBalance: {{ (float) ($shop->wallet->balance ?? 0) }},
-            init() {
-                let duration = 1200; 
-                let startTime = null;
-                const animate = (timestamp) => {
-                    if (!startTime) startTime = timestamp;
-                    let progress = Math.min((timestamp - startTime) / duration, 1);
-                    this.currentBalance = Math.floor(progress * this.targetBalance);
-                    if (progress < 1) {
-                        requestAnimationFrame(animate);
-                    }
-                };
-                requestAnimationFrame(animate);
-            }
-         }">
+         x-data="{ ... }">
         <div class="p-3 rounded-3 border-0 shadow-sm text-white" 
              style="background: linear-gradient(135deg, #0d6efd, #0b5ed7); position: relative; overflow: hidden;">
             
-            <i class="ti ti-wallet position-absolute opacity-10" style="font-size: 2.5rem; right: -5px; top: -5px;"></i>
+            {{-- FIX: Added z-index: 0 to keep it behind everything --}}
+            <i class="ti ti-wallet position-absolute opacity-10" 
+               style="font-size: 2.5rem; right: -5px; top: -5px; z-index: 0;"></i>
             
-            <div class="position-relative">
+            {{-- FIX: Added z-index: 1 and position: relative to the content wrapper --}}
+            <div class="position-relative" style="z-index: 1;">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <span class="small opacity-75 text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Available Balance</span>
+                    
+                    {{-- The button is now safely on top --}}
                     <button @click="showBalance = !showBalance" class="btn btn-link btn-sm p-0 text-white opacity-75 border-0 shadow-none">
                         <i class="ti" :class="showBalance ? 'ti-eye-off' : 'ti-eye'" style="font-size: 1rem;"></i>
                     </button>
                 </div>
                 
-                <div class="d-flex align-items-baseline">
-                    <h5 class="fw-bold mb-0" x-show="showBalance" x-transition:enter.duration.300ms>
-                        <span x-text="new Intl.NumberFormat().format(currentBalance)"></span>
-                    </h5>
-                    <h5 class="fw-bold mb-0" x-show="!showBalance" x-transition:enter.duration.300ms>******</h5>
-                    <span class="ms-1 small opacity-75" style="font-size: 0.7rem;">RWF</span>
-                </div>
-
-                {{-- Conditional Pending Row: Only shows if money is actually waiting --}}
-                @if(($shop->wallet->pending_balance ?? 0) > 0)
-                    <div class="mt-2 pt-2 border-top border-white border-opacity-10 d-flex justify-content-between align-items-center">
-                        <span class="opacity-75" style="font-size: 0.65rem;">
-                            <i class="ti ti-clock-hour-4 me-1"></i>Pending
-                        </span>
-                        <span class="fw-bold" style="font-size: 0.65rem;">
-                            {{ number_format($shop->wallet->pending_balance) }} RWF
-                        </span>
-                    </div>
-                @endif
+                {{-- Rest of your code... --}}
             </div>
-        </div>
-    </div>
-@elseif($shop && !$shop->is_verified)
-    {{-- Unverified Shop: Show Placeholder so the sidebar doesn't look empty --}}
-    <div class="px-3 pt-3 flex-shrink-0">
-        <div class="p-3 rounded-3 shadow-sm bg-light text-muted border">
-            <div class="d-flex align-items-center">
-                <i class="ti ti-shield-check opacity-50 me-2" style="font-size: 1.2rem;"></i>
-                <span class="small fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.5px;">Verification Pending</span>
-            </div>
-            <p class="mb-0 mt-1 opacity-75" style="font-size: 0.65rem;">Wallet activates after approval.</p>
         </div>
     </div>
 @endif
