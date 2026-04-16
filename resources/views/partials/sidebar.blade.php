@@ -88,7 +88,7 @@
                 </p>
                 
                 {{-- Updated to shop.index (The Landing/Welcome route) --}}
-                <a href="{{ route('user.shop.index') }}" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
+                <a href="{{ route('shop.index') }}" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
                     <i class="fas fa-rocket me-1 small"></i> Become a Vendor
                 </a>
             </div>
@@ -108,7 +108,7 @@
             </div>
             
             {{-- Updated to shop.status --}}
-            <a href="{{ route('user.shop.status') }}" class="btn btn-sm btn-warning w-100 rounded-pill fw-bold text-white">
+            <a href="{{ route('shop.status') }}" class="btn btn-sm btn-warning w-100 rounded-pill fw-bold text-white">
                 <i class="fas fa-clock me-1 small"></i> Check Status
             </a>
         </div>
@@ -135,7 +135,7 @@
             </div>
 
             {{-- Merchant Panel remains the same, ensure this route exists elsewhere --}}
-            <a href="{{ route('user.shop.dashboard') }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill fw-bold">
+            <a href="{{ route('shop.dashboard') }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill fw-bold">
                 <i class="fas fa-external-link-alt me-1 small"></i> Merchant Panel
             </a>
         </div>
