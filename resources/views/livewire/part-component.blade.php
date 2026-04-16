@@ -5,10 +5,8 @@
         ? round((($part->old_price - $part->price) / $part->old_price) * 100)
         : null;
     
-    // Get the descriptive name safely
     $firstSpec = $part->specifications->first();
     
-    // Check for variant_name first, then name
     $descriptiveName = 'Multiple vehicles';
     if ($firstSpec && $firstSpec->variant) {
         $descriptiveName = $firstSpec->variant->variant_name ?? $firstSpec->variant->name ?? 'Multiple vehicles';
@@ -52,7 +50,8 @@
             {{ Str::limit($part->part_name, 35) }}
         </a>
 
-        <div class="mt-auto"> {{-- Pushes price/button to bottom so cards are uniform height --}}
+        <div class="mt-auto"> 
+            {{-- Vehicle & Part Number --}}
             <small class="text-muted d-block mb-1 text-truncate px-2">
                 <i class="fa fa-car mr-1"></i> {{ $descriptiveName }}
             </small>
@@ -60,6 +59,18 @@
             <small class="text-muted d-block mb-1">
                 <i class="fa fa-cog mr-1"></i> {{ $part->part_number }}
             </small>
+
+            {{-- SHOP INFO SECTION --}}
+            <div class="border-top border-bottom my-2 py-1 bg-light-soft" style="background-color: #f8f9fa4d;">
+                <small class="d-block text-dark font-weight-bold">
+                    <i class="fa fa-store mr-1 text-primary"></i> {{ $part->shop->shop_name ?? 'Official Store' }}
+                </small>
+                @if($part->shop?->address)
+                    <small class="d-block text-muted text-truncate px-2">
+                        <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
+                    </small>
+                @endif
+            </div>
 
             @if($part->stock_quantity > 0)
                 <small class="badge {{ $part->stock_quantity < 5 ? 'badge-warning' : 'badge-light text-success' }} mb-2">
@@ -81,6 +92,7 @@
                     <button wire:click="addToCart" 
                             class="btn btn-primary btn-block btn-sm rounded-pill py-2 transition-all shadow-sm" 
                             :class="success ? 'btn-success' : 'btn-primary'"
+                            @click="confetti ? confetti() : null"
                             wire:loading.attr="disabled">
                         <i x-show="success" class="fa fa-check mr-1"></i>
                         <span wire:loading wire:target="addToCart" class="spinner-border spinner-border-sm mr-1"></span>

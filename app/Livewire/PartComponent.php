@@ -17,7 +17,8 @@ class PartComponent extends Component
 
     public function mount(Part $part, $currencySymbol = 'RWF', $isCompatible = false)
     {
-        $this->part = $part;
+        // Eager load shop and partBrand to show vendor info and metadata
+        $this->part = $part->load(['shop', 'partBrand', 'photos']);
         $this->currencySymbol = $currencySymbol;
         $this->isCompatible = $isCompatible;
     }
@@ -55,7 +56,6 @@ class PartComponent extends Component
             Cart::instance($instance)->update($cartItem->rowId, $newTotalQty);
             $message = 'Cart updated!';
         } else {
-            // Priority: Check photos relationship, then direct image attribute, then placeholder
             $mainPhoto = $this->part->photos->first()?->file_path ?? $this->part->image ?? 'frontend/img/placeholder.png';
             
             Cart::instance($instance)->add([
@@ -65,9 +65,12 @@ class PartComponent extends Component
                 'price'   => $this->part->price,
                 'weight'  => 0,
                 'options' => [
-                    'brand'       => $this->part->partBrand?->name,
-                    'image'       => $mainPhoto,
-                    'part_number' => $this->part->part_number,
+                    'brand'         => $this->part->partBrand?->name,
+                    'image'         => $mainPhoto,
+                    'part_number'   => $this->part->part_number,
+                    'shop_name'     => $this->part->shop?->shop_name, // Added Shop Name
+                    'shop_location' => $this->part->shop?->address,   // Direct column access
+                    'shop_id'       => $this->part->shop_id,
                 ]
             ]);
             $message = 'Added to cart!';
@@ -107,8 +110,10 @@ class PartComponent extends Component
             'price' => $this->part->price,
             'weight'=> 0,
             'options' => [
-                'brand' => $this->part->partBrand?->name,
-                'image' => $mainPhoto,
+                'brand'         => $this->part->partBrand?->name,
+                'image'         => $mainPhoto,
+                'shop_name'     => $this->part->shop?->shop_name, // Added Shop Name
+                'shop_location' => $this->part->shop?->address,   // Direct column access
             ]
         ]);
 
@@ -120,9 +125,6 @@ class PartComponent extends Component
         $this->dispatch('notify', message: 'Added to wishlist!');
     }
 
-    /**
-     * Helper to prevent "Duplicate entry" errors by cleaning DB before saving
-     */
     private function saveCartToDb($identifier, $instance)
     {
         DB::table('shoppingcart')
