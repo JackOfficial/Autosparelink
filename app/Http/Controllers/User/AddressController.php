@@ -59,7 +59,7 @@ class AddressController extends Controller
     public function edit(Address $address)
     {
         // Security check
-        if ($address->user_id !== Auth::id()) {
+        if ($address->user_id != Auth::id()) {
             abort(403);
         }
 

@@ -47,7 +47,7 @@ class OrderController extends Controller
     public function destroy(Order $order)
     {
         // Usually, orders aren't deleted, just cancelled.
-        if ($order->user_id !== Auth::id()) {
+        if ($order->user_id != Auth::id()) {
             abort(403);
         }
 
