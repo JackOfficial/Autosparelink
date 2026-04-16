@@ -18,7 +18,6 @@
 
 {{-- Wallet Sidebar Component --}}
 @if($shop && $shop->is_verified)
-    {{-- Verified Shop: Show Wallet Always --}}
     <div class="px-3 pt-3 flex-shrink-0" 
          x-data="{ 
             showBalance: true, 
@@ -41,38 +40,37 @@
         <div class="p-3 rounded-3 border-0 shadow-sm text-white" 
              style="background: linear-gradient(135deg, #0d6efd, #0b5ed7); position: relative; overflow: hidden;">
             
-            {{-- Background Icon: Forced to background with z-index: 0 --}}
+            {{-- IMPROVED: Moved icon to bottom-right and rotated it to stay away from the toggle --}}
             <i class="ti ti-wallet position-absolute opacity-10" 
-               style="font-size: 2.5rem; right: -8px; top: -8px; z-index: 0; pointer-events: none;"></i>
+               style="font-size: 3.5rem; right: -10px; bottom: -15px; transform: rotate(-15deg); z-index: 0; pointer-events: none;"></i>
             
-            {{-- Content Wrapper: Forced to foreground with z-index: 1 --}}
             <div class="position-relative" style="z-index: 1;">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="small opacity-75 text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Available Balance</span>
+                    <span class="small opacity-75 text-uppercase fw-bold" style="font-size: 0.55rem; letter-spacing: 0.8px;">Available Balance</span>
                     
-                    {{-- Toggle Button --}}
+                    {{-- Toggle Button with a slight background to separate it from any noise --}}
                     <button @click="showBalance = !showBalance" 
-                            class="btn btn-link btn-sm p-0 text-white opacity-75 border-0 shadow-none" 
-                            style="cursor: pointer;">
-                        <i class="ti" :class="showBalance ? 'ti-eye-off' : 'ti-eye'" style="font-size: 1rem;"></i>
+                            class="btn btn-sm p-1 text-white border-0 shadow-none d-flex align-items-center justify-content-center" 
+                            style="background: rgba(255,255,255,0.1); border-radius: 6px; width: 24px; height: 24px;">
+                        <i class="ti" :class="showBalance ? 'ti-eye-off' : 'ti-eye'" style="font-size: 0.9rem;"></i>
                     </button>
                 </div>
                 
                 <div class="d-flex align-items-baseline">
-                    <h5 class="fw-bold mb-0" x-show="showBalance" x-transition:enter.duration.300ms>
+                    <h5 class="fw-bold mb-0" style="letter-spacing: -0.5px;" x-show="showBalance" x-transition:enter.duration.300ms>
                         <span x-text="new Intl.NumberFormat().format(currentBalance)"></span>
                     </h5>
-                    <h5 class="fw-bold mb-0" x-show="!showBalance" x-transition:enter.duration.300ms>******</h5>
-                    <span class="ms-1 small opacity-75" style="font-size: 0.7rem;">RWF</span>
+                    <h5 class="fw-bold mb-0" x-show="!showBalance" x-transition:enter.duration.300ms>••••••</h5>
+                    <span class="ms-1 fw-medium opacity-75" style="font-size: 0.7rem;">RWF</span>
                 </div>
 
                 @if(($shop->wallet->pending_balance ?? 0) > 0)
                     <div class="mt-2 pt-2 border-top border-white border-opacity-10 d-flex justify-content-between align-items-center">
-                        <span class="opacity-75" style="font-size: 0.65rem;">
+                        <span class="opacity-75" style="font-size: 0.62rem;">
                             <i class="ti ti-clock-hour-4 me-1"></i>Pending
                         </span>
-                        <span class="fw-bold" style="font-size: 0.65rem;">
-                            {{ number_format($shop->wallet->pending_balance) }} RWF
+                        <span class="fw-bold" style="font-size: 0.62rem;">
+                            {{ number_format($shop->wallet->pending_balance) }}
                         </span>
                     </div>
                 @endif
@@ -80,14 +78,13 @@
         </div>
     </div>
 @elseif($shop && !$shop->is_verified)
-    {{-- Unverified Shop: Placeholder --}}
     <div class="px-3 pt-3 flex-shrink-0">
-        <div class="p-3 rounded-3 shadow-sm bg-light text-muted border">
+        <div class="p-3 rounded-3 shadow-sm bg-light text-muted border" style="border-style: dashed !important;">
             <div class="d-flex align-items-center">
-                <i class="ti ti-shield-check opacity-50 me-2" style="font-size: 1.2rem;"></i>
-                <span class="small fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.5px;">Verification Pending</span>
+                <i class="ti ti-shield-check opacity-50 me-2" style="font-size: 1.1rem;"></i>
+                <span class="small fw-bold text-uppercase" style="font-size: 0.55rem; letter-spacing: 0.5px;">Verification Pending</span>
             </div>
-            <p class="mb-0 mt-1 opacity-75" style="font-size: 0.65rem;">Wallet activates after approval.</p>
+            <p class="mb-0 mt-1 opacity-75" style="font-size: 0.62rem;">Wallet activates after approval.</p>
         </div>
     </div>
 @endif
