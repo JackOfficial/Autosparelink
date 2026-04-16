@@ -14,28 +14,35 @@ class DashboardController extends Controller
     /**
      * Main Dashboard View
      */
-   public function index()
+public function index()
 {
     $user = Auth::user();
 
-    // 1. Fetch Orders (Paginated)
+    // 1. Fetch Orders (Paginated) - Fixed pagination conflict
     $allOrders = $user->orders()
         ->with(['orderItems.part', 'payment', 'shipping', 'address'])
         ->latest()
-        ->paginate(10);
+        ->paginate(10, ['*'], 'orders_page'); 
 
     // 2. Fetch Tickets (Paginated)
-    $tickets = $user->tickets()->latest()->paginate(5);
+    $tickets = $user->tickets()->latest()->paginate(5, ['*'], 'tickets_page');
 
-    // 3. Page-Specific Data
-    // We only pass 'last_order' because the other stats are now 
-    // globally available via the View Composer in AppServiceProvider.
-    $lastOrder = $allOrders->first();
+    // 3. Prepare Stats (Required by your Blade)
+    // Your Blade uses $stats['total_orders'], etc.
+    $stats = [
+        'total_orders'    => $allOrders->total(),
+        'total_spent'     => $user->orders()->where('status', 'completed')->sum('total_amount'),
+        'open_tickets'    => $user->tickets()->where('status', 'open')->count(),
+        'pending_tickets' => $user->tickets()->where('status', 'pending')->count(),
+    ];
 
     // 4. Cart & Wishlist Content
     $wishlistItems = Cart::instance('wishlist')->content();
     $cartItems     = Cart::instance('default')->content();
     $cartTotal     = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+
+    // 5. Last Order for reference
+    $lastOrder = $allOrders->first();
 
     return view('user.index', compact(
         'user', 
@@ -44,7 +51,8 @@ class DashboardController extends Controller
         'wishlistItems', 
         'cartItems', 
         'cartTotal', 
-        'tickets'
+        'tickets',
+        'stats' // Don't forget to pass the stats!
     ));
 }
 
