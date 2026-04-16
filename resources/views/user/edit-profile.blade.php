@@ -28,7 +28,7 @@
     </div>
     
     <div class="list-group list-group-flush small fw-bold">
-        <a href="{{ route('dashboard.index') }}" class="list-group-item list-group-item-action py-3 border-0">
+        <a href="{{ route('user.dashboard.index') }}" class="list-group-item list-group-item-action py-3 border-0">
             <i class="fas fa-arrow-left me-2 text-primary"></i> Back to Dashboard
         </a>
     </div>
