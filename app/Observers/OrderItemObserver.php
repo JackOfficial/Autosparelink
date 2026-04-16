@@ -56,6 +56,10 @@ class OrderItemObserver
         // 4. Atomic Transaction to ensure database consistency
         DB::transaction(function () use ($wallet, $vendorNetEarnings, $adminServiceFee, $feePercentage, $orderItem) {
             
+            // NEW: Save the calculated commission to the OrderItem for record-keeping
+            $orderItem->commission_amount = $adminServiceFee;
+            $orderItem->save();
+
             // Increment the balance in the wallet table
             $wallet->increment('balance', $vendorNetEarnings);
 

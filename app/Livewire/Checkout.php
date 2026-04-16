@@ -2,33 +2,22 @@
 
 namespace App\Livewire;
 
-use App\Mail\OrderCallbackAdmin;
-use App\Mail\OrderCallbackClient;
+use App\Mail\{OrderCallbackAdmin, OrderCallbackClient};
 use Livewire\Component;
 use Gloudemans\Shoppingcart\Facades\Cart;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Address;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cookie;
+use App\Models\{Order, OrderItem, Address, Commission, Part};
+use Illuminate\Support\Facades\{Auth, DB, Mail, Log, Cookie};
 
 class Checkout extends Component
 {
-    public $addresses;           // User addresses
-    public $address_id;          // Selected existing address
+    public $addresses, $address_id, $guest_email;         // Selected existing address
     public $new_address = [];    // Array for new address
     public $use_new_address = false; // Toggle for using new address
-    public $guest_email;         // Added for guest email specifically
 
     public function mount()
     {
-        // Load user's addresses if logged in
         $this->addresses = Auth::check() ? Auth::user()->addresses()->get() : collect();
 
-        // 1. Retrieve Guest details from Cookies if they exist
         $saved_email   = Cookie::get('guest_email');
         $saved_name    = Cookie::get('guest_name');
         $saved_phone   = Cookie::get('guest_phone');
@@ -36,16 +25,12 @@ class Checkout extends Component
         $saved_city    = Cookie::get('guest_city');
         $saved_zip     = Cookie::get('guest_postal_code');
 
-        // 2. Determine Initial Toggle State
         if (!Auth::check() && $saved_email) {
-            // If they are a returning guest with data, show the "Saved" card first
             $this->use_new_address = false;
         } else {
-            // Otherwise, open the form if guest or no saved addresses exist
             $this->use_new_address = !Auth::check() || $this->addresses->isEmpty();
         }
 
-        // 3. Pre-fill address fields
         $this->new_address = [
             'full_name'      => Auth::check() ? Auth::user()->name : ($saved_name ?? ''),
             'phone'          => Auth::check() ? (Auth::user()->phone ?? '') : ($saved_phone ?? ''),
@@ -59,18 +44,16 @@ class Checkout extends Component
         $this->guest_email = Auth::check() ? Auth::user()->email : ($saved_email ?? '');
     }
 
-    /**
-     * Helper to remember guest info in cookies for 30 days
-     */
     private function saveGuestCookies()
     {
         if (!Auth::check()) {
-            Cookie::queue('guest_email', $this->guest_email, 60 * 24 * 30);
-            Cookie::queue('guest_name', $this->new_address['full_name'], 60 * 24 * 30);
-            Cookie::queue('guest_phone', $this->new_address['phone'], 60 * 24 * 30);
-            Cookie::queue('guest_address', $this->new_address['street_address'], 60 * 24 * 30);
-            Cookie::queue('guest_city', $this->new_address['city'], 60 * 24 * 30);
-            Cookie::queue('guest_postal_code', $this->new_address['postal_code'] ?? '', 60 * 24 * 30);
+            $duration = 60 * 24 * 30; // 30 days
+            Cookie::queue('guest_email', $this->guest_email, $duration);
+            Cookie::queue('guest_name', $this->new_address['full_name'], $duration);
+            Cookie::queue('guest_phone', $this->new_address['phone'], $duration);
+            Cookie::queue('guest_address', $this->new_address['street_address'], $duration);
+            Cookie::queue('guest_city', $this->new_address['city'], $duration);
+            Cookie::queue('guest_postal_code', $this->new_address['postal_code'] ?? '', $duration);
         }
     }
 
@@ -103,10 +86,8 @@ class Checkout extends Component
         $this->validate($rules);
 
         DB::beginTransaction();
-
         try {
             $final_address_id = null;
-            
             if (Auth::check()) {
                 if ($this->use_new_address) {
                     $address = Address::create(array_merge($this->new_address, [
@@ -125,6 +106,7 @@ class Checkout extends Component
                 'address_id'             => $final_address_id,
                 'total_amount'           => $subtotal,
                 'status'                 => 'pending',
+                'is_guest'               => !Auth::check(),
                 'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
                 'guest_email'            => $this->guest_email,
                 'guest_phone'            => $this->new_address['phone'],
@@ -134,25 +116,30 @@ class Checkout extends Component
             ]);
 
             foreach ($cartItems as $item) {
-                OrderItem::create([
-                    'order_id'   => $order->id,
-                    'part_id'    => $item->id,
-                    'quantity'   => $item->qty,
-                    'unit_price' => $item->price,
-                ]);
+                $part = Part::find($item->id);
+                if ($part) {
+                    $rate = Commission::getRateForShop($part->shop_id);
+                    $commissionAmount = (($item->price * $item->qty) * $rate) / 100;
+
+                    OrderItem::create([
+                        'order_id'          => $order->id,
+                        'part_id'           => $item->id,
+                        'shop_id'           => $part->shop_id,
+                        'part_name'         => $item->name,
+                        'quantity'          => $item->qty,
+                        'unit_price'        => $item->price,
+                        'commission_amount' => $commissionAmount,
+                        'status'            => 'pending',
+                    ]);
+                }
             }
 
             DB::commit();
-
-            $this->saveGuestCookies(); // Save info for next time
-
+            $this->saveGuestCookies();
             Cart::instance('default')->destroy();
 
             if (Auth::check()) {
-                DB::table('shoppingcart')
-                    ->where('identifier', Auth::id())
-                    ->where('instance', 'default')
-                    ->delete();
+                DB::table('shoppingcart')->where('identifier', Auth::id())->where('instance', 'default')->delete();
             }
 
             return redirect()->route('payment.process', ['order' => $order->id]);
@@ -178,7 +165,7 @@ class Checkout extends Component
                 'new_address.city'           => 'required|string',
             ]);
         } elseif (!$this->address_id) {
-            $this->dispatch('notify', message: 'Please select an address so we know your location.');
+            $this->dispatch('notify', message: 'Please select an address.');
             return;
         }
         $this->validate($rules);
@@ -190,7 +177,6 @@ class Checkout extends Component
         }
 
         DB::beginTransaction();
-
         try {
             $final_address_id = null;
             if (Auth::check()) {
@@ -207,39 +193,49 @@ class Checkout extends Component
             $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
             
             $order = Order::create([
-                'user_id'      => Auth::id(),
-                'address_id'   => $final_address_id,
-                'total_amount' => $subtotal,
-                'status'       => 'callback_requested',
-                'guest_name'   => !Auth::check() ? $this->new_address['full_name'] : null,
-                'guest_email'  => $this->guest_email,
-                'guest_phone'  => $this->new_address['phone'],
+                'user_id'                => Auth::id(),
+                'address_id'             => $final_address_id,
+                'total_amount'           => $subtotal,
+                'status'                 => 'callback_requested',
+                'is_guest'               => !Auth::check(),
+                'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
+                'guest_email'            => $this->guest_email,
+                'guest_phone'            => $this->new_address['phone'],
                 'guest_shipping_address' => !Auth::check() 
                     ? ($this->new_address['street_address'] . ', ' . $this->new_address['city']) 
                     : null,
             ]);
 
             foreach ($cartItems as $item) {
-                OrderItem::create([
-                    'order_id'   => $order->id,
-                    'part_id'    => $item->id,
-                    'quantity'   => $item->qty,
-                    'unit_price' => $item->price,
-                ]);
+                $part = Part::find($item->id);
+                if ($part) {
+                    $rate = Commission::getRateForShop($part->shop_id);
+                    $commissionAmount = (($item->price * $item->qty) * $rate) / 100;
+
+                    OrderItem::create([
+                        'order_id'          => $order->id,
+                        'part_id'           => $item->id,
+                        'shop_id'           => $part->shop_id,
+                        'part_name'         => $item->name,
+                        'quantity'          => $item->qty,
+                        'unit_price'        => $item->price,
+                        'commission_amount' => $commissionAmount,
+                        'status'            => 'pending',
+                    ]);
+                }
             }
 
             DB::commit();
-
-            $this->saveGuestCookies(); // Save info for next time
-
+            $this->saveGuestCookies();
             Cart::instance('default')->destroy();
+
             if (Auth::check()) {
                 DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
             }
 
+            // Emails
             try {
-                Mail::to('admin@happyfamilyrwanda.org')->send(new OrderCallbackAdmin($order));
-                
+                Mail::to('musengimanajacques@gmail.com')->send(new OrderCallbackAdmin($order));
                 $targetEmail = Auth::check() ? Auth::user()->email : $this->guest_email;
                 if ($targetEmail) {
                     Mail::to($targetEmail)->send(new OrderCallbackClient($order));
@@ -254,7 +250,7 @@ class Checkout extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Order Callback Failed: ' . $e->getMessage());
-            $this->dispatch('notify', message: 'Something went wrong. Please try again.');
+            $this->dispatch('notify', message: 'Something went wrong.');
         }
     }
 
