@@ -128,7 +128,7 @@ class VehicleController extends Controller
      */
     private function authorizeOwner(ClientVehicle $vehicle)
     {
-        if ($vehicle->user_id !== Auth::id()) {
+        if ($vehicle->user_id != Auth::id()) {
             abort(403);
         }
     }
