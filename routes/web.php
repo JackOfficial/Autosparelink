@@ -194,9 +194,15 @@ Route::get('/auth/redirect/{provider}', [SocialLoginController::class, 'redirect
 Route::get('/auth/callback/{provider}', [SocialLoginController::class, 'callback']);
 
 Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
-    Route::get('/home', [HomeContoller::class, 'index'])->name('home');
-    // Dashboard & Profile
-    Route::controller(UserDashboardController::class)->group(function () {
+
+    Route::prefix('user')->name('user.')->group(function () {
+         Route::resource('orders', OrderController::class);
+         Route::resource('addresses', UserAddressController::class);
+         Route::resource('vehicles', VehicleController::class);
+         Route::resource('tickets', TicketController::class);
+        Route::post('tickets/{ticket}/reply', [TicketController::class, 'reply'])->name('tickets.reply');
+
+        Route::controller(UserDashboardController::class)->group(function () {
         Route::get('/dashboard', 'index')->name('dashboard.index');
         Route::get('/profile/edit', 'editProfile')->name('profile.edit');
         Route::put('/profile/update', 'updateProfile')->name('profile.update');
@@ -207,18 +213,14 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
             auth()->user()->unreadNotifications->markAsRead();
             return back();
         })->name('notifications.read');
+        });
+
     });
+
+    Route::get('/home', [HomeContoller::class, 'index'])->name('home');
+    // Dashboard & Profile
 
     Route::post('/like/toggle', [LikeController::class, 'toggle'])->name('like.toggle');
-
-    Route::prefix('user')->name('user.')->group(function () {
-         Route::resource('orders', OrderController::class);
-         Route::resource('addresses', UserAddressController::class);
-         Route::resource('vehicles', VehicleController::class);
-
-         Route::resource('tickets', TicketController::class);
-        Route::post('tickets/{ticket}/reply', [TicketController::class, 'reply'])->name('tickets.reply');
-    });
 
     // OnBoarding Routes
     Route::prefix('shop')->name('shop.')->controller(OnboardingController::class)->group(function () {
