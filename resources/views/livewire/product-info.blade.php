@@ -76,7 +76,7 @@
     {{-- 4. Shipping Note & Sharing --}}
     <div class="mt-4 d-flex justify-content-between align-items-center flex-wrap">
         <div class="text-muted small">
-            <i class="fas fa-truck-moving text-primary mr-2"></i> Delivery within 24-48h in Kigali
+            <i class="fas fa-truck-moving text-primary mr-2"></i> Delivery within 3h in Kigali
         </div>
         <div class="share-area">
             <a href="https://wa.me/?text={{ urlencode($shareText . ' ' . $shareUrl) }}" target="_blank" class="share-icon wa"><i class="fab fa-whatsapp"></i></a>
