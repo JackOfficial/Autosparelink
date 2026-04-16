@@ -14,8 +14,10 @@ class ProductInfo extends Component
 
     public function mount($part)
     {
+        // Eager load shop along with other relationships
         $part->load([
             'partBrand',
+            'shop', // Added shop here
             'fitments.vehicleModel.brand',
         ]);
 
@@ -38,45 +40,37 @@ class ProductInfo extends Component
         }
     }
 
- public function addToCart()
-{
-    // 1. Check stock
-    if ($this->quantity > $this->part->stock_quantity) {
-        $this->dispatch('notify', message: 'Not enough stock available!');
-        return;
-    }
-
-    // 2. Add item to session cart
-    Cart::instance('default')->add([
-        'id'    => $this->part->id,
-        'name'  => $this->part->part_name,
-        'qty'   => $this->quantity,
-        'price' => $this->part->price,
-        'weight'=> 0,
-        'options' => [
-            'brand'       => $this->part->partBrand?->name,
-            'part_number' => $this->part->part_number,
-        ]
-    ]);
-
-     if (auth()->check()) {
-        try {
-            Cart::instance('default')->store(auth()->id());
-        } catch (\Gloudemans\Shoppingcart\Exceptions\CartAlreadyStoredException $e) {
-            // erase existing stored cart and store fresh
-            Cart::instance('default')->erase(auth()->id());
-            Cart::instance('default')->store(auth()->id());
+    public function addToCart()
+    {
+        if ($this->quantity > $this->part->stock_quantity) {
+            $this->dispatch('notify', message: 'Not enough stock available!');
+            return;
         }
-    }
 
-    // 3. Notify frontend / Livewire
-    $this->dispatch('cartUpdated');
-    $this->dispatch('notify', message: 'Item added to cart!');
-}
+        Cart::instance('default')->add([
+            'id'    => $this->part->id,
+            'name'  => $this->part->part_name,
+            'qty'   => $this->quantity,
+            'price' => $this->part->price,
+            'weight'=> 0,
+            'options' => [
+                'brand'         => $this->part->partBrand?->name,
+                'part_number'   => $this->part->part_number,
+                'shop_name'     => $this->part->shop?->shop_name, // Added Shop Name
+                'shop_location' => $this->part->shop?->address,   // Direct column access
+            ]
+        ]);
+
+        if (auth()->check()) {
+            $this->syncCartWithDatabase('default');
+        }
+
+        $this->dispatch('cartUpdated');
+        $this->dispatch('notify', message: 'Item added to cart!');
+    }
 
     public function addToWishlist()
     {
-        // Prevent duplicate wishlist items
         $exists = Cart::instance('wishlist')
             ->search(fn($item) => $item->id == $this->part->id)
             ->isNotEmpty();
@@ -93,23 +87,32 @@ class ProductInfo extends Component
             'price'   => $this->part->price,
             'weight'  => 0,
             'options' => [
-                'brand'       => $this->part->partBrand?->name,
-                'part_number' => $this->part->part_number,
+                'brand'         => $this->part->partBrand?->name,
+                'part_number'   => $this->part->part_number,
+                'shop_name'     => $this->part->shop?->shop_name, // Added Shop Name
+                'shop_location' => $this->part->shop?->address,   // Direct column access
             ]
         ]);
 
         if (auth()->check()) {
-        try {
-            Cart::instance('default')->store(auth()->id());
-        } catch (\Gloudemans\Shoppingcart\Exceptions\CartAlreadyStoredException $e) {
-            // erase existing stored cart and store fresh
-            Cart::instance('default')->erase(auth()->id());
-            Cart::instance('default')->store(auth()->id());
-        }
+            $this->syncCartWithDatabase('wishlist');
         }
 
         $this->dispatch('wishlistUpdated');
         $this->dispatch('notify', message: 'Added to wishlist!');
+    }
+
+    /**
+     * Refactored helper to handle database storage logic
+     */
+    protected function syncCartWithDatabase($instance)
+    {
+        try {
+            Cart::instance($instance)->store(auth()->id());
+        } catch (\Gloudemans\Shoppingcart\Exceptions\CartAlreadyStoredException $e) {
+            Cart::instance($instance)->erase(auth()->id());
+            Cart::instance($instance)->store(auth()->id());
+        }
     }
 
     public function render()

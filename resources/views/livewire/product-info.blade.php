@@ -12,7 +12,7 @@
     </div>
 
     {{-- 2. Pricing & Stock Status --}}
-    <div class="d-flex align-items-baseline justify-content-between mb-4">
+    <div class="d-flex align-items-baseline justify-content-between mb-2">
         <div>
             <h2 class="text-dark font-weight-bold mb-0">
                 {{ number_format($part->price, 0) }} <span class="h5 text-muted">RWF</span>
@@ -27,6 +27,18 @@
                 {{ $part->stock_quantity > 0 ? $part->stock_quantity . ' Units Available' : 'Low Stock' }}
             </span>
         </div>
+    </div>
+
+    {{-- SHOP INFO (Minimalist One Line) --}}
+    <div class="shop-detail-row mb-4">
+        <small class="text-muted">
+            <i class="fa fa-store mr-1 text-primary"></i> 
+            <span class="font-weight-bold text-dark">{{ $part->shop->shop_name ?? 'Official Store' }}</span>
+            @if($part->shop?->address)
+                <span class="mx-2 text-light-gray">|</span>
+                <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
+            @endif
+        </small>
     </div>
 
     <hr class="my-4 border-soft">
@@ -83,7 +95,13 @@
     {{-- REFINED STYLES --}}
     <style>
         .border-soft { border-color: #f1f5f9; }
+        .text-light-gray { color: #cbd5e1; }
         
+        .shop-detail-row {
+            padding-left: 2px;
+            letter-spacing: 0.2px;
+        }
+
         /* The Grid for Actions */
         .action-bar-grid {
             display: grid;
@@ -92,7 +110,7 @@
             align-items: end;
         }
 
-        /* Quantity Styling */
+        /* ... existing styles preserved ... */
         .qty-controls {
             display: flex;
             align-items: center;
@@ -119,7 +137,6 @@
             font-size: 1.1rem;
         }
 
-        /* Action Buttons */
         .btn-group-actions {
             display: flex;
             gap: 10px;
@@ -142,7 +159,6 @@
         }
         .btn-wishlist:hover { border-color: #f43f5e; color: #f43f5e; }
 
-        /* Stock Badge */
         .badge-stock-status {
             padding: 6px 14px;
             border-radius: 50px;
@@ -153,7 +169,6 @@
         .in-stock { background: #dcfce7; color: #166534; }
         .low-stock { background: #fee2e2; color: #991b1b; }
 
-        /* Share Icons */
         .share-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; margin-left: 8px; font-size: 0.9rem; transition: 0.3s; color: #94a3b8; border: 1px solid #e2e8f0; }
         .share-icon:hover { color: #fff; transform: translateY(-3px); }
         .share-icon.wa:hover { background: #25D366; border-color: #25D366; }
