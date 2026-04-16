@@ -79,8 +79,8 @@
                         <span class="d-none d-md-inline text-dark small fw-bold">{{ auth()->user()->name }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item py-2" href="{{ route('profile.edit') }}"><i class="fas fa-user-circle me-2 text-muted"></i> Account Settings</a></li>
-                        <li><a class="dropdown-item py-2" href="{{ route('orders.index') }}"><i class="fas fa-history me-2 text-muted"></i> Order History</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ route('user.profile.edit') }}"><i class="fas fa-user-circle me-2 text-muted"></i> Account Settings</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ route('user.orders.index') }}"><i class="fas fa-history me-2 text-muted"></i> Order History</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item py-2 text-danger" href="{{ route('logout') }}" 
