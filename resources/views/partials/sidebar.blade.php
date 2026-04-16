@@ -13,7 +13,7 @@
                     </a>
                 </li>
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 {{ request()->is('user/vehicles*') ? 'active' : 'text-dark' }}" href="/user/vehicles">
+                    <a class="nav-link py-2 px-3 {{ request()->is('/vehicles*') ? 'active' : 'text-dark' }}" href="//vehicles">
                         <i class="fas fa-car me-2"></i> Saved Vehicles
                      </a>
                 </li>
@@ -25,7 +25,7 @@
             <h6 class="text-uppercase text-muted small fw-bold mb-3" style="letter-spacing: 1px;">Orders & Shopping</h6>
             <ul class="nav flex-column">
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 d-flex justify-content-between align-items-center {{ request()->is('user/orders*') ? 'active' : 'text-dark' }}" href="{{ route('orders.index') }}">
+                    <a class="nav-link py-2 px-3 d-flex justify-content-between align-items-center {{ request()->is('/orders*') ? 'active' : 'text-dark' }}" href="{{ route('orders.index') }}">
                         <span><i class="fas fa-box me-2"></i> My Orders</span>
                         <span class="badge badge-soft-primary rounded-pill">{{ $stats['total_orders'] ?? 0 }}</span>
                     </a>
@@ -38,7 +38,7 @@
             <h6 class="text-uppercase text-muted small fw-bold mb-3" style="letter-spacing: 1px;">Support</h6>
             <ul class="nav flex-column">
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 d-flex justify-content-between align-items-center {{ request()->is('user/tickets*') ? 'active' : 'text-dark' }}" href="{{ route('tickets.index') }}">
+                    <a class="nav-link py-2 px-3 d-flex justify-content-between align-items-center {{ request()->is('/tickets*') ? 'active' : 'text-dark' }}" href="{{ route('tickets.index') }}">
                         <span><i class="fas fa-headset me-2"></i> Help Tickets</span>
                       @if(($stats['pending_tickets'] ?? 0) > 0)
             <span class="badge rounded-pill bg-warning text-dark">{{ $stats['pending_tickets'] }}</span>
@@ -58,7 +58,7 @@
             <h6 class="text-uppercase text-muted small fw-bold mb-3" style="letter-spacing: 1px;">Settings</h6>
             <ul class="nav flex-column">
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 {{ request()->is('user/profile*') ? 'active' : 'text-dark' }}" href="{{ route('profile.edit') }}">
+                    <a class="nav-link py-2 px-3 {{ request()->is('/profile*') ? 'active' : 'text-dark' }}" href="{{ route('profile.edit') }}">
                         <i class="fas fa-user-cog me-2"></i> Profile Settings
                     </a>
                 </li>
