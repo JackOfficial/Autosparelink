@@ -306,6 +306,16 @@
                 </p>
               </a>
             </li>
+
+           <li class="nav-item" x-show="isVisible($el)">
+             <a href="{{ route('admin.wallets.index') }}" class="nav-link {{ request()->routeIs('admin.wallets.*') ? 'active' : '' }}">
+             <i class="fas fa-wallet nav-icon"></i>
+            <p>
+             Business Wallets
+             </p>
+            </a>
+           </li>
+
             <li class="nav-item" x-show="isVisible($el)">
               <a href="/admin/carts" class="nav-link">
                 <i class="fas fa-shopping-basket nav-icon"></i>

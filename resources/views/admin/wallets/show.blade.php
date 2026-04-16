@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('admin.layouts.app')
 
 @section('title', 'Wallet History: ' . $wallet->shop->shop_name)
 
