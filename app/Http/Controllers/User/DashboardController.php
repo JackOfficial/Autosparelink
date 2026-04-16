@@ -20,7 +20,7 @@ class DashboardController extends Controller
 
     // 1. Fetch Orders (Paginated)
     $allOrders = $user->orders()
-        ->with(['orderItems.part', 'payment', 'shipping', 'addresses'])
+        ->with(['orderItems.part', 'payment', 'shipping', 'address'])
         ->latest()
         ->paginate(10);
 
