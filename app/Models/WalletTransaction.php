@@ -49,18 +49,39 @@ class WalletTransaction extends Model
         return $this->morphTo();
     }
 
-    public function getTypeBadgeAttribute()
+public function getTypeBadgeAttribute()
 {
-    $colors = [
-        'credit' => 'success',
-        'debit'  => 'danger',
+    // Matching your "bg-soft-primary" style
+    $styles = [
+        'credit' => ['bg' => 'soft-success', 'text' => 'success'],
+        'debit'  => ['bg' => 'soft-danger', 'text' => 'danger'],
     ];
 
+    $style = $styles[$this->type] ?? ['bg' => 'soft-secondary', 'text' => 'secondary'];
+
     return sprintf(
-        '<span class="badge bg-%s">%s</span>',
-        $colors[$this->type] ?? 'secondary',
+        '<span class="badge bg-%s text-%s rounded-pill px-3">%s</span>',
+        $style['bg'],
+        $style['text'],
         ucfirst($this->type)
     );
+}
+
+/**
+ * Calculate the net amount (Amount - Fees)
+ */
+public function getNetAmountAttribute(): float
+{
+    return (float) $this->amount - (float) $this->service_fee;
+}
+
+protected static function booted()
+{
+    static::creating(function ($transaction) {
+        if (!in_array($transaction->type, ['credit', 'debit'])) {
+            throw new \Exception("Invalid transaction type: {$transaction->type}");
+        }
+    });
 }
 
 }
