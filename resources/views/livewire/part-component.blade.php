@@ -52,25 +52,23 @@
 
         <div class="mt-auto"> 
             {{-- Vehicle & Part Number --}}
-            <small class="text-muted d-block mb-1 text-truncate px-2">
-                <i class="fa fa-car mr-1"></i> {{ $descriptiveName }}
-            </small>
+           <small class="text-muted d-block mb-1 text-truncate px-2">
+        <i class="fa fa-car mr-1"></i> {{ $descriptiveName }}
+    </small>
 
-            <small class="text-muted d-block mb-1">
-                <i class="fa fa-cog mr-1"></i> {{ $part->part_number }}
-            </small>
+    <small class="text-muted d-block mb-1">
+        <i class="fa fa-cog mr-1"></i> {{ $part->part_number }}
+    </small>
 
             {{-- SHOP INFO SECTION --}}
-            <div class="border-top border-bottom my-2 py-1 bg-light-soft" style="background-color: #f8f9fa4d;">
-                <small class="d-block text-dark font-weight-bold">
-                    <i class="fa fa-store mr-1 text-primary"></i> {{ $part->shop->shop_name ?? 'Official Store' }}
-                </small>
-                @if($part->shop?->address)
-                    <small class="d-block text-muted text-truncate px-2">
-                        <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
-                    </small>
-                @endif
-            </div>
+         <small class="text-muted d-block mb-2 text-truncate px-2">
+        <i class="fa fa-store mr-1 text-primary"></i> 
+        <span class="font-weight-bold text-dark">{{ $part->shop->shop_name ?? 'Shop' }}</span> 
+        @if($part->shop?->address)
+            <span class="mx-1">|</span>
+            <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
+        @endif
+    </small>
 
             @if($part->stock_quantity > 0)
                 <small class="badge {{ $part->stock_quantity < 5 ? 'badge-warning' : 'badge-light text-success' }} mb-2">
