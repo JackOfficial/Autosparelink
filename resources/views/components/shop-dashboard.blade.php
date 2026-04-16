@@ -9,9 +9,16 @@
     
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('frontend/img/logo.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('frontend/img/logo.png') }}">
+
+    {{-- 1. Google Fonts are fine here (but preconnect first for speed) --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    {{-- <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-wx3ZPVD6pK+... (truncated) ..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-wx3ZPVD6pK+... (truncated) ..." crossorigin="anonymous" referrerpolicy="no-referrer" /> --}}
 
     <script>
         const savedTheme = localStorage.getItem('theme') || 'light';

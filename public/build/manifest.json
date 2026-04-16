@@ -50,7 +50,7 @@
     ]
   },
   "resources/js/userdashboard/main.js": {
-    "file": "assets/main-B8gIYjLc.js",
+    "file": "assets/main-BEro7UZI.js",
     "name": "main",
     "src": "resources/js/userdashboard/main.js",
     "isEntry": true,
@@ -58,7 +58,28 @@
       "_bootstrap.esm-CiZvvyki.js"
     ],
     "css": [
-      "assets/main-4_8Xrnt1.css"
+      "assets/main-L4WSzi43.css"
+    ],
+    "assets": [
+      "assets/tabler-icons-BXBbaLXc.woff2",
+      "assets/tabler-icons-BJo9LE_l.woff",
+      "assets/tabler-icons-Ch1I3Ab1.ttf",
+      "assets/fa-brands-400-BP5tdqmh.woff2",
+      "assets/fa-regular-400-nyy7hhHF.woff2",
+      "assets/fa-solid-900-DRAAbZTg.woff2",
+      "assets/fa-v4compatibility-DD84SGiu.woff2"
+    ]
+  },
+  "resources/js/userdashboard/user-main.js": {
+    "file": "assets/user-main-B0tMMlv0.js",
+    "name": "user-main",
+    "src": "resources/js/userdashboard/user-main.js",
+    "isEntry": true,
+    "imports": [
+      "_bootstrap.esm-CiZvvyki.js"
+    ],
+    "css": [
+      "assets/user-main-CQ00LTG7.css"
     ],
     "assets": [
       "assets/tabler-icons-BXBbaLXc.woff2",
