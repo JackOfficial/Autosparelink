@@ -69,7 +69,7 @@
                                     </td>
                                     <td class="px-4 text-end">
                                         <div class="btn-group shadow-sm rounded-pill overflow-hidden">
-                                            <a href="{{ route('tickets.show', $ticket->id) }}" class="btn btn-sm btn-white border-end px-3">
+                                            <a href="{{ route('user.tickets.show', $ticket->id) }}" class="btn btn-sm btn-white border-end px-3">
                                                 View
                                             </a>
                                             @if($ticket->status !== 'closed')

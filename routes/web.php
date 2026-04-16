@@ -219,12 +219,15 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
     });
 
     Route::post('/like/toggle', [LikeController::class, 'toggle'])->name('like.toggle');
-    Route::resource('orders', OrderController::class);
-    Route::resource('addresses', UserAddressController::class);
-    Route::resource('vehicles', VehicleController::class);
 
-// OnBoarding Routes
-Route::prefix('shop')->name('shop.')->controller(OnboardingController::class)->group(function () {
+    Route::prefix('user')->name('user.')->group(function () {
+         Route::resource('orders', OrderController::class);
+         Route::resource('addresses', UserAddressController::class);
+         Route::resource('vehicles', VehicleController::class);
+    });
+
+    // OnBoarding Routes
+    Route::prefix('shop')->name('shop.')->controller(OnboardingController::class)->group(function () {
     
     // 1. Landing / Welcome page -> route('shop.index')
     Route::get('/become-a-partner', 'index')->name('index');

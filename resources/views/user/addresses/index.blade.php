@@ -12,7 +12,7 @@
             <p class="text-muted small mb-0">Manage your delivery locations for faster checkout.</p>
         </div>
         <div class="mt-3 mt-md-0">
-            <a href="{{ route('addresses.create') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+            <a href="{{ route('user.addresses.create') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
                 <i class="fas fa-plus me-2"></i> Add New Address
             </a>
         </div>
@@ -60,7 +60,7 @@
 
                         {{-- Actions --}}
                         <div class="d-flex gap-2 pt-3 border-top">
-                            <a href="{{ route('addresses.edit', $address->id) }}" class="btn btn-light btn-sm rounded-pill px-3 flex-grow-1">
+                            <a href="{{ route('user.addresses.edit', $address->id) }}" class="btn btn-light btn-sm rounded-pill px-3 flex-grow-1">
                                 <i class="fas fa-edit me-1 text-muted"></i> Edit
                             </a>
                             
@@ -71,7 +71,7 @@
                                 </button>
 
                                 <div x-show="confirmingDelete" x-cloak class="d-flex gap-1 animate__animated animate__fadeIn">
-                                    <form action="{{ route('addresses.destroy', $address->id) }}" method="POST" class="w-100">
+                                    <form action="{{ route('user.addresses.destroy', $address->id) }}" method="POST" class="w-100">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm rounded-pill px-2 w-100">Confirm</button>
                                     </form>
@@ -91,7 +91,7 @@
                     <h5 class="text-muted">No addresses saved yet</h5>
                     <p class="small text-muted mb-4">Add your shipping details now for a smoother checkout experience.</p>
                     <div>
-                        <a href="{{ route('addresses.create') }}" class="btn btn-primary rounded-pill px-5">Add My First Address</a>
+                        <a href="{{ route('user.addresses.create') }}" class="btn btn-primary rounded-pill px-5">Add My First Address</a>
                     </div>
                 </div>
             </div>

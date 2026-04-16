@@ -19,7 +19,7 @@
     {{-- Breadcrumb --}}
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="{{ route('vehicles.index') }}" class="text-decoration-none text-muted small">Garage</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('user.vehicles.index') }}" class="text-decoration-none text-muted small">Garage</a></li>
             <li class="breadcrumb-item active small fw-bold" aria-current="page">New Vehicle</li>
         </ol>
     </nav>
@@ -41,7 +41,7 @@
 
                 <div class="card-body p-4">
                     {{-- Added enctype for file uploads --}}
-                    <form action="{{ route('vehicles.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('user.vehicles.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         {{-- Section: Vehicle Photo (New) --}}
@@ -214,7 +214,7 @@
 
                         {{-- Footer Actions --}}
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <a href="{{ route('vehicles.index') }}" class="btn btn-link text-muted text-decoration-none fw-semibold px-0">
+                            <a href="{{ route('user.vehicles.index') }}" class="btn btn-link text-muted text-decoration-none fw-semibold px-0">
                                 <i class="fas fa-arrow-left me-1"></i> Back to Garage
                             </a>
                             <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow">

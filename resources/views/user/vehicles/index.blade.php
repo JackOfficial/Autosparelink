@@ -10,7 +10,7 @@
             <h2 class="h3 fw-bold text-dark mb-1">My Garage</h2>
             <p class="text-muted mb-0">Manage your vehicles for precise parts and service recommendations.</p>
         </div>
-        <a href="{{ route('vehicles.create') }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center justify-content-center">
+        <a href="{{ route('user.vehicles.create') }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center justify-content-center">
             <i class="fas fa-plus-circle me-2"></i> 
             <span>Add New Vehicle</span>
         </a>
@@ -86,10 +86,10 @@
 
                         {{-- Action Footer --}}
                         <div class="d-flex gap-2 pt-3 border-top mt-auto">
-                            <a href="{{ route('vehicles.edit', $vehicle->id) }}" class="btn btn-light border btn-sm rounded-pill flex-grow-1 fw-bold text-secondary">
+                            <a href="{{ route('user.vehicles.edit', $vehicle->id) }}" class="btn btn-light border btn-sm rounded-pill flex-grow-1 fw-bold text-secondary">
                                 <i class="fas fa-edit me-1"></i> Edit
                             </a>
-                            <form action="{{ route('vehicles.destroy', $vehicle->id) }}" method="POST" class="flex-grow-1" onsubmit="return confirm('Permanently remove this vehicle?')">
+                            <form action="{{ route('user.vehicles.destroy', $vehicle->id) }}" method="POST" class="flex-grow-1" onsubmit="return confirm('Permanently remove this vehicle?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill w-100 fw-bold">
@@ -112,7 +112,7 @@
                     <p class="text-muted mx-auto mb-4" style="max-width: 400px;">
                         Add your vehicle today to see parts that fit your specific make and model.
                     </p>
-                    <a href="{{ route('vehicles.create') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">
+                    <a href="{{ route('user.vehicles.create') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">
                         Add My First Vehicle
                     </a>
                 </div>

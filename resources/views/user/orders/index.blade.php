@@ -24,7 +24,7 @@
     {{-- Alpine.js Filter Bar --}}
     <div x-show="showFilters" x-collapse x-cloak class="mb-4">
         <div class="card border-0 shadow-sm rounded-4 p-3 bg-light">
-            <form action="{{ route('orders.index') }}" method="GET" class="row g-2">
+            <form action="{{ route('user.orders.index') }}" method="GET" class="row g-2">
                 <div class="col-md-4">
                     <input type="text" name="search" class="form-control form-control-sm border-0 rounded-3" placeholder="Search Order # or Part Name...">
                 </div>
@@ -105,12 +105,12 @@
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
-                                        <li><a class="dropdown-item py-2" href="{{ route('orders.show', $order->id) }}"><i class="fas fa-eye me-2 text-primary"></i> View Details</a></li>
-                                        <li><a class="dropdown-item py-2" href="{{ route('tickets.create', ['order_id' => $order->id]) }}"><i class="fas fa-headset me-2 text-info"></i> Support Ticket</a></li>
+                                        <li><a class="dropdown-item py-2" href="{{ route('user.orders.show', $order->id) }}"><i class="fas fa-eye me-2 text-primary"></i> View Details</a></li>
+                                        <li><a class="dropdown-item py-2" href="{{ route('user.tickets.create', ['order_id' => $order->id]) }}"><i class="fas fa-headset me-2 text-info"></i> Support Ticket</a></li>
                                         @if($order->status == 'pending')
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
-                                                <form action="{{ route('orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Cancel this order?')">
+                                                <form action="{{ route('user.orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Cancel this order?')">
                                                     @csrf @method('DELETE')
                                                     <button type="submit" class="dropdown-item py-2 text-danger"><i class="fas fa-times me-2"></i> Cancel Order</button>
                                                 </form>

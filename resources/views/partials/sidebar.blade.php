@@ -8,12 +8,12 @@
             <h6 class="text-uppercase text-muted small fw-bold mb-3" style="letter-spacing: 1px;">My Garage</h6>
             <ul class="nav flex-column">
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 {{ request()->is('dashboard') ? 'active' : '' }}" href="/dashboard">
+                    <a class="nav-link py-2 px-3 {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                         <i class="fas fa-desktop me-2"></i> Dashboard
                     </a>
                 </li>
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 {{ request()->is('/vehicles*') ? 'active' : 'text-dark' }}" href="//vehicles">
+                    <a class="nav-link py-2 px-3 {{ request()->is('user/vehicles*') ? 'active' : 'text-dark' }}" href="{{ route('user.vehicles.index') }}">
                         <i class="fas fa-car me-2"></i> Saved Vehicles
                      </a>
                 </li>
@@ -25,7 +25,7 @@
             <h6 class="text-uppercase text-muted small fw-bold mb-3" style="letter-spacing: 1px;">Orders & Shopping</h6>
             <ul class="nav flex-column">
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 d-flex justify-content-between align-items-center {{ request()->is('/orders*') ? 'active' : 'text-dark' }}" href="{{ route('orders.index') }}">
+                    <a class="nav-link py-2 px-3 d-flex justify-content-between align-items-center {{ request()->is('user/orders*') ? 'active' : 'text-dark' }}" href="{{ route('user.orders.index') }}">
                         <span><i class="fas fa-box me-2"></i> My Orders</span>
                         <span class="badge badge-soft-primary rounded-pill">{{ $stats['total_orders'] ?? 0 }}</span>
                     </a>
@@ -38,7 +38,7 @@
             <h6 class="text-uppercase text-muted small fw-bold mb-3" style="letter-spacing: 1px;">Support</h6>
             <ul class="nav flex-column">
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 d-flex justify-content-between align-items-center {{ request()->is('/tickets*') ? 'active' : 'text-dark' }}" href="{{ route('tickets.index') }}">
+                    <a class="nav-link py-2 px-3 d-flex justify-content-between align-items-center {{ request()->is('user/tickets*') ? 'active' : 'text-dark' }}" href="{{ route('user.tickets.index') }}">
                         <span><i class="fas fa-headset me-2"></i> Help Tickets</span>
                       @if(($stats['pending_tickets'] ?? 0) > 0)
             <span class="badge rounded-pill bg-warning text-dark">{{ $stats['pending_tickets'] }}</span>
@@ -58,14 +58,14 @@
             <h6 class="text-uppercase text-muted small fw-bold mb-3" style="letter-spacing: 1px;">Settings</h6>
             <ul class="nav flex-column">
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 {{ request()->is('/profile*') ? 'active' : 'text-dark' }}" href="{{ route('profile.edit') }}">
+                    <a class="nav-link py-2 px-3 {{ request()->is('user/profile*') ? 'active' : 'text-dark' }}" href="{{ route('user.profile.edit') }}">
                         <i class="fas fa-user-cog me-2"></i> Profile Settings
                     </a>
                 </li>
                <li class="nav-item mb-1">
-    <a class="nav-link py-2 px-3 rounded-3 {{ request()->is('addresses*') ? 'bg-primary text-white shadow-sm' : 'text-dark hover-bg-light' }}" 
-       href="{{ route('addresses.index') }}">
-        <i class="fas fa-map-marker-alt me-2 {{ request()->is('addresses*') ? 'text-white' : 'text-primary' }}"></i> 
+    <a class="nav-link py-2 px-3 rounded-3 {{ request()->is('user/addresses*') ? 'bg-primary text-white shadow-sm' : 'text-dark hover-bg-light' }}" 
+       href="{{ route('user.addresses.index') }}">
+        <i class="fas fa-map-marker-alt me-2 {{ request()->is('user/addresses*') ? 'text-white' : 'text-primary' }}"></i> 
         <span>My Addresses</span>
     </a>
 </li>
@@ -88,7 +88,7 @@
                 </p>
                 
                 {{-- Updated to shop.index (The Landing/Welcome route) --}}
-                <a href="{{ route('shop.index') }}" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
+                <a href="{{ route('user.shop.index') }}" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold py-2">
                     <i class="fas fa-rocket me-1 small"></i> Become a Vendor
                 </a>
             </div>
@@ -108,7 +108,7 @@
             </div>
             
             {{-- Updated to shop.status --}}
-            <a href="{{ route('shop.status') }}" class="btn btn-sm btn-warning w-100 rounded-pill fw-bold text-white">
+            <a href="{{ route('user.shop.status') }}" class="btn btn-sm btn-warning w-100 rounded-pill fw-bold text-white">
                 <i class="fas fa-clock me-1 small"></i> Check Status
             </a>
         </div>
@@ -135,7 +135,7 @@
             </div>
 
             {{-- Merchant Panel remains the same, ensure this route exists elsewhere --}}
-            <a href="{{ route('shop.dashboard') }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill fw-bold">
+            <a href="{{ route('user.shop.dashboard') }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill fw-bold">
                 <i class="fas fa-external-link-alt me-1 small"></i> Merchant Panel
             </a>
         </div>

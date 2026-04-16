@@ -8,7 +8,7 @@
     {{-- Breadcrumb --}}
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('addresses.index') }}" class="text-decoration-none text-muted small">Addresses</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('user.addresses.index') }}" class="text-decoration-none text-muted small">Addresses</a></li>
             <li class="breadcrumb-item active small fw-bold" aria-current="page">New Address</li>
         </ol>
     </nav>
@@ -22,7 +22,7 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <form action="{{ route('addresses.store') }}" method="POST">
+                    <form action="{{ route('user.addresses.store') }}" method="POST">
                         @csrf
 
                         <div class="row">
@@ -103,7 +103,7 @@
 
                         {{-- Form Buttons --}}
                         <div class="d-flex justify-content-between align-items-center border-top pt-4">
-                            <a href="{{ route('addresses.index') }}" class="btn btn-link text-muted text-decoration-none px-0">
+                            <a href="{{ route('user.addresses.index') }}" class="btn btn-link text-muted text-decoration-none px-0">
                                 <i class="fas fa-times me-1"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">

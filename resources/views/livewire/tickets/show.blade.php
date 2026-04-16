@@ -2,7 +2,7 @@
     
     {{-- Top Navigation & Status --}}
     <div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-        <a href="{{ route('tickets.index') }}" class="text-decoration-none text-secondary d-inline-flex align-items-center fw-bold">
+        <a href="{{ route('user.tickets.index') }}" class="text-decoration-none text-secondary d-inline-flex align-items-center fw-bold">
             <i class="fas fa-chevron-left me-2 small"></i> Back to Tickets
         </a>
         <div class="d-flex align-items-center mt-3 mt-md-0">

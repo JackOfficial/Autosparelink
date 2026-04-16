@@ -12,7 +12,7 @@
 
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4 p-md-5">
-                    <form action="{{ route('shop.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('user.shop.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <h5 class="fw-bold mb-3"><i class="fas fa-store me-2 text-primary"></i>Basic Information</h5>

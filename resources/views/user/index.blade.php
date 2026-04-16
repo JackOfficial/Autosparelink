@@ -60,7 +60,7 @@
             <div class="card border-0 shadow-sm rounded-lg mb-4">
                 <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                     <h5 class="font-weight-bold mb-0">Recent Orders</h5>
-                    <a href="{{ route('orders.index') }}" class="btn btn-sm btn-outline-primary rounded-pill">View All</a>
+                    <a href="{{ route('user.orders.index') }}" class="btn btn-sm btn-outline-primary rounded-pill">View All</a>
                 </div>
                 <div class="card-body px-0">
                     <div class="table-responsive">
@@ -102,7 +102,7 @@
             <div class="card border-0 shadow-sm rounded-lg">
                 <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                     <h5 class="font-weight-bold mb-0">Support Tickets</h5>
-                    <a href="{{ route('tickets.create') }}" class="btn btn-sm btn-primary rounded-pill px-3">+ New Ticket</a>
+                    <a href="{{ route('user.tickets.create') }}" class="btn btn-sm btn-primary rounded-pill px-3">+ New Ticket</a>
                 </div>
                 <div class="card-body px-0">
                     <div class="table-responsive">
@@ -126,7 +126,7 @@
                                             @endif
                                         </td>
                                         <td class="align-middle text-right px-4">
-                                            <a href="{{ route('tickets.show', $ticket) }}" class="btn btn-sm btn-light border rounded-pill px-3">View</a>
+                                            <a href="{{ route('user.tickets.show', $ticket) }}" class="btn btn-sm btn-light border rounded-pill px-3">View</a>
                                         </td>
                                     </tr>
                                 @empty
@@ -169,7 +169,7 @@
                     </div>
                     <h5 class="font-weight-bold mb-1">{{ $user->name }}</h5>
                     <p class="text-muted small mb-3">{{ $user->email }}</p>
-                    <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-block btn-light border rounded-pill">Edit Profile</a>
+                    <a href="{{ route('user.profile.edit') }}" class="btn btn-sm btn-block btn-light border rounded-pill">Edit Profile</a>
                 </div>
             </div>
         </div>

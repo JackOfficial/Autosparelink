@@ -8,7 +8,7 @@
     {{-- Breadcrumb --}}
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('vehicles.index') }}" class="text-decoration-none text-muted small">Garage</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('user.vehicles.index') }}" class="text-decoration-none text-muted small">Garage</a></li>
             <li class="breadcrumb-item active small fw-bold" aria-current="page">{{ $vehicle->brand?->brand_name }} {{ $vehicle->vehicleModel?->model_name }}</li>
         </ol>
     </nav>
@@ -112,11 +112,11 @@
             <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                 <h6 class="fw-bold mb-3">Quick Actions</h6>
                 <div class="d-grid gap-2">
-                    <a href="{{ route('vehicles.edit', $vehicle->id) }}" class="btn btn-outline-primary rounded-pill fw-bold">
+                    <a href="{{ route('user.vehicles.edit', $vehicle->id) }}" class="btn btn-outline-primary rounded-pill fw-bold">
                         <i class="fas fa-edit me-2"></i> Edit Specifications
                     </a>
                     
-                    <form action="{{ route('vehicles.destroy', $vehicle->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vehicle?')">
+                    <form action="{{ route('user.vehicles.destroy', $vehicle->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vehicle?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-link text-danger w-100 text-decoration-none small fw-bold mt-2">

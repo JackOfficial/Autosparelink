@@ -20,7 +20,7 @@
                 <p class="lead text-muted mb-5">Join the most trusted marketplace for auto parts. Reach thousands of mechanics and car owners across the country.</p>
                 
                 <div class="d-flex">
-                    <a href="{{ route('shop.create') }}" class="btn btn-primary btn-lg btn-pill px-4 font-weight-bold shadow mr-3">
+                    <a href="{{ route('user.shop.create') }}" class="btn btn-primary btn-lg btn-pill px-4 font-weight-bold shadow mr-3">
                         Start Selling Now
                     </a>
                     <a href="#benefits" class="btn btn-secondary btn-lg btn-pill px-4">
@@ -99,7 +99,7 @@
                         <h2 class="font-weight-bold mb-3">Ready to boost your sales?</h2>
                         <p class="lead mb-4 opacity-75">Join dozens of successful spare parts dealers in Rwanda already selling with us.</p>
                         <div class="d-flex flex-column flex-sm-row justify-content-center">
-                            <a href="{{ route('shop.create') }}" class="btn btn-light btn-lg btn-pill px-5 font-weight-bold text-primary m-2">
+                            <a href="{{ route('user.shop.create') }}" class="btn btn-light btn-lg btn-pill px-5 font-weight-bold text-primary m-2">
                               Create Your Shop Account
                             </a>
                             <a href="{{ route('terms') }}" class="btn btn-outline-light btn-lg btn-pill px-4 m-2">

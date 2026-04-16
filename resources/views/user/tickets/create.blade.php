@@ -7,8 +7,8 @@
     {{-- Breadcrumb / Back Navigation --}}
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('user.dashboard') }}" class="text-decoration-none text-muted small">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('tickets.index') }}" class="text-decoration-none text-muted small">Tickets</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none text-muted small">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('user.tickets.index') }}" class="text-decoration-none text-muted small">Tickets</a></li>
             <li class="breadcrumb-item active small fw-bold" aria-current="page">New Ticket</li>
         </ol>
     </nav>
@@ -23,7 +23,7 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <form action="{{ route('tickets.store') }}" method="POST">
+                    <form action="{{ route('user.tickets.store') }}" method="POST">
                         @csrf
 
                         <div class="row">
@@ -74,7 +74,7 @@
 
                         {{-- Submit Buttons --}}
                         <div class="d-flex justify-content-between align-items-center border-top pt-4">
-                            <a href="{{ route('tickets.index') }}" class="btn btn-link text-muted text-decoration-none px-0">
+                            <a href="{{ route('user.tickets.index') }}" class="btn btn-link text-muted text-decoration-none px-0">
                                 <i class="fas fa-times me-1"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">

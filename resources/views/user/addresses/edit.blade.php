@@ -8,7 +8,7 @@
     {{-- Breadcrumb --}}
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('addresses.index') }}" class="text-decoration-none text-muted small">Addresses</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('user.addresses.index') }}" class="text-decoration-none text-muted small">Addresses</a></li>
             <li class="breadcrumb-item active small fw-bold" aria-current="page">Edit Address</li>
         </ol>
     </nav>
@@ -21,7 +21,7 @@
                         <h2 class="h4 fw-bold text-dark mb-1">Edit Address</h2>
                         <p class="text-muted small mb-0">Update your shipping details below.</p>
                     </div>
-                    <form action="{{ route('addresses.destroy', $address->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this address?')">
+                    <form action="{{ route('user.addresses.destroy', $address->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this address?')">
                         @csrf @method('DELETE')
                         <button type="submit" class="btn btn-link text-danger text-decoration-none small">
                             <i class="fas fa-trash-alt me-1"></i> Delete Address
@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <form action="{{ route('addresses.update', $address->id) }}" method="POST">
+                    <form action="{{ route('user.addresses.update', $address->id) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -106,7 +106,7 @@
 
                         {{-- Action Buttons --}}
                         <div class="d-flex justify-content-between align-items-center border-top pt-4">
-                            <a href="{{ route('addresses.index') }}" class="btn btn-link text-muted text-decoration-none px-0">
+                            <a href="{{ route('user.addresses.index') }}" class="btn btn-link text-muted text-decoration-none px-0">
                                 <i class="fas fa-times me-1"></i> Cancel Changes
                             </a>
                             <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">
