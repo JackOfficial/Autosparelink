@@ -8,7 +8,7 @@
             <h6 class="text-uppercase text-muted small fw-bold mb-3" style="letter-spacing: 1px;">My Garage</h6>
             <ul class="nav flex-column">
                 <li class="nav-item mb-1">
-                    <a class="nav-link py-2 px-3 {{ request()->is('user/dashboard') ? 'active' : '' }}" href="/user/dashboard">
+                    <a class="nav-link py-2 px-3 {{ request()->is('dashboard') ? 'active' : '' }}" href="/dashboard">
                         <i class="fas fa-desktop me-2"></i> Dashboard
                     </a>
                 </li>
