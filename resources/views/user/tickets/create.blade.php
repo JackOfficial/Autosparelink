@@ -7,7 +7,7 @@
     {{-- Breadcrumb / Back Navigation --}}
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}" class="text-decoration-none text-muted small">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('user.dashboard.index') }}" class="text-decoration-none text-muted small">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="{{ route('user.tickets.index') }}" class="text-decoration-none text-muted small">Tickets</a></li>
             <li class="breadcrumb-item active small fw-bold" aria-current="page">New Ticket</li>
         </ol>
