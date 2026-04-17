@@ -35,6 +35,15 @@ class OrderItem extends Model
         return $this->belongsTo(Shop::class);
     }
 
+    /**
+     * Get the shipping details for this specific item.
+     */
+    public function shipping()
+    {
+        // Adjust the foreign key based on your database (e.g., shipping_id)
+        return $this->belongsTo(Shipping::class); 
+    }
+
     public function isPaid(): bool
 {
     return $this->order->payment && $this->order->payment->isSuccessful();

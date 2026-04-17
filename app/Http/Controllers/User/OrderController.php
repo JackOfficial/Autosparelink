@@ -45,23 +45,27 @@ class OrderController extends Controller
     /**
      * Display deep details for a specific order.
      */
-    public function show(Order $order)
-    {
-        if ($order->user_id != Auth::id()) {
-            abort(403);
-        }
-
-        // Use your Model's relationships: partBrand, photos (morphMany), and shop
-        $order->load([
-            'orderItems.part.partBrand',
-            'orderItems.part.category',
-            'orderItems.part.photos', // MorphMany relationship from your Photo model
-            'orderItems.shop',
-            'orderItems.shipping'
-        ]);
-
-        return view('user.orders.show', compact('order'));
+public function show(Order $order)
+{
+    // 1. Security Check
+    if ($order->user_id != Auth::id()) {
+        abort(403);
     }
+
+    // 2. Load relationships accurately
+    $order->load([
+        'orderItems.part' => function($query) {
+            $query->withTrashed(); // Crucial for order history if parts get deleted
+        },
+        'orderItems.part.partBrand',
+        'orderItems.part.category',
+        'orderItems.part.photos', 
+        'orderItems.shop',
+        // 'orderItems.shipping' removed because it's usually on the Order, not Item
+    ]);
+
+    return view('user.orders.show', compact('order'));
+}
 
     /**
      * Handle the Bulk Inspection (Accept/Dispute)
