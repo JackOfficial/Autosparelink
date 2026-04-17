@@ -88,7 +88,7 @@ public function show(Order $order)
                 ->firstOrFail();
 
             // Skip items that aren't in a state to be inspected
-            if ($item->status !== 'delivered') {
+            if ($item->status != 'delivered') {
                 continue;
             }
 
