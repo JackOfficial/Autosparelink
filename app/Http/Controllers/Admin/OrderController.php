@@ -34,41 +34,58 @@ class OrderController extends Controller
      * Update order status and handle child items.
      */
     public function update(Request $request, string $id)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled,callback_requested'
-        ]);
+{
+    $request->validate([
+        'status' => 'required|in:pending,processing,shipped,delivered,cancelled,callback_requested'
+    ]);
 
-        $order = Order::findOrFail($id);
+    $order = Order::findOrFail($id);
 
-        // Use a transaction to ensure everything stays in sync
-        DB::transaction(function () use ($request, $order) {
-            
-            $order->update(['status' => $request->status]);
+    DB::transaction(function () use ($request, $order) {
+        // Update the main order status
+        $order->update(['status' => $request->status]);
 
-            /**
-             * FINANCIAL INTEGRATION:
-             * If the Admin marks the WHOLE order as 'delivered', we should 
-             * probably mark all items as 'completed' so the vendors get paid.
-             */
-            if ($request->status === 'delivered') {
-                foreach ($order->orderItems as $item) {
-                    // This triggers the OrderItemObserver, which creates the WalletTransaction,
-                    // which then updates the Wallet balance. All automatically!
-                    $item->update(['status' => 'completed']);
-                }
+        /**
+         * IMPORTANT: We no longer auto-complete items here.
+         * 'delivered' just means it reached the destination.
+         * We only mark items 'completed' via the Finalize controller 
+         * AFTER customer confirmation.
+         */
+        
+        if ($request->status === 'cancelled') {
+            // If the whole order is cancelled, mark items cancelled too.
+            // This does NOT trigger the Observer's payment logic.
+            foreach ($order->orderItems as $item) {
+                $item->update(['status' => 'cancelled']);
             }
-            
-            // Handle Cancellation (Optional: you might want to reverse payments here)
-            if ($request->status === 'cancelled') {
-                $order->orderItems()->update(['status' => 'cancelled']);
-            }
-        });
+        }
+    });
 
-        return redirect()
-            ->route('admin.orders.show', $order->id)
-            ->with('success', "Order status updated and relevant vendor payments processed.");
-    }
+    return redirect()
+        ->route('admin.orders.show', $order->id)
+        ->with('success', "Order status updated to " . ucfirst($request->status));
+}
+
+public function finalize($id)
+{
+    $order = Order::findOrFail($id);
+
+    DB::transaction(function () use ($order) {
+        // 1. Mark the main order as completed
+        $order->update(['status' => 'completed']);
+
+        // 2. Mark each item as completed 
+        // THIS is what triggers your OrderItemObserver to pay the shop
+        foreach ($order->orderItems as $item) {
+            if ($item->status !== 'completed') {
+                $item->status = 'completed';
+                $item->save(); 
+            }
+        }
+    });
+
+    return back()->with('success', 'Order finalized and vendor payments released.');
+}
 
     public function destroy(string $id)
     {
