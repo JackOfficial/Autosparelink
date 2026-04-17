@@ -71,11 +71,13 @@
             </thead>
             <tbody class="border-top-0">
                 @forelse($orders as $order)
+
                     @php 
-                        $firstItem = $order->orderItems->first();
-                        $itemCount = $order->orderItems->count();
-                        // Get the first photo or use a placeholder
-                        $photoPath = $firstItem->part->photos->first()->file_path ?? null;
+                    $firstItem = $order->orderItems->first();
+                    $itemCount = $order->orderItems->count();
+    
+                    // Use the nullsafe operator (?) to avoid "property on null" errors
+                    $photoPath = $firstItem?->part?->photos?->first()?->file_path;
                     @endphp
                     <tr x-data="{ 
                         copied: false, 
@@ -103,38 +105,41 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3">
-                            <div class="d-flex align-items-center">
-                                {{-- Part Photo --}}
-                                <div class="me-3">
-                                    @if($photoPath)
-                                        <img src="{{ asset('storage/' . $photoPath) }}" 
-                                             alt="Part Image" 
-                                             class="rounded-3 border" 
-                                             style="width: 48px; height: 48px; object-fit: cover;">
-                                    @else
-                                        <div class="bg-light rounded-3 border d-flex align-items-center justify-content-center text-muted" 
-                                             style="width: 48px; height: 48px;">
-                                            <i class="fas fa-tools small"></i>
-                                        </div>
-                                    @endif
-                                </div>
-                                
-                                {{-- Part & Shop Info --}}
-                                <div>
-                                    <div class="small fw-bold text-dark">
-                                        {{ Str::limit($firstItem->part->part_name ?? 'Spare Parts', 35) }}
-                                    </div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">
-                                        <span class="text-primary fw-bold"><i class="fas fa-store me-1"></i>{{ $firstItem->shop->shop_name ?? 'N/A' }}</span> 
-                                        • {{ $firstItem->part->partBrand->name ?? 'Genuine' }}
-                                        @if($itemCount > 1)
-                                            <span class="badge bg-light text-dark border ms-1">+{{ $itemCount - 1 }} more</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
+                       <td class="py-3">
+    <div class="d-flex align-items-center">
+        {{-- Part Photo --}}
+        <div class="me-3">
+            @if($photoPath)
+                <img src="{{ asset('storage/' . $photoPath) }}" 
+                     class="rounded-3 border" 
+                     style="width: 48px; height: 48px; object-fit: cover;">
+            @else
+                <div class="bg-light rounded-3 border d-flex align-items-center justify-content-center text-muted" 
+                     style="width: 48px; height: 48px;">
+                    <i class="fas fa-tools small"></i>
+                </div>
+            @endif
+        </div>
+        
+        {{-- Part & Shop Info --}}
+        <div>
+            <div class="small fw-bold text-dark">
+                {{-- Fallback if part is missing --}}
+                {{ $firstItem?->part?->part_name ?? 'Unknown Part' }}
+            </div>
+            <div class="text-muted" style="font-size: 0.75rem;">
+                <span class="text-primary fw-bold">
+                    <i class="fas fa-store me-1"></i>{{ $firstItem?->shop?->shop_name ?? 'N/A' }}
+                </span> 
+                • {{ $firstItem?->part?->partBrand?->name ?? 'N/A' }}
+                
+                @if($itemCount > 1)
+                    <span class="badge bg-light text-dark border ms-1">+{{ $itemCount - 1 }} more</span>
+                @endif
+            </div>
+        </div>
+    </div>
+</td>
                         <td class="py-3 text-center">
                             <span class="fw-bold text-dark">RWF {{ number_format($order->total_amount, 0) }}</span>
                         </td>
