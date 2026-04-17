@@ -91,7 +91,7 @@
                             <td class="py-3">
                                 @php $itemCount = $order->orderItems->count(); @endphp
                                 <div class="small fw-bold text-dark">
-                                    {{ Str::limit($order->orderItems->first()->part->name ?? 'Spare Parts', 30) }}
+                                    {{ Str::limit($order->orderItems->first()->part->part_name ?? 'Spare Parts', 30) }}
                                 </div>
                                 <div class="text-muted small">
                                     {{ $itemCount > 1 ? '+'.($itemCount-1).' other items' : 'Single Item' }}
