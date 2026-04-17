@@ -139,7 +139,8 @@
                 <thead class="bg-light-subtle">
                     <tr class="small text-uppercase text-muted fw-bold">
                         <th class="px-4 py-3 border-0">Part Description</th>
-                        <th class="py-3 border-0">Shop</th>
+                        <th class="py-3 border-0">Shop & Location</th>
+                        <th class="py-3 border-0 text-center">Status</th>
                         <th class="py-3 border-0 text-center">Qty</th>
                         <th class="py-3 border-0 text-end">Unit Price</th>
                         <th class="px-4 py-3 border-0 text-end">Total</th>
@@ -153,7 +154,6 @@
                         <tr>
                             <td class="px-4 py-3">
                                 <div class="d-flex align-items-center">
-                                    {{-- Thumbnail --}}
                                     <div class="me-3">
                                         @if($photoPath)
                                             <img src="{{ asset('storage/' . $photoPath) }}" 
@@ -173,17 +173,31 @@
                                         <div class="small text-muted">
                                             {{ $item->part?->partBrand?->name ?? 'Genuine' }} • {{ $item->part?->category?->category_name ?? 'General' }}
                                         </div>
-                                        @if($item->status === 'disputed')
-                                            <span class="badge bg-danger-subtle text-danger rounded-pill mt-1" style="font-size: 10px;">
-                                                <i class="fas fa-exclamation-circle me-1"></i>Disputed
-                                            </span>
-                                        @endif
                                     </div>
                                 </div>
                             </td>
                             <td class="py-3">
-                                <span class="badge bg-light text-dark border font-monospace py-2">
-                                    <i class="fas fa-store me-1 text-primary"></i>{{ $item->shop->shop_name ?? 'N/A' }}
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-dark small mb-1">
+                                        <i class="fas fa-store me-1 text-primary"></i>{{ $item->shop->shop_name ?? 'N/A' }}
+                                    </span>
+                                    <span class="text-muted" style="font-size: 11px;">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ $item->shop->address ?? 'Kigali, Rwanda' }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="py-3 text-center">
+                                @php
+                                    $statusClasses = [
+                                        'pending'   => 'bg-warning-subtle text-warning border-warning-subtle',
+                                        'delivered' => 'bg-info-subtle text-info border-info-subtle',
+                                        'completed' => 'bg-success-subtle text-success border-success-subtle',
+                                        'disputed'  => 'bg-danger-subtle text-danger border-danger-subtle',
+                                    ];
+                                    $currentClass = $statusClasses[$item->status] ?? 'bg-light text-muted';
+                                @endphp
+                                <span class="badge {{ $currentClass }} border rounded-pill px-2 py-1 text-uppercase" style="font-size: 10px;">
+                                    {{ $item->status }}
                                 </span>
                             </td>
                             <td class="py-3 text-center fw-medium">{{ $item->quantity }}</td>
@@ -194,13 +208,12 @@
                 </tbody>
                 <tfoot class="border-top">
                     <tr>
-                        <td colspan="4" class="px-4 py-2 text-end text-muted small">Subtotal</td>
+                        <td colspan="5" class="px-4 py-2 text-end text-muted small">Subtotal</td>
                         <td class="px-4 py-2 text-end fw-bold text-dark">RWF {{ number_format($order->total_amount, 0) }}</td>
                     </tr>
-                    {{-- If you have tax or shipping, add those rows here --}}
                     <tr class="bg-light-subtle">
-                        <td colspan="4" class="px-4 py-3 text-end fw-bold text-primary text-uppercase">Total Amount</td>
-                        <td class="px-4 py-3 text-end fw-bold text-primary fs-5">{{ number_format($order->total_amount, 0) }}</td>
+                        <td colspan="5" class="px-4 py-3 text-end fw-bold text-primary text-uppercase">Total Amount</td>
+                        <td class="px-4 py-3 text-end fw-bold text-primary fs-5">RWF {{ number_format($order->total_amount, 0) }}</td>
                     </tr>
                 </tfoot>
             </table>
