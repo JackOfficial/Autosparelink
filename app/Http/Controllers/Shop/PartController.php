@@ -13,28 +13,29 @@ class PartController extends Controller
     /**
      * Display a listing of the shop's parts.
      */
-   public function index(Request $request)
-{
-    $parts = auth()->user()->shopParts()
-        ->with([
-            'category:id,category_name', 
-            'partBrand:id,name', 
-            'photos', 
-            'fitments.vehicleModel.brand'
-        ])
-        ->when($request->search, function($query, $search) {
-            $query->where(function($q) use ($search) {
-                $q->where('part_name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%")
-                  ->orWhere('part_number', 'like', "%{$search}%");
-            });
-        })
-        ->latest()
-        ->paginate(15)
-        ->withQueryString();
+    public function index(Request $request)
+    {
+        // Using your new scope ensures only the seller's parts are fetched
+        $parts = Part::forCurrentSeller()
+            ->with([
+                'category:id,category_name', 
+                'partBrand:id,name', 
+                'photos', 
+                'fitments.vehicleModel.brand'
+            ])
+            ->when($request->search, function($query, $search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('part_name', 'like', "%{$search}%")
+                      ->orWhere('sku', 'like', "%{$search}%")
+                      ->orWhere('part_number', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
-    return view('shop.parts.index', compact('parts'));
-}
+        return view('shop.parts.index', compact('parts'));
+    }
 
     /**
      * Show the form for creating a new part.
@@ -58,10 +59,9 @@ class PartController extends Controller
             // Add other validations as needed
         ]);
 
-        // Automatically inject the shop_id from the authenticated user
-        $validated['shop_id'] = auth()->user()->shop_id;
-
-        Part::create($validated);
+        // Use the relationship to create the part. 
+        // This automatically sets the shop_id based on the user's shop.
+        auth()->user()->shop->parts()->create($validated);
 
         return redirect()->route('shop.parts.index')->with('success', 'Part added successfully.');
     }
@@ -71,12 +71,14 @@ class PartController extends Controller
      */
     public function edit(Part $part)
     {
-        // Security Check: Ensure the part belongs to this shop
-        if ($part->shop_id != auth()->user()->shop->id) {
-            abort(403, 'Unauthorized action.');
-        }
+        // Security: Use the scope to ensure this part belongs to the seller.
+        // If someone tries to edit an ID they don't own, it returns 404.
+        $part = Part::forCurrentSeller()->findOrFail($part->id);
         
-        return view('shop.parts.edit', compact('part'));
+        $categories = Category::all();
+        $brands = PartBrand::all();
+
+        return view('shop.parts.edit', compact('part', 'categories', 'brands'));
     }
 
     /**
@@ -84,12 +86,13 @@ class PartController extends Controller
      */
     public function update(Request $request, Part $part)
     {
-        if ($part->shop_id !== auth()->user()->shop_id) {
-            abort(403);
-        }
+        // Security check using the scope
+        $part = Part::forCurrentSeller()->findOrFail($part->id);
 
         $validated = $request->validate([
             'part_name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'price' => 'required|numeric',
             // ... other validations
         ]);
 
@@ -103,9 +106,8 @@ class PartController extends Controller
      */
     public function destroy(Part $part)
     {
-        if ($part->shop_id !== auth()->user()->shop_id) {
-            abort(403);
-        }
+        // Security check using the scope
+        $part = Part::forCurrentSeller()->findOrFail($part->id);
 
         $part->delete();
 

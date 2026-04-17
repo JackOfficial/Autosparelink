@@ -45,4 +45,10 @@ class OrderItem extends Model
     {
         return $this->quantity * $this->unit_price;
     }
+
+    public function scopeForCurrentSeller($query)
+{
+    return $query->where('shop_id', auth()->user()->shop?->id);
+}
+
 }

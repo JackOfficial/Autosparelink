@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 
 class Part extends Model
 {
@@ -101,16 +102,16 @@ public function shop(): BelongsTo
     return $this->belongsTo(Shop::class);
 }
 
-     /**
+   /**
      * Generate SKU for a part
      */
-    public static function generateSku(string $brand, string $category, string $partName): string
+    public static function generateSku(?string $brand, ?string $category, string $partName): string
     {
+        $brand = $brand ?? 'GEN';
+        $category = $category ?? 'CAT';
+        
         return strtoupper(
-            Str::slug(
-                $brand . '-' . $category . '-' . $partName,
-                '-'
-            )
+            Str::slug($brand . '-' . $category . '-' . $partName . '-' . Str::random(4), '-')
         );
     }
 
@@ -127,34 +128,50 @@ public function isAvailable($requestedQuantity = 1)
     return $this->status === 'active' && $this->stock_quantity >= $requestedQuantity;
 }
 
-protected static function booted()
-{
-    // 1. Logic to run BEFORE a part is created in the database
-    static::creating(function ($part) {
-        // Automatically assign the Shop ID for Sellers
-        if (auth()->check() && auth()->user()->hasRole('seller')) {
-            $part->shop_id = auth()->user()->shop->id;
+/**
+     * Updated Scope: Smart filtering for Sellers vs Admins
+     */
+    public function scopeForCurrentSeller(Builder $query): Builder
+    {
+        $user = auth()->user();
+
+        // 1. If guest, show everything (Public Pages)
+        if (!$user) {
+            return $query;
         }
 
-        // Auto-generate SKU if it wasn't manually entered
-        if (empty($part->sku)) {
-            $part->sku = self::generateSku(
-                $part->partBrand->name ?? 'GEN', 
-                $part->category->name ?? 'CAT', 
-                $part->part_name ?? 'Part-name'
-            );
+        // 2. If Admin/Super-Admin, bypass the filter (Dashboard Management)
+        if ($user->hasRole('admin') || $user->hasRole('super-admin')) {
+            return $query;
         }
-    });
 
-    // // 2. The Global Scope for Sellers
-    // static::addGlobalScope('sellerParts', function ($builder) {
-    //     if (auth()->check() && auth()->user()->hasRole('seller')) {
-    //         // Check if user has a shop to avoid null errors
-    //         if (auth()->user()->shop) {
-    //             $builder->where('shop_id', auth()->user()->shop->id);
-    //         }
-    //     }
-    // });
-}
+        // 3. If Seller, strictly filter by their shop ID
+        if ($user->hasRole('seller') && $user->shop) {
+            return $query->where('shop_id', $user->shop->id);
+        }
+
+        return $query;
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($part) {
+            // 1. Automatically assign Shop ID for Sellers
+            if (auth()->check() && auth()->user()->hasRole('seller') && empty($part->shop_id)) {
+                $part->shop_id = auth()->user()->shop->id;
+            }
+
+            // 2. Auto-generate SKU if empty
+            if (empty($part->sku)) {
+                // Note: Relationships might be null here if not pre-loaded.
+                // We use a fallback or random string to ensure uniqueness.
+                $part->sku = self::generateSku(
+                    $part->partBrand->name ?? null, 
+                    $part->category->category_name ?? null, 
+                    $part->part_name
+                );
+            }
+        });
+    }
 
 }

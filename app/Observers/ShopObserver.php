@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Shop;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ShopObserver
@@ -27,22 +28,29 @@ class ShopObserver
     /**
      * Helper to initialize the wallet with default Rwandan Francs (RWF) values.
      */
-    private function createShopWallet(Shop $shop): void
-    {
-        try {
-            $shop->wallet()->create([
-                'balance' => 0.00,
-                'pending_balance' => 0.00,
-                'withdrawn_balance' => 0.00,
-                'currency' => 'RWF',
-                'last_transaction_at' => now(),
-            ]);
-            
-            Log::info("Financial Infrastructure: Wallet initialized for Shop '{$shop->shop_name}' (ID: #{$shop->id}) after Admin verification.");
-        } catch (\Exception $e) {
-            Log::error("CRITICAL: Failed to create wallet for Shop ID #{$shop->id} during verification. Error: " . $e->getMessage());
+   private function createShopWallet(Shop $shop): void
+{
+    DB::transaction(function () use ($shop) {
+        // Double-check inside the transaction for maximum safety
+        if ($shop->wallet()->exists()) {
+            return;
         }
+
+        $shop->wallet()->create([
+            'currency' => 'RWF',
+            'last_transaction_at' => now(),
+        ]);
+        
+        Log::info("Wallet initialized for Shop ID: #{$shop->id}");
+    });
+}
+
+    public function created(Shop $shop): void
+{
+    if ($shop->is_verified) {
+        $this->createShopWallet($shop);
     }
+}
 
     /**
      * Handle the Shop "deleted" event.

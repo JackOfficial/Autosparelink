@@ -11,55 +11,43 @@ use Carbon\Carbon;
 class SaleController extends Controller
 {
     /**
-     * Reuse your shop scope logic
-     */
-    private function shopOrders()
-    {
-        $user = Auth::user();
-        if (!$user->shop) abort(403);
-        
-        $shopId = $user->shop->id;
-        return Order::whereHas('orderItems.part', function ($query) use ($shopId) {
-            $query->where('shop_id', $shopId);
-        });
-    }
-
-    /**
      * Display Sales History / Report
      */
     public function index(Request $request)
     {
-        $shopId = Auth::user()->shop->id;
-        
-        // Base query for completed or successfully paid orders
-        $query = $this->shopOrders()
+        // Use the local scope for security and clarity
+        $query = Order::forCurrentSeller()
             ->whereIn('status', ['delivered', 'shipped', 'processing'])
             ->with(['user', 'payment', 'orderItems.part.photos']);
 
-        // Filter by Date (e.g., Today, This Week, This Month)
-        if ($request->has('period')) {
-            if ($request->period == 'today') $query->whereDate('created_at', Carbon::today());
-            if ($request->period == 'month') $query->whereMonth('created_at', Carbon::now()->month);
+        // Filter by Date
+        if ($request->filled('period')) {
+            if ($request->period == 'today') {
+                $query->whereDate('created_at', Carbon::today());
+            } elseif ($request->period == 'month') {
+                $query->whereMonth('created_at', Carbon::now()->month)
+                      ->whereYear('created_at', Carbon::now()->year);
+            }
         }
 
-        $sales = $query->latest()->paginate(20);
+        // Clone the query for stats before pagination
+        $statsQuery = clone $query;
+
+        $sales = $query->latest()->paginate(20)->withQueryString();
 
         // Quick Stats for the header
-        $totalRevenue = $query->sum('total_amount');
-        $salesCount = $query->count();
+        $totalRevenue = $statsQuery->sum('total_amount');
+        $salesCount = $statsQuery->count();
 
         return view('shop.sales.index', compact('sales', 'totalRevenue', 'salesCount'));
     }
 
     /**
      * Daily/Monthly Revenue Analytics
-     * Useful for building charts in your UI
      */
     public function analytics()
     {
-        $shopId = Auth::user()->shop->id;
-
-        $revenueData = $this->shopOrders()
+        $revenueData = Order::forCurrentSeller()
             ->where('status', 'delivered')
             ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
             ->groupBy('date')
@@ -75,7 +63,8 @@ class SaleController extends Controller
      */
     public function printInvoice(string $id)
     {
-        $order = $this->shopOrders()
+        // forCurrentSeller() ensures a seller can't view other people's invoices
+        $order = Order::forCurrentSeller()
             ->with(['user', 'orderItems.part', 'payment', 'address'])
             ->findOrFail($id);
 
@@ -83,25 +72,20 @@ class SaleController extends Controller
     }
 
     /**
-     * Mark a "Processing" order as "Delivered" specifically from the sales view
+     * Quick action to mark an order as Delivered/Finalized
      */
-    /**
- * Quick action to mark an order as Delivered/Finalized
- */
-public function finalize(string $id)
-{
-    // Reuse your shop-scoped query logic for security
-    $order = $this->shopOrders()->findOrFail($id);
-    
-    // Prevent finalizing already cancelled orders if you want
-    if ($order->status === 'cancelled') {
-        return back()->with('error', 'Cannot finalize a cancelled order.');
+    public function finalize(string $id)
+    {
+        $order = Order::forCurrentSeller()->findOrFail($id);
+        
+        if ($order->status === 'cancelled') {
+            return back()->with('error', 'Cannot finalize a cancelled order.');
+        }
+
+        $order->update([
+            'status' => 'delivered'
+        ]);
+
+        return back()->with('success', "Order #{$order->id} has been marked as completed.");
     }
-
-    $order->update([
-        'status' => 'delivered'
-    ]);
-
-    return back()->with('success', "Order #{$order->id} has been marked as completed.");
-}
 }

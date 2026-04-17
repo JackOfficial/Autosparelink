@@ -35,4 +35,10 @@ class Payout extends Model
     {
         return $this->status === 'completed';
     }
+
+    public function scopeForCurrentSeller($query)
+{
+    return $query->where('shop_id', auth()->user()->shop?->id);
+}
+
 }

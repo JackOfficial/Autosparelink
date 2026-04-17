@@ -11,53 +11,37 @@ use Illuminate\Support\Facades\Auth;
 
 class PayoutController extends Controller
 {
-    /**
-     * Get the current user's shop or abort.
-     */
-    private function getShopId()
-    {
-        if (!Auth::user()->shop) {
-            abort(403, 'You must have a registered shop to access payouts.');
-        }
-        return Auth::user()->shop->id;
-    }
-
-    /**
-     * Display the Earnings Overview and Payout History
-     */
     public function index()
     {
-        $shopId = $this->getShopId();
         $commissionRate = 0.10; // 10% Platform Fee
 
-        // 1. Calculate Gross Revenue from THIS shop's items 
-        // We use sum() on the database result for better performance
-        $totalGross = OrderItem::where('shop_id', $shopId)
+        // 1. Calculate Gross Revenue using the OrderItem scope
+        $totalGross = OrderItem::forCurrentSeller()
             ->whereHas('order', function ($query) {
                 $query->where('status', 'delivered')
                       ->whereHas('payment', fn($p) => $p->where('status', 'successful'));
             })
             ->get()
-            ->sum('subtotal'); // Accesses the getSubtotalAttribute defined in OrderItem
+            ->sum('subtotal');
 
         // 2. Financial Breakdown
         $totalCommission = $totalGross * $commissionRate;
         $netEarnings = $totalGross - $totalCommission;
 
-        // 3. Calculate already completed withdrawals
-        $totalWithdrawn = Payout::where('shop_id', $shopId)
+        // 3. Withdrawals using the Payout scope
+        $totalWithdrawn = Payout::forCurrentSeller()
             ->where('status', 'completed')
             ->sum('amount');
 
-        // 4. Calculate Pending withdrawals (Requested but not yet approved)
-        $pendingPayouts = Payout::where('shop_id', $shopId)
+        // 4. Pending withdrawals
+        $pendingPayouts = Payout::forCurrentSeller()
             ->where('status', 'pending')
             ->sum('amount');
 
         $availableBalance = $netEarnings - $totalWithdrawn - $pendingPayouts;
 
-        // 5. Get Payout History for the table
-        $payouts = Payout::where('shop_id', $shopId)
+        // 5. Payout History
+        $payouts = Payout::forCurrentSeller()
             ->latest()
             ->paginate(15);
 
@@ -71,21 +55,16 @@ class PayoutController extends Controller
         ));
     }
 
-    /**
-     * Handle Payout Requests
-     */
     public function store(Request $request)
     {
-        $shopId = $this->getShopId();
-
         $request->validate([
             'amount' => 'required|numeric|min:5000',
             'payout_method' => 'required|string|in:MTN MoMo,Airtel Money,Bank Transfer',
             'account_details' => 'required|string|max:255',
         ]);
 
-        // Security: Re-calculate balance on the server side
-        $totalGross = OrderItem::where('shop_id', $shopId)
+        // Re-calculate balance using scopes for security
+        $totalGross = OrderItem::forCurrentSeller()
             ->whereHas('order', function ($query) {
                 $query->where('status', 'delivered')
                       ->whereHas('payment', fn($p) => $p->where('status', 'successful'));
@@ -93,20 +72,18 @@ class PayoutController extends Controller
 
         $netEarnings = $totalGross * 0.90;
         
-        // Sum everything already paid or currently waiting in the queue
-        $alreadyRequested = Payout::where('shop_id', $shopId)
+        $alreadyRequested = Payout::forCurrentSeller()
             ->whereIn('status', ['completed', 'pending', 'processing'])
             ->sum('amount');
 
         $currentBalance = $netEarnings - $alreadyRequested;
 
-        // Validation: Prevent over-withdrawal
         if ($request->amount > $currentBalance) {
             return back()->with('error', 'Insufficient balance. You currently have ' . number_format($currentBalance) . ' RWF available.');
         }
 
-        Payout::create([
-            'shop_id' => $shopId,
+        // Use the relationship to create the payout (automatically sets shop_id)
+        auth()->user()->shop->payouts()->create([
             'amount' => $request->amount,
             'payout_method' => $request->payout_method,
             'account_details' => $request->account_details,

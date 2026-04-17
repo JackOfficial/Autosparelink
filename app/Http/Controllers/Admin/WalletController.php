@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\OrderItem;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use App\Models\Shop;
@@ -96,6 +97,21 @@ class WalletController extends Controller
         $transaction = WalletTransaction::findOrFail($id);
         return view('admin.wallets.edit_transaction', compact('transaction'));
     }
+
+    public function manualAdjustment(Request $request, Wallet $wallet)
+{
+    // If you need to take back 5,000 RWF for a returned item
+    $wallet->transactions()->create([
+        'type' => 'debit', // This automatically subtracts from balance!
+        'amount' => $request->amount,
+        'description' => "Manual Adjustment: Return of item #{$request->item_id}",
+        'status' => 'completed',
+        'reference_type' => OrderItem::class,
+        'reference_id' => $request->item_id,
+    ]);
+
+    return back()->with('success', 'Balance adjusted successfully.');
+}
 
     /**
      * Update transaction metadata (Note: Never update the 'amount' directly for audit integrity).

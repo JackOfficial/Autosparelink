@@ -24,80 +24,55 @@ class OrderItemObserver
     /**
      * Logic to calculate split and credit the vendor wallet
      */
-    private function processVendorPayment(OrderItem $orderItem): void
+   private function processVendorPayment(OrderItem $orderItem): void
     {
-        // Use the relationship to get the shop and wallet
         $shop = $orderItem->shop;
         
         if (!$shop || !$shop->wallet) {
-            Log::error("Payment failed for OrderItem #{$orderItem->id}: Shop or Wallet missing.");
+            Log::error("Payment failed: Shop or Wallet missing for OrderItem #{$orderItem->id}");
             return;
         }
 
         $wallet = $shop->wallet;
 
-        // 2. Prevent duplicate crediting for this specific OrderItem ID
-        $alreadyPaid = WalletTransaction::where('reference_type', OrderItem::class)
-            ->where('reference_id', $orderItem->id)
-            ->exists();
-
-        if ($alreadyPaid) {
-            return;
-        }
-
-        // 3. Dynamic Financial Calculations
-        $feePercentage = Commission::getRateForShop($shop->id); 
-        
-        // MATCHED TO MODEL: Changed 'price' to 'unit_price'
-        $itemSubtotal = $orderItem->unit_price * $orderItem->quantity;
-        $adminServiceFee = ($itemSubtotal * $feePercentage) / 100;
-        $vendorNetEarnings = $itemSubtotal - $adminServiceFee;
-
-        // 4. Atomic Transaction to ensure database consistency
-        DB::transaction(function () use ($wallet, $vendorNetEarnings, $adminServiceFee, $feePercentage, $orderItem) {
+        // Perform the logic inside a transaction to ensure integrity
+        DB::transaction(function () use ($wallet, $shop, $orderItem) {
             
-            // NEW: Save the calculated commission to the OrderItem for record-keeping
-            $orderItem->commission_amount = $adminServiceFee;
-            $orderItem->save();
+            // 1. Re-check inside the transaction with a lock to be 100% safe
+            $alreadyPaid = WalletTransaction::where('reference_type', OrderItem::class)
+                ->where('reference_id', $orderItem->id)
+                ->lockForUpdate()
+                ->exists();
 
-            // Increment the balance in the wallet table
-            $wallet->increment('balance', $vendorNetEarnings);
+            if ($alreadyPaid) {
+                return;
+            }
 
-            // Create the audit trail in the transactions table
-            $wallet->transactions()->create([
-                'type' => 'credit',
-                'amount' => $vendorNetEarnings,
-                'service_fee' => $adminServiceFee,
-                'fee_percentage' => $feePercentage,
-                'reference_type' => OrderItem::class,
-                'reference_id' => $orderItem->id,
-                // MATCHED TO MODEL: Changed 'product_name' to 'part_name'
-                'description' => "Earnings for item: {$orderItem->part_name} (Order #{$orderItem->order->order_number})",
-                'status' => 'completed',
+            // 2. Calculations
+            $feePercentage = Commission::getRateForShop($shop->id); 
+            $itemSubtotal = $orderItem->unit_price * $orderItem->quantity;
+            
+            // Ensure we use 2 decimal places for financial precision
+            $adminServiceFee = round(($itemSubtotal * $feePercentage) / 100, 2);
+            $vendorNetEarnings = $itemSubtotal - $adminServiceFee;
+
+            // 3. Persist local record
+            $orderItem->updateQuietly([
+                'commission_amount' => $adminServiceFee
             ]);
 
-            // Update the last activity timestamp
-            $wallet->update(['last_transaction_at' => now()]);
+            // 4. Trigger the wallet flow
+            // Note: WalletTransaction's 'booted' method handles the wallet balance increment.
+            $wallet->transactions()->create([
+                'type'           => 'credit',
+                'amount'         => $vendorNetEarnings,
+                'service_fee'    => $adminServiceFee,
+                'fee_percentage' => $feePercentage,
+                'reference_type' => OrderItem::class,
+                'reference_id'   => $orderItem->id,
+                'description'    => "Earnings for item: {$orderItem->part_name} (Order #{$orderItem->order->order_number})",
+                'status'         => 'completed',
+            ]);
         });
-    }
-
-    public function created(OrderItem $orderItem): void
-    {
-        //
-    }
-
-    public function deleted(OrderItem $orderItem): void
-    {
-        //
-    }
-
-    public function restored(OrderItem $orderItem): void
-    {
-        //
-    }
-
-    public function forceDeleted(OrderItem $orderItem): void
-    {
-        //
     }
 }

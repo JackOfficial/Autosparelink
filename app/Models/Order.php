@@ -55,4 +55,17 @@ class Order extends Model
         return $this->status === 'pending';
     }
 
+public function scopeForCurrentSeller($query)
+{
+    $shopId = auth()->user()->shop?->id;
+
+    if (!$shopId) {
+        return $query->whereRaw('1 = 0'); // Return empty result if no shop exists
+    }
+
+    return $query->whereHas('orderItems.part', function ($q) use ($shopId) {
+        $q->where('shop_id', $shopId);
+    });
+}
+
 }

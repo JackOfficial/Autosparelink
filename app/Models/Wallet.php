@@ -9,56 +9,72 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Wallet extends Model
 {
     /**
-     * The attributes that are mass assignable.
+     * Remove balances from fillable. 
+     * They should only be modified by Transactions, not $request->all().
      */
     protected $fillable = [
         'shop_id',
-        'balance',
-        'pending_balance',
-        'withdrawn_balance',
         'currency',
         'last_transaction_at'
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     * This ensures the balances are treated as numbers (floats/decimals) instead of strings.
-     */
     protected $casts = [
-        'balance' => 'decimal:2',
-        'pending_balance' => 'decimal:2',
-        'withdrawn_balance' => 'decimal:2',
+        'balance'             => 'decimal:2',
+        'pending_balance'     => 'decimal:2',
+        'withdrawn_balance'   => 'decimal:2',
         'last_transaction_at' => 'datetime',
     ];
 
     /**
-     * Get the shop that owns the wallet.
+     * Admin-aware scope for secure data retrieval.
      */
+    public function scopeForCurrentSeller($query)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return $query;
+        }
+
+        if ($user->hasRole('super-admin') || $user->hasRole('admin')) {
+            return $query;
+        }
+
+        return $query->where('shop_id', $user->shop?->id);
+    }
+
     public function shop(): BelongsTo
     {
         return $this->belongsTo(Shop::class);
     }
 
-    /**
-     * Get the transactions associated with this wallet.
-     * (Assumes you will create a WalletTransaction model)
-     */
     public function transactions(): HasMany
     {
         return $this->hasMany(WalletTransaction::class);
     }
 
     /**
-     * Helper to check if the shop can afford a withdrawal.
+     * Business Logic Helpers
      */
+
     public function canWithdraw($amount): bool
     {
-        return $this->balance >= $amount;
+        return (float) $this->balance >= (float) $amount;
     }
 
+    /**
+     * Accessor for total historical earnings.
+     */
     public function getTotalEarningsAttribute()
-{
-    return $this->balance + $this->withdrawn_balance;
-}
+    {
+        return (float) $this->balance + (float) $this->withdrawn_balance;
+    }
 
+    /**
+     * Helper to get a formatted balance string (e.g., 5,000 RWF)
+     */
+    public function getFormattedBalanceAttribute()
+    {
+        return number_format($this->balance) . ' ' . ($this->currency ?? 'RWF');
+    }
 }
