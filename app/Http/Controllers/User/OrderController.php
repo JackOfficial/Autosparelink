@@ -52,16 +52,12 @@ public function show(Order $order)
         abort(403);
     }
 
-    // 2. Load relationships accurately
+    // 2. Load relationships accurately without withTrashed()
     $order->load([
-        'orderItems.part' => function($query) {
-            $query->withTrashed(); // Crucial for order history if parts get deleted
-        },
         'orderItems.part.partBrand',
         'orderItems.part.category',
         'orderItems.part.photos', 
         'orderItems.shop',
-        // 'orderItems.shipping' removed because it's usually on the Order, not Item
     ]);
 
     return view('user.orders.show', compact('order'));
