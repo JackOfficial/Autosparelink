@@ -132,7 +132,7 @@
                                             {{ $item->shop->shop_name ?? 'N/A' }}
                                         </td>
                                         <td class="py-3 text-center fw-bold">{{ $item->quantity }}</td>
-                                        <td class="px-4 py-3 text-end fw-bold">RWF {{ number_format($item->price, 0) }}</td>
+                                        <td class="px-4 py-3 text-end fw-bold">RWF {{ number_format($item->unit_price, 0) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
