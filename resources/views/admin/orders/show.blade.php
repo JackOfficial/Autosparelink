@@ -382,14 +382,27 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-4">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px; font-weight: 800; font-size: 1.2rem; box-shadow: 0 4px 8px rgba(0,123,255,0.2);">
-                            {{ $initial }}
-                        </div>
-                        <div style="overflow: hidden;">
-                            <h6 class="mb-0 font-weight-bold text-dark text-truncate">{{ $customerName }}</h6>
-                            <span class="text-muted small text-truncate d-block">{{ $customerEmail }}</span>
-                        </div>
-                    </div>
+    <div class="mr-3">
+        @if($order->user && $order->user->avatar)
+            {{-- User Avatar --}}
+            <img src="{{ asset('storage/' . $order->user->avatar) }}" 
+                 alt="{{ $customerName }}" 
+                 class="rounded-circle shadow-sm"
+                 style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #fff;">
+        @else
+            {{-- Initial Fallback --}}
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                 style="width: 50px; height: 50px; font-weight: 800; font-size: 1.2rem; box-shadow: 0 4px 8px rgba(0,123,255,0.2);">
+                {{ $initial }}
+            </div>
+        @endif
+    </div>
+
+    <div style="overflow: hidden;">
+        <h6 class="mb-0 font-weight-bold text-dark text-truncate">{{ $customerName }}</h6>
+        <span class="text-muted small text-truncate d-block">{{ $customerEmail }}</span>
+    </div>
+</div>
                     <hr class="my-3" style="border-style: dashed; opacity: 0.5;">
                     
                     <div class="mb-3">
