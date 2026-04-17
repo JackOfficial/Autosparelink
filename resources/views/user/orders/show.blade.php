@@ -139,10 +139,10 @@
                 <thead class="bg-light-subtle">
                     <tr class="small text-uppercase text-muted fw-bold">
                         <th class="px-4 py-3 border-0">Part Description</th>
-                        <th class="py-3 border-0">Shop & Location</th>
+                        <th class="py-3 border-0">Shop</th>
                         <th class="py-3 border-0 text-center">Status</th>
                         <th class="py-3 border-0 text-center">Qty</th>
-                        <th class="py-3 border-0 text-end">Unit Price</th>
+                        <th class="py-3 border-0 text-end">Price</th>
                         <th class="px-4 py-3 border-0 text-end">Total</th>
                     </tr>
                 </thead>
