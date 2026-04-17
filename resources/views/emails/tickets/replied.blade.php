@@ -22,7 +22,7 @@
 
     <p>You can view the full conversation and reply by clicking the button below:</p>
     
-    <a href="{{ url('/tickets/'.$reply->ticket_id) }}" class="button">View Ticket Details</a>
+    <a href="{{ url('/user/tickets/'.$reply->ticket_id) }}" class="button">View Ticket Details</a>
 
     <p style="margin-top: 30px; font-size: 12px; color: #777;">
         Best Regards,<br>
