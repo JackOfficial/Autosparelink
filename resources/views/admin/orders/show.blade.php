@@ -339,7 +339,7 @@
                     <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mb-3">
                         @csrf @method('PUT')
                         <select name="status" class="form-control status-select shadow-none mb-3" onchange="this.form.submit()">
-                            @foreach(['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled', 'callback_requested'] as $stat)
+                            @foreach(['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as $stat)
                                 <option value="{{ $stat }}" {{ strtolower($order->status) == $stat ? 'selected' : '' }}>
                                     {{ ucfirst(str_replace('_', ' ', $stat)) }}
                                 </option>
