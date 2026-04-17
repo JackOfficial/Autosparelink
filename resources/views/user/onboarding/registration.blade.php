@@ -2,86 +2,143 @@
 
 @section('content')
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-7">
-            
-            <div class="text-center mb-4">
-                <h2 class="fw-bold">Open Your Shop</h2>
-                <p class="text-muted">Fill out the details below to start selling spare parts on our platform.</p>
+    <div class="row align-items-center g-5">
+        <div class="col-lg-5">
+            <div class="mb-4">
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold text-uppercase mb-3" style="font-size: 0.7rem; letter-spacing: 1px;">
+                    Vendor Partnership
+                </span>
+                <h1 class="display-5 fw-bold text-dark">Grow your spare parts business in Kigali.</h1>
+                <p class="lead text-muted">Join hundreds of local vendors selling Toyota, Mercedes, and Hyundai parts to customers across Rwanda.</p>
             </div>
 
-            <div class="card border-0 shadow-sm rounded-4">
+            <div class="row g-4 mt-2">
+                <div class="col-6">
+                    <div class="p-3 border rounded-4 bg-white shadow-sm">
+                        <i class="fas fa-bolt text-warning mb-2 fa-lg"></i>
+                        <h6 class="fw-bold mb-1">Fast Setup</h6>
+                        <p class="small text-muted mb-0">Get approved in 24 hours.</p>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-3 border rounded-4 bg-white shadow-sm">
+                        <i class="fas fa-shield-alt text-success mb-2 fa-lg"></i>
+                        <h6 class="fw-bold mb-1">Secure Pay</h6>
+                        <p class="small text-muted mb-0">Guaranteed vendor payouts.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 d-none d-lg-block">
+                <img src="https://images.unsplash.com/photo-1486006396123-c77565118a1b?q=80&w=800&auto=format&fit=crop" 
+                     class="img-fluid rounded-5 shadow-lg border border-5 border-white" 
+                     alt="Auto Parts Shop" style="transform: rotate(-2deg);">
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-lg rounded-5 overflow-hidden">
                 <div class="card-body p-4 p-md-5">
                     <form action="{{ route('shop.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        <h5 class="fw-bold mb-3"><i class="fas fa-store me-2 text-primary"></i>Basic Information</h5>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small">Shop Name</label>
-                                <input type="text" name="shop_name" class="form-control @error('shop_name') is-invalid @enderror" value="{{ old('shop_name') }}" placeholder="e.g., Kigali Auto Parts" required>
-                                @error('shop_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-primary text-white rounded-4 p-3 me-3 shadow-primary">
+                                <i class="fas fa-store fa-lg"></i>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small">Business Email</label>
-                                <input type="email" name="shop_email" class="form-control @error('shop_email') is-invalid @enderror" value="{{ old('shop_email') }}" placeholder="sales@yourshop.rw" required>
-                                @error('shop_email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div>
+                                <h4 class="fw-bold mb-0">Shop Application</h4>
+                                <p class="text-muted small mb-0">Official Business Registration Required</p>
                             </div>
+                        </div>
+
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold small">Phone Number</label>
-                                <input type="text" name="phone_number" class="form-control @error('phone_number') is-invalid @enderror" value="{{ old('phone_number') }}" placeholder="+250..." required>
-                                @error('phone_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <label class="form-label fw-bold text-secondary small">Shop Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 rounded-start-4"><i class="fas fa-tag text-muted"></i></span>
+                                    <input type="text" name="shop_name" class="form-control bg-light border-start-0 rounded-end-4 @error('shop_name') is-invalid @enderror" value="{{ old('shop_name') }}" placeholder="Kigali Auto Parts" required>
+                                </div>
+                                @error('shop_name') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
+
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold small">TIN Number</label>
-                                <input type="text" name="tin_number" class="form-control @error('tin_number') is-invalid @enderror" value="{{ old('tin_number') }}" placeholder="9-digit TIN" required>
-                                @error('tin_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <label class="form-label fw-bold text-secondary small">Business Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 rounded-start-4"><i class="fas fa-envelope text-muted"></i></span>
+                                    <input type="email" name="shop_email" class="form-control bg-light border-start-0 rounded-end-4 @error('shop_email') is-invalid @enderror" value="{{ old('shop_email') }}" placeholder="sales@shop.rw" required>
+                                </div>
+                                @error('shop_email') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-secondary small">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 rounded-start-4"><i class="fas fa-phone text-muted"></i></span>
+                                    <input type="text" name="phone_number" class="form-control bg-light border-start-0 rounded-end-4 @error('phone_number') is-invalid @enderror" value="{{ old('phone_number') }}" placeholder="+250..." required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-secondary small">TIN Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 rounded-start-4"><i class="fas fa-id-card text-muted"></i></span>
+                                    <input type="text" name="tin_number" class="form-control bg-light border-start-0 rounded-end-4 @error('tin_number') is-invalid @enderror" value="{{ old('tin_number') }}" placeholder="9-digit TIN" required>
+                                </div>
+                            </div>
+
                             <div class="col-12">
-                                <label class="form-label fw-semibold small">Physical Address</label>
-                                <input type="text" name="address" class="form-control @error('address') is-invalid @enderror" value="{{ old('address') }}" placeholder="District, Sector, Street No." required>
-                                @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <label class="form-label fw-bold text-secondary small">Physical Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 rounded-start-4"><i class="fas fa-map-marker-alt text-muted"></i></span>
+                                    <input type="text" name="address" class="form-control bg-light border-start-0 rounded-end-4 @error('address') is-invalid @enderror" value="{{ old('address') }}" placeholder="Nyarugenge, Gitega..." required>
+                                </div>
                             </div>
-                        </div>
 
-                        <hr class="my-4 opacity-50">
-
-                        <h5 class="fw-bold mb-3"><i class="fas fa-file-invoice me-2 text-primary"></i>Verification Documents</h5>
-                        <p class="small text-muted mb-3">Please upload clear scans or photos of your official documents.</p>
-                        
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small">RDB Certificate (PDF/Image)</label>
-                                <input type="file" name="rdb_certificate" class="form-control @error('rdb_certificate') is-invalid @enderror" required>
-                                <div class="form-text mt-1" style="font-size: 0.75rem;">Max size: 5MB</div>
-                                @error('rdb_certificate') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div class="col-12 mt-4">
+                                <div class="p-3 rounded-4 border border-dashed bg-light">
+                                    <h6 class="fw-bold mb-3 small text-uppercase">Documents Upload</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold">RDB Certificate</label>
+                                            <input type="file" name="rdb_certificate" class="form-control form-control-sm rounded-3">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold">National ID</label>
+                                            <input type="file" name="owner_id" class="form-control form-control-sm rounded-3">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small">Owner National ID / Passport</label>
-                                <input type="file" name="owner_id" class="form-control @error('owner_id') is-invalid @enderror" required>
-                                <div class="form-text mt-1" style="font-size: 0.75rem;">Max size: 2MB</div>
-                                @error('owner_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-secondary small">Specialization</label>
+                                <textarea name="description" class="form-control bg-light rounded-4" rows="3" placeholder="e.g., Japanese Engine Parts, Body Parts...">{{ old('description') }}</textarea>
                             </div>
-                        </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold small">Shop Description (Optional)</label>
-                            <textarea name="description" class="form-control" rows="3" placeholder="Tell customers what you specialize in (e.g., Toyota suspension, Brake pads...)">{{ old('description') }}</textarea>
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">
-                                Submit Application <i class="fas fa-arrow-right ms-2"></i>
-                            </button>
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-lg">
+                                    Launch My Shop <i class="fas fa-rocket ms-2"></i>
+                                </button>
+                                <p class="text-center mt-3 small text-muted">
+                                    By joining, you agree to our <a href="#" class="text-decoration-none">Vendor Policy</a>.
+                                </p>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
-
-            <p class="text-center mt-4 small text-muted">
-                By submitting, you agree to our <a href="#">Vendor Terms & Conditions</a>.
-            </p>
         </div>
     </div>
 </div>
+
+<style>
+    .rounded-5 { border-radius: 2rem !important; }
+    .rounded-4 { border-radius: 1.2rem !important; }
+    .shadow-primary { box-shadow: 0 10px 20px rgba(13, 110, 253, 0.2); }
+    .bg-light { background-color: #f8f9fa !important; }
+    .border-dashed { border-style: dashed !important; border-width: 2px !important; }
+    .input-group-text { border: none; }
+    .form-control:focus { box-shadow: none; border-color: #0d6efd; }
+</style>
 @endsection
