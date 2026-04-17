@@ -16,7 +16,7 @@ class OrderItemObserver
     public function updated(OrderItem $orderItem): void
     {
         // 1. Check if the status has flipped to 'completed'
-        if ($orderItem->isDirty('status') && $orderItem->status === 'completed') {
+        if ($orderItem->isDirty('status') && $orderItem->status == 'completed') {
             $this->processVendorPayment($orderItem);
         }
     }
