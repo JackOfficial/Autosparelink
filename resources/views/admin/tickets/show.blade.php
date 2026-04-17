@@ -176,7 +176,7 @@
             
             @elseif($ticket->user->avatar)
                 {{-- Show User Avatar --}}
-                <img src="{{ asset('storage/' . $ticket->user->avatar) }}" 
+                <img src="{{ $ticket->user->avatar }}" 
                      alt="{{ $ticket->user->name }}" 
                      class="img-fluid rounded-circle border shadow-sm mb-3" 
                      style="width: 80px; height: 80px; object-fit: cover;">
