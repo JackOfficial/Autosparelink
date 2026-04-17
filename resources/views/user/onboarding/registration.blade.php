@@ -132,7 +132,7 @@
                                     Launch My Shop <i class="fas fa-rocket ml-2"></i>
                                 </button>
                                 <p class="text-center mt-3 small text-muted">
-                                    By joining, you agree to our <a href="#" class="text-primary">Vendor Policy</a>.
+                                    By joining, you agree to our <a href="/terms-and-conditions" class="text-primary">Vendor Policy</a>.
                                 </p>
                             </div>
                         </div>
