@@ -22,17 +22,31 @@ class TicketController extends Controller
     /**
      * Show the form for creating a new ticket.
      */
-public function create()
+public function create(Request $request)
 {
-    // Ensure we only get orders belonging to the authenticated user
+    $orderId = $request->query('order_id');
+
+    // Security: If an ID is provided, verify ownership immediately
+    if ($orderId) {
+        $validOrder = Auth::user()->orders()->where('id', $orderId)->exists();
+        
+        if (!$validOrder) {
+            // Redirect to the same route but WITHOUT the order_id parameter
+            return redirect()->route('user.tickets.create')
+                             ->with('error', 'The referenced order was not found.');
+        }
+    }
+
+    // Optimization: Fetch orders for the dropdown
     $orders = Auth::user()->orders()
-        ->select('id', 'order_number', 'status', 'created_at') // Optimization: don't pull heavy columns
+        ->select('id', 'order_number', 'status', 'created_at')
         ->latest()
         ->limit(20)
         ->get();
 
     return view('user.tickets.create', [
-        'orders' => $orders
+        'orders' => $orders,
+        'preselectedOrder' => $orderId 
     ]);
 }
 

@@ -23,6 +23,13 @@
                 </div>
 
                 <div class="card-body p-4">
+                    {{-- Status Messages (Alerts for redirects with errors) --}}
+                    @if(session('error'))
+                        <div class="alert alert-danger border-0 rounded-3 small mb-4">
+                            <i class="fas fa-exclamation-triangle me-2"></i> {{ session('error') }}
+                        </div>
+                    @endif
+
                     <form action="{{ route('user.tickets.store') }}" method="POST">
                         @csrf
 
@@ -31,8 +38,11 @@
                             <div class="col-md-6 mb-3">
                                 <label for="category" class="form-label small fw-bold text-muted text-uppercase">Category</label>
                                 <select name="category" id="category" class="form-select border-0 bg-light rounded-3 @error('category') is-invalid @enderror" required>
-                                    <option value="" selected disabled>Select a category</option>
-                                    <option value="order_issue" {{ old('category') == 'order_issue' ? 'selected' : '' }}>Order Issue</option>
+                                    <option value="" disabled {{ !old('category') && !$preselectedOrder ? 'selected' : '' }}>Select a category</option>
+                                    
+                                    {{-- Pre-select 'order_issue' if coming from a dispute click --}}
+                                    <option value="order_issue" {{ (old('category') == 'order_issue' || $preselectedOrder) ? 'selected' : '' }}>Order Issue</option>
+                                    
                                     <option value="payment" {{ old('category') == 'payment' ? 'selected' : '' }}>Payment / Billing</option>
                                     <option value="part_request" {{ old('category') == 'part_request' ? 'selected' : '' }}>Part Availability</option>
                                     <option value="technical" {{ old('category') == 'technical' ? 'selected' : '' }}>Technical Support</option>
@@ -40,17 +50,19 @@
                                 @error('category') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
-                            {{-- Linked Order (Dynamic from your Controller) --}}
+                            {{-- Linked Order --}}
                             <div class="col-md-6 mb-3">
                                 <label for="order_id" class="form-label small fw-bold text-muted text-uppercase">Related Order (Optional)</label>
-                                <select name="order_id" id="order_id" class="form-select border-0 bg-light rounded-3">
+                                <select name="order_id" id="order_id" class="form-select border-0 bg-light rounded-3 @error('order_id') is-invalid @enderror">
                                     <option value="">None / General Inquiry</option>
                                     @foreach($orders as $order)
-                                        <option value="{{ $order->id }}" {{ old('order_id') == $order->id ? 'selected' : '' }}>
+                                        <option value="{{ $order->id }}" 
+                                            {{ (old('order_id') == $order->id || $preselectedOrder == $order->id) ? 'selected' : '' }}>
                                             #{{ $order->order_number }} - {{ $order->created_at->format('M d, Y') }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @error('order_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
@@ -128,6 +140,11 @@
     .form-select, .form-control {
         padding: 0.75rem 1rem;
         transition: all 0.2s ease-in-out;
+    }
+    /* Ensure validation errors show correctly with custom backgrounds */
+    .form-select.is-invalid, .form-control.is-invalid {
+        background-color: #fff !important;
+        border: 1px solid #dc3545 !important;
     }
     .form-select:focus, .form-control:focus {
         background-color: #fff !important;
