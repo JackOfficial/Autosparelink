@@ -97,57 +97,92 @@
             </div>
             @endif
 
-            {{-- Items Card --}}
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between">
-                    <h5 class="fw-bold mb-0">Spare Parts List</h5>
-                    <span class="badge bg-light text-dark border rounded-pill px-3">{{ $order->orderItems->count() }} Items</span>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr class="small text-uppercase text-muted">
-                                    <th class="px-4 py-3 border-0">Part Description</th>
-                                    <th class="py-3 border-0 text-center">Shop</th>
-                                    <th class="py-3 border-0 text-center">Qty</th>
-                                    <th class="px-4 py-3 border-0 text-end">Unit Price</th>
-                                     <th class="px-4 py-3 border-0 text-end">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($order->orderItems as $item)
-                                    <tr>
-                                        <td class="px-4 py-3">
-                                            <div class="d-flex align-items-center">
-                                                <div class="fw-bold text-dark">{{ $item->part->part_name }}</div>
+           {{-- Items Card --}}
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+    <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="fw-bold mb-0">Spare Parts List</h5>
+            <p class="text-muted small mb-0">Review the items in your order</p>
+        </div>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2">
+            {{ $order->orderItems->count() }} {{ Str::plural('Item', $order->orderItems->count()) }}
+        </span>
+    </div>
+    
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="bg-light-subtle">
+                    <tr class="small text-uppercase text-muted fw-bold">
+                        <th class="px-4 py-3 border-0">Part Description</th>
+                        <th class="py-3 border-0">Shop</th>
+                        <th class="py-3 border-0 text-center">Qty</th>
+                        <th class="py-3 border-0 text-end">Unit Price</th>
+                        <th class="px-4 py-3 border-0 text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($order->orderItems as $item)
+                        @php
+                            $photoPath = $item->part?->photos?->first()?->file_path;
+                        @endphp
+                        <tr>
+                            <td class="px-4 py-3">
+                                <div class="d-flex align-items-center">
+                                    {{-- Thumbnail --}}
+                                    <div class="me-3">
+                                        @if($photoPath)
+                                            <img src="{{ asset('storage/' . $photoPath) }}" 
+                                                 class="rounded-3 border" 
+                                                 style="width: 52px; height: 52px; object-fit: cover;" 
+                                                 alt="Part">
+                                        @else
+                                            <div class="bg-light rounded-3 border d-flex align-items-center justify-content-center text-muted" 
+                                                 style="width: 52px; height: 52px;">
+                                                <i class="fas fa-tools small"></i>
                                             </div>
-                                            <div class="small text-muted">
-                                                {{ $item->part->partBrand->name }} • {{ $item->part->category->category_name }}
-                                            </div>
-                                            @if($item->status === 'disputed')
-                                                <span class="badge bg-danger-subtle text-danger rounded-pill mt-1" style="font-size: 10px;">Item Disputed</span>
-                                            @endif
-                                        </td>
-                                        <td class="py-3 text-center small text-muted">
-                                            {{ $item->shop->shop_name ?? 'N/A' }}
-                                        </td>
-                                        <td class="py-3 text-center fw-bold">{{ $item->quantity }}</td>
-                                        <td class="px-4 py-3 text-end fw-bold">RWF {{ number_format($item->unit_price, 0) }}</td>
-                                        <td class="px-4 py-3 text-end fw-bold">RWF {{ number_format($item->unit_price * $item->quantity, 0) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot class="bg-light-subtle">
-                                <tr>
-                                    <td colspan="3" class="px-4 py-3 text-end fw-bold">Subtotal:</td>
-                                    <td class="px-4 py-3 text-end fw-bold">RWF {{ number_format($order->total_amount, 0) }}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
+                                        @endif
+                                    </div>
+                                    
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ $item->part?->part_name ?? 'Unknown Part' }}</div>
+                                        <div class="small text-muted">
+                                            {{ $item->part?->partBrand?->name ?? 'Genuine' }} • {{ $item->part?->category?->category_name ?? 'General' }}
+                                        </div>
+                                        @if($item->status === 'disputed')
+                                            <span class="badge bg-danger-subtle text-danger rounded-pill mt-1" style="font-size: 10px;">
+                                                <i class="fas fa-exclamation-circle me-1"></i>Disputed
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                <span class="badge bg-light text-dark border font-monospace py-2">
+                                    <i class="fas fa-store me-1 text-primary"></i>{{ $item->shop->shop_name ?? 'N/A' }}
+                                </span>
+                            </td>
+                            <td class="py-3 text-center fw-medium">{{ $item->quantity }}</td>
+                            <td class="py-3 text-end text-muted small">RWF {{ number_format($item->unit_price, 0) }}</td>
+                            <td class="px-4 py-3 text-end fw-bold text-dark">RWF {{ number_format($item->unit_price * $item->quantity, 0) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot class="border-top">
+                    <tr>
+                        <td colspan="4" class="px-4 py-2 text-end text-muted small">Subtotal</td>
+                        <td class="px-4 py-2 text-end fw-bold text-dark">RWF {{ number_format($order->total_amount, 0) }}</td>
+                    </tr>
+                    {{-- If you have tax or shipping, add those rows here --}}
+                    <tr class="bg-light-subtle">
+                        <td colspan="4" class="px-4 py-3 text-end fw-bold text-primary text-uppercase">Total Amount</td>
+                        <td class="px-4 py-3 text-end fw-bold text-primary fs-5">RWF {{ number_format($order->total_amount, 0) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
         </div>
 
         {{-- Right Column: Side Info --}}
