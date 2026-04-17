@@ -69,6 +69,11 @@ public function finalize($id)
 {
     $order = Order::findOrFail($id);
 
+    // Safety check: Prevent finalizing unless it was delivered or shipped
+    if (!in_array($order->status, ['delivered', 'shipped'])) {
+        return back()->with('error', 'Only delivered orders can be finalized.');
+    }
+
     DB::transaction(function () use ($order) {
         // 1. Mark the main order as completed
         $order->update(['status' => 'completed']);
