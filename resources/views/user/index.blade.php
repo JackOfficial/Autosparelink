@@ -178,11 +178,11 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm rounded-3 border-top border-primary border-4">
+            <div class="card shadow-sm rounded-3 border-top border-primary border-4">
                 <div class="card-body p-4 text-center">
                     <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 80px; height: 80px;">
                         @if($user->avatar)
-                            <img src="{{ asset('storage/'.$user->avatar) }}" class="img-fluid rounded-circle" alt="Avatar">
+                            <img src="{{ $user->avatar }}" class="img-fluid rounded-circle" alt="Avatar">
                         @else
                             <h3 class="mb-0 fw-bold text-primary">{{ strtoupper(substr($user->name, 0, 2)) }}</h3>
                         @endif
