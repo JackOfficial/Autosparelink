@@ -2,59 +2,73 @@
 
 @push('styles')
 <style>
-    /* Professional Blinking - smoother transition */
-    .blink_me { animation: blinker 1.2s cubic-bezier(.4, 0, .6, 1) infinite; }
-    @keyframes blinker { 50% { opacity: 0.3; } }
+    /* Animation for urgent alerts */
+    .blink_me { animation: blinker 1.5s cubic-bezier(.4, 0, .6, 1) infinite; }
+    @keyframes blinker { 50% { opacity: 0.4; } }
 
-    /* Modern Status Tints */
-    .status-badge {
-        font-size: 0.72rem;
+    /* Modern UI Variables & Utility */
+    :root {
+        --primary-soft: #e7f5ff;
+        --primary-deep: #1971c2;
+        --success-soft: #ebfbee;
+        --success-deep: #2b8a3e;
+        --warning-soft: #fff9db;
+        --warning-deep: #f08c00;
+        --danger-soft: #fff5f5;
+        --danger-deep: #c92a2a;
+    }
+
+    .card { border-radius: 12px; transition: all 0.3s ease; }
+    .shadow-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
+
+    /* Avatar & Profile Styling */
+    .avatar-wrapper { 
+        width: 42px; 
+        height: 42px; 
+        position: relative; 
+        border-radius: 10px; 
+        overflow: hidden;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-initials { 
+        width: 100%; 
+        height: 100%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-weight: 700; 
+        color: var(--primary-deep);
+        background: var(--primary-soft);
+    }
+
+    /* Status Badges */
+    .status-pill {
+        font-size: 0.7rem;
         font-weight: 700;
-        padding: 6px 14px;
-        border-radius: 20px;
+        padding: 5px 12px;
+        border-radius: 6px;
+        text-transform: uppercase;
         display: inline-flex;
         align-items: center;
-        letter-spacing: 0.3px;
-        border: 1px solid transparent;
     }
 
-    /* Refined Color Palette */
-    .bg-pending { background-color: #fff9db; color: #f08c00; border-color: #ffe066; }
-    .bg-delivered { background-color: #ebfbee; color: #2b8a3e; border-color: #b2f2bb; }
-    .bg-processing { background-color: #e7f5ff; color: #1971c2; border-color: #a5d8ff; }
-    .bg-cancelled { background-color: #fff5f5; color: #c92a2a; border-color: #ffc9c9; }
-    .bg-shipped { background-color: #f3f0ff; color: #6741d9; border-color: #d0bfff; }
-    .bg-callback { background-color: #fff0f6; color: #c2255c; border-color: #ffdeeb; }
-
-    /* Layout Components */
-    .search-input-wrapper {
-        transition: all 0.3s ease;
-        border-radius: 12px;
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-    }
-    .search-input-wrapper:focus-within {
-        background: #fff;
-        border-color: #4dabf7;
-        box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.15);
-    }
-    
+    /* Table Improvements */
     .table thead th {
-        background-color: #f8f9fa;
-        text-transform: uppercase;
-        font-size: 0.65rem;
-        letter-spacing: 1px;
-        padding: 15px 20px;
+        background-color: #fcfcfd;
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #f1f3f5;
     }
+    .table tbody tr td { border-bottom: 1px solid #f8f9fa; padding: 16px 12px; }
 
-    .btn-action {
-        transition: transform 0.2s, box-shadow 0.2s;
-        border-radius: 10px;
-    }
-    .btn-action:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.08);
-    }
+    /* Guest/Member Tag */
+    .user-type-tag { font-size: 0.6rem; padding: 1px 6px; border-radius: 4px; font-weight: 800; }
+    .tag-member { background: #e7f5ff; color: #007bff; }
+    .tag-guest { background: #f1f3f5; color: #6c757d; }
 
     [x-cloak] { display: none !important; }
 </style>
@@ -63,68 +77,69 @@
 @section('content')
 <div class="container-fluid py-4" x-data="{ 
     search: '',
-    showRow(rowText) {
-        return rowText.toLowerCase().includes(this.search.toLowerCase())
-    }
+    showRow(rowText) { return rowText.toLowerCase().includes(this.search.toLowerCase()) }
 }">
-    <div class="d-md-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="h4 font-weight-bold text-dark mb-1">Orders Portal</h2>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-transparent p-0 small">
-                    <li class="breadcrumb-item"><a href="#">Admin</a></li>
-                    <li class="breadcrumb-item active">Order Management</li>
-                </ol>
-            </nav>
+    
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-6">
+            <h1 class="h3 font-weight-bold text-dark mb-1">Order Pipeline</h1>
+            <p class="text-muted small">Real-time overview of business transactions and fulfillment.</p>
         </div>
-        
-        <div class="search-input-wrapper d-flex align-items-center px-3 py-1" style="width: 100%; max-width: 400px;">
-            <i class="fas fa-search text-muted mr-2"></i>
-            <input 
-                type="text" 
-                x-model="search" 
-                class="form-control border-0 bg-transparent shadow-none py-2" 
-                placeholder="Search orders, customers..."
-            >
-            <button x-show="search.length > 0" @click="search = ''" class="btn btn-link btn-sm text-muted p-0" x-cloak>
-                <i class="fas fa-times-circle"></i>
-            </button>
+        <div class="col-lg-6">
+            <div class="d-flex justify-content-lg-end align-items-center">
+                <div class="input-group shadow-sm bg-white" style="border-radius: 10px; overflow: hidden; max-width: 350px;">
+                    <span class="input-group-text border-0 bg-white"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" x-model="search" class="form-control border-0 shadow-none py-2" placeholder="Search client or ID...">
+                    <button x-show="search.length > 0" @click="search = ''" class="btn btn-link text-muted border-0" x-cloak>
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3">
-                <div class="small text-muted mb-1 text-uppercase font-weight-bold">Total Volume</div>
-                <div class="h5 mb-0 font-weight-bold text-dark">{{ $orders->total() }} Orders</div>
+            <div class="card border-0 shadow-sm p-3 shadow-hover bg-white">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-primary-soft p-3 mr-3 text-primary"><i class="fas fa-shopping-bag fa-lg"></i></div>
+                    <div>
+                        <div class="text-muted small font-weight-bold uppercase">Total Orders</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ $orders->total() }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3 shadow-hover bg-white">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-warning-soft p-3 mr-3 text-warning"><i class="fas fa-clock fa-lg"></i></div>
+                    <div>
+                        <div class="text-muted small font-weight-bold uppercase">Active Processing</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ $orders->where('status', 'processing')->count() }}</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     @if($orders->isEmpty())
-        <div class="card border-0 shadow-sm py-5">
-            <div class="card-body text-center">
-                <div class="mb-4">
-                    <div class="bg-light d-inline-block p-4 rounded-circle">
-                        <i class="fas fa-receipt fa-3x text-muted opacity-50"></i>
-                    </div>
-                </div>
-                <h5 class="text-dark">No orders yet</h5>
-                <p class="text-muted mx-auto" style="max-width: 300px;">When customers start purchasing SMM services, they will appear here in real-time.</p>
-            </div>
+        <div class="card border-0 shadow-sm py-5 text-center">
+            <i class="fas fa-folder-open fa-4x text-light mb-3"></i>
+            <h5 class="text-secondary">No current orders</h5>
+            <p class="text-muted small">New orders will pop up here as they arrive.</p>
         </div>
     @else
-        <div class="card shadow-sm border-0" style="border-radius: 16px;">
+        <div class="card border-0 shadow-sm">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table align-middle mb-0">
                     <thead>
                         <tr>
-                            <th class="px-4">Ref ID</th>
-                            <th>Client Info</th>
-                            <th>Date / Time</th>
-                            <th>Fulfillment</th>
-                            <th>Total Revenue</th>
-                            <th class="text-right px-4">Management</th>
+                            <th class="px-4">Order Details</th>
+                            <th>Customer</th>
+                            <th>Fulfillment Status</th>
+                            <th>Amount</th>
+                            <th class="text-center px-4">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -134,59 +149,66 @@
                                 $email = $order->user->email ?? $order->guest_email ?? 'N/A';
                                 $searchText = "#{$order->id} {$name} {$email}";
                                 
-                                $statusClass = match($order->status) {
-                                    'pending' => 'bg-pending',
-                                    'delivered' => 'bg-delivered',
-                                    'processing' => 'bg-processing',
-                                    'cancelled' => 'bg-cancelled',
-                                    'shipped' => 'bg-shipped',
-                                    'callback_requested' => 'bg-callback blink_me',
-                                    default => 'bg-light'
+                                $statusStyle = match($order->status) {
+                                    'pending' => 'background: var(--warning-soft); color: var(--warning-deep);',
+                                    'delivered' => 'background: var(--success-soft); color: var(--success-deep);',
+                                    'processing' => 'background: var(--primary-soft); color: var(--primary-deep);',
+                                    'cancelled' => 'background: var(--danger-soft); color: var(--danger-deep);',
+                                    'callback_requested' => 'background: #7048e8; color: #fff;',
+                                    default => 'background: #f1f3f5; color: #495057;'
                                 };
                             @endphp
                             <tr x-show="showRow('{{ addslashes($searchText) }}')" x-transition>
                                 <td class="px-4">
-                                    <div class="font-weight-bold text-primary">#{{ $order->id }}</div>
-                                    <span class="text-muted" style="font-size: 0.65rem;">SMM-{{ date('Y') }}</span>
+                                    <div class="font-weight-bold text-dark mb-0">Order #{{ $order->id }}</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">
+                                        <i class="far fa-calendar-alt mr-1"></i> {{ $order->created_at->format('M d, H:i') }}
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar-circle mr-3" style="background-color: {{ $order->user_id ? '#e7f5ff' : '#f8f9fa' }}">
-                                            {{ substr($name, 0, 1) }}
+                                        <div class="avatar-wrapper mr-3">
+                                            @if($order->user && $order->user->photo)
+                                                <img src="{{ asset('storage/' . $order->user->photo) }}" class="avatar-img" alt="User Photo">
+                                            @else
+                                                <div class="avatar-initials">
+                                                    {{ strtoupper(substr($name, 0, 1)) }}
+                                                </div>
+                                            @endif
                                         </div>
                                         <div>
-                                            <div class="font-weight-bold text-dark mb-0" style="line-height: 1.2;">{{ $name }}</div>
+                                            <div class="d-flex align-items-center mb-0">
+                                                <span class="font-weight-bold text-dark mr-2" style="font-size: 0.9rem;">{{ $name }}</span>
+                                                @if($order->user_id)
+                                                    <span class="user-type-tag tag-member">MEMBER</span>
+                                                @else
+                                                    <span class="user-type-tag tag-guest">GUEST</span>
+                                                @endif
+                                            </div>
                                             <div class="text-muted" style="font-size: 0.75rem;">{{ $email }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="text-dark mb-0 font-weight-500" style="font-size: 0.85rem;">
-                                        {{ $order->created_at->format('d M, Y') }}
-                                    </div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">
-                                        {{ $order->created_at->format('H:i') }} CAT
-                                    </div>
+                                    @if($order->status === 'callback_requested')
+                                        <span class="status-pill blink_me" style="{{ $statusStyle }}">
+                                            <i class="fas fa-phone-alt mr-2"></i> URGENT CALL
+                                        </span>
+                                    @else
+                                        <span class="status-pill" style="{{ $statusStyle }}">
+                                            {{ strtoupper($order->status) }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td>
-                                    <span class="status-badge {{ $statusClass }}">
-                                        @if($order->status === 'callback_requested')
-                                            <i class="fas fa-phone-alt mr-1 small"></i> Callback
-                                        @else
-                                            <span class="mr-1">●</span> {{ ucfirst($order->status) }}
-                                        @endif
-                                    </span>
+                                    <div class="font-weight-bold text-dark">{{ number_format($order->total_amount) }} <span class="text-muted small">RWF</span></div>
                                 </td>
-                                <td>
-                                    <div class="font-weight-bold text-dark">
-                                        {{ number_format($order->total_amount) }} 
-                                        <span class="small font-weight-normal text-muted">RWF</span>
+                                <td class="px-4 text-center">
+                                    <div class="dropdown">
+                                        <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-white border px-3 font-weight-bold shadow-sm" style="border-radius: 8px;">
+                                            Open <i class="fas fa-external-link-alt ml-1 small"></i>
+                                        </a>
                                     </div>
-                                </td>
-                                <td class="px-4 text-right">
-                                    <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-action bg-white border px-3 text-primary font-weight-bold">
-                                        Manage <i class="fas fa-chevron-right ml-1 small"></i>
-                                    </a>
                                 </td>
                             </tr>
                         @endforeach
@@ -194,18 +216,10 @@
                 </table>
             </div>
 
-            <div x-show="search.length > 0 && !Array.from($el.closest('.card').querySelectorAll('tbody tr')).some(tr => tr.style.display !== 'none')" class="p-5 text-center bg-white" x-cloak>
-                <div class="text-muted small">No orders found matching your search.</div>
-            </div>
-
             <div class="card-footer bg-white border-top-0 py-4">
-                <div class="d-md-flex justify-content-between align-items-center">
-                    <p class="text-muted small mb-md-0">
-                        Displaying {{ $orders->firstItem() }} - {{ $orders->lastItem() }} of {{ $orders->total() }} transactions
-                    </p>
-                    <div class="pagination-modern">
-                        {{ $orders->links('pagination::bootstrap-4') }}
-                    </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small font-italic">Showing {{ $orders->count() }} records on this page</div>
+                    <div>{{ $orders->links('pagination::bootstrap-4') }}</div>
                 </div>
             </div>
         </div>
