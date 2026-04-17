@@ -25,6 +25,24 @@
         border-bottom: 1px solid #f1f4f8; 
     }
     
+    .product-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #f1f4f8;
+    }
+    .shop-badge {
+        font-size: 0.65rem;
+        background: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #e9ecef;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-top: 4px;
+    }
+    
     /* Order Stepper - Now supporting 5 stages */
     .stepper-wrapper { display: flex; justify-content: space-between; margin-bottom: 2rem; padding: 0 1rem; }
     .stepper-item { position: relative; display: flex; flex-direction: column; align-items: center; flex: 1; }
@@ -134,52 +152,87 @@
                 </div>
             </div>
 
-            {{-- Items Table --}}
-            <div class="card shadow-sm mb-4">
-                <div class="card-header">
-                    <i class="fas fa-shopping-cart mr-2 text-primary"></i> Order Items
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="px-4">Product Detail</th>
-                                    <th class="text-center">Quantity</th>
-                                    <th class="text-right">Unit Price</th>
-                                    <th class="text-right px-4">Line Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($order->orderItems as $item)
-                                    <tr>
-                                        <td class="px-4 py-3">
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-light rounded p-2 mr-3 text-center" style="width: 45px;">
-                                                    <i class="fas fa-cog text-muted"></i>
-                                                </div>
-                                                <div>
-                                                    <span class="d-block font-weight-bold text-dark">{{ $item->part->part_name ?? 'Part not found' }}</span>
-                                                    <small class="text-muted">SKU: {{ $item->part->sku ?? 'N/A' }}</small>
-                                                </div>
+           {{-- Items Table --}}
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-shopping-cart mr-2 text-primary"></i> Order Items</span>
+        <span class="badge badge-soft-primary px-3">{{ $order->orderItems->count() }} Positions</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="px-4" style="width: 40%;">Product Detail</th>
+                        <th class="text-left">Vendor/Shop</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-right">Unit Price</th>
+                        <th class="text-right px-4">Line Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($order->orderItems as $item)
+                        <tr>
+                            <td class="px-4 py-3">
+                                <div class="d-flex align-items-center">
+                                    {{-- Product Photo --}}
+                                    <div class="mr-3">
+                                        @if($item->part && $item->part->image)
+                                            <img src="{{ asset('storage/' . $item->part->image) }}" 
+                                                 alt="{{ $item->part->part_name }}" 
+                                                 class="product-img shadow-sm">
+                                        @else
+                                            <div class="product-img bg-light d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-image text-muted opacity-50"></i>
                                             </div>
-                                        </td>
-                                        <td class="text-center font-weight-bold text-dark">{{ $item->quantity }}</td>
-                                        <td class="text-right text-muted">{{ number_format($item->unit_price) }} RWF</td>
-                                        <td class="text-right px-4 font-weight-bold text-dark">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot style="background: #fcfcfd; border-top: 2px solid #f1f4f8;">
-                                <tr>
-                                    <td colspan="3" class="text-right font-weight-bold py-3 text-muted">ORDER TOTAL:</td>
-                                    <td class="text-right px-4 h5 font-weight-bold text-primary py-3">{{ number_format($order->total_amount) }} RWF</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <span class="d-block font-weight-bold text-dark">{{ $item->part->part_name ?? 'Part not found' }}</span>
+                                        <small class="text-muted">SKU: {{ $item->part->sku ?? 'N/A' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-left">
+                                {{-- Shop Details --}}
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-store-alt mr-2 text-muted small"></i>
+                                    <div>
+                                        <span class="d-block small font-weight-bold text-dark">
+                                            {{ $item->part->shop->name ?? 'Direct Warehouse' }}
+                                        </span>
+                                        <span class="shop-badge">
+                                            {{ $item->part->shop->location ?? 'Main Branch' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-light px-3 py-2 text-dark font-weight-bold">
+                                    {{ $item->quantity }}
+                                </span>
+                            </td>
+                            <td class="text-right text-muted font-weight-medium">
+                                {{ number_format($item->unit_price) }} RWF
+                            </td>
+                            <td class="text-right px-4 font-weight-bold text-dark">
+                                {{ number_format($item->quantity * $item->unit_price) }} RWF
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot style="background: #fcfcfd; border-top: 2px solid #f1f4f8;">
+                    <tr>
+                        <td colspan="4" class="text-right font-weight-bold py-3 text-muted">ORDER TOTAL:</td>
+                        <td class="text-right px-4 h5 font-weight-bold text-primary py-3">
+                            {{ number_format($order->total_amount) }} RWF
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
 
             {{-- Logistics & Payment Grid --}}
             <div class="row">
