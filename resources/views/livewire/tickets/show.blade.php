@@ -127,7 +127,7 @@
                         <div class="mb-3">
                             <label class="small text-muted text-uppercase fw-bold ls-1 mb-1">Order Ref</label>
                             <div class="fw-bold text-primary">
-                                <i class="fas fa-hashtag small"></i> {{ $ticket->order_ref ?? 'General Inquiry' }}
+                                <i class="fas fa-hashtag small"></i> {{ $ticket->order_id ?? 'General Inquiry' }}
                             </div>
                         </div>
                         <div class="mb-3">
