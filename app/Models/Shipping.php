@@ -71,15 +71,41 @@ class Shipping extends Model
         return $this->status === 'delivered';
     }
 
+    public function getFullAddressAttribute()
+{
+    // If we have a linked address model, use it
+    if ($this->address_id && $this->address) {
+        return $this->address->full_address_string;
+    }
+
+    // Fallback: If it was a Guest Checkout, use the 'address' column 
+    // (Assuming you have a 'address' text column in shipping table for guests)
+    return $this->address_text ?? 'Address not provided';
+}
+
     /**
      * Boot logic to auto-assign shop_id
      */
     protected static function booted()
-    {
-        static::creating(function ($shipping) {
-            if (auth()->check() && auth()->user()->hasRole('seller') && empty($shipping->shop_id)) {
-                $shipping->shop_id = auth()->user()->shop->id;
-            }
-        });
-    }
+{
+    static::creating(function ($shipping) {
+        if (auth()->check() && auth()->user()->hasRole('seller') && empty($shipping->shop_id)) {
+            $shipping->shop_id = auth()->user()->shop->id;
+        }
+    });
+
+    static::updated(function ($shipping) {
+        // If the shipment status changes to delivered, 
+        // this is where you should trigger the OrderItem 'completed' status
+        if ($shipping->wasChanged('status') && $shipping->status === 'delivered') {
+            $shipping->order->orderItems()
+                ->where('shop_id', $shipping->shop_id)
+                ->get()
+                ->each(function($item) {
+                    $item->status = 'completed'; // This triggers your payment observer logic!
+                    $item->save(); 
+                });
+        }
+    });
+}
 }
