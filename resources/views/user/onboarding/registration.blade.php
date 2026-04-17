@@ -123,7 +123,7 @@
                             </div>
 
                             <div class="col-12 mb-3">
-                                <label class="font-weight-bold text-secondary small">Specialization</label>
+                                <label class="font-weight-bold text-dark small">Specialization</label>
                                 <textarea name="description" class="form-control bg-light rounded-4" rows="3" placeholder="e.g., Japanese Engine Parts...">{{ old('description') }}</textarea>
                             </div>
 
