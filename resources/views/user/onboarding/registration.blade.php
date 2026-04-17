@@ -55,7 +55,7 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="font-weight-bold text-secondary small">Shop Name</label>
+                                <label class="font-weight-bold text-dark small">Shop Name</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-light border-right-0 rounded-start-4"><i class="fas fa-tag text-muted"></i></span>
@@ -66,7 +66,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="font-weight-bold text-secondary small">Business Email</label>
+                                <label class="font-weight-bold text-dark small">Business Email</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-light border-right-0 rounded-start-4"><i class="fas fa-envelope text-muted"></i></span>
@@ -77,7 +77,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="font-weight-bold text-secondary small">Phone Number</label>
+                                <label class="font-weight-bold text-dark small">Phone Number</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-light border-right-0 rounded-start-4"><i class="fas fa-phone text-muted"></i></span>
@@ -87,7 +87,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="font-weight-bold text-secondary small">TIN Number</label>
+                                <label class="font-weight-bold text-dark small">TIN Number</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-light border-right-0 rounded-start-4"><i class="fas fa-id-card text-muted"></i></span>
@@ -97,7 +97,7 @@
                             </div>
 
                             <div class="col-12 mb-3">
-                                <label class="font-weight-bold text-secondary small">Physical Address</label>
+                                <label class="font-weight-bold text-dark small">Physical Address</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-light border-right-0 rounded-start-4"><i class="fas fa-map-marker-alt text-muted"></i></span>
