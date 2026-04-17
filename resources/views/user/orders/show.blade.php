@@ -176,7 +176,7 @@
                     {{-- If you have tax or shipping, add those rows here --}}
                     <tr class="bg-light-subtle">
                         <td colspan="4" class="px-4 py-3 text-end fw-bold text-primary text-uppercase">Total Amount</td>
-                        <td class="px-4 py-3 text-end fw-bold text-primary fs-5">RWF {{ number_format($order->total_amount, 0) }}</td>
+                        <td class="px-4 py-3 text-end fw-bold text-primary fs-5">{{ number_format($order->total_amount, 0) }}</td>
                     </tr>
                 </tfoot>
             </table>
