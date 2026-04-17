@@ -137,7 +137,7 @@
         <p class="text-muted small mb-3">You cannot reply to a closed ticket. Please reopen it first if further communication is required.</p>
         
         {{-- Optional: Add a Reopen Button if you have the route --}}
-        <form action="{{ route('admin.tickets.update-status', $ticket) }}" method="POST" class="d-inline">
+        <form action="{{ route('admin.tickets.status', $ticket) }}" method="POST" class="d-inline">
             @csrf
             @method('PATCH')
             <input type="hidden" name="status" value="open">
