@@ -38,22 +38,31 @@
             {{-- Original Message --}}
             <div class="card border-0 shadow-sm rounded-xl mb-4">
                 <div class="card-header bg-white border-0 pt-4 px-4">
-                    <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mr-3" style="width: 45px; height: 45px;">
-                            {{ strtoupper(substr($ticket->user->name, 0, 2)) }}
-                        </div>
-                        <div>
-                            <h6 class="font-weight-bold mb-0">
-                                {{ $ticket->user->name }} 
-                                @if($ticket->user->shop)
-                                    <span class="badge badge-info ml-1">Shop Vendor</span>
-                                @else
-                                    <span class="badge badge-light border ml-1">Customer</span>
-                                @endif
-                            </h6>
-                            <small class="text-muted">{{ $ticket->created_at->format('M d, Y \a\t h:i A') }}</small>
-                        </div>
-                    </div>
+                   <div class="d-flex align-items-center">
+    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mr-3 overflow-hidden" style="width: 45px; height: 45px; min-width: 45px;">
+        @if($ticket->user->avatar)
+            <img src="{{ $ticket->user->avatar }}" 
+                 alt="{{ $ticket->user->name }}" 
+                 style="width: 100%; height: 100%; object-fit: cover;">
+        @else
+            <span class="font-weight-bold">
+                {{ strtoupper(substr($ticket->user->name, 0, 2)) }}
+            </span>
+        @endif
+    </div>
+    
+    <div>
+        <h6 class="font-weight-bold mb-0">
+            {{ $ticket->user->name }} 
+            @if($ticket->user->shop)
+                <span class="badge badge-info ml-1">Shop Vendor</span>
+            @else
+                <span class="badge badge-light border ml-1">Customer</span>
+            @endif
+        </h6>
+        <small class="text-muted">{{ $ticket->created_at->format('M d, Y \a\t h:i A') }}</small>
+    </div>
+</div>
                 </div>
                 <div class="card-body px-4 pb-4">
                     <div class="p-4 bg-light rounded-xl border-left-primary shadow-inner">
