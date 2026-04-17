@@ -32,61 +32,85 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        Schema::defaultStringLength(191);
+   public function boot(): void
+{
+    Schema::defaultStringLength(191);
 
-        // Registering your observers
-        Shop::observe(ShopObserver::class);
-        OrderItem::observe(OrderItemObserver::class);
-        
-        Paginator::useBootstrapFive();
-        
-        Event::listen(
-            Login::class,
-            MigrateCartOnLogin::class,
-        );
+    // Registering observers
+    Shop::observe(ShopObserver::class);
+    OrderItem::observe(OrderItemObserver::class);
+    Specification::observe(SpecificationObserver::class);
 
-        // Sidebar/Layout Stats for the User Dashboard
-        View::composer(['layouts.dashboard', 'user.*'], function ($view) {
-    if (Auth::check()) {
-        $user = Auth::user();
-        
-        $ticketStats = $user->tickets()
-            ->selectRaw("status, count(*) as total")
-            ->groupBy('status')
-            ->pluck('total', 'status');
+    // UI Configuration
+    Paginator::useBootstrapFive();
 
-        $view->with('stats', [
-            'total_orders'   => $user->orders()->count(),
-            'active_orders'  => $user->orders()->whereIn('status', ['pending', 'processing', 'shipped'])->count(),
-            'total_spent'    => (float) $user->orders()->where('status', 'completed')->sum('total_amount'),
-            'pending_tickets'=> $ticketStats['pending'] ?? 0,
-            'open_tickets'   => $ticketStats['open'] ?? 0,
-            'closed_tickets' => $ticketStats['closed'] ?? 0,
-        ]);
-    }
-});
+    // Event Listeners
+    Event::listen(
+        Login::class,
+        MigrateCartOnLogin::class,
+    );
 
-        // Shop Context for components
-        View::composer(['components.shop-dashboard', 'components.partials.*'], function ($view) {
+    /**
+     * Sidebar/Layout Stats for the User & Seller Dashboard
+     * Handles both customer metrics and vendor wallet data.
+     */
+    View::composer(['layouts.dashboard', 'user.*'], function ($view) {
+        if (Auth::check()) {
+            $user = Auth::user();
+
+            // 1. Fetch Ticket Stats
+            $ticketStats = $user->tickets()
+                ->selectRaw("status, count(*) as total")
+                ->groupBy('status')
+                ->pluck('total', 'status');
+
+            // 2. Prepare Base Customer Stats
+            $stats = [
+                'total_orders'    => $user->orders()->count(),
+                'active_orders'   => $user->orders()->whereIn('status', ['pending', 'processing', 'shipped'])->count(),
+                'total_spent'     => (float) $user->orders()->where('status', 'completed')->sum('total_amount'),
+                'pending_tickets' => $ticketStats['pending'] ?? 0,
+                'open_tickets'    => $ticketStats['open'] ?? 0,
+                'closed_tickets'  => $ticketStats['closed'] ?? 0,
+            ];
+
+            // 3. Prepare Seller Wallet Stats (If applicable)
+            if ($user->hasRole('seller') && $user->shop) {
+                $wallet = $user->shop->wallet;
+                $view->with('seller_stats', [
+                    'balance'      => $wallet->balance,
+                    'total_earned' => $wallet->total_earnings, // Uses your Wallet model accessor
+                    'pending'      => $wallet->pending_balance,
+                    'currency'     => $wallet->currency ?? 'RWF',
+                ]);
+            }
+
+            $view->with('stats', $stats);
+        }
+    });
+
+    /**
+     * Shop Context for specific dashboard components
+     */
+    View::composer(['components.shop-dashboard', 'components.partials.*'], function ($view) {
+        if (Auth::check()) {
             $view->with('shop', Auth::user()->shop ?? null);
+        }
+    });
+
+    /**
+     * Admin Layout Counts (with 1-minute caching for performance)
+     */
+    View::composer('admin.layouts.app', function ($view) {
+        $counts = cache()->remember('admin_sidebar_counts', 60, function() {
+            return [
+                'abandoned' => DB::table('shoppingcart')->count(),
+                'pending'   => Order::where('status', 'pending')->count(),
+            ];
         });
 
-        // Specification Observer
-        Specification::observe(SpecificationObserver::class);
-
-        // Admin Layout Counts (with simple caching)
-        view()->composer('admin.layouts.app', function ($view) {
-            $counts = cache()->remember('admin_sidebar_counts', 60, function() {
-                return [
-                    'abandoned' => DB::table('shoppingcart')->count(),
-                    'pending'   => Order::where('status', 'pending')->count(),
-                ];
-            });
-
-            $view->with('abandonedCount', $counts['abandoned']);
-            $view->with('pendingOrdersCount', $counts['pending']);
-        });
-    }
+        $view->with('abandonedCount', $counts['abandoned']);
+        $view->with('pendingOrdersCount', $counts['pending']);
+    });
+}
 }

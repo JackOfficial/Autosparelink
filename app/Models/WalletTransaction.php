@@ -85,7 +85,12 @@ class WalletTransaction extends Model
      */
     public function getNetAmountAttribute(): float
     {
-        return (float) $this->amount - (float) $this->service_fee;
+        return (float) $this->amount;
+    }
+
+    public function getGrossAmountAttribute(): float
+    {
+    return (float) $this->amount + (float) $this->service_fee;
     }
 
     /**

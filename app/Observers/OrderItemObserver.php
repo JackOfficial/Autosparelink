@@ -24,7 +24,7 @@ class OrderItemObserver
     /**
      * Logic to calculate split and credit the vendor wallet
      */
-   private function processVendorPayment(OrderItem $orderItem): void
+    private function processVendorPayment(OrderItem $orderItem): void
     {
         $shop = $orderItem->shop;
         
@@ -49,7 +49,9 @@ class OrderItemObserver
             }
 
             // 2. Calculations
-            $feePercentage = Commission::getRateForShop($shop->id); 
+            // UPDATED: Now using the simplified global rate method
+            $feePercentage = Commission::getRate(); 
+            
             $itemSubtotal = $orderItem->unit_price * $orderItem->quantity;
             
             // Ensure we use 2 decimal places for financial precision
@@ -57,12 +59,12 @@ class OrderItemObserver
             $vendorNetEarnings = $itemSubtotal - $adminServiceFee;
 
             // 3. Persist local record
+            // Use updateQuietly to avoid triggering this observer again in an infinite loop
             $orderItem->updateQuietly([
                 'commission_amount' => $adminServiceFee
             ]);
 
             // 4. Trigger the wallet flow
-            // Note: WalletTransaction's 'booted' method handles the wallet balance increment.
             $wallet->transactions()->create([
                 'type'           => 'credit',
                 'amount'         => $vendorNetEarnings,
@@ -70,7 +72,7 @@ class OrderItemObserver
                 'fee_percentage' => $feePercentage,
                 'reference_type' => OrderItem::class,
                 'reference_id'   => $orderItem->id,
-                'description'    => "Earnings for item: {$orderItem->part_name} (Order #{$orderItem->order->order_number})",
+                'description'    => "Earnings for item: " . ($orderItem->part->part_name ?? 'Spare Part') . " (Order #{$orderItem->order_id})",
                 'status'         => 'completed',
             ]);
         });

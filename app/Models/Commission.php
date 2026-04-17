@@ -3,16 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Commission extends Model
 {
     /**
      * The attributes that are mass assignable.
+     * We removed 'type' and 'shop_id'.
      */
     protected $fillable = [
-        'type',
-        'shop_id',
         'rate',
         'description',
         'is_active',
@@ -27,43 +25,18 @@ class Commission extends Model
     ];
 
     /**
-     * Get the shop associated with a specific commission rule.
+     * Helper to retrieve the active global commission rate.
+     * Since the boss wants one rate for everyone, we no longer need $shopId.
+     * * @return float
      */
-    public function shop(): BelongsTo
+    public static function getRate(): float
     {
-        return $this->belongsTo(Shop::class);
-    }
-
-    /**
-     * Helper to retrieve the applicable commission rate.
-     * Logic: Specific Shop Rate > Global Rate > Default (10%)
-     * * @param int|null $shopId
-     * @return float
-     */
-    public static function getRateForShop(?int $shopId = null): float
-    {
-        // 1. Check if there is an active custom rate for this specific shop
-        if ($shopId) {
-            $shopRate = self::where('shop_id', $shopId)
-                ->where('type', 'shop')
-                ->where('is_active', true)
-                ->value('rate');
-
-            if ($shopRate !== null) {
-                return (float) $shopRate;
-            }
-        }
-
-        // 2. Fallback to the active global rate
-        $globalRate = self::where('type', 'global')
-            ->where('is_active', true)
+        // Get the latest active commission rate set by the admin
+        $rate = self::where('is_active', true)
+            ->latest()
             ->value('rate');
 
-        if ($globalRate !== null) {
-            return (float) $globalRate;
-        }
-
-        // 3. Absolute fallback if no rules are set in the database
-        return 10.00;
+        // Fallback to 10.00 if no active rate exists in the database
+        return $rate !== null ? (float) $rate : 10.00;
     }
 }
