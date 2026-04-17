@@ -16,6 +16,7 @@ class PartCatalogController extends Controller
      */
 
     public function parts(){
+        dd("hello");
         return view('parts.index', [
         'brandId' => null,
         'modelId' => null,
