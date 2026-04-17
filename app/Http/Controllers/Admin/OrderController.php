@@ -22,13 +22,20 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders'));
     }
 
-    public function show(string $id)
-    {
-        $order = Order::with(['user', 'orderItems.part.shop', 'payment', 'shipping', 'address'])
-            ->findOrFail($id);
+public function show(string $id)
+{
+    $order = Order::with([
+        'user', 
+        'payment', 
+        'shipping', 
+        'address',
+        'orderItems.shop', // Load shop directly from the item for the name/location
+        'orderItems.part.photos', // Load photos for the product images
+        'orderItems.part.category' // Load category for the badge in your UI
+    ])->findOrFail($id);
 
-        return view('admin.orders.show', compact('order'));
-    }
+    return view('admin.orders.show', compact('order'));
+}
 
     /**
      * Update order status and handle child items.

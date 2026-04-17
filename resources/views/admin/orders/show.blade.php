@@ -235,8 +235,14 @@
             <td class="text-left">
                 <div class="d-flex flex-column">
                     <span class="small font-weight-bold text-dark">
-                        {{ $item->part->shop->name ?? 'Direct Warehouse' }}
-                    </span>
+           @if($item->part->shop)
+        <a href="{{ route('admin.shops.show', $item->part->shop->id) }}" class="text-dark">
+            {{ $item->part->shop->name }}
+        </a>
+          @else
+        Direct Warehouse
+    @endif
+                   </span>
                     <span class="shop-badge">
                         <i class="fas fa-map-marker-alt mr-1" style="font-size: 0.5rem;"></i>
                         {{ $item->part->shop->location ?? 'Main Branch' }}
