@@ -19,7 +19,7 @@
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="card-header bg-white border-0 pt-4 px-4">
                     <h2 class="h4 fw-bold text-dark mb-1">Open Support Ticket</h2>
-                    <p class="text-muted small">Please fill out the form below. Our team usually responds within 24 hours.</p>
+                    <p class="text-muted small">Please fill out the form below. Our team typically responds within 30 minutes.</p>
                 </div>
 
                 <div class="card-body p-4">
