@@ -18,10 +18,6 @@ class Order extends Model
         'status'
     ];
 
-    protected $casts = [
-    'address' => 'array',
-    ];
-
     // Relationships
     public function user()
     {
