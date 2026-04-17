@@ -180,37 +180,38 @@
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th class="px-4" style="width: 40%;">Product Detail</th>
-                        <th class="text-left">Vendor/Shop</th>
-                        <th class="text-center">Quantity</th>
-                        <th class="text-right">Unit Price</th>
-                        <th class="text-right px-4">Line Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-    @foreach($order->orderItems as $item)
+    <thead>
+        <tr>
+            <th class="px-4" style="width: 40%;">Product Detail</th>
+            <th class="text-left">Vendor/Shop</th>
+            <th class="text-center">Quantity</th>
+            <th class="text-right">Unit Price</th>
+            <th class="text-right px-4">Line Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($order->orderItems as $item)
         <tr>
             <td class="px-4 py-3">
                 <div class="d-flex align-items-center">
-                    {{-- Part Photo Logic --}}
+                    {{-- Part Photo Logic: orderItems->part->photos->file_path --}}
                     <div class="mr-3">
-    @php 
-        // Get the first photo from the collection
-        $primaryPhoto = $item->part->photos->first(); 
-    @php
-    
-    @if($primaryPhoto && $primaryPhoto->file_path)
-        <img src="{{ asset('storage/' . $primaryPhoto->file_path) }}" 
-             alt="{{ $item->part->part_name }}" 
-             class="product-img shadow-sm">
-    @else
-        <div class="img-placeholder shadow-sm d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 60px; border-radius: 8px;">
-            <i class="fas fa-tools text-muted"></i>
-        </div>
-    @endif
-</div>
+                        @php
+                            $firstPhoto = $item->part->photos->first() ?? null;
+                        @endphp
+
+                        @if($firstPhoto && $firstPhoto->file_path)
+                            <img src="{{ asset('storage/' . $firstPhoto->file_path) }}" 
+                                 alt="{{ $item->part->part_name ?? 'Product Image' }}" 
+                                 class="product-img shadow-sm"
+                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                        @else
+                            <div class="img-placeholder shadow-sm d-flex align-items-center justify-content-center bg-light" 
+                                 style="width: 50px; height: 50px; border-radius: 8px; border: 1px solid #f1f4f8;">
+                                <i class="fas fa-tools text-muted opacity-50"></i>
+                            </div>
+                        @endif
+                    </div>
 
                     {{-- Part Info --}}
                     <div>
@@ -231,7 +232,6 @@
                 </div>
             </td>
             
-            {{-- Vendor/Shop Column --}}
             <td class="text-left">
                 <div class="d-flex flex-column">
                     <span class="small font-weight-bold text-dark">
@@ -258,17 +258,17 @@
                 {{ number_format($item->quantity * $item->unit_price) }} RWF
             </td>
         </tr>
-    @endforeach
-</tbody>
-                <tfoot style="background: #fcfcfd; border-top: 2px solid #f1f4f8;">
-                    <tr>
-                        <td colspan="4" class="text-right font-weight-bold py-3 text-muted">ORDER TOTAL:</td>
-                        <td class="text-right px-4 h5 font-weight-bold text-primary py-3">
-                            {{ number_format($order->total_amount) }} RWF
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
+        @endforeach
+    </tbody>
+    <tfoot style="background: #fcfcfd; border-top: 2px solid #f1f4f8;">
+        <tr>
+            <td colspan="4" class="text-right font-weight-bold py-3 text-muted">ORDER TOTAL:</td>
+            <td class="text-right px-4 h5 font-weight-bold text-primary py-3">
+                {{ number_format($order->total_amount) }} RWF
+            </td>
+        </tr>
+    </tfoot>
+</table>
         </div>
     </div>
 </div>
