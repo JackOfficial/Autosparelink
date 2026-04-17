@@ -11,6 +11,8 @@ class Shipping extends Model
     protected $fillable = [
         'order_id',
         'shop_id',
+        'address_id',       // Nullable: Linked to Address model for registered users
+        'address_text',     // Snapshot: Full address string for Guest Checkouts
         'carrier',
         'shipping_method',
         'shipping_cost',
@@ -19,9 +21,8 @@ class Shipping extends Model
         'delivered_at',
         'notes',
         'status',
-        'recipient_name',   // Added: Direct access for courier
-        'recipient_phone',  // Added: Direct access for courier
-        'address_id',       // Added: Link to address
+        'recipient_name',   
+        'recipient_phone',  
     ];
 
     protected $casts = [
@@ -50,6 +51,8 @@ class Shipping extends Model
         return $query;
     }
 
+    // --- Relationships ---
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
@@ -60,7 +63,13 @@ class Shipping extends Model
         return $this->belongsTo(Shop::class);
     }
 
-    // Helpers
+    public function address(): BelongsTo
+    {
+        return $this->belongsTo(Address::class);
+    }
+
+    // --- Helpers & Accessors ---
+
     public function isShipped()
     {
         return $this->status === 'shipped';
@@ -71,41 +80,53 @@ class Shipping extends Model
         return $this->status === 'delivered';
     }
 
+    /**
+     * Accessor to get the location regardless of checkout type.
+     */
     public function getFullAddressAttribute()
-{
-    // If we have a linked address model, use it
-    if ($this->address_id && $this->address) {
-        return $this->address->full_address_string;
+    {
+        // Prioritize the linked profile address if it exists
+        if ($this->address_id && $this->address) {
+            return $this->address->full_address_string;
+        }
+
+        // Fallback to the snapshot text (Guest checkout)
+        return $this->address_text ?? 'No address information available';
     }
 
-    // Fallback: If it was a Guest Checkout, use the 'address' column 
-    // (Assuming you have a 'address' text column in shipping table for guests)
-    return $this->address_text ?? 'Address not provided';
-}
-
     /**
-     * Boot logic to auto-assign shop_id
+     * Boot logic: Automation and Finance Bridging.
      */
     protected static function booted()
-{
-    static::creating(function ($shipping) {
-        if (auth()->check() && auth()->user()->hasRole('seller') && empty($shipping->shop_id)) {
-            $shipping->shop_id = auth()->user()->shop->id;
-        }
-    });
+    {
+        static::creating(function ($shipping) {
+            // Auto-assign shop_id for sellers
+            if (auth()->check() && auth()->user()->hasRole('seller') && empty($shipping->shop_id)) {
+                $shipping->shop_id = auth()->user()->shop->id;
+            }
+        });
 
-    static::updated(function ($shipping) {
-        // If the shipment status changes to delivered, 
-        // this is where you should trigger the OrderItem 'completed' status
-        if ($shipping->wasChanged('status') && $shipping->status === 'delivered') {
-            $shipping->order->orderItems()
-                ->where('shop_id', $shipping->shop_id)
-                ->get()
-                ->each(function($item) {
-                    $item->status = 'completed'; // This triggers your payment observer logic!
-                    $item->save(); 
-                });
-        }
-    });
-}
+        static::updated(function ($shipping) {
+    // 1. Tracking Notification Logic
+    if ($shipping->wasChanged('tracking_number') && !empty($shipping->tracking_number)) {
+        // Trigger notification: "Your package is moving! Tracking: {$shipping->tracking_number}"
+    }
+
+    // 2. Logistics -> Inspection Bridge:
+    // When marked 'delivered', move OrderItems to 'delivered' status.
+    // We DO NOT set 'completed' here because the client needs time to inspect the part.
+    if ($shipping->wasChanged('status') && $shipping->status === 'delivered') {
+        $shipping->order->orderItems()
+            ->where('shop_id', $shipping->shop_id)
+            ->where('status', '!=', 'completed') // Safety: don't revert if already completed
+            ->get()
+            ->each(function($item) {
+                // We update to 'delivered'. 
+                // This does NOT trigger the vendor payment logic in your observer.
+                $item->status = 'delivered'; 
+                $item->save(); 
+            });
+    }
+});
+    }
 }
