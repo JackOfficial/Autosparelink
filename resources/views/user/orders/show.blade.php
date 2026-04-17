@@ -196,7 +196,7 @@
                     
                     <div class="mb-3 d-flex justify-content-between align-items-center">
                         <label class="small text-muted fw-bold mb-0">ORDER NUMBER</label>
-                        <span class="fw-bold text-primary">#{{ $order->order_number }}</span>
+                        <span class="fw-bold text-primary">#{{ $order->order_number ?? 'N/A' }}</span>
                     </div>
 
                     <div class="mb-3 d-flex justify-content-between align-items-center">
