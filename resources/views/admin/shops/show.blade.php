@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="container-fluid mt-4">
-    {{-- Header Section --}}
+    {{-- 1. Header & Quick Actions --}}
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
         <div>
             <a href="{{ route('admin.shops.index') }}" class="btn btn-sm btn-link text-muted p-0 mb-2">
@@ -12,10 +12,10 @@
             <h2 class="h3 font-weight-bold mb-0 text-dark">Review: {{ $shop->shop_name }}</h2>
         </div>
         
-        <div class="d-flex mt-3 mt-md-0">
+        <div class="d-flex mt-3 mt-md-0 gap-2">
             @if(!$shop->is_active)
-                <form action="{{ route('admin.shops.approve', $shop) }}" method="POST" class="me-2" 
-                      onsubmit="return confirm('Approve this shop? The vendor will be notified and can start selling.');">
+                <form action="{{ route('admin.shops.approve', $shop) }}" method="POST" 
+                      onsubmit="return confirm('Approve this shop? The vendor will be notified.');">
                     @csrf @method('PUT')
                     <button type="submit" class="btn btn-success px-4 shadow-sm">
                         <i class="fas fa-check-circle me-1"></i> Approve Shop
@@ -33,131 +33,180 @@
         </div>
     </div>
 
+    {{-- 2. Stats Cards (Based on updated Controller data) --}}
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-white-50 small text-uppercase fw-bold">Wallet Balance</div>
+                            <div class="h4 mb-0 fw-bold">{{ number_format($shop->wallet->balance ?? 0) }} RWF</div>
+                        </div>
+                        <i class="fas fa-wallet fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-white-50 small text-uppercase fw-bold">Total Revenue</div>
+                            <div class="h4 mb-0 fw-bold">{{ number_format($totalRevenue ?? 0) }} RWF</div>
+                        </div>
+                        <i class="fas fa-money-bill-wave fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">Parts Listed</div>
+                            <div class="h4 mb-0 fw-bold">{{ $shop->parts_count }}</div>
+                        </div>
+                        <i class="fas fa-cogs fa-2x text-light"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">Commission</div>
+                            <div class="h4 mb-0 fw-bold text-primary">{{ $shop->commission_rate }}%</div>
+                        </div>
+                        <i class="fas fa-percentage fa-2x text-light"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
-        {{-- Left Column: Shop Identity --}}
+        {{-- Left Column: Identity --}}
         <div class="col-lg-4">
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body">
                     <div class="text-center mb-4">
-                        <div class="mb-3">
-                            <img src="{{ $shop->logo ? asset('storage/' . $shop->logo) : asset('images/default-shop.png') }}" 
-                                 class="rounded-circle border p-1 shadow-sm" 
-                                 style="width: 100px; height: 100px; object-fit: cover;">
-                        </div>
-                        <h5 class="font-weight-bold mb-1">{{ $shop->shop_name }}</h5>
+                        <img src="{{ $shop->logo ? asset('storage/' . $shop->logo) : asset('images/default-shop.png') }}" 
+                             class="rounded-circle border p-1 shadow-sm mb-3" 
+                             style="width: 110px; height: 110px; object-fit: cover;">
+                        <h5 class="fw-bold mb-1">{{ $shop->shop_name }}</h5>
                         <span class="badge bg-{{ $shop->is_active ? 'success' : 'warning text-dark' }} px-3">
                             {{ $shop->is_active ? 'Active' : 'Pending Verification' }}
                         </span>
                     </div>
 
-                    <hr class="my-4">
-
-                    <div class="mb-3">
-                        <label class="small text-muted text-uppercase fw-bold d-block">Shop Owner</label>
-                        <p class="mb-0 fw-bold text-dark">{{ $shop->user->name }}</p>
-                        <p class="small text-muted">{{ $shop->user->email }}</p>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="small text-muted text-uppercase fw-bold d-block">Contact Details</label>
-                        <p class="mb-1 small"><i class="fas fa-envelope me-2 text-muted"></i>{{ $shop->shop_email ?? $shop->user->email }}</p>
-                        <p class="mb-0 small"><i class="fas fa-phone me-2 text-muted"></i>{{ $shop->phone_number }}</p>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="small text-muted text-uppercase fw-bold d-block">Business Address</label>
-                        <p class="mb-0 small"><i class="fas fa-map-marker-alt me-2 text-muted"></i>{{ $shop->address }}</p>
-                    </div>
-
-                    <div class="mb-0">
-                        <label class="small text-muted text-uppercase fw-bold d-block">TIN Number (RRA)</label>
-                        <p class="mb-0 fw-bold text-primary">{{ $shop->tin_number }}</p>
+                    <div class="list-group list-group-flush small">
+                        <div class="list-group-item px-0 py-2 d-flex justify-content-between">
+                            <span class="text-muted">Owner</span>
+                            <span class="fw-bold">{{ $shop->user->name }}</span>
+                        </div>
+                        <div class="list-group-item px-0 py-2 d-flex justify-content-between">
+                            <span class="text-muted">TIN Number</span>
+                            <span class="fw-bold text-primary">{{ $shop->tin_number }}</span>
+                        </div>
+                        <div class="list-group-item px-0 py-2 d-flex justify-content-between">
+                            <span class="text-muted">Email</span>
+                            <span class="fw-bold">{{ $shop->shop_email ?? $shop->user->email }}</span>
+                        </div>
+                        <div class="list-group-item px-0 py-2 d-flex justify-content-between">
+                            <span class="text-muted">Phone</span>
+                            <span class="fw-bold">{{ $shop->phone_number }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="fw-bold mb-3">Shop Description</h6>
-                    <p class="text-muted small mb-0" style="line-height: 1.6;">
-                        {{ $shop->description ?? 'No description provided by vendor.' }}
-                    </p>
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body py-3">
+                    <h6 class="fw-bold mb-2 small text-uppercase">Internal Note</h6>
+                    <div class="p-2 bg-light rounded border-start border-warning" style="border-left-width: 4px !important;">
+                        <small class="text-muted">Verify the <strong>RDB Documents</strong> below against the RRA TIN database before approving payouts.</small>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- Right Column: Documentation Verification --}}
+        {{-- Right Column: Tabs --}}
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0">Verification Documents</h5>
-                    <span class="badge bg-light text-dark">{{ $shop->documents->count() }} Files</span>
+                <div class="card-header bg-white border-0 pt-3">
+                    <ul class="nav nav-pills card-header-pills" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active btn-sm" data-toggle="pill" data-target="#docs">Documents</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link btn-sm" data-toggle="pill" data-target="#sales">Recent Sales</button>
+                        </li>
+                    </ul>
                 </div>
-                <div class="card-body">
-                    @forelse($shop->documents as $doc)
-                        <div class="border rounded p-3 mb-4">
-                            <div class="row align-items-center">
-                                <div class="col-md-7 border-end">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="bg-light rounded p-2 me-3">
-                                            <i class="fas fa-file-contract text-primary fa-lg"></i>
-                                        </div>
+                <div class="card-body pt-0">
+                    <div class="tab-content mt-3">
+                        {{-- Documents Tab --}}
+                        <div class="tab-pane fade show active" id="docs">
+                            @forelse($shop->documents as $doc)
+                                <div class="border rounded p-3 mb-3 bg-light d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-file-contract fa-2x text-primary me-3"></i>
                                         <div>
                                             <h6 class="mb-0 fw-bold">{{ $doc->title }}</h6>
-                                            <span class="small text-muted">{{ strtoupper($doc->file_type) }} • {{ number_format($doc->file_size / 1024, 2) }} KB</span>
+                                            <small class="text-muted">{{ strtoupper($doc->file_type) }} • {{ $doc->created_at->format('M d, Y') }}</small>
                                         </div>
                                     </div>
-                                    
-                                    {{-- Secure Preview --}}
-                                    <div class="document-preview rounded bg-light mb-3 d-flex align-items-center justify-content-center" style="height: 250px; overflow: hidden;">
-                                        @if(in_array(strtolower($doc->file_type), ['jpg', 'jpeg', 'png', 'webp']))
-                                            {{-- Assuming files are stored in a non-public 'documents' folder --}}
-                                            <img src="{{ route('admin.shops.view-doc', $doc) }}" class="img-fluid" style="max-height: 100%; object-fit: contain;">
-                                        @else
-                                            <div class="text-center">
-                                                <i class="fas fa-file-pdf fa-4x text-danger mb-3"></i>
-                                                <p class="fw-bold text-muted">PDF Document Preview Not Available</p>
-                                            </div>
-                                        @endif
+                                    <div class="btn-group">
+                                        <a href="{{ route('admin.shops.view-doc', $doc) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
+                                        <a href="{{ route('admin.shops.download-doc', $doc) }}" class="btn btn-sm btn-light border"><i class="fas fa-download"></i></a>
                                     </div>
                                 </div>
-                                <div class="col-md-5 text-center">
-                                    <p class="small text-muted">Uploaded on: {{ $doc->created_at->format('M d, Y') }}</p>
-                                    <div class="d-grid gap-2">
-                                        <a href="{{ route('admin.shops.view-doc', $doc) }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-eye me-1"></i> View Full Size
-                                        </a>
-                                        <a href="{{ route('admin.shops.download-doc', $doc) }}" class="btn btn-light border btn-sm">
-                                            <i class="fas fa-download me-1"></i> Download File
-                                        </a>
-                                    </div>
+                            @empty
+                                <div class="text-center py-4">
+                                    <i class="fas fa-folder-open fa-2x text-light mb-2"></i>
+                                    <p class="text-muted mb-0">No documents found.</p>
                                 </div>
+                            @endforelse
+                        </div>
+
+                        {{-- Sales Tab --}}
+                        <div class="tab-pane fade" id="sales">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle">
+                                    <thead>
+                                        <tr class="text-muted small text-uppercase">
+                                            <th class="border-0">Order</th>
+                                            <th class="border-0">Part</th>
+                                            <th class="border-0 text-end">Amount</th>
+                                            <th class="border-0 text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentOrders as $item)
+                                            <tr>
+                                                <td class="fw-bold">#{{ $item->order->order_number }}</td>
+                                                <td class="small">{{ Str::limit($item->part_name, 30) }}</td>
+                                                <td class="text-end fw-bold">{{ number_format($item->unit_price * $item->quantity) }} RWF</td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-pill bg-light text-dark border small">{{ $item->status }}</span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="4" class="text-center py-4">No recent activity.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                    @empty
-                        <div class="text-center py-5">
-                            <i class="fas fa-folder-open fa-3x text-light mb-3"></i>
-                            <p class="text-muted">No documents have been uploaded for this shop.</p>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-            
-            {{-- Admin Footer --}}
-            <div class="card shadow-sm border-0 mt-4 bg-light border-start border-primary" style="border-left-width: 4px !important;">
-                <div class="card-body py-3">
-                    <p class="mb-0 small text-muted">
-                        <i class="fas fa-info-circle me-1 text-primary"></i>
-                        <strong>Compliance Checklist:</strong> 1. Verify TIN matches RRA records. 2. Ensure RDB Business Certificate is valid. 3. Check that phone numbers are verified.
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .document-preview img { transition: all 0.3s ease; cursor: zoom-in; }
-    .document-preview img:hover { transform: scale(1.02); }
-</style>
 @endsection

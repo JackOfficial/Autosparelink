@@ -27,12 +27,38 @@ class ShopController extends Controller
     /**
      * Display the specific shop details and its verification documents.
      */
-    public function show(Shop $shop)
-    {
-        $shop->load(['user', 'documents']);
-        
-        return view('admin.shops.show', compact('shop'));
-    }
+public function show(Shop $shop)
+{
+    // 1. Load basic relationships + Payouts
+    $shop->load([
+        'user', 
+        'documents', 
+        'wallet', 
+        'payouts' => function($query) {
+            $query->latest()->take(5);
+        }
+    ]);
+
+    // 2. Load counts for the Stats Cards (This creates $shop->parts_count and $shop->order_items_count)
+    $shop->loadCount(['parts', 'orderItems']);
+
+    // 3. Get recent orders with their main Order and Part data
+    $recentOrders = $shop->orderItems()
+        ->with(['order', 'part'])
+        ->latest()
+        ->take(10)
+        ->get();
+
+    // 4. Calculate total revenue (Sum of all sold items for this shop)
+    // We use a raw sum to be efficient with the database
+    $totalRevenue = $shop->orderItems()
+        ->whereHas('order.payment', function($q) {
+            $q->where('status', 'successful');
+        })
+        ->sum(DB::raw('quantity * unit_price'));
+
+    return view('admin.shops.show', compact('shop', 'recentOrders', 'totalRevenue'));
+}
 
 public function viewDocument(Document $document)
 {
