@@ -108,24 +108,45 @@
                 </div>
             @endforeach
 
-            {{-- Reply Form --}}
-            <div class="card border-0 shadow-sm rounded-xl mt-4 bg-dark text-white">
-                <div class="card-body p-4">
-                    <h6 class="font-weight-bold mb-3"><i class="fa fa-reply mr-2 text-primary"></i>Post a Official Reply</h6>
-                    <form action="{{ route('admin.tickets.reply', $ticket) }}" method="POST">
-                        @csrf
-                        <div class="form-group mb-3">
-                            <textarea name="message" rows="4" class="form-control rounded-xl border-0 p-3" 
-                                      placeholder="Write your response here..." required></textarea>
-                        </div>
-                        <div class="text-right">
-                            <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
-                                <i class="fa fa-paper-plane mr-2"></i> Send to {{ $ticket->user->shop ? 'Vendor' : 'User' }}
-                            </button>
-                        </div>
-                    </form>
+            {{-- Show Reply Form only if the ticket is NOT closed --}}
+@if($ticket->status !== 'closed')
+    <div class="card border-0 shadow-sm rounded-xl mt-4 bg-dark text-white">
+        <div class="card-body p-4">
+            <h6 class="font-weight-bold mb-3"><i class="fa fa-reply mr-2 text-primary"></i>Post a Official Reply</h6>
+            <form action="{{ route('admin.tickets.reply', $ticket) }}" method="POST">
+                @csrf
+                <div class="form-group mb-3">
+                    <textarea name="message" rows="4" class="form-control rounded-xl border-0 p-3" 
+                              placeholder="Write your response here..." required></textarea>
                 </div>
-            </div>
+                <div class="text-right">
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
+                        <i class="fa fa-paper-plane mr-2"></i> Send to {{ $ticket->user->shop ? 'Vendor' : 'User' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+@else
+    {{-- Notice for Closed Tickets --}}
+    <div class="alert bg-light border rounded-xl mt-4 p-4 text-center">
+        <div class="mb-2">
+            <i class="fa fa-lock fa-2x text-muted"></i>
+        </div>
+        <h6 class="font-weight-bold text-dark">This ticket is closed</h6>
+        <p class="text-muted small mb-3">You cannot reply to a closed ticket. Please reopen it first if further communication is required.</p>
+        
+        {{-- Optional: Add a Reopen Button if you have the route --}}
+        <form action="{{ route('admin.tickets.update-status', $ticket) }}" method="POST" class="d-inline">
+            @csrf
+            @method('PATCH')
+            <input type="hidden" name="status" value="open">
+            <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill px-4">
+                <i class="fa fa-undo mr-1"></i> Reopen Ticket
+            </button>
+        </form>
+    </div>
+@endif
         </div>
 
         <div class="col-lg-4">
