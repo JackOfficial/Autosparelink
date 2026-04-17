@@ -57,14 +57,35 @@
                 </div>
             </div>
 
+            @if(session('success'))
+    <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
+        <i class="fas fa-check-circle me-3 fa-lg"></i>
+        <div>
+            <h6 class="mb-0 fw-bold">Inspection Submitted</h6>
+            <span class="small">{{ session('success') }}</span>
+        </div>
+    </div>
+@endif
+
+@if($errors->any())
+    <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
+        <ul class="mb-0 small">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
             {{-- Inspection Form (Only if Delivered) --}}
             @if($order->status === 'delivered')
-            <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-info border-4">
+            <div class="card shadow-sm rounded-4 mb-4 border-start border-info border-4">
                 <div class="card-body p-4">
                     <h5 class="fw-bold text-dark"><i class="fas fa-search-plus text-info me-2"></i> Inspect Your Items</h5>
                     <p class="text-muted small">Please inspect the parts below. Confirming "Accept" will release payment to the seller.</p>
                     
-                    <form action="{{ route('user.orders.inspection', $order->id) }}" method="POST">
+                    <form action="{{ route('user.orders.inspection', $order->id) }}" method="POST" 
+                     x-data="{ submitting: false }" @submit="submitting = true">
                         @csrf
                         @foreach($order->orderItems as $index => $item)
                             <div class="inspection-item p-3 border rounded-4 mb-3 bg-light-subtle" x-data="{ action: 'accept' }">
@@ -89,9 +110,12 @@
                                 </div>
                             </div>
                         @endforeach
-                        <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold mt-2 shadow">
-                            Submit Final Inspection
-                        </button>
+                        <button type="submit" 
+            class="btn btn-dark w-100 rounded-pill py-2 fw-bold mt-2 shadow" 
+            :disabled="submitting">
+        <span x-show="!submitting">Submit Final Inspection</span>
+        <span x-show="submitting"><i class="fas fa-spinner fa-spin me-2"></i> Processing...</span>
+    </button>
                     </form>
                 </div>
             </div>

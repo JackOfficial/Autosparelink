@@ -66,7 +66,7 @@ public function show(Order $order)
     /**
      * Handle the Bulk Inspection (Accept/Dispute)
      */
-   public function handleInspection(Request $request, Order $order)
+ public function handleInspection(Request $request, Order $order)
 {
     if ($order->user_id != Auth::id()) {
         abort(403);
@@ -81,11 +81,13 @@ public function show(Order $order)
 
     DB::transaction(function () use ($request, $order) {
         foreach ($request->items as $itemData) {
+            // Lock the row to prevent double-processing/double-payment
             $item = OrderItem::where('id', $itemData['id'])
-                ->where('order_id', $order->id)
+                ->where('order_id', $order->id) // Security: ensure item belongs to this order
                 ->lockForUpdate() 
                 ->firstOrFail();
 
+            // Skip items that aren't in a state to be inspected
             if ($item->status !== 'delivered') {
                 continue;
             }
@@ -93,12 +95,14 @@ public function show(Order $order)
             if ($itemData['action'] === 'accept') {
                 $item->status = 'completed';
                 $item->notes = "Customer confirmed receipt via dashboard.";
+                // We use save() because your logic triggers on isDirty('status') == 'completed'
+                $item->save(); 
             } else {
                 $item->status = 'disputed';
-                $item->notes = "Dispute: " . $itemData['reason'];
+                $item->notes = "Dispute: " . ($itemData['reason'] ?? 'No reason provided.');
+                // Use updateQuietly if you don't want payment observers to even check this
+                $item->save(); 
             }
-
-            $item->save(); // Triggers your logic for vendor payments
         }
     });
 
