@@ -154,7 +154,7 @@
             <div class="card border-0 shadow-sm rounded-xl mb-4">
                 <div class="card-body p-4">
                     <h6 class="font-weight-bold mb-3 small text-uppercase text-muted">Update Status</h6>
-                    <form action="{{ route('admin.tickets.update-status', $ticket) }}" method="POST">
+                    <form action="{{ route('admin.tickets.status', $ticket) }}" method="POST">
                         @csrf
                         @method('PATCH')
                         <select name="status" class="form-control rounded-pill bg-light border-0 mb-3">

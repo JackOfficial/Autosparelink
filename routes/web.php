@@ -375,7 +375,6 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
         Route::get('/tickets/{ticket}', 'show')->name('tickets.show');
         Route::patch('/tickets/{ticket}/status', 'updateStatus')->name('tickets.status');
         Route::post('/tickets/{ticket}/reply', 'storeReply')->name('tickets.reply');
-        Route::patch('tickets/{ticket}/status', 'updateStatus')->name('tickets.update-status');
     });
 
     // Mailbox
