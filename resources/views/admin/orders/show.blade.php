@@ -385,7 +385,7 @@
     <div class="mr-3">
         @if($order->user && $order->user->avatar)
             {{-- User Avatar --}}
-            <img src="{{ asset('storage/' . $order->user->avatar) }}" 
+            <img src="{{ $order->user->avatar }}" 
                  alt="{{ $customerName }}" 
                  class="rounded-circle shadow-sm"
                  style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #fff;">
