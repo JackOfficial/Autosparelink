@@ -57,7 +57,6 @@ public function create(Request $request)
     {
         $validated = $request->validate([
             'category'  => 'required|string',
-            'priority'  => 'required|string|in:low,medium,high',
             'subject'   => 'required|string|min:5|max:255',
             'message'   => 'required|string|min:10',
             'order_id'  => 'nullable|exists:orders,id', 
@@ -70,7 +69,7 @@ public function create(Request $request)
             'subject'   => $validated['subject'],
             'message'   => $validated['message'],
             'order_id'  => $validated['order_id'] ?? null,
-            'priority'  => $validated['priority'],
+            'priority'  => $validated['priority'] ?? 'medium',
             'status'    => 'pending',
         ]);
 

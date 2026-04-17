@@ -30,6 +30,19 @@
                         </div>
                     @endif
 
+                    @if(session('success'))
+    <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
+        <div class="bg-success text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+            <i class="fas fa-check"></i>
+        </div>
+        <div>
+            <h6 class="mb-0 fw-bold">Success!</h6>
+            <span class="small">{{ session('success') }}</span>
+        </div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+                  @endif
+
                     <form action="{{ route('user.tickets.store') }}" method="POST">
                         @csrf
 
