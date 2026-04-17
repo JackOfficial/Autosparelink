@@ -146,15 +146,15 @@ protected static function booted()
         }
     });
 
-    // 2. The Global Scope for Sellers
-    static::addGlobalScope('sellerParts', function ($builder) {
-        if (auth()->check() && auth()->user()->hasRole('seller')) {
-            // Check if user has a shop to avoid null errors
-            if (auth()->user()->shop) {
-                $builder->where('shop_id', auth()->user()->shop->id);
-            }
-        }
-    });
+    // // 2. The Global Scope for Sellers
+    // static::addGlobalScope('sellerParts', function ($builder) {
+    //     if (auth()->check() && auth()->user()->hasRole('seller')) {
+    //         // Check if user has a shop to avoid null errors
+    //         if (auth()->user()->shop) {
+    //             $builder->where('shop_id', auth()->user()->shop->id);
+    //         }
+    //     }
+    // });
 }
 
 }
