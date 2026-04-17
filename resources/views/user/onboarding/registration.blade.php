@@ -30,8 +30,8 @@
             </div>
 
             <div class="mt-5 d-none d-lg-block">
-                <img src="https://images.unsplash.com/photo-1486006396123-c77565118a1b?q=80&w=800&auto=format&fit=crop" 
-                     class="img-fluid rounded-5 shadow-lg border border-5 border-white" 
+                <img src="{{ asset('frontend/img/part.png') }}" 
+                     class="img-fluid rounded-5 shadow-lg border-5 border-white" 
                      alt="Auto Parts Shop" style="transform: rotate(-2deg);">
             </div>
         </div>
