@@ -175,14 +175,26 @@
                     <hr class="opacity-10 my-4">
 
                     <div class="mb-0">
-                        <label class="small text-muted text-uppercase fw-bold ls-1 mb-2 d-block">Deliver To</label>
-                        <div class="d-flex">
-                            <i class="fas fa-map-marker-alt text-danger me-2 mt-1"></i>
-                            <p class="small text-dark mb-0 lh-base">
-                                {{ $order->address ?? 'Kigali, Rwanda' }}
-                            </p>
-                        </div>
-                    </div>
+    <label class="small text-muted text-uppercase fw-bold ls-1 mb-2 d-block">Deliver To</label>
+    <div class="d-flex">
+        <i class="fas fa-map-marker-alt text-danger me-3 mt-1"></i>
+        <div class="small text-dark mb-0 lh-base">
+            @if($order->address)
+                {{-- No manual decoding needed now! --}}
+                <div class="fw-bold text-dark">{{ $order->address['full_name'] ?? 'Recipient' }}</div>
+                <div class="text-muted">
+                    {{ $order->address['street_address'] ?? 'N/A' }}<br>
+                    {{ $order->address['city'] ?? '' }}{{ isset($order->address['country']) ? ', ' . $order->address['country'] : '' }}
+                </div>
+                <div class="mt-1 fw-medium text-primary">
+                    <i class="fas fa-phone-alt me-1 small"></i> {{ $order->address['phone'] ?? 'No Phone' }}
+                </div>
+            @else
+                <span class="text-muted italic">No delivery address specified.</span>
+            @endif
+        </div>
+    </div>
+</div>
                 </div>
             </div>
 
