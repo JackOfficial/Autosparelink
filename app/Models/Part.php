@@ -72,7 +72,7 @@ public function specifications()
     ->withTimestamps();
 }
 
-    public function photos()
+    public function photos() 
     {
         return $this->morphMany(Photo::class, 'imageable');
     }

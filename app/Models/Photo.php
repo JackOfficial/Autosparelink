@@ -17,7 +17,7 @@ class Photo extends Model
         'caption', 
         'imageable_id', 
         'imageable_type'
-    ];
+    ]; 
 
     /**
      * Get the parent imageable model (ClientVehicle, User, etc.).

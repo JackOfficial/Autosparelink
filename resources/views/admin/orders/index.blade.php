@@ -21,24 +21,25 @@
     /* Stat Card Specifics */
     .stat-icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
 
+    /* Photo Stack Styling */
+    .photo-stack { position: relative; width: 65px; height: 40px; }
+    .stack-img { 
+        position: absolute; 
+        width: 40px; 
+        height: 40px; 
+        object-fit: cover; 
+        border-radius: 8px; 
+        border: 2px solid #fff; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
     /* Filter Bar Styling */
     .filter-pill {
-        padding: 6px 16px;
-        border-radius: 8px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: 0.2s;
-        border: 1px solid #e9ecef;
-        background: white;
-        color: #495057;
-        text-transform: uppercase;
+        padding: 6px 16px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;
+        cursor: pointer; transition: 0.2s; border: 1px solid #e9ecef;
+        background: white; color: #495057; text-transform: uppercase;
     }
-    .filter-pill.active {
-        background: var(--primary-deep);
-        color: white;
-        border-color: var(--primary-deep);
-    }
+    .filter-pill.active { background: var(--primary-deep); color: white; border-color: var(--primary-deep); }
 
     /* User Profile */
     .avatar-wrapper { width: 42px; height: 42px; border-radius: 10px; overflow: hidden; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -81,8 +82,8 @@
         </div>
     </div>
 
+    {{-- Stat Cards --}}
     <div class="row mb-4">
-        {{-- Total --}}
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="card shadow-sm p-3 shadow-hover bg-white h-100" @click="statusFilter = 'all'" style="cursor: pointer;">
                 <div class="text-muted small font-weight-bold mb-2">TOTAL</div>
@@ -92,7 +93,6 @@
                 </div>
             </div>
         </div>
-        {{-- Processing --}}
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="card shadow-sm p-3 shadow-hover bg-white h-100" @click="statusFilter = 'processing'" style="cursor: pointer;">
                 <div class="text-muted small font-weight-bold mb-2">PROCESSING</div>
@@ -102,7 +102,6 @@
                 </div>
             </div>
         </div>
-        {{-- Shipped --}}
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="card shadow-sm p-3 shadow-hover bg-white h-100" @click="statusFilter = 'shipped'" style="cursor: pointer;">
                 <div class="text-muted small font-weight-bold mb-2">SHIPPED</div>
@@ -112,7 +111,6 @@
                 </div>
             </div>
         </div>
-        {{-- Delivered (Received but not accepted yet) --}}
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="card shadow-sm p-3 shadow-hover bg-white h-100" @click="statusFilter = 'delivered'" style="cursor: pointer;">
                 <div class="text-muted small font-weight-bold mb-2">DELIVERED</div>
@@ -122,7 +120,6 @@
                 </div>
             </div>
         </div>
-        {{-- Completed (Accepted) --}}
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="card shadow-sm p-3 shadow-hover bg-white h-100" @click="statusFilter = 'completed'" style="cursor: pointer;">
                 <div class="text-muted small font-weight-bold mb-2">COMPLETED</div>
@@ -132,7 +129,6 @@
                 </div>
             </div>
         </div>
-        {{-- Callbacks --}}
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="card shadow-sm p-3 shadow-hover bg-white h-100" @click="statusFilter = 'callback_requested'" style="cursor: pointer;">
                 <div class="text-muted small font-weight-bold mb-2">CALLBACKS</div>
@@ -144,6 +140,7 @@
         </div>
     </div>
 
+    {{-- Filter Pills --}}
     <div class="d-flex flex-wrap mb-4" style="gap: 10px;">
         <button class="filter-pill" :class="statusFilter === 'all' ? 'active' : ''" @click="statusFilter = 'all'">All</button>
         <button class="filter-pill" :class="statusFilter === 'pending' ? 'active' : ''" @click="statusFilter = 'pending'">Pending</button>
@@ -168,6 +165,7 @@
                         <tr>
                             <th class="px-4 py-3">Reference</th>
                             <th>Customer</th>
+                            <th>Items Preview</th>
                             <th>Pipeline Stage</th>
                             <th>Grand Total</th>
                             <th class="text-center px-4">Management</th>
@@ -213,6 +211,28 @@
                                                 </span>
                                             </div>
                                             <div class="text-muted small">{{ $email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {{-- Order Items Photo Stack --}}
+                                    <div class="d-flex align-items-center">
+                                        @php $firstItem = $order->orderItems->first(); @endphp
+                                        <div class="photo-stack mr-3">
+                                            @if($firstItem && $firstItem->part)
+                                                @forelse($firstItem->part->photos->take(3) as $index => $photo)
+                                                    <img src="{{ asset('storage/' . $photo->file_path) }}" 
+                                                         class="stack-img shadow-sm" 
+                                                         style="left: {{ $index * 12 }}px; z-index: {{ 10 - $index }};">
+                                                @empty
+                                                    <div class="bg-light rounded border d-flex align-items-center justify-content-center" style="width:40px; height:40px; color:#adb5bd;">
+                                                        <i class="fa fa-image small"></i>
+                                                    </div>
+                                                @endforelse
+                                            @endif
+                                        </div>
+                                        <div class="small text-muted font-weight-bold">
+                                            +{{ $order->orderItems->count() }} items
                                         </div>
                                     </div>
                                 </td>

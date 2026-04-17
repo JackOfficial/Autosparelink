@@ -22,7 +22,7 @@ class OrderItem extends Model
     // Relationships
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(Order::class); 
     }
 
     public function part(): BelongsTo

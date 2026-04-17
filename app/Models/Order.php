@@ -50,7 +50,7 @@ class Order extends Model
 }
 
     // Helper
-    public function isPending()
+    public function isPending() 
     {
         return $this->status === 'pending';
     }
