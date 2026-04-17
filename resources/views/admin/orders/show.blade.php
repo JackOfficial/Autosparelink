@@ -237,7 +237,7 @@
                     <span class="small font-weight-bold text-dark">
            @if($item->part->shop)
         <a href="{{ route('admin.shops.show', $item->part->shop->id) }}" class="text-dark">
-            {{ $item->part->shop->name }}
+            {{ $item->part->shop->shop_name }}
         </a>
           @else
         Direct Warehouse
@@ -245,7 +245,7 @@
                    </span>
                     <span class="shop-badge">
                         <i class="fas fa-map-marker-alt mr-1" style="font-size: 0.5rem;"></i>
-                        {{ $item->part->shop->location ?? 'Main Branch' }}
+                        {{ $item->part->shop->address ?? 'Main Branch' }}
                     </span>
                 </div>
             </td>
