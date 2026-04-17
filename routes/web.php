@@ -202,6 +202,8 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
          Route::resource('vehicles', VehicleController::class);
          Route::resource('tickets', TicketController::class);
         Route::post('tickets/{ticket}/reply', [TicketController::class, 'reply'])->name('tickets.reply');
+         Route::post('orders/{order}/inspection', [OrderController::class, 'handleInspection'])
+        ->name('orders.inspection');
 
         Route::controller(UserDashboardController::class)->group(function () {
         Route::get('/dashboard', 'index')->name('dashboard.index');
@@ -237,6 +239,7 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
 
     // 4. Success / Application Status page -> route('shop.status')
     Route::get('/status', 'status')->name('status');
+
 });
 
 });

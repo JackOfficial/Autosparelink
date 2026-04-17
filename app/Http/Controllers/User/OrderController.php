@@ -66,50 +66,45 @@ public function show(Order $order)
     /**
      * Handle the Bulk Inspection (Accept/Dispute)
      */
-    public function processInspection(Request $request, Order $order)
-    {
-        if ($order->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $request->validate([
-            'items' => 'required|array',
-            'items.*.id' => 'required|exists:order_items,id',
-            'items.*.action' => 'required|in:accept,dispute',
-            'items.*.reason' => 'required_if:items.*.action,dispute|nullable|string|max:500',
-        ]);
-
-        DB::transaction(function () use ($request, $order) {
-            foreach ($request->items as $itemData) {
-                $item = OrderItem::where('id', $itemData['id'])
-                    ->where('order_id', $order->id)
-                    ->firstOrFail();
-
-                // Safety: Only process items currently in 'delivered' state
-                if ($item->status !== 'delivered') {
-                    continue;
-                }
-
-                if ($itemData['action'] === 'accept') {
-                    $item->status = 'completed';
-                    $item->notes = "Customer confirmed receipt via dashboard.";
-                } else {
-                    $item->status = 'disputed';
-                    $item->notes = "Dispute: " . $itemData['reason'];
-                }
-
-                /**
-                 * NOTE: This save() triggers your OrderItem Observer.
-                 * Your Observer should check: if ($item->status === 'completed') { ...Pay Shop... }
-                 */
-                $item->save(); 
-            }
-        });
-
-        return redirect()->route('user.orders.show', $order->id)
-            ->with('success', 'Thank you. Your feedback has been recorded.');
+   public function handleInspection(Request $request, Order $order)
+{
+    if ($order->user_id != Auth::id()) {
+        abort(403);
     }
 
+    $request->validate([
+        'items' => 'required|array',
+        'items.*.id' => 'required|exists:order_items,id',
+        'items.*.action' => 'required|in:accept,dispute',
+        'items.*.reason' => 'required_if:items.*.action,dispute|nullable|string|max:500',
+    ]);
+
+    DB::transaction(function () use ($request, $order) {
+        foreach ($request->items as $itemData) {
+            $item = OrderItem::where('id', $itemData['id'])
+                ->where('order_id', $order->id)
+                ->lockForUpdate() 
+                ->firstOrFail();
+
+            if ($item->status !== 'delivered') {
+                continue;
+            }
+
+            if ($itemData['action'] === 'accept') {
+                $item->status = 'completed';
+                $item->notes = "Customer confirmed receipt via dashboard.";
+            } else {
+                $item->status = 'disputed';
+                $item->notes = "Dispute: " . $itemData['reason'];
+            }
+
+            $item->save(); // Triggers your logic for vendor payments
+        }
+    });
+
+    return redirect()->route('user.orders.show', $order->id)
+        ->with('success', 'Thank you. Your inspection results have been submitted.');
+}
     /**
      * Cancel a pending order
      */
