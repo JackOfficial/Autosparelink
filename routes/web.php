@@ -332,6 +332,7 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     // E-commerce Management
     Route::resource('carts', AdminCartController::class);
     Route::resource('orders', AdminOrderController::class);
+    Route::post('/orders/{id}/finalize', [AdminOrderController::class, 'finalize'])->name('orders.finalize');
     Route::resource('payments', PaymentController::class);
     Route::resource('shippings', ShippingController::class);
     Route::resource('addresses', AddressController::class);

@@ -349,7 +349,7 @@
 
                     {{-- Logic for Final Acceptance --}}
                     @if($currentStatus === 'delivered')
-                        <form action="{{ route('shop.sales.finalize', $order->id) }}" method="POST">
+                        <form action="{{ route('admin.orders.finalize', $order->id) }}" method="POST">
                             @csrf
                             <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm">
                                 <i class="fas fa-handshake mr-2"></i> Confirm Customer Accepted
