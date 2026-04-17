@@ -111,7 +111,8 @@
                                     <th class="px-4 py-3 border-0">Part Description</th>
                                     <th class="py-3 border-0 text-center">Shop</th>
                                     <th class="py-3 border-0 text-center">Qty</th>
-                                    <th class="px-4 py-3 border-0 text-end">Price</th>
+                                    <th class="px-4 py-3 border-0 text-end">Unit Price</th>
+                                     <th class="px-4 py-3 border-0 text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -133,6 +134,7 @@
                                         </td>
                                         <td class="py-3 text-center fw-bold">{{ $item->quantity }}</td>
                                         <td class="px-4 py-3 text-end fw-bold">RWF {{ number_format($item->unit_price, 0) }}</td>
+                                        <td class="px-4 py-3 text-end fw-bold">RWF {{ number_format($item->unit_price * $item->quantity, 0) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
