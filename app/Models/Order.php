@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Pest\Support\Str;
 
 class Order extends Model
 {
@@ -66,6 +67,25 @@ public function scopeForCurrentSeller($query)
     return $query->whereHas('orderItems.part', function ($q) use ($shopId) {
         $q->where('shop_id', $shopId);
     });
+}
+
+protected static function boot()
+{
+    parent::boot();
+
+    static::creating(function ($order) {
+        $order->order_number = self::generateUniqueOrderNumber();
+    });
+}
+
+private static function generateUniqueOrderNumber()
+{
+    do {
+        // Generate a 6-character random string
+        $number = 'AS-' . strtoupper(Str::random(6));
+    } while (self::where('order_number', $number)->exists());
+
+    return $number;
 }
 
 }
