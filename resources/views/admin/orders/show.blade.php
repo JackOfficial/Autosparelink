@@ -26,12 +26,31 @@
     }
     
     .product-img {
-        width: 50px;
-        height: 50px;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 1px solid #f1f4f8;
+       width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #edf2f9;
+    background-color: #f8f9fa;
+    transition: transform 0.2s;
     }
+
+    .product-img:hover {
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+.img-placeholder {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f4f8;
+    border-radius: 8px;
+    color: #cbd5e0;
+}
+
     .shop-badge {
         font-size: 0.65rem;
         background: #f8f9fa;
@@ -171,56 +190,71 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($order->orderItems as $item)
-                        <tr>
-                            <td class="px-4 py-3">
-                                <div class="d-flex align-items-center">
-                                    {{-- Product Photo --}}
-                                    <div class="mr-3">
-                                        @if($item->part && $item->part->image)
-                                            <img src="{{ asset('storage/' . $item->part->image) }}" 
-                                                 alt="{{ $item->part->part_name }}" 
-                                                 class="product-img shadow-sm">
-                                        @else
-                                            <div class="product-img bg-light d-flex align-items-center justify-content-center">
-                                                <i class="fas fa-image text-muted opacity-50"></i>
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <span class="d-block font-weight-bold text-dark">{{ $item->part->part_name ?? 'Part not found' }}</span>
-                                        <small class="text-muted">SKU: {{ $item->part->sku ?? 'N/A' }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="text-left">
-                                {{-- Shop Details --}}
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-store-alt mr-2 text-muted small"></i>
-                                    <div>
-                                        <span class="d-block small font-weight-bold text-dark">
-                                            {{ $item->part->shop->name ?? 'Direct Warehouse' }}
-                                        </span>
-                                        <span class="shop-badge">
-                                            {{ $item->part->shop->location ?? 'Main Branch' }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge badge-light px-3 py-2 text-dark font-weight-bold">
-                                    {{ $item->quantity }}
-                                </span>
-                            </td>
-                            <td class="text-right text-muted font-weight-medium">
-                                {{ number_format($item->unit_price) }} RWF
-                            </td>
-                            <td class="text-right px-4 font-weight-bold text-dark">
-                                {{ number_format($item->quantity * $item->unit_price) }} RWF
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
+    @foreach($order->orderItems as $item)
+        <tr>
+            <td class="px-4 py-3">
+                <div class="d-flex align-items-center">
+                    {{-- Part Photo Logic --}}
+                    <div class="mr-3">
+                        @if($item->part && $item->part->image)
+                            <img src="{{ asset('storage/' . $item->part->image) }}" 
+                                 alt="{{ $item->part->part_name }}" 
+                                 class="product-img shadow-sm">
+                        @else
+                            <div class="img-placeholder shadow-sm">
+                                <i class="fas fa-tools fa-lg"></i>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Part Info --}}
+                    <div>
+                        <span class="d-block font-weight-bold text-dark">
+                            {{ $item->part->part_name ?? 'Unknown Part' }}
+                        </span>
+                        <div class="d-flex align-items-center mt-1">
+                            <span class="badge badge-soft-secondary mr-2" style="font-size: 0.6rem;">
+                                SKU: {{ $item->part->sku ?? 'N/A' }}
+                            </span>
+                            @if($item->part && $item->part->category)
+                                <small class="text-muted text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.5px;">
+                                    <i class="fas fa-tag mr-1"></i>{{ $item->part->category->name }}
+                                </small>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </td>
+            
+            {{-- Vendor/Shop Column --}}
+            <td class="text-left">
+                <div class="d-flex flex-column">
+                    <span class="small font-weight-bold text-dark">
+                        {{ $item->part->shop->name ?? 'Direct Warehouse' }}
+                    </span>
+                    <span class="shop-badge">
+                        <i class="fas fa-map-marker-alt mr-1" style="font-size: 0.5rem;"></i>
+                        {{ $item->part->shop->location ?? 'Main Branch' }}
+                    </span>
+                </div>
+            </td>
+
+            <td class="text-center">
+                <span class="badge badge-light px-3 py-2 text-dark font-weight-bold">
+                    {{ $item->quantity }}
+                </span>
+            </td>
+
+            <td class="text-right text-muted font-weight-medium">
+                {{ number_format($item->unit_price) }} RWF
+            </td>
+
+            <td class="text-right px-4 font-weight-bold text-primary">
+                {{ number_format($item->quantity * $item->unit_price) }} RWF
+            </td>
+        </tr>
+    @endforeach
+</tbody>
                 <tfoot style="background: #fcfcfd; border-top: 2px solid #f1f4f8;">
                     <tr>
                         <td colspan="4" class="text-right font-weight-bold py-3 text-muted">ORDER TOTAL:</td>
