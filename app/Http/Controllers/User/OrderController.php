@@ -7,82 +7,96 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Auth::user()->orders()
-            ->latest()
-            ->paginate(15); 
-      
+        $orders = Auth::user()->orders()->latest()->paginate(15); 
         return view('user.orders.index', compact('orders'));
     }
 
     public function show(Order $order)
     {
         if ($order->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
+            abort(403);
         }
 
-        // Eager load items and their shipping status for the UI
-        $order->load(['orderItems.part', 'orderItems.shipping']);
+        // Load items, the spare part details, and the specific shipping info for each shop
+        $order->load(['orderItems.part', 'orderItems.shop', 'orderItems.shipping']);
 
         return view('user.orders.show', compact('order'));
     }
 
     /**
-     * User confirms they are happy with the item.
-     * This triggers the vendor payment via the OrderItem Observer.
+     * Handle the Bulk Inspection (Accept/Dispute)
      */
-    public function confirmReceipt(OrderItem $item)
+    public function processInspection(Request $request, Order $order)
     {
-        if ($item->order->user_id !== Auth::id()) {
+        if ($order->user_id !== Auth::id()) {
             abort(403);
         }
 
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.id' => 'required|exists:order_items,id',
+            'items.*.action' => 'required|in:accept,dispute',
+            'items.*.reason' => 'required_if:items.*.action,dispute|nullable|string|max:500',
+        ]);
+
+        DB::transaction(function () use ($request, $order) {
+            foreach ($request->items as $itemData) {
+                $item = OrderItem::where('id', $itemData['id'])
+                    ->where('order_id', $order->id)
+                    ->firstOrFail();
+
+                // Only process items that are currently 'delivered'
+                if ($item->status !== 'delivered') {
+                    continue;
+                }
+
+                if ($itemData['action'] === 'accept') {
+                    $item->status = 'completed';
+                    $item->notes = "Customer confirmed receipt.";
+                } else {
+                    $item->status = 'disputed';
+                    $item->notes = "Customer reported issue: " . $itemData['reason'];
+                }
+
+                $item->save(); // Triggers the safe payment logic if status is 'completed'
+            }
+        });
+
+        return redirect()->route('user.orders.show', $order->id)
+            ->with('success', 'Your order inspection has been submitted successfully.');
+    }
+
+    /**
+     * Legacy single item confirmation (optional, if you keep the single button)
+     */
+    public function confirmReceipt(OrderItem $item)
+    {
+        if ($item->order->user_id !== Auth::id()) abort(403);
+        
         if ($item->status !== 'delivered') {
-            return back()->with('error', 'Item must be marked as delivered before confirmation.');
+            return back()->with('error', 'Item must be delivered first.');
         }
 
         $item->status = 'completed';
         $item->save();
 
-        return back()->with('success', 'Thank you! The payment has been released to the vendor.');
-    }
-
-    /**
-     * User reports a problem.
-     * This MOVES the status to 'disputed', which stops the Auto-Complete Scheduler.
-     */
-    public function reportIssue(Request $request, OrderItem $item)
-    {
-        if ($item->order->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $request->validate([
-            'reason' => 'required|string|max:500',
-        ]);
-
-        // Change status to disputed
-        $item->status = 'disputed';
-        
-        // Optionally store the reason in a 'notes' column or a separate Dispute model
-        $item->notes = "Dispute raised by customer: " . $request->reason;
-        $item->save();
-
-        return back()->with('warning', 'Dispute logged. Our team will review this before any payment is released.');
+        return back()->with('success', 'Item confirmed and payment released.');
     }
 
     public function destroy(Order $order)
     {
-        if ($order->user_id != Auth::id()) {
-            abort(403);
-        }
+        if ($order->user_id != Auth::id()) abort(403);
 
         if ($order->status === 'pending') {
             $order->update(['status' => 'cancelled']);
+            // Also cancel items
+            $order->orderItems()->update(['status' => 'cancelled']);
             return back()->with('success', 'Order cancelled successfully.');
         }
 
