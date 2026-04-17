@@ -14,7 +14,7 @@
             <button onclick="window.print()" class="btn btn-white border rounded-pill px-3 shadow-sm bg-white">
                 <i class="fas fa-print me-1"></i> Print Invoice
             </button>
-            <a href="{{ route('tickets.create', ['order_id' => $order->id]) }}" class="btn btn-info text-white rounded-pill px-4 fw-bold shadow-sm">
+            <a href="{{ route('user.tickets.create', ['order_id' => $order->id]) }}" class="btn btn-info text-white rounded-pill px-4 fw-bold shadow-sm">
                 <i class="fas fa-headset me-1"></i> Get Help
             </a>
         </div>
@@ -191,7 +191,7 @@
                 <div class="card-body p-4">
                     <h6 class="fw-bold mb-2">Technical Issue?</h6>
                     <p class="small opacity-75 mb-3">If the spare part does not match your vehicle fitment, please open a dispute immediately.</p>
-                    <a href="{{ route('tickets.create', ['order_id' => $order->id]) }}" class="btn btn-outline-light btn-sm rounded-pill w-100">
+                    <a href="{{ route('user.tickets.create', ['order_id' => $order->id]) }}" class="btn btn-outline-light btn-sm rounded-pill w-100">
                         Report Fitment Issue
                     </a>
                 </div>
