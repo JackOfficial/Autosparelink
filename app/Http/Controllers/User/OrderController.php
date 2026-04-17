@@ -11,20 +11,54 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function index()
+    /**
+     * Display filtered order history for the user.
+     */
+    public function index(Request $request)
     {
-        $orders = Auth::user()->orders()->latest()->paginate(15); 
+        $query = Auth::user()->orders()->latest();
+
+        // 1. Filter by status if provided in the request
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // 2. Search by Order Number or Part Name (via relationship)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'LIKE', "%{$search}%")
+                  ->orWhereHas('orderItems.part', function($sq) use ($search) {
+                      $sq->where('part_name', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        // 3. Eager load specific relationships for the Index UI
+        $orders = $query->with(['orderItems.part.partBrand', 'orderItems.part.category'])
+                        ->paginate(15)
+                        ->withQueryString(); 
+      
         return view('user.orders.index', compact('orders'));
     }
 
+    /**
+     * Display deep details for a specific order.
+     */
     public function show(Order $order)
     {
         if ($order->user_id !== Auth::id()) {
             abort(403);
         }
 
-        // Load items, the spare part details, and the specific shipping info for each shop
-        $order->load(['orderItems.part', 'orderItems.shop', 'orderItems.shipping']);
+        // Use your Model's relationships: partBrand, photos (morphMany), and shop
+        $order->load([
+            'orderItems.part.partBrand',
+            'orderItems.part.category',
+            'orderItems.part.photos', // MorphMany relationship from your Photo model
+            'orderItems.shop',
+            'orderItems.shipping'
+        ]);
 
         return view('user.orders.show', compact('order'));
     }
@@ -51,55 +85,56 @@ class OrderController extends Controller
                     ->where('order_id', $order->id)
                     ->firstOrFail();
 
-                // Only process items that are currently 'delivered'
+                // Safety: Only process items currently in 'delivered' state
                 if ($item->status !== 'delivered') {
                     continue;
                 }
 
                 if ($itemData['action'] === 'accept') {
                     $item->status = 'completed';
-                    $item->notes = "Customer confirmed receipt.";
+                    $item->notes = "Customer confirmed receipt via dashboard.";
                 } else {
                     $item->status = 'disputed';
-                    $item->notes = "Customer reported issue: " . $itemData['reason'];
+                    $item->notes = "Dispute: " . $itemData['reason'];
                 }
 
-                $item->save(); // Triggers the safe payment logic if status is 'completed'
+                /**
+                 * NOTE: This save() triggers your OrderItem Observer.
+                 * Your Observer should check: if ($item->status === 'completed') { ...Pay Shop... }
+                 */
+                $item->save(); 
             }
         });
 
         return redirect()->route('user.orders.show', $order->id)
-            ->with('success', 'Your order inspection has been submitted successfully.');
+            ->with('success', 'Thank you. Your feedback has been recorded.');
     }
 
     /**
-     * Legacy single item confirmation (optional, if you keep the single button)
+     * Cancel a pending order
      */
-    public function confirmReceipt(OrderItem $item)
-    {
-        if ($item->order->user_id !== Auth::id()) abort(403);
-        
-        if ($item->status !== 'delivered') {
-            return back()->with('error', 'Item must be delivered first.');
-        }
-
-        $item->status = 'completed';
-        $item->save();
-
-        return back()->with('success', 'Item confirmed and payment released.');
-    }
-
     public function destroy(Order $order)
     {
         if ($order->user_id != Auth::id()) abort(403);
 
+        // Only allow cancellation if the whole order is still pending
         if ($order->status === 'pending') {
-            $order->update(['status' => 'cancelled']);
-            // Also cancel items
-            $order->orderItems()->update(['status' => 'cancelled']);
-            return back()->with('success', 'Order cancelled successfully.');
+            DB::transaction(function () use ($order) {
+                $order->update(['status' => 'cancelled']);
+                
+                // Update each item so shops see the cancellation
+                $order->orderItems()->update(['status' => 'cancelled']);
+                
+                // Restore Stock: Since the items were never shipped, 
+                // we should put the quantities back into the Part model.
+                foreach ($order->orderItems as $item) {
+                    $item->part()->increment('stock_quantity', $item->quantity);
+                }
+            });
+
+            return back()->with('success', 'Order and items cancelled. Stock has been restored.');
         }
 
-        return back()->with('error', 'Processed orders cannot be cancelled.');
+        return back()->with('error', 'Orders already in process cannot be cancelled.');
     }
 }

@@ -3,7 +3,7 @@
 @section('title', 'My Orders')
 
 @section('content')
-<div class="container py-4 py-lg-5" x-data="{ showFilters: false }">
+<div class="container py-4 py-lg-5" x-data="{ showFilters: {{ request('search') || request('status') ? 'true' : 'false' }} }">
     
     {{-- Header Section --}}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
@@ -13,7 +13,8 @@
         </div>
         <div class="mt-3 mt-md-0 d-flex gap-2">
             <button @click="showFilters = !showFilters" class="btn btn-white border rounded-pill px-3 shadow-sm bg-white">
-                <i class="fas fa-filter me-1 text-primary"></i> Filter
+                <i class="fas fa-filter me-1 text-primary"></i> 
+                <span x-text="showFilters ? 'Hide Filters' : 'Show Filters'"></span>
             </button>
             <a href="{{ url('/') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
                 <i class="fas fa-plus me-1"></i> New Order
@@ -27,22 +28,29 @@
             <form action="{{ route('user.orders.index') }}" method="GET" class="row g-3">
                 <div class="col-md-5">
                     <label class="small fw-bold text-muted mb-1">Search</label>
-                    <input type="text" name="search" class="form-control rounded-3 border-light-subtle" placeholder="Order number or part name...">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-light-subtle text-muted"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" value="{{ request('search') }}" class="form-control rounded-end-3 border-light-subtle" placeholder="Order # or part name...">
+                    </div>
                 </div>
                 <div class="col-md-4">
                     <label class="small fw-bold text-muted mb-1">Status</label>
                     <select name="status" class="form-select rounded-3 border-light-subtle">
                         <option value="">All Statuses</option>
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="delivered">Awaiting Inspection</option>
-                        <option value="completed">Completed</option>
-                        <option value="disputed">In Dispute</option>
-                        <option value="cancelled">Cancelled</option>
+                        @foreach(['pending', 'processing', 'delivered', 'completed', 'disputed', 'cancelled'] as $status)
+                            <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
+                                {{ ucfirst($status) }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-dark w-100 rounded-3">Apply Filters</button>
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-dark flex-grow-1 rounded-3">Apply</button>
+                    @if(request('search') || request('status'))
+                        <a href="{{ route('user.orders.index') }}" class="btn btn-light border rounded-3" title="Clear Filters">
+                            <i class="fas fa-undo"></i>
+                        </a>
+                    @endif
                 </div>
             </form>
         </div>
@@ -55,7 +63,7 @@
                 <thead class="bg-light-subtle">
                     <tr>
                         <th class="px-4 py-3 border-0 small text-uppercase fw-bold text-muted">Order Info</th>
-                        <th class="py-3 border-0 small text-uppercase fw-bold text-muted">Items</th>
+                        <th class="py-3 border-0 small text-uppercase fw-bold text-muted">Part Details</th>
                         <th class="py-3 border-0 small text-uppercase fw-bold text-muted text-center">Amount</th>
                         <th class="py-3 border-0 small text-uppercase fw-bold text-muted text-center">Status</th>
                         <th class="px-4 py-3 border-0 text-end small text-uppercase fw-bold text-muted">Actions</th>
@@ -63,6 +71,10 @@
                 </thead>
                 <tbody class="border-top-0">
                     @forelse($orders as $order)
+                        @php 
+                            $firstItem = $order->orderItems->first();
+                            $itemCount = $order->orderItems->count();
+                        @endphp
                         <tr x-data="{ 
                             copied: false, 
                             copyId() { 
@@ -82,19 +94,22 @@
                                             <i @click="copyId" 
                                                :class="copied ? 'fas fa-check text-success' : 'far fa-copy'" 
                                                class="ms-2 cursor-pointer small opacity-50" 
-                                               style="cursor: pointer;"></i>
+                                               style="cursor: pointer;"
+                                               title="Copy ID"></i>
                                         </div>
-                                        <div class="small text-muted">{{ $order->created_at->format('d M, Y \a\t H:i') }}</div>
+                                        <div class="small text-muted">{{ $order->created_at->format('d M, Y') }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td class="py-3">
-                                @php $itemCount = $order->orderItems->count(); @endphp
                                 <div class="small fw-bold text-dark">
-                                    {{ Str::limit($order->orderItems->first()->part->part_name ?? 'Spare Parts', 30) }}
+                                    {{ Str::limit($firstItem->part->part_name ?? 'Spare Parts', 35) }}
                                 </div>
                                 <div class="text-muted small">
-                                    {{ $itemCount > 1 ? '+'.($itemCount-1).' other items' : 'Single Item' }}
+                                    {{ $firstItem->part->partBrand->name ?? 'Genuine' }} • {{ $firstItem->part->category->category_name ?? 'General' }}
+                                    @if($itemCount > 1)
+                                        <span class="badge bg-light text-dark border ms-1">+{{ $itemCount - 1 }} more</span>
+                                    @endif
                                 </div>
                             </td>
                             <td class="py-3 text-center">
@@ -150,9 +165,9 @@
                                 <div class="opacity-25 mb-3">
                                     <i class="fas fa-shopping-cart fa-4x"></i>
                                 </div>
-                                <h5 class="text-muted fw-bold">No orders yet</h5>
-                                <p class="text-muted small">Your shopping history will appear here once you make a purchase.</p>
-                                <a href="{{ url('/') }}" class="btn btn-primary rounded-pill px-4 mt-2">Start Shopping</a>
+                                <h5 class="text-muted fw-bold">No orders found</h5>
+                                <p class="text-muted small">Try adjusting your search or filters.</p>
+                                <a href="{{ route('user.orders.index') }}" class="btn btn-outline-primary rounded-pill px-4 mt-2">Clear All Filters</a>
                             </td>
                         </tr>
                     @endforelse
@@ -167,7 +182,8 @@
     </div>
 </div>
 
-<style>
+  @push('styles')
+    <style>
     [x-cloak] { display: none !important; }
     .table thead th { font-size: 0.75rem; letter-spacing: 0.05rem; }
     .rounded-4 { border-radius: 1.25rem !important; }
@@ -175,5 +191,7 @@
     .btn-white { background: #fff; }
     .table-hover tbody tr { transition: background-color 0.2s ease; }
     .table-hover tbody tr:hover { background-color: #fbfcfe; }
-</style>
+    .cursor-pointer { cursor: pointer; }
+    </style>
+  @endpush
 @endsection
