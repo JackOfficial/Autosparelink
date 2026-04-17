@@ -84,7 +84,7 @@ public function create(Request $request)
             }
         }
 
-        return redirect()->route('tickets.index')
+        return redirect()->route('user.tickets.index')
             ->with('success', "Ticket #{$ticket->id} has been opened successfully.");
     }
 
