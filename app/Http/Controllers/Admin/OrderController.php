@@ -51,7 +51,6 @@ class OrderController extends Controller
          * We only mark items 'completed' via the Finalize controller 
          * AFTER customer confirmation.
          */
-        
         if ($request->status === 'cancelled') {
             // If the whole order is cancelled, mark items cancelled too.
             // This does NOT trigger the Observer's payment logic.
