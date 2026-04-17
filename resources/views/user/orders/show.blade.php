@@ -207,13 +207,9 @@
                     @endforeach
                 </tbody>
                 <tfoot class="border-top">
-                    <tr>
-                        <td colspan="5" class="px-4 py-2 text-end text-muted small">Subtotal</td>
-                        <td class="px-4 py-2 text-end fw-bold text-dark">RWF {{ number_format($order->total_amount, 0) }}</td>
-                    </tr>
                     <tr class="bg-light-subtle">
                         <td colspan="5" class="px-4 py-3 text-end fw-bold text-primary text-uppercase">Total Amount</td>
-                        <td class="px-4 py-3 text-end fw-bold text-primary fs-5">RWF {{ number_format($order->total_amount, 0) }}</td>
+                        <td class="px-4 py-3 text-end fw-bold text-primary">RWF {{ number_format($order->total_amount, 0) }}</td>
                     </tr>
                 </tfoot>
             </table>
