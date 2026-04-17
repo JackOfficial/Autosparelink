@@ -196,16 +196,21 @@
                 <div class="d-flex align-items-center">
                     {{-- Part Photo Logic --}}
                     <div class="mr-3">
-                        @if($item->part && $item->part->image)
-                            <img src="{{ asset('storage/' . $item->part->image) }}" 
-                                 alt="{{ $item->part->part_name }}" 
-                                 class="product-img shadow-sm">
-                        @else
-                            <div class="img-placeholder shadow-sm">
-                                <i class="fas fa-tools fa-lg"></i>
-                            </div>
-                        @endif
-                    </div>
+    @php 
+        // Get the first photo from the collection
+        $primaryPhoto = $item->part->photos->first(); 
+    @php
+    
+    @if($primaryPhoto && $primaryPhoto->file_path)
+        <img src="{{ asset('storage/' . $primaryPhoto->file_path) }}" 
+             alt="{{ $item->part->part_name }}" 
+             class="product-img shadow-sm">
+    @else
+        <div class="img-placeholder shadow-sm d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 60px; border-radius: 8px;">
+            <i class="fas fa-tools text-muted"></i>
+        </div>
+    @endif
+</div>
 
                     {{-- Part Info --}}
                     <div>
