@@ -66,7 +66,7 @@
     $initial = strtoupper(substr($customerName, 0, 1));
 
     // Stepper logic
-    $statuses = ['pending', 'processing', 'shipped', 'delivered'];
+    $statuses = ['pending', 'processing', 'shipped', 'delivered', 'Completed'];
     $currentIdx = array_search($order->status, $statuses);
 @endphp
 
@@ -230,13 +230,29 @@
                     <form action="{{ route('admin.orders.update', $order->id) }}" method="POST">
                         @csrf @method('PUT')
                         <select name="status" class="form-control form-control-lg status-select shadow-none mb-3" onchange="this.form.submit()">
-                            @foreach(['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'callback_requested'] as $stat)
+                            @foreach(['pending', 'processing', 'shipped', 'delivered', 'Completed', 'cancelled', 'callback_requested'] as $stat)
                                 <option value="{{ $stat }}" {{ $order->status == $stat ? 'selected' : '' }}>
                                     {{ ucfirst(str_replace('_', ' ', $stat)) }}
                                 </option>
                             @endforeach
                         </select>
                     </form>
+
+                    {{-- Show 'Complete Order' button only when it is Delivered --}}
+        @if($order->status === 'delivered')
+            <form action="{{ route('shop.sales.finalize', $order->id) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-success btn-block font-weight-bold shadow-sm">
+                    <i class="fas fa-handshake mr-2"></i> Customer Accepted
+                </button>
+                <p class="text-muted small text-center mt-2 mb-0">Moves order to 'Completed' status</p>
+            </form>
+        @elseif($order->status === 'completed')
+            <div class="text-center text-success py-2">
+                <i class="fas fa-check-circle fa-2x"></i>
+                <div class="font-weight-bold mt-1">Order Fully Completed</div>
+            </div>
+        @endif
                     
                     @if($order->status !== 'delivered' && $order->status !== 'cancelled')
                         <form action="{{ route('shop.sales.finalize', $order->id) }}" method="POST">

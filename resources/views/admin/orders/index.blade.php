@@ -117,6 +117,17 @@
             </div>
         </div>
         <div class="col-md-2 mb-3">
+        <div class="card shadow-sm p-3 shadow-hover bg-white" @click="statusFilter = 'completed'" style="cursor: pointer;">
+        <div class="text-muted small font-weight-bold mb-2">COMPLETED</div>
+        <div class="d-flex align-items-center justify-content-between">
+            <h4 class="font-weight-bold mb-0 text-success">{{ $orders->where('status', 'completed')->count() }}</h4>
+            <div class="stat-icon" style="background: rgba(43, 138, 62, 0.1); color: #2b8a3e;">
+                <i class="fas fa-check-double"></i>
+            </div>
+        </div>
+        </div>
+        </div>
+        <div class="col-md-2 mb-3">
             <div class="card shadow-sm p-3 shadow-hover bg-white" @click="statusFilter = 'callback_requested'" style="cursor: pointer;">
                 <div class="text-muted small font-weight-bold mb-2">CALLBACKS</div>
                 <div class="d-flex align-items-center justify-content-between">
@@ -174,6 +185,7 @@
                                 $style = match($order->status) {
                                     'pending' => 'background: var(--warning-soft); color: var(--warning-deep);',
                                     'delivered' => 'background: var(--success-soft); color: var(--success-deep);',
+                                    'completed' => 'background: var(--success-soft); color: var(--success-deep);',
                                     'processing' => 'background: var(--primary-soft); color: var(--primary-deep);',
                                     'cancelled' => 'background: var(--danger-soft); color: var(--danger-deep);',
                                     'callback_requested' => 'background: #7048e8; color: #fff;',
