@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
 use App\Models\Payout;
-use App\Models\Commission; // Import the Commission model
+use App\Models\Commission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -14,47 +14,52 @@ class PayoutController extends Controller
 {
     /**
      * Helper to calculate the shop's current financial standing.
+     * Strictly filters for 'completed' items within 'completed' orders.
      */
     private function getFinancialSummary()
     {
-        // 1. Fetch the dynamic commission rate from Admin settings
-        // If getRate() returns 10, $percentage will be 0.10
+        $shopId = Auth::user()->shop->id;
         $rawRate = Commission::getRate();
         $percentage = $rawRate / 100;
 
-        // 2. Gross Revenue (Completed OrderItems + Completed Orders + Successful Payment)
-        $totalGross = OrderItem::forCurrentSeller()
+        // 1. Audited Gross Revenue 
+        // We sum directly from OrderItem to ensure we only count items marked completed
+        $revenueData = OrderItem::where('shop_id', $shopId)
             ->where('status', 'completed')
             ->whereHas('order', function ($query) {
                 $query->where('status', 'completed');
                     //   ->whereHas('payment', fn($p) => $p->where('status', 'successful'));
             })
-            ->sum(DB::raw('unit_price * quantity'));
+            ->selectRaw("SUM(unit_price * quantity) as total_gross")
+            ->first();
 
-        // 3. Financial Breakdown using dynamic rate
+        $totalGross = $revenueData->total_gross ?? 0;
+
+        // 2. Financial Breakdown
         $totalCommission = $totalGross * $percentage;
         $netEarnings = $totalGross - $totalCommission;
 
-        // 4. Payout Deductions (Everything already paid or in the pipeline)
-        $deductions = Payout::forCurrentSeller()
+        // 3. Payout Deductions (Auditing the 'Wallet' movement)
+        // We include 'processing' to ensure money is "charged" while admin reviews it
+        $deductions = Payout::where('shop_id', $shopId)
             ->whereIn('status', ['completed', 'pending', 'processing'])
             ->selectRaw("
-                SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as withdrawn,
-                SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) as pending
+                SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as total_withdrawn,
+                SUM(CASE WHEN status IN ('pending', 'processing') THEN amount ELSE 0 END) as total_locked
             ")
             ->first();
 
-        $totalWithdrawn = $deductions->withdrawn ?? 0;
-        $pendingPayouts = $deductions->pending ?? 0;
+        $withdrawn = $deductions->total_withdrawn ?? 0;
+        $locked = $deductions->total_locked ?? 0;
 
         return [
             'totalGross'       => $totalGross,
-            'commissionRate'   => $rawRate, // Pass the raw rate (e.g., 10) to the view
+            'commissionRate'   => $rawRate,
             'totalCommission'  => $totalCommission,
             'netEarnings'      => $netEarnings,
-            'totalWithdrawn'   => $totalWithdrawn,
-            'pendingPayouts'   => $pendingPayouts,
-            'availableBalance' => $netEarnings - ($totalWithdrawn + $pendingPayouts)
+            'totalWithdrawn'   => $withdrawn,
+            'pendingPayouts'   => $locked,
+            'availableBalance' => $netEarnings - ($withdrawn + $locked)
         ];
     }
 
@@ -80,12 +85,14 @@ class PayoutController extends Controller
         ]);
 
         return DB::transaction(function () use ($request) {
+            // Re-calculate summary inside the transaction to prevent double-spending
             $summary = $this->getFinancialSummary();
 
             if ($request->amount > $summary['availableBalance']) {
-                return back()->with('error', 'Insufficient balance. You can withdraw up to ' . number_format($summary['availableBalance']) . ' RWF.');
+                return back()->with('error', 'Insufficient balance. Audited balance: ' . number_format($summary['availableBalance']) . ' RWF.');
             }
 
+            // Creating the payout record "locks" the funds immediately
             Auth::user()->shop->payouts()->create([
                 'amount'          => $request->amount,
                 'payout_method'   => $request->payout_method,
@@ -95,7 +102,7 @@ class PayoutController extends Controller
             ]);
 
             return redirect()->route('shop.payouts.index')
-                ->with('success', 'Your request for ' . number_format($request->amount) . ' RWF has been submitted for approval.');
+                ->with('success', 'Your request for ' . number_format($request->amount) . ' RWF has been submitted. Your balance has been updated.');
         });
     }
 }

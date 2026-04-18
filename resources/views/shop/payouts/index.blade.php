@@ -11,6 +11,7 @@
         .bg-soft-danger { background-color: #fef2f2; color: #991b1b; }
         .table-hover tbody tr:hover { background-color: #f8fafc; }
         .uppercase { text-transform: uppercase; letter-spacing: 0.5px; }
+        .smaller { font-size: 0.75rem; }
     </style>
     @endpush
 
@@ -24,17 +25,17 @@
                         <p class="text-muted small fw-bold mb-1 uppercase">Gross Revenue</p>
                         <h4 class="fw-bold mb-0 text-dark">{{ number_format($totalGross) }} <small class="fs-6">RWF</small></h4>
                         <div class="mt-2 small text-muted">
-                            <i class="ti ti-info-circle me-1"></i> Total sales delivered
+                            <i class="ti ti-info-circle me-1"></i> Audited total sales
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Platform Fee --}}
+            {{-- Platform Fee - NOW DYNAMIC --}}
             <div class="col-md-3">
                 <div class="card balance-card shadow-sm h-100 border-start border-danger border-4 bg-soft-danger">
                     <div class="card-body">
-                        <p class="text-danger small fw-bold mb-1 uppercase">Platform Fee (10%)</p>
+                        <p class="text-danger small fw-bold mb-1 uppercase">Platform Fee ({{ $commissionRate }}%)</p>
                         <h4 class="fw-bold mb-0 text-danger">- {{ number_format($totalCommission) }} <small class="fs-6 text-danger">RWF</small></h4>
                         <div class="mt-2 small text-danger-emphasis">Service commission</div>
                     </div>
@@ -48,7 +49,9 @@
                         <div class="d-flex justify-content-between">
                             <p class="text-success small fw-bold mb-1 uppercase">Available Wallet</p>
                             @if($pendingPayouts > 0)
-                                <span class="badge bg-warning text-dark rounded-pill smaller">{{ number_format($pendingPayouts) }} Pending</span>
+                                <span class="badge bg-warning text-dark rounded-pill smaller" title="Locked in pending requests">
+                                    {{ number_format($pendingPayouts) }} Locked
+                                </span>
                             @endif
                         </div>
                         <h4 class="fw-bold mb-0 text-success">{{ number_format($availableBalance) }} <small class="fs-6 text-success">RWF</small></h4>
@@ -73,7 +76,7 @@
             {{-- Payout History --}}
             <div class="col-lg-8">
                 <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
-                    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-white py-3 border-0">
                         <h6 class="mb-0 fw-bold text-dark">
                             <i class="ti ti-history me-2 text-primary fs-5"></i>Withdrawal History
                         </h6>
@@ -118,9 +121,6 @@
                                 @empty
                                 <tr>
                                     <td colspan="4" class="text-center py-5">
-                                        <div class="text-muted opacity-50 mb-3">
-                                            <i class="ti ti-wallet fs-1"></i>
-                                        </div>
                                         <p class="text-muted mb-0">No withdrawal requests found.</p>
                                     </td>
                                 </tr>
@@ -145,12 +145,12 @@
                     <div class="card-body p-4">
                         @if(session('success'))
                             <div class="alert alert-success border-0 small mb-4 shadow-sm">
-                                <i class="ti ti-check me-1"></i> {{ session('success') }}
+                                {{ session('success') }}
                             </div>
                         @endif
                         @if(session('error'))
                             <div class="alert alert-danger border-0 small mb-4 shadow-sm">
-                                <i class="ti ti-alert-triangle me-1"></i> {{ session('error') }}
+                                {{ session('error') }}
                             </div>
                         @endif
 
@@ -160,7 +160,7 @@
                                 <label class="small fw-bold text-muted mb-1 uppercase">Amount to Withdraw</label>
                                 <div class="input-group border rounded-3 overflow-hidden">
                                     <input type="number" name="amount" class="form-control border-0 py-2" 
-                                           placeholder="Min. 5,000" min="5000" step="1" required>
+                                           placeholder="Min. 5,000" min="5000" required>
                                     <span class="input-group-text bg-light border-0 small fw-bold">RWF</span>
                                 </div>
                                 <div class="mt-1 d-flex justify-content-between">
@@ -182,8 +182,7 @@
                             <div class="mb-4">
                                 <label class="small fw-bold text-muted mb-1 uppercase">Account Details</label>
                                 <input type="text" name="account_details" class="form-control border rounded-3 py-2" 
-                                       placeholder="e.g., 078xxxxxxx or IBAN" required>
-                                <small class="text-muted smaller mt-1 d-block italic">Double check your payment info.</small>
+                                       placeholder="Phone number or Bank info" required>
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm rounded-pill" 
@@ -194,7 +193,7 @@
                             @if($availableBalance < 5000)
                                 <div class="mt-3 p-2 bg-light rounded-3 text-center">
                                     <small class="text-danger fw-medium">
-                                        <i class="ti ti-alert-circle me-1"></i> Minimum 5,000 RWF required.
+                                        Min. 5,000 RWF required to withdraw.
                                     </small>
                                 </div>
                             @endif
