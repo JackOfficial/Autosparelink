@@ -84,9 +84,9 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Parent Category</label>
+                                <label class="form-label small fw-bold">Category</label>
                                 <select class="form-select" wire:model.live="parentCategoryId">
-                                    <option value="">-- Select Parent --</option>
+                                    <option value="">-- Select Category --</option>
                                     @foreach($parentCategories as $parent)
                                         <option value="{{ $parent->id }}">{{ $parent->category_name }}</option>
                                     @endforeach
@@ -94,9 +94,9 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Child Category <span class="text-danger">*</span></label>
-                                <select class="form-select @error('category_id') is-invalid @enderror" wire:model="category_id">
-                                    <option value="">-- Select Child --</option>
+                                <label class="form-label small fw-bold">Subcategory <span class="text-danger">*</span></label>
+                                <select class="form-select @error('category_id') is-invalid @enderror" wire:model="category_id" {{ !$parentCategoryId ? 'disabled' : '' }}>
+                                    <option value="">-- Select Subcategory --</option>
                                     @foreach($childCategories as $child)
                                         <option value="{{ $child->id }}">{{ $child->category_name }}</option>
                                     @endforeach

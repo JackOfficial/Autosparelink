@@ -89,7 +89,7 @@
 </div>
 
 <div class="col-md-6">
-    <label class="form-label small fw-bold">Sub Category <span class="text-danger">*</span></label>
+    <label class="form-label small fw-bold">Subcategory <span class="text-danger">*</span></label>
     {{-- The 'disabled' attribute prevents selection until parentCategoryId is set --}}
     <select class="form-select @error('category_id') is-invalid @enderror" 
             wire:model="category_id" 
