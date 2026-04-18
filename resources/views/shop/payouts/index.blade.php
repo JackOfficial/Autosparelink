@@ -113,7 +113,7 @@
                                             ];
                                             $currentClass = $statusClasses[$payout->status] ?? 'bg-light text-muted';
                                         @endphp
-                                        <span class="badge {{ $currentClass }} py-2 px-3 rounded-pill uppercase smaller">
+                                        <span class="badge {{ $currentClass }} text-dark py-2 px-3 rounded-pill uppercase smaller">
                                             {{ $payout->status }}
                                         </span>
                                     </td>
