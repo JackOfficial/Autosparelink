@@ -252,6 +252,7 @@ Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group
     Route::prefix('profile')->name('profile.')->group(function () {
           Route::get('/edit', [ShopProfileController::class, 'edit'])->name('edit');
           Route::put('/update', [ShopProfileController::class, 'update'])->name('update');
+          Route::get('/download-doc/{id}', [ShopProfileController::class, 'downloadDocument'])->name('documents.download');
     });
 
     Route::prefix('support')->name('support.')->group(function () {

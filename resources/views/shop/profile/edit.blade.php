@@ -17,59 +17,69 @@
                             </div>
                         @endif
 
-                        {{-- Global Error List (Optional but helpful for debugging) --}}
-                        @if ($errors->any())
-                            <div class="alert alert-danger border-0 shadow-sm small mb-4">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
                         <form action="{{ route('shop.profile.update') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
                             <div class="row mb-4">
-                                {{-- Logo Upload with Alpine.js Preview --}}
+                                {{-- Logo Upload --}}
                                 <div class="col-md-4 text-center border-end" 
                                      x-data="imageViewer('{{ $shop->logo ? asset('storage/' . $shop->logo) : asset('images/default-shop.png') }}')">
-                                    
                                     <label class="small fw-bold text-muted d-block mb-3">Shop Logo</label>
-                                    
                                     <div class="mb-3">
-                                        <img :src="imageUrl" 
-                                             class="rounded-circle border p-1 shadow-sm" 
-                                             style="width: 120px; height: 120px; object-fit: cover;"
-                                             alt="Shop Logo Preview">
+                                        <img :src="imageUrl" class="rounded-circle border p-1 shadow-sm" style="width: 120px; height: 120px; object-fit: cover;">
                                     </div>
-
-                                    <input type="file" 
-                                           name="logo" 
-                                           class="form-control form-control-sm @error('logo') is-invalid @enderror" 
-                                           accept="image/*"
-                                           @change="fileChosen">
-                                    @error('logo') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    
-                                    <div class="small text-muted mt-2">Recommended: 500x500px</div>
+                                    <input type="file" name="logo" class="form-control form-control-sm" accept="image/*" @change="fileChosen">
                                 </div>
 
                                 {{-- Main Details --}}
                                 <div class="col-md-8">
                                     <div class="mb-3">
                                         <label class="small fw-bold text-muted">Business Name</label>
-                                        <input type="text" name="shop_name" class="form-control @error('shop_name') is-invalid @enderror" 
-                                               value="{{ old('shop_name', $shop->shop_name) }}" required>
-                                        @error('shop_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        <input type="text" name="shop_name" class="form-control" value="{{ old('shop_name', $shop->shop_name) }}" required>
                                     </div>
                                     <div class="mb-3">
                                         <label class="small fw-bold text-muted">TIN Number (RRA)</label>
-                                        <input type="text" name="tin_number" class="form-control @error('tin_number') is-invalid @enderror" 
-                                               value="{{ old('tin_number', $shop->tin_number) }}" placeholder="e.g. 123456789">
-                                        @error('tin_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        <input type="text" name="tin_number" class="form-control" value="{{ old('tin_number', $shop->tin_number) }}">
                                     </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            {{-- Documents Section (Polymorphic Relationship) --}}
+                            <div class="mb-4">
+                                <h6 class="fw-bold text-dark mb-3"><i class="fas fa-file-invoice me-2 text-primary"></i>Business Verification Documents</h6>
+                                <div class="row g-3">
+                                    @forelse($shop->documents as $doc)
+                                        <div class="col-md-4">
+                                            <div class="border rounded p-3 bg-light-subtle text-center h-100 shadow-sm">
+                                                <label class="small fw-bold text-muted d-block mb-2">{{ $doc->title }}</label>
+                                                
+                                                <div class="mb-3">
+                                                    @if(in_array(strtolower($doc->file_type), ['jpg', 'jpeg', 'png']))
+                                                        <i class="fas fa-file-image fa-3x text-info"></i>
+                                                    @else
+                                                        <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                                    @endif
+                                                </div>
+
+                                                <div class="d-grid gap-2">
+                                                    {{-- Secure download route for 'local' disk files --}}
+                                                    <a href="{{ route('profile.documents.download', $doc->id) }}" class="btn btn-sm btn-outline-primary shadow-sm">
+                                                        <i class="fas fa-download me-1"></i> Download
+                                                    </a>
+                                                    <small class="text-muted" style="font-size: 0.7rem;">
+                                                        Submitted: {{ $doc->created_at->format('d M Y') }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="col-12 text-center py-3">
+                                            <p class="text-muted small">No documents found. Please contact support if you need to upload verification files.</p>
+                                        </div>
+                                    @endforelse
                                 </div>
                             </div>
 
@@ -78,28 +88,22 @@
                             {{-- Description --}}
                             <div class="mb-3">
                                 <label class="small fw-bold text-muted">Shop Description</label>
-                                <textarea name="description" class="form-control @error('description') is-invalid @enderror" 
-                                          rows="4" placeholder="Specialized in Mercedes-Benz and BMW spare parts...">{{ old('description', $shop->description) }}</textarea>
-                                @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <textarea name="description" class="form-control" rows="4">{{ old('description', $shop->description) }}</textarea>
                             </div>
 
                             {{-- Contact & Location --}}
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="small fw-bold text-muted">Public Phone Number</label>
-                                    <input type="text" name="phone_number" class="form-control @error('phone_number') is-invalid @enderror" 
-                                           value="{{ old('phone_number', $shop->phone_number) }}" required>
-                                    @error('phone_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    <input type="text" name="phone_number" class="form-control" value="{{ old('phone_number', $shop->phone_number) }}" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="small fw-bold text-muted">Store Location / Address</label>
-                                    <input type="text" name="address" class="form-control @error('address') is-invalid @enderror" 
-                                           value="{{ old('address', $shop->address) }}" placeholder="e.g. Nyarugenge, Kigali" required>
-                                    @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    <input type="text" name="address" class="form-control" value="{{ old('address', $shop->address) }}" required>
                                 </div>
                             </div>
 
-                            {{-- Read-only Status & Fee Info --}}
+                            {{-- Status Bar --}}
                             <div class="card bg-light border-0 mt-4">
                                 <div class="card-body py-3 d-flex justify-content-between align-items-center">
                                     <div>

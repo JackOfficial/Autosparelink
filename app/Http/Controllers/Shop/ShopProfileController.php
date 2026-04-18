@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ShopProfileController extends Controller
 {
@@ -32,6 +33,21 @@ class ShopProfileController extends Controller
     {
         //
     }
+
+    public function downloadDocument($id)
+{
+    // Ensure the document belongs to the authenticated user's shop
+    $document = auth()->user()->shop->documents()->findOrFail($id);
+
+    if (!Storage::disk('local')->exists($document->file_path)) {
+        abort(404, 'File not found on server.');
+    }
+
+    return Storage::disk('local')->download(
+        $document->file_path, 
+        Str::slug($document->title) . '.' . $document->file_type
+    );
+}
 
     /**
      * Display the specified resource.
@@ -60,36 +76,43 @@ public function edit()
     /**
      * Update the specified resource in storage.
      */
-   public function update(Request $request)
+public function update(Request $request)
 {
     $shop = auth()->user()->shop;
 
     $request->validate([
-        // Ensure name is unique but ignore the current shop ID
-        'shop_name'    => 'required|string|max:255|unique:shops,shop_name,' . $shop->id,
-        'description'  => 'nullable|string|max:1000',
-        'phone_number' => 'required|string|max:20',
-        'address'      => 'required|string|max:255',
-        'tin_number'   => 'nullable|digits:9', 
-        'logo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        'shop_name'       => 'required|string|max:255|unique:shops,shop_name,' . $shop->id,
+        'description'     => 'nullable|string|max:1000',
+        'phone_number'    => 'required|string|max:20',
+        'address'         => 'required|string|max:255',
+        'tin_number'      => 'nullable|digits:9', 
+        'logo'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        // Document validation
+        'rdb_certificate' => 'nullable|mimes:pdf,jpg,jpeg,png|max:4096',
+        'tin_certificate' => 'nullable|mimes:pdf,jpg,jpeg,png|max:4096',
+        'owner_id'        => 'nullable|mimes:pdf,jpg,jpeg,png|max:4096',
     ]);
 
-    // Use specific keys to prevent mass-assignment vulnerabilities
     $data = $request->only(['shop_name', 'description', 'phone_number', 'address', 'tin_number']);
 
-    // Handle Logo Upload
-    if ($request->hasFile('logo')) {
-        // Delete old logo from storage if it exists to save disk space
-        if ($shop->logo && Storage::disk('public')->exists($shop->logo)) {
-            Storage::disk('public')->delete($shop->logo);
+    // List of all possible file uploads
+    $fileFields = ['logo' => 'shops/logos', 'rdb_certificate' => 'shops/docs', 'tin_certificate' => 'shops/docs', 'owner_id' => 'shops/docs'];
+
+    foreach ($fileFields as $field => $path) {
+        if ($request->hasFile($field)) {
+            // Delete old file if it exists
+            if ($shop->$field && Storage::disk('public')->exists($shop->$field)) {
+                Storage::disk('public')->delete($shop->$field);
+            }
+            
+            // Store the new file
+            $data[$field] = $request->file($field)->store($path, 'public');
         }
-        
-        $data['logo'] = $request->file('logo')->store('shops/logos', 'public');
     }
 
     $shop->update($data);
 
-    return back()->with('success', 'Shop profile updated successfully.');
+    return back()->with('success', 'Shop profile and documents updated successfully.');
 }
 
     /**
