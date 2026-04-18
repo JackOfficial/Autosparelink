@@ -88,7 +88,7 @@ public function finalize($id)
         // 2. Mark each item as completed 
         // THIS is what triggers your OrderItemObserver to pay the shop
         foreach ($order->orderItems as $item) {
-            if ($item->status !== 'completed') {
+            if ($item->status != 'completed') {
                 $item->status = 'completed';
                 $item->save(); 
             }

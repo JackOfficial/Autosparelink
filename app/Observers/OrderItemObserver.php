@@ -15,6 +15,12 @@ class OrderItemObserver
      */
     public function updated(OrderItem $orderItem): void
     {
+        Log::info("Observer triggered for OrderItem #{$orderItem->id}. Status: {$orderItem->status}");
+
+        if ($orderItem->isDirty('status')) {
+        Log::info("Status is dirty. New status: " . $orderItem->status);
+        }
+
         // 1. Check if the status has flipped to 'completed'
         if ($orderItem->isDirty('status') && $orderItem->status == 'completed') {
             $this->processVendorPayment($orderItem);
