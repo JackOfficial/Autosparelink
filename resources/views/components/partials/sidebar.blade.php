@@ -16,14 +16,15 @@
         </a>
     </div>
 
-{{-- Wallet Sidebar Component --}}
+{{-- Wallet Sidebar Component - Updated with Audited Stats --}}
 @if($shop && $shop->is_verified)
     {{-- Verified Shop: Show Wallet Always --}}
     <div class="px-3 pt-3 flex-shrink-0" 
          x-data="{ 
             showBalance: true, 
             currentBalance: 0, 
-            targetBalance: {{ (float) ($shop->wallet->balance ?? 0) }},
+            {{-- Updated to use $seller_stats['balance'] --}}
+            targetBalance: {{ (float) ($seller_stats['balance'] ?? 0) }},
             init() {
                 let duration = 1200; 
                 let startTime = null;
@@ -61,13 +62,14 @@
                     <span class="ms-1 fw-medium opacity-75" style="font-size: 0.7rem;">RWF</span>
                 </div>
 
-                @if(($shop->wallet->pending_balance ?? 0) > 0)
+                {{-- Updated to use $seller_stats['pending'] --}}
+                @if(($seller_stats['pending'] ?? 0) > 0)
                     <div class="mt-2 pt-2 border-top border-white border-opacity-10 d-flex justify-content-between align-items-center">
                         <span class="opacity-75" style="font-size: 0.62rem;">
                             <i class="ti ti-clock-hour-4 me-1"></i>Pending
                         </span>
                         <span class="fw-bold" style="font-size: 0.62rem;">
-                            {{ number_format($shop->wallet->pending_balance) }}
+                            {{ number_format($seller_stats['pending']) }}
                         </span>
                     </div>
                 @endif
