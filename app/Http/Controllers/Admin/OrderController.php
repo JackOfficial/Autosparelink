@@ -95,6 +95,7 @@ public function finalize($id)
                 $item->save(); 
             }
         }
+
     });
 
     return back()->with('success', 'Order finalized and vendor payments released.');
