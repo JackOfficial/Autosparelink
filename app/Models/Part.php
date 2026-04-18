@@ -160,24 +160,28 @@ public function isAvailable($requestedQuantity = 1)
     }
 
     protected static function booted()
-    {
-        static::creating(function ($part) {
-            // 1. Automatically assign Shop ID for Sellers
-            if (auth()->check() && auth()->user()->hasRole('seller') && empty($part->shop_id)) {
-                $part->shop_id = auth()->user()->shop->id;
-            }
+{
+    static::saving(function ($part) {
+        // 1. Automatically assign Shop ID for Sellers (only on creation)
+        if (auth()->check() && auth()->user()->hasRole('seller') && empty($part->shop_id)) {
+            $part->shop_id = auth()->user()->shop->id;
+        }
 
-            // 2. Auto-generate SKU if empty
-            if (empty($part->sku)) {
-                // Note: Relationships might be null here if not pre-loaded.
-                // We use a fallback or random string to ensure uniqueness.
-                $part->sku = self::generateSku(
-                    $part->partBrand->name ?? null, 
-                    $part->category->category_name ?? null, 
-                    $part->part_name
-                );
-            }
-        });
-    }
+        // 2. Sync/Generate SKU
+        // We check if the name, brand, or category changed, or if the SKU is empty
+        if ($part->isDirty(['part_name', 'part_brand_id', 'category_id']) || empty($part->sku)) {
+            
+            // Load relationships if they aren't loaded to get the names for the SKU
+            $brandName = $part->partBrand ? $part->partBrand->name : null;
+            $categoryName = $part->category ? $part->category->category_name : null;
+
+            $part->sku = self::generateSku(
+                $brandName, 
+                $categoryName, 
+                $part->part_name
+            );
+        }
+    });
+}
 
 }
