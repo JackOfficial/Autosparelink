@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -85,32 +86,68 @@ public function update(Request $request)
         'description'     => 'nullable|string|max:1000',
         'phone_number'    => 'required|string|max:20',
         'address'         => 'required|string|max:255',
-        'tin_number'      => 'nullable|digits:9', 
+        'tin_number'      => 'nullable|string|max:50', 
         'logo'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         // Document validation
-        'rdb_certificate' => 'nullable|mimes:pdf,jpg,jpeg,png|max:4096',
-        'tin_certificate' => 'nullable|mimes:pdf,jpg,jpeg,png|max:4096',
-        'owner_id'        => 'nullable|mimes:pdf,jpg,jpeg,png|max:4096',
+        'rdb_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        'tin_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        'owner_id'        => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
     ]);
 
-    $data = $request->only(['shop_name', 'description', 'phone_number', 'address', 'tin_number']);
+    DB::transaction(function () use ($request, $shop) {
+        // 1. Update basic shop info
+        $shop->update([
+            'shop_name'    => $request->shop_name,
+            'slug'         => Str::slug($request->shop_name),
+            'description'  => $request->description,
+            'phone_number' => $request->phone_number,
+            'address'      => $request->address,
+            'tin_number'   => $request->tin_number,
+        ]);
 
-    // List of all possible file uploads
-    $fileFields = ['logo' => 'shops/logos', 'rdb_certificate' => 'shops/docs', 'tin_certificate' => 'shops/docs', 'owner_id' => 'shops/docs'];
-
-    foreach ($fileFields as $field => $path) {
-        if ($request->hasFile($field)) {
-            // Delete old file if it exists
-            if ($shop->$field && Storage::disk('public')->exists($shop->$field)) {
-                Storage::disk('public')->delete($shop->$field);
+        // 2. Handle Logo (Public Disk)
+        if ($request->hasFile('logo')) {
+            if ($shop->logo && Storage::disk('public')->exists($shop->logo)) {
+                Storage::disk('public')->delete($shop->logo);
             }
-            
-            // Store the new file
-            $data[$field] = $request->file($field)->store($path, 'public');
+            $shop->logo = $request->file('logo')->store('shops/logos', 'public');
+            $shop->save();
         }
-    }
 
-    $shop->update($data);
+        // 3. Handle Verification Documents (Polymorphic & Local Disk)
+        $documentsToProcess = [
+            'rdb_certificate' => 'RDB Certificate',
+            'tin_certificate' => 'VAT/TIN Certificate',
+            'owner_id'        => 'Owner ID / Passport',
+        ];
+
+        foreach ($documentsToProcess as $inputKey => $documentTitle) {
+            if ($request->hasFile($inputKey)) {
+                $file = $request->file($inputKey);
+
+                // Find existing document record to delete old file
+                $existingDoc = $shop->documents()->where('title', $documentTitle)->first();
+
+                if ($existingDoc && Storage::disk('local')->exists($existingDoc->file_path)) {
+                    Storage::disk('local')->delete($existingDoc->file_path);
+                }
+
+                // Store new file on local disk
+                $path = $file->store('shop_verification/' . $shop->id, 'local');
+
+                // Update existing record or create new one
+                $shop->documents()->updateOrCreate(
+                    ['title' => $documentTitle],
+                    [
+                        'file_path'   => $path,
+                        'file_type'   => $file->getClientOriginalExtension(),
+                        'file_size'   => $file->getSize(),
+                        'uploaded_by' => auth()->id(),
+                    ]
+                );
+            }
+        }
+    });
 
     return back()->with('success', 'Shop profile and documents updated successfully.');
 }

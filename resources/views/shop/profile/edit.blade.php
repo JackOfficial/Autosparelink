@@ -81,7 +81,7 @@
                                                                 <i class="fas fa-file-pdf fa-2x text-danger"></i>
                                                             @endif
                                                             <div class="mt-2">
-                                                                <a href="{{ route('shop.documents.download', $existingDoc->id) }}" class="btn btn-sm btn-link text-decoration-none fw-bold p-0">
+                                                                <a href="{{ route('profile.documents.download', $existingDoc->id) }}" class="btn btn-sm btn-link text-decoration-none fw-bold p-0">
                                                                     <i class="fas fa-download me-1"></i>Download Current
                                                                 </a>
                                                             </div>
