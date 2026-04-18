@@ -12,6 +12,7 @@ class Part extends Model
     protected $fillable = [
         'sku',
         'shop_id',
+        'part_state_id',
         'part_number',
         'part_name',
         'category_id',
@@ -21,7 +22,12 @@ class Part extends Model
         'price',
         'stock_quantity',
         'status',
-    ];  
+    ];
+    
+    public function state()
+    {
+        return $this->belongsTo(PartState::class, 'part_state_id');
+    }
 
     public function category()
     {
