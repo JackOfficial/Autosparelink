@@ -10,7 +10,6 @@
                     </div>
                     <div class="card-body p-4">
                         
-                        {{-- Success Message --}}
                         @if(session('success'))
                             <div class="alert alert-success border-0 shadow-sm small mb-4">
                                 <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
@@ -47,39 +46,65 @@
 
                             <hr class="my-4">
 
-                            {{-- Documents Section (Polymorphic Relationship) --}}
+                            {{-- Documents Section --}}
                             <div class="mb-4">
-                                <h6 class="fw-bold text-dark mb-3"><i class="fas fa-file-invoice me-2 text-primary"></i>Business Verification Documents</h6>
+                                <h6 class="fw-bold text-dark mb-3">
+                                    <i class="fas fa-file-shield me-2 text-primary"></i>Business Verification Documents
+                                </h6>
                                 <div class="row g-3">
-                                    @forelse($shop->documents as $doc)
+                                    @php
+                                        // Define the expected documents for a Rwanda-based business
+                                        $expectedDocs = [
+                                            'RDB Certificate' => 'rdb_certificate',
+                                            'VAT/TIN Certificate' => 'tin_certificate',
+                                            'Owner ID/Passport' => 'owner_id'
+                                        ];
+                                    @endphp
+
+                                    @foreach($expectedDocs as $title => $slug)
+                                        @php 
+                                            // Find if this specific document type exists in the polymorphic relation
+                                            $existingDoc = $shop->documents->where('title', $title)->first(); 
+                                        @endphp
+                                        
                                         <div class="col-md-4">
-                                            <div class="border rounded p-3 bg-light-subtle text-center h-100 shadow-sm">
-                                                <label class="small fw-bold text-muted d-block mb-2">{{ $doc->title }}</label>
-                                                
-                                                <div class="mb-3">
-                                                    @if(in_array(strtolower($doc->file_type), ['jpg', 'jpeg', 'png']))
-                                                        <i class="fas fa-file-image fa-3x text-info"></i>
+                                            <div class="border rounded p-3 bg-light-subtle h-100 shadow-sm d-flex flex-column justify-content-between">
+                                                <div>
+                                                    <label class="small fw-bold text-muted d-block mb-2">{{ $title }}</label>
+                                                    
+                                                    @if($existingDoc)
+                                                        {{-- File Found: Show Download & UI --}}
+                                                        <div class="text-center py-2 mb-2 bg-white rounded border border-dashed">
+                                                            @if(in_array(strtolower($existingDoc->file_type), ['jpg', 'jpeg', 'png']))
+                                                                <i class="fas fa-file-image fa-2x text-info"></i>
+                                                            @else
+                                                                <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                                            @endif
+                                                            <div class="mt-2">
+                                                                <a href="{{ route('shop.documents.download', $existingDoc->id) }}" class="btn btn-sm btn-link text-decoration-none fw-bold p-0">
+                                                                    <i class="fas fa-download me-1"></i>Download Current
+                                                                </a>
+                                                            </div>
+                                                        </div>
                                                     @else
-                                                        <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                                        {{-- File Missing: Show Warning --}}
+                                                        <div class="text-center py-2 mb-2 bg-warning-subtle rounded border border-warning border-dashed">
+                                                            <i class="fas fa-exclamation-triangle text-warning mb-1"></i>
+                                                            <span class="d-block small fw-bold text-warning-emphasis">Missing Document</span>
+                                                        </div>
                                                     @endif
                                                 </div>
 
-                                                <div class="d-grid gap-2">
-                                                    {{-- Secure download route for 'local' disk files --}}
-                                                    <a href="{{ route('profile.documents.download', $doc->id) }}" class="btn btn-sm btn-outline-primary shadow-sm">
-                                                        <i class="fas fa-download me-1"></i> Download
-                                                    </a>
-                                                    <small class="text-muted" style="font-size: 0.7rem;">
-                                                        Submitted: {{ $doc->created_at->format('d M Y') }}
-                                                    </small>
+                                                {{-- Always show upload input for updates/new uploads --}}
+                                                <div class="mt-2">
+                                                    <label class="x-small text-muted mb-1" style="font-size: 0.7rem;">
+                                                        {{ $existingDoc ? 'Replace Document' : 'Upload Document' }}
+                                                    </label>
+                                                    <input type="file" name="{{ $slug }}" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
                                                 </div>
                                             </div>
                                         </div>
-                                    @empty
-                                        <div class="col-12 text-center py-3">
-                                            <p class="text-muted small">No documents found. Please contact support if you need to upload verification files.</p>
-                                        </div>
-                                    @endforelse
+                                    @endforeach
                                 </div>
                             </div>
 
