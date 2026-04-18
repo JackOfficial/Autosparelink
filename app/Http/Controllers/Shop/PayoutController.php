@@ -5,32 +5,37 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
 use App\Models\Payout;
+use App\Models\Commission; // Import the Commission model
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class PayoutController extends Controller
 {
-    protected $commissionRate = 0.10; // 10% Platform Fee
-
     /**
      * Helper to calculate the shop's current financial standing.
      */
     private function getFinancialSummary()
     {
-        // 1. Gross Revenue (Only Delivered & Successfully Paid)
-        $totalGross = OrderItem::forCurrentSeller()
-            ->whereHas('order', function ($query) {
-                $query->where('status', 'delivered')
-                    ->whereHas('payment', fn($p) => $p->where('status', 'successful'));
-            })
-            ->sum(DB::raw('unit_price * quantity')); // More reliable than subtotal column if it varies
+        // 1. Fetch the dynamic commission rate from Admin settings
+        // If getRate() returns 10, $percentage will be 0.10
+        $rawRate = Commission::getRate();
+        $percentage = $rawRate / 100;
 
-        // 2. Platform Fees & Net
-        $totalCommission = $totalGross * $this->commissionRate;
+        // 2. Gross Revenue (Completed OrderItems + Completed Orders + Successful Payment)
+        $totalGross = OrderItem::forCurrentSeller()
+            ->where('status', 'completed')
+            ->whereHas('order', function ($query) {
+                $query->where('status', 'completed')
+                      ->whereHas('payment', fn($p) => $p->where('status', 'successful'));
+            })
+            ->sum(DB::raw('unit_price * quantity'));
+
+        // 3. Financial Breakdown using dynamic rate
+        $totalCommission = $totalGross * $percentage;
         $netEarnings = $totalGross - $totalCommission;
 
-        // 3. Payout Deductions (Everything already paid or in the pipeline)
+        // 4. Payout Deductions (Everything already paid or in the pipeline)
         $deductions = Payout::forCurrentSeller()
             ->whereIn('status', ['completed', 'pending', 'processing'])
             ->selectRaw("
@@ -44,6 +49,7 @@ class PayoutController extends Controller
 
         return [
             'totalGross'       => $totalGross,
+            'commissionRate'   => $rawRate, // Pass the raw rate (e.g., 10) to the view
             'totalCommission'  => $totalCommission,
             'netEarnings'      => $netEarnings,
             'totalWithdrawn'   => $totalWithdrawn,
@@ -80,13 +86,12 @@ class PayoutController extends Controller
                 return back()->with('error', 'Insufficient balance. You can withdraw up to ' . number_format($summary['availableBalance']) . ' RWF.');
             }
 
-            // Create the payout via shop relationship
             Auth::user()->shop->payouts()->create([
                 'amount'          => $request->amount,
                 'payout_method'   => $request->payout_method,
                 'account_details' => $request->account_details,
                 'status'          => 'pending',
-                'currency'        => 'RWF', // Ensure currency is locked
+                'currency'        => 'RWF',
             ]);
 
             return redirect()->route('shop.payouts.index')
