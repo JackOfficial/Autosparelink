@@ -100,14 +100,30 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Part Brand <span class="text-danger">*</span></label>
-                                <select class="form-select @error('part_brand_id') is-invalid @enderror" wire:model="part_brand_id">
-                                    <option value="">-- Select Brand --</option>
-                                    @foreach($brands as $brand)
-                                        <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('part_brand_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <div class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label small fw-bold">Part Brand <span class="text-danger">*</span></label>
+        <select class="form-select @error('part_brand_id') is-invalid @enderror" wire:model="part_brand_id">
+            <option value="">-- Select Brand --</option>
+            @foreach($brands as $brand)
+                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+            @endforeach
+        </select>
+        @error('part_brand_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    </div>
+
+    {{-- Added Part State --}}
+    <div class="col-md-6">
+        <label class="form-label small fw-bold">Condition / State <span class="text-danger">*</span></label>
+        <select class="form-select @error('part_state_id') is-invalid @enderror" wire:model="part_state_id">
+            <option value="">-- Select Condition --</option>
+            @foreach($states as $state)
+                <option value="{{ $state->id }}">{{ $state->name }}</option>
+            @endforeach
+        </select>
+        @error('part_state_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    </div>
+</div>
                             </div>
 
                             <div class="col-md-3">

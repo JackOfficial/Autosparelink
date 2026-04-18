@@ -4,7 +4,7 @@ namespace App\Livewire\Shop\Parts;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\{Part, Category, PartBrand, Specification, PartFitment};
+use App\Models\{Part, Category, PartBrand, Specification, PartFitment, PartState};
 use Illuminate\Support\Str;
 
 class PartsComponent extends Component
@@ -15,6 +15,7 @@ class PartsComponent extends Component
     public $part_name, $part_number, $oem_number, $description;
     public $parentCategoryId, $category_id, $part_brand_id;
     public $searchPart = '';
+    public $part_state_id;
     // Inventory & Subs
     public $price, $stock_quantity;
     public $substitution_part_ids = []; // For the multiple select
@@ -63,6 +64,7 @@ class PartsComponent extends Component
             'part_brand_id' => 'required',
             'price' => 'required|numeric',
             'stock_quantity' => 'required|integer',
+            'part_state_id' => 'required|exists:part_states,id',
         ]);
 
         $brand = PartBrand::find($this->part_brand_id);
@@ -70,6 +72,7 @@ class PartsComponent extends Component
 
         $part = Part::create([
             'part_name'      => $this->part_name,
+            'part_state_id'  => $this->part_state_id,
             'part_number'    => $this->part_number,
             'oem_number'     => $this->oem_number,
             'category_id'    => $this->category_id,
@@ -139,6 +142,7 @@ class PartsComponent extends Component
             'childCategories'  => Category::where('parent_id', $this->parentCategoryId)->orderBy('category_name')->get(),
             'brands'           => PartBrand::orderBy('name')->get(),
             'allParts'         => Part::with('partBrand')->orderBy('part_name')->get(),
+            'states'           => PartState::all(),
             'partResults' => $partResults,
             'selectedSubstitutions' => Part::whereIn('id', $this->substitution_part_ids)->with('partBrand')->get(),
         ]);

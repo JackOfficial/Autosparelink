@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Part;
 use App\Models\Category;
 use App\Models\PartBrand;
+use App\Models\PartState;
 use Illuminate\Http\Request;
 
 class PartController extends Controller
@@ -45,7 +46,8 @@ class PartController extends Controller
     {
         $categories = Category::all();
         $brands = PartBrand::all();
-        return view('shop.parts.create', compact('categories', 'brands'));
+        $states = PartState::all();
+        return view('shop.parts.create', compact('categories', 'brands', 'states'));
     }
 
     /**
