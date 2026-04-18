@@ -247,12 +247,12 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
 Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group(function () {
    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
    Route::resource('/parts', ShopPartController::class);
-   Route::resource('/orders', ShopOrderController::class); 
+   Route::resource('/orders', ShopOrderController::class);
+   Route::get('/download-doc/{id}', [ShopProfileController::class, 'downloadDocument'])->name('documents.download'); 
 
     Route::prefix('profile')->name('profile.')->group(function () {
           Route::get('/edit', [ShopProfileController::class, 'edit'])->name('edit');
           Route::put('/update', [ShopProfileController::class, 'update'])->name('update');
-          Route::get('/download-doc/{id}', [ShopProfileController::class, 'downloadDocument'])->name('documents.download');
     });
 
     Route::prefix('support')->name('support.')->group(function () {
