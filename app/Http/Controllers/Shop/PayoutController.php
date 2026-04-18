@@ -26,8 +26,8 @@ class PayoutController extends Controller
         $totalGross = OrderItem::forCurrentSeller()
             ->where('status', 'completed')
             ->whereHas('order', function ($query) {
-                $query->where('status', 'completed')
-                      ->whereHas('payment', fn($p) => $p->where('status', 'successful'));
+                $query->where('status', 'completed');
+                    //   ->whereHas('payment', fn($p) => $p->where('status', 'successful'));
             })
             ->sum(DB::raw('unit_price * quantity'));
 
