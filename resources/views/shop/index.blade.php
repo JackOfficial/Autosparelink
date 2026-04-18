@@ -12,7 +12,7 @@
                     </ol>
                 </nav>
                 <h1 class="h3 mb-1 fw-bold text-dark">Business Overview</h1>
-                <p class="text-muted small mb-0">Live updates for <strong>{{ $shop->name }}</strong></p>
+                <p class="text-muted small mb-0">Live updates for <strong>{{ $shop->shop_name }}</strong></p>
             </div>
             <div class="col-12 col-md-auto d-flex gap-2">
                 <button class="btn btn-white border rounded-pill shadow-sm px-3 py-2 small">
