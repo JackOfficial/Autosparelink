@@ -5,89 +5,73 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
 use App\Models\Part;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\Wallet;
+use App\Models\WalletTransaction;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function dashboard()
-{
-    $shop = auth()->user()->shop;
+    {
+        $shop = Auth::user()->shop;
+        
+        // Scope-based retrieval for strict data ownership
+        $wallet = Wallet::forCurrentSeller()->first();
 
-    // 1. Get last 7 days of sales (Specific to THIS Shop)
-    $salesData = OrderItem::where('shop_id', $shop->id)
-        ->where('created_at', '>=', now()->subDays(7))
-        ->whereHas('order.payment', function ($query) {
-            $query->where('status', 'successful');
-        })
-        ->selectRaw('DATE(created_at) as date, SUM(quantity * unit_price) as total')
-        ->groupBy('date')
-        ->orderBy('date')
-        ->get()
-        ->pluck('total', 'date');
+        // 1. CHART DATA: 7-Day Revenue (Net Earnings from Wallet)
+        $salesData = WalletTransaction::forCurrentSeller()
+            ->where('type', 'credit')
+            ->where('status', 'completed')
+            ->where('created_at', '>=', now()->subDays(6)->startOfDay())
+            ->selectRaw('DATE(created_at) as date, SUM(amount) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total', 'date');
 
-    // 2. Fetch Low Stock Items (Logic Fixed for Shop Isolation)
-    $lowStockItems = Part::where('shop_id', $shop->id)
-        ->where(function($query) {
-            $query->where('stock_quantity', '<', 5);
-            // If you add min_threshold later, uncomment the line below:
-            // ->orWhereColumn('stock_quantity', '<=', 'min_threshold');
-        })
-        ->limit(5)
-        ->get();
+        // Map dates to ensure every day in the last week exists (fill 0s)
+        $chartFinal = collect(range(0, 6))->mapWithKeys(function ($days) {
+            $date = now()->subDays($days)->format('Y-m-d');
+            return [$date => 0];
+        })->merge($salesData)->reverse();
 
-    // 3. Fetch Pending Pickups for the Blue Card
-    $pendingPickups = OrderItem::with(['order.user'])
-        ->where('shop_id', $shop->id)
-        ->where('status', 'ready_for_pickup')
-        ->latest()
-        ->limit(3)
-        ->get()
-        ->map(function($item) {
-            return (object)[
-                'customer_name' => $item->order->user->name ?? 'Guest Customer',
-                'scheduled_at'  => $item->updated_at,
-                'items_count'   => $item->quantity,
-                'location'      => $item->order->shipping_address ?? 'Kigali Store'
-            ];
-        });
+        // 2. INVENTORY METRICS: For Radial Bar & Stats
+        $totalParts = Part::forCurrentSeller()->count();
+        $lowStockCount = Part::forCurrentSeller()->where('stock_quantity', '<', 5)->count();
+        $healthyCount = max(0, $totalParts - $lowStockCount);
 
-    // 4. High-Value Dashboard Metrics
-    $stats = [
-        'total_inventory' => Part::where('shop_id', $shop->id)->count(),
-        'low_stock'       => Part::where('shop_id', $shop->id)
-                                ->where('stock_quantity', '<', 5)
-                                ->count(),
-        'pending_pickup'  => OrderItem::where('shop_id', $shop->id)
-                                ->where('status', 'ready_for_pickup')
-                                ->count(),
-        'total_revenue'   => OrderItem::where('shop_id', $shop->id)
-                                ->whereHas('order.payment', function($q){
-                                    $q->where('status', 'successful');
-                                })->sum(DB::raw('quantity * unit_price')),
-    ];
+        // 3. AGGREGATED STATS
+        $stats = [
+            'total_inventory'   => $totalParts,
+            'low_stock'         => $lowStockCount,
+            'available_balance' => $wallet?->balance ?? 0,
+            'pending_balance'   => $wallet?->pending_balance ?? 0,
+            'total_revenue'     => $wallet?->total_earnings ?? 0,
+        ];
 
-    // 5. Recent Activity
-    $recentSales = OrderItem::with(['order.user', 'part'])
-        ->where('shop_id', $shop->id)
-        ->latest()
-        ->take(5)
-        ->get();
-
-    // Chart Formatting
-    $formattedSales = collect(range(0, 6))->mapWithKeys(function($days) {
-        $date = now()->subDays($days)->format('Y-m-d');
-        return [$date => 0];
-    })->merge($salesData)->reverse();
-
-    return view('shop.index', [
-        'salesData'      => $formattedSales->values(),
-        'salesLabels'    => $formattedSales->keys(),
-        'stats'          => $stats,
-        'recentSales'    => $recentSales,
-        'lowStockItems'  => $lowStockItems,
-        'pendingPickups' => $pendingPickups,
-        'shop'           => $shop
-    ]);
-}
+        return view('shop.index', [
+            'shop'           => $shop,
+            'wallet'         => $wallet,
+            'stats'          => $stats,
+            'salesData'      => $chartFinal->values(),
+            'salesLabels'    => $chartFinal->keys(),
+            'inventoryStats' => [$lowStockCount, $healthyCount], // Used for Radial Bar [Critical, Healthy]
+            'recentSales'    => OrderItem::forCurrentSeller()
+                                    ->with(['order.user', 'part'])
+                                    ->latest()
+                                    ->take(5)
+                                    ->get(),
+            'pendingPickups' => OrderItem::forCurrentSeller()
+                                    ->where('status', 'ready_for_pickup')
+                                    ->with(['order.user'])
+                                    ->latest()
+                                    ->limit(3)
+                                    ->get()
+                                    ->map(fn($item) => (object)[
+                                        'customer_name' => $item->order->user->name ?? 'Guest Customer',
+                                        'location'      => $item->order->shipping_address ?? 'Kigali Store',
+                                        'items_count'   => $item->quantity,
+                                        'updated_at'    => $item->updated_at,
+                                    ]),
+        ]);
+    }
 }

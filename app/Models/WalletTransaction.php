@@ -108,21 +108,41 @@ class WalletTransaction extends Model
             $wallet = $transaction->wallet;
 
             // 1. Handle COMPLETED transactions (Immediate balance update)
-            if ($transaction->status === 'completed') {
-                if ($transaction->type === 'credit') {
+            if ($transaction->status == 'completed') {
+                if ($transaction->type == 'credit') {
                     $wallet->increment('balance', $transaction->amount);
-                } elseif ($transaction->type === 'debit') {
+                } elseif ($transaction->type == 'debit') {
                     $wallet->decrement('balance', $transaction->amount);
                 }
             } 
             
             // 2. Handle PENDING transactions (Escrow/Pending state)
-            elseif ($transaction->status === 'pending') {
+            elseif ($transaction->status == 'pending') {
                 $wallet->increment('pending_balance', $transaction->amount);
             }
 
             // 3. Always update the activity timestamp
             $wallet->update(['last_transaction_at' => now()]);
         });
+
+        static::updated(function ($transaction) {
+    // If the status just flipped from pending to completed
+    if ($transaction->isDirty('status') && 
+        $transaction->getOriginal('status') == 'pending' && 
+        $transaction->status == 'completed') {
+        
+        $wallet = $transaction->wallet;
+        
+        // Move money from pending to actual balance
+        $wallet->decrement('pending_balance', $transaction->amount);
+        
+        if ($transaction->type == 'credit') {
+            $wallet->increment('balance', $transaction->amount);
+        } else {
+            $wallet->decrement('balance', $transaction->amount);
+        }
+    }
+    });
+
     }
 }

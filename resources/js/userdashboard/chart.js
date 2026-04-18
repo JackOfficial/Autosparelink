@@ -17,13 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Chart instances stored globally within this scope to allow updates
     let salesChart, inventoryChart;
 
-    // 1. Sales Performance Chart
+    // 1. Sales Performance Chart (Revenue Analytics)
     const spEl = document.getElementById('salesPurchaseChart');
-    if (spEl) {
+    if (spEl && window.dashboardData) {
         const spOptions = {
             series: [{ 
-                name: 'Revenue', 
-                data: window.dashboardData?.sales || [] 
+                name: 'Net Earnings', 
+                data: window.dashboardData.sales || [] 
             }],
             colors: ['#0D8ABC'], 
             chart: { 
@@ -31,8 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 height: 350, 
                 toolbar: { show: false },
                 zoom: { enabled: false },
-                background: 'transparent', // Vital for dark mode
-                theme: { mode: getTheme() }  // Dynamic theme
+                background: 'transparent',
+                fontFamily: 'inherit',
+                theme: { mode: getTheme() }
             },
             dataLabels: { enabled: false },
             stroke: { curve: 'smooth', width: 3 },
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             xaxis: { 
-                categories: window.dashboardData?.labels || [],
+                categories: window.dashboardData.labels || [],
                 axisBorder: { show: false },
                 axisTicks: { show: false },
                 labels: { style: { colors: '#6c757d' } }
@@ -54,11 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
             yaxis: { 
                 labels: { 
                     style: { colors: '#6c757d' },
+                    // Rwandan Francs get large; use 'k' for thousands
                     formatter: (val) => val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val
                 } 
             },
             tooltip: { 
-                theme: getTheme(), // Follows theme
+                theme: getTheme(),
                 x: { format: 'dd MMM' },
                 y: { formatter: (val) => formatCurrency(val) } 
             },
@@ -71,30 +73,39 @@ document.addEventListener('DOMContentLoaded', () => {
         salesChart.render();
     }
 
-    // 2. Inventory Distribution Chart
+    // 2. Inventory Health Chart (Radial Bar)
     const custEl = document.getElementById('customerChart');
-    if (custEl) {
+    if (custEl && window.dashboardData) {
         const custOptions = {
-            series: [window.dashboardData?.lowStock || 30, 70],
+            // Series [Low Stock Count, Healthy Stock Count]
+            series: window.dashboardData.inventoryStats || [0, 100],
             chart: { 
-                height: 250, 
+                height: 300, 
                 type: 'radialBar',
                 theme: { mode: getTheme() }
             },
-            colors: ['#FB2C36', '#00C951'], // Match your brand red and green
-            labels: ['Low Stock', 'Healthy'],
+            colors: ['#FB2C36', '#00C951'], // Red for Critical, Green for Healthy
+            labels: ['Critical', 'Healthy'],
             plotOptions: {
                 radialBar: {
-                    hollow: { size: '50%' },
+                    hollow: { size: '60%' },
                     track: { background: getTheme() === 'dark' ? '#333' : "#f8f9fa" },
                     dataLabels: { 
                         name: { fontSize: '14px', color: '#6c757d', offsetY: -10 }, 
                         value: { 
-                            fontSize: '20px', 
+                            fontSize: '22px', 
                             fontWeight: 'bold', 
                             offsetY: 5,
-                            color: getTheme() === 'dark' ? '#fff' : '#333'
-                        } 
+                            color: getTheme() === 'dark' ? '#fff' : '#333',
+                            formatter: (val) => val // Show raw count instead of percentage
+                        },
+                        total: {
+                            show: true,
+                            label: 'Low Items',
+                            color: '#6c757d',
+                            // Specifically show the first value in our array (low stock)
+                            formatter: () => window.dashboardData.inventoryStats[0]
+                        }
                     }
                 }
             },
@@ -108,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggler = document.getElementById('themeToggler');
     if (themeToggler) {
         themeToggler.addEventListener('click', () => {
-            // Short delay to ensure the HTML attribute has updated first
             setTimeout(() => {
                 const currentTheme = getTheme();
                 const gridColor = currentTheme === 'dark' ? '#333' : '#f1f1f1';
