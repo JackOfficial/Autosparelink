@@ -188,11 +188,23 @@
                     <div class="d-flex align-items-center mb-1">
                         <div class="fw-bold text-dark me-2">{{ $part->part_name }}</div>
                         @if($part->state)
-                            <span class="badge-state text-white shadow-sm" 
-                                  style="background-color: {{ $part->state->color_code ?? '#6c757d' }};">
-                                {{ $part->state->name }}
-                            </span>
-                        @endif
+    @php
+        $stateColor = match(strtolower($part->state->slug ?? $part->state->name)) {
+            'new'          => '#2dce89', // Green
+            'used'         => '#feb2b2', // Soft Red/Pink
+            'refurbished'  => '#11cdef', // Cyan/Blue
+            default        => '#6c757d', // Gray
+        };
+        
+        // Ensure text is readable: Dark text for 'Used' since it's a light background
+        $textColor = (strtolower($part->state->slug ?? $part->state->name) === 'used') ? '#c53030' : '#ffffff';
+    @endphp
+
+    <span class="badge-state shadow-sm" 
+          style="background-color: {{ $stateColor }}; color: {{ $textColor }};">
+        {{ $part->state->name }}
+    </span>
+@endif
                     </div>
                     <div class="mt-1">
                         <span class="badge bg-light text-dark border sku-copy me-2" 
