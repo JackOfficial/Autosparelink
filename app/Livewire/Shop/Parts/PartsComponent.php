@@ -143,7 +143,7 @@ class PartsComponent extends Component
             'brands'           => PartBrand::orderBy('name')->get(),
             'allParts'         => Part::with('partBrand')->orderBy('part_name')->get(),
             'states'           => PartState::all(),
-            'partResults' => $partResults,
+            'partResults'      => $partResults,
             'selectedSubstitutions' => Part::whereIn('id', $this->substitution_part_ids)->with('partBrand')->get(),
         ]);
 

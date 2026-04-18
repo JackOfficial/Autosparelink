@@ -4,7 +4,7 @@ namespace App\Livewire\Shop\Parts;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\{Part, Category, PartBrand, Specification, PartFitment};
+use App\Models\{Part, Category, PartBrand, Specification, PartFitment, PartState};
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,7 +17,7 @@ class EditComponent extends Component
     // Form Properties
     public $part_name, $part_number, $oem_number, $description;
     public $parentCategoryId, $category_id, $part_brand_id;
-    public $price, $stock_quantity;
+    public $price, $stock_quantity, $part_state_id;
     
     // Selection & Search State
     public $selectedSpecs = []; 
@@ -45,6 +45,7 @@ class EditComponent extends Component
         $this->stock_quantity = $part->stock_quantity;
         $this->part_brand_id = $part->part_brand_id;
         $this->category_id = $part->category_id;
+        $this->part_state_id = $part->part_state_id;
         
         // Logic for dropdowns
         $this->parentCategoryId = $part->category?->parent_id;
@@ -105,6 +106,7 @@ class EditComponent extends Component
         // 1. Update Core Part Data
         $this->part->update([
             'part_name'      => $this->part_name,
+            'part_state_id'  => $this->part_state_id,
             'part_number'    => $this->part_number,
             'oem_number'     => $this->oem_number,
             'category_id'    => $this->category_id,
@@ -171,6 +173,7 @@ class EditComponent extends Component
             'parentCategories'      => Category::whereNull('parent_id')->orderBy('category_name')->get(),
             'childCategories'       => Category::where('parent_id', $this->parentCategoryId)->orderBy('category_name')->get(),
             'brands'                => PartBrand::orderBy('name')->get(),
+            'states'                => PartState::all(),
             'selectedSubstitutions' => Part::whereIn('id', $this->substitution_part_ids)->with('partBrand')->get(),
         ]);
     }
