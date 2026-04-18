@@ -78,26 +78,31 @@
                                 @error('oem_number') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">Parent Category</label>
-                                <select class="form-select" wire:model.live="parentCategoryId">
-                                    <option value="">-- Select Parent --</option>
-                                    @foreach($parentCategories as $parent)
-                                        <option value="{{ $parent->id }}">{{ $parent->category_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                           <div class="col-md-6">
+    <label class="form-label small fw-bold">Category</label>
+    <select class="form-select" wire:model.live="parentCategoryId">
+        <option value="">-- Select Category --</option>
+        @foreach($parentCategories as $parent)
+            <option value="{{ $parent->id }}">{{ $parent->category_name }}</option>
+        @endforeach
+    </select>
+</div>
 
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">Child Category <span class="text-danger">*</span></label>
-                                <select class="form-select @error('category_id') is-invalid @enderror" wire:model="category_id">
-                                    <option value="">-- Select Child --</option>
-                                    @foreach($childCategories as $child)
-                                        <option value="{{ $child->id }}">{{ $child->category_name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
+<div class="col-md-6">
+    <label class="form-label small fw-bold">Sub Category <span class="text-danger">*</span></label>
+    {{-- The 'disabled' attribute prevents selection until parentCategoryId is set --}}
+    <select class="form-select @error('category_id') is-invalid @enderror" 
+            wire:model="category_id" 
+            {{ !$parentCategoryId ? 'disabled' : '' }}>
+        <option value="">
+            {{ !$parentCategoryId ? '-- Select Parent First --' : '-- Select Child --' }}
+        </option>
+        @foreach($childCategories as $child)
+            <option value="{{ $child->id }}">{{ $child->category_name }}</option>
+        @endforeach
+    </select>
+    @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+</div>
 
                             <div class="col-md-6">
                                 <div class="row g-3">
