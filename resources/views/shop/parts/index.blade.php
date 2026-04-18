@@ -29,6 +29,17 @@
 
     .compat-pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: #f8f9fe; color: #525f7f; border: 1px solid #e9ecef; margin-inline-end: 4px; margin-bottom: 4px; display: inline-block; font-weight: 500; }
     
+    /* State Badge Styling */
+    .badge-state {
+        font-size: 0.6rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+    
     [x-cloak] { display: none !important; }
 </style>
 @endpush
@@ -37,6 +48,7 @@
      x-data="{ 
         search: '{{ request('search') }}', 
         filterType: 'all',
+        filterState: 'all',
         copiedSku: null,
         copyToClipboard(text) {
             navigator.clipboard.writeText(text);
@@ -109,21 +121,29 @@
         {{-- Search and Filter Bar --}}
         <div class="card-header bg-white border-0 py-3">
             <div class="row align-items-center">
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <form @submit.prevent="submitSearch">
                         <div class="input-group border rounded-pill px-3 py-1 bg-light">
-                            <input type="text" x-model="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Press Enter to search SKU or Name...">
+                            <input type="text" x-model="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Press Enter to search...">
                             <button type="submit" class="btn btn-transparent p-0 text-muted">
                                 <i class="fa fa-search"></i>
                             </button>
                         </div>
                     </form>
                 </div>
-                <div class="col-md-7 text-md-end mt-3 mt-md-0">
+                <div class="col-md-8 text-md-end mt-3 mt-md-0">
+                    {{-- Status Filters --}}
+                    <div class="btn-group shadow-none me-2">
+                        <button class="btn btn-light btn-sm px-3 border" :class="filterType === 'all' && 'active border-primary'" @click="filterType = 'all'">All</button>
+                        <button class="btn btn-light btn-sm px-3 border" :class="filterType === 'active' && 'active border-primary'" @click="filterType = 'active'">Live</button>
+                        <button class="btn btn-light btn-sm px-3 border" :class="filterType === 'low' && 'active border-primary'" @click="filterType = 'low'">Low Stock</button>
+                    </div>
+                    {{-- State Filters --}}
                     <div class="btn-group shadow-none">
-                        <button class="btn btn-light btn-sm px-3" :class="filterType === 'all' && 'active border-primary'" @click="filterType = 'all'">All</button>
-                        <button class="btn btn-light btn-sm px-3" :class="filterType === 'active' && 'active border-primary'" @click="filterType = 'active'">Live</button>
-                        <button class="btn btn-light btn-sm px-3" :class="filterType === 'low' && 'active border-primary'" @click="filterType = 'low'">Low Stock</button>
+                        <button class="btn btn-outline-light btn-sm text-dark border" :class="filterState === 'all' && 'bg-white border-primary'" @click="filterState = 'all'">All Conditions</button>
+                        <button class="btn btn-outline-light btn-sm text-dark border" :class="filterState === 'new' && 'bg-white border-primary'" @click="filterState = 'new'">New</button>
+                        <button class="btn btn-outline-light btn-sm text-dark border" :class="filterState === 'used' && 'bg-white border-primary'" @click="filterState = 'used'">Used</button>
+                        <button class="btn btn-outline-light btn-sm text-dark border" :class="filterState === 'refurbished' && 'bg-white border-primary'" @click="filterState = 'refurbished'">Restored</button>
                     </div>
                 </div>
             </div>
@@ -144,10 +164,11 @@
                <tbody>
     @forelse($parts as $part)
     <tr class="part-row" 
-        x-show="filterType === 'all' || 
+        x-show="((filterType === 'all') || 
                 (filterType === 'active' && {{ $part->status ? 'true' : 'false' }}) || 
-                (filterType === 'low' && {{ $part->stock_quantity }} < 5)"
-        x-transition> {{-- Added a smooth transition for the filter --}}
+                (filterType === 'low' && {{ $part->stock_quantity }} < 5)) && 
+                (filterState === 'all' || filterState === '{{ $part->state->slug ?? '' }}')"
+        x-transition>
         
         <td class="ps-4">
             <div class="d-flex align-items-center">
@@ -164,7 +185,15 @@
                     @endforelse
                 </div>
                 <div>
-                    <div class="fw-bold text-dark mb-0">{{ $part->part_name }}</div>
+                    <div class="d-flex align-items-center mb-1">
+                        <div class="fw-bold text-dark me-2">{{ $part->part_name }}</div>
+                        @if($part->state)
+                            <span class="badge-state text-white shadow-sm" 
+                                  style="background-color: {{ $part->state->color_code ?? '#6c757d' }};">
+                                {{ $part->state->name }}
+                            </span>
+                        @endif
+                    </div>
                     <div class="mt-1">
                         <span class="badge bg-light text-dark border sku-copy me-2" 
                               @click="copyToClipboard('{{ $part->sku }}')"
@@ -182,7 +211,6 @@
             <div class="d-flex flex-wrap" style="max-width: 220px;">
                 @forelse($part->fitments->take(2) as $fitment)
                     <span class="compat-pill">
-                        {{-- Fixed potential naming conflict with model_name/name --}}
                         {{ $fitment->specification->variant->name ?? '' }} {{ $fitment->vehicleModel->name ?? '' }}
                     </span>
                 @empty

@@ -20,6 +20,7 @@ class PartController extends Controller
             ->with([
                 'category:id,category_name', 
                 'partBrand:id,name', 
+                'state',
                 'photos', 
                 'fitments.vehicleModel.brand'
             ])
