@@ -28,6 +28,7 @@ class PartController extends Controller
     $parts = Part::with([
             'category:id,category_name', // Selecting specific columns for performance
             'partBrand:id,name',
+            'shop',
             'photos',
             'state',
             'fitments.vehicleModel.brand',

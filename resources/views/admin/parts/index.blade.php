@@ -187,7 +187,7 @@
                                     
                                     {{-- Shop Name --}}
                                     <div class="text-primary small font-weight-bold mb-1">
-                                        <i class="fas fa-store mr-1"></i> {{ $part->shop->name ?? 'Unknown Shop' }}
+                                        <i class="fas fa-store mr-1"></i> {{ $part->shop->shop_name ?? 'Unknown Shop' }}
                                     </div>
 
                                     <div class="d-flex align-items-center mt-1">
