@@ -29,6 +29,7 @@ class PartController extends Controller
             'category:id,category_name', // Selecting specific columns for performance
             'partBrand:id,name',
             'photos',
+            'state',
             'fitments.vehicleModel.brand',
         ])
         ->when($request->search, function($query, $search) {

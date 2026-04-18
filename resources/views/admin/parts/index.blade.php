@@ -29,6 +29,9 @@
     .compat-pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: #f8f9fe; color: #525f7f; border: 1px solid #e9ecef; margin-right: 4px; margin-bottom: 4px; display: inline-block; font-weight: 500; }
     .sub-item { font-size: 0.75rem; color: #4c51bf; background: #ebf4ff; padding: 1px 6px; border-radius: 3px; display: block; margin-top: 2px; width: fit-content; border: 1px solid #c3dafe; }
     
+    /* State Badge Styling */
+    .badge-state { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; margin-left: 5px; }
+
     [x-cloak] { display: none !important; }
 </style>
 @endpush
@@ -111,7 +114,7 @@
             <div class="row align-items-center">
                 <div class="col-md-5">
                     <div class="input-group border rounded-pill px-3 py-1 bg-light">
-                        <input type="text" x-model="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Search name, SKU, fitment or substitutes...">
+                        <input type="text" x-model="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Search name, SKU, shop or fitments...">
                         <div class="input-group-append">
                             <span class="btn btn-transparent p-0 text-muted d-flex align-items-center">
                                 <i class="fa fa-search" x-show="search === ''"></i>
@@ -163,7 +166,30 @@
                                     @endforelse
                                 </div>
                                 <div>
-                                    <div class="font-weight-bold text-dark mb-0" style="font-size: 0.95rem;">{{ $part->part_name }}</div>
+                                    <div class="d-flex align-items-center mb-0">
+                                        <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">{{ $part->part_name }}</div>
+                                        {{-- State Badge --}}
+                                        @if($part->state)
+                                            @php
+                                                $stateColor = match(strtolower($part->state->slug ?? $part->state->name)) {
+                                                    'new'          => '#2dce89',
+                                                    'used'         => '#feb2b2',
+                                                    'refurbished'  => '#11cdef',
+                                                    default        => '#6c757d',
+                                                };
+                                                $textColor = (strtolower($part->state->slug ?? $part->state->name) === 'used') ? '#c53030' : '#ffffff';
+                                            @endphp
+                                            <span class="badge-state" style="background-color: {{ $stateColor }}; color: {{ $textColor }};">
+                                                {{ $part->state->name }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    
+                                    {{-- Shop Name --}}
+                                    <div class="text-primary small font-weight-bold mb-1">
+                                        <i class="fas fa-store mr-1"></i> {{ $part->shop->name ?? 'Unknown Shop' }}
+                                    </div>
+
                                     <div class="d-flex align-items-center mt-1">
                                         <span class="badge badge-light border sku-copy text-muted mr-2" @click="copyToClipboard('{{ $part->sku }}')" title="Click to copy SKU">
                                             {{ $part->sku }}
@@ -176,10 +202,8 @@
                         <td>
                             <div class="small text-dark fw-500 mb-1">{{ $part->category->category_name ?? 'General' }}</div>
                             <div class="d-flex flex-wrap" style="max-width: 250px;">
-                                {{-- Accessing through the fitments relationship created in your save() --}}
                                 @forelse($part->fitments->take(3) as $fitment)
                                     <span class="compat-pill">
-                                        {{-- Adjust these property names if your Specification model uses different ones --}}
                                         {{ $fitment->specification->variant->name ?? 'Model' }}
                                     </span>
                                 @empty
