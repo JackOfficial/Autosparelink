@@ -80,7 +80,6 @@ public function finalize($id)
     if (!in_array($order->status, ['delivered', 'shipped'])) {
         return back()->with('error', 'Only delivered orders can be finalized.');
     }
-    dd("ahangaha!");
 
     DB::transaction(function () use ($order) {
         // 1. Mark the main order as completed
