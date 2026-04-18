@@ -78,9 +78,9 @@ class AppServiceProvider extends ServiceProvider
             if ($user->hasRole('seller') && $user->shop) {
                 $wallet = $user->shop->wallet;
                 $view->with('seller_stats', [
-                    'balance'      => $wallet->balance,
-                    'total_earned' => $wallet->total_earnings, // Uses your Wallet model accessor
-                    'pending'      => $wallet->pending_balance,
+                    'balance'      => $wallet->balance ?? 0,
+                    'total_earned' => $wallet->total_earnings ?? 0, // Uses your Wallet model accessor
+                    'pending'      => $wallet->pending_balance ?? 0,
                     'currency'     => $wallet->currency ?? 'RWF',
                 ]);
             }
