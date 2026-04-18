@@ -75,7 +75,7 @@ public function show(string $id)
 public function finalize($id)
 {
     $order = Order::findOrFail($id);
-
+dd("ahangaha!");
     // Safety check: Prevent finalizing unless it was delivered or shipped
     if (!in_array($order->status, ['delivered', 'shipped'])) {
         return back()->with('error', 'Only delivered orders can be finalized.');
@@ -90,6 +90,7 @@ public function finalize($id)
         foreach ($order->orderItems as $item) {
             if ($item->status != 'completed') {
                 $item->status = 'completed';
+                
                 $item->save(); 
             }
         }
