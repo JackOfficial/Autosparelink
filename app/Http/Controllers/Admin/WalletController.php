@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\OrderItem;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use App\Models\Shop;
@@ -14,59 +13,36 @@ class WalletController extends Controller
 {
     /**
      * Display all shop wallets with their current balances.
+     * Uses centralized Shop model audit logic.
      */
-   public function index()
-{
-    // 1. Fetch Wallets with necessary Shop and Order relations
-    // We paginate first to keep the data set small for calculations
-    $wallets = Wallet::with([
-        'shop.orderItems' => function ($query) {
-            $query->where('status', 'completed')
-                  ->whereHas('order', fn($q) => $q->where('status', 'completed'));
-        },
-        'shop.payouts' => function ($query) {
-            $query->whereIn('status', ['completed', 'pending', 'processing']);
-        }
-    ])
-    ->latest('updated_at')
-    ->paginate(15);
+    public function index()
+    {
+        // 1. Fetch Wallets with Shop relation (Paginated for performance)
+        $wallets = Wallet::with('shop')
+            ->latest('updated_at')
+            ->paginate(15);
 
-    // 2. Transform the collection to include audited math
-    $wallets->getCollection()->transform(function ($wallet) {
-        $shop = $wallet->shop;
-        $percentage = $shop->commission_rate / 100;
+        // 2. Transform the collection to include centralized audited math
+        $wallets->getCollection()->transform(function ($wallet) {
+            // Call the Single Source of Truth from Shop.php
+            $audit = $wallet->shop->getFinancialAudit();
 
-        // Audited Gross
-        $totalGross = $shop->orderItems->sum(function($item) {
-            return $item->quantity * $item->unit_price;
+            // Attach values for the Blade view
+            $wallet->audited_gross      = $audit['totalGross'];
+            $wallet->commission_rate    = $audit['commissionRate'];
+            $wallet->audited_commission = $audit['totalCommission'];
+            $wallet->audited_net        = $audit['netEarnings'];
+            $wallet->audited_locked     = $audit['pendingPayouts'];
+            $wallet->audited_balance    = $audit['availableBalance'];
+
+            return $wallet;
         });
 
-        // Financial Breakdown
-        $totalCommission = $totalGross * $percentage;
-        $netEarnings = $totalGross - $totalCommission;
-
-        // Payout Audit
-        $withdrawn = $shop->payouts->where('status', 'completed')->sum('amount');
-        $locked = $shop->payouts->whereIn('status', ['pending', 'processing'])->sum('amount');
-        
-        // Calculated Audited Balance
-        $auditedBalance = $netEarnings - ($withdrawn + $locked);
-
-        // Attach calculated values to the wallet object for the view
-        $wallet->audited_gross = $totalGross;
-        $wallet->audited_commission = $totalCommission;
-        $wallet->audited_net = $netEarnings;
-        $wallet->audited_locked = $locked;
-        $wallet->audited_balance = $auditedBalance;
-
-        return $wallet;
-    });
-
-    return view('admin.wallets.index', compact('wallets'));
-}
+        return view('admin.wallets.index', compact('wallets'));
+    }
 
     /**
-     * Show the form for manual adjustment (e.g., adding bonus or manual deduction).
+     * Show the form for manual adjustment.
      */
     public function create()
     {
@@ -80,42 +56,42 @@ class WalletController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'shop_id' => 'required|exists:shops,id',
-            'type' => 'required|in:credit,debit',
-            'amount' => 'required|numeric|min:1',
+            'shop_id'     => 'required|exists:shops,id',
+            'type'        => 'required|in:credit,debit',
+            'amount'      => 'required|numeric|min:1',
             'description' => 'required|string|max:255',
         ]);
 
         try {
-            DB::transaction(function () use ($request) {
+            return DB::transaction(function () use ($request) {
                 $wallet = Wallet::firstOrCreate(['shop_id' => $request->shop_id]);
 
                 // 1. Create the Transaction Record
-                $transaction = new WalletTransaction([
-                    'wallet_id' => $wallet->id,
-                    'type' => $request->type,
-                    'amount' => $request->amount,
-                    'description' => $request->description,
-                    'status' => 'completed',
-                    'reference_type' => 'AdminAdjustment', // Identifies this was manual
-                    'reference_id' => auth()->id(), 
+                $wallet->transactions()->create([
+                    'type'           => $request->type,
+                    'amount'         => $request->amount,
+                    'description'    => $request->description,
+                    'status'         => 'completed',
+                    'reference_type' => 'AdminAdjustment',
+                    'reference_id'   => auth()->id(), 
                 ]);
-                $transaction->save();
 
                 // 2. Update the Wallet Balance
                 if ($request->type === 'credit') {
                     $wallet->increment('balance', $request->amount);
                 } else {
-                    if (!$wallet->canWithdraw($request->amount)) {
-                        throw new \Exception('Insufficient shop balance for this debit.');
+                    // Prevent balance from going negative if your logic requires it
+                    if ($wallet->balance < $request->amount) {
+                        throw new \Exception('Insufficient shop balance for this debit adjustment.');
                     }
                     $wallet->decrement('balance', $request->amount);
                 }
 
                 $wallet->update(['last_transaction_at' => now()]);
-            });
 
-            return redirect()->route('admin.wallets.index')->with('success', 'Wallet adjusted successfully.');
+                return redirect()->route('admin.wallets.index')
+                    ->with('success', 'Wallet adjusted successfully.');
+            });
         } catch (\Exception $e) {
             return back()->with('error', 'Error: ' . $e->getMessage())->withInput();
         }
@@ -134,31 +110,7 @@ class WalletController extends Controller
     }
 
     /**
-     * Optional: Edit a specific transaction description if needed.
-     */
-    public function edit(string $id)
-    {
-        $transaction = WalletTransaction::findOrFail($id);
-        return view('admin.wallets.edit_transaction', compact('transaction'));
-    }
-
-    public function manualAdjustment(Request $request, Wallet $wallet)
-{
-    // If you need to take back 5,000 RWF for a returned item
-    $wallet->transactions()->create([
-        'type' => 'debit', // This automatically subtracts from balance!
-        'amount' => $request->amount,
-        'description' => "Manual Adjustment: Return of item #{$request->item_id}",
-        'status' => 'completed',
-        'reference_type' => OrderItem::class,
-        'reference_id' => $request->item_id,
-    ]);
-
-    return back()->with('success', 'Balance adjusted successfully.');
-}
-
-    /**
-     * Update transaction metadata (Note: Never update the 'amount' directly for audit integrity).
+     * Update transaction metadata only (Amount is immutable for audit integrity).
      */
     public function update(Request $request, string $id)
     {
@@ -171,8 +123,7 @@ class WalletController extends Controller
     }
 
     /**
-     * Standard Admin practices: We generally do not 'destroy' wallets.
-     * We just deactivate the Shop instead.
+     * Wallets are generally not destroyed for financial audit reasons.
      */
     public function destroy(string $id)
     {
