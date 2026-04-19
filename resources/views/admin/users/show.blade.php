@@ -120,25 +120,37 @@
                 </div>
                 <div class="card-body">
                     @if($user->shop)
-                        <div class="row align-items-center">
-                            <div class="col-auto">
-                                <div class="bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    <i class="fas fa-store fa-lg"></i>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <h6 class="font-weight-bold mb-1 text-dark">{{ $user->shop->shop_name }}</h6>
-                                <p class="text-muted small mb-0">
-                                    <i class="fas fa-map-marker-alt mr-1"></i> {{ $user->shop->address ?? 'No address provided' }}
-                                </p>
-                            </div>
-                            <div class="col-md-auto mt-3 mt-md-0">
-                                <a href="{{ route('admin.shops.show', $user->shop->id) }}" class="btn btn-outline-primary btn-sm px-3 rounded-pill">
-                                    Manage Shop <i class="fas fa-external-link-alt ml-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    @else
+    <div class="row align-items-center">
+        <div class="col-auto">
+            @if($user->shop->logo)
+                {{-- Display Shop Logo --}}
+                <img src="{{ asset($user->shop->logo) }}" 
+                     alt="{{ $user->shop->shop_name }}" 
+                     class="rounded shadow-sm border" 
+                     style="width: 60px; height: 60px; object-fit: contain; background: white;">
+            @else
+                {{-- Fallback Icon --}}
+                <div class="bg-soft-primary text-primary rounded shadow-sm d-flex align-items-center justify-content-center" 
+                     style="width: 60px; height: 60px;">
+                    <i class="fas fa-store fa-lg"></i>
+                </div>
+            @endif
+        </div>
+        <div class="col">
+            <h6 class="font-weight-bold mb-1 text-dark">{{ $user->shop->shop_name }}</h6>
+            <p class="text-muted small mb-0">
+                <i class="fas fa-map-marker-alt mr-1"></i> {{ $user->shop->address ?? 'No address provided' }}
+            </p>
+        </div>
+        <div class="col-md-auto mt-3 mt-md-0">
+            <a href="{{ route('admin.shops.show', $user->shop->id) }}" class="btn btn-outline-primary btn-sm px-3 rounded-pill">
+                Manage Shop <i class="fas fa-external-link-alt ml-1"></i>
+            </a>
+        </div>
+    </div>
+@else
+    {{-- Your 'No Shop Assigned' empty state here --}}
+@endif
                         <div class="text-center py-4">
                             <div class="text-muted opacity-50 mb-2">
                                 <i class="fas fa-store-slash fa-2x"></i>
