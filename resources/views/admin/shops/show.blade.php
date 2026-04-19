@@ -39,73 +39,75 @@
     </div>
 
     {{-- 2. Audited Stats Cards --}}
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm bg-white overflow-hidden">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase font-weight-bold">Total Gross Sales</div>
-                            <div class="h4 mb-0 font-weight-bold text-dark">{{ number_format($totalGross) }} <small class="h6">RWF</small></div>
-                            <small class="text-muted">Total audited revenue</small>
-                        </div>
-                        <div class="icon-shape bg-soft-primary text-primary px-3 py-2">
-                            <i class="fas fa-chart-line fa-lg"></i>
-                        </div>
+ <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-sm bg-white border-left border-primary" style="border-left-width: 4px !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase font-weight-bold">Total Gross Sales</div>
+                        <div class="h4 mb-0 font-weight-bold text-dark">{{ number_format($totalGross) }} <small class="h6">RWF</small></div>
+                        <small class="text-muted">Total audited revenue</small>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm bg-dark text-white overflow-hidden">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="text-white-50 small text-uppercase font-weight-bold">Net Earnings</div>
-                            <div class="h4 mb-0 font-weight-bold text-success">{{ number_format($netEarnings) }} <small class="h6 text-success">RWF</small></div>
-                            <small class="text-success small"><i class="fas fa-check-circle mr-1"></i> After {{ $shop->commission_rate }}% Fee</small>
-                        </div>
-                        <i class="fas fa-money-bill-wave fa-2x text-white-50 opacity-20"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm bg-success text-white overflow-hidden">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="text-white-50 small text-uppercase font-weight-bold">Available Balance</div>
-                            <div class="h4 mb-0 font-weight-bold">{{ number_format($availableBalance) }} <small class="h6">RWF</small></div>
-                            <small class="text-white-50">Locked: {{ number_format($pendingPayouts) }} RWF</small>
-                        </div>
-                        <div class="icon-shape bg-white text-success px-3 py-2">
-                            <i class="fas fa-wallet fa-lg"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm bg-white border-left border-primary" style="border-left-width: 4px !important;">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase font-weight-bold">Total Commission</div>
-                            <div class="h4 mb-0 font-weight-bold text-primary">{{ $totalCommission }}</div>
-                            <small class="text-muted">Total items in store</small>
-                        </div>
-                        <div class="icon-shape bg-soft-info text-info px-3 py-2">
-                            <i class="fas fa-boxes fa-lg"></i>
-                        </div>
+                    <div class="icon-shape bg-soft-primary text-primary rounded-circle px-3 py-2">
+                        <i class="fas fa-chart-bar fa-lg"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-sm bg-white border-left border-info" style="border-left-width: 4px !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase font-weight-bold">Total Commission</div>
+                        <div class="h4 mb-0 font-weight-bold text-info">{{ number_format($totalCommission) }} <small class="h6">RWF</small></div>
+                        <small class="text-muted">Platform share ({{ $shop->commission_rate }}%)</small>
+                    </div>
+                    <div class="icon-shape bg-soft-info text-info rounded-circle px-3 py-2">
+                        <i class="fas fa-percentage fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-sm bg-white border-left border-dark" style="border-left-width: 4px !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small text-uppercase font-weight-bold">Net Earnings</div>
+                        <div class="h4 mb-0 font-weight-bold text-dark">{{ number_format($netEarnings) }} <small class="h6 text-muted">RWF</small></div>
+                        <small class="text-success small"><i class="fas fa-arrow-down mr-1"></i> After platform fees</small>
+                    </div>
+                    <div class="icon-shape bg-light text-dark rounded-circle px-3 py-2">
+                        <i class="fas fa-hand-holding-usd fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-sm bg-success text-white border-left border-success" style="border-left-width: 4px !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-white-50 small text-uppercase font-weight-bold">Available Balance</div>
+                        <div class="h4 mb-0 font-weight-bold text-white">{{ number_format($availableBalance) }} <small class="h6">RWF</small></div>
+                        <small class="text-white-50">Locked: {{ number_format($pendingPayouts) }} RWF</small>
+                    </div>
+                    <div class="icon-shape bg-white text-success rounded-circle px-3 py-2 shadow-sm">
+                        <i class="fas fa-wallet fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <div class="row">
         {{-- Left Column: Identity --}}
