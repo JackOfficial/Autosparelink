@@ -94,8 +94,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <div class="text-muted small text-uppercase font-weight-bold">Total Withdraw</div>
-                            <div class="h4 mb-0 font-weight-bold text-primary">{{ $totalWithdrawn }}</div>
+                            <div class="text-muted small text-uppercase font-weight-bold">Total Commission</div>
+                            <div class="h4 mb-0 font-weight-bold text-primary">{{ $totalCommission }}</div>
                             <small class="text-muted">Total items in store</small>
                         </div>
                         <div class="icon-shape bg-soft-info text-info px-3 py-2">
