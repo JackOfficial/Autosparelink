@@ -48,6 +48,7 @@ use App\Http\Controllers\Admin\CartController as AdminCartController;
 use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\Admin\VehicleBrandController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CommissionController;
 use App\Http\Controllers\Admin\DriveTypeController;
 use App\Http\Controllers\Admin\EngineTypeController;
 use App\Http\Controllers\Admin\InboxController;
@@ -340,6 +341,7 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::post('/orders/{id}/finalize', [AdminOrderController::class, 'finalize'])->name('orders.finalize');
     Route::resource('payments', PaymentController::class);
     Route::resource('payouts', AdminPayoutController::class);
+    Route::resource('commissions', CommissionController::class);
     Route::resource('shippings', ShippingController::class);
     Route::resource('addresses', AddressController::class);
     Route::resource('specifications', AdminSpecificationController::class);

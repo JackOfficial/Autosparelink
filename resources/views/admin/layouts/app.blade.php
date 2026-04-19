@@ -337,6 +337,13 @@
             @endif
           </p></a></li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/shippings" class="nav-link"><i class="fas fa-truck nav-icon"></i><p>Shippings</p></a></li>
+             <li class="nav-item" x-show="isVisible($el)">
+    <a href="{{ route('admin.commissions.index') }}" 
+       class="nav-link {{ request()->routeIs('admin.commissions.*') ? 'active' : '' }}">
+        <i class="fas fa-percentage nav-icon"></i>
+        <p>Commission Rate</p>
+    </a>
+</li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/addresses" class="nav-link"><i class="fas fa-map-marker-alt nav-icon"></i><p>Addresses</p></a></li>
           </ul>
         </li>
