@@ -28,17 +28,32 @@
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-sm-6">
-                            <label class="text-muted small text-uppercase">Vendor Information</label>
-                            <div class="d-flex align-items-center mt-1">
-                                <div class="bg-light p-3 rounded mr-3 text-primary font-weight-bold" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
-                                    {{ substr($payout->shop->name, 0, 1) }}
-                                </div>
-                                <div>
-                                    <h5 class="mb-0 font-weight-bold">{{ $payout->shop->name }}</h5>
-                                    <p class="text-muted mb-0 small">{{ $payout->shop->user->email }}</p>
-                                </div>
-                            </div>
-                        </div>
+    <label class="text-muted small text-uppercase font-weight-bold">Vendor Information</label>
+    <div class="d-flex align-items-center mt-2">
+        <div class="mr-3 shadow-sm border overflow-hidden bg-white" 
+             style="width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            @if($payout->shop->logo)
+                <img src="{{ asset('storage/' . $payout->shop->logo) }}" 
+                     alt="{{ $payout->shop->shop_name }}" 
+                     style="width: 100%; height: 100%; object-fit: cover;">
+            @else
+                <div class="bg-soft-primary text-primary font-weight-bold h4 mb-0">
+                    {{ strtoupper(substr($payout->shop->shop_name, 0, 1)) }}
+                </div>
+            @endif
+        </div>
+
+        <div>
+            <h5 class="mb-0 font-weight-bold text-dark">{{ $payout->shop->shop_name }}</h5>
+            <p class="text-muted mb-0 small">
+                <i class="fas fa-envelope mr-1"></i>{{ $payout->shop->user->email }}
+            </p>
+            <span class="badge badge-light border text-xs mt-1">
+                Vendor ID: #{{ str_pad($payout->shop->id, 4, '0', STR_PAD_LEFT) }}
+            </span>
+        </div>
+    </div>
+</div>
                         <div class="col-sm-6 text-sm-right">
                             <label class="text-muted small text-uppercase">Request Date</label>
                             <p class="font-weight-bold mb-0">{{ $payout->created_at->format('d M Y, H:i A') }}</p>
