@@ -148,7 +148,7 @@
                         <div class="form-group">
                             <label class="small font-weight-bold">Action Decision</label>
                             <select name="status" class="form-control" required>
-                                <option value="processing" {{ $payout->status == 'processing' ? 'selected' : '' }}>Processing</option>
+                                <option value="">Perform Action</option>
                                 <option value="completed">Approve & Complete</option>
                                 <option value="rejected">Reject Request</option>
                             </select>
