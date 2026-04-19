@@ -216,7 +216,7 @@
       </div>
       <div class="info">
         <a href="#" class="d-block text-light fw-bold">
-          {{ Auth::user()->name }}
+          {{ Str::limit(Auth::user()->name, 17) }}
           <small class="d-block text-muted">{{ Auth::user()->getRoleNames()->first() }}</small>
         </a>
       </div>
