@@ -5,38 +5,61 @@
 <div class="container-fluid mt-4 pb-5">
     {{-- 1. Header & Quick Actions --}}
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-        <div>
-            <a href="{{ route('admin.shops.index') }}" class="btn btn-sm btn-link text-muted p-0 mb-2 text-decoration-none">
-                <i class="fas fa-arrow-left mr-1"></i> Back to Shops
-            </a>
-            <div class="d-flex align-items-center">
-                <h2 class="h3 font-weight-bold mb-0 text-dark mr-3">{{ $shop->shop_name }}</h2>
-                <span class="badge badge-pill px-3 shadow-sm {{ $shop->is_active ? 'badge-success' : 'badge-warning text-dark' }}">
-                    {{ $shop->is_active ? 'Verified Shop' : 'Verification Pending' }}
-                </span>
-            </div>
-        </div>
+    <div>
+        {{-- Improved Back Button with hover transition --}}
+        <a href="{{ route('admin.shops.index') }}" class="btn btn-sm btn-link text-muted p-0 mb-2 text-decoration-none d-inline-flex align-items-center back-link">
+            <i class="fas fa-chevron-left mr-1 small"></i> <span>Back to Shops</span>
+        </a>
         
-        <div class="d-flex mt-3 mt-md-0">
-            @if(!$shop->is_active)
-                <form action="{{ route('admin.shops.approve', $shop) }}" method="POST" 
-                      onsubmit="return confirm('Approve this shop? The vendor will be notified.');" class="mr-2">
-                    @csrf @method('PUT')
-                    <button type="submit" class="btn btn-success px-4 shadow-sm border-0">
-                        <i class="fas fa-check-circle mr-1"></i> Approve Shop
-                    </button>
-                </form>
-            @endif
+        <div class="d-flex align-items-center flex-wrap">
+            {{-- Main Title --}}
+            <h2 class="h3 font-weight-bold mb-0 text-dark mr-3">{{ $shop->shop_name }}</h2>
+            
+            {{-- Status Badge --}}
+            <span class="badge badge-pill px-3 py-2 shadow-sm {{ $shop->is_active ? 'badge-success' : 'badge-warning text-dark' }}">
+                <i class="fas {{ $shop->is_active ? 'fa-check-circle' : 'fa-clock' }} mr-1"></i>
+                {{ $shop->is_active ? 'Verified' : 'Pending' }}
+            </span>
+        </div>
 
-            <form action="{{ route('admin.shops.toggle', $shop) }}" method="POST">
-                @csrf @method('PUT')
-                <button type="submit" class="btn btn-{{ $shop->is_active ? 'outline-danger' : 'primary' }} px-4 shadow-sm">
-                    <i class="fas fa-{{ $shop->is_active ? 'ban' : 'play' }} mr-1"></i> 
-                    {{ $shop->is_active ? 'Suspend Shop' : 'Activate Shop' }}
-                </button>
-            </form>
+        {{-- Meta Info Row: Including Spare Parts Count --}}
+        <div class="mt-2 d-flex align-items-center text-muted small">
+            <span class="mr-3">
+                <i class="fas fa-tools mr-1"></i> 
+                <strong>{{ number_format($shop->parts_count) }}</strong> Spare Parts
+            </span>
+            <span class="mr-3">
+                <i class="fas fa-calendar-alt mr-1"></i> 
+                Joined {{ $shop->created_at->format('M d, Y') }}
+            </span>
+            <span>
+                <i class="fas fa-map-marker-alt mr-1"></i> 
+                {{ $shop->city ?? 'Rwanda' }}
+            </span>
         </div>
     </div>
+    
+    {{-- Action Buttons --}}
+    <div class="d-flex mt-3 mt-lg-0 align-items-center">
+        @if(!$shop->is_active)
+            <form action="{{ route('admin.shops.approve', $shop) }}" method="POST" 
+                  onsubmit="return confirm('Approve this shop? The vendor will be notified.');" class="mr-2">
+                @csrf @method('PUT')
+                <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm">
+                    <i class="fas fa-check mr-1"></i> Approve
+                </button>
+            </form>
+        @endif
+
+        <form action="{{ route('admin.shops.toggle', $shop) }}" method="POST">
+            @csrf @method('PUT')
+            <button type="submit" class="btn btn-{{ $shop->is_active ? 'outline-danger' : 'primary' }} font-weight-bold px-4 shadow-sm">
+                <i class="fas fa-{{ $shop->is_active ? 'user-slash' : 'user-check' }} mr-1"></i> 
+                {{ $shop->is_active ? 'Suspend' : 'Activate' }}
+            </button>
+        </form>
+    </div>
+</div>
 
     {{-- 2. Audited Stats Cards --}}
  <div class="row mb-4">
@@ -253,5 +276,11 @@
     .mt-n1 { margin-top: -3rem !important; }
     .hover-shadow:hover { box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1); transition: 0.3s; }
     .opacity-20 { opacity: 0.2; }
+       /* Subtle hover effect for the back link */
+    .back-link { transition: transform 0.2s ease; }
+    .back-link:hover { transform: translateX(-3px); color: #000 !important; }
+    
+    /* Ensure badges look crisp */
+    .badge-pill { font-size: 85%; letter-spacing: 0.3px; }
 </style>
 @endsection
