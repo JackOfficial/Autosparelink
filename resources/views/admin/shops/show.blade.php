@@ -99,7 +99,7 @@
                         </div>
                         <div class="list-group-item px-0 py-3 d-flex justify-content-between">
                             <span class="text-muted"><i class="fas fa-tools mr-2"></i> Inventory</span>
-                            <span class="font-weight-bold">{{ number_format($shop->parts_count) }} Parts</span>
+                            <span class="font-weight-bold">{{ number_format($shop->parts->count()) }} Parts</span>
                         </div>
                         <div class="list-group-item px-0 py-3 d-flex justify-content-between">
                             <span class="text-muted"><i class="fas fa-phone mr-2"></i> Contact</span>
