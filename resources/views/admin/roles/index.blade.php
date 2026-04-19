@@ -20,7 +20,7 @@
                     <tr>
                         <th class="pl-4">Role Name</th>
                         <th>Permissions Count</th>
-                        <th class="text-right pr-4">Actions</th>
+                        <th class="text-right pr-4 d-none">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,10 +28,10 @@
                     <tr>
                         <td class="pl-4 font-weight-bold">{{ ucfirst($role->name) }}</td>
                         <td><span class="badge badge-info px-2">{{ $role->permissions->count() }} Permissions</span></td>
-                        <td class="text-right pr-4">
+                        <td class="text-right pr-4 d-none">
                             <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-sm btn-light border"><i class="fas fa-edit"></i></a>
                             <form action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="d-inline">
-                                @propto @method('DELETE')
+                                 @method('DELETE')
                                 <button class="btn btn-sm btn-light border text-danger" onclick="return confirm('Delete role?')"><i class="fas fa-trash"></i></button>
                             </form>
                         </td>
