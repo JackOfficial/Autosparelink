@@ -7,10 +7,12 @@
             <h1 class="m-0 text-dark font-weight-bold"><i class="fas fa-user-shield mr-2 text-primary"></i>Roles & Permissions</h1>
         </div>
         <div class="col-sm-6 text-right">
-            <a href="{{ route('admin.roles.create') }}" class="btn btn-primary shadow-sm">
-                <i class="fas fa-plus mr-1"></i> Create New Role
-            </a>
-        </div>
+    @role('super-admin')
+        <a href="{{ route('admin.roles.create') }}" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus mr-1"></i> Create New Role
+        </a>
+    @endrole
+</div>
     </div>
 
     <div class="card border-0 shadow-sm">
