@@ -85,10 +85,13 @@ class UsersController extends Controller
     /**
      * Display the specified user.
      */
-    public function show(User $user)
-    {
-        return view('admin.users.show', compact('user'));
-    }
+   public function show(User $user)
+{
+    // Eager load the shop relationship to save a database query
+    $user->load('shop'); 
+    
+    return view('admin.users.show', compact('user'));
+}
 
     /**
      * Show the form for editing the specified user.
