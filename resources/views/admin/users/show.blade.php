@@ -119,7 +119,7 @@
                     @endif
                 </div>
                 <div class="card-body">
-                    @if($user->shop)
+                   @if($user->shop)
     <div class="row align-items-center">
         <div class="col-auto">
             @if($user->shop->logo)
@@ -149,8 +149,6 @@
         </div>
     </div>
 @else
-    {{-- Your 'No Shop Assigned' empty state here --}}
-@endif
                         <div class="text-center py-4">
                             <div class="text-muted opacity-50 mb-2">
                                 <i class="fas fa-store-slash fa-2x"></i>
