@@ -124,7 +124,7 @@
         <div class="col-auto">
             @if($user->shop->logo)
                 {{-- Display Shop Logo --}}
-                <img src="{{ asset($user->shop->logo) }}" 
+                <img src="{{ asset('storage' . $user->shop->logo) }}"
                      alt="{{ $user->shop->shop_name }}" 
                      class="rounded shadow-sm border" 
                      style="width: 60px; height: 60px; object-fit: contain; background: white;">
