@@ -39,6 +39,7 @@
                     <tr>
                         <th class="pl-4">User</th>
                         <th>Email</th>
+                        <th>Business / Shop</th>
                         <th>Access Roles</th>
                         <th>Joined Date</th>
                         <th class="text-right pr-4">Actions</th>
@@ -50,8 +51,11 @@
                         <td class="pl-4">
                             <div class="d-flex align-items-center">
                                 <div class="avatar-wrapper mr-3">
-                                    @if ($user->avatar)
-                                        <img src="{{ $user->avatar }}" alt="" class="rounded-circle border shadow-sm" style="width:42px; height:42px; object-fit:cover;">
+                                    @php
+                                        $userPhoto = $user->photo ? asset($user->photo) : ($user->avatar ?: null);
+                                    @endphp
+                                    @if ($userPhoto)
+                                        <img src="{{ $userPhoto }}" alt="" class="rounded-circle border shadow-sm" style="width:42px; height:42px; object-fit:cover;">
                                     @else
                                         <div class="rounded-circle border bg-soft-primary text-primary d-flex align-items-center justify-content-center shadow-sm font-weight-bold" style="width:42px; height:42px;">
                                             {{ strtoupper(substr($user->name, 0, 1)) }}
@@ -66,6 +70,17 @@
                         </td>
                         <td>
                             <span class="text-dark">{{ $user->email }}</span>
+                        </td>
+                        <td>
+                            @if($user->shop)
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-soft-success text-success border border-success px-2 py-1" style="font-size: 11px;">
+                                        <i class="fas fa-store mr-1"></i> {{ $user->shop->name }}
+                                    </span>
+                                </div>
+                            @else
+                                <span class="text-muted small italic">No Shop Linked</span>
+                            @endif
                         </td>
                         <td>
                             @forelse($user->getRoleNames() as $role)
@@ -86,6 +101,11 @@
                         </td>
                         <td class="text-right pr-4">
                             <div class="btn-group">
+                                <a href="{{ route('admin.users.show', $user) }}" 
+                                   class="btn btn-sm btn-white border shadow-none" 
+                                   title="View Profile">
+                                    <i class="fas fa-eye text-success"></i>
+                                </a>
                                 <a href="{{ route('admin.users.edit', $user) }}" 
                                    class="btn btn-sm btn-white border shadow-none" 
                                    title="Edit User">
@@ -108,7 +128,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-5">
+                        <td colspan="6" class="text-center py-5">
                             <div class="opacity-50">
                                 <i class="fas fa-users-slash fa-3x mb-3"></i>
                                 <p class="mb-0">No users found in the system.</p>
@@ -125,10 +145,12 @@
 @push('styles')
 <style>
     .bg-soft-primary { background-color: #eef5ff; }
+    .bg-soft-success { background-color: #e6fcf5; }
     .table td { vertical-align: middle !important; }
     .badge { font-weight: 600; letter-spacing: 0.5px; }
     .btn-white { background: #fff; color: #6c757d; }
     .btn-white:hover { background: #f8f9fa; color: #333; }
+    .italic { font-style: italic; }
 </style>
 @endpush
 @endsection

@@ -98,6 +98,34 @@
         </div>
 
         <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-4 bg-soft-primary">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title font-weight-bold text-primary mb-0">
+                        <i class="fas fa-store mr-2"></i>Shop Assignment
+                    </h5>
+                </div>
+                <div class="card-body pt-0">
+                    @if($user->shop)
+                        <div class="bg-white p-3 rounded shadow-sm border">
+                            <h6 class="font-weight-bold mb-1">{{ $user->shop->name }}</h6>
+                            <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt mr-1"></i> {{ $user->shop->address ?? 'No address set' }}</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="badge badge-success px-2 py-1">Linked Shop</span>
+                                <a href="{{ route('admin.shops.show', $user->shop->id) }}" target="_blank" class="small font-weight-bold">
+                                    View Shop <i class="fas fa-external-link-alt ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-center py-3">
+                            <i class="fas fa-store-slash fa-2x text-muted mb-2"></i>
+                            <p class="text-muted small mb-0 font-italic">No shop currently assigned to this user.</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="card-title font-weight-bold text-dark mb-0">Profile Image</h5>
@@ -119,7 +147,6 @@
                             <label class="custom-file-label" for="photoInput">Choose new photo</label>
                         </div>
                     </div>
-                    <small class="text-muted d-block mt-2">Recommended: Square image, max 2MB</small>
                 </div>
             </div>
 
@@ -128,7 +155,7 @@
                     <h5 class="card-title font-weight-bold text-dark mb-0">Authentication</h5>
                 </div>
                 <div class="card-body">
-                    <div class="d-flex align-items-center mb-2">
+                    <div class="d-flex align-items-center">
                         <i class="fab fa-google text-danger mr-3 fa-lg"></i>
                         <div>
                             <span class="d-block font-weight-bold small">Google Login</span>
