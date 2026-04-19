@@ -49,44 +49,44 @@
                                 <i class="fas fa-key mr-1 small"></i> {{ $role->permissions->count() }} 
                             </span>
                         </td>
-                        <td class="text-right pr-4">
-                            <div class="btn-group">
-                                <a href="{{ route('admin.roles.show', $role) }}" 
-                                   class="btn btn-sm btn-white border shadow-none" 
-                                   title="View Role Details">
-                                    <i class="fas fa-eye text-success"></i>
-                                </a>
+                       <td class="text-right pr-4">
+    <div class="btn-group">
+        <a href="{{ route('admin.roles.show', $role) }}" 
+           class="btn btn-sm btn-white border shadow-none" 
+           title="View Role Details">
+            <i class="fas fa-eye text-success"></i>
+        </a>
 
-                                @php
-                                    $protectedRoles = ['super-admin', 'admin', 'user', 'seller'];
-                                    $isProtected = in_array(strtolower($role->name), $protectedRoles);
-                                @endphp
+        <a href="{{ route('admin.roles.edit', $role) }}" 
+           class="btn btn-sm btn-white border shadow-none ml-1" 
+           title="Edit Role">
+            <i class="fas fa-edit text-primary"></i>
+        </a>
 
-                                @if(!$isProtected)
-                                    <a href="{{ route('admin.roles.edit', $role) }}" 
-                                       class="btn btn-sm btn-white border shadow-none ml-1" 
-                                       title="Edit Role">
-                                        <i class="fas fa-edit text-primary"></i>
-                                    </a>
+        @php
+            $protectedRoles = ['super-admin', 'admin', 'user', 'seller'];
+            $isProtected = in_array(strtolower($role->name), $protectedRoles);
+        @endphp
 
-                                    @role('super-admin')
-                                    <form action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="d-inline ml-1">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-sm btn-white border text-danger shadow-none" 
-                                                title="Delete Role"
-                                                onclick="return confirm('Are you sure you want to delete the {{ $role->name }} role?')">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                    @endrole
-                                @else
-                                    <span class="btn btn-sm btn-light border ml-1 disabled" title="System Protected Role">
-                                        <i class="fas fa-lock text-muted small"></i>
-                                    </span>
-                                @endif
-                            </div>
-                        </td>
+        @if(!$isProtected)
+            @role('super-admin')
+            <form action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="d-inline ml-1">
+                @csrf
+                @method('DELETE')
+                <button class="btn btn-sm btn-white border text-danger shadow-none" 
+                        title="Delete Role"
+                        onclick="return confirm('Are you sure you want to delete the {{ $role->name }} role?')">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </form>
+            @endrole
+        @else
+            <span class="btn btn-sm btn-light border ml-1 disabled" title="System Role: Cannot be deleted">
+                <i class="fas fa-lock text-muted small"></i>
+            </span>
+        @endif
+    </div>
+</td>
                     </tr>
                     @endforeach
                 </tbody>
