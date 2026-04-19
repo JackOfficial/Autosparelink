@@ -46,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
         /**
          * Sidebar/Layout Stats for the User & Seller Dashboard
          */
-        View::composer(['layouts.dashboard', 'user.*', 'layouts.shop.*'], function ($view) {
+        View::composer(['layouts.dashboard', 'admin.layouts.app', 'components.shop-dashboard'], function ($view) {
             if (Auth::check()) {
                 $user = Auth::user();
 
