@@ -13,6 +13,12 @@
         this.shopName = name;
         this.amount = amt;
         this.showModal = true;
+        // Optional: Prevent body scroll when modal is open
+        document.body.classList.add('modal-open');
+    },
+    closeModal() {
+        this.showModal = false;
+        document.body.classList.remove('modal-open');
     }
 }">
     <div class="row mb-4 pt-3">
@@ -144,10 +150,10 @@
                                         </a>
                                         
                                         @if($payout->status === 'pending' || $payout->status === 'processing')
-                                        <button @click="openModal('{{ $payout->id }}', '{{ $payout->shop->name_name }}', '{{ number_format($payout->amount) }}')" 
-                                                class="btn btn-sm btn-primary shadow-none ml-1">
-                                            Update
-                                        </button>
+                                        <button @click="openModal('{{ $payout->id }}', '{{ addslashes($payout->shop->shop_name) }}', '{{ number_format($payout->amount) }}')" 
+        class="btn btn-sm btn-primary shadow-none ml-1">
+    Update
+</button>
                                         @endif
                                     </div>
                                 </td>
@@ -179,64 +185,80 @@
     </div>
 
     <div x-show="showModal" 
-         class="modal fade show" 
-         style="display: block; background: rgba(0,0,0,0.6); z-index: 1050;"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 transform scale-90"
-         x-transition:enter-end="opacity-100 transform scale-100"
-         @keydown.escape.window="showModal = false">
-        
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title font-weight-bold">
-                        <i class="fas fa-cog mr-2"></i>Process Payout
-                    </h5>
-                    <button type="button" class="close text-white" @click="showModal = false">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <form :action="'/admin/payouts/' + payoutId" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="modal-body p-4">
-                        <div class="d-flex align-items-center mb-4 p-3 rounded" style="background: #f0f7ff; border: 1px solid #d0e5ff;">
-                            <div class="mr-auto">
-                                <small class="text-muted text-uppercase font-weight-bold d-block">Vendor</small>
-                                <span class="h6 font-weight-bold text-dark mb-0" x-text="shopName"></span>
-                            </div>
-                            <div class="text-right">
-                                <small class="text-muted text-uppercase font-weight-bold d-block">Payout Amount</small>
-                                <span class="h5 font-weight-bold text-primary mb-0" x-text="amount + ' RWF'"></span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="font-weight-bold small">Decision</label>
-                            <select name="status" class="form-control form-control-lg custom-select" required style="font-size: 14px;">
-                                <option value="processing">Move to Processing</option>
-                                <option value="completed">Confirm Payment Dispatched</option>
-                                <option value="rejected">Decline Request</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="font-weight-bold small">Transfer Reference / Reason</label>
-                            <textarea name="admin_note" class="form-control" rows="3" placeholder="Enter bank reference number or rejection reason for the vendor..."></textarea>
-                        </div>
-
-                        <div class="alert alert-info p-2 small mb-0">
-                            <i class="fas fa-info-circle mr-1"></i> Updating to <strong>Completed</strong> will finalize the transaction and update the vendor's audited balance history.
-                        </div>
-                    </div>
-                    <div class="modal-footer bg-light border-0">
-                        <button type="button" class="btn btn-link text-muted" @click="showModal = false">Dismiss</button>
-                        <button type="submit" class="btn btn-primary px-4 font-weight-bold shadow-sm">Confirm Action</button>
-                    </div>
-                </form>
+     x-cloak
+     class="modal fade show" 
+     style="display: block; background: rgba(0,0,0,0.6); z-index: 1050;"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 transform scale-90"
+     x-transition:enter-end="opacity-100 transform scale-100"
+     @keydown.escape.window="showModal = false">
+    
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fas fa-cog mr-2"></i>Process Payout
+                </h5>
+                <button type="button" class="close text-white" @click="showModal = false">
+                    <span>&times;</span>
+                </button>
             </div>
+
+            <form :action="'{{ route('admin.payouts.index') }}/' + payoutId" method="POST">
+                @csrf
+                @method('PUT')
+                
+                <div class="modal-body p-4">
+                    @if($errors->any())
+                        <div class="alert alert-danger py-2 small mb-3">
+                            <i class="fas fa-exclamation-circle mr-1"></i> Please check the form for errors.
+                        </div>
+                    @endif
+
+                    <div class="d-flex align-items-center mb-4 p-3 rounded" style="background: #f0f7ff; border: 1px solid #d0e5ff;">
+                        <div class="mr-auto">
+                            <small class="text-muted text-uppercase font-weight-bold d-block">Vendor</small>
+                            <span class="h6 font-weight-bold text-dark mb-0" x-text="shopName"></span>
+                        </div>
+                        <div class="text-right">
+                            <small class="text-muted text-uppercase font-weight-bold d-block">Payout Amount</small>
+                            <span class="h5 font-weight-bold text-primary mb-0" x-text="amount + ' RWF'"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold small">Decision</label>
+                        <select name="status" class="form-control form-control-lg custom-select" required style="font-size: 14px;">
+                            <option value="processing">Move to Processing</option>
+                            <option value="completed">Confirm Payment Dispatched</option>
+                            <option value="rejected">Decline Request</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold small">Transfer Reference / Reason</label>
+                        <textarea name="admin_note" 
+                                  class="form-control @error('admin_note') is-invalid @enderror" 
+                                  rows="3" 
+                                  placeholder="Enter bank reference number or rejection reason for the vendor..."></textarea>
+                        @error('admin_note')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="alert alert-info p-2 small mb-0">
+                        <i class="fas fa-info-circle mr-1"></i> Updating to <strong>Completed</strong> will finalize the transaction and lock the record.
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-link text-muted shadow-none" @click="showModal = false">Dismiss</button>
+                    <button type="submit" class="btn btn-primary px-4 font-weight-bold shadow-sm">Confirm Action</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 </div>
 
 @push('styles')
