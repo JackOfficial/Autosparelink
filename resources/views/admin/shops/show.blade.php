@@ -3,196 +3,146 @@
 
 @section('content')
 <div class="container-fluid mt-4 pb-5">
-    {{-- 1. Header & Quick Actions --}}
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-    <div>
-        {{-- Improved Back Button with hover transition --}}
-        <a href="{{ route('admin.shops.index') }}" class="btn btn-sm btn-link text-muted p-0 mb-2 text-decoration-none d-inline-flex align-items-center back-link">
-            <i class="fas fa-chevron-left mr-1 small"></i> <span>Back to Shops</span>
-        </a>
-        
-        <div class="d-flex align-items-center flex-wrap">
-            {{-- Main Title --}}
-            <h2 class="h3 font-weight-bold mb-0 text-dark mr-3">{{ $shop->shop_name }}</h2>
-            
-            {{-- Status Badge --}}
-            <span class="badge badge-pill px-3 py-2 shadow-sm {{ $shop->is_active ? 'badge-success' : 'badge-warning text-dark' }}">
-                <i class="fas {{ $shop->is_active ? 'fa-check-circle' : 'fa-clock' }} mr-1"></i>
-                {{ $shop->is_active ? 'Verified' : 'Pending' }}
-            </span>
-        </div>
-
-        {{-- Meta Info Row: Including Spare Parts Count --}}
-        <div class="mt-2 d-flex align-items-center text-muted small">
-            <span class="mr-3">
-                <i class="fas fa-tools mr-1"></i> 
-                <strong>{{ number_format($shop->parts_count) }}</strong> Spare Parts
-            </span>
-            <span class="mr-3">
-                <i class="fas fa-calendar-alt mr-1"></i> 
-                Joined {{ $shop->created_at->format('M d, Y') }}
-            </span>
-            <span>
-                <i class="fas fa-map-marker-alt mr-1"></i> 
-                {{ $shop->city ?? 'Rwanda' }}
-            </span>
-        </div>
-    </div>
     
-    {{-- Action Buttons --}}
-    <div class="d-flex mt-3 mt-lg-0 align-items-center">
-        @if(!$shop->is_active)
-            <form action="{{ route('admin.shops.approve', $shop) }}" method="POST" 
-                  onsubmit="return confirm('Approve this shop? The vendor will be notified.');" class="mr-2">
+    {{-- 1. HEADER: Context & Primary Actions --}}
+    <div class="row align-items-end mb-4">
+        <div class="col-md-8">
+            <a href="{{ route('admin.shops.index') }}" class="btn btn-sm btn-link text-muted p-0 mb-2 text-decoration-none d-inline-flex align-items-center back-link">
+                <i class="fas fa-chevron-left mr-1 small"></i> <span>Back to Shops List</span>
+            </a>
+            <div class="d-flex align-items-center">
+                <h2 class="h3 font-weight-bold mb-0 text-dark mr-3">{{ $shop->shop_name }}</h2>
+                <span class="badge badge-pill px-3 py-2 shadow-sm {{ $shop->is_active ? 'badge-success' : 'badge-warning text-dark' }}">
+                    <i class="fas {{ $shop->is_active ? 'fa-check-circle' : 'fa-clock' }} mr-1"></i>
+                    {{ $shop->is_active ? 'Verified Account' : 'Pending Verification' }}
+                </span>
+            </div>
+        </div>
+        <div class="col-md-4 text-md-right mt-3 mt-md-0">
+            @if(!$shop->is_active)
+                <form action="{{ route('admin.shops.approve', $shop) }}" method="POST" class="d-inline mr-2" onsubmit="return confirm('Approve this shop?');">
+                    @csrf @method('PUT')
+                    <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm">
+                        <i class="fas fa-check mr-1"></i> Approve Shop
+                    </button>
+                </form>
+            @endif
+
+            <form action="{{ route('admin.shops.toggle', $shop) }}" method="POST" class="d-inline">
                 @csrf @method('PUT')
-                <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm">
-                    <i class="fas fa-check mr-1"></i> Approve
+                <button type="submit" class="btn btn-{{ $shop->is_active ? 'outline-danger' : 'primary' }} font-weight-bold px-4 shadow-sm">
+                    <i class="fas fa-{{ $shop->is_active ? 'user-slash' : 'user-check' }} mr-1"></i> 
+                    {{ $shop->is_active ? 'Suspend Access' : 'Restore Access' }}
                 </button>
             </form>
-        @endif
-
-        <form action="{{ route('admin.shops.toggle', $shop) }}" method="POST">
-            @csrf @method('PUT')
-            <button type="submit" class="btn btn-{{ $shop->is_active ? 'outline-danger' : 'primary' }} font-weight-bold px-4 shadow-sm">
-                <i class="fas fa-{{ $shop->is_active ? 'user-slash' : 'user-check' }} mr-1"></i> 
-                {{ $shop->is_active ? 'Suspend' : 'Activate' }}
-            </button>
-        </form>
+        </div>
     </div>
-</div>
 
-    {{-- 2. Audited Stats Cards --}}
- <div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-3">
-        <div class="card border-0 shadow-sm bg-white border-left border-primary" style="border-left-width: 4px !important;">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small text-uppercase font-weight-bold">Total Gross Sales</div>
-                        <div class="h4 mb-0 font-weight-bold text-dark">{{ number_format($totalGross) }} <small class="h6">RWF</small></div>
-                        <small class="text-muted">Total audited revenue</small>
-                    </div>
-                    <div class="icon-shape bg-soft-primary text-primary rounded-circle px-3 py-2">
-                        <i class="fas fa-chart-bar fa-lg"></i>
-                    </div>
+    {{-- 2. FINANCIAL OVERVIEW: Audited Stats --}}
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-white border-left border-primary h-100" style="border-left-width: 4px !important;">
+                <div class="card-body py-3">
+                    <div class="text-muted small text-uppercase font-weight-bold">Gross Sales</div>
+                    <div class="h4 mb-0 font-weight-bold text-dark">{{ number_format($totalGross) }} <small class="h6">RWF</small></div>
+                    <div class="text-muted extra-small mt-1"><i class="fas fa-receipt mr-1"></i> Total transaction volume</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-white border-left border-info h-100" style="border-left-width: 4px !important;">
+                <div class="card-body py-3">
+                    <div class="text-muted small text-uppercase font-weight-bold">Revenue Share</div>
+                    <div class="h4 mb-0 font-weight-bold text-info">{{ number_format($totalCommission) }} <small class="h6">RWF</small></div>
+                    <div class="text-muted extra-small mt-1"><i class="fas fa-tag mr-1"></i> Platform Fee ({{ $shop->commission_rate }}%)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-white border-left border-dark h-100" style="border-left-width: 4px !important;">
+                <div class="card-body py-3">
+                    <div class="text-muted small text-uppercase font-weight-bold">Net Earnings</div>
+                    <div class="h4 mb-0 font-weight-bold text-dark">{{ number_format($netEarnings) }} <small class="h6">RWF</small></div>
+                    <div class="text-success extra-small mt-1 font-weight-bold"><i class="fas fa-wallet mr-1"></i> After platform cut</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-success text-white h-100">
+                <div class="card-body py-3">
+                    <div class="text-white-50 small text-uppercase font-weight-bold">Payable Balance</div>
+                    <div class="h4 mb-0 font-weight-bold text-white">{{ number_format($availableBalance) }} <small class="h6">RWF</small></div>
+                    <div class="text-white-50 extra-small mt-1">Locked: {{ number_format($pendingPayouts) }} RWF</div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="col-xl-3 col-md-6 mb-3">
-        <div class="card border-0 shadow-sm bg-white border-left border-info" style="border-left-width: 4px !important;">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small text-uppercase font-weight-bold">Total Commission</div>
-                        <div class="h4 mb-0 font-weight-bold text-info">{{ number_format($totalCommission) }} <small class="h6">RWF</small></div>
-                        <small class="text-muted">Platform share ({{ $shop->commission_rate }}%)</small>
-                    </div>
-                    <div class="icon-shape bg-soft-info text-info rounded-circle px-3 py-2">
-                        <i class="fas fa-percentage fa-lg"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-3">
-        <div class="card border-0 shadow-sm bg-white border-left border-dark" style="border-left-width: 4px !important;">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small text-uppercase font-weight-bold">Net Earnings</div>
-                        <div class="h4 mb-0 font-weight-bold text-dark">{{ number_format($netEarnings) }} <small class="h6 text-muted">RWF</small></div>
-                        <small class="text-success small"><i class="fas fa-arrow-down mr-1"></i> After platform fees</small>
-                    </div>
-                    <div class="icon-shape bg-light text-dark rounded-circle px-3 py-2">
-                        <i class="fas fa-hand-holding-usd fa-lg"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-3">
-        <div class="card border-0 shadow-sm bg-success text-white border-left border-success" style="border-left-width: 4px !important;">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-white-50 small text-uppercase font-weight-bold">Available Balance</div>
-                        <div class="h4 mb-0 font-weight-bold text-white">{{ number_format($availableBalance) }} <small class="h6">RWF</small></div>
-                        <small class="text-white-50">Locked: {{ number_format($pendingPayouts) }} RWF</small>
-                    </div>
-                    <div class="icon-shape bg-white text-success rounded-circle px-3 py-2 shadow-sm">
-                        <i class="fas fa-wallet fa-lg"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
     <div class="row">
-        {{-- Left Column: Identity --}}
+        {{-- 3. LEFT COLUMN: Identity & Trust --}}
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 mb-4 overflow-hidden text-center">
-                <div class="bg-primary py-4">
+            <div class="card shadow-sm border-0 mb-4 overflow-hidden">
+                <div class="bg-dark py-5 text-center position-relative">
                     <img src="{{ $shop->logo ? asset('storage/' . $shop->logo) : asset('images/default-shop.png') }}" 
                          class="rounded-circle border border-white shadow-lg bg-white" 
-                         style="width: 110px; height: 110px; object-fit: contain; border-width: 4px !important;">
+                         style="width: 100px; height: 100px; object-fit: contain; border-width: 4px !important;">
                 </div>
-                <div class="card-body pt-0 mt-n1">
-                    <h5 class="font-weight-bold mt-3 mb-1">{{ $shop->shop_name }}</h5>
-                    <p class="text-muted small mb-3">Member since {{ $shop->created_at->format('M Y') }}</p>
-
-                    <div class="list-group list-group-flush text-left small">
-                        <div class="list-group-item px-0 py-3 d-flex align-items-center">
-                            <i class="fas fa-user-circle text-muted mr-3"></i>
-                            <div>
-                                <div class="text-muted extra-small text-uppercase">Owner</div>
-                                <div class="font-weight-bold">{{ $shop->user->name }}</div>
-                            </div>
+                <div class="card-body pt-4">
+                    <div class="list-group list-group-flush small">
+                        <div class="list-group-item px-0 py-3 border-top-0 d-flex justify-content-between">
+                            <span class="text-muted"><i class="fas fa-user-circle mr-2"></i> Owner</span>
+                            <span class="font-weight-bold">{{ $shop->user->name }}</span>
                         </div>
-                        <div class="list-group-item px-0 py-3 d-flex align-items-center">
-                            <i class="fas fa-id-card text-muted mr-3"></i>
-                            <div>
-                                <div class="text-muted extra-small text-uppercase">TIN Number</div>
-                                <div class="font-weight-bold text-primary">{{ $shop->tin_number }}</div>
-                            </div>
+                        <div class="list-group-item px-0 py-3 d-flex justify-content-between">
+                            <span class="text-muted"><i class="fas fa-id-card mr-2"></i> TIN Number</span>
+                            <span class="font-weight-bold text-primary">{{ $shop->tin_number }}</span>
                         </div>
-                        <div class="list-group-item px-0 py-3 d-flex align-items-center border-0">
-                            <i class="fas fa-phone mr-3 text-muted"></i>
-                            <div>
-                                <div class="text-muted extra-small text-uppercase">Phone</div>
-                                <div class="font-weight-bold">{{ $shop->phone_number }}</div>
-                            </div>
+                        <div class="list-group-item px-0 py-3 d-flex justify-content-between">
+                            <span class="text-muted"><i class="fas fa-tools mr-2"></i> Inventory</span>
+                            <span class="font-weight-bold">{{ number_format($shop->parts_count) }} Parts</span>
+                        </div>
+                        <div class="list-group-item px-0 py-3 d-flex justify-content-between">
+                            <span class="text-muted"><i class="fas fa-phone mr-2"></i> Contact</span>
+                            <span class="font-weight-bold">{{ $shop->phone_number }}</span>
+                        </div>
+                        <div class="list-group-item px-0 py-3 border-0 d-flex justify-content-between">
+                            <span class="text-muted"><i class="fas fa-map-marker-alt mr-2"></i> Location</span>
+                            <span class="font-weight-bold">{{ $shop->city ?? 'Rwanda' }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0 mb-4 bg-light border-left border-warning" style="border-left-width: 5px !important;">
+            {{-- Checklist Card --}}
+            <div class="card shadow-sm border-0 bg-soft-warning border-left border-warning" style="border-left-width: 5px !important;">
                 <div class="card-body">
-                    <h6 class="font-weight-bold mb-2 small text-uppercase text-warning">
-                        <i class="fas fa-exclamation-triangle mr-1"></i> Admin Checklist
+                    <h6 class="font-weight-bold mb-3 small text-uppercase text-warning">
+                        <i class="fas fa-tasks mr-1"></i> Verification Checklist
                     </h6>
-                    <ul class="mb-0 small text-muted pl-3">
-                        <li>Cross-check <strong>TIN</strong> with RRA Portal.</li>
-                        <li>Verify <strong>RDB Certificate</strong> validity.</li>
-                        <li>Ensure Shop Location is accurate.</li>
-                    </ul>
+                    <div class="custom-control custom-checkbox mb-2 small">
+                        <input type="checkbox" class="custom-control-input" id="check1" checked disabled>
+                        <label class="custom-control-label text-muted" for="check1">TIN Verified (RRA)</label>
+                    </div>
+                    <div class="custom-control custom-checkbox mb-2 small">
+                        <input type="checkbox" class="custom-control-input" id="check2" {{ $shop->is_active ? 'checked disabled' : '' }}>
+                        <label class="custom-control-label text-muted" for="check2">RDB Certificate Valid</label>
+                    </div>
+                    <div class="custom-control custom-checkbox small">
+                        <input type="checkbox" class="custom-control-input" id="check3" {{ $shop->is_active ? 'checked disabled' : '' }}>
+                        <label class="custom-control-label text-muted" for="check3">Physical Location Survey</label>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- Right Column: Tabs --}}
+        {{-- 4. RIGHT COLUMN: Detailed Activity --}}
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-bottom pt-3">
+                <div class="card-header bg-white border-bottom pt-0">
                     <ul class="nav nav-tabs card-header-tabs border-bottom-0" id="shopTabs" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active font-weight-bold text-uppercase small py-3" id="docs-tab" data-toggle="tab" href="#docs" role="tab">
-                                <i class="fas fa-file-invoice mr-2"></i>Legal Documents
+                                <i class="fas fa-file-contract mr-2"></i>Legal Documents
                             </a>
                         </li>
                         <li class="nav-item">
@@ -202,61 +152,69 @@
                         </li>
                     </ul>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="tab-content" id="shopTabsContent">
-                        {{-- Documents Tab --}}
-                        <div class="tab-pane fade show active" id="docs" role="tabpanel">
+                        {{-- Tab 1: Documents --}}
+                        <div class="tab-pane fade show active p-4" id="docs" role="tabpanel">
                             @forelse($shop->documents as $doc)
-                                <div class="border rounded p-3 mb-3 bg-white d-flex align-items-center justify-content-between hover-shadow">
+                                <div class="border rounded p-3 mb-3 bg-light d-flex align-items-center justify-content-between hover-shadow transition">
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-soft-primary text-primary rounded p-3 mr-3">
-                                            <i class="fas fa-file-contract"></i>
+                                        <div class="bg-white text-primary rounded shadow-sm p-3 mr-3">
+                                            <i class="fas fa-file-pdf fa-lg"></i>
                                         </div>
                                         <div>
                                             <h6 class="mb-0 font-weight-bold">{{ $doc->title }}</h6>
-                                            <small class="text-muted">{{ strtoupper($doc->file_type) }} • {{ $doc->created_at->diffForHumans() }}</small>
+                                            <small class="text-muted text-uppercase">{{ $doc->file_type }} • {{ $doc->created_at->format('d M Y') }}</small>
                                         </div>
                                     </div>
-                                    <div class="btn-group shadow-sm">
-                                        <a href="{{ route('admin.shops.view-doc', $doc) }}" target="_blank" class="btn btn-sm btn-light border">
-                                            <i class="fas fa-eye text-primary"></i>
+                                    <div class="btn-group">
+                                        <a href="{{ route('admin.shops.view-doc', $doc) }}" target="_blank" class="btn btn-sm btn-white border shadow-sm" title="View">
+                                            <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('admin.shops.download-doc', $doc) }}" class="btn btn-sm btn-light border">
-                                            <i class="fas fa-download text-muted"></i>
+                                        <a href="{{ route('admin.shops.download-doc', $doc) }}" class="btn btn-sm btn-white border shadow-sm" title="Download">
+                                            <i class="fas fa-download"></i>
                                         </a>
                                     </div>
                                 </div>
                             @empty
-                                <div class="text-center py-5 text-muted">No documents uploaded.</div>
+                                <div class="text-center py-5">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width: 60px; opacity: 0.3;">
+                                    <p class="mt-3 text-muted">No legal documents submitted for review.</p>
+                                </div>
                             @endforelse
                         </div>
 
-                        {{-- Sales Tab --}}
+                        {{-- Tab 2: Sales --}}
                         <div class="tab-pane fade" id="sales" role="tabpanel">
                             <div class="table-responsive">
-                                <table class="table table-hover">
+                                <table class="table table-hover align-middle mb-0">
                                     <thead class="bg-light">
                                         <tr class="text-muted small text-uppercase">
-                                            <th>Order #</th>
+                                            <th class="pl-4">Order ID</th>
                                             <th>Spare Part</th>
-                                            <th class="text-right">Amount</th>
+                                            <th class="text-right">Total Price</th>
                                             <th class="text-center">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($recentOrders as $item)
                                             <tr>
-                                                <td class="font-weight-bold">#{{ $item->order->order_number }}</td>
-                                                <td>{{ Str::limit($item->part_name, 30) }}</td>
-                                                <td class="text-right font-weight-bold">{{ number_format($item->unit_price * $item->quantity) }} RWF</td>
+                                                <td class="pl-4 font-weight-bold text-primary">#{{ $item->order->order_number }}</td>
+                                                <td>
+                                                    <div class="font-weight-bold text-dark">{{ Str::limit($item->part_name, 35) }}</div>
+                                                    <small class="text-muted">Qty: {{ $item->quantity }}</small>
+                                                </td>
+                                                <td class="text-right font-weight-bold text-dark">
+                                                    {{ number_format($item->unit_price * $item->quantity) }} <span class="small text-muted font-weight-normal">RWF</span>
+                                                </td>
                                                 <td class="text-center">
-                                                    <span class="badge badge-pill px-3 {{ $item->status == 'completed' ? 'badge-success' : 'badge-secondary' }}">
+                                                    <span class="badge badge-pill px-3 py-1 {{ $item->status == 'completed' ? 'badge-soft-success text-success' : 'badge-soft-secondary' }}">
                                                         {{ ucfirst($item->status) }}
                                                     </span>
                                                 </td>
                                             </tr>
                                         @empty
-                                            <tr><td colspan="4" class="text-center py-4">No sales found.</td></tr>
+                                            <tr><td colspan="4" class="text-center py-5 text-muted">No sales history recorded yet.</td></tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -270,17 +228,18 @@
 </div>
 
 <style>
-    .bg-soft-primary { background-color: rgba(0, 123, 255, 0.1); }
-    .bg-soft-info { background-color: rgba(23, 162, 184, 0.1); }
-    .extra-small { font-size: 0.7rem; }
-    .mt-n1 { margin-top: -3rem !important; }
-    .hover-shadow:hover { box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1); transition: 0.3s; }
-    .opacity-20 { opacity: 0.2; }
-       /* Subtle hover effect for the back link */
-    .back-link { transition: transform 0.2s ease; }
-    .back-link:hover { transform: translateX(-3px); color: #000 !important; }
+    /* Professional Utility Classes */
+    .bg-soft-warning { background-color: #fff9e6; }
+    .badge-soft-success { background-color: #e6fcf5; color: #0ca678; }
+    .badge-soft-secondary { background-color: #f1f3f5; color: #495057; }
+    .extra-small { font-size: 0.72rem; }
+    .transition { transition: all 0.2s ease-in-out; }
+    .hover-shadow:hover { transform: translateY(-2px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.08) !important; }
+    .back-link:hover { transform: translateX(-4px); }
     
-    /* Ensure badges look crisp */
-    .badge-pill { font-size: 85%; letter-spacing: 0.3px; }
+    /* Dashboard Table Styling */
+    .table td, .table th { vertical-align: middle; padding: 1rem 0.75rem; border-top: 1px solid #f2f2f2; }
+    .nav-tabs .nav-link { border: none; color: #adb5bd; border-bottom: 2px solid transparent; }
+    .nav-tabs .nav-link.active { color: #007bff; border-bottom: 2px solid #007bff; background: transparent; }
 </style>
 @endsection
