@@ -97,10 +97,10 @@
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <span class="font-weight-bold text-success h6 mb-0 mr-2">kkkkkk{{ number_format($wallet->audited_balance) }} <span class="small">RWF</span></span>
+                                    <span class="font-weight-bold text-success h6 mb-0 mr-2">{{ number_format($wallet->audited_balance) }} <span class="small">RWF</span></span>
                                     
                                     {{-- TRUST INDICATOR: Alerts admin if manual balance differs from audited math --}}
-                                    @if(round($wallet->balance) != round($wallet->audited_balance))
+                                    @if(round($wallet->balance) != round($wallet->audited_gross))
                                         <i class="fas fa-exclamation-triangle text-danger animated pulse infinite" 
                                            data-toggle="tooltip" 
                                            title="System Mismatch: DB shows {{ number_format($wallet->balance) }}. Audit suggests {{ number_format($wallet->audited_balance) }}."></i>
