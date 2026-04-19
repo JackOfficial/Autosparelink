@@ -144,7 +144,7 @@
                                         </a>
                                         
                                         @if($payout->status === 'pending' || $payout->status === 'processing')
-                                        <button @click="openModal('{{ $payout->id }}', '{{ $payout->shop->name }}', '{{ number_format($payout->amount) }}')" 
+                                        <button @click="openModal('{{ $payout->id }}', '{{ $payout->shop->name_name }}', '{{ number_format($payout->amount) }}')" 
                                                 class="btn btn-sm btn-primary shadow-none ml-1">
                                             Update
                                         </button>
