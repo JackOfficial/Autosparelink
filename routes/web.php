@@ -62,6 +62,7 @@ use App\Http\Controllers\Admin\PartFitmentController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PayoutController as AdminPayoutController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShippingController;
 use App\Http\Controllers\Admin\ShopController;
 use App\Http\Controllers\Admin\TransmissionTypeController;
@@ -342,6 +343,7 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('payments', PaymentController::class);
     Route::resource('payouts', AdminPayoutController::class);
     Route::resource('commissions', CommissionController::class);
+    Route::resource('roles', RoleController::class);
     Route::resource('shippings', ShippingController::class);
     Route::resource('addresses', AddressController::class);
     Route::resource('specifications', AdminSpecificationController::class);

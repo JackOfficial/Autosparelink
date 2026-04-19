@@ -357,6 +357,13 @@
           <ul class="nav nav-treeview">
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/users" class="nav-link"><i class="fas fa-user nav-icon"></i><p>Users</p></a></li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/roles-and-permissions" class="nav-link"><i class="fas fa-user-shield nav-icon"></i><p>Roles & Permissions</p></a></li>
+            <li class="nav-item" x-show="isVisible($el)">
+    <a href="{{ route('admin.roles.index') }}" 
+       class="nav-link {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+        <i class="fas fa-shield-alt nav-icon"></i>
+        <p>Roles & Permissions</p>
+    </a>
+</li>
           </ul>
         </li>
 

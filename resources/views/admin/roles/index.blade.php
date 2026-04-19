@@ -1,0 +1,45 @@
+@extends('admin.layouts.app')
+
+@section('content')
+<div class="container-fluid">
+    <div class="row mb-4 pt-3">
+        <div class="col-sm-6">
+            <h1 class="m-0 text-dark font-weight-bold"><i class="fas fa-user-shield mr-2 text-primary"></i>Roles & Permissions</h1>
+        </div>
+        <div class="col-sm-6 text-right">
+            <a href="{{ route('admin.roles.create') }}" class="btn btn-primary shadow-sm">
+                <i class="fas fa-plus mr-1"></i> Create New Role
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="bg-light small text-uppercase font-weight-bold">
+                    <tr>
+                        <th class="pl-4">Role Name</th>
+                        <th>Permissions Count</th>
+                        <th class="text-right pr-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($roles as $role)
+                    <tr>
+                        <td class="pl-4 font-weight-bold">{{ ucfirst($role->name) }}</td>
+                        <td><span class="badge badge-info px-2">{{ $role->permissions->count() }} Permissions</span></td>
+                        <td class="text-right pr-4">
+                            <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-sm btn-light border"><i class="fas fa-edit"></i></a>
+                            <form action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="d-inline">
+                                @propto @method('DELETE')
+                                <button class="btn btn-sm btn-light border text-danger" onclick="return confirm('Delete role?')"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endsection
