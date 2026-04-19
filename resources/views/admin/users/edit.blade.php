@@ -134,7 +134,7 @@
                     <div x-data="{ preview: null }" class="mb-3">
                         <div class="position-relative d-inline-block mb-3">
                             @php
-                                $avatarPath = $user->photo ? asset($user->photo) : ($user->avatar ?: asset('images/placeholder-user.png'));
+                                $avatarPath = $user->avatar ? asset($user->avatar) : ($user->avatar ?: asset('images/placeholder-user.png'));
                             @endphp
                             <img :src="preview ? preview : '{{ $avatarPath }}'" 
                                  class="rounded-circle shadow-sm border p-1" 

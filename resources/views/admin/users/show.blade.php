@@ -54,7 +54,7 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-0 py-3">
                     <h6 class="font-weight-bold mb-0 text-muted small text-uppercase">Security & Auth</h6>
                 </div>
@@ -78,7 +78,7 @@
         </div>
 
         <div class="col-md-8">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="card-title font-weight-bold text-dark mb-0">Account Details</h5>
                 </div>
@@ -99,39 +99,58 @@
                                     <td class="py-3"><code class="text-primary font-weight-bold">#USR-{{ str_pad($user->id, 5, '0', STR_PAD_LEFT) }}</code></td>
                                 </tr>
                                 <tr>
-                                    <th class="pl-4 py-3 text-muted small text-uppercase">Auth Providers</th>
-                                    <td class="py-3">
-                                        @if(!empty($user->social_providers))
-                                            @foreach($user->social_providers as $provider)
-                                                <span class="badge badge-light border px-2 py-1 mr-1">
-                                                    <i class="fab fa-{{ $provider }} text-danger"></i> {{ ucfirst($provider) }}
-                                                </span>
-                                            @endforeach
-                                        @else
-                                            <span class="text-muted italic small">Standard Email Login</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
                                     <th class="pl-4 py-3 text-muted small text-uppercase">Registered On</th>
                                     <td class="py-3 text-dark">
                                         {{ $user->created_at->format('l, F j, Y') }}
                                         <small class="text-muted d-block">({{ $user->created_at->diffForHumans() }})</small>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th class="pl-4 py-3 text-muted small text-uppercase">Last Profile Update</th>
-                                    <td class="py-3 text-dark">
-                                        {{ $user->updated_at->format('d M, Y - H:i') }}
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title font-weight-bold text-dark mb-0">Business / Shop Information</h5>
+                    @if($user->shop)
+                        <span class="badge badge-success px-2 py-1">Linked Merchant</span>
+                    @endif
+                </div>
+                <div class="card-body">
+                    @if($user->shop)
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <div class="bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-store fa-lg"></i>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h6 class="font-weight-bold mb-1 text-dark">{{ $user->shop->name }}</h6>
+                                <p class="text-muted small mb-0">
+                                    <i class="fas fa-map-marker-alt mr-1"></i> {{ $user->shop->address ?? 'No address provided' }}
+                                </p>
+                            </div>
+                            <div class="col-md-auto mt-3 mt-md-0">
+                                <a href="{{ route('admin.shops.show', $user->shop->id) }}" class="btn btn-outline-primary btn-sm px-3 rounded-pill">
+                                    Manage Shop <i class="fas fa-external-link-alt ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <div class="text-muted opacity-50 mb-2">
+                                <i class="fas fa-store-slash fa-2x"></i>
+                            </div>
+                            <p class="text-muted mb-0">This user is not currently associated with a shop.</p>
+                            <small class="text-muted">They are registered as a standard customer.</small>
+                        </div>
+                    @endif
+                </div>
                 <div class="card-footer bg-light border-0 py-3">
                     <small class="text-muted">
-                        <i class="fas fa-info-circle mr-1"></i> For safety, sensitive details like passwords cannot be viewed here.
+                        <i class="fas fa-info-circle mr-1"></i> Only users with merchant roles can manage shop listings.
                     </small>
                 </div>
             </div>
