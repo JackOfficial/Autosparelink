@@ -59,6 +59,7 @@ use App\Http\Controllers\Admin\PartBrandController;
 use App\Http\Controllers\Admin\PartController;
 use App\Http\Controllers\Admin\PartFitmentController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\PayoutController as AdminPayoutController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\ShippingController;
 use App\Http\Controllers\Admin\ShopController;
@@ -338,6 +339,7 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('orders', AdminOrderController::class);
     Route::post('/orders/{id}/finalize', [AdminOrderController::class, 'finalize'])->name('orders.finalize');
     Route::resource('payments', PaymentController::class);
+    Route::resource('payouts', AdminPayoutController::class);
     Route::resource('shippings', ShippingController::class);
     Route::resource('addresses', AddressController::class);
     Route::resource('specifications', AdminSpecificationController::class);

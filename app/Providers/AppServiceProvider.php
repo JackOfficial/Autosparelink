@@ -110,10 +110,15 @@ class AppServiceProvider extends ServiceProvider
                 return [
                     'abandoned' => DB::table('shoppingcart')->count(),
                     'pending'   => Order::where('status', 'pending')->count(),
+                    'payouts'   => \App\Models\Payout::where('status', 'pending')->count(),
                 ];
             });
-            $view->with('abandonedCount', $counts['abandoned']);
-            $view->with('pendingOrdersCount', $counts['pending']);
+
+            $view->with([
+            'abandonedCount'      => $counts['abandoned'],
+            'pendingOrdersCount'  => $counts['pending'],
+            'pendingPayoutsCount' => $counts['payouts'], // Now available in your sidebar
+             ]);
         });
     }
 }

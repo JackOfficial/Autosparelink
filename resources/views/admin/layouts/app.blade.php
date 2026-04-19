@@ -329,6 +329,13 @@
               </a>
             </li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/payments" class="nav-link"><i class="fas fa-credit-card nav-icon"></i><p>Payments</p></a></li>
+            <li class="nav-item {{ request()->routeIs('admin.payouts.*') ? 'active' : '' }}" x-show="isVisible($el)"><a href="{{ route('admin.payouts.index') }}" class="nav-link"><i class="fas fa-wallet nav-icon"></i><p>Payouts
+              @if($pendingPayoutsCount > 0)
+                <span class="right badge badge-warning shadow-sm">
+                    {{ $pendingPayoutsCount }}
+                </span>
+            @endif
+          </p></a></li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/shippings" class="nav-link"><i class="fas fa-truck nav-icon"></i><p>Shippings</p></a></li>
             <li class="nav-item" x-show="isVisible($el)"><a href="/admin/addresses" class="nav-link"><i class="fas fa-map-marker-alt nav-icon"></i><p>Addresses</p></a></li>
           </ul>
