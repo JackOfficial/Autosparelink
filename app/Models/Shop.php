@@ -95,6 +95,49 @@ class Shop extends Model
         return $this->is_active && $this->is_verified;
     }
 
+    // app/Models/Shop.php
+
+public function getFinancialAudit()
+{
+    // Use your exact logic from the PayoutController
+    $rawRate = Commission::getRate(); // Or $this->commission_rate
+    $percentage = $rawRate / 100;
+
+    // 1. Audited Gross Revenue
+    $revenueData = $this->orderItems()
+        ->where('status', 'completed')
+        ->whereHas('order', fn($q) => $q->where('status', 'completed'))
+        ->selectRaw("SUM(unit_price * quantity) as total_gross")
+        ->first();
+
+    $totalGross = $revenueData->total_gross ?? 0;
+
+    // 2. Financial Breakdown
+    $totalCommission = $totalGross * $percentage;
+    $netEarnings = $totalGross - $totalCommission;
+
+    // 3. Payout Deductions
+    $deductions = $this->payouts()
+        ->whereIn('status', ['completed', 'pending', 'processing'])
+        ->selectRaw("
+            SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as total_withdrawn,
+            SUM(CASE WHEN status IN ('pending', 'processing') THEN amount ELSE 0 END) as total_locked
+        ")
+        ->first();
+
+    $withdrawn = $deductions->total_withdrawn ?? 0;
+    $locked = $deductions->total_locked ?? 0;
+
+    return [
+        'totalGross'       => $totalGross,
+        'totalCommission'  => $totalCommission,
+        'netEarnings'      => $netEarnings,
+        'totalWithdrawn'   => $withdrawn,
+        'pendingPayouts'   => $locked,
+        'availableBalance' => $netEarnings - ($withdrawn + $locked)
+    ];
+}
+
     protected static function booted()
     {
         static::saving(function ($shop) {

@@ -16,51 +16,10 @@ class PayoutController extends Controller
      * Helper to calculate the shop's current financial standing.
      * Strictly filters for 'completed' items within 'completed' orders.
      */
-    private function getFinancialSummary()
+   private function getFinancialSummary()
     {
-        $shopId = Auth::user()->shop->id;
-        $rawRate = Commission::getRate();
-        $percentage = $rawRate / 100;
-
-        // 1. Audited Gross Revenue 
-        // We sum directly from OrderItem to ensure we only count items marked completed
-        $revenueData = OrderItem::where('shop_id', $shopId)
-            ->where('status', 'completed')
-            ->whereHas('order', function ($query) {
-                $query->where('status', 'completed');
-                    //   ->whereHas('payment', fn($p) => $p->where('status', 'successful'));
-            })
-            ->selectRaw("SUM(unit_price * quantity) as total_gross")
-            ->first();
-
-        $totalGross = $revenueData->total_gross ?? 0;
-
-        // 2. Financial Breakdown
-        $totalCommission = $totalGross * $percentage;
-        $netEarnings = $totalGross - $totalCommission;
-
-        // 3. Payout Deductions (Auditing the 'Wallet' movement)
-        // We include 'processing' to ensure money is "charged" while admin reviews it
-        $deductions = Payout::where('shop_id', $shopId)
-            ->whereIn('status', ['completed', 'pending', 'processing'])
-            ->selectRaw("
-                SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as total_withdrawn,
-                SUM(CASE WHEN status IN ('pending', 'processing') THEN amount ELSE 0 END) as total_locked
-            ")
-            ->first();
-
-        $withdrawn = $deductions->total_withdrawn ?? 0;
-        $locked = $deductions->total_locked ?? 0;
-
-        return [
-            'totalGross'       => $totalGross,
-            'commissionRate'   => $rawRate,
-            'totalCommission'  => $totalCommission,
-            'netEarnings'      => $netEarnings,
-            'totalWithdrawn'   => $withdrawn,
-            'pendingPayouts'   => $locked,
-            'availableBalance' => $netEarnings - ($withdrawn + $locked)
-        ];
+    // Simply call the centralized model method
+    return Auth::user()->shop->getFinancialAudit();
     }
 
     public function index()
