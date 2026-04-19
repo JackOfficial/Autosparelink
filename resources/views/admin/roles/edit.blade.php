@@ -11,7 +11,7 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <label class="font-weight-bold small text-uppercase">Role Name</label>
-                        <input type="text" name="name" value="{{ old('name', $role->name ?? '') }}" class="form-control" placeholder="e.g. Editor" required>
+                        <input type="text" name="name" value="{{ old('name', $role->name ?? '') }}" class="form-control" placeholder="e.g. Editor" disabled>
                         <p class="text-muted small mt-2">Define a unique name for this user group.</p>
                         <button type="submit" class="btn btn-primary btn-block shadow-sm font-weight-bold mt-3">
                             <i class="fas fa-save mr-1"></i> Save Role
