@@ -39,19 +39,30 @@ public function show(Shop $shop)
         }
     ]);
 
-    // 2. Load counts for the Stats Cards (This creates $shop->parts_count and $shop->order_items_count)
-    $shop->loadCount(['parts', 'orderItems']);
+    // 2. Load Audited Counts 
+    // Only count parts that are 'active' and order items that are actually 'completed'
+    $shop->loadCount([
+        'parts' => function ($query) {
+            $query->where('status', 'active'); // Assuming you have a status on parts
+        },
+        'orderItems' => function ($query) {
+            $query->where('status', 'completed'); // Only count real sales
+        }
+    ]);
 
-    // 3. Get recent orders with their main Order and Part data
+    // 3. Get recent orders (Audited)
+    // Only show orders that have moved past the 'pending' stage
     $recentOrders = $shop->orderItems()
-        ->with(['order', 'part'])
+        ->whereNotIn('status', ['pending', 'cancelled'])
+        ->with(['order.user', 'part']) // Include order user for better admin UX
         ->latest()
         ->take(10)
         ->get();
 
-    // 4. Calculate total revenue (Sum of all sold items for this shop)
-    // We use a raw sum to be efficient with the database
+    // 4. Calculate Total Revenue (The "Truth" Logic)
+    // Logic: Item Status is 'completed' AND Payment Status is 'successful'
     $totalRevenue = $shop->orderItems()
+        ->where('status', 'completed') 
         ->whereHas('order.payment', function($q) {
             $q->where('status', 'successful');
         })
