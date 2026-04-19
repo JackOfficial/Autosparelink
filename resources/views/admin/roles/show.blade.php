@@ -15,9 +15,6 @@
             <a href="{{ route('admin.roles.index') }}" class="btn btn-light border shadow-sm">
                 <i class="fas fa-arrow-left mr-1"></i> Back to Roles
             </a>
-            <a href="{{ route('admin.roles.edit', $role->id) }}" class="btn btn-info shadow-sm ml-2">
-                <i class="fas fa-edit mr-1"></i> Edit Role
-            </a>
         </div>
     </div>
 
