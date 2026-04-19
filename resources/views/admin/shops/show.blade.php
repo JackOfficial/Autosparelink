@@ -122,7 +122,7 @@
                             <i class="fas fa-user-circle text-muted me-3"></i>
                             <div>
                                 <div class="text-muted extra-small text-uppercase">Owner</div>
-                                <div class="fw-bold">{{ $user->name }}</div>
+                                <div class="fw-bold">{{ $shop->user->name }}</div>
                             </div>
                         </div>
                         <div class="list-group-item px-0 py-3 d-flex align-items-center">
