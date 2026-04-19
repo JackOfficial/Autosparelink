@@ -2,7 +2,17 @@
 
 @section('content')
 <div class="container-fluid pt-4">
-    {{-- Breadcrumb omitted for brevity, keep your existing one --}}
+    {{-- Breadcrumb --}}
+    <div class="row mb-3">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0">
+                    <li class="breadcrumb-item"><a href="{{ route('admin.roles.index') }}" class="text-muted small">Roles</a></li>
+                    <li class="breadcrumb-item active font-weight-bold small">Access Matrix</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
 
     <form action="{{ isset($role) ? route('admin.roles.update', $role) : route('admin.roles.store') }}" method="POST">
         @csrf
@@ -10,18 +20,38 @@
 
         <div class="row">
             <div class="col-lg-4">
-                {{-- ... Your existing sidebar code ... --}}
+                <div class="card border-0 shadow-sm mb-4 sticky-top" style="top: 20px;">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3">
+                            <span class="p-3 rounded-circle bg-soft-primary d-inline-block">
+                                <i class="fas fa-fingerprint text-primary fa-2x"></i>
+                            </span>
+                        </div>
+                        <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">System Role</label>
+                        <h3 class="font-weight-bold text-dark mb-4">{{ ucfirst($role->name ?? 'New Role') }}</h3>
+                        
+                        <input type="hidden" name="name" value="{{ $role->name ?? '' }}">
+                        
+                        <div class="text-left small bg-light p-3 rounded mb-4">
+                            <p class="mb-0 text-muted">
+                                <i class="fas fa-info-circle text-primary mr-1"></i> 
+                                Permissions selected here define what users in this group can see and do within the dashboard.
+                            </p>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-lg shadow-sm font-weight-bold py-3">
+                            <i class="fas fa-save mr-2"></i> Commit Changes
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm overflow-hidden">
-                    <div class="card-header bg-white py-4 px-4 border-bottom-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="mb-0 font-weight-bold text-dark">Capabilities Management</h5>
-                                <p class="text-muted small mb-0">Smart toggle permissions using Alpine.js</p>
-                            </div>
-                            <span class="badge badge-primary badge-pill px-3 py-2">{{ $permissions->count() }} Total</span>
+                    <div class="card-header bg-white py-4 px-4 border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 font-weight-bold text-dark">Module Permissions</h5>
+                        <div class="badge badge-primary px-3 py-2 rounded-pill">
+                            <span x-text="document.querySelectorAll('.perm-check:checked').length"></span> / {{ $permissions->count() }} Set
                         </div>
                     </div>
                     
@@ -30,7 +60,7 @@
                             @foreach($permissions->groupBy(fn($p) => explode('.', $p->name)[0]) as $group => $groupPermissions)
                                 <div class="col-md-6 mb-4">
                                     {{-- Alpine Component for each Group --}}
-                                    <div class="card border-0 shadow-sm h-100 permission-group" 
+                                    <div class="card border-0 shadow-sm h-100" 
                                          x-data="{ 
                                             total: {{ $groupPermissions->count() }},
                                             selected: [{{ implode(',', $groupPermissions->filter(fn($p) => in_array($p->name, $rolePermissions ?? []))->pluck('id')->toArray()) }}],
@@ -43,35 +73,33 @@
                                             }
                                          }">
                                         
-                                        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
-                                            <h6 class="mb-0 font-weight-bold text-primary text-uppercase small">
-                                                <i class="fas fa-folder-open mr-2 opacity-5"></i>{{ $group }}
+                                        <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center pt-3 pb-0">
+                                            <h6 class="mb-0 font-weight-bold text-dark text-uppercase small">
+                                                {{ $group }}
                                             </h6>
                                             
-                                            <div class="custom-control custom-checkbox small">
+                                            <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" 
                                                        class="custom-control-input" 
                                                        id="select-all-{{ $group }}"
                                                        @click="toggleAll()"
                                                        :checked="selected.length === total"
                                                        :indeterminate="selected.length > 0 && selected.length < total">
-                                                <label class="custom-control-label font-weight-bold text-muted" for="select-all-{{ $group }}">
-                                                    <span x-text="selected.length === total ? 'All' : 'Select All'"></span>
-                                                </label>
+                                                <label class="custom-control-label small font-weight-bold" for="select-all-{{ $group }}">All</label>
                                             </div>
                                         </div>
 
-                                        <div class="card-body">
+                                        <div class="card-body pt-3">
                                             @foreach($groupPermissions as $permission)
-                                                <div class="custom-control custom-switch mb-3">
+                                                <div class="custom-control custom-checkbox mb-2 py-1 border-bottom-light">
                                                     <input type="checkbox" 
                                                            name="permissions[]" 
                                                            value="{{ $permission->name }}" 
-                                                           class="custom-control-input" 
+                                                           class="custom-control-input perm-check" 
                                                            id="perm-{{ $permission->id }}"
                                                            x-model="selected"
                                                            :value="{{ $permission->id }}">
-                                                    <label class="custom-control-label text-dark text-capitalize w-100" 
+                                                    <label class="custom-control-label text-muted small w-100" 
                                                            for="perm-{{ $permission->id }}" 
                                                            style="cursor: pointer;">
                                                         {{ str_replace('.', ' ', $permission->name) }}
@@ -80,13 +108,9 @@
                                             @endforeach
                                         </div>
 
-                                        <div class="card-footer bg-white border-top-0 pt-0">
-                                            <div class="progress" style="height: 4px;">
-                                                <div class="progress-bar bg-primary" 
-                                                     role="progressbar" 
-                                                     :style="`width: ${(selected.length / total) * 100}%`" 
-                                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
+                                        <div class="progress rounded-0" style="height: 3px;">
+                                            <div class="progress-bar bg-primary" 
+                                                 :style="`width: ${(selected.length / total) * 100}%`" ></div>
                                         </div>
                                     </div>
                                 </div>
@@ -98,4 +122,14 @@
         </div>
     </form>
 </div>
+
+<style>
+    .bg-light-gray { background-color: #f4f7f6; }
+    .bg-soft-primary { background-color: #eef2ff; }
+    .border-bottom-light { border-bottom: 1px solid #f1f1f1; }
+    .border-bottom-light:last-child { border-bottom: none; }
+    .custom-control-label { transition: color 0.2s; }
+    .custom-control-input:checked ~ .custom-control-label { color: #212529 !important; font-weight: 500; }
+    .permission-group { border-radius: 10px; }
+</style>
 @endsection
