@@ -5,30 +5,30 @@
 @section('content')
 <div class="container-fluid py-4">
     
-    {{-- Financial Overview Cards --}}
+    {{-- Financial Overview Cards (Audited Totals for the Current Page) --}}
     <div class="row mb-5">
         <div class="col-md-4 mb-3 mb-md-0">
             <div class="card border-0 shadow-sm rounded-4 p-3 bg-primary text-white">
                 <div class="media align-items-center">
-                    <div class="rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px; background-color: rgba(255,255,255,0.2) !important;">
-                        <i class="fas fa-wallet fa-lg"></i>
+                    <div class="rounded-circle bg-white d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px; background-color: rgba(255,255,255,0.2) !important;">
+                        <i class="fas fa-chart-line fa-lg"></i>
                     </div>
                     <div class="media-body">
-                        <h6 class="mb-0 opacity-75 small">Total System Balance</h6>
-                        <h3 class="font-weight-bold mb-0 text-white">{{ number_format($wallets->sum('balance')) }} RWF</h3>
+                        <h6 class="mb-0 opacity-75 small text-uppercase font-weight-bold">Total Page Net Revenue</h6>
+                        <h3 class="font-weight-bold mb-0 text-white">{{ number_format($wallets->sum('audited_net')) }} RWF</h3>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-3 mb-md-0">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-left border-warning" style="border-left-width: 5px !important;">
                 <div class="media align-items-center">
                     <div class="bg-soft-warning rounded-circle d-flex align-items-center justify-content-center mr-3 text-warning" style="width: 50px; height: 50px;">
-                        <i class="fas fa-clock fa-lg"></i>
+                        <i class="fas fa-lock fa-lg"></i>
                     </div>
                     <div class="media-body">
-                        <h6 class="text-muted mb-0 small">Total Pending Payouts</h6>
-                        <h3 class="font-weight-bold mb-0 text-dark">{{ number_format($wallets->sum('pending_balance')) }} RWF</h3>
+                        <h6 class="text-muted mb-0 small text-uppercase font-weight-bold">Total Locked Funds</h6>
+                        <h3 class="font-weight-bold mb-0 text-dark">{{ number_format($wallets->sum('audited_locked')) }} RWF</h3>
                     </div>
                 </div>
             </div>
@@ -45,7 +45,8 @@
         <div class="card-header bg-white border-0 py-3">
             <div class="row align-items-center">
                 <div class="col">
-                    <h5 class="font-weight-bold mb-0">Shop Wallet Directory</h5>
+                    <h5 class="font-weight-bold mb-0">Audited Wallet Directory</h5>
+                    <small class="text-muted">Calculated based on completed spare parts sales and payouts.</small>
                 </div>
                 <div class="col-auto">
                     <form action="{{ route('admin.wallets.index') }}" method="GET" class="form-inline">
@@ -59,10 +60,10 @@
                 <thead class="bg-light">
                     <tr>
                         <th class="pl-4">Shop Details</th>
-                        <th>Available Balance</th>
-                        <th>Pending</th>
-                        <th>Withdrawn</th>
-                        <th>Last Activity</th>
+                        <th>Gross Sales</th>
+                        <th>Net (After {{ $wallets->first()->shop->commission_rate ?? '' }}%)</th>
+                        <th>Payable Balance</th>
+                        <th>Locked/Pending</th>
                         <th class="text-right pr-4">Actions</th>
                     </tr>
                 </thead>
@@ -73,44 +74,58 @@
                                 <div class="media align-items-center">
                                     <div class="mr-3">
                                         @if($wallet->shop->logo)
-                                            <img src="{{ asset('storage/' . $wallet->shop->logo) }}" class="rounded border" width="40" height="40" alt="Logo">
+                                            <img src="{{ asset('storage/' . $wallet->shop->logo) }}" class="rounded border shadow-sm" width="45" height="45" style="object-fit: cover;">
                                         @else
-                                            <div class="rounded bg-soft-primary text-primary d-flex align-items-center justify-content-center font-weight-bold" style="width: 40px; height: 40px; font-size: 14px;">
+                                            <div class="rounded bg-soft-primary text-primary d-flex align-items-center justify-content-center font-weight-bold" style="width: 45px; height: 45px; font-size: 16px;">
                                                 {{ strtoupper(substr($wallet->shop->shop_name, 0, 1)) }}
                                             </div>
                                         @endif
                                     </div>
                                     <div class="media-body">
                                         <h6 class="font-weight-bold text-dark mb-0">{{ $wallet->shop->shop_name }}</h6>
-                                        <span class="text-muted small">TIN: {{ $wallet->shop->tin_number ?? 'N/A' }}</span>
+                                        <span class="text-muted extra-small">TIN: {{ $wallet->shop->tin_number ?? 'N/A' }}</span>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <span class="font-weight-bold text-primary">{{ number_format($wallet->balance) }} RWF</span>
+                                <div class="font-weight-bold text-dark small">{{ number_format($wallet->audited_gross) }}</div>
+                                <div class="extra-small text-muted">Total Revenue</div>
                             </td>
                             <td>
-                                <span class="text-warning small font-weight-bold">{{ number_format($wallet->pending_balance) }}</span>
+                                <div class="font-weight-bold text-info small">{{ number_format($wallet->audited_net) }}</div>
+                                <div class="extra-small text-muted">Shop Earnings</div>
                             </td>
                             <td>
-                                <span class="text-muted small">{{ number_format($wallet->withdrawn_balance) }}</span>
+                                <div class="d-flex align-items-center">
+                                    <span class="font-weight-bold text-success h6 mb-0 mr-2">{{ number_format($wallet->audited_balance) }} <span class="small">RWF</span></span>
+                                    
+                                    {{-- TRUST INDICATOR: Alerts admin if manual balance differs from audited math --}}
+                                    @if(round($wallet->balance) != round($wallet->audited_balance))
+                                        <i class="fas fa-exclamation-triangle text-danger animated pulse infinite" 
+                                           data-toggle="tooltip" 
+                                           title="System Mismatch: DB shows {{ number_format($wallet->balance) }}. Audit suggests {{ number_format($wallet->audited_balance) }}."></i>
+                                    @endif
+                                </div>
                             </td>
                             <td>
-                                <span class="text-muted small">
-                                    {{ $wallet->last_transaction_at ? $wallet->last_transaction_at->diffForHumans() : 'No activity' }}
+                                <span class="badge badge-pill badge-soft-warning px-3 py-1 font-weight-bold">
+                                    {{ number_format($wallet->audited_locked) }} RWF
                                 </span>
                             </td>
                             <td class="text-right pr-4">
-                                <a href="{{ route('admin.wallets.show', $wallet->id) }}" class="btn btn-light btn-sm rounded-pill px-3 border shadow-sm">
-                                    <i class="fas fa-history mr-1 text-primary"></i> View History
+                                <a href="{{ route('admin.shops.show', $wallet->shop->id) }}" class="btn btn-white btn-sm rounded-pill px-3 border shadow-sm mr-1" title="Shop Profile">
+                                    <i class="fas fa-store text-muted"></i>
+                                </a>
+                                <a href="{{ route('admin.wallets.show', $wallet->id) }}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                                    <i class="fas fa-history mr-1"></i> Ledger
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="fas fa-store-slash fa-3x mb-3 opacity-25"></i>
-                                <p>No shop wallets found in the system.</p>
+                                <i class="fas fa-file-invoice-dollar fa-3x mb-3 opacity-25"></i>
+                                <p>No shop wallet data found matching current audit rules.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -128,23 +143,43 @@
 </div>
 
 <style>
-    /* Soft UI Custom Styling for BS4 */
-    .bg-soft-primary { background-color: rgba(13, 110, 253, 0.08) !important; }
+    /* Professional Soft UI Styling */
+    .bg-soft-primary { background-color: rgba(0, 123, 255, 0.08) !important; }
     .bg-soft-warning { background-color: rgba(255, 193, 7, 0.1) !important; }
-    .rounded-4 { border-radius: 1rem !important; }
+    .badge-soft-warning { background-color: #fff4e6; color: #d9480f; }
+    .rounded-4 { border-radius: 0.85rem !important; }
+    .extra-small { font-size: 0.7rem; }
+    
     .table thead th { 
-        font-size: 0.75rem; 
+        font-size: 0.7rem; 
         text-transform: uppercase; 
-        letter-spacing: 1px; 
-        font-weight: 700;
-        color: #6c757d;
-        border-bottom: none;
-        vertical-align: middle;
+        letter-spacing: 0.8px; 
+        font-weight: 800;
+        color: #8898aa;
+        background-color: #f8f9fe;
+        border-top: none;
+        border-bottom: 1px solid #e9ecef;
     }
+    
     .table td { 
-        border-bottom: 1px solid #f8f9fa; 
         vertical-align: middle;
+        padding: 1.1rem 0.75rem;
     }
-    .media-body h3 { line-height: 1.2; }
+
+    .btn-white { background-color: #fff; color: #212529; }
+
+    /* Animated pulse for discrepancies */
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.4; }
+        100% { opacity: 1; }
+    }
+    .animated.pulse { animation: pulse 1.5s infinite; }
 </style>
+
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+</script>
 @endsection

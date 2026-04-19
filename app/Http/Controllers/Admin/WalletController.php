@@ -15,11 +15,55 @@ class WalletController extends Controller
     /**
      * Display all shop wallets with their current balances.
      */
-    public function index()
-    {
-        $wallets = Wallet::with('shop')->latest('last_transaction_at')->paginate(15);
-        return view('admin.wallets.index', compact('wallets'));
-    }
+   public function index()
+{
+    // 1. Fetch Wallets with necessary Shop and Order relations
+    // We paginate first to keep the data set small for calculations
+    $wallets = Wallet::with([
+        'shop.orderItems' => function ($query) {
+            $query->where('status', 'completed')
+                  ->whereHas('order', fn($q) => $q->where('status', 'completed'));
+        },
+        'shop.payouts' => function ($query) {
+            $query->whereIn('status', ['completed', 'pending', 'processing']);
+        }
+    ])
+    ->latest('updated_at')
+    ->paginate(15);
+
+    // 2. Transform the collection to include audited math
+    $wallets->getCollection()->transform(function ($wallet) {
+        $shop = $wallet->shop;
+        $percentage = $shop->commission_rate / 100;
+
+        // Audited Gross
+        $totalGross = $shop->orderItems->sum(function($item) {
+            return $item->quantity * $item->unit_price;
+        });
+
+        // Financial Breakdown
+        $totalCommission = $totalGross * $percentage;
+        $netEarnings = $totalGross - $totalCommission;
+
+        // Payout Audit
+        $withdrawn = $shop->payouts->where('status', 'completed')->sum('amount');
+        $locked = $shop->payouts->whereIn('status', ['pending', 'processing'])->sum('amount');
+        
+        // Calculated Audited Balance
+        $auditedBalance = $netEarnings - ($withdrawn + $locked);
+
+        // Attach calculated values to the wallet object for the view
+        $wallet->audited_gross = $totalGross;
+        $wallet->audited_commission = $totalCommission;
+        $wallet->audited_net = $netEarnings;
+        $wallet->audited_locked = $locked;
+        $wallet->audited_balance = $auditedBalance;
+
+        return $wallet;
+    });
+
+    return view('admin.wallets.index', compact('wallets'));
+}
 
     /**
      * Show the form for manual adjustment (e.g., adding bonus or manual deduction).
