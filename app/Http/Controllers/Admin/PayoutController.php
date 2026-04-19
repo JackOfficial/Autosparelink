@@ -60,12 +60,22 @@ class PayoutController extends Controller
     {
         $payout = Payout::findOrFail($id);
         
+        // 1. Safety Guard: Prevent modification of finalized payouts
+        if (in_array($payout->status, ['completed', 'rejected'])) {
+            return back()->with('error', 'This payout has already been finalized and cannot be changed.');
+        }
+
+        // 2. Validation
         $request->validate([
             'status' => 'required|in:processing,completed,rejected',
-            'admin_note' => 'nullable|string|max:500'
+            'admin_note' => $request->status == 'rejected' 
+                            ? 'required|string|min:5|max:500' // Require reason for rejection
+                            : 'nullable|string|max:500'
+        ], [
+            'admin_note.required' => 'Please provide a reason for rejecting this payout so the vendor understands why.'
         ]);
 
-        // If approving, perform one last audit check
+        // 3. Logic for Approval (Audit Check)
         if ($request->status == 'completed') {
             $rate = (Commission::getRate() ?? 0) / 100;
             
@@ -84,18 +94,24 @@ class PayoutController extends Controller
             $currentAvailable = $netEarnings - $otherDeductions;
 
             if ($payout->amount > $currentAvailable) {
-                return back()->with('error', 'Insufficient audited funds to complete this payout.');
+                return back()->with('error', 'Insufficient audited funds. The shop balance might have changed due to recent refunds.');
             }
         }
 
+        // 4. Update the record
+        // By changing status to 'rejected', it automatically disappears from 
+        // the 'otherDeductions' sum in the next calculation, effectively restoring the balance.
         $payout->update([
             'status' => $request->status,
             'admin_note' => $request->admin_note,
-            'processed_at' => $request->status == 'completed' ? now() : $payout->processed_at,
+            'processed_at' => in_array($request->status, ['completed', 'rejected']) ? now() : $payout->processed_at,
         ]);
 
-        return redirect()->route('admin.payouts.index')
-            ->with('success', "Payout status updated to {$request->status}.");
+        $message = $request->status == 'rejected' 
+            ? "Payout has been rejected and funds have been released back to the vendor."
+            : "Payout status updated to {$request->status}.";
+
+        return redirect()->route('admin.payouts.index')->with('success', $message);
     }
 
     /**
