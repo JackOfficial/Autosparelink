@@ -29,7 +29,7 @@ class ShopController extends Controller
      */
 public function show(Shop $shop)
 {
-    // 1. Load basic relationships + Payouts
+    // 1. Load basic relationships
     $shop->load([
         'user', 
         'documents', 
@@ -39,36 +39,58 @@ public function show(Shop $shop)
         }
     ]);
 
-    // 2. Load Audited Counts 
-    // Only count parts that are 'active' and order items that are actually 'completed'
+    // 2. Audited Counts (Parts & Completed Sales)
     $shop->loadCount([
-        'parts' => function ($query) {
-            $query->where('status', 'active'); // Assuming you have a status on parts
-        },
-        'orderItems' => function ($query) {
-            $query->where('status', 'completed'); // Only count real sales
-        }
+        'parts' => fn($q) => $q->where('status', 'active'),
+        'orderItems' => fn($q) => $q->where('status', 'completed')
     ]);
 
-    // 3. Get recent orders (Audited)
-    // Only show orders that have moved past the 'pending' stage
+    // 3. Financial Audit (Mirroring PayoutController Logic)
+    $percentage = $shop->commission_rate / 100;
+
+    // Audited Gross Revenue: Items completed AND the Parent Order is completed
+    $totalGross = $shop->orderItems()
+        ->where('status', 'completed')
+        ->whereHas('order', function ($query) {
+            $query->where('status', 'completed');
+        })
+        ->sum(DB::raw('quantity * unit_price'));
+
+    // Financial Breakdown
+    $totalCommission = $totalGross * $percentage;
+    $netEarnings = $totalGross - $totalCommission;
+
+    // Payout Audit (Withdrawn vs Locked)
+    $deductions = $shop->payouts()
+        ->whereIn('status', ['completed', 'pending', 'processing'])
+        ->selectRaw("
+            SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as total_withdrawn,
+            SUM(CASE WHEN status IN ('pending', 'processing') THEN amount ELSE 0 END) as total_locked
+        ")
+        ->first();
+
+    $withdrawn = $deductions->total_withdrawn ?? 0;
+    $locked = $deductions->total_locked ?? 0;
+    $availableBalance = $netEarnings - ($withdrawn + $locked);
+
+    // 4. Recent Sales for the Table
     $recentOrders = $shop->orderItems()
         ->whereNotIn('status', ['pending', 'cancelled'])
-        ->with(['order.user', 'part']) // Include order user for better admin UX
+        ->with(['order.user', 'part'])
         ->latest()
         ->take(10)
         ->get();
 
-    // 4. Calculate Total Revenue (The "Truth" Logic)
-    // Logic: Item Status is 'completed' AND Payment Status is 'successful'
-    $totalRevenue = $shop->orderItems()
-        ->where('status', 'completed') 
-        ->whereHas('order.payment', function($q) {
-            $q->where('status', 'successful');
-        })
-        ->sum(DB::raw('quantity * unit_price'));
-
-    return view('admin.shops.show', compact('shop', 'recentOrders', 'totalRevenue'));
+    return view('admin.shops.show', [
+        'shop'             => $shop,
+        'recentOrders'     => $recentOrders,
+        'totalGross'       => $totalGross,
+        'totalCommission'  => $totalCommission,
+        'netEarnings'      => $netEarnings,
+        'totalWithdrawn'   => $withdrawn,
+        'pendingPayouts'   => $locked,
+        'availableBalance' => $availableBalance,
+    ]);
 }
 
 public function viewDocument(Document $document)

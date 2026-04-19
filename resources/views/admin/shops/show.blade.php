@@ -38,17 +38,53 @@
         </div>
     </div>
 
-    {{-- 2. Audited Stats Cards --}}
+    {{-- 2. Audited Stats Cards (Financial Truth) --}}
     <div class="row mb-4">
+        {{-- Total Gross --}}
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="card border-0 shadow-sm bg-white overflow-hidden">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <div class="text-muted small text-uppercase fw-bold">Wallet Balance</div>
-                            <div class="h3 mb-0 fw-bold text-dark">{{ number_format($shop->wallet->balance ?? 0) }} <small class="h6">RWF</small></div>
+                            <div class="text-muted small text-uppercase fw-bold">Total Gross Sales</div>
+                            <div class="h4 mb-0 fw-bold text-dark">{{ number_format($totalGross) }} <small class="h6">RWF</small></div>
+                            <small class="text-muted">Total audited revenue</small>
                         </div>
                         <div class="icon-shape bg-soft-primary text-primary rounded-circle px-3 py-2">
+                            <i class="fas fa-chart-line fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Net Earnings (After Platform Fee) --}}
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-dark text-white overflow-hidden">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small text-uppercase fw-bold">Net Earnings</div>
+                            <div class="h4 mb-0 fw-bold text-success">{{ number_format($netEarnings) }} <small class="h6 text-success">RWF</small></div>
+                            <small class="text-success small"><i class="fas fa-check-circle me-1"></i> After {{ $shop->commission_rate }}% Fee</small>
+                        </div>
+                        <i class="fas fa-hand-holding-dollar fa-2x text-white-50 opacity-20"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Available to Withdraw --}}
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-success text-white overflow-hidden">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small text-uppercase fw-bold">Available Balance</div>
+                            <div class="h4 mb-0 fw-bold">{{ number_format($availableBalance) }} <small class="h6">RWF</small></div>
+                            <small class="text-white-50">Locked: {{ number_format($pendingPayouts) }} RWF</small>
+                        </div>
+                        <div class="icon-shape bg-white text-success rounded-circle px-3 py-2">
                             <i class="fas fa-wallet fa-lg"></i>
                         </div>
                     </div>
@@ -56,47 +92,18 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm bg-dark text-white overflow-hidden position-relative">
-                <div class="card-body z-index-10">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="text-white-50 small text-uppercase fw-bold">Audited Revenue</div>
-                            <div class="h3 mb-0 fw-bold text-success">{{ number_format($totalRevenue ?? 0) }} <small class="h6">RWF</small></div>
-                            <div class="text-success small mt-1"><i class="fas fa-shield-check me-1"></i> Verified Only</div>
-                        </div>
-                        <i class="fas fa-money-bill-trend-up fa-2x text-white-50 opacity-20"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm bg-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="text-muted small text-uppercase fw-bold">Active Parts</div>
-                            <div class="h3 mb-0 fw-bold text-dark">{{ $shop->parts_count }}</div>
-                        </div>
-                        <div class="icon-shape bg-soft-info text-info rounded-circle px-3 py-2">
-                            <i class="fas fa-boxes-stacked fa-lg"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        {{-- Active Items --}}
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="card border-0 shadow-sm bg-white border-start border-primary border-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <div class="text-muted small text-uppercase fw-bold">Platform Fee</div>
-                            <div class="h3 mb-0 fw-bold text-primary">{{ $shop->commission_rate }}%</div>
+                            <div class="text-muted small text-uppercase fw-bold">Active Parts</div>
+                            <div class="h4 mb-0 fw-bold text-primary">{{ $shop->parts_count }}</div>
+                            <small class="text-muted">Total items in store</small>
                         </div>
-                        <div class="icon-shape bg-soft-secondary text-muted rounded-circle px-3 py-2">
-                            <i class="fas fa-hand-holding-dollar fa-lg"></i>
+                        <div class="icon-shape bg-soft-info text-info rounded-circle px-3 py-2">
+                            <i class="fas fa-boxes-stacked fa-lg"></i>
                         </div>
                     </div>
                 </div>
@@ -207,7 +214,6 @@
                                 </div>
                             @empty
                                 <div class="text-center py-5">
-                                    <img src="{{ asset('images/empty-docs.svg') }}" style="width: 120px; opacity: 0.5" class="mb-3">
                                     <p class="text-muted mb-0">No verification documents uploaded yet.</p>
                                 </div>
                             @endforelse
