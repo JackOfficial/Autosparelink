@@ -49,7 +49,7 @@
                             <div class="h4 mb-0 font-weight-bold text-dark">{{ number_format($totalGross) }} <small class="h6">RWF</small></div>
                             <small class="text-muted">Total audited revenue</small>
                         </div>
-                        <div class="icon-shape bg-soft-primary text-primary rounded-circle px-3 py-2">
+                        <div class="icon-shape bg-soft-primary text-primary px-3 py-2">
                             <i class="fas fa-chart-line fa-lg"></i>
                         </div>
                     </div>
@@ -81,7 +81,7 @@
                             <div class="h4 mb-0 font-weight-bold">{{ number_format($availableBalance) }} <small class="h6">RWF</small></div>
                             <small class="text-white-50">Locked: {{ number_format($pendingPayouts) }} RWF</small>
                         </div>
-                        <div class="icon-shape bg-white text-success rounded-circle px-3 py-2">
+                        <div class="icon-shape bg-white text-success px-3 py-2">
                             <i class="fas fa-wallet fa-lg"></i>
                         </div>
                     </div>
@@ -98,7 +98,7 @@
                             <div class="h4 mb-0 font-weight-bold text-primary">{{ $shop->parts_count }}</div>
                             <small class="text-muted">Total items in store</small>
                         </div>
-                        <div class="icon-shape bg-soft-info text-info rounded-circle px-3 py-2">
+                        <div class="icon-shape bg-soft-info text-info px-3 py-2">
                             <i class="fas fa-boxes fa-lg"></i>
                         </div>
                     </div>
