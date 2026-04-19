@@ -66,7 +66,7 @@ class PayoutController extends Controller
         ]);
 
         // If approving, perform one last audit check
-        if ($request->status === 'completed' || $request->status === 'processing') {
+        if ($request->status == 'completed') {
             $rate = (Commission::getRate() ?? 0) / 100;
             
             $totalGross = OrderItem::where('shop_id', $payout->shop_id)
@@ -91,7 +91,7 @@ class PayoutController extends Controller
         $payout->update([
             'status' => $request->status,
             'admin_note' => $request->admin_note,
-            'processed_at' => $request->status === 'completed' ? now() : $payout->processed_at,
+            'processed_at' => $request->status == 'completed' ? now() : $payout->processed_at,
         ]);
 
         return redirect()->route('admin.payouts.index')
@@ -105,7 +105,7 @@ class PayoutController extends Controller
     {
         $payout = Payout::findOrFail($id);
         
-        if ($payout->status === 'pending') {
+        if ($payout->status == 'pending') {
             $payout->delete();
             return back()->with('success', 'Payout request cancelled.');
         }
