@@ -1,124 +1,134 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Admin - Users')
+@section('title', 'User Management | Autosparelink')
 
 @section('content')
-
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="text-dark">Users ({{ $users->count() }})</h1>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-                    <li class="breadcrumb-item active">Users</li>
-                </ol>
+<div class="container-fluid">
+    <div class="row mb-4 pt-3">
+        <div class="col-sm-6">
+            <h1 class="m-0 text-dark font-weight-bold">
+                <i class="fas fa-users mr-2 text-primary"></i>Users Management
+            </h1>
+            <p class="text-muted small">Overview of all registered platform users and their access levels.</p>
+        </div>
+        <div class="col-sm-6 text-right">
+            <div class="d-inline-flex">
+                <div class="bg-white p-2 px-3 rounded shadow-sm border-left border-primary mr-3 text-left">
+                    <small class="text-muted text-uppercase d-block" style="font-size: 10px;">Total Registered</small>
+                    <span class="h6 font-weight-bold text-dark mb-0">{{ $users->count() }} Users</span>
+                </div>
+                @role('super-admin')
+                <a href="{{ route('admin.users.create') }}" class="btn btn-primary shadow-sm d-flex align-items-center">
+                    <i class="fas fa-user-plus mr-2"></i> Add New User
+                </a>
+                @endrole
             </div>
         </div>
     </div>
-</section>
 
-<section class="content">
-<div class="container-fluid">
-<div class="row">
-<div class="col-12">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h3 class="card-title font-weight-bold text-uppercase small text-muted mb-0" style="letter-spacing: 1px;">
+                User Directory
+            </h3>
+        </div>
 
-<div class="card shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title text-uppercase">All Users</h3>
-        <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus"></i> Add User
-        </a>
+        <div class="card-body table-responsive p-0">
+            <table id="example1" class="table table-hover align-middle mb-0">
+                <thead class="bg-light small text-uppercase font-weight-bold">
+                    <tr>
+                        <th class="pl-4">User</th>
+                        <th>Email</th>
+                        <th>Access Roles</th>
+                        <th>Joined Date</th>
+                        <th class="text-right pr-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($users as $user)
+                    <tr>
+                        <td class="pl-4">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-wrapper mr-3">
+                                    @if ($user->avatar)
+                                        <img src="{{ $user->avatar }}" alt="" class="rounded-circle border shadow-sm" style="width:42px; height:42px; object-fit:cover;">
+                                    @else
+                                        <div class="rounded-circle border bg-soft-primary text-primary d-flex align-items-center justify-content-center shadow-sm font-weight-bold" style="width:42px; height:42px;">
+                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <div>
+                                    <span class="font-weight-bold text-dark d-block">{{ $user->name }}</span>
+                                    <small class="text-muted">ID: #USR-{{ str_pad($user->id, 4, '0', STR_PAD_LEFT) }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-dark">{{ $user->email }}</span>
+                        </td>
+                        <td>
+                            @forelse($user->getRoleNames() as $role)
+                                @php
+                                    $roleClass = $role === 'super-admin' ? 'badge-danger' : ($role === 'admin' ? 'badge-primary' : 'badge-info');
+                                @endphp
+                                <span class="badge {{ $roleClass }} px-2 py-1 text-uppercase" style="font-size: 10px; border-radius: 4px;">
+                                    <i class="fas fa-shield-alt mr-1 small"></i> {{ $role }}
+                                </span>
+                            @empty
+                                <span class="badge badge-light border text-muted px-2 py-1" style="font-size: 10px;">No Role Assigned</span>
+                            @endforelse
+                        </td>
+                        <td>
+                            <span class="text-muted small">
+                                <i class="far fa-calendar-alt mr-1"></i> {{ optional($user->created_at)->format('d M, Y') }}
+                            </span>
+                        </td>
+                        <td class="text-right pr-4">
+                            <div class="btn-group">
+                                <a href="{{ route('admin.users.edit', $user) }}" 
+                                   class="btn btn-sm btn-white border shadow-none" 
+                                   title="Edit User">
+                                    <i class="fas fa-user-edit text-primary"></i>
+                                </a>
+
+                                @role('super-admin')
+                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="d-inline ml-1">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-white border text-danger shadow-none" 
+                                            title="Delete User"
+                                            onclick="return confirm('Permanently delete {{ $user->name }}?')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                                @endrole
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="opacity-50">
+                                <i class="fas fa-users-slash fa-3x mb-3"></i>
+                                <p class="mb-0">No users found in the system.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <div class="card-body table-responsive p-3">
-        <table id="example1" class="table table-bordered table-striped table-hover">
-            <thead class="thead-light">
-                <tr class="text-uppercase">
-                    <th>Photo</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Roles</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            @forelse($users as $user)
-                <tr>
-                    <td>
-                        @if ($user->photo)
-                            <a href="{{ asset('storage/'.$user->photo) }}" target="_blank">
-                                <img src="{{ asset('storage/'.$user->photo) }}"
-                                     loading="lazy"
-                                     class="rounded-circle border"
-                                     style="width:50px;height:50px;object-fit:cover;">
-                            </a>
-                        @else
-                            <img src="{{ asset('images/avatar-placeholder.png') }}"
-                                 class="rounded-circle border"
-                                 style="width:50px;height:50px;object-fit:cover;">
-                        @endif
-                    </td>
-
-                    <td>{{ $user->name }}</td>
-                    <td>{{ $user->email }}</td>
-
-                    <td>
-                        @forelse($user->getRoleNames() as $role)
-                            <span class="badge rounded-pill bg-info text-dark">{{ $role }}</span>
-                        @empty
-                            <span class="badge rounded-pill bg-secondary">No role</span>
-                        @endforelse
-                    </td>
-
-                    <td>{{ optional($user->created_at)->format('Y-m-d') }}</td>
-
-                    <td class="d-flex gap-1">
-                        <a href="{{ route('admin.users.edit', $user) }}"
-                           class="btn btn-info btn-sm" title="Edit">
-                            <i class="fas fa-pencil-alt"></i>
-                        </a>
-
-                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-danger btn-sm" title="Delete"
-                                    onclick="return confirm('Delete this user?')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center text-muted py-3">
-                        <i class="fas fa-user-slash"></i> No users available.
-                    </td>
-                </tr>
-            @endforelse
-            </tbody>
-
-            <tfoot>
-                <tr class="text-uppercase">
-                    <th>Photo</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Roles</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
 </div>
 
-</div>
-</div>
-</div>
-</section>
-
+@push('styles')
+<style>
+    .bg-soft-primary { background-color: #eef5ff; }
+    .table td { vertical-align: middle !important; }
+    .badge { font-weight: 600; letter-spacing: 0.5px; }
+    .btn-white { background: #fff; color: #6c757d; }
+    .btn-white:hover { background: #f8f9fa; color: #333; }
+</style>
+@endpush
 @endsection

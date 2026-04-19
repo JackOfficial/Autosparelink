@@ -1,146 +1,155 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Edit User')
+@section('title', 'Edit User Account | Autosparelink')
 
 @section('content')
+<div class="container-fluid">
+    <div class="row mb-4 pt-3">
+        <div class="col-sm-6">
+            <h1 class="m-0 text-dark font-weight-bold">
+                <i class="fas fa-user-edit mr-2 text-primary"></i>Edit User
+            </h1>
+            <p class="text-muted small">Update profile details and account permissions for <strong>{{ $user->name }}</strong>.</p>
+        </div>
+        <div class="col-sm-6 text-right">
+            <a href="{{ route('admin.users.index') }}" class="btn btn-light border shadow-sm">
+                <i class="fas fa-arrow-left mr-1"></i> Back to Directory
+            </a>
+        </div>
+    </div>
 
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6"><h1>Edit User</h1></div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.users.index') }}">Users</a></li>
-                    <li class="breadcrumb-item active">Edit</li>
-                </ol>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title font-weight-bold text-dark mb-0">General Information</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('admin.users.update', $user->id) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="font-weight-bold small text-uppercase">Full Name</label>
+                                <input type="text" name="name" value="{{ old('name', $user->name) }}" class="form-control @error('name') is-invalid @enderror" placeholder="Enter full name" required>
+                                @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="font-weight-bold small text-uppercase">Email Address</label>
+                                <input type="email" name="email" value="{{ old('email', $user->email) }}" class="form-control @error('email') is-invalid @enderror" placeholder="email@example.com" required>
+                                @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="font-weight-bold small text-uppercase">New Password</label>
+                                <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="••••••••">
+                                <small class="text-muted">Leave empty to keep current password</small>
+                                @error('password')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="font-weight-bold small text-uppercase">Confirm Password</label>
+                                <input type="password" name="password_confirmation" class="form-control" placeholder="••••••••">
+                            </div>
+
+                            <div class="col-12"><hr class="my-3"></div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="font-weight-bold small text-uppercase">Account Roles</label>
+                                @role('super-admin')
+                                    <select name="roles[]" class="form-control select2" multiple data-placeholder="Select Roles">
+                                        @foreach($roles as $role)
+                                            <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
+                                                {{ ucfirst($role->name) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="text-muted">Super-Admin access only</small>
+                                @else
+                                    <div class="p-2 border rounded bg-light">
+                                        @foreach($user->getRoleNames() as $role)
+                                            <span class="badge badge-primary px-2 py-1">{{ ucfirst($role) }}</span>
+                                        @endforeach
+                                        @if($user->roles->isEmpty()) <span class="text-muted">No roles assigned</span> @endif
+                                    </div>
+                                    <small class="text-danger"><i class="fas fa-lock mr-1"></i> Role management restricted</small>
+                                @endrole
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="font-weight-bold small text-uppercase">Status</label>
+                                <select name="status" class="form-control custom-select" required>
+                                    <option value="1" {{ old('status', $user->status) == 1 ? 'selected' : '' }}>Active Account</option>
+                                    <option value="0" {{ old('status', $user->status) == 0 ? 'selected' : '' }}>Suspended / Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary px-5 shadow-sm font-weight-bold">
+                                <i class="fas fa-save mr-1"></i> Update Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title font-weight-bold text-dark mb-0">Profile Image</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div x-data="{ preview: null }" class="mb-3">
+                        <div class="position-relative d-inline-block mb-3">
+                            @php
+                                $avatarPath = $user->photo ? asset($user->photo) : ($user->avatar ?: asset('images/placeholder-user.png'));
+                            @endphp
+                            <img :src="preview ? preview : '{{ $avatarPath }}'" 
+                                 class="rounded-circle shadow-sm border p-1" 
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                        </div>
+                        
+                        <div class="custom-file text-left">
+                            <input type="file" name="photo" class="custom-file-input" id="photoInput" 
+                                   @change="preview = URL.createObjectURL($event.target.files[0])">
+                            <label class="custom-file-label" for="photoInput">Choose new photo</label>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">Recommended: Square image, max 2MB</small>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title font-weight-bold text-dark mb-0">Authentication</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fab fa-google text-danger mr-3 fa-lg"></i>
+                        <div>
+                            <span class="d-block font-weight-bold small">Google Login</span>
+                            @if($user->provider === 'google' || in_array('google', $user->social_providers ?? []))
+                                <span class="badge badge-success px-2">Connected</span>
+                            @else
+                                <span class="badge badge-light border text-muted px-2">Not Linked</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</section>
-
-<section class="content">
-<div class="container-fluid">
-    <div class="card shadow-sm">
-        <div class="card-body">
-
-            <form action="{{ route('admin.users.update', $user->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-
-                <div class="row">
-
-                    <!-- Name -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Full Name</label>
-                        <input type="text" name="name" value="{{ old('name', $user->name) }}" class="form-control @error('name') is-invalid @enderror" required>
-                        @error('name')<span class="text-danger">{{ $message }}</span>@enderror
-                    </div>
-
-                    <!-- Email -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" value="{{ old('email', $user->email) }}" class="form-control @error('email') is-invalid @enderror" required>
-                        @error('email')<span class="text-danger">{{ $message }}</span>@enderror
-                    </div>
-
-                    <!-- Password -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Password <small class="text-muted">(leave blank to keep current)</small></label>
-                        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror">
-                        @error('password')<span class="text-danger">{{ $message }}</span>@enderror
-                    </div>
-
-                    <!-- Password Confirmation -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Confirm Password</label>
-                        <input type="password" name="password_confirmation" class="form-control">
-                    </div>
-
-                    <!-- Roles & Permissions (only for super-admin) -->
-                    @if(auth()->user()->hasRole('super-admin'))
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Roles</label>
-                            <select name="roles[]" class="form-control" multiple>
-                                @foreach($roles as $role)
-                                    <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
-                                        {{ ucfirst($role->name) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <small class="text-muted">Use CTRL (CMD on Mac) to select multiple roles</small>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Permissions</label>
-                            <select name="permissions[]" class="form-control" multiple>
-                                @foreach($permissions as $permission)
-                                    <option value="{{ $permission->name }}" {{ $user->hasPermissionTo($permission->name) ? 'selected' : '' }}>
-                                        {{ ucfirst($permission->name) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <small class="text-muted">Assign specific permissions (optional)</small>
-                        </div>
-                    @endif
-
-                    <!-- Profile Photo -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Profile Photo (optional)</label>
-                        <div x-data="{ preview: null }">
-                            <input type="file" name="photo" accept="image/*" class="form-control"
-                                @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
-                            
-                            <!-- Show uploaded photo if exists -->
-                            @if($user->photo)
-                                <img src="{{ asset($user->photo) }}" class="img-thumbnail mt-2" width="100">
-                            <!-- Else show Google avatar -->
-                            @elseif($user->provider === 'google' && $user->avatar)
-                                <img src="{{ $user->avatar }}" class="img-thumbnail mt-2" width="100">
-                            @endif
-
-                            <!-- New preview -->
-                            <template x-if="preview">
-                                <img :src="preview" class="img-thumbnail mt-2" width="100">
-                            </template>
-                        </div>
-                        <small class="text-muted">Upload a photo to override existing or Google avatar</small>
-                    </div>
-
-                    <!-- Social Login -->
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">Social Login</label>
-                        <div class="d-flex gap-2">
-                            @foreach(['google'] as $provider)
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="social_providers[]" value="{{ $provider }}" id="provider-{{ $provider }}" {{ in_array($provider, $user->social_providers ?? []) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="provider-{{ $provider }}">{{ ucfirst($provider) }}</label>
-                                </div>
-                            @endforeach
-                        </div>
-                        <small class="text-muted">Check the providers the user can use to login</small>
-                    </div>
-
-                    <!-- Status -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-control" required>
-                            <option value="1" {{ $user->status ? 'selected' : '' }}>Active</option>
-                            <option value="0" {{ !$user->status ? 'selected' : '' }}>Inactive</option>
-                        </select>
-                    </div>
-
-                </div>
-
-                <button type="submit" class="btn btn-primary mt-2">
-                    <i class="fas fa-save"></i> Update User
-                </button>
-
-            </form>
-
-        </div>
-    </div>
 </div>
-</section>
 
+@push('styles')
+<style>
+    .form-control { border-radius: 8px; border: 1px solid #e2e8f0; }
+    .form-control:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .bg-soft-primary { background-color: #eef5ff; }
+</style>
+@endpush
 @endsection
