@@ -127,7 +127,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <h6 class="font-weight-bold mb-1 text-dark">{{ $user->shop->name }}</h6>
+                                <h6 class="font-weight-bold mb-1 text-dark">{{ $user->shop->name_name }}</h6>
                                 <p class="text-muted small mb-0">
                                     <i class="fas fa-map-marker-alt mr-1"></i> {{ $user->shop->address ?? 'No address provided' }}
                                 </p>

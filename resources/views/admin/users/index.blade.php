@@ -75,7 +75,7 @@
                             @if($user->shop)
                                 <div class="d-flex align-items-center">
                                     <span class="badge bg-soft-success text-success border border-success px-2 py-1" style="font-size: 11px;">
-                                        <i class="fas fa-store mr-1"></i> {{ $user->shop->name }}
+                                        <i class="fas fa-store mr-1"></i> {{ $user->shop->shop_name }}
                                     </span>
                                 </div>
                             @else
