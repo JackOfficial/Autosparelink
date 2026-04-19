@@ -113,7 +113,7 @@
                                 </a>
 
                                 @role('super-admin')
-                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="d-inline ml-1">
+                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="d-none ml-1">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-sm btn-white border text-danger shadow-none" 
