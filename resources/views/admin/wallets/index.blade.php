@@ -97,7 +97,7 @@
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <span class="font-weight-bold text-success h6 mb-0 mr-2">{{ number_format($wallet->audited_balance) }} <span class="small">RWF</span></span>
+                                    <span class="font-weight-bold text-success h6 mb-0 mr-2">kkkkkk{{ number_format($wallet->audited_balance) }} <span class="small">RWF</span></span>
                                     
                                     {{-- TRUST INDICATOR: Alerts admin if manual balance differs from audited math --}}
                                     @if(round($wallet->balance) != round($wallet->audited_balance))
