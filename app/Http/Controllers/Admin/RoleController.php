@@ -13,11 +13,16 @@ class RoleController extends Controller
     /**
      * Display a listing of roles.
      */
-    public function index()
-    {
-        $roles = Role::with('permissions')->get();
-        return view('admin.roles.index', compact('roles'));
-    }
+   public function index()
+{
+    // with('permissions') fixes the "0 Permissions" issue by pre-loading them
+    // withCount('users') creates the 'users_count' variable for your badge
+    $roles = Role::with('permissions')
+        ->withCount('users')
+        ->get();
+
+    return view('admin.roles.index', compact('roles'));
+}
 
     /**
      * Show the form for creating a new role.
