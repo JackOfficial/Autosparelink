@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $blueprint) {
             // Adding status after the email column
             // 1 = Active, 0 = Inactive/Suspended
-            $blueprint->integer('status')->default(1)->after('email');
+            $blueprint->integer('status')->default(1)->after('updated_at');
         });
     }
 

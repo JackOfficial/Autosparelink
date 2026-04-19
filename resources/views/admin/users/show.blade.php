@@ -35,7 +35,7 @@
                         
                         <span class="badge {{ $user->status ? 'badge-success' : 'badge-danger' }} position-absolute shadow-sm" 
                               style="bottom: 10px; right: 10px; border: 2px solid white; padding: 5px 10px; border-radius: 50px;">
-                            {{ $user->state ? 'ACTIVE' : 'INACTIVE' }}
+                            {{ $user->status ? 'ACTIVE' : 'INACTIVE' }}
                         </span>
                     </div>
                     
