@@ -90,14 +90,28 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="symbol-40 bg-soft-primary text-primary mr-3 font-weight-bold">
-                                            {{ substr($payout->shop->name, 0, 1) }}
-                                        </div>
-                                        <div>
-                                            <span class="font-weight-bold d-block text-dark">{{ $payout->shop->name }}</span>
-                                            <small class="text-muted"><i class="fas fa-envelope mr-1"></i>{{ $payout->shop->user->email }}</small>
-                                        </div>
-                                    </div>
+    <div class="symbol-40 mr-3 overflow-hidden shadow-sm border" style="width: 40px; height: 40px; border-radius: 8px;">
+        @if($payout->shop->logo)
+            <img src="{{ asset('storage/' . $payout->shop->logo) }}" 
+                 alt="{{ $payout->shop->shop_name }}" 
+                 style="width: 100%; height: 100%; object-fit: cover;">
+        @else
+            <div class="bg-soft-primary text-primary font-weight-bold d-flex align-items-center justify-content-center" 
+                 style="width: 100%; height: 100%;">
+                {{ strtoupper(substr($payout->shop->shop_name, 0, 1)) }}
+            </div>
+        @endif
+    </div>
+
+    <div>
+        <span class="font-weight-bold d-block text-dark line-height-1">
+            {{ $payout->shop->shop_name }}
+        </span>
+        <small class="text-muted">
+            <i class="fas fa-envelope mr-1" style="font-size: 10px;"></i>{{ $payout->shop->user->email }}
+        </small>
+    </div>
+</div>
                                 </td>
                                 <td>
                                     <span class="font-weight-bold text-dark">{{ number_format($payout->amount) }}</span>
