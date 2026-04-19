@@ -13,8 +13,8 @@ use App\Models\Specification;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Shop;
-use App\Models\Payout; // Import Payout
-use App\Models\Commission; // Import Commission
+use App\Models\Payout;
+use App\Models\Commission;
 use App\Observers\OrderItemObserver;
 use App\Observers\ShopObserver;
 use Illuminate\Support\Facades\DB;
@@ -45,8 +45,9 @@ class AppServiceProvider extends ServiceProvider
 
         /**
          * Sidebar/Layout Stats for the User & Seller Dashboard
+         * Included 'layouts.*' and 'components.partials.*' to ensure the sidebar gets data.
          */
-        View::composer(['layouts.dashboard', 'admin.layouts.app', 'components.shop-dashboard'], function ($view) {
+        View::composer(['layouts.*', 'user.*', 'admin.layouts.app', 'components.shop-dashboard', 'components.partials.*'], function ($view) {
             if (Auth::check()) {
                 $user = Auth::user();
 
@@ -68,28 +69,26 @@ class AppServiceProvider extends ServiceProvider
                 // 2. Prepare Seller Wallet Stats - AUDITED VERSION
                 if ($user->hasRole('seller') && $user->shop) {
                     $shopId = $user->shop->id;
-                    $rate = Commission::getRate() / 100;
+                    $rate = (Commission::getRate() ?? 0) / 100;
 
-                    // Calculate Earnings from Completed Items
+                    // Use coalesce/sum to ensure we don't return null
                     $totalGross = OrderItem::where('shop_id', $shopId)
                         ->where('status', 'completed')
                         ->whereHas('order', fn($q) => $q->where('status', 'completed'))
-                        ->sum(DB::raw('unit_price * quantity'));
+                        ->sum(DB::raw('unit_price * quantity')) ?? 0;
 
                     $netEarnings = $totalGross * (1 - $rate);
 
-                    // Calculate All Deductions (Sent + Pending + Processing)
                     $totalDeductions = Payout::where('shop_id', $shopId)
                         ->whereIn('status', ['completed', 'pending', 'processing'])
-                        ->sum('amount');
+                        ->sum('amount') ?? 0;
 
-                    // This is the "Audited" balance that updates instantly
                     $auditedBalance = $netEarnings - $totalDeductions;
 
                     $view->with('seller_stats', [
-                        'balance'      => $auditedBalance,
+                        'balance'      => max(0, $auditedBalance), 
                         'total_earned' => $netEarnings, 
-                        'pending'      => Payout::where('shop_id', $shopId)->whereIn('status', ['pending', 'processing'])->sum('amount'),
+                        'pending'      => Payout::where('shop_id', $shopId)->whereIn('status', ['pending', 'processing'])->sum('amount') ?? 0,
                         'currency'     => 'RWF',
                     ]);
                 }
@@ -98,13 +97,14 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        // Rest of your composers...
+        // Shop Context
         View::composer(['components.shop-dashboard', 'components.partials.*'], function ($view) {
             if (Auth::check()) {
                 $view->with('shop', Auth::user()->shop ?? null);
             }
         });
 
+        // Admin Layout Counts
         View::composer('admin.layouts.app', function ($view) {
             $counts = cache()->remember('admin_sidebar_counts', 60, function() {
                 return [
