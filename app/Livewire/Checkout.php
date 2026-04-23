@@ -170,7 +170,12 @@ class Checkout extends Component
                 session()->flash('message', 'Payment request sent to ' . $paymentPhone . '. Please check your phone.');
                 return redirect()->route('order.success', ['order' => $order->id]);
             } else {
-                throw new \Exception($response['message'] ?? 'Could not initiate InTouchPay payment.');
+                // This will show you the specific responsecode (like 0005 or 0004)
+$errorMsg = isset($response['responsecode']) 
+    ? "Error Code: " . $response['responsecode'] . " - " . ($response['message'] ?? 'Unknown Error')
+    : 'Could not initiate InTouchPay payment.';
+
+throw new \Exception($errorMsg);
             }
 
         } catch (\Exception $e) {

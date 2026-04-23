@@ -28,7 +28,8 @@ class InTouchPaymentService
     public function requestPayment(string $phone, float $amount, string $requestId)
     {
         // Timestamp must be UTC formatted as yyyymmddhhmmss [cite: 71]
-        $timestamp = Carbon::now('UTC')->format('YmdHis'); 
+        $timestamp = Carbon::now('UTC')->format('Ymds');
+        $password = $this->generatePassword($timestamp);
         
         $data = [
             'username'             => $this->username, // [cite: 71]
@@ -37,7 +38,7 @@ class InTouchPaymentService
             'mobilephoneno'        => $this->formatNumber($phone), // [cite: 71]
             'requesttransactionid' => $requestId, // [cite: 71]
             'accountno'            => $this->accountNo, // [cite: 71]
-            'password'             => $this->generatePassword($timestamp), // [cite: 66, 73]
+            'password'             => $password, // [cite: 66, 73]
             'callbackurl'          => route('api.payments.intouch.callback'), // [cite: 62, 73]
         ];
 
