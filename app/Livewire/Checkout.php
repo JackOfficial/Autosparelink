@@ -157,6 +157,8 @@ class Checkout extends Component
                 $transactionId
             );
 
+            dd($response);
+
             // 2. Handle Response
             if ($response && isset($response['success']) && $response['success'] == true) {
                 DB::commit();
