@@ -170,10 +170,15 @@ class Checkout extends Component
                 session()->flash('message', 'Payment request sent to ' . $paymentPhone . '. Please check your phone.');
                 return redirect()->route('order.success', ['order' => $order->id]);
             } else {
-                // This will show you the specific responsecode (like 0005 or 0004)
-            $errorCode = $response['responsecode'] ?? 'No Code';
-            $errorDesc = $response['message'] ?? 'Check your .env credentials';
-            throw new \Exception("InTouch Error [{$errorCode}]: {$errorDesc}");
+                if (!$response) {
+        throw new \Exception("InTouch API returned an empty response. Check your Internet/SSL or Server Logs.");
+    }
+
+    // 2. If we have a response but success is false, show the details
+    $errorCode = $response['responsecode'] ?? 'N/A';
+    $errorDesc = $response['message'] ?? 'No message provided by API';
+
+    throw new \Exception("InTouch Error [{$errorCode}]: {$errorDesc}");
             }
 
         } catch (\Exception $e) {
