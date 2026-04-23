@@ -4,67 +4,68 @@ namespace App\Http\Controllers\Payment;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\OrderItem;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Models\{Order, OrderItem};
+use Illuminate\Support\Facades\{DB, Log};
 
 class InTouchController extends Controller
 {
     public function handleCallback(Request $request)
     {
-        // 1. Log the full payload for debugging and traceability
+        // 1. Log full payload for debugging
         Log::info('InTouch Callback Received:', $request->all());
 
-        /**
-         * Per documentation, InTouch submits data as 'jsonpayload' 
-         * containing status and transaction details.
-         */
-        $payload = $request->input('jsonpayload');
+        // InTouch sends data directly in the root of the request
+        $status = $request->input('status'); // 'Successfull' or 'failed'
+        $gatewayTransactionId = $request->input('transactionid'); // Gateway's ID
+        $localRequestId = $request->input('requesttransactionid'); // Your AST-... ID
 
-        // Check if payload exists to avoid errors
-        if (!$payload) {
-            return response()->json(['message' => 'Invalid Payload'], 400);
+        if (!$gatewayTransactionId || !$localRequestId) {
+            return response()->json(['message' => 'Invalid Callback Data'], 400);
         }
 
-        $status = $payload['status'] ?? null; // e.g., 'Successfull' or 'failed' [cite: 92]
-        $requestId = $payload['requesttransactionid'] ?? null; // This is your internal Order ID [cite: 89]
-
-        /**
-         * Status for success is explicitly "Successfull" in the documentation.
-         */
+        // 2. Process Success
         if ($status === 'Successfull') {
-            DB::transaction(function () use ($requestId) {
-                // Find the order item and lock it to prevent double-processing vendor payments
-                $orderItem = OrderItem::where('order_id', $requestId)
-                    ->lockForUpdate()
-                    ->first();
+            DB::transaction(function () use ($gatewayTransactionId, $localRequestId) {
+                
+                // Find the main order using the gateway ID we stored during placeOrder
+                $order = Order::where('transaction_id', $gatewayTransactionId)
+                              ->orWhere('order_id', $localRequestId)
+                              ->first();
 
-                if ($orderItem && $orderItem->status !== 'completed') {
-                    /** * Update triggers your Observer for vendor payout.
-                     * Ensure your logic uses updateQuietly() inside the observer 
-                     * if needed to prevent loops.
-                     */
-                    $orderItem->status = 'completed';
-                    $orderItem->save(); 
+                if ($order && $order->status !== 'completed') {
+                    // Update main order status
+                    $order->update(['status' => 'completed']);
+
+                    // Find and update all items for this order
+                    // Locking prevents double-processing if multiple callbacks arrive
+                    $items = OrderItem::where('order_id', $order->id)
+                                      ->lockForUpdate()
+                                      ->get();
+
+                    foreach ($items as $item) {
+                        if ($item->status !== 'completed') {
+                            $item->status = 'completed';
+                            // save() is called individually to trigger your Vendor Payout Observers
+                            $item->save(); 
+                        }
+                    }
                 }
             });
 
-            /**
-             * The App must respond with HTTP 200 OK and a specific JSON structure[cite: 102, 105, 106, 107].
-             */
             return response()->json([
-                'message' => 'success',
+                'status' => 'success',
                 'success' => true,
-                'request_id' => $requestId
+                'requesttransactionid' => $localRequestId
             ], 200);
         }
 
-        Log::warning("InTouch Payment not successful for Order: {$requestId}. Status: {$status}");
+        // 3. Handle Failures
+        Log::warning("InTouch Payment failed for Order: {$localRequestId}. Status: {$status}");
         
         return response()->json([
-            'message' => 'Payment failed or pending',
+            'status' => 'failed',
             'success' => false,
-            'request_id' => $requestId
-        ], 200); // Always return 200 to acknowledge the gateway's ping
+            'requesttransactionid' => $localRequestId
+        ], 200); 
     }
 }

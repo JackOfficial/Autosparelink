@@ -62,6 +62,7 @@ class Checkout extends Component
     /**
      * Handles the Mobile Money payment via InTouchPay
      */
+    
     public function placeOrder(InTouchPaymentService $inTouch)
     {
         $cartItems = Cart::instance('default')->content();
@@ -113,15 +114,15 @@ class Checkout extends Component
 
             $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
             
-            // Generate Unique ID for InTouchPay
-            $transactionId = 'AST-' . strtoupper(Str::random(10));
+            // Generate Unique ID for InTouchPay (Your local reference)
+            $localTransactionId = 'AST-' . strtoupper(Str::random(10));
 
             $order = Order::create([
                 'user_id'                => Auth::id(),
                 'address_id'             => $final_address_id,
                 'total_amount'           => $subtotal,
                 'status'                 => 'pending',
-                'order_id'               => $transactionId, 
+                'order_id'               => $localTransactionId, 
                 'is_guest'               => !Auth::check(),
                 'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
                 'guest_email'            => $this->guest_email,
@@ -154,13 +155,18 @@ class Checkout extends Component
             $response = $inTouch->requestPayment(
                 $paymentPhone,
                 $subtotal,
-                $transactionId
+                $localTransactionId
             );
 
-            dd($response);
-
-            // 2. Handle Response
+            // 2. Handle Response and Store Gateway ID
             if ($response && isset($response['success']) && $response['success'] == true) {
+                
+                // UPDATE: Store the gateway's transactionid in your order
+                // Ensure your 'orders' table has a 'transaction_id' column
+                $order->update([
+                    'transaction_id' => $response['transactionid'] ?? null
+                ]);
+
                 DB::commit();
                 $this->saveGuestCookies();
                 Cart::instance('default')->destroy();
@@ -172,9 +178,8 @@ class Checkout extends Component
                 session()->flash('message', 'Payment request sent to ' . $paymentPhone . '. Please check your phone.');
                 return redirect()->route('order.success', ['order' => $order->id]);
             } else {
-                // If API returned but success is false, or API returned HTML (null)
                 if (!$response) {
-                    throw new \Exception("InTouch Gateway returned an invalid response. This often happens if credentials or the URL are incorrect.");
+                    throw new \Exception("InTouch Gateway returned an invalid response.");
                 }
 
                 $errorCode = $response['responsecode'] ?? 'N/A';
