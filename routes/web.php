@@ -192,9 +192,6 @@ Route::controller(FlutterwavePaymentController::class)->group(function () {
     Route::post('/flw-webhook', 'webhook')->name('payment.webhook');
 });
 
-Route::post('/payments/intouch/callback', [InTouchController::class, 'handleCallback'])
-    ->name('api.payments.intouch.callback');
-
 // =============================================================
 // AUTHENTICATED USER ROUTES
 // =============================================================
