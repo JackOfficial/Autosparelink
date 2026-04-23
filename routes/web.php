@@ -1,5 +1,6 @@
 <?php
 
+
 use Illuminate\Support\Facades\Route;
 
 // --- 1. OAUTH & AUTH CONTROLLERS ---
@@ -28,6 +29,7 @@ use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\VinController;
 use App\Http\Controllers\PaymentController as FlutterwavePaymentController;
+use App\Http\Controllers\Payment\InTouchController;
 
 // --- 4. SUPPORT & DASHBOARD CONTROLLERS ---
 use App\Http\Controllers\User\TicketController;
@@ -189,6 +191,9 @@ Route::controller(FlutterwavePaymentController::class)->group(function () {
     Route::get('/payment/receipt/{id}', 'downloadReceipt')->name('payment.receipt');
     Route::post('/flw-webhook', 'webhook')->name('payment.webhook');
 });
+
+Route::post('/payments/intouch/callback', [InTouchController::class, 'handleCallback'])
+    ->name('api.payments.intouch.callback');
 
 // =============================================================
 // AUTHENTICATED USER ROUTES

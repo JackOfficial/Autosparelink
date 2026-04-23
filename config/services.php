@@ -54,6 +54,13 @@ return [
 
     'tinymce' => [
     'key' => env('TINYMCE_API_KEY'),
-],
+    ],
+
+    'intouch' => [
+    'base_url'         => env('INTOUCH_BASE_URL', 'https://www.intouchpay.co.rw/api'),
+    'username'         => env('INTOUCH_USERNAME'),
+    'account_no'       => env('INTOUCH_ACCOUNT_NO'),
+    'partner_password' => env('INTOUCH_PARTNER_PASSWORD'),
+    ],
 
 ];

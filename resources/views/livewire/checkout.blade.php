@@ -162,18 +162,20 @@
                     <div class="card-body p-4">
                         <h5 class="font-weight-bold mb-4"><i class="fa fa-credit-card text-primary mr-2"></i>Payment Method</h5>
                         
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="p-3 border rounded-lg bg-light d-flex align-items-center shadow-sm" style="border-left: 5px solid #ffcc00 !important;">
-                                    <img src="{{ asset('images/momo.jpg')}}" style="width: 45px; height: 45px; object-fit: contain;" class="rounded mr-3" alt="MoMo">
-                                    <div>
-                                        <h6 class="mb-0 font-weight-bold">Mobile Money & Cards</h6>
-                                        <p class="small text-muted mb-0">Secure payment via Flutterwave.</p>
-                                    </div>
-                                    <i class="fa fa-check-circle text-warning ml-auto fa-lg"></i>
-                                </div>
-                            </div>
-                        </div>
+                        {{-- Updated Payment Section for InTouchPay --}}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="p-3 border rounded-lg bg-light d-flex align-items-center shadow-sm" style="border-left: 5px solid #007bff !important;">
+            {{-- You can use an MTN/Airtel logo here since InTouch processes MoMo --}}
+            <img src="{{ asset('images/momo.jpg')}}" style="width: 45px; height: 45px; object-fit: contain;" class="rounded mr-3" alt="InTouchPay">
+            <div>
+                <h6 class="mb-0 font-weight-bold">Mobile Money (Rwandan Networks)</h6>
+                <p class="small text-muted mb-0">Securely processed via InTouchPay.</p>
+            </div>
+            <i class="fa fa-check-circle text-primary ml-auto fa-lg"></i>
+        </div>
+    </div>
+</div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3 mb-md-0">
