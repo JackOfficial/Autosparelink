@@ -154,7 +154,7 @@ Route::controller(PartCatalogController::class)->group(function () {
     Route::get('/catalog/{brand}/{model}/{slug}', 'part_for_specification')->name('specification.parts');
 });
 
-// Route::get('/parts-catalog/{brand?}/{model?}/{variant?}', [SparePartController::class, 'catalog'])->name('parts.catalog');
+// Route::get('/parts-catalog/{brand?}/{model?}/{variant?}', [SparePartController::class, 'catalog'])->name('parts.catalog'); //oyo waciye muri steps by steps
 // Route::get('/spare-parts/{id}', [SparePartController::class, 'parts']);
 
 Route::get('/model/{brand}', [BrandController::class, 'show'])->name('brand.models');

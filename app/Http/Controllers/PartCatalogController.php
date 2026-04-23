@@ -31,19 +31,6 @@ public function part_for_specification($brand, $model, $slug)
         ->with(['vehicleModel.brand'])
         ->firstOrFail();
 
-    // 2. Generate what the correct slugs SHOULD be
-    $correctBrand = Str::slug($specification->vehicleModel->brand->brand_name);
-    $correctModel = Str::slug($specification->vehicleModel->model_name);
-
-    // 3. Strict Verification: Check both Brand AND Model
-    if ($brand !== $correctBrand || $model !== $correctModel) {
-        return redirect()->route('specification.parts', [
-            'brand' => $correctBrand,
-            'model' => $correctModel,
-            'slug'  => $specification->slug
-        ], 301); // 301 is crucial for SEO
-    }
-
     return view('parts.specification-parts', compact('specification'));
 }
 
