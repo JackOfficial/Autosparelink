@@ -15,7 +15,6 @@ class InTouchPaymentService
 
     public function __construct()
     {
-        // Ensure these are set in your config/services.php
         $this->baseUrl = config('services.intouch.base_url', 'https://www.intouchpay.co.rw/api');
         $this->username = config('services.intouch.username');
         $this->accountNo = config('services.intouch.account_no');
@@ -23,95 +22,101 @@ class InTouchPaymentService
     }
 
     /**
-     * RequestPayment: Receiving payment from a customer [cite: 9, 19]
+     * RequestPayment: Receiving payment from a customer
      */
     public function requestPayment(string $phone, float $amount, string $requestId)
     {
-        // Timestamp must be UTC formatted as yyyymmddhhmmss [cite: 71]
-        $timestamp = Carbon::now('UTC')->format('Ymds');
+        // Fixed: Section 1.4 requires 14 digits (yyyymmddhhmmss)
+        $timestamp = Carbon::now('UTC')->format('YmdHis'); 
         $password = $this->generatePassword($timestamp);
         
         $data = [
-            'username'             => $this->username, // [cite: 71]
-            'timestamp'            => $timestamp, // [cite: 71]
-            'amount'               => $amount, // [cite: 71]
-            'mobilephoneno'        => $this->formatNumber($phone), // [cite: 71]
-            'requesttransactionid' => $requestId, // [cite: 71]
-            'accountno'            => $this->accountNo, // [cite: 71]
-            'password'             => $password, // [cite: 66, 73]
-            'callbackurl'          => route('api.payments.intouch.callback'), // [cite: 62, 73]
+            'username'             => $this->username,
+            'timestamp'            => $timestamp,
+            'amount'               => $amount,
+            // Fixed: Included both keys to satisfy both the Python example and the Table spec
+            'mobilephone'          => $this->formatNumber($phone), 
+            'mobilephoneno'        => $this->formatNumber($phone), 
+            'requesttransactionid' => $requestId,
+            'accountno'            => $this->accountNo,
+            'password'             => $password,
+            'callbackurl'          => route('api.payments.intouch.callback'),
         ];
 
-        // Parameters are submitted as http-form post [cite: 14, 63]
-        $response = Http::asForm()->post("{$this->baseUrl}/requestpayment/", $data);
+        // Ensure trailing slash as per Section 1.1
+        $url = rtrim($this->baseUrl, '/') . '/requestpayment/';
 
-        return $response->json(); // Response format is json [cite: 16, 75]
+        // Submitted as http-form post
+        $response = Http::asForm()->post($url, $data);
+
+        return $response->json();
     }
 
     /**
-     * RequestDeposit: Sending payment to a vendor [cite: 9, 114]
+     * RequestDeposit: Sending payment to a vendor
      */
     public function requestDeposit(string $phone, float $amount, string $requestId, string $reason = "Vendor Payout")
     {
-        $timestamp = Carbon::now('UTC')->format('YmdHis'); // [cite: 157]
+        $timestamp = Carbon::now('UTC')->format('YmdHis'); 
 
         $data = [
-            'username'             => $this->username, // [cite: 157]
-            'timestamp'            => $timestamp, // [cite: 157]
-            'amount'               => $amount, // [cite: 157]
-            'mobilephoneno'        => $this->formatNumber($phone), // [cite: 157]
-            'requesttransactionid' => $requestId, // [cite: 157]
-            'accountno'            => $this->accountNo, // [cite: 157]
-            'password'             => $this->generatePassword($timestamp), // [cite: 151, 157]
-            'withdrawcharge'       => 1, // Set to 1 to include charges if required [cite: 157]
-            'reason'               => $reason, // [cite: 157]
-            'sid'                  => 1, // Set to 1 for Bulk Payments [cite: 157]
+            'username'             => $this->username,
+            'timestamp'            => $timestamp,
+            'amount'               => $amount,
+            'mobilephone'          => $this->formatNumber($phone),
+            'mobilephoneno'        => $this->formatNumber($phone),
+            'requesttransactionid' => $requestId,
+            'accountno'            => $this->accountNo,
+            'password'             => $this->generatePassword($timestamp),
+            'withdrawcharge'       => 1, 
+            'reason'               => $reason,
+            'sid'                  => 1, 
         ];
 
-        // Parameters are submitted as http-form post [cite: 14, 148]
-        $response = Http::asForm()->post("{$this->baseUrl}/requestdeposit/", $data);
+        $url = rtrim($this->baseUrl, '/') . '/requestdeposit/';
+        $response = Http::asForm()->post($url, $data);
 
-        return $response->json(); // [cite: 16, 159]
+        return $response->json();
     }
 
     /**
-     * Security: Generate SHA256 Hexdigest [cite: 66, 151]
-     */
-    private function generatePassword(string $timestamp): string
-    {
-        // Formula: Username+accountno+partnerpassword+timestamp [cite: 66, 151, 191]
-        $rawString = $this->username . $this->accountNo . $this->partnerPassword . $timestamp;
-        
-        // Encrypt using SHA256 and return hexdigest [cite: 66, 67, 152, 153]
-        return hash('sha256', $rawString); 
-    }
-
-    /**
-     * Get Transaction Status: Query the status of a transaction [cite: 181]
+     * Get Transaction Status
      */
     public function getTransactionStatus(string $requestId, string $gatewayTransactionId)
     {
+        // Note: Section 4.5 suggests yyyymmddss for this specific endpoint
         $timestamp = Carbon::now('UTC')->format('YmdHis');
 
         $data = [
-            'username'             => $this->username, // [cite: 192]
-            'timestamp'            => $timestamp, // [cite: 192]
-            'password'             => $this->generatePassword($timestamp), // [cite: 191, 192]
-            'requesttransactionid' => $requestId, // [cite: 192]
-            'transactionid'        => $gatewayTransactionId, // [cite: 192]
+            'username'             => $this->username,
+            'timestamp'            => $timestamp,
+            'password'             => $this->generatePassword($timestamp),
+            'requesttransactionid' => $requestId,
+            'transactionid'        => $gatewayTransactionId,
         ];
 
-        // Uses POST to query status [cite: 189]
-        $response = Http::asForm()->post("{$this->baseUrl}/gettransactionstatus/", $data);
+        $url = rtrim($this->baseUrl, '/') . '/gettransactionstatus/';
+        $response = Http::asForm()->post($url, $data);
 
-        return $response->json(); // [cite: 193]
+        return $response->json();
+    }
+
+    /**
+     * Security: Generate SHA256 Hexdigest
+     */
+    private function generatePassword(string $timestamp): string
+    {
+        // Formula: Username+accountno+partnerpassword+timestamp
+        $rawString = $this->username . $this->accountNo . $this->partnerPassword . $timestamp;
+        
+        return hash('sha256', $rawString); 
     }
 
     private function formatNumber(string $phone): string
     {
-        // Documentation examples show the 250 prefix (e.g., 250785971082) [cite: 60, 145]
         $phone = preg_replace('/[^0-9]/', '', $phone);
         
+        // Ensure 250 prefix
         if (Str::startsWith($phone, '0')) {
             return '250' . substr($phone, 1);
         }

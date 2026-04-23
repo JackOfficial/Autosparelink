@@ -7,14 +7,14 @@ use Livewire\Component;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use App\Models\{Order, OrderItem, Address, Commission, Part};
 use Illuminate\Support\Facades\{Auth, DB, Mail, Log, Cookie};
-use App\Services\InTouchPaymentService; // Added for InTouchPay
+use App\Services\InTouchPaymentService;
 use Illuminate\Support\Str;
 
 class Checkout extends Component
 {
-    public $addresses, $address_id, $guest_email;         // Selected existing address
-    public $new_address = [];    // Array for new address
-    public $use_new_address = false; // Toggle for using new address
+    public $addresses, $address_id, $guest_email;
+    public $new_address = [];
+    public $use_new_address = false;
 
     public function mount()
     {
@@ -60,7 +60,7 @@ class Checkout extends Component
     }
 
     /**
-     * Updated to use InTouchPaymentService"
+     * Handles the Mobile Money payment via InTouchPay
      */
     public function placeOrder(InTouchPaymentService $inTouch)
     {
@@ -93,20 +93,27 @@ class Checkout extends Component
         DB::beginTransaction();
         try {
             $final_address_id = null;
+            $paymentPhone = '';
+
             if (Auth::check()) {
                 if ($this->use_new_address) {
                     $address = Address::create(array_merge($this->new_address, [
                         'user_id' => Auth::id(),
                     ]));
                     $final_address_id = $address->id;
+                    $paymentPhone = $this->new_address['phone'];
                 } else {
                     $final_address_id = $this->address_id;
+                    $selectedAddress = Address::find($this->address_id);
+                    $paymentPhone = $selectedAddress ? $selectedAddress->phone : Auth::user()->phone;
                 }
+            } else {
+                $paymentPhone = $this->new_address['phone'];
             }
 
             $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
             
-            // Unique external_id for InTouchPay
+            // Generate Unique ID for InTouchPay
             $transactionId = 'AST-' . strtoupper(Str::random(10));
 
             $order = Order::create([
@@ -114,7 +121,7 @@ class Checkout extends Component
                 'address_id'             => $final_address_id,
                 'total_amount'           => $subtotal,
                 'status'                 => 'pending',
-                'order_id'               => $transactionId, // Store the unique ID for callback matching
+                'order_id'               => $transactionId, 
                 'is_guest'               => !Auth::check(),
                 'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
                 'guest_email'            => $this->guest_email,
@@ -143,19 +150,15 @@ class Checkout extends Component
                 }
             }
 
-            // 1. Initiate the InTouchPay push request
-            $paymentPhone = $this->use_new_address || !Auth::check() 
-                ? $this->new_address['phone'] 
-                : Auth::user()->addresses->find($this->address_id)->phone;
-
+            // 1. Initiate InTouchPay Request
             $response = $inTouch->requestPayment(
                 $paymentPhone,
                 $subtotal,
                 $transactionId
             );
 
-            // 2. Process Response
-            if (isset($response['success']) && $response['success'] == true) {
+            // 2. Handle Response
+            if ($response && isset($response['success']) && $response['success'] == true) {
                 DB::commit();
                 $this->saveGuestCookies();
                 Cart::instance('default')->destroy();
@@ -164,30 +167,29 @@ class Checkout extends Component
                     DB::table('shoppingcart')->where('identifier', Auth::id())->where('instance', 'default')->delete();
                 }
 
-                // Commented out Flutterwave logic as requested:
-                // return redirect()->route('payment.process', ['order' => $order->id]);
-
                 session()->flash('message', 'Payment request sent to ' . $paymentPhone . '. Please check your phone.');
                 return redirect()->route('order.success', ['order' => $order->id]);
             } else {
+                // If API returned but success is false, or API returned HTML (null)
                 if (!$response) {
-        throw new \Exception("InTouch API returned an empty response. Check your Internet/SSL or Server Logs.");
-    }
+                    throw new \Exception("InTouch Gateway returned an invalid response. This often happens if credentials or the URL are incorrect.");
+                }
 
-    // 2. If we have a response but success is false, show the details
-    $errorCode = $response['responsecode'] ?? 'N/A';
-    $errorDesc = $response['message'] ?? 'No message provided by API';
-
-    throw new \Exception("InTouch Error [{$errorCode}]: {$errorDesc}");
+                $errorCode = $response['responsecode'] ?? 'N/A';
+                $errorDesc = $response['message'] ?? 'Unknown Error';
+                throw new \Exception("InTouch Error [{$errorCode}]: {$errorDesc}");
             }
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Checkout Error: ' . $e->getMessage());
-            $this->dispatch('notify', message: 'Something went wrong: ' . $e->getMessage());
+            Log::error('Checkout API Error: ' . $e->getMessage());
+            $this->dispatch('notify', message: 'Payment Error: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Handles the "Call Me for Order" logic
+     */
     public function requestCallback() 
     {
         $rules = [
@@ -270,7 +272,6 @@ class Checkout extends Component
                 DB::table('shoppingcart')->where('identifier', Auth::id())->delete();
             }
 
-            // Emails
             try {
                 Mail::to('musengimanajacques@gmail.com')->send(new OrderCallbackAdmin($order));
                 $targetEmail = Auth::check() ? Auth::user()->email : $this->guest_email;
