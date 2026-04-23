@@ -99,7 +99,7 @@
             {{-- Breadcrumb Navigation --}}
             <nav aria-label="breadcrumb" class="mb-3 px-2">
                 <ol class="breadcrumb bg-transparent p-0 small">
-                    <li class="breadcrumb-item"><a href="{{ route('parts.catalog') }}" class="text-muted">Catalog</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('spare-parts.index') }}" class="text-muted">Catalog</a></li>
                     <li class="breadcrumb-item"><span class="text-muted">{{ $specification->vehicleModel->brand->brand_name }}</span></li>
                     <li class="breadcrumb-item"><span class="text-muted">{{ $specification->vehicleModel->model_name }}</span></li>
                     <li class="breadcrumb-item active text-primary font-weight-bold" aria-current="page">{{ $specification->model_code }}</li>
