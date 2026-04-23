@@ -22,7 +22,7 @@
                     <h4 class="card-title border-bottom pb-2">Order Summary</h4>
                     <div class="row mb-2">
                         <div class="col-sm-4 font-weight-bold">Order ID:</div>
-                        <div class="col-sm-8 text-primary font-weight-bold">{{ $order->order_id }}</div>
+                        <div class="col-sm-8 text-primary font-weight-bold">{{ $order->order_number }}</div>
                     </div>
                     <div class="row mb-2">
                         <div class="col-sm-4 font-weight-bold">Status:</div>

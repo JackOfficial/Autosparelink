@@ -12,12 +12,12 @@ class InTouchController extends Controller
 {
     public function handleCallback(Request $request)
     {
-        // 1. Log the full payload for traceability
+        // 1. Log the full payload for audit trails
         Log::info('InTouch Callback Received:', $request->all());
 
         $status = $request->input('status'); // 'Successfull'
-        $gatewayTransactionId = $request->input('transactionid'); // Gateway ID
-        $localRequestId = $request->input('requesttransactionid'); // AST-... reference
+        $gatewayTransactionId = $request->input('transactionid'); // Gateway's numeric ID
+        $localRequestId = $request->input('requesttransactionid'); // Your reference (e.g., AST-...)
 
         if (!$gatewayTransactionId || !$localRequestId) {
             return response()->json(['message' => 'Invalid Callback Data'], 400);
@@ -27,19 +27,21 @@ class InTouchController extends Controller
         if ($status === 'Successfull') {
             DB::beginTransaction();
             try {
-                // Find order using the gateway ID stored during placement or local reference
-                $order = Order::where('transaction_id', $gatewayTransactionId)
-                              ->orWhere('order_id', $localRequestId)
+                // Eager load everything needed to prevent N+1 queries during loop
+                // Using lockForUpdate to prevent race conditions if multiple callbacks hit
+                $order = Order::where('order_number', $localRequestId) 
+                              ->orWhere('transaction_id', $gatewayTransactionId)
                               ->with(['orderItems.part', 'user'])
+                              ->lockForUpdate()
                               ->first();
 
-                // Only process if order exists and isn't already finalized
+                // Validation: Only proceed if order exists and isn't already paid/processing
                 if ($order && !in_array($order->status, ['completed', 'processing'])) {
                     
                     // A. Update Main Order Status
                     $order->update(['status' => 'processing']);
 
-                    // B. Create Payment Record (Integrated from your old logic)
+                    // B. Create Payment Record (Essential for your isPaid() helper)
                     Payment::updateOrCreate(
                         ['order_id' => $order->id],
                         [
@@ -52,17 +54,14 @@ class InTouchController extends Controller
                     );
 
                     // C. Handle Order Items & Stock Management
-                    $items = OrderItem::where('order_id', $order->id)
-                                      ->lockForUpdate()
-                                      ->get();
-
-                    foreach ($items as $item) {
+                    // This specifically triggers your OrderItemObserver->updated()
+                    foreach ($order->orderItems as $item) {
                         if ($item->status !== 'completed') {
-                            // save() triggers your Vendor Payout Observer
+                            // 1. Update status (This triggers Vendor Payout logic)
                             $item->status = 'completed';
                             $item->save(); 
 
-                            // Decrement Stock (Integrated logic)
+                            // 2. Decrement Stock
                             if ($item->part) {
                                 $item->part->decrement('stock_quantity', $item->quantity);
                             }
@@ -77,11 +76,15 @@ class InTouchController extends Controller
 
                     DB::commit();
 
-                    // E. Send Invoice Email (After commit to ensure data integrity)
+                    // E. Send Invoice Email (Safely outside the core transaction)
                     $this->sendInvoice($order);
 
+                    Log::info("Order #{$order->order_number} successfully finalized via InTouch.");
+
                 } else {
-                    DB::rollBack(); // Order already processed or not found
+                    // Logic for already processed orders
+                    DB::rollBack();
+                    Log::info("InTouch Callback ignored: Order #{$localRequestId} already processed.");
                 }
 
                 return response()->json([
@@ -92,13 +95,16 @@ class InTouchController extends Controller
 
             } catch (\Exception $e) {
                 DB::rollBack();
-                Log::error('InTouch Callback Processing Error: ' . $e->getMessage());
+                Log::error("InTouch Callback Fatal Error: " . $e->getMessage(), [
+                    'order_id' => $localRequestId,
+                    'trace' => $e->getTraceAsString()
+                ]);
                 return response()->json(['status' => 'error'], 500);
             }
         }
 
-        // 3. Handle Failures
-        Log::warning("InTouch Payment failed for Order: {$localRequestId}. Status: {$status}");
+        // 3. Handle Non-Success Statuses
+        Log::warning("InTouch Payment not successful for Order: {$localRequestId}. Status: {$status}");
         
         return response()->json([
             'status' => 'failed',
@@ -118,7 +124,7 @@ class InTouchController extends Controller
                 Mail::to($recipientEmail)->send(new OrderPaidInvoice($order));
             }
         } catch (\Exception $e) {
-            Log::error('InTouch Invoice Email Failed: ' . $e->getMessage());
+            Log::error('InTouch Invoice Email Failed to Send: ' . $e->getMessage());
         }
     }
 }
