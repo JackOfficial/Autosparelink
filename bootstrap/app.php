@@ -11,6 +11,7 @@ use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -29,7 +30,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
     $middleware->validateCsrfTokens(except: [
         'flw-webhook', // This allows Flutterwave to send data to your site
-        'api/payments/intouch/callback', // This allows Intouch to send data to your site
     ]);
     
     })

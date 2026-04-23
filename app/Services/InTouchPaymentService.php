@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class InTouchPaymentService
 {
@@ -73,7 +74,16 @@ class InTouchPaymentService
             'sid'                  => 1, 
         ];
 
-        $url = rtrim($this->baseUrl, '/') . '/requestdeposit/';
+         $url = rtrim($this->baseUrl, '/') . '/requestdeposit/';
+
+        Log::info('InTouch Payment Request Sent:', [
+    'request_id' => $requestId,
+    'phone' => $phone,
+    'amount' => $amount,
+    'url' => $url
+     ]);
+
+       
         $response = Http::asForm()->post($url, $data);
 
         return $response->json();
