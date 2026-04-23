@@ -204,12 +204,13 @@ Route::get('/auth/callback/{provider}', [SocialLoginController::class, 'callback
 
 Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
 
+    
+
     Route::prefix('user')->name('user.')->group(function () {
          Route::resource('orders', OrderController::class);
          Route::resource('addresses', UserAddressController::class);
          Route::resource('vehicles', VehicleController::class);
          Route::resource('tickets', TicketController::class);
-         Route::get('/order-success/{order}', [OrderController::class, 'success'])->name('order.success');
         Route::post('tickets/{ticket}/reply', [TicketController::class, 'reply'])->name('tickets.reply');
          Route::post('orders/{order}/inspection', [OrderController::class, 'handleInspection'])
         ->name('orders.inspection');
@@ -228,6 +229,8 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
         });
 
     });
+
+    Route::get('/order-success/{order}', [OrderController::class, 'success'])->name('order.success');
 
     Route::get('/home', [HomeContoller::class, 'index'])->name('home');
     // Dashboard & Profile
