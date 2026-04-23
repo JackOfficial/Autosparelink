@@ -47,7 +47,7 @@ class InTouchPaymentService
         $url = rtrim($this->baseUrl, '/') . '/requestpayment/';
 
         // Submitted as http-form post
-        $response = Http::asForm()->post($url, $data);
+        $response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
 
         return $response->json();
     }
