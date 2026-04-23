@@ -127,7 +127,7 @@ class Checkout extends Component
             foreach ($cartItems as $item) {
                 $part = Part::find($item->id);
                 if ($part) {
-                    $rate = Commission::getRateForShop($part->shop_id);
+                    $rate = Commission::getRate();
                     $commissionAmount = (($item->price * $item->qty) * $rate) / 100;
 
                     OrderItem::create([
@@ -238,7 +238,7 @@ class Checkout extends Component
             foreach ($cartItems as $item) {
                 $part = Part::find($item->id);
                 if ($part) {
-                    $rate = Commission::getRateForShop($part->shop_id);
+                    $rate = Commission::getRate();
                     $commissionAmount = (($item->price * $item->qty) * $rate) / 100;
 
                     OrderItem::create([
