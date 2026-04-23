@@ -171,11 +171,9 @@ class Checkout extends Component
                 return redirect()->route('order.success', ['order' => $order->id]);
             } else {
                 // This will show you the specific responsecode (like 0005 or 0004)
-$errorMsg = isset($response['responsecode']) 
-    ? "Error Code: " . $response['responsecode'] . " - " . ($response['message'] ?? 'Unknown Error')
-    : 'Could not initiate InTouchPay payment.';
-
-throw new \Exception($errorMsg);
+            $errorCode = $response['responsecode'] ?? 'No Code';
+            $errorDesc = $response['message'] ?? 'Check your .env credentials';
+            throw new \Exception("InTouch Error [{$errorCode}]: {$errorDesc}");
             }
 
         } catch (\Exception $e) {
