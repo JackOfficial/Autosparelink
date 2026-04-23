@@ -62,7 +62,7 @@ class Checkout extends Component
     /**
      * Handles the Mobile Money payment via InTouchPay
      */
-    
+
     public function placeOrder(InTouchPaymentService $inTouch)
     {
         $cartItems = Cart::instance('default')->content();
@@ -122,7 +122,7 @@ class Checkout extends Component
                 'address_id'             => $final_address_id,
                 'total_amount'           => $subtotal,
                 'status'                 => 'pending',
-                'order_id'               => $localTransactionId, 
+                'order_number'               => $localTransactionId, 
                 'is_guest'               => !Auth::check(),
                 'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
                 'guest_email'            => $this->guest_email,
