@@ -29,7 +29,6 @@ use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\VinController;
 use App\Http\Controllers\PaymentController as FlutterwavePaymentController;
-use App\Http\Controllers\Payment\InTouchController;
 
 // --- 4. SUPPORT & DASHBOARD CONTROLLERS ---
 use App\Http\Controllers\User\TicketController;
