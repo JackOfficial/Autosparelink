@@ -209,6 +209,7 @@ Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
          Route::resource('addresses', UserAddressController::class);
          Route::resource('vehicles', VehicleController::class);
          Route::resource('tickets', TicketController::class);
+         Route::get('/order-success/{order}', [OrderController::class, 'success'])->name('order.success');
         Route::post('tickets/{ticket}/reply', [TicketController::class, 'reply'])->name('tickets.reply');
          Route::post('orders/{order}/inspection', [OrderController::class, 'handleInspection'])
         ->name('orders.inspection');

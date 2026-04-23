@@ -109,6 +109,17 @@ public function show(Order $order)
     return redirect()->route('user.orders.show', $order->id)
         ->with('success', 'Thank you. Your inspection results have been submitted.');
 }
+
+public function success(Order $order)
+{
+    // Optional: Verify the user owns the order if they are logged in
+    if (auth()->check() && $order->user_id != auth()->id()) {
+        abort(403);
+    }
+
+    return view('orders.success', compact('order'));
+}
+
     /**
      * Cancel a pending order
      */
