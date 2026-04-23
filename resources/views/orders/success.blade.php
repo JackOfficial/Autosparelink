@@ -48,11 +48,11 @@
             </div>
 
             <div class="mt-5">
-                <a href="{{ url('/') }}" class="btn btn-outline-primary px-4 mr-2">
+                <a href="{{ route('spare-parts.index') }}" class="btn btn-outline-primary px-4 mr-2">
                     <i class="fas fa-shopping-bag mr-1"></i> Continue Shopping
                 </a>
                 @auth
-                    <a href="{{ route('user.orders') }}" class="btn btn-primary px-4">
+                    <a href="{{ route('user.orders.index') }}" class="btn btn-primary px-4">
                         <i class="fas fa-list mr-1"></i> View My Orders
                     </a>
                 @endauth
