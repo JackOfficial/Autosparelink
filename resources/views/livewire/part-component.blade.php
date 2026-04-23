@@ -25,10 +25,20 @@
             </div>
         @endif
 
-        {{-- Brand/Type Badge --}}
-        <div class="badge-custom {{ ($part->partBrand->type ?? '') == 'OEM' ? 'badge-new' : 'badge-aftermarket' }}" style="z-index: 5; position: absolute; top: 10px; left: 10px;">
-            {{ $part->partBrand->type ?? 'Parts' }}
-        </div>
+        @php
+    $stateName = strtolower($part->state->name ?? '');
+    $badgeClass = match($stateName) {
+        'new'         => 'badge-new',
+        'refurbished' => 'badge-refurbished',
+        'used'        => 'badge-used',
+        default       => 'badge-new',
+    };
+@endphp
+
+        {{-- Part State Badge --}}
+       <div class="badge-custom {{ $badgeClass }}" style="z-index: 5; position: absolute; top: 10px; left: 10px;">
+    {{ $part->state->name ?? '' }}
+</div>
 
         @if($discount)
             <div class="badge-custom badge-discount" style="top:40px; left: 10px; z-index: 5; position: absolute;">-{{ $discount }}%</div>
