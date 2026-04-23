@@ -7,6 +7,8 @@ use Livewire\Component;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use App\Models\{Order, OrderItem, Address, Commission, Part};
 use Illuminate\Support\Facades\{Auth, DB, Mail, Log, Cookie};
+use App\Services\InTouchPaymentService; // Added for InTouchPay
+use Illuminate\Support\Str;
 
 class Checkout extends Component
 {
@@ -57,7 +59,10 @@ class Checkout extends Component
         }
     }
 
-    public function placeOrder()
+    /**
+     * Updated to use InTouchPaymentService"
+     */
+    public function placeOrder(InTouchPaymentService $inTouch)
     {
         $cartItems = Cart::instance('default')->content();
 
@@ -101,11 +106,15 @@ class Checkout extends Component
 
             $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
             
+            // Unique external_id for InTouchPay
+            $transactionId = 'AST-' . strtoupper(Str::random(10));
+
             $order = Order::create([
                 'user_id'                => Auth::id(),
                 'address_id'             => $final_address_id,
                 'total_amount'           => $subtotal,
                 'status'                 => 'pending',
+                'order_id'               => $transactionId, // Store the unique ID for callback matching
                 'is_guest'               => !Auth::check(),
                 'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
                 'guest_email'            => $this->guest_email,
@@ -134,15 +143,35 @@ class Checkout extends Component
                 }
             }
 
-            DB::commit();
-            $this->saveGuestCookies();
-            Cart::instance('default')->destroy();
+            // 1. Initiate the InTouchPay push request
+            $paymentPhone = $this->use_new_address || !Auth::check() 
+                ? $this->new_address['phone'] 
+                : Auth::user()->addresses->find($this->address_id)->phone;
 
-            if (Auth::check()) {
-                DB::table('shoppingcart')->where('identifier', Auth::id())->where('instance', 'default')->delete();
+            $response = $inTouch->requestPayment(
+                $paymentPhone,
+                $subtotal,
+                $transactionId
+            );
+
+            // 2. Process Response
+            if (isset($response['success']) && $response['success'] == true) {
+                DB::commit();
+                $this->saveGuestCookies();
+                Cart::instance('default')->destroy();
+
+                if (Auth::check()) {
+                    DB::table('shoppingcart')->where('identifier', Auth::id())->where('instance', 'default')->delete();
+                }
+
+                // Commented out Flutterwave logic as requested:
+                // return redirect()->route('payment.process', ['order' => $order->id]);
+
+                session()->flash('message', 'Payment request sent to ' . $paymentPhone . '. Please check your phone.');
+                return redirect()->route('order.success', ['order' => $order->id]);
+            } else {
+                throw new \Exception($response['message'] ?? 'Could not initiate InTouchPay payment.');
             }
-
-            return redirect()->route('payment.process', ['order' => $order->id]);
 
         } catch (\Exception $e) {
             DB::rollBack();
