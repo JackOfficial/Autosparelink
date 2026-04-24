@@ -19,9 +19,7 @@ return new class extends Migration
           ->constrained('orders')
           ->cascadeOnDelete();
 
-           $table->foreignId('user_id')
-          ->constrained('users')
-          ->cascadeOnDelete();
+          $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
 
 
     // Payment details
