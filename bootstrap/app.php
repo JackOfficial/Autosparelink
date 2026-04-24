@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
     $middleware->validateCsrfTokens(except: [
         'flw-webhook', // This allows Flutterwave to send data to your site
+        'api/payments/intouch/callback'
     ]);
     
     })

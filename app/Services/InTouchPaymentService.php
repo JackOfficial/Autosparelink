@@ -41,8 +41,11 @@ class InTouchPaymentService
             'requesttransactionid' => $requestId,
             'accountno'            => $this->accountNo,
             'password'             => $password,
-            'callbackurl'          => route('api.payments.intouch.callback'),
+            'callbackurl'          => route('api.payments.intouch.callback', [], true),
         ];
+
+        $callback = route('api.payments.intouch.callback', [], true);
+        Log::info("Sending Callback URL to InTouch: " . $callback);
 
         // Ensure trailing slash as per Section 1.1
         $url = rtrim($this->baseUrl, '/') . '/requestpayment/';
