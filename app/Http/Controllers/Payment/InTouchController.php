@@ -60,7 +60,7 @@ class InTouchController extends Controller
                         if ($item->status != 'completed') {
                             // 1. Update status (This triggers Vendor Payout logic)
                             Log::info("Processing Item #{$item->id} for Vendor Payout.");
-                            $item->status = 'completed';
+                            $item->status = 'pending';
                             $item->save(); 
 
                             // 2. Decrement Stock
