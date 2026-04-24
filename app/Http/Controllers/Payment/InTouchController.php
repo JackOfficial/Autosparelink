@@ -42,10 +42,9 @@ class InTouchController extends Controller
                     $order->update(['status' => 'processing']);
 
                     // B. Create Payment Record (Essential for your isPaid() helper)
-                    Payment::updateOrCreate(
+                    $payment = Payment::updateOrCreate(
                         ['order_id' => $order->id],
                         [
-                            'user_id' => $order->user_id,
                             'amount' => $order->total_amount,
                             'method' => 'intouchpay',
                             'transaction_reference' => $gatewayTransactionId,
@@ -53,6 +52,12 @@ class InTouchController extends Controller
                             'paid_at' => now()
                         ]
                     );
+
+                    Log::info('Payment Save Attempt:', [
+    'was_successful' => $payment->wasRecentlyCreated || $payment->wasChanged(),
+    'payment_id' => $payment->id,
+    'errors' => $payment->getErrors() // If you use a validation trait
+]);
 
                     // C. Handle Order Items & Stock Management
                     // This specifically triggers your OrderItemObserver->updated()

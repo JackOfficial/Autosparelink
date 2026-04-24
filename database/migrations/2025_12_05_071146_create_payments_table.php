@@ -19,8 +19,6 @@ return new class extends Migration
           ->constrained('orders')
           ->cascadeOnDelete();
 
-          $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
-
 
     // Payment details
     $table->decimal('amount', 10, 2);
