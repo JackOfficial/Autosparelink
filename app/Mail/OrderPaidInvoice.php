@@ -27,7 +27,7 @@ class OrderPaidInvoice extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.order-paid', // Create this simple thank you view
+            view: 'emails.orders.order-paid', // Create this simple thank you view
         );
     }
 
