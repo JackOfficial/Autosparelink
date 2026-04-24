@@ -24,7 +24,7 @@ class InTouchController extends Controller
         }
 
         // 2. Process Success
-        if ($status === 'Successfull') {
+        if (strtolower($status) === 'successfull' || strtolower($status) === 'success') {
             DB::beginTransaction();
             try {
                 // Eager load everything needed to prevent N+1 queries during loop
@@ -56,8 +56,10 @@ class InTouchController extends Controller
                     // C. Handle Order Items & Stock Management
                     // This specifically triggers your OrderItemObserver->updated()
                     foreach ($order->orderItems as $item) {
-                        if ($item->status !== 'completed') {
+                        
+                        if ($item->status != 'completed') {
                             // 1. Update status (This triggers Vendor Payout logic)
+                            Log::info("Processing Item #{$item->id} for Vendor Payout.");
                             $item->status = 'completed';
                             $item->save(); 
 

@@ -47,6 +47,13 @@ class InTouchPaymentService
         // Ensure trailing slash as per Section 1.1
         $url = rtrim($this->baseUrl, '/') . '/requestpayment/';
 
+        // Log this to see exactly what you are sending
+        Log::info('InTouch Payment Request Initiated:', [
+            'url' => $url,
+            'callback' => $data['callbackurl'],
+            'request_id' => $requestId
+        ]);
+
         // Submitted as http-form post
         $response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
 
