@@ -45,6 +45,7 @@ class InTouchController extends Controller
                     Payment::updateOrCreate(
                         ['order_id' => $order->id],
                         [
+                            'user_id' => $order->user_id,
                             'amount' => $order->total_amount,
                             'method' => 'intouchpay',
                             'transaction_reference' => $gatewayTransactionId,

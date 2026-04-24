@@ -19,6 +19,11 @@ return new class extends Migration
           ->constrained('orders')
           ->cascadeOnDelete();
 
+           $table->foreignId('user_id')
+          ->constrained('users')
+          ->cascadeOnDelete();
+
+
     // Payment details
     $table->decimal('amount', 10, 2);
     $table->string('method'); // e.g., card, mobile_money, cash, flutterwave
