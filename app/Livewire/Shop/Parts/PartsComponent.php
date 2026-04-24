@@ -111,7 +111,7 @@ class PartsComponent extends Component
         }
 
         session()->flash('success', 'Part Created!');
-        return redirect()->route('admin.spare-parts.index');
+        return redirect()->route('shop.parts.index');
     }
 
     public function render()
