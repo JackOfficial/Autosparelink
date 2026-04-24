@@ -23,6 +23,16 @@ use Illuminate\Support\Facades\Route;
 Route::post('/payments/intouch/callback', [InTouchController::class, 'handleCallback'])
     ->name('api.payments.intouch.callback');
 
+Route::get('/test-callback/{orderNumber}', function ($orderNumber) {
+    $request = new Request([
+        'status' => 'Successfull',
+        'transactionid' => 'FAKE_' . time(),
+        'requesttransactionid' => $orderNumber
+    ]);
+
+    return (new InTouchController())->handleCallback($request);
+});    
+
 /**
  * Default Sanctum User Route (Optional)
  */
