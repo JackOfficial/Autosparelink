@@ -17,7 +17,7 @@ class PaymentLog extends Model
         'error_message',
         'raw_response'
     ];
-
+    
     /**
      * Get the user that made the payment.
      */
