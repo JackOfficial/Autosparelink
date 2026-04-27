@@ -45,7 +45,6 @@ class InTouchPaymentService
         ];
        
         $callback = route('api.payments.intouch.callback', [], true);
-         dd($callback);
         Log::info("Sending Callback URL to InTouch: " . $callback);
 
         // Ensure trailing slash as per Section 1.1
