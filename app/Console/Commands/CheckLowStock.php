@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Part;
+use App\Models\User;
+use App\Notifications\LowStockAlert;
 use Illuminate\Console\Command;
 
 class CheckLowStock extends Command
@@ -24,20 +27,24 @@ class CheckLowStock extends Command
      * Execute the console command.
      */
     public function handle()
-{
-    // Define what "low stock" means for you (e.g., less than 5 items)
+   {
     $threshold = 5;
-    $lowStockParts = \App\Models\Part::where('stock_quantity', '<', $threshold)->get();
+    $lowStockParts = Part::where('stock_quantity', '<', $threshold)->get();
 
     if ($lowStockParts->isNotEmpty()) {
-        $admin = \App\Models\User::where('is_admin', true)->first();
+        // Use Spatie's role scope to find users with the 'admin' role
+        $admins = User::role('admin')->get();
         
-        if ($admin) {
-            // We pass the collection to a custom property or directly
-            $admin->lowStockParts = $lowStockParts;
-            $admin->notify(new \App\Notifications\LowStockAlert($admin));
-            $this->info('Low stock alert sent to admin.');
+        if ($admins->isNotEmpty()) {
+            foreach ($admins as $admin) {
+                // Attach the collection to the admin object for the notification to use
+                $admin->lowStockParts = $lowStockParts;
+                $admin->notify(new LowStockAlert($admin));
+            }
+            $this->info('Low stock alerts sent to ' . $admins->count() . ' admin(s).');
+        } else {
+            $this->warn('No users found with the "admin" role.');
         }
     }
-}
+  }
 }
