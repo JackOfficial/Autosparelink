@@ -12,27 +12,21 @@ class InTouchController extends Controller
 {
     public function handleCallback(Request $request)
     {
-        // Capture JSON payload as requested by InTouch Support
-        $data = $request->isJson() ? $request->json()->all() : $request->all();
-        Log::info('InTouch Callback Received:', $data);
+        Log::info('InTouch Callback Received:', $request->all());
 
-        $status = $data['status'] ?? null; 
-        $gatewayTransactionId = $data['transactionid'] ?? null; 
-        $localRequestId = $data['requesttransactionid'] ?? null; 
-        $errorMessage = $data['description'] ?? $data['message'] ?? null;
+        $status = $request->input('status'); 
+        $gatewayTransactionId = $request->input('transactionid'); 
+        $localRequestId = $request->input('requesttransactionid'); 
+        $errorMessage = $request->input('description') ?? $request->input('message');
 
         if (!$gatewayTransactionId || !$localRequestId) {
-            return response()->json([
-                'message' => 'Invalid Callback Data',
-                'success' => false,
-                'request_id' => $localRequestId ?? 'unknown'
-            ], 400);
+            return response()->json(['message' => 'Invalid Callback Data'], 400);
         }
 
         // 1. Initial Success Check
-        if (strtolower($status) == 'successfull' || strtolower($status) == 'success') {
+        if (strtolower($status) === 'successfull' || strtolower($status) === 'success') {
             
-            // Logic unchanged: find the order to associate everything
+            // We find the order first to associate the log entry
             $order = Order::where('order_number', $localRequestId) 
                           ->orWhere('transaction_id', $gatewayTransactionId)
                           ->with(['orderItems.part', 'user'])
@@ -40,29 +34,26 @@ class InTouchController extends Controller
 
             if (!$order) {
                 Log::error("InTouch Callback: Order not found for reference {$localRequestId}");
-                return response()->json([
-                    'message' => 'Order not found',
-                    'success' => false,
-                    'request_id' => $localRequestId
-                ], 404);
+                return response()->json(['message' => 'Order not found'], 404);
             }
 
-            // 2. Audit Trail
+            // 2. Audit Trail - Save this OUTSIDE the transaction so it persists even on failure
             PaymentLog::create([
                 'user_id'        => $order->user_id,
                 'tx_ref'         => $localRequestId,
                 'transaction_id' => $gatewayTransactionId,
-                'amount'         => $data['amount'] ?? $order->total_amount,
+                'amount'         => $request->input('amount') ?? $order->total_amount,
                 'currency'       => 'RWF',
                 'status'         => $status,
                 'error_message'  => null,
-                'raw_response'   => json_encode($data)
+                'raw_response'   => json_encode($request->all())
             ]);
 
             // 3. Process Business Logic
             if (!in_array($order->status, ['completed', 'processing'])) {
                 DB::beginTransaction();
                 try {
+                    // Lock for update to handle high-concurrency hits
                     $order = Order::where('id', $order->id)->lockForUpdate()->first();
 
                     // A. Update Main Order
@@ -104,39 +95,22 @@ class InTouchController extends Controller
                     // E. Post-Transaction Email
                     $this->sendInvoice($order);
 
-                    // Updated to return the specific format required by InTouch Support
-                    return response()->json([
-                        'message' => 'success',
-                        'success' => true,
-                        'request_id' => $localRequestId
-                    ], 200);
+                    return response()->json(['status' => 'success', 'success' => true], 200);
 
                 } catch (\Exception $e) {
                     DB::rollBack();
                     Log::error("InTouch Callback Fatal Error: " . $e->getMessage());
-                    return response()->json([
-                        'message' => 'Internal processing error',
-                        'success' => false,
-                        'request_id' => $localRequestId
-                    ], 500);
+                    return response()->json(['status' => 'error'], 500);
                 }
             } else {
                 Log::info("InTouch Callback ignored: Order #{$localRequestId} already processed.");
-                return response()->json([
-                    'message' => 'success',
-                    'success' => true,
-                    'request_id' => $localRequestId
-                ], 200);
+                return response()->json(['status' => 'already_processed'], 200);
             }
         }
 
         // 4. Handle Non-Success
         Log::warning("InTouch Payment failed for Order: {$localRequestId}. Status: {$status}");
-        return response()->json([
-            'message' => $errorMessage ?? 'Payment failed',
-            'success' => false,
-            'request_id' => $localRequestId
-        ], 200); 
+        return response()->json(['status' => 'failed', 'success' => false], 200); 
     }
 
     private function sendInvoice($order)
