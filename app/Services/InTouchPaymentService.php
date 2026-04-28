@@ -31,8 +31,9 @@ class InTouchPaymentService
     $password = $this->generatePassword($timestamp);
     
     // Force HTTPS for the callback to prevent POST data loss via redirects
-    //$callbackUrl = secure_url('api/payments/intouch/callback');
-    $callbackUrl = 'https://autospare-test.free.beeceptor.com';
+    // $callbackUrl = 'https://autospare-test.free.beeceptor.com';
+    
+    $callbackUrl = secure_url('api/payments/intouch/callback');
 
     $data = [
         'username'             => $this->username,

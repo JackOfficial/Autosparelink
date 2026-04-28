@@ -12,27 +12,16 @@ class InTouchController extends Controller
 {
     public function handleCallback(Request $request)
     {
-        // 1. Capture and Log the raw hit
-        $rawData = $request->all();
-        Log::info('InTouch Callback Received:', $rawData);
+        // Capture JSON payload as requested by InTouch Support
+        $data = $request->isJson() ? $request->json()->all() : $request->all();
+        Log::info('InTouch Callback Received:', $data);
 
-        /**
-         * 2. Handle the "jsonpayload" Wrapper
-         * Based on Beeceptor testing, the real server wraps data in 'jsonpayload'.
-         * If it's missing, we fallback to the flat $rawData.
-         */
-        $data = isset($rawData['jsonpayload']) ? $rawData['jsonpayload'] : $rawData;
-
-        // 3. Extract variables with flexible fallbacks for keys
         $status = $data['status'] ?? null; 
         $gatewayTransactionId = $data['transactionid'] ?? null; 
         $localRequestId = $data['requesttransactionid'] ?? null; 
-        
-        // Error description can come in multiple formats
-        $errorMessage = $data['statusdesc'] ?? $data['description'] ?? $data['message'] ?? 'Unknown Error';
+        $errorMessage = $data['description'] ?? $data['message'] ?? null;
 
         if (!$gatewayTransactionId || !$localRequestId) {
-            Log::error('InTouch Callback: Missing IDs.', ['payload' => $data]);
             return response()->json([
                 'message' => 'Invalid Callback Data',
                 'success' => false,
@@ -40,13 +29,10 @@ class InTouchController extends Controller
             ], 400);
         }
 
-        /**
-         * 4. Success Logic
-         * Using strtolower to catch 'Successfull' (two l's) or 'success'
-         */
-        if (in_array(strtolower($status), ['successfull', 'success'])) {
+        // 1. Initial Success Check
+        if (strtolower($status) == 'successfull' || strtolower($status) == 'success') {
             
-            // Find order by order_number (localRequestId)
+            // Logic unchanged: find the order to associate everything
             $order = Order::where('order_number', $localRequestId) 
                           ->orWhere('transaction_id', $gatewayTransactionId)
                           ->with(['orderItems.part', 'user'])
@@ -61,19 +47,19 @@ class InTouchController extends Controller
                 ], 404);
             }
 
-            // 5. Audit Trail - Log everything for troubleshooting
+            // 2. Audit Trail
             PaymentLog::create([
                 'user_id'        => $order->user_id,
                 'tx_ref'         => $localRequestId,
                 'transaction_id' => $gatewayTransactionId,
                 'amount'         => $data['amount'] ?? $order->total_amount,
-                'currency'       => $data['currency'] ?? 'RWF',
+                'currency'       => 'RWF',
                 'status'         => $status,
                 'error_message'  => null,
-                'raw_response'   => json_encode($rawData)
+                'raw_response'   => json_encode($data)
             ]);
 
-            // 6. Process Business Logic (Idempotency check included)
+            // 3. Process Business Logic
             if (!in_array($order->status, ['completed', 'processing'])) {
                 DB::beginTransaction();
                 try {
@@ -82,8 +68,8 @@ class InTouchController extends Controller
                     // A. Update Main Order
                     $order->update(['status' => 'processing']);
 
-                    // B. Finalize Payment Record
-                    Payment::updateOrCreate(
+                    // B. Finalize Payment Model
+                    $payment = Payment::updateOrCreate(
                         ['order_id' => $order->id],
                         [
                             'amount' => $order->total_amount,
@@ -94,9 +80,10 @@ class InTouchController extends Controller
                         ]
                     );
 
-                    // C. Handle Items & Inventory
+                    // C. Handle Order Items & Stock (Escrow Logic)
                     foreach ($order->orderItems as $item) {
                         if ($item->status != 'completed') {
+                            Log::info("Setting Item #{$item->id} to pending.");
                             $item->status = 'pending';
                             $item->save(); 
 
@@ -106,7 +93,7 @@ class InTouchController extends Controller
                         }
                     }
 
-                    // D. Initialize Shipping
+                    // D. Shipping
                     Shipping::updateOrCreate(
                         ['order_id' => $order->id],
                         ['status' => 'pending']
@@ -114,10 +101,10 @@ class InTouchController extends Controller
 
                     DB::commit();
 
-                    // E. Send Invoice
+                    // E. Post-Transaction Email
                     $this->sendInvoice($order);
 
-                    // Final Return format required by InTouch Support handshake
+                    // Updated to return the specific format required by InTouch Support
                     return response()->json([
                         'message' => 'success',
                         'success' => true,
@@ -134,7 +121,7 @@ class InTouchController extends Controller
                     ], 500);
                 }
             } else {
-                Log::info("InTouch Callback: Order #{$localRequestId} already processed.");
+                Log::info("InTouch Callback ignored: Order #{$localRequestId} already processed.");
                 return response()->json([
                     'message' => 'success',
                     'success' => true,
@@ -143,10 +130,10 @@ class InTouchController extends Controller
             }
         }
 
-        // 7. Handle Failed/Canceled Payments
+        // 4. Handle Non-Success
         Log::warning("InTouch Payment failed for Order: {$localRequestId}. Status: {$status}");
         return response()->json([
-            'message' => $errorMessage,
+            'message' => $errorMessage ?? 'Payment failed',
             'success' => false,
             'request_id' => $localRequestId
         ], 200); 
