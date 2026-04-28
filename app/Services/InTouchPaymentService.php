@@ -25,43 +25,40 @@ class InTouchPaymentService
     /**
      * RequestPayment: Receiving payment from a customer
      */
-    public function requestPayment(string $phone, float $amount, string $requestId)
-    {
-        // Fixed: Section 1.4 requires 14 digits (yyyymmddhhmmss)
-        $timestamp = Carbon::now('UTC')->format('YmdHis'); 
-        $password = $this->generatePassword($timestamp);
-        
-        $data = [
-            'username'             => $this->username,
-            'timestamp'            => $timestamp,
-            'amount'               => $amount,
-            // Fixed: Included both keys to satisfy both the Python example and the Table spec
-            'mobilephone'          => $this->formatNumber($phone), 
-            'mobilephoneno'        => $this->formatNumber($phone), 
-            'requesttransactionid' => $requestId,
-            'accountno'            => $this->accountNo,
-            'password'             => $password,
-            'callbackurl'          => route('api.payments.intouch.callback', [], true),
-        ];
-       
-        $callback = route('api.payments.intouch.callback', [], true);
-        Log::info("Sending Callback URL to InTouch: " . $callback);
+   public function requestPayment(string $phone, float $amount, string $requestId)
+{
+    $timestamp = Carbon::now('UTC')->format('YmdHis'); 
+    $password = $this->generatePassword($timestamp);
+    
+    // Force HTTPS for the callback to prevent POST data loss via redirects
+    $callbackUrl = secure_url('api/payments/intouch/callback');
 
-        // Ensure trailing slash as per Section 1.1
-        $url = rtrim($this->baseUrl, '/') . '/requestpayment/';
+    $data = [
+        'username'             => $this->username,
+        'timestamp'            => $timestamp,
+        'amount'               => $amount,
+        'mobilephone'          => $this->formatNumber($phone), 
+        'mobilephoneno'        => $this->formatNumber($phone), 
+        'requesttransactionid' => $requestId,
+        'accountno'            => $this->accountNo,
+        'password'             => $password,
+        'callbackurl'          => $callbackUrl,
+    ];
 
-        // Log this to see exactly what you are sending
-        Log::info('InTouch Payment Request Initiated:', [
-            'url' => $url,
-            'callback' => $data['callbackurl'],
-            'request_id' => $requestId
-        ]);
+    Log::info("Sending Callback URL to InTouch: " . $callbackUrl);
 
-        // Submitted as http-form post
-        $response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
+    $url = rtrim($this->baseUrl, '/') . '/requestpayment/';
 
-        return $response->json();
-    }
+    Log::info('InTouch Payment Request Initiated:', [
+        'url' => $url,
+        'callback' => $callbackUrl,
+        'request_id' => $requestId
+    ]);
+
+    $response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
+
+    return $response->json();
+}
 
     /**
      * RequestDeposit: Sending payment to a vendor
