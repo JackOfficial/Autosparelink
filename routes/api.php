@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Payment\InTouchController;
+use App\Http\Controllers\Payment\InTouchDepositController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,15 +24,32 @@ use Illuminate\Support\Facades\Route;
 Route::post('/payments/intouch/callback', [InTouchController::class, 'handleCallback'])
     ->name('api.payments.intouch.callback');
 
+Route::middleware(['auth'])->group(function () {
+    
+    // Route to trigger the payout
+    Route::post('/payments/intouch/payout', [InTouchDepositController::class, 'processPayout'])
+         ->name('api.payments.intouch.payout');
+});   
+
+Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('admin.')->group(function () {
+     // Check current balance   
+    Route::get('/payments/intouch/balance', [InTouchDepositController::class, 'checkBalance'])
+         ->name('payments.intouch.balance');  
+});
+
 Route::get('/test-callback/{orderNumber}', function ($orderNumber) {
     $request = new Request([
-        'status' => 'Successfull',
-        'transactionid' => 'FAKE_' . time(),
-        'requesttransactionid' => $orderNumber
+        'jsonpayload' => [ // Added the wrapper to match real InTouch behavior
+            'status' => 'Successfull',
+            'transactionid' => 'FAKE_' . time(),
+            'requesttransactionid' => $orderNumber,
+            'amount' => 100,
+            'currency' => 'RWF'
+        ]
     ]);
 
     return (new InTouchController())->handleCallback($request);
-});    
+});  
 
 /**
  * Default Sanctum User Route (Optional)

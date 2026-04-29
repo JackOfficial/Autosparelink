@@ -65,38 +65,64 @@ class InTouchPaymentService
     /**
      * RequestDeposit: Sending payment to a vendor
      */
-    public function requestDeposit(string $phone, float $amount, string $requestId, string $reason = "Vendor Payout")
-    {
-        $timestamp = Carbon::now('UTC')->format('YmdHis'); 
-
-        $data = [
-            'username'             => $this->username,
-            'timestamp'            => $timestamp,
-            'amount'               => $amount,
-            'mobilephone'          => $this->formatNumber($phone),
-            'mobilephoneno'        => $this->formatNumber($phone),
-            'requesttransactionid' => $requestId,
-            'accountno'            => $this->accountNo,
-            'password'             => $this->generatePassword($timestamp),
-            'withdrawcharge'       => 1, 
-            'reason'               => $reason,
-            'sid'                  => 1, 
-        ];
-
-         $url = rtrim($this->baseUrl, '/') . '/requestdeposit/';
-
-        Log::info('InTouch Payment Request Sent:', [
-    'request_id' => $requestId,
-    'phone' => $phone,
-    'amount' => $amount,
-    'url' => $url
-     ]);
-
-       
-        $response = Http::asForm()->post($url, $data);
-
-        return $response->json();
+   public function requestDeposit(string $phone, float $amount, string $requestId, string $reason = "Vendor Payout")
+{
+    $timestamp = Carbon::now('UTC')->format('YmdHis'); 
+    $formattedPhone = $this->formatNumber($phone);
+    
+    // Logic to determine SID (Service ID)
+    // 1 for MTN (078/079), 2 for Airtel (072/073) - Confirm these IDs with InTouch
+    $sid = 1; 
+    if (Str::startsWith($formattedPhone, '25072') || Str::startsWith($formattedPhone, '25073')) {
+        $sid = 2; 
     }
+
+    $data = [
+        'username'             => $this->username,
+        'timestamp'            => $timestamp,
+        'amount'               => $amount,
+        'mobilephone'          => $formattedPhone,
+        'mobilephoneno'        => $formattedPhone,
+        'requesttransactionid' => $requestId,
+        'accountno'            => $this->accountNo,
+        'password'             => $this->generatePassword($timestamp),
+        'withdrawcharge'       => 1, // Usually 1 means the vendor pays the fee
+        'reason'               => $reason,
+        'sid'                  => $sid, 
+    ];
+
+    $url = rtrim($this->baseUrl, '/') . '/requestdeposit/';
+    
+    // Use the same robust timeout settings as requestPayment
+    $response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
+
+    return $response->json();
+}
+
+/**
+ * Get the current account balance (Float)
+ */
+public function getBalance()
+{
+    $timestamp = Carbon::now('UTC')->format('YmdHis');
+    
+    $data = [
+        'username'  => $this->username,
+        'timestamp' => $timestamp,
+        'accountno' => $this->accountNo,
+        'password'  => $this->generatePassword($timestamp),
+    ];
+
+    $url = rtrim($this->baseUrl, '/') . '/getbalance/';
+
+    try {
+        $response = Http::asForm()->timeout(30)->post($url, $data);
+        return $response->json();
+    } catch (\Exception $e) {
+        Log::error('InTouch Balance Check Error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Could not retrieve balance'];
+    }
+}
 
     /**
      * Get Transaction Status

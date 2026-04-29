@@ -31,6 +31,7 @@ class OrderController extends Controller
     /**
      * Display shop-specific orders
      */
+    
     public function index()
     {
         $shopId = Auth::user()->shop->id;
