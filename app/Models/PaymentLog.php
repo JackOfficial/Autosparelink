@@ -7,15 +7,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaymentLog extends Model
 {
-   protected $fillable = [
+    protected $fillable = [
         'user_id',
-        'tx_ref',
-        'transaction_id',
+        'tx_ref',           // Matches InTouch 'requesttransactionid'
+        'transaction_id',   // Matches InTouch 'transactionid'
         'amount',
         'currency',
         'status',
         'error_message',
-        'raw_response'
+        'raw_response'      // Critical for debugging nested JSON payloads
+    ];
+
+    /**
+     * The attributes that should be cast.
+     * This allows you to save and retrieve the full InTouch response as an array.
+     */
+    protected $casts = [
+        'raw_response' => 'array',
+        'amount' => 'decimal:2',
     ];
     
     /**
