@@ -149,17 +149,16 @@ class Part extends Model
                 $part->shop_id = auth()->user()->shop->id;
             }
 
-            // 2. Markup Pricing Logic (Enhanced)
-            // Fallback: Check shop-specific rate, then Global Admin Rate
-            $globalRate = Commission::getRate();
-            $shopRate = $part->shop ? $part->shop->commission_rate : null;
+            /**
+             * 2. Global Markup Pricing Logic
+             * Commission is applied to all shops equally.
+             */
+            $globalRate = (float) Commission::getRate();
+            $part->applied_rate = $globalRate;
             
-            $finalRate = $shopRate ?? $globalRate;
-            
-            $part->applied_rate = (float) $finalRate;
+            $multiplier = 1 + ($globalRate / 100);
             
             // Calculate customer-facing unit_price (base + markup)
-            $multiplier = 1 + ($finalRate / 100);
             $part->unit_price = (float) $part->price * $multiplier;
 
             // Mirror markup on old_price for consistent UI discount display
