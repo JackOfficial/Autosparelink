@@ -38,7 +38,7 @@
                         <div class="form-group mb-4">
                             <label class="font-weight-bold text-dark mb-2">Target Shop</label>
                             <select name="shop_id" class="form-control form-control-lg rounded-3 @error('shop_id') is-invalid @enderror" style="height: calc(1.5em + 1rem + 2px);">
-                                <option value="" selected disabled>Select the shop to adjust...</option>
+                                <option value="" selected disabled>Select the shop to pay...</option>
                                 @foreach($shops as $id => $name)
                                     <option value="{{ $id }}" {{ old('shop_id') == $id ? 'selected' : '' }}>
                                         {{ $name }}
