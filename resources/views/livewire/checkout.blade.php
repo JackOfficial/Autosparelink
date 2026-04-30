@@ -80,7 +80,7 @@
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div>
                                             <h6 class="font-weight-bold text-primary mb-1"><i class="fa fa-check-circle mr-2"></i>Using Saved Details</h6>
-                                            <p class="small text-muted mb-0">We've loaded your information from your last visit.</p>
+                                            <p class="small text-muted mb-0">Loaded from your last visit.</p>
                                         </div>
                                         <button class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm" wire:click="$set('use_new_address', true)">
                                             Change Address
@@ -135,54 +135,44 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="small font-weight-bold text-muted text-uppercase">City</label>
-                                    <input type="text" class="form-control border-0 bg-light" placeholder="e.g. Kigali" wire:model="new_address.city" style="height: 45px;">
+                                    <input type="text" class="form-control border-0 bg-light" placeholder="e.g. Kigali" wire:model.live="new_address.city" style="height: 45px;">
                                     @error('new_address.city') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="small font-weight-bold text-muted text-uppercase">Postal Code</label>
                                     <input type="text" class="form-control border-0 bg-light" placeholder="Optional" wire:model="new_address.postal_code" style="height: 45px;">
                                 </div>
-                                
-                                @if(!Auth::check() && Cookie::get('guest_email'))
-                                    <div class="col-12 text-right">
-                                        <button type="button" class="btn btn-link btn-sm text-primary font-weight-bold" wire:click="$set('use_new_address', false)">
-                                            <i class="fa fa-arrow-left mr-1"></i> Use my saved information instead
-                                        </button>
-                                    </div>
-                                @endif
                             </div>
                         @endif
                     </div>
                 </div>
 
                 {{-- Payment Section --}}
-                <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;" x-data="{ paymentMethod: 'momo' }">
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
                     <div class="card-body p-4">
                         <h5 class="font-weight-bold mb-4"><i class="fa fa-credit-card text-primary mr-2"></i>Select Payment Method</h5>
                         
                         <div class="row mb-4">
                             {{-- Option 1: Mobile Money --}}
                             <div class="col-md-6 mb-3 mb-md-0">
-                                <div class="p-3 border rounded-lg cursor-pointer transition-all shadow-sm" 
-                                     :class="paymentMethod === 'momo' ? 'border-primary bg-light' : 'bg-white'"
-                                     @click="paymentMethod = 'momo'; $wire.set('payment_method', 'momo')"
+                                <div class="p-3 border rounded-lg transition-all shadow-sm {{ $payment_method === 'momo' ? 'border-primary bg-light' : 'bg-white' }}" 
+                                     wire:click="$set('payment_method', 'momo')"
                                      style="border-left: 5px solid #007bff !important; cursor: pointer;">
                                     <div class="d-flex align-items-center">
                                         <img src="{{ asset('images/momo.jpg')}}" style="width: 40px; height: 40px; object-fit: contain;" class="rounded mr-3" alt="MoMo">
                                         <div>
-                                            <h6 class="mb-0 font-weight-bold small">Mobile Money</h6>
-                                            <p class="text-muted mb-0" style="font-size: 0.7rem;">InTouchPay Security</p>
+                                            <h6 class="mb-0 font-weight-bold small">Full Payment</h6>
+                                            <p class="text-muted mb-0" style="font-size: 0.7rem;">via Mobile Money</p>
                                         </div>
-                                        <i class="fa fa-check-circle ml-auto" :class="paymentMethod === 'momo' ? 'text-primary' : 'text-light'"></i>
+                                        <i class="fa fa-check-circle ml-auto {{ $payment_method === 'momo' ? 'text-primary' : 'text-light' }}"></i>
                                     </div>
                                 </div>
                             </div>
 
                             {{-- Option 2: Pay on Delivery --}}
                             <div class="col-md-6">
-                                <div class="p-3 border rounded-lg cursor-pointer transition-all shadow-sm"
-                                     :class="paymentMethod === 'cod' ? 'border-success bg-light' : 'bg-white'"
-                                     @click="paymentMethod = 'cod'; $wire.set('payment_method', 'cod')"
+                                <div class="p-3 border rounded-lg transition-all shadow-sm {{ $payment_method === 'cod' ? 'border-success bg-light' : 'bg-white' }}"
+                                     wire:click="$set('payment_method', 'cod')"
                                      style="border-left: 5px solid #28a745 !important; cursor: pointer;">
                                     <div class="d-flex align-items-center">
                                         <div class="bg-success rounded text-white mr-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
@@ -190,27 +180,29 @@
                                         </div>
                                         <div>
                                             <h6 class="mb-0 font-weight-bold small">Pay on Delivery</h6>
-                                            <p class="text-muted mb-0" style="font-size: 0.7rem;">Pay when you receive</p>
+                                            <p class="text-muted mb-0" style="font-size: 0.7rem;">Commitment Fee Required</p>
                                         </div>
-                                        <i class="fa fa-check-circle ml-auto" :class="paymentMethod === 'cod' ? 'text-success' : 'text-light'"></i>
+                                        <i class="fa fa-check-circle ml-auto {{ $payment_method === 'cod' ? 'text-success' : 'text-light' }}"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {{-- Delivery Fee Notice for COD --}}
-                        <div x-show="paymentMethod === 'cod'" x-transition class="alert alert-warning border-0 mb-4 animate__animated animate__headShake" style="border-radius: 12px; background-color: #fff3cd;">
-                            <div class="d-flex">
-                                <i class="fa fa-info-circle mr-3 mt-1 text-warning fa-lg"></i>
-                                <div>
-                                    <h6 class="font-weight-bold mb-1 text-dark">Non-Refundable Delivery Fee</h6>
-                                    <p class="small mb-0 text-dark">
-                                        To confirm your order, you must pay a delivery fee upfront: <br>
-                                        <strong>3,000 RWF</strong> (Within Kigali) or <strong>5,000 RWF</strong> (Outside Kigali).
-                                    </p>
+                        @if($payment_method === 'cod')
+                            <div class="alert alert-warning border-0 mb-4 animate__animated animate__headShake" style="border-radius: 12px; background-color: #fff3cd;">
+                                <div class="d-flex">
+                                    <i class="fa fa-info-circle mr-3 mt-1 text-warning fa-lg"></i>
+                                    <div>
+                                        <h6 class="font-weight-bold mb-1 text-dark">Commitment Fee Notice</h6>
+                                        <p class="small mb-0 text-dark">
+                                            To confirm Pay on Delivery, you pay a small fee now: <br>
+                                            <strong>3,000 RWF</strong> (Kigali) / <strong>5,000 RWF</strong> (Provinces).
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
 
                         <div class="text-center mb-4">
                             <p class="small text-muted">
@@ -222,7 +214,12 @@
                             <div class="col-md-6 mb-3 mb-md-0">
                                 <button wire:click="placeOrder" wire:loading.attr="disabled" class="btn btn-primary btn-lg btn-block rounded-pill shadow font-weight-bold py-3">
                                     <span wire:loading.remove wire:target="placeOrder">
-                                        <i class="fa fa-lock mr-2"></i>Pay {{ $total }} RWF
+                                        <i class="fa fa-lock mr-2"></i>
+                                        @if($payment_method === 'cod')
+                                            Pay Fee: {{ number_format( (strtolower($new_address['city'] ?? '') == 'kigali' ? 3000 : 5000) ) }} RWF
+                                        @else
+                                            Pay {{ $total }} RWF
+                                        @endif
                                     </span>
                                     <span wire:loading wire:target="placeOrder">
                                         <i class="fa fa-spinner fa-spin mr-2"></i>Processing...
@@ -280,16 +277,16 @@
                         </div>
                         <div class="card-footer bg-light border-0 p-4">
                             <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted small">Subtotal</span>
+                                <span class="text-muted small">Items Subtotal</span>
                                 <span class="text-dark font-weight-bold">{{ $total }} RWF</span>
                             </div>
                             <div class="d-flex justify-content-between mb-3">
-                                <span class="text-muted small">Delivery</span>
-                                <span class="text-success font-weight-bold small">Calculated at call</span>
+                                <span class="text-muted small">Shipping</span>
+                                <span class="text-success font-weight-bold small">Calculated at delivery</span>
                             </div>
                             <hr class="my-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="font-weight-bold text-dark mb-0">Total</h5>
+                                <h5 class="font-weight-bold text-dark mb-0">Order Total</h5>
                                 <h4 class="font-weight-bold text-primary mb-0">{{ $total }} RWF</h4>
                             </div>
                         </div>

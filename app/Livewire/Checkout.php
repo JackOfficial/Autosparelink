@@ -15,9 +15,9 @@ class Checkout extends Component
     public $addresses, $address_id, $guest_email;
     public $new_address = [];
     public $use_new_address = false;
-    public $payment_method = 'momo';
+    public $payment_method = 'momo'; // Options: 'momo' or 'cod'
 
-    public function mount()
+   public function mount()
     {
         $this->addresses = Auth::check() ? Auth::user()->addresses()->get() : collect();
 
@@ -61,6 +61,14 @@ class Checkout extends Component
     }
 
     /**
+     * Determine fee: 3k for Kigali, 5k for outside
+     */
+    private function getCommitmentFee($city)
+    {
+        return (strtolower(trim($city)) === 'kigali') ? 3000 : 5000;
+    }
+
+    /**
      * Handles the Mobile Money payment via InTouchPay
      */
 
@@ -75,6 +83,7 @@ class Checkout extends Component
 
         $rules = [
             'guest_email' => Auth::check() ? 'nullable|email' : 'required|email',
+            'payment_method' => 'required|in:momo,cod',
         ];
 
         if ($this->use_new_address || !Auth::check()) {
@@ -96,41 +105,44 @@ class Checkout extends Component
         try {
             $final_address_id = null;
             $paymentPhone = '';
+            $city = '';
 
-            if (Auth::check()) {
-                if ($this->use_new_address) {
-                    $address = Address::create(array_merge($this->new_address, [
-                        'user_id' => Auth::id(),
-                    ]));
-                    $final_address_id = $address->id;
-                    $paymentPhone = $this->new_address['phone'];
-                } else {
-                    $final_address_id = $this->address_id;
-                    $selectedAddress = Address::find($this->address_id);
-                    $paymentPhone = $selectedAddress ? $selectedAddress->phone : Auth::user()->phone;
-                }
+            // 1. Resolve Address and City for Fee calculation
+            if (Auth::check() && !$this->use_new_address) {
+                $selectedAddress = Address::find($this->address_id);
+                $final_address_id = $selectedAddress->id;
+                $paymentPhone = $selectedAddress->phone;
+                $city = $selectedAddress->city;
             } else {
                 $paymentPhone = $this->new_address['phone'];
+                $city = $this->new_address['city'];
+                if (Auth::check()) {
+                    $address = Address::create(array_merge($this->new_address, ['user_id' => Auth::id()]));
+                    $final_address_id = $address->id;
+                }
             }
 
             $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
-            
-            // Generate Unique ID for InTouchPay (Your local reference)
             $localTransactionId = 'AST-' . strtoupper(Str::random(10));
+            
+            // 2. Logic flow for Payment vs Commitment Fee
+            $payableNow = ($this->payment_method === 'cod') ? $this->getCommitmentFee($city) : $subtotal;
+            $orderStatus = ($this->payment_method === 'cod') ? 'awaiting_commitment_fee' : 'pending';
 
             $order = Order::create([
                 'user_id'                => Auth::id(),
                 'address_id'             => $final_address_id,
-                'total_amount'           => $subtotal,
-                'status'                 => 'pending',
+                'total_amount'           => $subtotal, // Full Order Value
+                'paid_amount'            => 0,         // Will be updated via Webhook
+                'status'                 => $orderStatus,
                 'order_number'           => $localTransactionId, 
-                'payment_method'         => $this->payment_method, // Ensure you have this column
+                'payment_method'         => $this->payment_method,
                 'is_guest'               => !Auth::check(),
                 'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
                 'guest_email'            => $this->guest_email,
                 'guest_phone'            => $this->new_address['phone'],
                 'guest_shipping_address' => !Auth::check() 
-                    ? ($this->new_address['street_address'] . ', ' . $this->new_address['city'] . ', ' . $this->new_address['country']) 
+                    ? ($this->new_address['street_address'] . ', ' . $city . ', ' . $this->new_address['country']) 
                     : null,
             ]);
 
@@ -138,8 +150,6 @@ class Checkout extends Component
                 $part = Part::find($item->id);
                 if ($part) {
                     $rate = Commission::getRate();
-                    $commissionAmount = (($item->price * $item->qty) * $rate) / 100;
-
                     OrderItem::create([
                         'order_id'          => $order->id,
                         'part_id'           => $item->id,
@@ -147,27 +157,17 @@ class Checkout extends Component
                         'part_name'         => $item->name,
                         'quantity'          => $item->qty,
                         'unit_price'        => $item->price,
-                        'commission_amount' => $commissionAmount,
+                        'commission_amount' => (($item->price * $item->qty) * $rate) / 100,
                         'status'            => 'pending',
                     ]);
                 }
             }
 
-            // 1. Initiate InTouchPay Request
-            $response = $inTouch->requestPayment(
-                $paymentPhone,
-                $subtotal,
-                $localTransactionId
-            );
+            // 3. Initiate InTouchPay Request (either for Full Amount or Fee)
+            $response = $inTouch->requestPayment($paymentPhone, $payableNow, $localTransactionId);
 
-            // 2. Handle Response and Store Gateway ID
             if ($response && isset($response['success']) && $response['success'] == true) {
-                
-                // UPDATE: Store the gateway's transactionid in your order
-                // Ensure your 'orders' table has a 'transaction_id' column
-                $order->update([
-                    'transaction_id' => $response['transactionid'] ?? null
-                ]);
+                $order->update(['transaction_id' => $response['transactionid'] ?? null]);
 
                 DB::commit();
                 $this->saveGuestCookies();
@@ -177,16 +177,14 @@ class Checkout extends Component
                     DB::table('shoppingcart')->where('identifier', Auth::id())->where('instance', 'default')->delete();
                 }
 
-                session()->flash('message', 'Payment request sent to ' . $paymentPhone . '. Please check your phone.');
+                $message = ($this->payment_method === 'cod') 
+                    ? "Please pay the commitment fee of " . number_format($payableNow) . " RWF on your phone to confirm delivery."
+                    : "Payment request sent. Please check your phone.";
+
+                session()->flash('message', $message);
                 return redirect()->route('order.success', ['order' => $order->id]);
             } else {
-                if (!$response) {
-                    throw new \Exception("InTouch Gateway returned an invalid response.");
-                }
-
-                $errorCode = $response['responsecode'] ?? 'N/A';
-                $errorDesc = $response['message'] ?? 'Unknown Error';
-                throw new \Exception("InTouch Error [{$errorCode}]: {$errorDesc}");
+                throw new \Exception($response['message'] ?? "Gateway Connection Failed");
             }
 
         } catch (\Exception $e) {
