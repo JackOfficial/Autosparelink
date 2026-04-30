@@ -75,7 +75,6 @@
                                 </div>
                             </div>
 
-                            {{-- DEFAULT VIEW: Show saved info if cookies exist and user hasn't clicked "Change" --}}
                             @if(Cookie::get('guest_email') && !$use_new_address)
                                 <div class="p-4 border rounded-lg mb-4 bg-white shadow-sm border-primary animate__animated animate__fadeIn" style="border-left: 5px solid #007bff !important;">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -106,7 +105,6 @@
                             @endif
                         @endif
 
-                        {{-- FORM VIEW: Show if New Address checkbox is checked OR guest has no cookies --}}
                         @if($use_new_address || (!Auth::check() && !Cookie::get('guest_email')))
                             <div class="row animate__animated animate__fadeIn">
                                 <div class="col-12 mb-3">
@@ -158,24 +156,67 @@
                 </div>
 
                 {{-- Payment Section --}}
-                <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;" x-data="{ paymentMethod: 'momo' }">
                     <div class="card-body p-4">
-                        <h5 class="font-weight-bold mb-4"><i class="fa fa-credit-card text-primary mr-2"></i>Payment Method</h5>
+                        <h5 class="font-weight-bold mb-4"><i class="fa fa-credit-card text-primary mr-2"></i>Select Payment Method</h5>
                         
-                        {{-- Updated Payment Section for InTouchPay --}}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="p-3 border rounded-lg bg-light d-flex align-items-center shadow-sm" style="border-left: 5px solid #007bff !important;">
-            {{-- You can use an MTN/Airtel logo here since InTouch processes MoMo --}}
-            <img src="{{ asset('images/momo.jpg')}}" style="width: 45px; height: 45px; object-fit: contain;" class="rounded mr-3" alt="InTouchPay">
-            <div>
-                <h6 class="mb-0 font-weight-bold">Mobile Money (Rwandan Networks)</h6>
-                <p class="small text-muted mb-0">Securely processed via InTouchPay.</p>
-            </div>
-            <i class="fa fa-check-circle text-primary ml-auto fa-lg"></i>
-        </div>
-    </div>
-</div>
+                        <div class="row mb-4">
+                            {{-- Option 1: Mobile Money --}}
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <div class="p-3 border rounded-lg cursor-pointer transition-all shadow-sm" 
+                                     :class="paymentMethod === 'momo' ? 'border-primary bg-light' : 'bg-white'"
+                                     @click="paymentMethod = 'momo'; $wire.set('payment_method', 'momo')"
+                                     style="border-left: 5px solid #007bff !important; cursor: pointer;">
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ asset('images/momo.jpg')}}" style="width: 40px; height: 40px; object-fit: contain;" class="rounded mr-3" alt="MoMo">
+                                        <div>
+                                            <h6 class="mb-0 font-weight-bold small">Mobile Money</h6>
+                                            <p class="text-muted mb-0" style="font-size: 0.7rem;">InTouchPay Security</p>
+                                        </div>
+                                        <i class="fa fa-check-circle ml-auto" :class="paymentMethod === 'momo' ? 'text-primary' : 'text-light'"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Option 2: Pay on Delivery --}}
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-lg cursor-pointer transition-all shadow-sm"
+                                     :class="paymentMethod === 'cod' ? 'border-success bg-light' : 'bg-white'"
+                                     @click="paymentMethod = 'cod'; $wire.set('payment_method', 'cod')"
+                                     style="border-left: 5px solid #28a745 !important; cursor: pointer;">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success rounded text-white mr-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="fa fa-hand-holding-usd"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 font-weight-bold small">Pay on Delivery</h6>
+                                            <p class="text-muted mb-0" style="font-size: 0.7rem;">Pay when you receive</p>
+                                        </div>
+                                        <i class="fa fa-check-circle ml-auto" :class="paymentMethod === 'cod' ? 'text-success' : 'text-light'"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Delivery Fee Notice for COD --}}
+                        <div x-show="paymentMethod === 'cod'" x-transition class="alert alert-warning border-0 mb-4 animate__animated animate__headShake" style="border-radius: 12px; background-color: #fff3cd;">
+                            <div class="d-flex">
+                                <i class="fa fa-info-circle mr-3 mt-1 text-warning fa-lg"></i>
+                                <div>
+                                    <h6 class="font-weight-bold mb-1 text-dark">Non-Refundable Delivery Fee</h6>
+                                    <p class="small mb-0 text-dark">
+                                        To confirm your order, you must pay a delivery fee upfront: <br>
+                                        <strong>3,000 RWF</strong> (Within Kigali) or <strong>5,000 RWF</strong> (Outside Kigali).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mb-4">
+                            <p class="small text-muted">
+                                By clicking pay, you agree to our <a href="/terms" target="_blank" class="text-primary font-weight-bold border-bottom">Terms of Use</a>.
+                            </p>
+                        </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3 mb-md-0">
