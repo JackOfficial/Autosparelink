@@ -68,6 +68,19 @@
     .sub-image-wrapper { width: 64px; height: 64px; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 6px; }
     .sub-image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
+      .x-small { 
+        font-size: 0.6rem; 
+        padding: 2px 6px; 
+        border-radius: 4px; 
+        letter-spacing: 0.03em;
+        font-weight: 700;
+    }
+    .gap-1 { gap: 4px; }
+    .badge-success { background-color: #dcfce7; color: #166534; }
+    .badge-warning { background-color: #fef9c3; color: #854d0e; }
+    .badge-info { background-color: #e0f2fe; color: #075985; }
+    .badge-primary { background-color: #e0e7ff; color: #3730a3; }
+
         /* New Shop Styling */
     .shop-avatar {
         width: 32px;
@@ -206,7 +219,7 @@
                     <tbody>
                         @foreach($substitutions as $sub)
                         <tr>
-                            {{-- Product Details with Quality Badge --}}
+                            {{-- Product Details with Quality & State Badges --}}
                             <td class="pl-4 py-3" style="min-width: 300px;">
                                 <div class="d-flex align-items-center">
                                     <div class="sub-image-wrapper">
@@ -218,10 +231,25 @@
                                             {{ $sub->part_number }}
                                         </a>
                                         <div class="text-muted small mb-1">{{ Str::limit($sub->part_name, 30) }}</div>
-                                        {{-- Example Condition Badge --}}
-                                        <span class="badge {{ $sub->is_genuine ? 'badge-success' : 'badge-light' }} x-small" style="font-size: 0.65rem; letter-spacing: 0.02em;">
-                                            {{ $sub->is_genuine ? 'GENUINE O.E.M' : 'AFTERMARKET' }}
-                                        </span>
+                                        
+                                        <div class="d-flex gap-1 flex-wrap">
+                                            {{-- Condition State Badge --}}
+                                            @php
+                                                $stateClass = [
+                                                    'new' => 'badge-success',
+                                                    'used' => 'badge-warning',
+                                                    'refurbished' => 'badge-info'
+                                                ][$sub->state ?? 'new'] ?? 'badge-secondary';
+                                            @endphp
+                                            <span class="badge {{ $stateClass }} x-small text-uppercase">
+                                                {{ $sub->state ?? 'New' }}
+                                            </span>
+
+                                            {{-- Quality Badge --}}
+                                            <span class="badge {{ $sub->is_genuine ? 'badge-primary' : 'badge-light' }} x-small text-uppercase">
+                                                {{ $sub->is_genuine ? 'GENUINE O.E.M' : 'AFTERMARKET' }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
