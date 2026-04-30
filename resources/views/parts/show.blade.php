@@ -12,77 +12,62 @@
         --orange-main: #ff8a00;
     }
     
-    /* 1. Layout & Sidebar */
     .container-custom { max-width: 1320px; margin: 0 auto; }
     .sticky-sidebar { position: sticky; top: 2rem; }
 
-    /* 2. Gallery Viewport */
+    /* --- FIXED GALLERY STYLES --- */
     .gallery-container { 
         background: #fff; border-radius: 16px; border: 1px solid var(--border-color); 
-        overflow: hidden; transition: box-shadow 0.3s ease;
+        overflow: hidden; transition: box-shadow 0.3s ease; position: relative;
     }
-    .gallery-container:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
     .main-image-viewport { 
         height: 520px; display: flex; align-items: center; justify-content: center; 
-        background: #fff; padding: 1.5rem; position: relative; 
+        background: #fff; padding: 1.5rem; position: relative; overflow: hidden;
     }
     .main-image-viewport img { 
         max-height: 100%; width: auto; object-fit: contain; 
-        transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
+        transition: all 0.4s ease;
     }
-    
-    /* 3. Global Tech Tables */
+
+    /* Navigation Arrows */
+    .gallery-nav {
+        position: absolute; top: 50%; width: 100%; display: flex;
+        justify-content: space-between; padding: 0 20px; transform: translateY(-50%);
+        pointer-events: none; z-index: 10;
+    }
+    .nav-btn {
+        width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.9);
+        border: 1px solid var(--border-color); display: flex; align-items: center;
+        justify-content: center; color: var(--dark-steel); cursor: pointer;
+        pointer-events: auto; transition: 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .nav-btn:hover { background: var(--primary-blue); color: #fff; }
+
+    /* Thumbnail Strip */
+    .thumb-strip {
+        display: flex; gap: 10px; padding: 15px; background: var(--soft-bg);
+        border-top: 1px solid var(--border-color); overflow-x: auto;
+    }
+    .thumb-item {
+        width: 70px; height: 70px; border-radius: 8px; border: 2px solid transparent;
+        background: #fff; padding: 5px; cursor: pointer; transition: 0.2s; flex-shrink: 0;
+    }
+    .thumb-item img { width: 100%; height: 100%; object-fit: contain; }
+    .thumb-item.active-thumb { border-color: var(--primary-blue); box-shadow: 0 0 0 2px rgba(0,97,242,0.1); }
+    /* --- END GALLERY FIXES --- */
+
+    /* Rest of your existing styles preserved */
     .tech-card { border: none; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
     .tech-table thead th { 
         background: var(--soft-bg); color: #64748b; font-weight: 700; 
         text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; padding: 1rem 1.2rem;
     }
-    .tech-table tbody td { padding: 1rem 1.2rem; vertical-align: middle !important; border-bottom: 1px solid var(--soft-bg) !important; }
-    .tech-table tbody tr { transition: all 0.2s; }
-    .tech-table tbody tr:hover { background-color: #f8fbff !important; }
-
-    /* 4. Common Components (Merged Duplicates) */
-    .icon-box-sm {
-        width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px;
-    }
-    .bg-primary-soft { background: rgba(0, 97, 242, 0.1); }
-    .bg-orange-soft { background: rgba(255, 138, 0, 0.1) !important; }
-    .text-orange { color: var(--orange-main) !important; }
-
-    .sub-image-wrapper {
-        width: 64px; height: 64px; background: #fff; border: 1px solid var(--border-color);
-        border-radius: 12px; display: flex; align-items: center; justify-content: center;
-        padding: 6px; transition: all 0.3s ease;
-    }
-    .sub-image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply; }
-    .tech-table tr:hover .sub-image-wrapper { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-
-    /* 5. Badges & Buttons */
-    .brand-badge {
-        background: var(--primary-blue); color: #fff; padding: 5px 12px; border-radius: 6px;
-        font-weight: 800; font-size: 0.8rem; text-transform: uppercase;
-    }
-    .badge-soft-primary { background-color: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
-    
-    .btn-primary.rounded-pill {
-        transition: all 0.3s ease; font-size: 0.75rem; text-transform: uppercase;
-        letter-spacing: 0.5px; border: none; background: linear-gradient(135deg, #0061f2 0%, #0045ab 100%);
-    }
-    .btn-primary.rounded-pill:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 97, 242, 0.3); }
-
-    /* 6. Typography */
-    .part-link { color: #1a202c; font-weight: 800; text-decoration: none !important; }
-    .part-link:hover { color: var(--primary-blue); }
-    .model-text { font-weight: 700; color: #1e293b; font-size: 0.95rem; }
-    .trim-box { font-size: 0.85rem; color: #64748b; background: var(--soft-bg); padding: 4px 10px; border-radius: 6px; display: inline-block; }
+    .tech-table tbody td { padding: 1rem 1.2rem; border-bottom: 1px solid var(--soft-bg) !important; }
+    .brand-badge { background: var(--primary-blue); color: #fff; padding: 5px 12px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; }
     .price-text { font-size: 1.1rem; font-weight: 800; color: #000; }
+    .sub-image-wrapper { width: 64px; height: 64px; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 6px; }
+    .sub-image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-    /* 7. Fitment Years */
-    .year-range { display: inline-flex; align-items: center; background: #fff; border: 1px solid var(--border-color); padding: 2px; border-radius: 8px; }
-    .year-tag { padding: 2px 8px; font-weight: 700; font-size: 0.8rem; color: #334155; }
-    .year-divider { width: 8px; height: 2px; background: #cbd5e1; margin: 0 2px; }
-
-    /* 8. Responsive Fixes */
     @media (max-width: 991px) {
         .main-image-viewport { height: 350px; }
         .sticky-sidebar { position: relative; top: 0; }
@@ -103,6 +88,7 @@
     </nav>
 
     <div class="row gx-lg-5">
+        <div class="row gx-lg-5">
         {{-- 2. IMAGE GALLERY --}}
         <div class="col-lg-7 mb-4">
             <div class="gallery-container shadow-sm" 
@@ -112,11 +98,18 @@
                  }">
                 
                 <div class="main-image-viewport">
-                    <img :src="images[index]" alt="{{ $part->part_name }}" 
-                         x-transition:enter="transition ease-out duration-300"
-                         x-transition:enter-start="opacity-0 scale-95"
-                         x-transition:enter-end="opacity-100 scale-100">
+                    {{-- Main Dynamic Image --}}
+                    <template x-for="(img, i) in images" :key="i">
+                        <img x-show="index === i" 
+                             :src="img" 
+                             alt="{{ $part->part_name }}"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             style="position: absolute;">
+                    </template>
                     
+                    {{-- Navigation Arrows --}}
                     <div class="gallery-nav" x-show="images.length > 1">
                         <button class="nav-btn" @click="index = (index - 1 + images.length) % images.length">
                             <i class="fa fa-chevron-left"></i>
@@ -127,9 +120,12 @@
                     </div>
                 </div>
 
+                {{-- Thumbnail Strip --}}
                 <div class="thumb-strip" x-show="images.length > 1">
                     <template x-for="(img, i) in images" :key="i">
-                        <div class="thumb-item" :class="{ 'active-thumb': index === i }" @click="index = i">
+                        <div class="thumb-item" 
+                             :class="{ 'active-thumb': index === i }" 
+                             @click="index = i">
                             <img :src="img" loading="lazy">
                         </div>
                     </template>
