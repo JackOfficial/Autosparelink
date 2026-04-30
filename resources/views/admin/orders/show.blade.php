@@ -338,47 +338,53 @@
 
         {{-- Sidebar Controls --}}
         <div class="col-lg-4">
-            <div class="card shadow-sm status-control-card mb-4 no-print">
-                <div class="card-body p-4">
-                    <span class="info-label text-center mb-3">Update Order Progress</span>
-                    
-                    <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mb-3">
-                        @csrf @method('PUT')
-                        <select name="status" class="form-control status-select shadow-none mb-3" onchange="this.form.submit()">
-                            @foreach(['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as $stat)
-                                <option value="{{ $stat }}" {{ strtolower($order->status) == $stat ? 'selected' : '' }}>
-                                    {{ ucfirst(str_replace('_', ' ', $stat)) }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </form>
+          <div class="card shadow-sm status-control-card mb-4 no-print">
+    <div class="card-body p-4">
+        {{-- Only show the update form if the order is NOT completed --}}
+        @if($currentStatus !== 'completed')
+            <span class="info-label text-center mb-3">Update Order Progress</span>
+            
+            <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mb-3">
+                @csrf @method('PUT')
+                <select name="status" class="form-control status-select shadow-none mb-3" onchange="this.form.submit()">
+                    @foreach(['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as $stat)
+                        <option value="{{ $stat }}" {{ strtolower($order->status) == $stat ? 'selected' : '' }}>
+                            {{ ucfirst(str_replace('_', ' ', $stat)) }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+        @endif
 
-                    {{-- Logic for Final Acceptance --}}
-                    @if($currentStatus === 'delivered')
-                        <form action="{{ route('admin.orders.finalize', $order->id) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm">
-                                <i class="fas fa-handshake mr-2"></i> Confirm Customer Accepted
-                            </button>
-                            <p class="text-muted small text-center mt-2 mb-0">This verifies items match user expectations.</p>
-                        </form>
-                    @elseif($currentStatus === 'completed')
-                        <div class="alert bg-success-soft text-success text-center border-0 mb-0">
-                            <i class="fas fa-check-double fa-2x mb-2"></i>
-                            <div class="font-weight-bold">Order Finalized</div>
-                            <small>Transaction accepted by customer</small>
-                        </div>
-                    @else
-                        {{-- Contextual Action for non-delivered items --}}
-                        <div class="p-3 bg-light rounded text-center">
-                            <small class="text-muted d-block mb-2">Next standard step:</small>
-                            <span class="badge badge-pill badge-primary px-3 py-2">
-                                {{ $currentIdx < 4 ? ucfirst($statuses[$currentIdx + 1] ?? 'None') : 'Finalized' }}
-                            </span>
-                        </div>
-                    @endif
-                </div>
+        {{-- Logic for Final Acceptance / Displaying Finalized State --}}
+        @if($currentStatus === 'delivered')
+            <form action="{{ route('admin.orders.finalize', $order->id) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm">
+                    <i class="fas fa-handshake mr-2"></i> Confirm Customer Accepted
+                </button>
+                <p class="text-muted small text-center mt-2 mb-0">This verifies items match user expectations.</p>
+            </form>
+        @elseif($currentStatus === 'completed')
+            {{-- This replaces the update form entirely when finalized --}}
+            <div class="alert bg-success-soft text-success text-center border-0 mb-0">
+                <i class="fas fa-check-double fa-2x mb-2"></i>
+                <div class="font-weight-bold">Order Finalized</div>
+                <small>Transaction accepted by customer</small>
+                <hr class="my-2" style="border-top: 1px solid rgba(40, 167, 69, 0.2);">
+                <p class="extra-small mb-0 text-uppercase">Payment Processed to Vendor</p>
             </div>
+        @else
+            {{-- Contextual Action for non-delivered items --}}
+            <div class="p-3 bg-light rounded text-center">
+                <small class="text-muted d-block mb-2">Next standard step:</small>
+                <span class="badge badge-pill badge-primary px-3 py-2">
+                    {{ $currentIdx < 4 ? ucfirst($statuses[$currentIdx + 1] ?? 'None') : 'Finalized' }}
+                </span>
+            </div>
+        @endif
+    </div>
+</div>
 
             {{-- Customer Card --}}
             <div class="card shadow-sm mb-4">
