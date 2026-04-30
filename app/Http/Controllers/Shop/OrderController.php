@@ -5,33 +5,28 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    /**
-     * Scope the query to only orders containing parts belonging to the user's shop.
-     */
     private function shopOrders()
     {
         $user = Auth::user();
 
-        // Check if the user has a shop to prevent errors
         if (!$user->shop) {
             abort(403, 'No shop associated with this account.');
         }
 
         $shopId = $user->shop->id;
 
-        return Order::whereHas('orderItems.part', function ($query) use ($shopId) {
+        // Scope to orders that contain this shop's parts
+        return Order::whereHas('orderItems', function ($query) use ($shopId) {
             $query->where('shop_id', $shopId);
         });
     }
 
-    /**
-     * Display shop-specific orders
-     */
-    
     public function index()
     {
         $shopId = Auth::user()->shop->id;
@@ -40,83 +35,73 @@ class OrderController extends Controller
             ->with([
                 'user',
                 'orderItems' => function($q) use ($shopId) {
-                    // Critical: Only load items that belong to this specific shop
-                    $q->whereHas('part', fn($p) => $p->where('shop_id', $shopId))
-                      ->with('part');
+                    // Only load this shop's items to prevent cross-shop data leaks
+                    $q->where('shop_id', $shopId)->with('part');
                 },
-                'payment',
-                'shipping'
+                'payment'
             ])
             ->latest()
-            ->orderByRaw("FIELD(status, 'callback_requested') DESC")
             ->paginate(15);
 
         return view('shop.orders.index', compact('orders'));
     }
 
-    /**
-     * Display specific shop order
-     */
     public function show(string $id)
     {
+        $shopId = Auth::user()->shop->id;
+
         $order = $this->shopOrders()
-        ->with([
-        'user', 
-        'orderItems' => function($query) {
-            $query->orderBy('id', 'asc'); // Keep items in order
-        },
-        'orderItems.part', 
-        'payment', 
-        'shipping', 
-        'address'
-        ])
-        ->findOrFail($id);
+            ->with([
+                'user', 
+                'orderItems' => function($query) use ($shopId) {
+                    $query->where('shop_id', $shopId)->with('part');
+                },
+                'payment', 
+                'address'
+            ])
+            ->findOrFail($id);
 
         return view('shop.orders.show', compact('order'));
     }
 
     /**
-     * Edit order status
+     * Update order item status
+     * In a multi-vendor system, shops update ITEMS, not the whole ORDER.
      */
-    public function edit(string $id)
-    {
-        $order = $this->shopOrders()->findOrFail($id);
-        
-        $statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'callback_requested'];
-
-        return view('shop.orders.edit', compact('order', 'statuses'));
-    }
-
-    /**
-     * Update order status
-     */
-    public function update(Request $request, string $id)
+    public function updateItemStatus(Request $request, string $orderItemId)
     {
         $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled,callback_requested'
+            'status' => 'required|in:pending,processing,shipped,completed,cancelled'
         ]);
 
-        $order = $this->shopOrders()->findOrFail($id);
-        
-        $order->update([
-            'status' => $request->status
-        ]);
+        $shopId = Auth::user()->shop->id;
 
-        return redirect()
-            ->route('shop.orders.show', $order->id)
-            ->with('success', "Order #{$order->id} updated successfully.");
+        // Securely find the item belonging to this shop
+        $item = OrderItem::where('shop_id', $shopId)->findOrFail($orderItemId);
+
+        // Wrap in transaction as per your saved logic for payment safety
+        DB::transaction(function () use ($item, $request) {
+            // lockForUpdate prevents race conditions during payment processing
+            $item->lockForUpdate();
+            
+            $item->status = $request->status;
+            
+            // Your OrderItemObserver or model booted logic will see 'isDirty' 
+            // and trigger the WalletTransaction if status is 'completed'
+            $item->save(); 
+        });
+
+        return back()->with('success', "Item status updated to {$request->status}.");
     }
 
     /**
-     * Delete order (Soft delete from shop view)
+     * Delete logic remains the same (Soft delete from shop view only)
      */
     public function destroy(string $id)
     {
         $order = $this->shopOrders()->findOrFail($id);
         $order->delete();
 
-        return redirect()
-            ->route('shop.orders.index')
-            ->with('success', 'Order removed successfully.');
+        return redirect()->route('shop.orders.index')->with('success', 'Order view removed.');
     }
 }

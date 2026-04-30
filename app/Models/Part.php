@@ -19,7 +19,11 @@ class Part extends Model
         'part_brand_id',
         'oem_number',
         'description',
-        'price',
+        'price',            // The Base Price set by the Shop
+        'old_price',        // Base discount price set by shop
+        'unit_price',       // The Markup Price shown to customers
+        'old_unit_price',   // Markup discount price for customers
+        'applied_rate',     // The commission rate at time of save
         'stock_quantity',
         'status',
     ];
@@ -44,39 +48,27 @@ class Part extends Model
         return $this->hasMany(PartFitment::class);
     }
 
-public function specifications()
-{
-    return $this->belongsToMany(
-        Specification::class,
-        'part_fitments',
-        'part_id',
-        'specification_id' // Correct column
-    )->withTimestamps();
-}
+    public function specifications()
+    {
+        return $this->belongsToMany(
+            Specification::class,
+            'part_fitments',
+            'part_id',
+            'specification_id'
+        )->withTimestamps();
+    }
 
-    // public function variants()
-    // {
-    //     return $this->belongsToMany(
-    //         Variant::class,
-    //         'part_fitments',
-    //         'part_id',
-    //         'variant_id'
-    //     )
-    //     ->withPivot(['vehicle_model_id', 'start_year', 'end_year'])
-    //     ->withTimestamps();
-    // }
-
-   public function vehicleModels()
-{
-    return $this->belongsToMany(
-        VehicleModel::class,
-        'part_fitments',
-        'part_id',
-        'vehicle_model_id'
-    )
-    ->withPivot(['specification_id', 'start_year', 'end_year']) // Fixed column name here
-    ->withTimestamps();
-}
+    public function vehicleModels()
+    {
+        return $this->belongsToMany(
+            VehicleModel::class,
+            'part_fitments',
+            'part_id',
+            'vehicle_model_id'
+        )
+        ->withPivot(['specification_id', 'start_year', 'end_year'])
+        ->withTimestamps();
+    }
 
     public function photos() 
     {
@@ -84,33 +76,30 @@ public function specifications()
     }
 
     public function substitutions()
-{
-    return $this->belongsToMany(
-         Part::class,               // The related model
-        'part_substitutions',      // Pivot table
-        'part_id',                 // Foreign key on pivot for this part
-        'substitution_part_id'     // Foreign key on pivot for the substitution
-    );
-}
+    {
+        return $this->belongsToMany(
+             Part::class,
+            'part_substitutions',
+            'part_id',
+            'substitution_part_id'
+        );
+    }
 
-public function substitutedFor()
-{
-    return $this->belongsToMany(
-        Part::class,
-        'part_substitutions',
-        'substitution_part_id',
-        'part_id'
-    );
-}
+    public function substitutedFor()
+    {
+        return $this->belongsToMany(
+            Part::class,
+            'part_substitutions',
+            'substitution_part_id',
+            'part_id'
+        );
+    }
 
-public function shop(): BelongsTo
-{
-    return $this->belongsTo(Shop::class);
-}
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class);
+    }
 
-   /**
-     * Generate SKU for a part
-     */
     public static function generateSku(?string $brand, ?string $category, string $partName): string
     {
         $brand = $brand ?? 'GEN';
@@ -121,37 +110,30 @@ public function shop(): BelongsTo
         );
     }
 
-public function scopeForSpecification($query, $specId)
-{
-    return $query->whereHas('specifications', function ($q) use ($specId) {
-        $q->where('specifications.id', $specId);
-    });
-}
+    public function scopeForSpecification($query, $specId)
+    {
+        return $query->whereHas('specifications', function ($q) use ($specId) {
+            $q->where('specifications.id', $specId);
+        });
+    }
 
-// Add this to your Part.php model
-public function isAvailable($requestedQuantity = 1)
-{
-    return $this->status === 'active' && $this->stock_quantity >= $requestedQuantity;
-}
+    public function isAvailable($requestedQuantity = 1)
+    {
+        return $this->status === 'active' && $this->stock_quantity >= $requestedQuantity;
+    }
 
-/**
-     * Updated Scope: Smart filtering for Sellers vs Admins
-     */
     public function scopeForCurrentSeller(Builder $query): Builder
     {
         $user = auth()->user();
 
-        // 1. If guest, show everything (Public Pages)
         if (!$user) {
             return $query;
         }
 
-        // 2. If Admin/Super-Admin, bypass the filter (Dashboard Management)
         if ($user->hasRole('admin') || $user->hasRole('super-admin')) {
             return $query;
         }
 
-        // 3. If Seller, strictly filter by their shop ID
         if ($user->hasRole('seller') && $user->shop) {
             return $query->where('shop_id', $user->shop->id);
         }
@@ -160,28 +142,38 @@ public function isAvailable($requestedQuantity = 1)
     }
 
     protected static function booted()
-{
-    static::saving(function ($part) {
-        // 1. Automatically assign Shop ID for Sellers (only on creation)
-        if (auth()->check() && auth()->user()->hasRole('seller') && empty($part->shop_id)) {
-            $part->shop_id = auth()->user()->shop->id;
-        }
+    {
+        static::saving(function ($part) {
+            // 1. Assign Shop ID for Sellers
+            if (auth()->check() && auth()->user()->hasRole('seller') && empty($part->shop_id)) {
+                $part->shop_id = auth()->user()->shop->id;
+            }
 
-        // 2. Sync/Generate SKU
-        // We check if the name, brand, or category changed, or if the SKU is empty
-        if ($part->isDirty(['part_name', 'part_brand_id', 'category_id']) || empty($part->sku)) {
+            // 2. Markup Pricing Logic (Enhanced)
+            // Fallback: Check shop-specific rate, then Global Admin Rate
+            $globalRate = Commission::getRate();
+            $shopRate = $part->shop ? $part->shop->commission_rate : null;
             
-            // Load relationships if they aren't loaded to get the names for the SKU
-            $brandName = $part->partBrand ? $part->partBrand->name : null;
-            $categoryName = $part->category ? $part->category->category_name : null;
+            $finalRate = $shopRate ?? $globalRate;
+            
+            $part->applied_rate = (float) $finalRate;
+            
+            // Calculate customer-facing unit_price (base + markup)
+            $multiplier = 1 + ($finalRate / 100);
+            $part->unit_price = (float) $part->price * $multiplier;
 
-            $part->sku = self::generateSku(
-                $brandName, 
-                $categoryName, 
-                $part->part_name
-            );
-        }
-    });
-}
+            // Mirror markup on old_price for consistent UI discount display
+            if (!empty($part->old_price)) {
+                $part->old_unit_price = (float) $part->old_price * $multiplier;
+            }
 
+            // 3. SKU Generation
+            if ($part->isDirty(['part_name', 'part_brand_id', 'category_id']) || empty($part->sku)) {
+                $brandName = $part->partBrand ? $part->partBrand->name : null;
+                $categoryName = $part->category ? $part->category->category_name : null;
+
+                $part->sku = self::generateSku($brandName, $categoryName, $part->part_name);
+            }
+        });
+    }
 }

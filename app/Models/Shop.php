@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,9 +16,9 @@ class Shop extends Model
 
     protected $fillable = [
         'user_id',
-        'shop_name', // Matches your Controller & Form
+        'shop_name',
         'slug',
-        'shop_email', // Matches your Controller
+        'shop_email',
         'description',
         'logo',
         'tin_number',
@@ -30,19 +29,12 @@ class Shop extends Model
         'is_verified',
     ];
 
-    /**
-     * Ensure data types are consistent
-     */
     protected $casts = [
         'is_active' => 'boolean',
         'is_verified' => 'boolean',
         'commission_rate' => 'decimal:2',
     ];
 
-    /**
-     * Polymorphic relationship for verification documents
-     * (RDB Certificate, IDs, etc.)
-     */
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');
@@ -58,65 +50,60 @@ class Shop extends Model
         return $this->hasMany(Part::class);
     }
 
-    /**
-     * Connects Shop directly to OrderItems sold
-     */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    /**
-     * Track payout history for this shop
-     */
     public function payouts(): HasMany
     {
         return $this->hasMany(Payout::class);
     }
 
-    /**
-     * Helper to get the public logo URL or a default placeholder
-     */
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
     public function getLogoUrlAttribute(): string
     {
         return $this->logo ? asset('storage/' . $this->logo) : asset('images/default-shop-logo.png');
     }
 
-    public function wallet(): HasOne
-   {
-    return $this->hasOne(Wallet::class);
-   }
-
-    /**
-     * Helper to check if the shop is ready for business
-     */
     public function isOperational(): bool
     {
         return $this->is_active && $this->is_verified;
     }
 
-    // app/Models/Shop.php
-
-public function getFinancialAudit()
+    /**
+     * Updated Financial Audit for Markup Model
+     * 
+     * In this model:
+     * - unit_price: Price paid by customer (Base + Commission)
+     * - shop_payout: Price set by shop (Base)
+     */
+    public function getFinancialAudit()
     {
-        // 1. Get the current rate
-        $rawRate = Commission::getRate(); 
-        $percentage = $rawRate / 100;
+        // 1. Get the shop's specific commission rate
+        $currentRate = (float) ($this->commission_rate ?? 0);
 
-        // 2. Audited Gross Revenue
+        // 2. Aggregate Revenue Data for this shop's specific items
+        // We calculate based on 'shop_payout' because the shop receives 100% of their set price.
         $revenueData = $this->orderItems()
             ->where('status', 'completed')
-            ->whereHas('order', fn($q) => $q->where('status', 'completed'))
-            ->selectRaw("SUM(unit_price * quantity) as total_gross")
+            ->selectRaw("
+                SUM(unit_price * quantity) as total_customer_paid,
+                SUM(shop_payout * quantity) as total_shop_revenue
+            ")
             ->first();
 
-        $totalGross = $revenueData->total_gross ?? 0;
+        $totalGross = (float) ($revenueData->total_customer_paid ?? 0);
+        $netEarnings = (float) ($revenueData->total_shop_revenue ?? 0);
+        
+        // The commission is the difference between what the customer paid and what the shop gets
+        $totalCommission = $totalGross - $netEarnings;
 
-        // 3. Financial Breakdown
-        $totalCommission = $totalGross * $percentage;
-        $netEarnings = $totalGross - $totalCommission;
-
-        // 4. Payout Deductions
+        // 3. Payout Deductions (Withdrawals)
         $deductions = $this->payouts()
             ->whereIn('status', ['completed', 'pending', 'processing'])
             ->selectRaw("
@@ -125,14 +112,14 @@ public function getFinancialAudit()
             ")
             ->first();
 
-        $withdrawn = $deductions->total_withdrawn ?? 0;
-        $locked = $deductions->total_locked ?? 0;
+        $withdrawn = (float) ($deductions->total_withdrawn ?? 0);
+        $locked = (float) ($deductions->total_locked ?? 0);
 
         return [
-            'totalGross'       => $totalGross,
-            'commissionRate'   => $rawRate, // --- ADDED THIS SO BLADE CAN USE IT ---
-            'totalCommission'  => $totalCommission,
-            'netEarnings'      => $netEarnings,
+            'totalGross'       => $totalGross,       // What customers paid for this shop's items
+            'commissionRate'   => $currentRate,      // The % added to this shop's prices
+            'totalCommission'  => $totalCommission,  // Revenue for the platform from this shop
+            'netEarnings'      => $netEarnings,      // Total the shop is entitled to (100% of their base price)
             'totalWithdrawn'   => $withdrawn,
             'pendingPayouts'   => $locked,
             'availableBalance' => $netEarnings - ($withdrawn + $locked)
@@ -142,11 +129,9 @@ public function getFinancialAudit()
     protected static function booted()
     {
         static::saving(function ($shop) {
-            // Updated to reference 'shop_name'
             if ($shop->isDirty('shop_name')) {
                 $shop->slug = Str::slug($shop->shop_name);
             }
         });
     }
-
 }

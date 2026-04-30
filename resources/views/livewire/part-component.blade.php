@@ -1,9 +1,16 @@
 @php
-    $mainPhoto = $part->photos->first()?->file_path ?? 'frontend/img/placeholder.png';
+    $mainPhoto = $part->photos->first()?->file_path ?? $part->image ?? 'frontend/img/placeholder.png';
     
-    $discount = !empty($part->old_price) && $part->old_price > $part->price
-        ? round((($part->old_price - $part->price) / $part->old_price) * 100)
-        : null;
+    /**
+     * CRITICAL MARKUP UPDATE:
+     * Use unit_price (Base + Markup) for display and discount math.
+     */
+    $displayPrice = $part->unit_price; 
+    $oldDisplayPrice = $part->old_unit_price ?? $part->old_price;
+    
+    $discount = !empty($oldDisplayPrice) && $oldDisplayPrice > $displayPrice
+    ? round((($oldDisplayPrice - $displayPrice) / $oldDisplayPrice) * 100)
+    : null;
     
     $firstSpec = $part->specifications->first();
     
@@ -26,19 +33,19 @@
         @endif
 
         @php
-    $stateName = strtolower($part->state->name ?? '');
-    $badgeClass = match($stateName) {
-        'new'         => 'badge-new',
-        'refurbished' => 'badge-refurbished',
-        'used'        => 'badge-used',
-        default       => 'badge-new',
-    };
-@endphp
+            $stateName = strtolower($part->state->name ?? '');
+            $badgeClass = match($stateName) {
+                'new'         => 'badge-new',
+                'refurbished' => 'badge-refurbished',
+                'used'        => 'badge-used',
+                default       => 'badge-new',
+            };
+        @endphp
 
         {{-- Part State Badge --}}
-       <div class="badge-custom {{ $badgeClass }}" style="z-index: 5; position: absolute; top: 10px; left: 10px;">
-    {{ $part->state->name ?? '' }}
-</div>
+        <div class="badge-custom {{ $badgeClass }}" style="z-index: 5; position: absolute; top: 10px; left: 10px;">
+            {{ $part->state->name ?? '' }}
+        </div>
 
         @if($discount)
             <div class="badge-custom badge-discount" style="top:40px; left: 10px; z-index: 5; position: absolute;">-{{ $discount }}%</div>
@@ -62,23 +69,23 @@
 
         <div class="mt-auto"> 
             {{-- Vehicle & Part Number --}}
-           <small class="text-muted d-block mb-1 text-truncate px-2">
-        <i class="fa fa-car mr-1"></i> {{ $descriptiveName }}
-    </small>
+            <small class="text-muted d-block mb-1 text-truncate px-2">
+                <i class="fa fa-car mr-1"></i> {{ $descriptiveName }}
+            </small>
 
-    <small class="text-muted d-block mb-1">
-        <i class="fa fa-cog mr-1"></i> {{ $part->part_number }}
-    </small>
+            <small class="text-muted d-block mb-1">
+                <i class="fa fa-cog mr-1"></i> {{ $part->part_number }}
+            </small>
 
             {{-- SHOP INFO SECTION --}}
-         <small class="text-muted d-block mb-2 text-truncate px-2">
-        <i class="fa fa-store mr-1 text-primary"></i> 
-        <span class="font-weight-bold text-dark">{{ $part->shop->shop_name ?? 'Shop' }}</span> 
-        @if($part->shop?->address)
-            <span class="mx-1">|</span>
-            <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
-        @endif
-    </small>
+            <small class="text-muted d-block mb-2 text-truncate px-2">
+                <i class="fa fa-store mr-1 text-primary"></i> 
+                <span class="font-weight-bold text-dark">{{ $part->shop->shop_name ?? 'Shop' }}</span> 
+                @if($part->shop?->address)
+                    <span class="mx-1">|</span>
+                    <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
+                @endif
+            </small>
 
             @if($part->stock_quantity > 0)
                 <small class="badge {{ $part->stock_quantity < 5 ? 'badge-warning' : 'badge-light text-success' }} mb-2">
@@ -89,7 +96,8 @@
             @endif
 
             <div class="d-flex align-items-center justify-content-center mb-3">
-                <h5 class="mb-0 text-primary font-weight-bold">{{ number_format($part->price, 0) }} {{ $currencySymbol ?? 'RWF' }}</h5>
+                {{-- DISPLAY UNIT_PRICE (Base + Markup) --}}
+                <h5 class="mb-0 text-primary font-weight-bold">{{ number_format($displayPrice, 0) }} {{ $currencySymbol ?? 'RWF' }}</h5>
                 @if(!empty($part->old_price))
                     <small class="text-muted ml-2"><del>{{ number_format($part->old_price, 0) }}</del></small>
                 @endif
@@ -100,7 +108,6 @@
                     <button wire:click="addToCart" 
                             class="btn btn-primary btn-block btn-sm rounded-pill py-2 transition-all shadow-sm" 
                             :class="success ? 'btn-success' : 'btn-primary'"
-                            @click="confetti ? confetti() : null"
                             wire:loading.attr="disabled">
                         <i x-show="success" class="fa fa-check mr-1"></i>
                         <span wire:loading wire:target="addToCart" class="spinner-border spinner-border-sm mr-1"></span>

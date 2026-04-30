@@ -8,6 +8,7 @@ use App\Models\Part;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -15,10 +16,11 @@ class DashboardController extends Controller
     {
         $shop = Auth::user()->shop;
         
-        // Scope-based retrieval for strict data ownership
+        // Scope-based retrieval ensures strict data ownership
         $wallet = Wallet::forCurrentSeller()->first();
 
         // 1. CHART DATA: 7-Day Revenue (Net Earnings from Wallet)
+        // Uses shop_payout amounts that have been cleared to the wallet
         $salesData = WalletTransaction::forCurrentSeller()
             ->where('type', 'credit')
             ->where('status', 'completed')
@@ -34,18 +36,21 @@ class DashboardController extends Controller
             return [$date => 0];
         })->merge($salesData)->reverse();
 
-        // 2. INVENTORY METRICS: For Radial Bar & Stats
+        // 2. INVENTORY METRICS: Radial Bar & Low Stock Alerts
         $totalParts = Part::forCurrentSeller()->count();
         $lowStockCount = Part::forCurrentSeller()->where('stock_quantity', '<', 5)->count();
         $healthyCount = max(0, $totalParts - $lowStockCount);
 
         // 3. AGGREGATED STATS
+        // These rely on getFinancialAudit() logic to maintain accuracy
+        $audit = $shop->getFinancialAudit();
+
         $stats = [
             'total_inventory'   => $totalParts,
             'low_stock'         => $lowStockCount,
-            'available_balance' => $wallet?->balance ?? 0,
-            'pending_balance'   => $wallet?->pending_balance ?? 0,
-            'total_revenue'     => $wallet?->total_earnings ?? 0,
+            'available_balance' => $audit['availableBalance'], // Use audited balance for accuracy
+            'pending_balance'   => $audit['pendingPayouts'],
+            'total_revenue'     => $audit['netEarnings'],     // Total shop earnings (base prices)
         ];
 
         return view('shop.index', [
@@ -54,12 +59,15 @@ class DashboardController extends Controller
             'stats'          => $stats,
             'salesData'      => $chartFinal->values(),
             'salesLabels'    => $chartFinal->keys(),
-            'inventoryStats' => [$lowStockCount, $healthyCount], // Used for Radial Bar [Critical, Healthy]
+            'inventoryStats' => [$lowStockCount, $healthyCount],
+            
+            // Recent Sales now focuses on shop-specific OrderItems
             'recentSales'    => OrderItem::forCurrentSeller()
                                     ->with(['order.user', 'part'])
                                     ->latest()
                                     ->take(5)
                                     ->get(),
+                                    
             'pendingPickups' => OrderItem::forCurrentSeller()
                                     ->where('status', 'ready_for_pickup')
                                     ->with(['order.user'])

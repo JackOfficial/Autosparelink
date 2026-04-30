@@ -10,54 +10,65 @@ class ShopObserver
 {
     /**
      * Handle the Shop "updated" event.
-     * This triggers when the Admin approves the shop in the backend.
      */
     public function updated(Shop $shop): void
     {
-        // 1. Check if 'is_verified' just flipped from false to true.
-        // We use is_verified for the "Gate" and is_active for "Status/Banning".
+        // 1. Check if 'is_verified' flipped to true.
         if ($shop->isDirty('is_verified') && $shop->is_verified === true) {
             
-            // 2. Double-check that a wallet doesn't already exist (Safety first!)
+            // 2. Initialize the Wallet if it doesn't exist.
             if (!$shop->wallet()->exists()) {
                 $this->createShopWallet($shop);
+            }
+
+            // 3. Ensure a commission rate is set for the markup model.
+            // Using updateQuietly prevents re-triggering this observer.
+            if (is_null($shop->commission_rate)) {
+                $shop->updateQuietly([
+                    'commission_rate' => config('app.default_commission_rate', 10)
+                ]);
             }
         }
     }
 
     /**
-     * Helper to initialize the wallet with default Rwandan Francs (RWF) values.
+     * Helper to initialize the wallet with default RWF values.
      */
-   private function createShopWallet(Shop $shop): void
-{
-    DB::transaction(function () use ($shop) {
-        // Double-check inside the transaction for maximum safety
-        if ($shop->wallet()->exists()) {
-            return;
-        }
+    private function createShopWallet(Shop $shop): void
+    {
+        DB::transaction(function () use ($shop) {
+            // Safety check inside the transaction
+            if ($shop->wallet()->exists()) {
+                return;
+            }
 
-        $shop->wallet()->create([
-            'currency' => 'RWF',
-            'last_transaction_at' => now(),
-        ]);
-        
-        Log::info("Wallet initialized for Shop ID: #{$shop->id}");
-    });
-}
-
-    public function created(Shop $shop): void
-{
-    if ($shop->is_verified) {
-        $this->createShopWallet($shop);
+            $shop->wallet()->create([
+                'currency'            => 'RWF',
+                'balance'             => 0,
+                'pending_balance'     => 0, // Explicitly set for dashboard stats accuracy
+                'total_earnings'      => 0,
+                'last_transaction_at' => now(),
+            ]);
+            
+            Log::info("Wallet initialized for Shop ID: #{$shop->id} ({$shop->shop_name})");
+        });
     }
-}
+
+    /**
+     * Handle immediate verification upon creation (e.g., admin-created shops).
+     */
+    public function created(Shop $shop): void
+    {
+        if ($shop->is_verified) {
+            $this->createShopWallet($shop);
+        }
+    }
 
     /**
      * Handle the Shop "deleted" event.
      */
     public function deleted(Shop $shop): void
     {
-        // We typically do NOT delete the wallet here to maintain financial 
-        // audit trails for tax/RRA purposes in Rwanda.
+        Log::warning("Shop ID #{$shop->id} was deleted. Wallet remains for financial audit trails.");
     }
 }

@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Container\Attributes\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 class Wallet extends Model
 {
     /**
-     * Remove balances from fillable. 
-     * They should only be modified by Transactions, not $request->all().
+     * Remove balances from fillable for financial security.
+     * They are modified via WalletTransaction logic.
      */
     protected $fillable = [
         'shop_id',
@@ -27,17 +27,13 @@ class Wallet extends Model
     ];
 
     /**
-     * Admin-aware scope for secure data retrieval.
+     * Secure data retrieval based on user roles.
      */
-    public function scopeForCurrentSeller($query)
+    public function scopeForCurrentSeller(Builder $query): Builder
     {
         $user = auth()->user();
 
-        if (!$user) {
-            return $query;
-        }
-
-        if ($user->hasRole('super-admin') || $user->hasRole('admin')) {
+        if (!$user || $user->hasRole('super-admin') || $user->hasRole('admin')) {
             return $query;
         }
 
@@ -55,28 +51,27 @@ class Wallet extends Model
     }
 
     /**
-     * Business Logic Helpers
+     * Business Logic: Validate withdrawal requests.
      */
-
     public function canWithdraw($amount): bool
     {
         return (float) $this->balance >= (float) $amount;
     }
 
     /**
-     * Accessor for total historical earnings.
+     * Logic for calculating Total Historical Earnings.
      */
-    public function getTotalEarningsAttribute()
+    public function getTotalEarningsAttribute(): float
     {
         return (float) $this->balance + (float) $this->withdrawn_balance;
     }
 
     /**
-     * Helper to get a formatted balance string (e.g., 5,000 RWF)
+     * UI Helper: Professional formatting for RWF.
      */
-    public function getFormattedBalanceAttribute()
+    public function getFormattedBalanceAttribute(): string
     {
-        return number_format($this->balance) . ' ' . ($this->currency ?? 'RWF');
+        // Rwandan Francs typically do not use decimals in display
+        return number_format($this->balance, 0) . ' ' . ($this->currency ?? 'RWF');
     }
-
 }

@@ -4,7 +4,6 @@ namespace App\Observers;
 
 use App\Models\OrderItem;
 use App\Models\WalletTransaction;
-use App\Models\Commission;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -15,20 +14,15 @@ class OrderItemObserver
      */
     public function updated(OrderItem $orderItem): void
     {
-        Log::info("Observer triggered for OrderItem #{$orderItem->id}. Status: {$orderItem->status}");
-
-        if ($orderItem->isDirty('status')) {
-        Log::info("Status is dirty. New status: " . $orderItem->status);
-        }
-
-        // 1. Check if the status has flipped to 'completed'
+        // 1. Trigger vendor payment only when status explicitly flips to 'completed'
+        // This follows your logic for processing vendor payments
         if ($orderItem->isDirty('status') && $orderItem->status == 'completed') {
             $this->processVendorPayment($orderItem);
         }
     }
 
     /**
-     * Logic to calculate split and credit the vendor wallet
+     * Credit the vendor wallet based on the markup model
      */
     private function processVendorPayment(OrderItem $orderItem): void
     {
@@ -41,10 +35,10 @@ class OrderItemObserver
 
         $wallet = $shop->wallet;
 
-        // Perform the logic inside a transaction to ensure integrity
-        DB::transaction(function () use ($wallet, $shop, $orderItem) {
+        // Wrapped in a transaction with lockForUpdate to prevent double payments
+        DB::transaction(function () use ($wallet, $orderItem) {
             
-            // 1. Re-check inside the transaction with a lock to be 100% safe
+            // 1. Re-check for existing transaction to ensure integrity
             $alreadyPaid = WalletTransaction::where('reference_type', OrderItem::class)
                 ->where('reference_id', $orderItem->id)
                 ->lockForUpdate()
@@ -54,31 +48,28 @@ class OrderItemObserver
                 return;
             }
 
-            // 2. Calculations
-            // UPDATED: Now using the simplified global rate method
-            $feePercentage = Commission::getRate(); 
+            // 2. Calculations (Markup Model Logic)
+            // Vendor gets 100% of their set shop_payout
+            $vendorNetEarnings = $orderItem->shop_payout * $orderItem->quantity;
             
-            $itemSubtotal = $orderItem->unit_price * $orderItem->quantity;
-            
-            // Ensure we use 2 decimal places for financial precision
-            $adminServiceFee = round(($itemSubtotal * $feePercentage) / 100, 2);
-            $vendorNetEarnings = $itemSubtotal - $adminServiceFee;
+            // Platform Revenue (The Markup) = Total Customer Paid - Vendor Base Price
+            $totalCustomerPaid = $orderItem->unit_price * $orderItem->quantity;
+            $adminMarkupRevenue = $totalCustomerPaid - $vendorNetEarnings;
 
-            // 3. Persist local record
-            // Use updateQuietly to avoid triggering this observer again in an infinite loop
+            // 3. Persist local record using updateQuietly to avoid infinite loops
             $orderItem->updateQuietly([
-                'commission_amount' => $adminServiceFee
+                'commission_amount' => $adminMarkupRevenue
             ]);
 
             // 4. Trigger the wallet flow
             $wallet->transactions()->create([
                 'type'           => 'credit',
-                'amount'         => $vendorNetEarnings,
-                'service_fee'    => $adminServiceFee,
-                'fee_percentage' => $feePercentage,
+                'amount'         => $vendorNetEarnings, // The base price the shop set
+                'service_fee'    => $adminMarkupRevenue, // The profit the platform made via markup
+                'fee_percentage' => $orderItem->applied_rate, // The rate applied at time of part creation
                 'reference_type' => OrderItem::class,
                 'reference_id'   => $orderItem->id,
-                'description'    => "Earnings for item: " . ($orderItem->part->part_name ?? 'Spare Part') . " (Order #{$orderItem->order_id})",
+                'description'    => "Earnings for: " . ($orderItem->part->part_name ?? 'Spare Part'),
                 'status'         => 'completed',
             ]);
         });
