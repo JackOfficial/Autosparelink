@@ -129,16 +129,6 @@
                             <span class="text-muted">Shipping</span>
                             <span class="text-success font-weight-bold">Free</span>
                         </div>
-                        
-                        <div class="my-4 bg-light p-3 rounded">
-                            <label class="small font-weight-bold text-muted text-uppercase">Discount Code</label>
-                            <div class="input-group input-group-sm">
-                                <input type="text" class="form-control border-right-0" placeholder="Code">
-                                <div class="input-group-append">
-                                    <button class="btn btn-dark px-3">Apply</button>
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="font-weight-bold mb-0">Total</h5>
