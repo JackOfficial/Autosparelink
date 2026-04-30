@@ -68,6 +68,32 @@
     .sub-image-wrapper { width: 64px; height: 64px; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 6px; }
     .sub-image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
+        /* New Shop Styling */
+    .shop-avatar {
+        width: 32px;
+        height: 32px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+    }
+
+    .x-small { padding: 2px 6px; border-radius: 4px; }
+    
+    .part-link { color: #1e293b; text-decoration: none; transition: 0.2s; }
+    .part-link:hover { color: var(--primary-blue); }
+
+    /* Re-stating necessary button styles for clarity */
+    .btn-outline-primary {
+        border-width: 2px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
     @media (max-width: 991px) {
         .main-image-viewport { height: 350px; }
         .sticky-sidebar { position: relative; top: 0; }
@@ -160,7 +186,7 @@
                 <h4 class="section-title mb-0">Alternative Replacements</h4>
             </div>
             <span class="badge badge-soft-primary px-3 py-2 rounded-pill small font-weight-bold">
-                {{ $substitutions->count() }} Compatible Alternatives
+                {{ $substitutions->count() }} Options Available
             </span>
         </div>
         
@@ -169,36 +195,58 @@
                 <table class="table tech-table mb-0 align-middle">
                     <thead class="bg-light">
                         <tr>
-                            <th class="py-3 pl-4">Product Details</th>
+                            <th class="py-3 pl-4">Product & Specification</th>
                             <th class="py-3">Brand</th>
-                            <th class="py-3">Availability</th>
+                            <th class="py-3">Vendor / Shop</th>
+                            <th class="py-3">Stock Status</th>
                             <th class="py-3 text-right">Price (RWF)</th>
-                            <th class="py-3 text-center">Details</th>
+                            <th class="py-3 text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($substitutions as $sub)
                         <tr>
-                            {{-- Photo & Identification --}}
-                            <td class="pl-4 py-3" style="min-width: 320px;">
+                            {{-- Product Details with Quality Badge --}}
+                            <td class="pl-4 py-3" style="min-width: 300px;">
                                 <div class="d-flex align-items-center">
                                     <div class="sub-image-wrapper">
                                         <img src="{{ $sub->photos->first() ? asset('storage/' . $sub->photos->first()->file_path) : asset('frontend/img/placeholder.jpg') }}" 
                                              alt="{{ $sub->part_name }}">
                                     </div>
                                     <div class="ml-3">
-                                        <a href="{{ route('spare-parts.show', $sub->sku) }}" class="part-link">
+                                        <a href="{{ route('spare-parts.show', $sub->sku) }}" class="part-link font-weight-bold">
                                             {{ $sub->part_number }}
                                         </a>
-                                        <div class="text-muted small font-weight-medium">{{ Str::limit($sub->part_name, 35) }}</div>
+                                        <div class="text-muted small mb-1">{{ Str::limit($sub->part_name, 30) }}</div>
+                                        {{-- Example Condition Badge --}}
+                                        <span class="badge {{ $sub->is_genuine ? 'badge-success' : 'badge-light' }} x-small" style="font-size: 0.65rem; letter-spacing: 0.02em;">
+                                            {{ $sub->is_genuine ? 'GENUINE O.E.M' : 'AFTERMARKET' }}
+                                        </span>
                                     </div>
                                 </div>
                             </td>
 
-                            {{-- Manufacturer --}}
+                            {{-- Brand --}}
                             <td>
-                                <div class="manufacturer-tag">
+                                <div class="manufacturer-tag small font-weight-bold text-uppercase">
                                     {{ $sub->partBrand->name ?? 'Generic' }}
+                                </div>
+                            </td>
+
+                            {{-- Shop / Vendor Information --}}
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="shop-avatar mr-2">
+                                        <i class="fas fa-store text-muted"></i>
+                                    </div>
+                                    <div>
+                                        <a href="#" class="text-dark small font-weight-bold d-block mb-0">
+                                            {{ $sub->shop->name ?? 'AutoLink Official' }}
+                                        </a>
+                                        <div class="text-warning small" style="font-size: 0.7rem;">
+                                            <i class="fas fa-star"></i> 4.8 (120+ sales)
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
 
@@ -206,19 +254,22 @@
                             <td>
                                 <div class="stock-indicator {{ $sub->stock_quantity > 0 ? 'is-in' : 'is-out' }}">
                                     <span class="dot"></span>
-                                    {{ $sub->stock_quantity > 0 ? 'In Stock' : 'On Order' }}
+                                    {{ $sub->stock_quantity > 0 ? $sub->stock_quantity . ' in stock' : 'Out of Stock' }}
                                 </div>
                             </td>
 
                             {{-- Price --}}
                             <td class="text-right pr-4">
-                                <span class="price-text">{{ number_format($sub->price, 0) }}</span>
+                                @if($sub->old_unit_price && $sub->old_unit_price > $sub->unit_price)
+                                    <del class="text-muted small d-block" style="font-size: 0.7rem;">{{ number_format($sub->old_unit_price, 0) }}</del>
+                                @endif
+                                <span class="price-text text-primary">{{ number_format($sub->unit_price ?? $sub->price, 0) }}</span>
                             </td>
 
-                            {{-- Action Link --}}
+                            {{-- View Button --}}
                             <td class="text-center pr-4">
-                                <a href="{{ route('spare-parts.show', $sub->sku) }}" class="btn-view-circle">
-                                    <i class="fas fa-arrow-right"></i>
+                                <a href="{{ route('spare-parts.show', $sub->sku) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                    View
                                 </a>
                             </td>
                         </tr>
