@@ -193,7 +193,7 @@
                             @if($availableBalance < 5000)
                                 <div class="mt-3 p-2 bg-light rounded-3 text-center">
                                     <small class="text-danger fw-medium">
-                                        Min. 5,000 RWF required to withdraw.
+                                        Min. 100 RWF required to withdraw.
                                     </small>
                                 </div>
                             @endif
