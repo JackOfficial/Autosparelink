@@ -160,7 +160,7 @@
                                 <label class="small fw-bold text-muted mb-1 uppercase">Amount to Withdraw</label>
                                 <div class="input-group border rounded-3 overflow-hidden">
                                     <input type="number" name="amount" class="form-control border-0 py-2" 
-                                           placeholder="Min. 5,000" min="5000" required>
+                                           placeholder="Min. 100" min="100" required>
                                     <span class="input-group-text bg-light border-0 small fw-bold">RWF</span>
                                 </div>
                                 <div class="mt-1 d-flex justify-content-between">
