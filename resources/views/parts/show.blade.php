@@ -188,6 +188,7 @@
     </div>
 
 {{-- 4. SUBSTITUTIONS --}}
+{{-- 4. SUBSTITUTIONS --}}
 @if($substitutions->isNotEmpty())
 <div class="row mt-5">
     <div class="col-12">
@@ -233,16 +234,19 @@
                                         <div class="text-muted small mb-1">{{ Str::limit($sub->part_name, 30) }}</div>
                                         
                                         <div class="d-flex gap-1 flex-wrap">
-                                            {{-- Condition State Badge --}}
+                                            {{-- Fixed Condition State Badge Logic --}}
                                             @php
+                                                // Access the slug string from the related PartState model
+                                                $stateSlug = $sub->state ? strtolower($sub->state->slug) : 'new';
+                                                
                                                 $stateClass = [
-                                                    'new' => 'badge-success',
-                                                    'used' => 'badge-warning',
+                                                    'new'         => 'badge-success',
+                                                    'used'        => 'badge-warning',
                                                     'refurbished' => 'badge-info'
-                                                ][$sub->state ?? 'new'] ?? 'badge-secondary';
+                                                ][$stateSlug] ?? 'badge-secondary';
                                             @endphp
                                             <span class="badge {{ $stateClass }} x-small text-uppercase">
-                                                {{ $sub->state ?? 'New' }}
+                                                {{ $sub->state->name ?? 'New' }}
                                             </span>
 
                                             {{-- Quality Badge --}}
