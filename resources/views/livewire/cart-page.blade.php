@@ -19,106 +19,121 @@
                 </div>
             </div>
 
-            @if($cartContent->count() > 0)
-                <div class="card shadow-sm border-0 rounded-lg">
-                    <div class="table-responsive">
-                        <table class="table table-borderless align-middle mb-0">
-                            <thead class="bg-light text-uppercase small font-weight-bold">
-                                <tr>
-                                    <th class="py-3 px-4">Product</th>
-                                    <th class="py-3">Price</th>
-                                    <th class="py-3 text-center">Quantity</th>
-                                    <th class="py-3">Total</th>
-                                    <th class="py-3"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($cartContent as $item)
-                                <tr class="border-bottom" wire:key="{{ $item->rowId }}">
-                                    <td class="py-4 px-4">
-                                        <div class="d-flex align-items-center">
-                                            <img src="{{ $item->options->image ? Storage::url($item->options->image) : asset('frontend/img/placeholder.png') }}" 
-                                                 class="rounded mr-3" 
-                                                 style="width: 70px; height: 70px; object-fit: cover;"
-                                                 alt="{{ $item->name }}">
-                                            <div>
-                                                <h6 class="mb-0 font-weight-bold">{{ $item->name }}</h6>
-                                                <div class="d-flex flex-column">
-                                                    <small class="text-muted">{{ $item->options->brand ?? '' }}</small>
-                                                    {{-- Displaying State/Condition if available --}}
-                                                    @if(isset($item->options->state))
-                                                        <span class="badge badge-pill badge-light text-dark align-self-start" style="font-size: 10px;">
-                                                            {{ $item->options->state }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-4">{{ number_format($item->price, 0) }} RWF</td>
-                                    <td class="py-4">
-                                        <div class="d-flex justify-content-center">
-                                            <div class="input-group input-group-sm" style="width: 110px;">
-                                                <div class="input-group-prepend">
-                                                    <button class="btn btn-outline-secondary border-right-0" 
-                                                            wire:click="updateQuantity('{{ $item->rowId }}', {{ $item->qty - 1 }})"
-                                                            wire:loading.attr="disabled">-</button>
-                                                </div>
-                                                <input type="text" class="form-control text-center border-left-0 border-right-0 bg-white" 
-                                                       value="{{ $item->qty }}" readonly>
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-outline-secondary border-left-0" 
-                                                            wire:click="updateQuantity('{{ $item->rowId }}', {{ $item->qty + 1 }})"
-                                                            wire:loading.attr="disabled">+</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 font-weight-bold text-primary">
-                                        {{ number_format($item->subtotal, 0) }} RWF
-                                    </td>
-                                    <td class="py-4 text-right px-4">
-                                        <div class="btn-group">
-                                            <button class="btn btn-link text-primary p-0 mr-3" 
-                                                    title="Move to Wishlist"
-                                                    wire:click="moveToWishlist('{{ $item->rowId }}')"
-                                                    wire:loading.attr="disabled">
-                                                <i class="far fa-heart" wire:loading.remove wire:target="moveToWishlist('{{ $item->rowId }}')"></i>
-                                                <span class="spinner-border spinner-border-sm" role="status" wire:loading wire:target="moveToWishlist('{{ $item->rowId }}')"></span>
-                                            </button>
+        @if($cartContent->count() > 0)
+    <div class="card shadow-sm border-0 rounded-lg">
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle mb-0">
+                <thead class="bg-light text-uppercase small font-weight-bold">
+                    <tr>
+                        <th class="py-3 px-4" style="width: 45%;">Product Details</th>
+                        <th class="py-3">Price</th>
+                        <th class="py-3 text-center">Quantity</th>
+                        <th class="py-3">Total</th>
+                        <th class="py-3 text-right px-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($cartContent as $item)
+                    <tr class="border-bottom" wire:key="{{ $item->rowId }}">
+                        <td class="py-4 px-4">
+                            <div class="d-flex align-items-center">
+                                <div class="position-relative">
+                                    <img src="{{ $item->options->image ? Storage::url($item->options->image) : asset('frontend/img/placeholder.png') }}" 
+                                         class="rounded shadow-sm border" 
+                                         style="width: 85px; height: 85px; object-fit: cover;"
+                                         alt="{{ $item->name }}">
+                                    @if($item->options->discount)
+                                        <span class="badge badge-danger position-absolute" style="top: -5px; left: -5px;">-{{ $item->options->discount }}%</span>
+                                    @endif
+                                </div>
+                                <div class="ml-3">
+                                    <h6 class="mb-1 font-weight-bold text-dark">{{ $item->name }}</h6>
+                                    
+                                    <div class="d-flex flex-wrap align-items-center" style="gap: 10px;">
+                                        {{-- Part Number / SKU --}}
+                                        @if($item->options->sku)
+                                            <small class="text-muted"><i class="fas fa-barcode mr-1"></i> {{ $item->options->sku }}</small>
+                                        @endif
 
-                                            <button class="btn btn-link text-danger p-0" title="Remove Item"
-                                                    wire:click="removeItem('{{ $item->rowId }}')" 
-                                                    wire:loading.attr="disabled">
-                                                <i class="fas fa-trash-alt" wire:loading.remove wire:target="removeItem('{{ $item->rowId }}')"></i>
-                                                <span class="spinner-border spinner-border-sm" role="status" wire:loading wire:target="removeItem('{{ $item->rowId }}')"></span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                        {{-- Brand --}}
+                                        <small class="text-muted"><i class="fas fa-industry mr-1"></i> {{ $item->options->brand ?? 'Generic' }}</small>
+                                        
+                                        {{-- Condition Badge --}}
+                                        @if(isset($item->options->state))
+                                            <span class="badge badge-soft-{{ $item->options->state == 'New' ? 'success' : 'warning' }} px-2" style="font-size: 10px; background-color: #f0f0f0;">
+                                                {{ strtoupper($item->options->state) }}
+                                            </span>
+                                        @endif
+                                    </div>
 
-                <div class="mt-4">
-                    <a href="{{ url('/') }}" class="btn btn-link text-decoration-none p-0 text-primary">
-                        <i class="fas fa-arrow-left mr-2"></i> Continue Shopping
-                    </a>
-                </div>
+                                    {{-- Shipping Estimate --}}
+                                    <div class="mt-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-truck-loading mr-1"></i> 
+                                            Est. Delivery: {{ now()->addDays(2)->format('d M') }} - {{ now()->addDays(5)->format('d M') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4">
+                            <span class="text-dark font-weight-bold">{{ number_format($item->price, 0) }}</span>
+                            <small class="text-muted d-block">RWF / unit</small>
+                        </td>
+                        <td class="py-4">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="input-group input-group-sm shadow-sm" style="width: 110px;">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-white border border-right-0" 
+                                                wire:click="updateQuantity('{{ $item->rowId }}', {{ $item->qty - 1 }})"
+                                                wire:loading.attr="disabled">-</button>
+                                    </div>
+                                    <input type="text" class="form-control text-center border-top border-bottom bg-white" 
+                                           value="{{ $item->qty }}" readonly style="max-width: 40px;">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-white border border-left-0" 
+                                                wire:click="updateQuantity('{{ $item->rowId }}', {{ $item->qty + 1 }})"
+                                                wire:loading.attr="disabled">+</button>
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-1" style="font-size: 10px;">In Stock</small>
+                            </div>
+                        </td>
+                        <td class="py-4">
+                            <div class="text-primary font-weight-bold" style="font-size: 1.1rem;">
+                                {{ number_format($item->subtotal, 0) }} RWF
+                            </div>
+                        </td>
+                        <td class="py-4 text-right px-4">
+                            <div class="d-flex justify-content-end align-items-center">
+                                {{-- Add to Wishlist --}}
+                                <button class="btn btn-icon btn-light rounded-circle mr-2" 
+                                        style="width: 35px; height: 35px;"
+                                        title="Save for Later"
+                                        wire:click="moveToWishlist('{{ $item->rowId }}')"
+                                        wire:loading.attr="disabled">
+                                    <i class="far fa-heart text-primary" wire:loading.remove wire:target="moveToWishlist('{{ $item->rowId }}')"></i>
+                                    <span class="spinner-border spinner-border-sm text-primary" role="status" wire:loading wire:target="moveToWishlist('{{ $item->rowId }}')"></span>
+                                </button>
 
-            @else
-                <div class="text-center py-5 card shadow-sm border-0">
-                    <div class="card-body">
-                        <i class="fas fa-shopping-cart fa-4x text-light mb-3"></i>
-                        <h4>Your cart is empty</h4>
-                        <p class="text-muted">Explore our spare parts and automotive services.</p>
-                        <a href="{{ url('/spare-parts') }}" class="btn btn-primary px-5 shadow-sm mt-3">Browse Products</a>
-                    </div>
-                </div>
-            @endif
+                                {{-- Delete --}}
+                                <button class="btn btn-icon btn-light rounded-circle text-danger" 
+                                        style="width: 35px; height: 35px;"
+                                        title="Remove from Cart"
+                                        wire:click="removeItem('{{ $item->rowId }}')" 
+                                        wire:loading.attr="disabled">
+                                    <i class="fas fa-times" wire:loading.remove wire:target="removeItem('{{ $item->rowId }}')"></i>
+                                    <span class="spinner-border spinner-border-sm text-danger" role="status" wire:loading wire:target="removeItem('{{ $item->rowId }}')"></span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
+    </div>
+@endif
 
         {{-- Order Summary Section --}}
         <div class="col-lg-4 mt-lg-0 mt-5">
