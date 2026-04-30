@@ -14,24 +14,29 @@ class PartCard extends Component
 
     public function mount(Part $part)
     {
-        // Eager load shop and brand. Make sure 'location' is a column in your shops table.
-        $this->part = $part->load(['shop', 'partBrand']);
+        $this->part = $part->load(['shop', 'partBrand', 'state']);
     }
 
     public function addToCart()
     {
-        if ($this->quantity > $this->part->stock_quantity) {
-            $this->dispatch('notify', message: 'Not enough stock available!');
+        // Use the isAvailable helper from your Model for consistency
+        if (!$this->part->isAvailable($this->quantity)) {
+            $this->dispatch('notify', message: 'Not enough stock or item unavailable!');
             return;
         }
 
         $mainPhoto = $this->part->photos->first()?->file_path ?? $this->part->image ?? 'frontend/img/placeholder.png';
         
+        /**
+         * CRITICAL MARKUP UPDATE:
+         * 1. 'price' must be the customer-facing unit_price.
+         * 2. 'options' stores the shop's original payout for accounting.
+         */
         Cart::instance('default')->add([
             'id'      => $this->part->id,
             'name'    => $this->part->part_name,
             'qty'     => $this->quantity,
-            'price'   => $this->part->price,
+            'price'   => (float) $this->part->unit_price, // Marked up price
             'weight'  => 0,
             'options' => [
                 'brand'         => $this->part->partBrand?->name,
@@ -39,7 +44,10 @@ class PartCard extends Component
                 'part_number'   => $this->part->part_number,
                 'shop_name'     => $this->part->shop?->shop_name,
                 'shop_id'       => $this->part->shop_id,
-                'shop_location' => $this->part->shop?->address, // Added Shop Location
+                'shop_location' => $this->part->shop?->address,
+                'shop_payout'   => (float) $this->part->price,    // Original base price
+                'applied_rate'  => (float) $this->part->applied_rate, // Snapshot of commission
+                'sku'           => $this->part->sku,
             ]
         ]);
 
@@ -47,7 +55,8 @@ class PartCard extends Component
             $this->syncCartWithDatabase('default');
         }
 
-        $this->dispatch('cartUpdated');
+        // Pass the part_id to trigger the Alpine.js success state in your blade
+        $this->dispatch('cartUpdated', part_id: $this->part->id);
         $this->dispatch('notify', message: 'Item added to cart!');
     }
 
@@ -66,14 +75,14 @@ class PartCard extends Component
             'id'      => $this->part->id,
             'name'    => $this->part->part_name,
             'qty'     => 1,
-            'price'   => $this->part->price,
+            'price'   => (float) $this->part->unit_price,
             'weight'  => 0,
             'options' => [
                 'brand'         => $this->part->partBrand?->name,
                 'part_number'   => $this->part->part_number,
                 'image'         => $this->part->image,
                 'shop_name'     => $this->part->shop?->shop_name,
-                'shop_location' => $this->part->shop?->address, // Added Shop Location
+                'shop_location' => $this->part->shop?->address,
             ]
         ]);
 
@@ -88,10 +97,11 @@ class PartCard extends Component
     protected function syncCartWithDatabase($instance)
     {
         try {
-            Cart::instance($instance)->store(auth()->id());
-        } catch (\Gloudemans\Shoppingcart\Exceptions\CartAlreadyStoredException $e) {
+            // Updated logic based on your saved info: erase and re-store to avoid duplicates
             Cart::instance($instance)->erase(auth()->id());
             Cart::instance($instance)->store(auth()->id());
+        } catch (\Exception $e) {
+            // Fail silently or log error for shared hosting stability
         }
     }
 

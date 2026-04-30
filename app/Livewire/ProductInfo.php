@@ -14,16 +14,19 @@ class ProductInfo extends Component
 
     public function mount($part)
     {
-        // Eager load shop along with other relationships
+        // Eager load shop and category for the UI
         $part->load([
             'partBrand',
-            'shop', // Added shop here
+            'shop',
+            'category', 
             'fitments.vehicleModel.brand',
         ]);
 
         $this->part = $part;
         $this->shareUrl  = urlencode(request()->fullUrl());
-        $this->shareText = urlencode($this->part->part_name . ' - Only ' . number_format($this->part->price, 2) . ' RWF');
+        
+        // Update: Use unit_price (Markup Price) for the share text
+        $this->shareText = urlencode($this->part->part_name . ' - Only ' . number_format($this->part->unit_price, 0) . ' RWF');
     }
 
     public function incrementQty()
@@ -50,24 +53,22 @@ class ProductInfo extends Component
         $mainPhoto = $this->part->photos->first()?->file_path ?? $this->part->image ?? 'frontend/img/placeholder.png';
 
         Cart::instance('default')->add([
-            'id'    => $this->part->id,
-            'name'  => $this->part->part_name,
-            'qty'   => $this->quantity,
-            'price' => $this->part->price,
-            'weight'=> 0,
+            'id'      => $this->part->id,
+            'name'    => $this->part->part_name,
+            'qty'     => $this->quantity,
+            // Update: Pass the unit_price (Markup Price) to the cart
+            'price'   => $this->part->unit_price,
+            'weight'  => 0,
             'options' => [
                 'brand'         => $this->part->partBrand?->name,
                 'image'         => $mainPhoto,
                 'part_number'   => $this->part->part_number,
-                'shop_name'     => $this->part->shop?->shop_name, // Added Shop Name
+                'shop_name'     => $this->part->shop?->shop_name,
                 'shop_id'       => $this->part->shop_id,
-                'shop_location' => $this->part->shop?->address,   // Direct column access
+                'shop_location' => $this->part->shop?->address,
+                'base_price'    => $this->part->price, // Optional: keep record of original cost
             ]
         ]);
-
-        //
-
-        //
 
         if (auth()->check()) {
             $this->syncCartWithDatabase('default');
@@ -92,13 +93,14 @@ class ProductInfo extends Component
             'id'      => $this->part->id,
             'name'    => $this->part->part_name,
             'qty'     => 1,
-            'price'   => $this->part->price,
+            // Update: Use unit_price for wishlist accuracy
+            'price'   => $this->part->unit_price,
             'weight'  => 0,
             'options' => [
                 'brand'         => $this->part->partBrand?->name,
                 'part_number'   => $this->part->part_number,
-                'shop_name'     => $this->part->shop?->shop_name, // Added Shop Name
-                'shop_location' => $this->part->shop?->address,   // Direct column access
+                'shop_name'     => $this->part->shop?->shop_name,
+                'shop_location' => $this->part->shop?->address,
             ]
         ]);
 
@@ -110,9 +112,6 @@ class ProductInfo extends Component
         $this->dispatch('notify', message: 'Added to wishlist!');
     }
 
-    /**
-     * Refactored helper to handle database storage logic
-     */
     protected function syncCartWithDatabase($instance)
     {
         try {

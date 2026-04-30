@@ -8,7 +8,7 @@
             <p class="mb-1 {{ $part->weight ? '' : 'd-none' }}"><strong>Weight:</strong> {{ $part->weight }} kg</p>
         </div>
         
-        {{-- New Shop Info Section --}}
+        {{-- Shop Info Section --}}
         <div class="col-md-6 border-left">
             <p class="mb-1 text-muted small uppercase font-weight-bold">Sold By</p>
             <p class="mb-1">
@@ -24,7 +24,20 @@
         </div>
     </div>
 
-    <h3 class="text-primary mb-3">{{ number_format($part->price, 0) }} RWF</h3>
+    {{-- Pricing Section with Markup Support --}}
+    <div class="mb-3">
+        <h3 class="text-primary mb-0">
+            {{ number_format($part->unit_price, 0) }} RWF
+        </h3>
+        @if($part->old_unit_price && $part->old_unit_price > $part->unit_price)
+            <small class="text-muted">
+                <del>{{ number_format($part->old_unit_price, 0) }} RWF</del>
+                <span class="text-success ml-2">
+                    -{{ round((($part->old_unit_price - $part->unit_price) / $part->old_unit_price) * 100) }}%
+                </span>
+            </small>
+        @endif
+    </div>
 
     <p>
         <strong>Availability:</strong>
@@ -57,10 +70,13 @@
     </div>
 
     <div class="mb-3 d-flex align-items-center">
-        <button class="btn btn-primary btn-lg mr-2 shadow-sm" wire:click="addToCart" wire:loading.attr="disabled">
+        <button class="btn btn-primary btn-lg mr-2 shadow-sm" 
+                wire:click="addToCart" 
+                wire:loading.attr="disabled"
+                @if($part->stock_quantity <= 0) disabled @endif>
             <i class="fa fa-shopping-cart mr-1" wire:loading.remove wire:target="addToCart"></i>
             <span class="spinner-border spinner-border-sm mr-1" wire:loading wire:target="addToCart"></span>
-            Add to Cart
+            {{ $part->stock_quantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
         </button>
 
         <button class="btn btn-outline-secondary btn-lg wishlist-btn shadow-sm" wire:click="addToWishlist" wire:loading.attr="disabled">
