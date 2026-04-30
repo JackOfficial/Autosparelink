@@ -15,6 +15,7 @@ class Checkout extends Component
     public $addresses, $address_id, $guest_email;
     public $new_address = [];
     public $use_new_address = false;
+    public $payment_method = 'momo';
 
     public function mount()
     {
@@ -122,7 +123,8 @@ class Checkout extends Component
                 'address_id'             => $final_address_id,
                 'total_amount'           => $subtotal,
                 'status'                 => 'pending',
-                'order_number'               => $localTransactionId, 
+                'order_number'           => $localTransactionId, 
+                'payment_method'         => $this->payment_method, // Ensure you have this column
                 'is_guest'               => !Auth::check(),
                 'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
                 'guest_email'            => $this->guest_email,
