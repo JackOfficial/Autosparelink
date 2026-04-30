@@ -186,7 +186,7 @@
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm rounded-pill" 
-                                    {{ $availableBalance < 5000 ? 'disabled' : '' }}>
+                                    {{ $availableBalance < 100 ? 'disabled' : '' }}>
                                 <i class="ti ti-send me-1"></i> Request Payout
                             </button>
 
