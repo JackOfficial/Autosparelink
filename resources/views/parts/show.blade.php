@@ -87,7 +87,7 @@
         </ol>
     </nav>
 
-    <div class="row gx-lg-5">
+    
         <div class="row gx-lg-5">
         {{-- 2. IMAGE GALLERY --}}
         <div class="col-lg-7 mb-4">
