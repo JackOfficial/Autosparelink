@@ -3,7 +3,7 @@
 @section('title', 'Manual Wallet Adjustment')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" x-data="{ adjustmentType: '{{ old('type', 'credit') }}' }">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-7">
             
@@ -54,17 +54,17 @@
                             {{-- Action Type --}}
                             <div class="col-md-6 mb-3 mb-md-0">
                                 <label class="font-weight-bold text-dark d-block mb-2">Adjustment Direction</label>
-                                <div class="btn-group btn-group-toggle w-100 shadow-sm" data-toggle="buttons">
-                                    <label class="btn btn-outline-success w-50 py-3 rounded-left active border-2">
-                                        <input type="radio" name="type" id="type_credit" value="credit" autocomplete="off" checked> 
+                                <div class="btn-group w-100 shadow-sm">
+                                    <label class="btn btn-outline-success w-50 py-3 rounded-left border-2" :class="adjustmentType === 'credit' ? 'active' : ''">
+                                        <input type="radio" name="type" value="credit" x-model="adjustmentType" class="d-none"> 
                                         <i class="fas fa-plus-circle mr-1"></i> Credit
                                     </label>
-                                    <label class="btn btn-outline-danger w-50 py-3 rounded-right border-2">
-                                        <input type="radio" name="type" id="type_debit" value="debit" autocomplete="off"> 
+                                    <label class="btn btn-outline-danger w-50 py-3 rounded-right border-2" :class="adjustmentType === 'debit' ? 'active' : ''">
+                                        <input type="radio" name="type" value="debit" x-model="adjustmentType" class="d-none"> 
                                         <i class="fas fa-minus-circle mr-1"></i> Debit
                                     </label>
                                 </div>
-                                <small class="text-muted mt-2 d-block">Credit adds money; Debit removes it.</small>
+                                <small class="text-muted mt-2 d-block">Credit adds money; Debit removes it via Intouchpay.</small>
                             </div>
 
                             {{-- Amount --}}
@@ -83,11 +83,36 @@
                             </div>
                         </div>
 
+                        {{-- Payout Details Section (Visible only on Debit) --}}
+                        <div x-show="adjustmentType === 'debit'" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform -translate-y-2"
+                             x-transition:enter-end="opacity-100 transform translate-y-0"
+                             class="bg-light p-3 rounded-3 mb-4 border">
+                            <div class="row">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label class="font-weight-bold text-dark mb-2 small text-uppercase">Payout Method</label>
+                                    <select name="payout_method" class="form-control rounded-3 @error('payout_method') is-invalid @enderror">
+                                        <option value="MTN MoMo" {{ old('payout_method') == 'MTN MoMo' ? 'selected' : '' }}>MTN MoMo</option>
+                                        <option value="Airtel Money" {{ old('payout_method') == 'Airtel Money' ? 'selected' : '' }}>Airtel Money</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="font-weight-bold text-dark mb-2 small text-uppercase">Recipient Phone</label>
+                                    <input type="text" name="account_details" class="form-control rounded-3 @error('account_details') is-invalid @enderror" 
+                                           placeholder="25078..." value="{{ old('account_details') }}">
+                                </div>
+                            </div>
+                            @if($errors->has('payout_method') || $errors->has('account_details'))
+                                <div class="text-danger small font-weight-bold mt-2">Payout details are required for debits.</div>
+                            @endif
+                        </div>
+
                         {{-- Description/Reason --}}
                         <div class="form-group mb-5">
                             <label class="font-weight-bold text-dark mb-2">Internal Reason / Memo</label>
                             <textarea name="description" rows="3" class="form-control rounded-3 shadow-sm @error('description') is-invalid @enderror" 
-                                      placeholder="Explain why this adjustment is being made (e.g., Refund for order #SKU-99, Correction of duplicate payout)">{{ old('description') }}</textarea>
+                                      placeholder="Explain why this adjustment is being made...">{{ old('description') }}</textarea>
                             <div class="d-flex justify-content-between mt-2">
                                 <small class="text-muted">This will appear in the shop's ledger.</small>
                                 @error('description')
@@ -129,45 +154,30 @@
 </div>
 
 <style>
-    /* Styling consistent with HappyFamilyRW UI */
     .bg-soft-primary { background-color: rgba(0, 123, 255, 0.08) !important; }
     .bg-soft-warning { background-color: rgba(255, 193, 7, 0.15) !important; }
     .rounded-4 { border-radius: 1rem !important; }
     .rounded-3 { border-radius: 0.6rem !important; }
     .rounded-left-3 { border-top-left-radius: 0.6rem !important; border-bottom-left-radius: 0.6rem !important; }
     .rounded-right-3 { border-top-right-radius: 0.6rem !important; border-bottom-right-radius: 0.6rem !important; }
-    
     .border-2 { border-width: 2px !important; }
 
-    .form-control {
-        border: 1px solid #e9ecef;
-        transition: all 0.2s ease;
-    }
-    .form-control:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.05);
-    }
+    .form-control { border: 1px solid #e9ecef; transition: all 0.2s ease; }
+    .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.05); }
 
-    /* Professional Button States for BS4 */
-    .btn-group-toggle .btn {
+    .btn-group .btn {
         font-weight: 700;
         text-transform: uppercase;
         font-size: 0.8rem;
         letter-spacing: 0.5px;
+        transition: all 0.3s ease;
     }
-    .btn-group-toggle .btn.active {
-        color: #fff !important;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .btn-outline-success.active { background-color: #28a745 !important; border-color: #28a745 !important; }
-    .btn-outline-danger.active { background-color: #dc3545 !important; border-color: #dc3545 !important; }
+    
+    /* Manual Active states for Alpine.js interaction */
+    .btn-outline-success.active { background-color: #28a745 !important; color: white !important; }
+    .btn-outline-danger.active { background-color: #dc3545 !important; color: white !important; }
 
-    .transition-3d-hover {
-        transition: all 0.2s ease;
-    }
-    .transition-3d-hover:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
-    }
+    .transition-3d-hover { transition: all 0.2s ease; }
+    .transition-3d-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important; }
 </style>
 @endsection
