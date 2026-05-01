@@ -57,7 +57,7 @@
 
                         {{-- Info List --}}
                         <div class="flex-grow-1">
-                            <div class="d-flex align-items-start mb-2">
+                            <div class="d-flex align-items-start mb-2 {{ $address->details == null ? 'd-none' : '' }}">
                                 <i class="fas fa-map-pin text-primary opacity-50 me-3 mt-1"></i>
                                 <span class="small text-dark">{{ $address->details }}</span>
                             </div>
