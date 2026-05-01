@@ -76,7 +76,7 @@ class AddressController extends Controller
         }
 
         $validated = $request->validate([
-            'address_name' => 'required|string|max:50',
+            'address_name' => 'nullable|string|max:50',
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'city' => 'required|string|max:100',
