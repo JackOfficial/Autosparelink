@@ -198,10 +198,8 @@ Route::controller(FlutterwavePaymentController::class)->group(function () {
 Route::get('/auth/redirect/{provider}', [SocialLoginController::class, 'redirect']);
 Route::get('/auth/callback/{provider}', [SocialLoginController::class, 'callback']);
 
-Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
-
+Route::middleware(['auth', 'verified'])->group(function () {
     
-
     Route::prefix('user')->name('user.')->group(function () {
          Route::resource('orders', OrderController::class);
          Route::resource('addresses', UserAddressController::class);
