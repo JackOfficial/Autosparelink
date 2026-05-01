@@ -71,7 +71,7 @@ class AddressController extends Controller
      */
     public function update(Request $request, Address $address)
     {
-        if ($address->user_id !== Auth::id()) {
+        if ($address->user_id != Auth::id()) {
             abort(403);
         }
 
