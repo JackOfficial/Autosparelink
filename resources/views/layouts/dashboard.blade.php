@@ -70,8 +70,8 @@
             .sidebar.show { margin-left: 0; }
         }
     </style>
-    @stack('styles')
     @vite(['resources/js/userdashboard/user-main.js'])
+    @stack('styles')
     @livewireStyles
 </head>
 <body x-data="{ sidebarOpen: false }">
