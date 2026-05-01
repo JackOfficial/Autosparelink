@@ -92,7 +92,7 @@ class AddressController extends Controller
 
         $address->update($validated);
 
-        return redirect()->route('users.addresses.index')
+        return redirect()->route('user.addresses.index')
             ->with('success', 'Address updated successfully.');
     }
 
