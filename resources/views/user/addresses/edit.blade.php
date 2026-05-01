@@ -39,7 +39,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="address_name" class="form-label small fw-bold text-muted text-uppercase">Address Label</label>
                                 <input type="text" name="address_name" id="address_name" value="{{ old('address_name', $address->address_name) }}" 
-                                       class="form-control border-0 bg-light rounded-3 @error('address_name') is-invalid @enderror" required>
+                                       class="form-control border-0 bg-light rounded-3 @error('address_name') is-invalid @enderror">
                                 @error('address_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
@@ -63,7 +63,7 @@
 
                             {{-- City --}}
                             <div class="col-md-6 mb-3">
-                                <label for="city" class="form-label small fw-bold text-muted text-uppercase">City / Province</label>
+                                <label for="city" class="form-label small fw-bold text-muted text-uppercase">Province</label>
                                 <input type="text" name="city" id="city" value="{{ old('city', $address->city) }}" 
                                        class="form-control border-0 bg-light rounded-3 @error('city') is-invalid @enderror" required>
                                 @error('city') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -90,9 +90,9 @@
 
                         {{-- Directions --}}
                         <div class="mb-4">
-                            <label for="details" class="form-label small fw-bold text-muted text-uppercase">Detailed Directions</label>
-                            <textarea name="details" id="details" rows="3" 
-                                      class="form-control border-0 bg-light rounded-3 @error('details') is-invalid @enderror" required>{{ old('details', $address->details) }}</textarea>
+                            <label for="details" class="form-label small fw-bold text-muted text-uppercase">Detailed Directions (Optional)</label>
+                            <textarea name="details" id="details" rows="2" 
+                                      class="form-control border-0 bg-light rounded-3 @error('details') is-invalid @enderror">{{ old('details', $address->details) }}</textarea>
                             @error('details') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 

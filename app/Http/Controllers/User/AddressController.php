@@ -37,8 +37,8 @@ class AddressController extends Controller
             'phone' => 'required|string|max:20',
             'city' => 'required|string|max:100',
             'district' => 'required|string|max:100',
-            'sector' => 'nullable|string|max:100',
-            'details' => 'required|string', // Specific directions/house number
+            'sector' => 'required|string|max:100',
+            'details' => 'nullable|string', // Specific directions/house number
             'is_default' => 'nullable|boolean',
         ]);
 
@@ -81,7 +81,7 @@ class AddressController extends Controller
             'phone' => 'required|string|max:20',
             'city' => 'required|string|max:100',
             'district' => 'required|string|max:100',
-            'details' => 'required|string',
+            'details' => 'nullable|string',
             'is_default' => 'nullable|boolean',
         ]);
 
