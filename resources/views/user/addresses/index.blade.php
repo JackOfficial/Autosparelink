@@ -30,9 +30,7 @@
     <div class="row g-4">
         @forelse($addresses as $address)
             <div class="col-md-6 col-xl-4">
-                {{-- Data scope moved to the card level --}}
-                <div class="card border-0 shadow-sm rounded-4 h-100 position-relative transition-hover {{ $address->is_default ? 'border-start border-primary border-4' : '' }}" 
-                     x-data="{ confirmingDelete: false }">
+                <div class="card border-0 shadow-sm rounded-4 h-100 position-relative transition-hover {{ $address->is_default ? 'border-start border-primary border-4' : '' }}">
                     
                     {{-- Default Badge --}}
                     @if($address->is_default)
@@ -73,34 +71,22 @@
                             </div>
                         </div>
 
-                        {{-- Refined Action Buttons --}}
+                        {{-- Action Buttons (Standard Version) --}}
                         <div class="mt-4 pt-3 border-top">
                             <div class="d-grid gap-2">
-                                {{-- Edit button stays visible or can be hidden during confirmation --}}
                                 <a href="{{ route('user.addresses.edit', $address->id) }}" 
-                                   class="btn btn-outline-primary border-2 btn-sm rounded-3 py-2 fw-bold"
-                                   x-show="!confirmingDelete">
+                                   class="btn btn-outline-primary border-2 btn-sm rounded-3 py-2 fw-bold">
                                     <i class="fas fa-edit me-2"></i> Edit Location
                                 </a>
                                 
-                                <div class="w-100">
-                                    {{-- The 'Remove' trigger button --}}
-                                    <button type="button" 
-                                            @click="confirmingDelete = true" 
-                                            x-show="!confirmingDelete" 
-                                            class="btn btn-link text-danger text-decoration-none btn-sm w-100 py-2 fw-bold shadow-none">
+                                <form action="{{ route('user.addresses.destroy', $address->id) }}" method="POST" 
+                                      onsubmit="return confirm('Are you sure you want to remove this address?');">
+                                    @csrf 
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-link text-danger text-decoration-none btn-sm w-100 py-2 fw-bold shadow-none">
                                         <i class="fas fa-trash-alt me-2"></i> Remove Address
                                     </button>
-
-                                    {{-- The hidden confirmation UI --}}
-                                    <div x-show="confirmingDelete" x-cloak class="d-flex gap-2">
-                                        <form action="{{ route('user.addresses.destroy', $address->id) }}" method="POST" class="flex-grow-1">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm w-100 rounded-3 py-2 fw-bold">Delete Now</button>
-                                        </form>
-                                        <button type="button" @click="confirmingDelete = false" class="btn btn-light btn-sm flex-grow-1 rounded-3 py-2 fw-bold">Cancel</button>
-                                    </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -124,9 +110,6 @@
 </div>
 
 <style>
-    /* CRITICAL: Hides elements while Alpine is loading */
-    [x-cloak] { display: none !important; }
-
     .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1) !important; }
     .rounded-4 { border-radius: 1.2rem !important; }
     
