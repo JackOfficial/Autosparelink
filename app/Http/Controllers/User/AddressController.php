@@ -81,6 +81,7 @@ class AddressController extends Controller
             'phone' => 'required|string|max:20',
             'city' => 'required|string|max:100',
             'district' => 'required|string|max:100',
+            'sector' => 'required|string|max:100',
             'details' => 'nullable|string',
             'is_default' => 'nullable|boolean',
         ]);
