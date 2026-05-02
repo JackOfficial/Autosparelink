@@ -16,6 +16,7 @@ class Checkout extends Component
     public $new_address = [];
     public $use_new_address = false;
     public $payment_method = 'momo'; // Options: 'momo' or 'cod'
+    public $total;
 
     public function mount()
     {
@@ -350,13 +351,16 @@ class Checkout extends Component
 
         $shippingFee = $this->calculateAverageShippingPrice($city);
         $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
-        $totalWithShipping = $subtotal + $shippingFee;
+        
+        // Populate the public property $total so it's directly accessible in your Blade view
+        $this->total = $subtotal + $shippingFee;
 
         return view('livewire.checkout', [
             'cartContent'       => Cart::instance('default')->content(),
             'subtotal'          => $subtotal,
             'shippingFee'       => $shippingFee,
-            'totalWithShipping' => $totalWithShipping,
+            'totalWithShipping' => $this->total,
+            'total'             => $this->total, // Passed explicitly for safety
             'addresses'         => Auth::check() ? Auth::user()->addresses : collect()
         ]);
     }
