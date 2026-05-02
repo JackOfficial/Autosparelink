@@ -205,7 +205,7 @@
                                             <img src="{{ asset('images/momo.jpg') }}" style="width: 42px; height: 42px; object-fit: contain;" class="rounded mr-3 bg-white p-1" alt="MoMo">
                                             <div>
                                                 <h6 class="mb-0 font-weight-bold text-dark" style="font-size: 0.85rem;">Pay in Full</h6>
-                                                <p class="text-muted mb-0 small">via Mobile Money</p>
+                                                <p class="text-muted mb-0 small">Items + Shipping</p>
                                             </div>
                                         </div>
                                         <i class="fa fa-check-circle fa-lg {{ $payment_method === 'momo' ? 'text-primary' : 'text-light' }}" style="opacity: {{ $payment_method === 'momo' ? '1' : '0.4' }};"></i>
@@ -225,7 +225,7 @@
                                             </span>
                                             <div>
                                                 <h6 class="mb-0 font-weight-bold text-dark" style="font-size: 0.85rem;">Pay on Delivery</h6>
-                                                <p class="text-muted mb-0 small">Commitment Fee Required</p>
+                                                <p class="text-muted mb-0 small">Pay Shipping in Advance</p>
                                             </div>
                                         </div>
                                         <i class="fa fa-check-circle fa-lg {{ $payment_method === 'cod' ? 'text-success' : 'text-light' }}" style="opacity: {{ $payment_method === 'cod' ? '1' : '0.4' }};"></i>
@@ -234,16 +234,16 @@
                             </div>
                         </div>
 
-                        {{-- Delivery Fee Notice for COD --}}
+                        {{-- Dynamic Delivery Fee Notice for COD --}}
                         @if($payment_method === 'cod')
                             <div class="alert alert-warning border-0 mb-4 px-3 py-3 animate__animated animate__fadeIn" style="border-radius: 12px; background-color: #fff8e1; border-left: 4px solid #ffc107 !important;">
                                 <div class="d-flex">
                                     <i class="fa fa-info-circle mr-3 mt-1 text-warning fa-lg"></i>
                                     <div>
-                                        <h6 class="font-weight-bold mb-1 text-dark" style="font-size: 0.9rem;">Commitment Fee Required</h6>
+                                        <h6 class="font-weight-bold mb-1 text-dark" style="font-size: 0.9rem;">Shipping Payment Required</h6>
                                         <p class="small mb-0 text-secondary" style="line-height: 1.5;">
-                                            To confirm Pay on Delivery, please pay a commitment fee: <br>
-                                            <strong>3,000 RWF</strong> (Within Kigali) / <strong>5,000 RWF</strong> (Upcountry & Provinces).
+                                            To confirm Pay on Delivery, please complete upfront payment for the calculated shipping fee: <br>
+                                            <strong>{{ number_format($shippingFee, 0) }} RWF</strong>.
                                         </p>
                                     </div>
                                 </div>
@@ -264,9 +264,9 @@
                                     <span wire:loading.remove wire:target="placeOrder">
                                         <i class="fa fa-lock mr-2"></i>
                                         @if($payment_method === 'cod')
-                                            Pay Fee: {{ number_format(strtolower($new_address['city'] ?? '') == 'kigali' ? 3000 : 5000) }} RWF
+                                            Pay Shipping Fee: {{ number_format($shippingFee, 0) }} RWF
                                         @else
-                                            Pay {{ $total }} RWF
+                                            Pay {{ number_format($total + $shippingFee, 0) }} RWF
                                         @endif
                                     </span>
                                     <span wire:loading wire:target="placeOrder">
@@ -326,16 +326,22 @@
                         <div class="card-footer bg-light border-0 p-4">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted small">Items Subtotal</span>
-                                <span class="text-dark font-weight-bold">{{ $total }} RWF</span>
+                                <span class="text-dark font-weight-bold">{{ number_format($total, 0) }} RWF</span>
                             </div>
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="text-muted small">Shipping & Delivery</span>
-                                <span class="text-success font-weight-bold small">Calculated at dispatch</span>
+                                <span class="text-success font-weight-bold small">{{ number_format($shippingFee, 0) }} RWF</span>
                             </div>
                             <hr class="my-3" style="border-style: dashed; opacity: 0.5;">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5 class="font-weight-bold text-dark mb-0" style="font-size: 1.1rem;">Total Due</h5>
-                                <h4 class="font-weight-bold text-primary mb-0" style="font-size: 1.35rem;">{{ $total }} RWF</h4>
+                                <h4 class="font-weight-bold text-primary mb-0" style="font-size: 1.35rem;">
+                                    @if($payment_method === 'cod')
+                                        {{ number_format($shippingFee, 0) }} RWF
+                                    @else
+                                        {{ number_format($total + $shippingFee, 0) }} RWF
+                                    @endif
+                                </h4>
                             </div>
                         </div>
                     </div>
