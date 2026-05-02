@@ -108,58 +108,71 @@
         </div>
     </div>
 
-    <div wire:ignore.self class="modal fade" id="createTicketModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="fw-bold mt-2 ms-2">Open New Ticket</h5>
-                    <button type="button" class="btn-close me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form wire:submit.prevent="saveTicket">
-                    <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">CATEGORY</label>
-                            <select wire:model="category" class="form-select border-0 bg-light rounded-3 @error('category') is-invalid @enderror">
-                                <option value="">Select Category</option>
-                                <option value="order">Order Issues</option>
-                                <option value="payment">Payment/Billing</option>
-                                <option value="part_request">Part Availability Request</option>
-                                <option value="technical">Opening Shop</option>
-                                <option value="technical">Technical Support</option>
-                            </select>
-                            @error('category') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">ORDER REFERENCE (OPTIONAL)</label>
-                            <input type="text" wire:model="order_ref" class="form-control border-0 bg-light rounded-3" placeholder="e.g. #ORD-12345">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">SUBJECT</label>
-                            <input type="text" wire:model="subject" class="form-control border-0 bg-light rounded-3 @error('subject') is-invalid @enderror" placeholder="Brief summary">
-                            @error('subject') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="mb-0">
-                            <label class="form-label small fw-bold text-muted">MESSAGE</label>
-                            <textarea wire:model="message" rows="4" class="form-control border-0 bg-light rounded-3 @error('message') is-invalid @enderror" placeholder="How can we help?"></textarea>
-                            @error('message') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="button" class="btn btn-link text-muted text-decoration-none px-4" data-bs-dismiss="modal">Discard</button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
-                            <span wire:loading.remove wire:target="saveTicket">Send Ticket</span>
-                            <span wire:loading wire:target="saveTicket">
-                                <span class="spinner-border spinner-border-sm me-1"></span> Processing...
-                            </span>
-                        </button>
-                    </div>
-                </form>
+<div wire:ignore.self class="modal fade" id="createTicketModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold mt-2 ms-2">Open New Ticket</h5>
+                <button type="button" class="btn-close me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            
+            {{-- 1. Added x-data to watch the category selection state --}}
+            <form wire:submit.prevent="saveTicket" 
+                  x-data="{ category: @entangle('category').live }" 
+                  x-init="$watch('category', value => { if(value !== 'order') @this.set('order_ref', '') })">
+                
+                <div class="modal-body p-4">
+                    {{-- Category Selection --}}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">CATEGORY</label>
+                        {{-- 2. Bound the select directly to Alpine.js using x-model --}}
+                        <select wire:model.live="category" 
+                                x-model="category"
+                                class="form-select border-0 bg-light rounded-3 @error('category') is-invalid @enderror">
+                            <option value="">Select Category</option>
+                            <option value="order">Order Issues</option>
+                            <option value="payment">Payment/Billing</option>
+                            <option value="part_request">Part Availability Request</option>
+                            <option value="opening_shop">Opening Shop</option>
+                            <option value="technical">Technical Support</option>
+                        </select>
+                        @error('category') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    {{-- 3. Order Reference: Toggled dynamically based on Alpine state --}}
+                    <div class="mb-3" x-show="category === 'order'" x-transition x-cloak>
+                        <label class="form-label small fw-bold text-muted">ORDER REFERENCE (OPTIONAL)</label>
+                        <input type="text" wire:model="order_ref" class="form-control border-0 bg-light rounded-3" placeholder="e.g. #ORD-12345">
+                    </div>
+
+                    {{-- Subject --}}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">SUBJECT</label>
+                        <input type="text" wire:model="subject" class="form-control border-0 bg-light rounded-3 @error('subject') is-invalid @enderror" placeholder="Brief summary">
+                        @error('subject') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    {{-- Message --}}
+                    <div class="mb-0">
+                        <label class="form-label small fw-bold text-muted">MESSAGE</label>
+                        <textarea wire:model="message" rows="4" class="form-control border-0 bg-light rounded-3 @error('message') is-invalid @enderror" placeholder="How can we help?"></textarea>
+                        @error('message') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-link text-muted text-decoration-none px-4" data-bs-dismiss="modal">Discard</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
+                        <span wire:loading.remove wire:target="saveTicket">Send Ticket</span>
+                        <span wire:loading wire:target="saveTicket">
+                            <span class="spinner-border spinner-border-sm me-1"></span> Processing...
+                        </span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 </div>
 
 @script
