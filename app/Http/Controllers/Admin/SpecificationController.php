@@ -40,9 +40,11 @@ class SpecificationController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $vehicle_model_id = $request->query('vehicle_model_id');
+
+        return view('admin.specifications.create', compact('vehicle_model_id'));
     }
 
     /**
