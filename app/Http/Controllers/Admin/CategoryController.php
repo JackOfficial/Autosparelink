@@ -15,14 +15,14 @@ class CategoryController extends Controller
      */
     public function index()
     {
-             // Parent categories only (parent_id IS NULL)
+        // Parent categories only (parent_id IS NULL)
         $categories = Category::with(['children' => function ($query) {
-        $query->orderBy('category_name', 'asc')->withCount('parts'); // Count parts in subcategories
-    }])
-    ->withCount('children')
-    ->whereNull('parent_id')
-    ->orderBy('category_name', 'asc')
-    ->get();
+            $query->orderBy('category_name', 'asc')->withCount('parts'); // Count parts in subcategories
+        }])
+        ->withCount('children')
+        ->whereNull('parent_id')
+        ->orderBy('category_name', 'asc')
+        ->get();
 
         return view('admin.categories.index', compact('categories'));
     }
@@ -45,20 +45,21 @@ class CategoryController extends Controller
             'category_name' => 'required|string|max:255',
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'parent_id' => 'nullable|exists:categories,id',
+            'shipping_price' => 'nullable|numeric|min:0', // Added numeric validation for shipping price
         ]);
 
         $photoPath = null;
-       if ($request->hasFile('photo')) {
-    // Creates a name like: braking-system-171045600.jpg
-    $filename = Str::slug($request->category_name) . '-' . time() . '.' . $request->file('photo')->extension();
-    
-    $photoPath = $request->file('photo')->storeAs('categories', $filename, 'public');
-    }
+        if ($request->hasFile('photo')) {
+            // Creates a name like: braking-system-171045600.jpg
+            $filename = Str::slug($request->category_name) . '-' . time() . '.' . $request->file('photo')->extension();
+            $photoPath = $request->file('photo')->storeAs('categories', $filename, 'public');
+        }
 
         Category::create([
             'category_name' => $request->category_name,
             'photo' => $photoPath,
             'parent_id' => $request->parent_id,
+            'shipping_price' => $request->shipping_price ?? 0, // Fallback to 0 if null
         ]);
 
         return redirect()->route('admin.categories.index')->with('success', 'Category created successfully.');
@@ -77,47 +78,52 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-       $parents = Category::whereNull('parent_id')->where('id', '!=', $category->id)->get();
+        $parents = Category::whereNull('parent_id')->where('id', '!=', $category->id)->get();
         return view('admin.categories.edit', compact('category', 'parents'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-   public function update(Request $request, Category $category)
-{
-    $request->validate([
-        'category_name' => 'required|string|max:255',
-        'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        'parent_id' => 'nullable|exists:categories,id',
-    ]);
+    public function update(Request $request, Category $category)
+    {
+        $request->validate([
+            'category_name' => 'required|string|max:255',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'parent_id' => 'nullable|exists:categories,id',
+            'shipping_price' => 'nullable|numeric|min:0', // Added numeric validation for shipping price
+        ]);
 
-    $data = $request->only(['category_name', 'parent_id']);
+        // Updated to explicitly pull the new column
+        $data = $request->only(['category_name', 'parent_id', 'shipping_price']);
+        
+        // Ensure shipping price defaults to 0 if left empty in the form
+        $data['shipping_price'] = $request->input('shipping_price') ?? 0;
 
-    if ($request->hasFile('photo')) {
-        // 1. Delete old photo if it exists
-        if ($category->photo && Storage::disk('public')->exists($category->photo)) {
-            Storage::disk('public')->delete($category->photo);
+        if ($request->hasFile('photo')) {
+            // 1. Delete old photo if it exists
+            if ($category->photo && Storage::disk('public')->exists($category->photo)) {
+                Storage::disk('public')->delete($category->photo);
+            }
+
+            // 2. Generate a clean, SEO-friendly name
+            $extension = $request->file('photo')->extension();
+            $filename = Str::slug($request->category_name) . '-' . time() . '.' . $extension;
+
+            // 3. Store with the custom name
+            $data['photo'] = $request->file('photo')->storeAs('categories', $filename, 'public');
         }
 
-        // 2. Generate a clean, SEO-friendly name: "category-name-171045600.webp"
-        $extension = $request->file('photo')->extension();
-        $filename = Str::slug($request->category_name) . '-' . time() . '.' . $extension;
+        $category->update($data);
 
-        // 3. Store with the custom name
-        $data['photo'] = $request->file('photo')->storeAs('categories', $filename, 'public');
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Category updated successfully.');
     }
-
-    $category->update($data);
-
-    return redirect()->route('admin.categories.index')
-        ->with('success', 'Category updated successfully.');
-}
 
     /**
      * Remove the specified resource from storage.
      */
-     public function destroy(Category $category)
+    public function destroy(Category $category)
     {
         if ($category->photo && Storage::disk('public')->exists($category->photo)) {
             Storage::disk('public')->delete($category->photo);

@@ -21,11 +21,11 @@
 }">
 
 {{-- ================= HEADER ================= --}}
-<section class="content-header py-4"> {{-- Increased padding --}}
+<section class="content-header py-4">
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="display-5 font-weight-bold"> {{-- Bigger Title --}}
+                <h1 class="display-5 font-weight-bold">
                     Categories
                     <small class="text-muted h4" x-show="!search">({{ $categories->count() }})</small>
                     <small class="text-primary h4" x-show="search" x-cloak>Filtering...</small>
@@ -43,7 +43,6 @@
 
 {{-- ================= CONTENT ================= --}}
 <section class="content">
-    {{-- Container widened to 1100px and centered for a balanced look --}}
     <div class="container-fluid" style="max-width: 1100px;">
 
         {{-- FLASH MESSAGE --}}
@@ -57,7 +56,7 @@
         {{-- ACTION & SEARCH BAR --}}
         <div class="row mb-4 align-items-center">
             <div class="col-md-7">
-                <div class="input-group input-group-lg shadow-sm"> {{-- Switched to Large input --}}
+                <div class="input-group input-group-lg shadow-sm">
                     <div class="input-group-prepend">
                         <span class="input-group-text bg-white border-right-0 px-3">
                             <i class="fas fa-search text-muted"></i>
@@ -105,9 +104,16 @@
 
                         <div>
                             <h4 class="mb-0 font-weight-bold text-dark">{{ $parent->category_name }}</h4>
-                            <span class="badge badge-pill badge-primary-soft text-primary mt-1">
-                                {{ $parent->children->count() }} Subcategories
-                            </span>
+                            <div class="mt-1">
+                                <span class="badge badge-pill badge-primary-soft text-primary">
+                                    {{ $parent->children->count() }} Subcategories
+                                </span>
+                                @if($parent->shipping_price > 0)
+                                    <span class="badge badge-pill badge-success-soft text-success ml-1">
+                                        <i class="fas fa-truck mr-1"></i> {{ number_format($parent->shipping_price) }} RWF
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -138,6 +144,7 @@
                                     <tr>
                                         <th class="pl-4 py-3" width="100">Icon</th>
                                         <th class="py-3">Subcategory Name</th>
+                                        <th class="text-center py-3" width="160">Shipping Price</th>
                                         <th class="text-center py-3" width="120">Items Count</th>
                                         <th class="text-right pr-4 py-3" width="150">Actions</th>
                                     </tr>
@@ -159,6 +166,15 @@
                                             </td>
                                             <td class="align-middle py-3">
                                                 <span class="h6 mb-0 font-weight-600">{{ $child->category_name }}</span>
+                                            </td>
+                                            <td class="text-center align-middle py-3">
+                                                @if($child->shipping_price > 0)
+                                                    <span class="badge badge-success px-3 py-2" style="font-size: 13px; border-radius: 6px;">
+                                                        {{ number_format($child->shipping_price) }} RWF
+                                                    </span>
+                                                @else
+                                                    <span class="text-muted small font-italic">No custom fee</span>
+                                                @endif
                                             </td>
                                             <td class="text-center align-middle py-3">
                                                 <span class="badge badge-secondary px-2 py-1">{{ $child->parts_count ?? 0 }}</span>
@@ -210,6 +226,12 @@
     /* Layout Polish */
     .badge-primary-soft {
         background-color: rgba(0, 123, 255, 0.1);
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+
+    .badge-success-soft {
+        background-color: rgba(40, 167, 69, 0.1);
         font-weight: 500;
         font-size: 0.85rem;
     }
