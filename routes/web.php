@@ -246,7 +246,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // 4. Success / Application Status page -> route('shop.status')
     Route::get('/status', 'status')->name('status');
 
-});
+    });
 
 });
 
