@@ -266,7 +266,7 @@
                                         @if($payment_method === 'cod')
                                             Pay Shipping Fee: {{ number_format($shippingFee, 0) }} RWF
                                         @else
-                                            Pay {{ number_format($total + $shippingFee, 0) }} RWF
+                                            Pay {{ number_format($subtotal + $shippingFee, 0) }} RWF
                                         @endif
                                     </span>
                                     <span wire:loading wire:target="placeOrder">
@@ -326,7 +326,7 @@
                         <div class="card-footer bg-light border-0 p-4">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted small">Items Subtotal</span>
-                                <span class="text-dark font-weight-bold">{{ number_format($total, 0) }} RWF</span>
+                                <span class="text-dark font-weight-bold">{{ number_format($subtotal, 0) }} RWF</span>
                             </div>
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="text-muted small">Shipping & Delivery</span>
@@ -339,7 +339,7 @@
                                     @if($payment_method === 'cod')
                                         {{ number_format($shippingFee, 0) }} RWF
                                     @else
-                                        {{ number_format($total + $shippingFee, 0) }} RWF
+                                        {{ number_format($subtotal + $shippingFee, 0) }} RWF
                                     @endif
                                 </h4>
                             </div>
