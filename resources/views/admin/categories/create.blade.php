@@ -9,6 +9,7 @@
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.categories.index') }}">Categories</a></li>
                     <li class="breadcrumb-item active">Add Category</li>
                 </ol>
             </div>
@@ -22,7 +23,13 @@
             <div class="card card-primary" x-data="{ photoPreview: null }">
                 <div class="card-body">
                     @if ($errors->any())
-                        <div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                     @endif
 
                     <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
@@ -45,7 +52,7 @@
                         <div class="form-group">
                             <label for="parent_id">Parent Category</label>
                             <select name="parent_id" class="form-control">
-                                <option value="">-- None --</option>
+                                <option value="">-- None (Top Level) --</option>
                                 @foreach($parents as $parent)
                                     <option value="{{ $parent->id }}" {{ old('parent_id') == $parent->id ? 'selected' : '' }}>
                                         {{ $parent->category_name }}
@@ -54,7 +61,19 @@
                             </select>
                         </div>
 
-                        <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Add Category</button>
+                        {{-- New Shipping Price Input Field --}}
+                        <div class="form-group">
+                            <label for="shipping_price">Shipping Price (RWF)</label>
+                            <input type="number" name="shipping_price" class="form-control" min="0" step="0.01" 
+                                   value="{{ old('shipping_price', 0) }}" 
+                                   placeholder="e.g. 3000">
+                            <small class="form-text text-muted">Set a customized shipping fee for this category, or leave at 0.</small>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-plus mr-1"></i> Add Category</button>
+                            <a href="{{ route('admin.categories.index') }}" class="btn btn-default ml-1">Cancel</a>
+                        </div>
 
                     </form>
                 </div>
