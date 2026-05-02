@@ -47,21 +47,18 @@ class Checkout extends Component
 
         $this->guest_email = Auth::check() ? Auth::user()->email : ($saved_email ?? '');
 
-        // Auto-select the default address if the user has addresses and isn't using a new address
+        // Auto-select the default address
         if (Auth::check() && !$this->use_new_address && $this->addresses->isNotEmpty()) {
             $this->address_id = $this->addresses->first()->id;
         }
     }
 
-    /**
-     * Re-calculate totals instantly when key data changes in the Blade view.
-     */
     public function updated($propertyName)
     {
         if (in_array($propertyName, ['address_id', 'use_new_address', 'new_address.city'])) {
             $city = $this->getCurrentCity();
             $shippingFee = $this->calculateAverageShippingPrice($city);
-            $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+            $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
             $this->total = $subtotal + $shippingFee;
         }
     }
@@ -101,7 +98,6 @@ class Checkout extends Component
         $totalShipping = 0;
         $validItemCount = 0;
 
-        // Regional base fallback fee
         $fallbackFee = (strtolower(trim($city)) === 'kigali') ? 3000 : 5000;
 
         foreach ($cartItems as $item) {
@@ -157,6 +153,9 @@ class Checkout extends Component
 
             if (Auth::check() && !$this->use_new_address) {
                 $selectedAddress = Address::find($this->address_id);
+                if (!$selectedAddress) {
+                    throw new \Exception("The selected address is invalid.");
+                }
                 $final_address_id = $selectedAddress->id;
                 $paymentPhone = $selectedAddress->phone;
                 $city = $selectedAddress->city;
@@ -166,11 +165,13 @@ class Checkout extends Component
                 if (Auth::check()) {
                     $address = Address::create(array_merge($this->new_address, ['user_id' => Auth::id()]));
                     $final_address_id = $address->id;
+                    // Refresh component collection to include the new address
+                    $this->addresses = Auth::user()->addresses()->get();
                 }
             }
 
             $shippingFee = $this->calculateAverageShippingPrice($city);
-            $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+            $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
             $totalOrderAmount = $subtotal + $shippingFee;
 
             if ($this->payment_method === 'cod') {
@@ -284,13 +285,14 @@ class Checkout extends Component
                         'user_id' => Auth::id(),
                     ]));
                     $final_address_id = $address->id;
+                    $this->addresses = Auth::user()->addresses()->get();
                 } else {
                     $final_address_id = $this->address_id;
                 }
             }
 
             $shippingFee = $this->calculateAverageShippingPrice($city);
-            $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+            $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
             $totalOrderAmount = $subtotal + $shippingFee;
             
             $order = Order::create([
@@ -355,24 +357,20 @@ class Checkout extends Component
         }
     }
 
-   public function render()
-{
-    $city = $this->getCurrentCity();
-    $shippingFee = $this->calculateAverageShippingPrice($city);
-    
-    // 1. Get the pure subtotal of item prices from the cart
-    $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
-    
-    // 2. Add shipping fee to the pure subtotal to calculate the exact total
-    $this->total = $subtotal + $shippingFee;
+    public function render()
+    {
+        $city = $this->getCurrentCity();
+        $shippingFee = $this->calculateAverageShippingPrice($city);
+        $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
+        $this->total = $subtotal + $shippingFee;
 
-    return view('livewire.checkout', [
-        'cartContent'       => Cart::instance('default')->content(),
-        'subtotal'          => $subtotal,          // Will be exactly 110 RWF
-        'shippingFee'       => $shippingFee,       // Will be exactly 3,000 RWF
-        'totalWithShipping' => $this->total,       // Will be exactly 3,110 RWF
-        'total'             => $this->total,       // Passed for safety
-        'addresses'         => Auth::check() ? Auth::user()->addresses : collect()
-    ]);
-}
+        return view('livewire.checkout', [
+            'cartContent'       => Cart::instance('default')->content(),
+            'subtotal'          => $subtotal,
+            'shippingFee'       => $shippingFee,
+            'totalWithShipping' => $this->total,
+            'total'             => $this->total,
+            'addresses'         => $this->addresses
+        ]);
+    }
 }
