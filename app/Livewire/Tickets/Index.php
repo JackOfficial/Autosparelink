@@ -21,13 +21,24 @@ class Index extends Component
     protected $paginationTheme = 'bootstrap';
 
     /**
-     * Validation rules matching your controller logic
+     * Validation rules matching your UI and dependent dropdown logic
      */
-    protected $rules = [
-        'category'  => 'required|string|in:order,payment,part_request,technical',
-        'subject'   => 'required|string|min:5|max:255',
-        'message'   => 'required|string|min:10',
-        'order_ref' => 'nullable|string|max:100',
+    protected function rules()
+    {
+        return [
+            'category'  => 'required|string|in:order,payment,part_request,opening_shop,technical',
+            'subject'   => 'required|string|min:5|max:255',
+            'message'   => 'required|string|min:10',
+            // Makes order_ref required ONLY if the category is exactly 'order'
+            'order_ref' => 'required_if:category,order|nullable|string|max:100',
+        ];
+    }
+
+    /**
+     * Custom validation messages for better user experience
+     */
+    protected $messages = [
+        'order_ref.required_if' => 'Please enter the order reference number for this issue.',
     ];
 
     /**
@@ -35,7 +46,7 @@ class Index extends Component
      */
     public function saveTicket()
     {
-        // 1. Run validation
+        // 1. Run validation rules
         $validated = $this->validate();
 
         // 2. Create ticket using the authenticated user relationship
@@ -43,9 +54,9 @@ class Index extends Component
             'category'  => $validated['category'],
             'subject'   => $validated['subject'],
             'message'   => $validated['message'],
-            'order_ref' => $validated['order_ref'],
+            'order_ref' => $validated['category'] === 'order' ? $validated['order_ref'] : null,
             'status'    => 'open',
-            'priority'  => 'medium', // Default priority from your store method
+            'priority'  => 'medium', // Default priority
         ]);
 
         // 3. Reset form fields for the next use
