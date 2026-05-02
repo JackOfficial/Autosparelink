@@ -165,7 +165,7 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-3 mb-4 bg-dark text-white">
                 <div class="card-body p-4">
-                    <h6 class="small text-uppercase text-muted mb-3">Cart Summary</h6>
+                    <h6 class="small text-uppercase text-light mb-3">Cart Summary</h6>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Items:</span>
                         <span class="fw-bold">{{ count($cartItems) }}</span>
