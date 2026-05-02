@@ -68,7 +68,8 @@ class SpecificationController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $specification = Specification::findOrFail($id);
+        return view('admin.specifications.edit', compact('specification'));
     }
 
     /**
@@ -84,6 +85,10 @@ class SpecificationController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+       $specification = Specification::findOrFail($id);
+        $specification->delete();
+
+        return redirect()->route('admin.specifications.index')
+            ->with('success', 'Specification deleted successfully.');
     }
 }
