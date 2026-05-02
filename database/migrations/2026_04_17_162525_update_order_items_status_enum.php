@@ -21,7 +21,7 @@ return new class extends Migration
                 'at_hub', 
                 'delivered', 
                 'completed', 
-                'cancelled',
+                'canceled',
                 'disputed', // For when the client opens a complaint
                 'returned'  // For when the item is physically sent back
             ])->default('pending')->change();
@@ -48,7 +48,7 @@ return new class extends Migration
                 'at_hub', 
                 'delivered', 
                 'completed', 
-                'cancelled'
+                'canceled'
             ])->default('pending')->change();
         });
     }

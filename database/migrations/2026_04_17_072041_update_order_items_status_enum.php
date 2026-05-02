@@ -21,7 +21,7 @@ return new class extends Migration
                 'at_hub', 
                 'delivered', 
                 'completed', 
-                'cancelled'
+                'canceled'
             ])->default('pending')->change();
         });
     }
@@ -38,7 +38,10 @@ return new class extends Migration
                 'packed', 
                 'ready_for_pickup', 
                 'collected', 
-                'at_hub'
+                'at_hub',
+                 'delivered', 
+                'completed', 
+                'canceled'
             ])->default('pending')->change();
         });
     }

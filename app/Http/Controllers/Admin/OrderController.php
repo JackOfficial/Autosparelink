@@ -43,31 +43,52 @@ class OrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Enforce exact statuses available in your database schema
         $request->validate([
             'status' => 'required|in:pending,awaiting_commitment_fee,callback_requested,processing,shipped,delivered,canceled,completed'
         ]);
 
-        $order = Order::findOrFail($id);
+        // FIX: Eager load both payment and orderItems here
+        $order = Order::with(['payment', 'orderItems'])->findOrFail($id);
 
-        DB::transaction(function () use ($request, $order) {
-            // Update the main order status
-            $order->update(['status' => $request->status]);
+        // 1. SECURITY GUARD: Check if the order has been paid before advancing the status
+        $unpaidStatuses = ['pending', 'awaiting_commitment_fee', 'callback_requested'];
+        
+        if (in_array($order->status, $unpaidStatuses)) {
+            // Check if there's no payment record, or if the payment status isn't 'successful'
+            $hasValidPayment = $order->payment && $order->payment->status === 'successful';
 
-            /**
-             * IMPORTANT: We no longer auto-complete items here.
-             * 'delivered' just means it reached the destination.
-             * We only mark items 'completed' via the Finalize controller 
-             * AFTER customer confirmation.
-             */
-            if ($request->status === 'canceled') {
-                // If the whole order is canceled, mark items canceled too.
-                // This does NOT trigger the Observer's payment logic.
-                foreach ($order->orderItems as $item) {
-                    $item->update(['status' => 'canceled']);
-                }
+            // Block changing to actionable/advanced statuses if no payment is found
+            if (!$hasValidPayment && in_array($request->status, ['processing', 'shipped', 'delivered', 'completed'])) {
+                return back()->with('error', 'Action denied: Cannot advance status because the client has not paid yet.');
             }
-        });
+        }
+
+        // 2. Process the status update safely
+        try {
+            DB::transaction(function () use ($request, $order) {
+                // 1. If the admin is trying to cancel the order
+                if ($request->status === 'canceled') {
+                    
+                    // 2. Check if a successful payment exists
+                    $isPaid = $order->payment && $order->payment->status === 'successful';
+                    
+                    if ($isPaid) {
+                        // Throw an exception to roll back the transaction and show an error to the admin
+                        throw new \Exception('Cannot cancel an order that has already been paid. Please initiate a refund first.');
+                    }
+
+                    // 3. If it's NOT paid, it's safe to cancel everything
+                    foreach ($order->orderItems as $item) {
+                        $item->update(['status' => 'canceled']);
+                    }
+                }
+
+                // Update the main order status
+                $order->update(['status' => $request->status]);
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return redirect()
             ->route('admin.orders.show', $order->id)
@@ -102,7 +123,7 @@ class OrderController extends Controller
 
     public function destroy(string $id)
     {
-        $order = Order::findOrFail($id);
+        $order = Order::with('payment')->findOrFail($id);
         
         // Safety: Check if order has successful payments before deleting
         if ($order->payment && $order->payment->status === 'successful') {
