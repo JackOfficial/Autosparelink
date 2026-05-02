@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Specification;
 use Illuminate\Http\Request;
 
 class SpecificationController extends Controller
@@ -12,7 +13,28 @@ class SpecificationController extends Controller
      */
     public function index()
     {
-       return view('admin.specifications.index');
+        $specifications = Specification::with([
+            'variant.vehicleModel.brand',
+            'destinations',
+            'engineType',
+            'transmissionType',
+            'driveType'
+        ])
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        // 2. Group dynamically matching your Blade's key pattern: 'Brand|Model|Variant Group'
+        $groupedSpecs = $specifications->groupBy(function ($spec) {
+            $brand = $spec->variant->vehicleModel->brand->name ?? 'Unknown Brand';
+            $model = $spec->variant->vehicleModel->name ?? 'Unknown Model';
+            
+            // Extracts the variant group or default variant name if your system matches them
+            $variantGroupName = $spec->variant->variant_group ?? $spec->variant->name ?? '';
+
+            return "{$brand}|{$model}|{$variantGroupName}";
+        });
+
+        return view('admin.specifications.index', compact('groupedSpecs'));
     }
 
     /**
