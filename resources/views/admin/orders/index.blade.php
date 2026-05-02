@@ -144,12 +144,13 @@
     <div class="d-flex flex-wrap mb-4" style="gap: 10px;">
         <button class="filter-pill" :class="statusFilter === 'all' ? 'active' : ''" @click="statusFilter = 'all'">All</button>
         <button class="filter-pill" :class="statusFilter === 'pending' ? 'active' : ''" @click="statusFilter = 'pending'">Pending</button>
+        <button class="filter-pill" :class="statusFilter === 'awaiting_commitment_fee' ? 'active' : ''" @click="statusFilter = 'awaiting_commitment_fee'">Commitment Fee</button>
         <button class="filter-pill" :class="statusFilter === 'processing' ? 'active' : ''" @click="statusFilter = 'processing'">Processing</button>
         <button class="filter-pill" :class="statusFilter === 'shipped' ? 'active' : ''" @click="statusFilter = 'shipped'">Shipped</button>
         <button class="filter-pill" :class="statusFilter === 'delivered' ? 'active' : ''" @click="statusFilter = 'delivered'">Delivered</button>
         <button class="filter-pill" :class="statusFilter === 'completed' ? 'active' : ''" @click="statusFilter = 'completed'">Completed</button>
         <button class="filter-pill" :class="statusFilter === 'callback_requested' ? 'active' : ''" @click="statusFilter = 'callback_requested'">Callbacks</button>
-        <button class="filter-pill" :class="statusFilter === 'cancelled' ? 'active' : ''" @click="statusFilter = 'cancelled'">Cancelled</button>
+        <button class="filter-pill" :class="statusFilter === 'canceled' ? 'active' : ''" @click="statusFilter = 'canceled'">Canceled</button>
     </div>
 
     @if($orders->isEmpty())
@@ -180,11 +181,12 @@
                                 
                                 $style = match($order->status) {
                                     'pending' => 'background: var(--warning-soft); color: var(--warning-deep);',
+                                    'awaiting_commitment_fee' => 'background: var(--purple-soft); color: var(--purple-deep);',
                                     'processing' => 'background: var(--primary-soft); color: var(--primary-deep);',
                                     'shipped' => 'background: var(--purple-soft); color: var(--purple-deep);',
                                     'delivered' => 'background: var(--info-soft); color: var(--info-deep);',
                                     'completed' => 'background: var(--success-soft); color: var(--success-deep);',
-                                    'cancelled' => 'background: var(--danger-soft); color: var(--danger-deep);',
+                                    'canceled' => 'background: var(--danger-soft); color: var(--danger-deep);',
                                     'callback_requested' => 'background: #7048e8; color: #fff;',
                                     default => 'background: #f1f3f5; color: #495057;'
                                 };
