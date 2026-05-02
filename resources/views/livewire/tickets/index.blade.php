@@ -124,6 +124,7 @@
                                 <option value="order">Order Issues</option>
                                 <option value="payment">Payment/Billing</option>
                                 <option value="part_request">Part Availability Request</option>
+                                <option value="technical">Opening Shop</option>
                                 <option value="technical">Technical Support</option>
                             </select>
                             @error('category') <div class="invalid-feedback">{{ $message }}</div> @enderror
