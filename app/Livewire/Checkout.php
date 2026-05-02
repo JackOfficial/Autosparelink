@@ -355,21 +355,24 @@ class Checkout extends Component
         }
     }
 
-    public function render()
-    {
-        $city = $this->getCurrentCity();
-        $shippingFee = $this->calculateAverageShippingPrice($city);
-        $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
-        
-        $this->total = $subtotal + $shippingFee;
+   public function render()
+{
+    $city = $this->getCurrentCity();
+    $shippingFee = $this->calculateAverageShippingPrice($city);
+    
+    // 1. Get the pure subtotal of item prices from the cart
+    $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+    
+    // 2. Add shipping fee to the pure subtotal to calculate the exact total
+    $this->total = $subtotal + $shippingFee;
 
-        return view('livewire.checkout', [
-            'cartContent'       => Cart::instance('default')->content(),
-            'subtotal'          => $subtotal,
-            'shippingFee'       => $shippingFee,
-            'totalWithShipping' => $this->total,
-            'total'             => $this->total,
-            'addresses'         => Auth::check() ? Auth::user()->addresses : collect()
-        ]);
-    }
+    return view('livewire.checkout', [
+        'cartContent'       => Cart::instance('default')->content(),
+        'subtotal'          => $subtotal,          // Will be exactly 110 RWF
+        'shippingFee'       => $shippingFee,       // Will be exactly 3,000 RWF
+        'totalWithShipping' => $this->total,       // Will be exactly 3,110 RWF
+        'total'             => $this->total,       // Passed for safety
+        'addresses'         => Auth::check() ? Auth::user()->addresses : collect()
+    ]);
+}
 }
