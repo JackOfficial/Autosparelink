@@ -17,7 +17,7 @@ class Checkout extends Component
     public $use_new_address = false;
     public $payment_method = 'momo'; // Options: 'momo' or 'cod'
 
-   public function mount()
+    public function mount()
     {
         $this->addresses = Auth::check() ? Auth::user()->addresses()->get() : collect();
 
@@ -61,16 +61,38 @@ class Checkout extends Component
     }
 
     /**
-     * Determine fee: 3k for Kigali, 5k for outside
+     * Calculates the average shipping price for items in the cart.
+     * Falls back to regional fees if no specific custom category shipping price is set.
      */
-    private function getCommitmentFee($city)
+    private function calculateAverageShippingPrice($city)
     {
-        return (strtolower(trim($city)) === 'kigali') ? 3000 : 5000;
-    }
+        $cartItems = Cart::instance('default')->content();
+        if ($cartItems->isEmpty()) {
+            return 0;
+        }
 
-    /**
-     * Handles the Mobile Money payment via InTouchPay
-     */
+        $totalShipping = 0;
+        $validItemCount = 0;
+
+        // Regional base fallback fee
+        $fallbackFee = (strtolower(trim($city)) === 'kigali') ? 3000 : 5000;
+
+        foreach ($cartItems as $item) {
+            $part = Part::with('category')->find($item->id);
+
+            if ($part) {
+                // If the direct category has a custom shipping price, use it
+                if ($part->category && $part->category->shipping_price > 0) {
+                    $totalShipping += $part->category->shipping_price;
+                } else {
+                    $totalShipping += $fallbackFee;
+                }
+                $validItemCount++;
+            }
+        }
+
+        return $validItemCount > 0 ? ($totalShipping / $validItemCount) : $fallbackFee;
+    }
 
     public function placeOrder(InTouchPaymentService $inTouch)
     {
@@ -107,7 +129,7 @@ class Checkout extends Component
             $paymentPhone = '';
             $city = '';
 
-            // 1. Resolve Address and City for Fee calculation
+            // 1. Resolve Address and City
             if (Auth::check() && !$this->use_new_address) {
                 $selectedAddress = Address::find($this->address_id);
                 $final_address_id = $selectedAddress->id;
@@ -122,18 +144,30 @@ class Checkout extends Component
                 }
             }
 
+            // Calculate exact shipping fee for the cart
+            $shippingFee = $this->calculateAverageShippingPrice($city);
             $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
-            $localTransactionId = 'AST-' . strtoupper(Str::random(10));
             
-            // 2. Logic flow for Payment vs Commitment Fee
-            $payableNow = ($this->payment_method === 'cod') ? $this->getCommitmentFee($city) : $subtotal;
-            $orderStatus = ($this->payment_method === 'cod') ? 'awaiting_commitment_fee' : 'pending';
+            // Total price includes the subtotal and the calculated shipping fee
+            $totalOrderAmount = $subtotal + $shippingFee;
+
+            // 2. Logic flow for Payment Method vs Payable Now amount
+            if ($this->payment_method === 'cod') {
+                $payableNow = $shippingFee; // Charge only shipping upfront for CoD
+                $orderStatus = 'awaiting_commitment_fee';
+            } else {
+                $payableNow = $totalOrderAmount; // Pay everything now for MoMo
+                $orderStatus = 'pending';
+            }
+
+            $localTransactionId = 'AST-' . strtoupper(Str::random(10));
 
             $order = Order::create([
                 'user_id'                => Auth::id(),
                 'address_id'             => $final_address_id,
-                'total_amount'           => $subtotal, // Full Order Value
-                'paid_amount'            => 0,         // Will be updated via Webhook
+                'total_amount'           => $totalOrderAmount,
+                'shipping_amount'        => $shippingFee, // Added for record keeping
+                'paid_amount'            => 0,            // Will be updated via Webhook
                 'status'                 => $orderStatus,
                 'order_number'           => $localTransactionId, 
                 'payment_method'         => $this->payment_method,
@@ -163,7 +197,7 @@ class Checkout extends Component
                 }
             }
 
-            // 3. Initiate InTouchPay Request (either for Full Amount or Fee)
+            // 3. Initiate InTouchPay Request
             $response = $inTouch->requestPayment($paymentPhone, $payableNow, $localTransactionId);
 
             if ($response && isset($response['success']) && $response['success'] == true) {
@@ -178,7 +212,7 @@ class Checkout extends Component
                 }
 
                 $message = ($this->payment_method === 'cod') 
-                    ? "Please pay the commitment fee of " . number_format($payableNow) . " RWF on your phone to confirm delivery."
+                    ? "Please pay the delivery fee of " . number_format($payableNow) . " RWF on your phone to confirm delivery."
                     : "Payment request sent. Please check your phone.";
 
                 session()->flash('message', $message);
@@ -194,11 +228,9 @@ class Checkout extends Component
         }
     }
 
-    /**
-     * Handles the "Call Me for Order" logic
-     */
     public function requestCallback() 
     {
+        // Existing Callback logic updated with shipping price
         $rules = [
             'guest_email' => Auth::check() ? 'nullable|email' : 'required|email',
         ];
@@ -225,6 +257,8 @@ class Checkout extends Component
         DB::beginTransaction();
         try {
             $final_address_id = null;
+            $city = $this->use_new_address ? $this->new_address['city'] : '';
+
             if (Auth::check()) {
                 if ($this->use_new_address) {
                     $address = Address::create(array_merge($this->new_address, [
@@ -233,15 +267,20 @@ class Checkout extends Component
                     $final_address_id = $address->id;
                 } else {
                     $final_address_id = $this->address_id;
+                    $selectedAddress = Address::find($this->address_id);
+                    $city = $selectedAddress ? $selectedAddress->city : '';
                 }
             }
 
+            $shippingFee = $this->calculateAverageShippingPrice($city);
             $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+            $totalOrderAmount = $subtotal + $shippingFee;
             
             $order = Order::create([
                 'user_id'                => Auth::id(),
                 'address_id'             => $final_address_id,
-                'total_amount'           => $subtotal,
+                'total_amount'           => $totalOrderAmount,
+                'shipping_amount'        => $shippingFee,
                 'status'                 => 'callback_requested',
                 'is_guest'               => !Auth::check(),
                 'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
@@ -301,10 +340,24 @@ class Checkout extends Component
 
     public function render()
     {
+        $city = '';
+        if ($this->use_new_address || !Auth::check()) {
+            $city = $this->new_address['city'] ?? '';
+        } elseif ($this->address_id) {
+            $selectedAddress = Address::find($this->address_id);
+            $city = $selectedAddress ? $selectedAddress->city : '';
+        }
+
+        $shippingFee = $this->calculateAverageShippingPrice($city);
+        $subtotal = (float) str_replace(',', '', Cart::instance('default')->subtotal());
+        $totalWithShipping = $subtotal + $shippingFee;
+
         return view('livewire.checkout', [
-            'cartContent' => Cart::instance('default')->content(),
-            'total'       => Cart::instance('default')->subtotal(),
-            'addresses'   => Auth::check() ? Auth::user()->addresses : collect()
+            'cartContent'       => Cart::instance('default')->content(),
+            'subtotal'          => $subtotal,
+            'shippingFee'       => $shippingFee,
+            'totalWithShipping' => $totalWithShipping,
+            'addresses'         => Auth::check() ? Auth::user()->addresses : collect()
         ]);
     }
 }
