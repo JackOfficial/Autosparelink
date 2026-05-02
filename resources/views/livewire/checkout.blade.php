@@ -241,7 +241,7 @@
                                     <i class="fa fa-info-circle mr-3 mt-1 text-warning fa-lg"></i>
                                     <div>
                                         <h6 class="font-weight-bold mb-1 text-dark" style="font-size: 0.9rem;">Shipping Payment Required</h6>
-                                        <p class="small mb-0 text-secondary" style="line-height: 1.5;">
+                                        <p class="small mb-0 text-dark" style="line-height: 1.5;">
                                             To confirm Pay on Delivery, please complete upfront payment for the calculated shipping fee: <br>
                                             <strong>{{ number_format($shippingFee, 0) }} RWF</strong>.
                                         </p>
