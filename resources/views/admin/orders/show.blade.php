@@ -26,30 +26,30 @@
     }
     
     .product-img {
-       width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid #edf2f9;
-    background-color: #f8f9fa;
-    transition: transform 0.2s;
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #edf2f9;
+        background-color: #f8f9fa;
+        transition: transform 0.2s;
     }
 
     .product-img:hover {
-    transform: scale(1.1);
-    z-index: 10;
-}
+        transform: scale(1.1);
+        z-index: 10;
+    }
 
-.img-placeholder {
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f1f4f8;
-    border-radius: 8px;
-    color: #cbd5e0;
-}
+    .img-placeholder {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f4f8;
+        border-radius: 8px;
+        color: #cbd5e0;
+    }
 
     .shop-badge {
         font-size: 0.65rem;
@@ -62,7 +62,7 @@
         margin-top: 4px;
     }
     
-    /* Order Stepper - Now supporting 5 stages */
+    /* Order Stepper - Now supporting 5 standard stages */
     .stepper-wrapper { display: flex; justify-content: space-between; margin-bottom: 2rem; padding: 0 1rem; }
     .stepper-item { position: relative; display: flex; flex-direction: column; align-items: center; flex: 1; }
     .stepper-item::before { position: absolute; content: ""; border-bottom: 2px solid #e9ecef; width: 100%; top: 18px; left: -50%; z-index: 1; }
@@ -108,10 +108,11 @@
     $country = $order->country ?? $order->address->country ?? '';
     $initial = strtoupper(substr($customerName, 0, 1));
 
-    // Refined Stepper logic - explicitly handling 'completed' casing
+    // Refined Stepper logic - explicitly handling 'completed' & 'canceled' casing
     $statuses = ['pending', 'processing', 'shipped', 'delivered', 'completed'];
     $currentStatus = strtolower($order->status);
     $currentIdx = array_search($currentStatus, $statuses);
+    $isPaid = $order->payment && $order->payment->status === 'successful';
 @endphp
 
 <div class="container-fluid py-4">
@@ -136,6 +137,13 @@
         </div>
     </div>
 
+    {{-- Error Alerts from backend guards --}}
+    @if(session('error'))
+        <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-radius: 12px; border-left: 5px solid #dc3545 !important;">
+            <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
+        </div>
+    @endif
+
     {{-- Urgent Callback Alert --}}
     @if($order->status === 'callback_requested')
         <div class="alert alert-danger blink_me d-flex align-items-center mb-4 border-0 shadow-sm" style="border-radius: 12px; background: #fff5f5; border-left: 5px solid #c92a2a !important;">
@@ -154,130 +162,136 @@
             {{-- Pipeline Stepper --}}
             <div class="card shadow-sm mb-4">
                 <div class="card-body py-4">
-                    <div class="stepper-wrapper">
-                        @foreach($statuses as $index => $step)
-                            @php
-                                $isCompleted = $currentIdx > $index || $currentStatus === 'completed';
-                                $isActive = $currentIdx === $index;
-                            @endphp
-                            <div class="stepper-item {{ $isCompleted ? 'completed' : ($isActive ? 'active' : '') }}">
-                                <div class="step-counter">
-                                    @if($isCompleted) <i class="fas fa-check"></i> @else {{ $index + 1 }} @endif
+                    @if($currentStatus === 'canceled')
+                        <div class="text-center text-danger py-2">
+                            <i class="fas fa-ban fa-2x mb-2"></i>
+                            <h6 class="font-weight-bold mb-0 text-uppercase">This order has been canceled</h6>
+                            <small class="text-muted">No further pipeline progressions are possible.</small>
+                        </div>
+                    @else
+                        <div class="stepper-wrapper">
+                            @foreach($statuses as $index => $step)
+                                @php
+                                    $isStepCompleted = $currentIdx > $index || $currentStatus === 'completed';
+                                    $isActive = $currentIdx === $index;
+                                @endphp
+                                <div class="stepper-item {{ $isStepCompleted ? 'completed' : ($isActive ? 'active' : '') }}">
+                                    <div class="step-counter">
+                                        @if($isStepCompleted) <i class="fas fa-check"></i> @else {{ $index + 1 }} @endif
+                                    </div>
+                                    <div class="step-name">{{ ucfirst($step) }}</div>
                                 </div>
-                                <div class="step-name">{{ ucfirst($step) }}</div>
-                            </div>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
 
-           {{-- Items Table --}}
-<div class="card shadow-sm mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="fas fa-shopping-cart mr-2 text-primary"></i> Order Items</span>
-        <span class="badge badge-soft-primary px-3">{{ $order->orderItems->count() }} Positions</span>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-    <thead>
-        <tr>
-            <th class="px-4" style="width: 40%;">Product Detail</th>
-            <th class="text-left">Vendor/Shop</th>
-            <th class="text-center">Quantity</th>
-            <th class="text-right">Unit Price</th>
-            <th class="text-right px-4">Line Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($order->orderItems as $item)
-        <tr>
-            <td class="px-4 py-3">
-                <div class="d-flex align-items-center">
-                    {{-- Part Photo Logic: orderItems->part->photos->file_path --}}
-                    <div class="mr-3">
-                        @php
-                            $firstPhoto = $item->part->photos->first() ?? null;
-                        @endphp
+            {{-- Items Table --}}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-shopping-cart mr-2 text-primary"></i> Order Items</span>
+                    <span class="badge badge-soft-primary px-3">{{ $order->orderItems->count() }} Positions</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="px-4" style="width: 40%;">Product Detail</th>
+                                    <th class="text-left">Vendor/Shop</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-right">Unit Price</th>
+                                    <th class="text-right px-4">Line Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($order->orderItems as $item)
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="mr-3">
+                                                @php
+                                                    $firstPhoto = $item->part->photos->first() ?? null;
+                                                @endphp
 
-                        @if($firstPhoto && $firstPhoto->file_path)
-                            <img src="{{ asset('storage/' . $firstPhoto->file_path) }}" 
-                                 alt="{{ $item->part->part_name ?? 'Product Image' }}" 
-                                 class="product-img shadow-sm"
-                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
-                        @else
-                            <div class="img-placeholder shadow-sm d-flex align-items-center justify-content-center bg-light" 
-                                 style="width: 50px; height: 50px; border-radius: 8px; border: 1px solid #f1f4f8;">
-                                <i class="fas fa-tools text-muted opacity-50"></i>
-                            </div>
-                        @endif
-                    </div>
+                                                @if($firstPhoto && $firstPhoto->file_path)
+                                                    <img src="{{ asset('storage/' . $firstPhoto->file_path) }}" 
+                                                         alt="{{ $item->part->part_name ?? 'Product Image' }}" 
+                                                         class="product-img shadow-sm"
+                                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                @else
+                                                    <div class="img-placeholder shadow-sm d-flex align-items-center justify-content-center bg-light" 
+                                                         style="width: 50px; height: 50px; border-radius: 8px; border: 1px solid #f1f4f8;">
+                                                        <i class="fas fa-tools text-muted opacity-50"></i>
+                                                    </div>
+                                                @endif
+                                            </div>
 
-                    {{-- Part Info --}}
-                    <div>
-                        <span class="d-block font-weight-bold text-dark">
-                            {{ $item->part->part_name ?? 'Unknown Part' }}
-                        </span>
-                        <div class="d-flex align-items-center mt-1">
-                            <span class="badge badge-soft-secondary mr-2" style="font-size: 0.6rem;">
-                                SKU: {{ $item->part->sku ?? 'N/A' }}
-                            </span>
-                            @if($item->part && $item->part->category)
-                                <small class="text-muted text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.5px;">
-                                    <i class="fas fa-tag mr-1"></i>{{ $item->part->category->name }}
-                                </small>
-                            @endif
-                        </div>
+                                            <div>
+                                                <span class="d-block font-weight-bold text-dark">
+                                                    {{ $item->part->part_name ?? 'Unknown Part' }}
+                                                </span>
+                                                <div class="d-flex align-items-center mt-1">
+                                                    <span class="badge badge-soft-secondary mr-2" style="font-size: 0.6rem;">
+                                                        SKU: {{ $item->part->sku ?? 'N/A' }}
+                                                    </span>
+                                                    @if($item->part && $item->part->category)
+                                                        <small class="text-muted text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.5px;">
+                                                            <i class="fas fa-tag mr-1"></i>{{ $item->part->category->name }}
+                                                        </small>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <td class="text-left">
+                                        <div class="d-flex flex-column">
+                                            <span class="small font-weight-bold text-dark">
+                                                @if($item->part->shop)
+                                                    <a href="{{ route('admin.shops.show', $item->part->shop->id) }}" class="text-dark">
+                                                        {{ $item->part->shop->shop_name }}
+                                                    </a>
+                                                @else
+                                                    Direct Warehouse
+                                                @endif
+                                            </span>
+                                            <span class="shop-badge">
+                                                <i class="fas fa-map-marker-alt mr-1" style="font-size: 0.5rem;"></i>
+                                                {{ $item->part->shop->address ?? 'Main Branch' }}
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span class="badge badge-light px-3 py-2 text-dark font-weight-bold">
+                                            {{ $item->quantity }}
+                                        </span>
+                                    </td>
+
+                                    <td class="text-right text-muted font-weight-medium">
+                                        {{ number_format($item->unit_price) }} RWF
+                                    </td>
+
+                                    <td class="text-right px-4 font-weight-bold text-primary">
+                                        {{ number_format($item->quantity * $item->unit_price) }} RWF
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot style="background: #fcfcfd; border-top: 2px solid #f1f4f8;">
+                                <tr>
+                                    <td colspan="4" class="text-right font-weight-bold py-3 text-muted">ORDER TOTAL:</td>
+                                    <td class="text-right px-4 h5 font-weight-bold text-primary py-3">
+                                        {{ number_format($order->total_amount) }} RWF
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
-            </td>
-            
-            <td class="text-left">
-                <div class="d-flex flex-column">
-                    <span class="small font-weight-bold text-dark">
-           @if($item->part->shop)
-        <a href="{{ route('admin.shops.show', $item->part->shop->id) }}" class="text-dark">
-            {{ $item->part->shop->shop_name }}
-        </a>
-          @else
-        Direct Warehouse
-    @endif
-                   </span>
-                    <span class="shop-badge">
-                        <i class="fas fa-map-marker-alt mr-1" style="font-size: 0.5rem;"></i>
-                        {{ $item->part->shop->address ?? 'Main Branch' }}
-                    </span>
-                </div>
-            </td>
-
-            <td class="text-center">
-                <span class="badge badge-light px-3 py-2 text-dark font-weight-bold">
-                    {{ $item->quantity }}
-                </span>
-            </td>
-
-            <td class="text-right text-muted font-weight-medium">
-                {{ number_format($item->unit_price) }} RWF
-            </td>
-
-            <td class="text-right px-4 font-weight-bold text-primary">
-                {{ number_format($item->quantity * $item->unit_price) }} RWF
-            </td>
-        </tr>
-        @endforeach
-    </tbody>
-    <tfoot style="background: #fcfcfd; border-top: 2px solid #f1f4f8;">
-        <tr>
-            <td colspan="4" class="text-right font-weight-bold py-3 text-muted">ORDER TOTAL:</td>
-            <td class="text-right px-4 h5 font-weight-bold text-primary py-3">
-                {{ number_format($order->total_amount) }} RWF
-            </td>
-        </tr>
-    </tfoot>
-</table>
-        </div>
-    </div>
-</div>
+            </div>
 
             {{-- Logistics & Payment Grid --}}
             <div class="row">
@@ -285,9 +299,8 @@
                     <div class="card shadow-sm h-100">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <span>Payment Status</span>
-                            @php $isPaid = $order->payment && $order->payment->status === 'completed'; @endphp
                             <span class="badge {{ $isPaid ? 'bg-success text-white' : 'bg-warning text-dark' }} px-2 py-1" style="border-radius: 4px; font-size: 0.6rem;">
-                                {{ $isPaid ? 'PAID' : 'PENDING' }}
+                                {{ $isPaid ? 'SUCCESSFUL' : 'PENDING' }}
                             </span>
                         </div>
                         <div class="card-body">
@@ -338,53 +351,69 @@
 
         {{-- Sidebar Controls --}}
         <div class="col-lg-4">
-          <div class="card shadow-sm status-control-card mb-4 no-print">
-    <div class="card-body p-4">
-        {{-- Only show the update form if the order is NOT completed --}}
-        @if($currentStatus !== 'completed')
-            <span class="info-label text-center mb-3">Update Order Progress</span>
-            
-            <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mb-3">
-                @csrf @method('PUT')
-                <select name="status" class="form-control status-select shadow-none mb-3" onchange="this.form.submit()">
-                    @foreach(['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as $stat)
-                        <option value="{{ $stat }}" {{ strtolower($order->status) == $stat ? 'selected' : '' }}>
-                            {{ ucfirst(str_replace('_', ' ', $stat)) }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
-        @endif
+            <div class="card shadow-sm status-control-card mb-4 no-print">
+                <div class="card-body p-4">
+                    {{-- Only show status modifier if order is NOT completed or canceled --}}
+                    @if(!in_array($currentStatus, ['completed', 'canceled']))
+                        <span class="info-label text-center mb-3">Update Order Progress</span>
+                        
+                        <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mb-3">
+                            @csrf @method('PUT')
+                            <select name="status" class="form-control status-select shadow-none mb-3" onchange="this.form.submit()">
+                                @foreach(['pending', 'processing', 'shipped', 'delivered', 'canceled'] as $stat)
+                                    @php
+                                        // Disable advanced choices if order isn't paid
+                                        $isDisabled = !$isPaid && in_array($stat, ['processing', 'shipped', 'delivered']);
+                                    @endphp
+                                    <option value="{{ $stat }}" {{ $currentStatus === $stat ? 'selected' : '' }} {{ $isDisabled ? 'disabled' : '' }}>
+                                        {{ ucfirst(str_replace('_', ' ', $stat)) }} 
+                                        @if($isDisabled) (Awaiting Payment) @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+                    @endif
 
-        {{-- Logic for Final Acceptance / Displaying Finalized State --}}
-        @if($currentStatus === 'delivered')
-            <form action="{{ route('admin.orders.finalize', $order->id) }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm">
-                    <i class="fas fa-handshake mr-2"></i> Confirm Customer Accepted
-                </button>
-                <p class="text-muted small text-center mt-2 mb-0">This verifies items match user expectations.</p>
-            </form>
-        @elseif($currentStatus === 'completed')
-            {{-- This replaces the update form entirely when finalized --}}
-            <div class="alert bg-success-soft text-success text-center border-0 mb-0">
-                <i class="fas fa-check-double fa-2x mb-2"></i>
-                <div class="font-weight-bold">Order Finalized</div>
-                <small>Transaction accepted by customer</small>
-                <hr class="my-2" style="border-top: 1px solid rgba(40, 167, 69, 0.2);">
-                <p class="extra-small mb-0 text-uppercase">Payment Processed to Vendor</p>
+                    {{-- Logic for Final Acceptance / Completed State / Canceled State --}}
+                    @if($currentStatus === 'delivered')
+                        <form action="{{ route('admin.orders.finalize', $order->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm">
+                                <i class="fas fa-handshake mr-2"></i> Confirm Customer Accepted
+                            </button>
+                            <p class="text-muted small text-center mt-2 mb-0">Releases vendor wallet balance directly.</p>
+                        </form>
+                    @elseif($currentStatus === 'completed')
+                        <div class="alert bg-success-soft text-success text-center border-0 mb-0 py-3">
+                            <i class="fas fa-check-double fa-2x mb-2"></i>
+                            <div class="font-weight-bold h6 mb-1">Order Complete</div>
+                            <small class="d-block mb-1">Transaction accepted by customer</small>
+                            <hr class="my-2" style="border-top: 1px solid rgba(40, 167, 69, 0.2);">
+                            <p class="extra-small mb-0 text-uppercase font-weight-bold">Payment Released to Vendor</p>
+                        </div>
+                    @elseif($currentStatus === 'canceled')
+                        <div class="alert bg-danger-soft text-danger text-center border-0 mb-0 py-3">
+                            <i class="fas fa-ban fa-2x mb-2"></i>
+                            <div class="font-weight-bold h6 mb-1">Canceled</div>
+                            <small class="d-block">This order is non-actionable.</small>
+                        </div>
+                    @else
+                        {{-- Standard Next Contextual Stage info --}}
+                        <div class="p-3 bg-light rounded text-center">
+                            <small class="text-muted d-block mb-2">Next standard step:</small>
+                            @if(!$isPaid)
+                                <span class="badge badge-pill badge-warning px-3 py-2">
+                                    <i class="fas fa-hourglass-start mr-1"></i> Awaiting MoMo Payment
+                                </span>
+                            @else
+                                <span class="badge badge-pill badge-primary px-3 py-2">
+                                    {{ $currentIdx < 4 ? ucfirst($statuses[$currentIdx + 1] ?? 'None') : 'Finalized' }}
+                                </span>
+                            @endif
+                        </div>
+                    @endif
+                </div>
             </div>
-        @else
-            {{-- Contextual Action for non-delivered items --}}
-            <div class="p-3 bg-light rounded text-center">
-                <small class="text-muted d-block mb-2">Next standard step:</small>
-                <span class="badge badge-pill badge-primary px-3 py-2">
-                    {{ $currentIdx < 4 ? ucfirst($statuses[$currentIdx + 1] ?? 'None') : 'Finalized' }}
-                </span>
-            </div>
-        @endif
-    </div>
-</div>
 
             {{-- Customer Card --}}
             <div class="card shadow-sm mb-4">
@@ -394,27 +423,25 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-4">
-    <div class="mr-3">
-        @if($order->user && $order->user->avatar)
-            {{-- User Avatar --}}
-            <img src="{{ $order->user->avatar }}" 
-                 alt="{{ $customerName }}" 
-                 class="rounded-circle shadow-sm"
-                 style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #fff;">
-        @else
-            {{-- Initial Fallback --}}
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                 style="width: 50px; height: 50px; font-weight: 800; font-size: 1.2rem; box-shadow: 0 4px 8px rgba(0,123,255,0.2);">
-                {{ $initial }}
-            </div>
-        @endif
-    </div>
+                        <div class="mr-3">
+                            @if($order->user && $order->user->avatar)
+                                <img src="{{ $order->user->avatar }}" 
+                                     alt="{{ $customerName }}" 
+                                     class="rounded-circle shadow-sm"
+                                     style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #fff;">
+                            @else
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px; font-weight: 800; font-size: 1.2rem; box-shadow: 0 4px 8px rgba(0,123,255,0.2);">
+                                    {{ $initial }}
+                                </div>
+                            @endif
+                        </div>
 
-    <div style="overflow: hidden;">
-        <h6 class="mb-0 font-weight-bold text-dark text-truncate">{{ $customerName }}</h6>
-        <span class="text-muted small text-truncate d-block">{{ $customerEmail }}</span>
-    </div>
-</div>
+                        <div style="overflow: hidden;">
+                            <h6 class="mb-0 font-weight-bold text-dark text-truncate">{{ $customerName }}</h6>
+                            <span class="text-muted small text-truncate d-block">{{ $customerEmail }}</span>
+                        </div>
+                    </div>
                     <hr class="my-3" style="border-style: dashed; opacity: 0.5;">
                     
                     <div class="mb-3">
