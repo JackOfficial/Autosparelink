@@ -101,7 +101,7 @@
 @php
     $customerName = $order->guest_name ?? $order->user->name ?? 'Guest Customer';
     $customerEmail = $order->guest_email ?? $order->user->email ?? 'No email';
-    $customerPhone = $order->guest_phone ?? $order->address->phone ?? 'N/A';
+    $customerPhone = $order->address->phone ?? $order->guest_phone ??  ?? 'N/A';
     
     $street = $order->guest_shipping_address ?? $order->address->street_address ?? 'No address provided';
     $city = $order->city ?? $order->address->city ?? '';
