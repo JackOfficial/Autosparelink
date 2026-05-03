@@ -152,7 +152,7 @@
             </div>
             <div>
                 <h6 class="mb-0 font-weight-bold text-danger">Action Required: Callback Requested</h6>
-                <span class="small">The client is waiting for a call at <strong>{{ $customerPhone }}</strong>.</span>
+                <span class="small text-dark">The client is waiting for a call at <strong>{{ $customerPhone }}</strong>.</span>
             </div>
         </div>
     @endif
