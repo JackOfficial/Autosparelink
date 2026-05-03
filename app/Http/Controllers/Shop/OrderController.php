@@ -68,9 +68,9 @@ class OrderController extends Controller
      */
     public function updateItemStatus(Request $request, string $orderItemId)
     {
-        // 1. Validation: Strip out 'completed' so shops cannot submit it to the API
+        // 1. Validate against exactly what the vendor can submit
         $request->validate([
-            'status' => 'required|in:pending,processing,shipped,canceled,callback_requested'
+            'status' => 'required|in:pending,packed,ready_for_pickup,canceled'
         ]);
 
         $shopId = Auth::user()->shop->id;
@@ -82,43 +82,41 @@ class OrderController extends Controller
                 ->lockForUpdate()
                 ->findOrFail($orderItemId);
 
-            // 2. Strict Security: Only administrators can trigger 'completed' (release payments)
-            if ($newStatus === 'completed') {
-                abort(403, 'Only platform administrators can complete order items and release payments.');
+            // 2. Terminal/Admin State Protection: Block updating items that the platform controls
+            $adminControlledStatuses = [
+                'ready_for_pickup', 'collected', 'at_hub', 
+                'delivered', 'completed', 'canceled', 
+                'disputed', 'returned'
+            ];
+
+            if (in_array($item->status, $adminControlledStatuses)) {
+                abort(403, "Cannot modify an item that is already marked as " . str_replace('_', ' ', $item->status) . ".");
             }
 
-            // 3. Callback Security: If already in callback mode, it is completely locked for the shop
-            if ($item->status === 'callback_requested') {
-                abort(403, 'Callbacks are handled exclusively by administrative personnel.');
-            }
-
-            // 4. Payment Security: Prevent processing unpaid or callback orders
-            if (in_array($item->status, ['pending', 'callback_requested'])) {
-                if (in_array($newStatus, ['processing', 'shipped', 'completed'])) {
+            // 3. Payment Protection: Block moving unpaid orders forward
+            // (If the customer has not paid, prevent the shop from selecting anything other than canceled/pending)
+            if (!$item->order->payment || $item->order->payment->status !== 'completed') {
+                if (in_array($newStatus, ['packed', 'ready_for_pickup'])) {
                     abort(403, 'Cannot fulfill or process an item that has not been paid for yet.');
                 }
             }
 
-            // 5. Progression Security: If it is paid ('processing'), restrict downgrading or canceling
-            if ($item->status === 'processing') {
-                if (in_array($newStatus, ['pending', 'callback_requested'])) {
-                    abort(403, 'Cannot change a paid item back to pending or callback status.');
-                }
-                if ($newStatus === 'canceled') {
-                    abort(403, 'Cannot cancel an order item that has already been paid for.');
-                }
+            // 4. Fulfillment Protection: Prevent reverting once packed
+            if ($item->status === 'packed' && $newStatus === 'pending') {
+                abort(403, 'Cannot move a packed item back to pending status.');
             }
 
-            // 6. Terminal State Security: Block updating locked terminal states
-            if (in_array($item->status, ['completed', 'canceled'])) {
-                abort(403, "Cannot modify an item that is already marked as {$item->status}.");
+            // 5. Explicit Cancellation Restrictions
+            if ($newStatus === 'canceled' && in_array($item->status, ['packed', 'ready_for_pickup'])) {
+                abort(403, 'Cannot cancel an order item that is already packed or ready for pickup.');
             }
 
-            // Save the update using the explicit save() call to properly trigger observers
+            // 6. Set status and save to properly trigger observers
             $item->status = $newStatus;
             $item->save(); 
 
-            return back()->with('success', "Item status updated to {$newStatus}.");
+            $displayStatus = str_replace('_', ' ', $newStatus);
+            return back()->with('success', "Item status updated to {$displayStatus}.");
         });
     }
 }

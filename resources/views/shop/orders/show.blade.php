@@ -3,59 +3,102 @@
 
     @push('styles')
     <style>
-        /* Logic: Blinking for Call Requests */
-        .blink_me { animation: blinker 0.8s cubic-bezier(.45,.05,.55,.95) infinite; }
-        @keyframes blinker { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+        :root {
+            --surface-bg: #f8f9fa;
+            --border-color: #eef2f6;
+            --text-muted: #8492a6;
+            --text-main: #2b3c4e;
+        }
 
-        .card { border-radius: 15px; border: none; }
-        .info-label { font-size: 0.7rem; text-transform: uppercase; color: #95aac9; font-weight: 700; margin-bottom: 2px; display: block; }
-        .info-value { font-size: 0.95rem; color: #12263f; font-weight: 500; }
+        .card { 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color);
+            background-color: #fff;
+            transition: all 0.2s ease-in-out;
+        }
         
-        /* Status Control UI */
-        .status-control-card { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; border-radius: 15px; }
-        .status-select { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 10px; font-weight: bold; }
-        .status-select option { color: #333; }
+        .info-label { 
+            font-size: 0.72rem; 
+            text-transform: uppercase; 
+            color: var(--text-muted); 
+            font-weight: 700; 
+            letter-spacing: 0.5px;
+            margin-bottom: 4px; 
+            display: block; 
+        }
+        
+        .info-value { 
+            font-size: 0.92rem; 
+            color: var(--text-main); 
+            font-weight: 500; 
+        }
+        
+        .item-status-select { 
+            font-size: 0.82rem; 
+            border-radius: 8px; 
+            padding: 0.4rem 0.6rem; 
+            border: 1px solid #d1d9e2;
+            background-color: #fff;
+            cursor: pointer;
+            transition: border-color 0.15s ease-in-out;
+        }
 
-        .item-status-select { font-size: 0.85rem; border-radius: 8px; padding: 0.35rem 0.5rem; }
-
-        .bg-light-soft { background-color: #f8f9fa; }
+        .item-status-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+            outline: none;
+        }
+        
+        .bg-light-soft { 
+            background-color: var(--surface-bg); 
+        }
         
         @media print {
-            .btn, .status-control-card, nav, .breadcrumb, .no-print { display: none !important; }
-            .card { border: 1px solid #ddd !important; shadow: none !important; }
+            .btn, nav, .breadcrumb, .no-print, .item-status-select { display: none !important; }
+            .card { border: 1px solid #ddd !important; box-shadow: none !important; }
             .container-fluid { padding: 0 !important; }
         }
 
         .img-stack-container {
             position: relative;
-            width: 65px; 
-            height: 45px;
+            width: 55px; 
+            height: 42px;
         }
 
         .stack-img {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 6px;
             border: 2px solid #fff;
             position: absolute;
-            transition: transform 0.2s;
+            transition: transform 0.2s ease;
         }
 
         .stack-img:hover {
-            transform: translateY(-5px);
-            z-index: 20 !important;
+            transform: translateY(-3px) scale(1.05);
+            z-index: 30 !important;
+        }
+
+        .table > :not(caption) > * > * {
+            padding: 1rem 0.75rem;
+        }
+
+        .badge-status {
+            font-size: 0.75rem;
+            padding: 0.45em 0.85em;
+            font-weight: 600;
+            border-radius: 6px;
+            letter-spacing: 0.3px;
         }
     </style>
     @endpush
 
     @php
-        // PRIMARY LOGIC: Fallbacks for Guest vs Member
+        // Mask exact shipping address and phone for the shop (Admin handles delivery)
         $customerName = $order->guest_name ?? $order->user->name ?? 'Guest Customer';
         $customerEmail = $order->guest_email ?? $order->user->email ?? 'No email provided';
-        $customerPhone = $order->guest_phone ?? $order->address->phone ?? 'N/A';
         
-        $street = $order->guest_shipping_address ?? $order->address->street_address ?? 'No address provided';
         $city = $order->city ?? $order->address->city ?? '';
         $country = $order->country ?? $order->address->country ?? '';
         $initial = strtoupper(substr($customerName, 0, 1));
@@ -68,57 +111,48 @@
 
     <div class="container-fluid py-4">
         {{-- Header Section --}}
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-2">
-                        <li class="breadcrumb-item"><a href="{{ route('shop.orders.index') }}" class="text-decoration-none">Orders</a></li>
-                        <li class="breadcrumb-item active">#{{ $order->id }}</li>
+                <nav aria-label="breadcrumb" class="no-print">
+                    <ol class="breadcrumb mb-2" style="font-size: 0.85rem;">
+                        <li class="breadcrumb-item"><a href="{{ route('shop.orders.index') }}" class="text-decoration-none text-muted">Orders</a></li>
+                        <li class="breadcrumb-item active text-dark fw-medium">#{{ $order->id }}</li>
                     </ol>
                 </nav>
-                <div class="d-flex align-items-center gap-2">
-                    <h2 class="h3 mb-0 fw-bold">Order Details</h2>
-                    <span class="badge bg-secondary text-uppercase">{{ str_replace('_', ' ', $order->status) }}</span>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <h2 class="h4 mb-0 fw-bold text-dark">Order #{{ $order->id }}</h2>
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle text-uppercase badge-status">
+                        {{ str_replace('_', ' ', $order->status) }}
+                    </span>
                 </div>
             </div>
-            <div class="mt-3 mt-md-0 d-flex gap-2 no-print">
-                <button onclick="window.print()" class="btn btn-white border shadow-sm bg-white">
-                    <i class="fas fa-print me-1 text-muted"></i> Print Invoice
+            <div class="d-flex gap-2 no-print">
+                <button onclick="window.print()" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center bg-white shadow-sm px-3 py-2" style="border-radius: 8px;">
+                    <i class="fas fa-print me-2 text-muted"></i> Print Invoice
                 </button>
             </div>
         </div>
 
-        {{-- Urgent Callback Alert --}}
-@if($order->status === 'callback_requested')
-    <div class="alert alert-warning d-flex align-items-center mb-4 shadow-sm border-0 p-3" style="border-radius: 12px;">
-        <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 text-warning" style="width: 40px; height: 40px;">
-            <i class="fas fa-headset"></i>
-        </div>
-        <div>
-            <h6 class="mb-0 fw-bold">Support Action Pending</h6>
-            <span class="small">The customer requested a call. Platform administrators are resolving it directly.</span>
-        </div>
-    </div>
-@endif
-
-        {{-- Success/Error Alerts for Status Changes --}}
-        @if(session('success'))
-            <div class="alert alert-success border-0 shadow-sm mb-4" style="border-radius: 12px;">
-                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+        {{-- Success/Error Alerts --}}
+        @if(session('success')) 
+            <div class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4 py-3" style="border-radius: 12px;" role="alert">
+                <i class="fas fa-check-circle me-3 fs-5"></i>
+                <div class="small fw-medium">{{ session('success') }}</div>
             </div>
         @endif
 
         @if(session('error'))
-            <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-radius: 12px;">
-                <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
+            <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4 py-3" style="border-radius: 12px;" role="alert">
+                <i class="fas fa-exclamation-circle me-3 fs-5"></i>
+                <div class="small fw-medium">{{ session('error') }}</div>
             </div>
         @endif
 
         <div class="row g-4">
             <div class="col-lg-8">
-                {{-- Items Table --}}
+                {{-- Items Table Card --}}
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white py-3 border-bottom">
+                    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
                         <h6 class="mb-0 fw-bold text-uppercase small text-muted">
                             <i class="fas fa-shopping-basket me-2 text-primary"></i> Cart Items
                         </h6>
@@ -126,22 +160,22 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table align-middle mb-0">
-                                <thead class="bg-light-soft">
+                                <thead class="bg-light-soft border-bottom">
                                     <tr>
-                                        <th class="ps-4 border-0 small text-muted">Product</th>
-                                        <th class="text-center border-0 small text-muted">Qty</th>
-                                        <th class="text-end border-0 small text-muted">Unit Price</th>
-                                        <th class="text-end border-0 small text-muted">Subtotal</th>
-                                        <th class="text-center border-0 small text-muted no-print" style="width: 200px;">Item Status</th>
+                                        <th class="ps-4 border-0 small fw-bold text-muted text-uppercase" style="font-size: 0.72rem;">Product</th>
+                                        <th class="text-center border-0 small fw-bold text-muted text-uppercase" style="font-size: 0.72rem;">Qty</th>
+                                        <th class="text-end border-0 small fw-bold text-muted text-uppercase" style="font-size: 0.72rem;">Unit Price</th>
+                                        <th class="text-end border-0 small fw-bold text-muted text-uppercase" style="font-size: 0.72rem;">Subtotal</th>
+                                        <th class="text-center border-0 small fw-bold text-muted text-uppercase no-print" style="font-size: 0.72rem; width: 190px;">Item Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($order->orderItems as $item)
-                                        <tr>
+                                        <tr class="border-bottom">
                                             <td class="ps-4">
                                                 <div class="d-flex align-items-center">
-                                                    {{-- Part Image Logic --}}
-                                                    <div class="me-4 img-stack-container">
+                                                    {{-- Visual stack of parts images --}}
+                                                    <div class="me-3 img-stack-container d-none d-sm-block">
                                                         @forelse($item->part->photos->take(3) as $index => $photo)
                                                             <img src="{{ asset('storage/' . $photo->file_path) }}" 
                                                                  class="stack-img shadow-sm" 
@@ -149,96 +183,87 @@
                                                                  alt="Part Image">
                                                         @empty
                                                             <div class="bg-light rounded border d-flex align-items-center justify-content-center text-muted shadow-sm" 
-                                                                 style="width: 40px; height: 40px;">
-                                                                <i class="fa fa-image small opacity-50"></i>
+                                                                 style="width: 38px; height: 38px;">
+                                                                <i class="fa fa-image opacity-50" style="font-size: 0.8rem;"></i>
                                                             </div>
                                                         @endforelse
                                                     </div>
                                                     
                                                     <div>
-                                                        <div class="fw-bold text-dark">{{ $item->part->part_name ?? 'Product Deleted' }}</div>
-                                                        <div class="text-muted" style="font-size: 0.75rem;">
-                                                            <span class="badge bg-light text-dark border-0 fw-normal">SKU: {{ $item->part->sku ?? 'N/A' }}</span>
+                                                        <div class="fw-bold text-dark mb-1" style="font-size: 0.88rem;">
+                                                            {{ $item->part->part_name ?? 'Product Deleted' }}
                                                         </div>
+                                                        <span class="badge bg-light text-secondary border border-secondary-subtle fw-medium" style="font-size: 0.68rem;">
+                                                            SKU: {{ $item->part->sku ?? 'N/A' }}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="text-center fw-bold">{{ $item->quantity }}</td>
-                                            <td class="text-end text-nowrap">{{ number_format($item->unit_price) }} <span class="small text-muted">RWF</span></td>
-                                            <td class="text-end fw-bold text-dark text-nowrap">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
+                                            <td class="text-center fw-semibold text-dark" style="font-size: 0.9rem;">{{ $item->quantity }}</td>
+                                            <td class="text-end text-nowrap text-secondary" style="font-size: 0.9rem;">{{ number_format($item->unit_price) }} RWF</td>
+                                            <td class="text-end fw-bold text-dark text-nowrap" style="font-size: 0.9rem;">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
                                             <td class="text-center no-print">
-                                                
-                                                {{-- 1. Locked terminal states --}}
-                                                @if(in_array($item->status, ['completed', 'canceled']))
-                                                    <span class="badge bg-{{ $item->status === 'completed' ? 'success' : 'secondary' }} py-2 px-3">
-                                                        {{ strtoupper($item->status) }}
+                                                @php
+                                                    // Any item state past "ready_for_pickup" locks out shop edits
+                                                    $isLocked = in_array($item->status, [
+                                                        'ready_for_pickup', 'collected', 'at_hub', 
+                                                        'delivered', 'completed', 'canceled', 
+                                                        'disputed', 'returned'
+                                                    ]);
+                                                @endphp
+
+                                                @if($isLocked)
+                                                    @php
+                                                        $badgeClass = match($item->status) {
+                                                            'completed', 'delivered' => 'bg-success-subtle text-success border-success-subtle',
+                                                            'disputed', 'returned' => 'bg-danger-subtle text-danger border-danger-subtle',
+                                                            'ready_for_pickup', 'collected', 'at_hub' => 'bg-info-subtle text-info-emphasis border-info-subtle',
+                                                            default => 'bg-light text-secondary border-secondary-subtle'
+                                                        };
+                                                    @endphp
+                                                    <span class="badge {{ $badgeClass }} border text-uppercase badge-status w-100 py-2 d-inline-block text-center">
+                                                        {{ str_replace('_', ' ', $item->status) }}
                                                     </span>
-
-                                                {{-- 2. Locked status: Callbacks handled exclusively by administrative personnel --}}
-                                                @elseif($item->status === 'callback_requested')
-                                                    <div class="d-flex flex-column align-items-center">
-                                                        <span class="badge bg-danger py-2 px-3 mb-1">
-                                                            <i class="fas fa-phone-alt me-1"></i> CALLBACK
-                                                        </span>
-                                                        <span class="text-muted" style="font-size: 0.65rem;">Admin Action Pending</span>
-                                                    </div>
-
-                                                {{-- 3. Dynamic status modification for valid stages --}}
                                                 @else
                                                     <form action="{{ route('shop.orders.items.update-status', $item->id) }}" method="POST">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <select name="status" class="form-select form-select-sm item-status-select" onchange="this.form.submit()">
-                                                            
-                                                            {{-- Pending: Prevent downgrading if paid --}}
-                                                            <option value="pending" {{ $item->status === 'pending' ? 'selected' : '' }} 
-                                                                {{ $item->status === 'processing' ? 'disabled' : '' }}>
+                                                        <select name="status" class="form-select form-select-sm item-status-select fw-semibold" onchange="this.form.submit()">
+                                                            <option value="pending" {{ $item->status === 'pending' ? 'selected' : '' }}>
                                                                 Pending
                                                             </option>
-
-                                                            {{-- Disabled dropdown view placeholder for Callback Requests --}}
-                                                            <option value="callback_requested" {{ $item->status === 'callback_requested' ? 'selected' : '' }} disabled>
-                                                                Callback Requested
+                                                            <option value="packed" {{ $item->status === 'packed' ? 'selected' : '' }}>
+                                                                Packed
                                                             </option>
-
-                                                            {{-- Processing: Block until the item is fully paid --}}
-                                                            <option value="processing" {{ $item->status === 'processing' ? 'selected' : '' }} 
-                                                                {{ in_array($item->status, ['pending', 'callback_requested']) ? 'disabled' : '' }}>
-                                                                Processing
+                                                            <option value="ready_for_pickup" {{ $item->status === 'ready_for_pickup' ? 'selected' : '' }}>
+                                                                Ready for Pickup
                                                             </option>
-
-                                                            {{-- Shipped: Block until the item is fully paid --}}
-                                                            <option value="shipped" {{ $item->status === 'shipped' ? 'selected' : '' }} 
-                                                                {{ in_array($item->status, ['pending', 'callback_requested']) ? 'disabled' : '' }}>
-                                                                Shipped
+                                                            <option value="canceled" {{ $item->status === 'canceled' ? 'selected' : '' }}>
+                                                                Cancel
                                                             </option>
-
-                                                            {{-- Canceled: Available on unpaid items. Block once processing begins --}}
-                                                            <option value="canceled" {{ $item->status === 'canceled' ? 'selected' : '' }} 
-                                                                {{ $item->status === 'processing' ? 'disabled' : '' }}>
-                                                                Canceled
-                                                            </option>
-
                                                         </select>
                                                     </form>
                                                 @endif
-
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot class="bg-light-soft">
-                                    <tr>
-                                        <td colspan="3" class="text-end fw-bold py-2 border-0">Items Subtotal:</td>
-                                        <td colspan="2" class="text-end pe-4 fw-bold py-2 border-0">{{ number_format($shopSubtotal) }} RWF</td>
+                                    <tr class="border-bottom-0">
+                                        <td colspan="3" class="text-end fw-semibold py-2 border-0 text-muted" style="font-size: 0.85rem;">Items Subtotal:</td>
+                                        <td colspan="2" class="text-end pe-4 fw-bold py-2 border-0 text-dark" style="font-size: 0.9rem;">
+                                            {{ number_format($shopSubtotal) }} RWF
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="3" class="text-end fw-bold py-2 border-0">Delivery Fee:</td>
-                                        <td colspan="2" class="text-end pe-4 fw-bold py-2 border-0">{{ number_format($order->delivery_price ?? 0) }} RWF</td>
+                                        <td colspan="3" class="text-end fw-semibold py-2 border-0 text-muted" style="font-size: 0.85rem;">Delivery Fee:</td>
+                                        <td colspan="2" class="text-end pe-4 fw-bold py-2 border-0 text-dark" style="font-size: 0.9rem;">
+                                            {{ number_format($order->delivery_price ?? 0) }} RWF
+                                        </td>
                                     </tr>
-                                    <tr>
-                                        <td colspan="3" class="text-end fw-bold py-3 border-top border-secondary-subtle">Total Amount:</td>
-                                        <td colspan="2" class="text-end pe-4 fw-bold text-primary h5 py-3 border-top border-secondary-subtle">
+                                    <tr class="border-top">
+                                        <td colspan="3" class="text-end fw-bold py-3 text-dark border-0">Total Amount:</td>
+                                        <td colspan="2" class="text-end pe-4 fw-bold text-primary h5 mb-0 py-3 border-0 text-nowrap">
                                             {{ number_format($shopSubtotal + ($order->delivery_price ?? 0)) }} RWF
                                         </td>
                                     </tr>
@@ -248,53 +273,65 @@
                     </div>
                 </div>
 
-                <div class="row g-4 mb-4 mb-lg-0">
-                    {{-- Payment Status --}}
+                {{-- Administrative Logistics Information (Uneditable by Shop) --}}
+                <div class="row g-4">
                     <div class="col-md-6">
                         <div class="card shadow-sm h-100">
-                            <div class="card-body p-4">
-                                <h6 class="fw-bold text-uppercase small text-muted mb-3">Payment Info</h6>
-                                @if($order->payment)
-                                    <div class="mb-3">
-                                        <span class="info-label">Transaction ID</span>
-                                        <span class="info-value text-break">{{ $order->payment->transaction_id }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
-                                        <span class="small fw-bold">{{ strtoupper($order->payment->method) }}</span>
-                                        <span class="badge {{ $order->payment->status === 'completed' ? 'bg-success' : 'bg-warning' }}">
-                                            {{ ucfirst($order->payment->status) }}
-                                        </span>
-                                    </div>
-                                @else
-                                    <div class="text-center py-2">
-                                        <i class="fas fa-hourglass-half text-warning mb-2"></i>
-                                        <p class="small text-muted mb-0">No payment record found.</p>
-                                    </div>
-                                @endif
+                            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="fw-bold text-uppercase small text-muted mb-3 d-flex align-items-center">
+                                        <i class="fas fa-receipt me-2 text-primary"></i> Payment Info
+                                    </h6>
+                                    @if($order->payment)
+                                        <div class="mb-3">
+                                            <span class="info-label">Transaction ID</span>
+                                            <span class="info-value text-break" style="font-size: 0.85rem;">{{ $order->payment->transaction_id }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center p-3 bg-light-soft rounded border">
+                                            <div>
+                                                <span class="info-label mb-0">Payment Method</span>
+                                                <span class="fw-bold text-dark small">{{ strtoupper($order->payment->method) }}</span>
+                                            </div>
+                                            <span class="badge {{ $order->payment->status === 'completed' ? 'bg-success text-white' : 'bg-warning text-dark' }} badge-status border-0">
+                                                {{ ucfirst($order->payment->status) }}
+                                            </span>
+                                        </div>
+                                    @else
+                                        <div class="text-center py-3">
+                                            <i class="fas fa-hourglass-half text-muted opacity-50 mb-2 fs-5"></i>
+                                            <p class="small text-muted mb-0">No payment record found.</p>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Shipping Status --}}
                     <div class="col-md-6">
                         <div class="card shadow-sm h-100">
-                            <div class="card-body p-4">
-                                <h6 class="fw-bold text-uppercase small text-muted mb-3">Logistics</h6>
-                                @if($order->shipping)
-                                    <div class="mb-3">
-                                        <span class="info-label">Carrier</span>
-                                        <span class="info-value">{{ $order->shipping->carrier }}</span>
-                                    </div>
-                                    <div class="p-2 border rounded border-dashed text-center">
-                                        <span class="small text-muted me-2">Tracking:</span>
-                                        <span class="fw-bold text-primary">{{ $order->shipping->tracking_number }}</span>
-                                    </div>
-                                @else
-                                    <div class="text-center py-2">
-                                        <i class="fas fa-truck-loading text-muted mb-2"></i>
-                                        <p class="small text-muted mb-0">Shipping not initialized.</p>
-                                    </div>
-                                @endif
+                            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="fw-bold text-uppercase small text-muted mb-3 d-flex align-items-center">
+                                        <i class="fas fa-truck-loading me-2 text-primary"></i> Logistics
+                                    </h6>
+                                    @if($order->shipping)
+                                        <div class="mb-3">
+                                            <span class="info-label">Carrier Partner</span>
+                                            <span class="info-value" style="font-size: 0.88rem;">{{ $order->shipping->carrier }}</span>
+                                        </div>
+                                        <div class="p-3 bg-light-soft border border-dashed rounded text-center">
+                                            <span class="small text-muted d-block mb-1" style="font-size: 0.75rem;">Tracking ID:</span>
+                                            <span class="fw-bold text-primary" style="font-size: 0.9rem; letter-spacing: 0.5px;">
+                                                {{ $order->shipping->tracking_number }}
+                                            </span>
+                                        </div>
+                                    @else
+                                        <div class="text-center py-3">
+                                            <i class="fas fa-shipping-fast text-muted opacity-50 mb-2 fs-5"></i>
+                                            <p class="small text-muted mb-0">Managed entirely by platform administrators.</p>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -302,65 +339,67 @@
             </div>
 
             <div class="col-lg-4">
-                {{-- Customer Profile Card --}}
-<div class="card shadow-sm h-100">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <span class="fw-bold small text-muted text-uppercase">Customer Info</span>
-        @if(!$order->user_id)
-            <span class="badge bg-secondary rounded-pill" style="font-size: 0.6rem;">GUEST</span>
-        @endif
-    </div>
-    
-    <div class="card-body p-4">
-        {{-- Avatar & Identity Section --}}
-        <div class="d-flex align-items-center mb-4">
-            <div class="me-3 position-relative">
-                @if($order->user && $order->user->avatar)
-                    <img src="{{ $order->user->avatar }}" 
-                         alt="{{ $customerName }}" 
-                         class="rounded-circle shadow-sm object-fit-cover" 
-                         style="width: 55px; height: 55px; border: 2px solid #fff;">
-                @else
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                         style="width: 55px; height: 55px; font-size: 1.2rem; border: 2px solid #fff;">
-                        <span class="fw-bold">{{ $initial }}</span>
+                {{-- Customer / Delivery Destination Card --}}
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold small text-muted text-uppercase">Delivery Area</span>
+                        @if(!$order->user_id)
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill py-1 px-2" style="font-size: 0.62rem; font-weight: 700;">GUEST</span>
+                        @endif
                     </div>
-                @endif
-            </div>
+                    
+                    <div class="card-body p-4 d-flex flex-column h-100">
+                        {{-- Identity Context --}}
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="me-3 position-relative">
+                                @if($order->user && $order->user->avatar)
+                                    <img src="{{ $order->user->avatar }}" 
+                                         alt="{{ $customerName }}" 
+                                         class="rounded-circle shadow-sm object-fit-cover" 
+                                         style="width: 50px; height: 50px; border: 2px solid #fff;">
+                                @else
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                         style="width: 50px; height: 50px; font-size: 1.15rem; border: 2px solid #fff;">
+                                        <span class="fw-bold">{{ $initial }}</span>
+                                    </div>
+                                @endif
+                            </div>
 
-            <div>
-                <div class="d-flex align-items-center">
-                    <h6 class="mb-0 fw-bold text-dark me-2">{{ $customerName }}</h6>
-                    @if($order->user_id)
-                        <span class="badge bg-soft-primary text-primary border border-primary-subtle rounded-pill" style="font-size: 0.65rem; padding: 0.25em 0.6em;">
-                            <i class="fas fa-user-check me-1"></i> MEMBER
-                        </span>
-                    @endif
+                            <div>
+                                <div class="d-flex align-items-center mb-1">
+                                    <h6 class="mb-0 fw-bold text-dark me-2" style="font-size: 0.95rem;">{{ $customerName }}</h6>
+                                    @if($order->user_id)
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.62rem; padding: 0.25em 0.6em; font-weight: 700;">
+                                            MEMBER
+                                        </span>
+                                    @endif
+                                </div>
+                                <span class="text-muted small" style="font-size: 0.78rem;">Customer ID: #{{ $order->user_id ?? 'Guest' }}</span>
+                            </div>
+                        </div>
+
+                        {{-- Safe Hidden Target Destination Area --}}
+                        <div class="mb-4">
+                            <span class="info-label">Destination Region:</span>
+                            <div class="info-value p-3 bg-light-soft border rounded lh-base text-dark mt-1" style="font-size: 0.88rem;">
+                                <strong>{{ $city }}{{ $city && $country ? ',' : '' }} {{ $country }}</strong>
+                                <hr class="my-2 border-secondary-subtle opacity-25">
+                                <span class="text-muted" style="font-size: 0.78rem;">
+                                    <i class="fas fa-shield-alt me-1 text-primary opacity-75"></i> Drop-off handled exclusively by platform couriers.
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Information Banner --}}
+                        <div class="mt-auto no-print">
+                            <span class="info-label">Logistics Support</span>
+                            <div class="p-3 border rounded bg-light-soft text-muted d-flex align-items-start" style="font-size: 0.78rem; border-color: var(--border-color) !important;">
+                                <i class="fas fa-info-circle me-2 text-secondary mt-1"></i>
+                                <span>Package the order securely with your specific parts invoice and update status to <strong>Ready for Pickup</strong>.</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <span class="text-muted small">Customer ID: #{{ $order->user_id ?? 'Guest' }}</span>
-            </div>
-        </div>
-
-        {{-- General Location Info Section --}}
-        <div class="mb-3">
-            <span class="info-label">Destination Region:</span>
-            <div class="info-value small lh-base text-dark">
-                {{ $city }}{{ $city && $country ? ',' : '' }} {{ $country }}<br>
-                <span class="text-muted" style="font-size: 0.8rem;">
-                    <i class="fas fa-shield-alt me-1"></i> Exact address hidden (Managed by Admin)
-                </span>
-            </div>
-        </div>
-
-        {{-- Hidden Contact Section --}}
-        <div class="mt-4 no-print">
-            <span class="info-label">Support</span>
-            <div class="p-2 border rounded bg-light-soft text-center text-muted" style="font-size: 0.8rem;">
-                <i class="fas fa-info-circle me-1"></i> For any delivery issues, contact platform support.
-            </div>
-        </div>
-    </div>
-</div>
             </div>
         </div>
     </div>
