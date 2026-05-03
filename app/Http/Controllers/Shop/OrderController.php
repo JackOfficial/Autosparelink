@@ -35,7 +35,6 @@ class OrderController extends Controller
             ->with([
                 'user',
                 'orderItems' => function($q) use ($shopId) {
-                    // Only load this shop's items to prevent cross-shop data leaks
                     $q->where('shop_id', $shopId)->with('part');
                 },
                 'payment'
@@ -65,8 +64,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Update order item status
-     * In a multi-vendor system, shops update ITEMS, not the whole ORDER.
+     * Update order item status safely.
      */
     public function updateItemStatus(Request $request, string $orderItemId)
     {
@@ -75,33 +73,40 @@ class OrderController extends Controller
         ]);
 
         $shopId = Auth::user()->shop->id;
+        $newStatus = $request->status;
 
-        // Securely find the item belonging to this shop
-        $item = OrderItem::where('shop_id', $shopId)->findOrFail($orderItemId);
+        // Use a database transaction to acquire a lock immediately
+        return DB::transaction(function () use ($shopId, $orderItemId, $newStatus) {
+            
+            // 1. Lock the order item for update immediately
+            $item = OrderItem::where('shop_id', $shopId)
+                ->lockForUpdate()
+                ->findOrFail($orderItemId);
 
-        // Wrap in transaction as per your saved logic for payment safety
-        DB::transaction(function () use ($item, $request) {
-            // lockForUpdate prevents race conditions during payment processing
-            $item->lockForUpdate();
-            
-            $item->status = $request->status;
-            
-            // Your OrderItemObserver or model booted logic will see 'isDirty' 
-            // and trigger the WalletTransaction if status is 'completed'
+            // 2. Security Check: If it is already processing (paid), restrict back-actions
+            if ($item->status === 'processing') {
+                
+                // Block moving back to pending
+                if ($newStatus === 'pending') {
+                    abort(403, 'Cannot change a paid item back to pending.');
+                }
+
+                // Block cancelling paid items from the vendor panel
+                if ($newStatus === 'cancelled') {
+                    abort(403, 'Cannot cancel an order item that has already been paid for.');
+                }
+            }
+
+            // 3. Security Check: Block updating items that are already completed or cancelled
+            if (in_array($item->status, ['completed', 'cancelled'])) {
+                abort(403, "Cannot modify an item that is already marked as {$item->status}.");
+            }
+
+            // 4. Update and save
+            $item->status = $newStatus;
             $item->save(); 
+
+            return back()->with('success', "Item status updated to {$newStatus}.");
         });
-
-        return back()->with('success', "Item status updated to {$request->status}.");
-    }
-
-    /**
-     * Delete logic remains the same (Soft delete from shop view only)
-     */
-    public function destroy(string $id)
-    {
-        $order = $this->shopOrders()->findOrFail($id);
-        $order->delete();
-
-        return redirect()->route('shop.orders.index')->with('success', 'Order view removed.');
     }
 }
