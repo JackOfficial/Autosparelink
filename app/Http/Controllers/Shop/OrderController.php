@@ -69,7 +69,7 @@ class OrderController extends Controller
     public function updateItemStatus(Request $request, string $orderItemId)
     {
         $request->validate([
-            'status' => 'required|in:pending,processing,shipped,completed,cancelled'
+            'status' => 'required|in:pending,processing,shipped,completed,canceled'
         ]);
 
         $shopId = Auth::user()->shop->id;
@@ -92,13 +92,13 @@ class OrderController extends Controller
                 }
 
                 // Block cancelling paid items from the vendor panel
-                if ($newStatus === 'cancelled') {
+                if ($newStatus === 'canceled') {
                     abort(403, 'Cannot cancel an order item that has already been paid for.');
                 }
             }
 
-            // 3. Security Check: Block updating items that are already completed or cancelled
-            if (in_array($item->status, ['completed', 'cancelled'])) {
+            // 3. Security Check: Block updating items that are already completed or canceled
+            if (in_array($item->status, ['completed', 'canceled'])) {
                 abort(403, "Cannot modify an item that is already marked as {$item->status}.");
             }
 

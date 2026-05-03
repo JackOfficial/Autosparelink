@@ -256,6 +256,9 @@ Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group
    Route::resource('/orders', ShopOrderController::class);
    Route::get('/download-doc/{id}', [ShopProfileController::class, 'downloadDocument'])->name('documents.download'); 
 
+   Route::patch('/orders/items/{orderItemId}/status', [ShopOrderController::class, 'updateItemStatus'])
+        ->name('orders.items.update-status');
+
     Route::prefix('profile')->name('profile.')->group(function () {
           Route::get('/edit', [ShopProfileController::class, 'edit'])->name('edit');
           Route::put('/update', [ShopProfileController::class, 'update'])->name('update');
