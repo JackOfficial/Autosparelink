@@ -66,48 +66,59 @@ class OrderController extends Controller
     /**
      * Update order item status safely.
      */
-   public function updateItemStatus(Request $request, string $orderItemId)
-{
-    $request->validate([
-        'status' => 'required|in:pending,processing,shipped,completed,canceled,callback_requested'
-    ]);
+    public function updateItemStatus(Request $request, string $orderItemId)
+    {
+        // 1. Validation: Strip out 'completed' so shops cannot submit it to the API
+        $request->validate([
+            'status' => 'required|in:pending,processing,shipped,canceled,callback_requested'
+        ]);
 
-    $shopId = Auth::user()->shop->id;
-    $newStatus = $request->status;
+        $shopId = Auth::user()->shop->id;
+        $newStatus = $request->status;
 
-    return DB::transaction(function () use ($shopId, $orderItemId, $newStatus) {
-        
-        $item = OrderItem::where('shop_id', $shopId)
-            ->lockForUpdate()
-            ->findOrFail($orderItemId);
+        return DB::transaction(function () use ($shopId, $orderItemId, $newStatus) {
+            
+            $item = OrderItem::where('shop_id', $shopId)
+                ->lockForUpdate()
+                ->findOrFail($orderItemId);
 
-        // --- UPDATED SECURITY CHECK: Prevent processing unpaid or callback orders ---
-        if (in_array($item->status, ['pending', 'callback_requested'])) {
-            // If the item is unpaid or awaiting a call, the shop CANNOT advance it
-            if (in_array($newStatus, ['processing', 'shipped', 'completed'])) {
-                abort(403, 'Cannot fulfill or process an item that has not been paid for yet.');
+            // 2. Strict Security: Only administrators can trigger 'completed' (release payments)
+            if ($newStatus === 'completed') {
+                abort(403, 'Only platform administrators can complete order items and release payments.');
             }
-        }
 
-        // 2. Existing Security Check: If it is already processing (paid), restrict back-actions
-        if ($item->status === 'processing') {
-            if (in_array($newStatus, ['pending', 'callback_requested'])) {
-                abort(403, 'Cannot change a paid item back to pending or callback status.');
+            // 3. Callback Security: If already in callback mode, it is completely locked for the shop
+            if ($item->status === 'callback_requested') {
+                abort(403, 'Callbacks are handled exclusively by administrative personnel.');
             }
-            if ($newStatus === 'canceled') {
-                abort(403, 'Cannot cancel an order item that has already been paid for.');
+
+            // 4. Payment Security: Prevent processing unpaid or callback orders
+            if (in_array($item->status, ['pending', 'callback_requested'])) {
+                if (in_array($newStatus, ['processing', 'shipped', 'completed'])) {
+                    abort(403, 'Cannot fulfill or process an item that has not been paid for yet.');
+                }
             }
-        }
 
-        // 3. Existing Security Check: Block updating terminal states
-        if (in_array($item->status, ['completed', 'canceled'])) {
-            abort(403, "Cannot modify an item that is already marked as {$item->status}.");
-        }
+            // 5. Progression Security: If it is paid ('processing'), restrict downgrading or canceling
+            if ($item->status === 'processing') {
+                if (in_array($newStatus, ['pending', 'callback_requested'])) {
+                    abort(403, 'Cannot change a paid item back to pending or callback status.');
+                }
+                if ($newStatus === 'canceled') {
+                    abort(403, 'Cannot cancel an order item that has already been paid for.');
+                }
+            }
 
-        $item->status = $newStatus;
-        $item->save(); 
+            // 6. Terminal State Security: Block updating locked terminal states
+            if (in_array($item->status, ['completed', 'canceled'])) {
+                abort(403, "Cannot modify an item that is already marked as {$item->status}.");
+            }
 
-        return back()->with('success', "Item status updated to {$newStatus}.");
-    });
-}
+            // Save the update using the explicit save() call to properly trigger observers
+            $item->status = $newStatus;
+            $item->save(); 
+
+            return back()->with('success', "Item status updated to {$newStatus}.");
+        });
+    }
 }

@@ -167,56 +167,62 @@
                                             <td class="text-end text-nowrap">{{ number_format($item->unit_price) }} <span class="small text-muted">RWF</span></td>
                                             <td class="text-end fw-bold text-dark text-nowrap">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
                                             <td class="text-center no-print">
-                                                {{-- Guard against updating completed/canceled items --}}
+                                                
+                                                {{-- 1. Locked terminal states --}}
                                                 @if(in_array($item->status, ['completed', 'canceled']))
                                                     <span class="badge bg-{{ $item->status === 'completed' ? 'success' : 'secondary' }} py-2 px-3">
                                                         {{ strtoupper($item->status) }}
                                                     </span>
+
+                                                {{-- 2. Locked status: Callbacks handled exclusively by administrative personnel --}}
+                                                @elseif($item->status === 'callback_requested')
+                                                    <div class="d-flex flex-column align-items-center">
+                                                        <span class="badge bg-danger py-2 px-3 mb-1">
+                                                            <i class="fas fa-phone-alt me-1"></i> CALLBACK
+                                                        </span>
+                                                        <span class="text-muted" style="font-size: 0.65rem;">Admin Action Pending</span>
+                                                    </div>
+
+                                                {{-- 3. Dynamic status modification for valid stages --}}
                                                 @else
                                                     <form action="{{ route('shop.orders.items.update-status', $item->id) }}" method="POST">
                                                         @csrf
                                                         @method('PATCH')
                                                         <select name="status" class="form-select form-select-sm item-status-select" onchange="this.form.submit()">
-    
-    {{-- Pending: Disabled if already paid to prevent downgrades --}}
-    <option value="pending" {{ $item->status === 'pending' ? 'selected' : '' }} 
-        {{ $item->status === 'processing' ? 'disabled' : '' }}>
-        Pending
-    </option>
+                                                            
+                                                            {{-- Pending: Prevent downgrading if paid --}}
+                                                            <option value="pending" {{ $item->status === 'pending' ? 'selected' : '' }} 
+                                                                {{ $item->status === 'processing' ? 'disabled' : '' }}>
+                                                                Pending
+                                                            </option>
 
-    {{-- Callback Requested: Only enabled/selectable if unpaid --}}
-    <option value="callback_requested" {{ $item->status === 'callback_requested' ? 'selected' : '' }} 
-        {{ $item->status === 'processing' ? 'disabled' : '' }}>
-        Callback Requested
-    </option>
+                                                            {{-- Disabled dropdown view placeholder for Callback Requests --}}
+                                                            <option value="callback_requested" {{ $item->status === 'callback_requested' ? 'selected' : '' }} disabled>
+                                                                Callback Requested
+                                                            </option>
 
-    {{-- Processing: Disabled if unpaid or awaiting callback --}}
-    <option value="processing" {{ $item->status === 'processing' ? 'selected' : '' }} 
-        {{ in_array($item->status, ['pending', 'callback_requested']) ? 'disabled' : '' }}>
-        Processing
-    </option>
+                                                            {{-- Processing: Block until the item is fully paid --}}
+                                                            <option value="processing" {{ $item->status === 'processing' ? 'selected' : '' }} 
+                                                                {{ in_array($item->status, ['pending', 'callback_requested']) ? 'disabled' : '' }}>
+                                                                Processing
+                                                            </option>
 
-    {{-- Shipped: Disabled if unpaid or awaiting callback --}}
-    <option value="shipped" {{ $item->status === 'shipped' ? 'selected' : '' }} 
-        {{ in_array($item->status, ['pending', 'callback_requested']) ? 'disabled' : '' }}>
-        Shipped
-    </option>
+                                                            {{-- Shipped: Block until the item is fully paid --}}
+                                                            <option value="shipped" {{ $item->status === 'shipped' ? 'selected' : '' }} 
+                                                                {{ in_array($item->status, ['pending', 'callback_requested']) ? 'disabled' : '' }}>
+                                                                Shipped
+                                                            </option>
 
-    {{-- Completed: Disabled if unpaid or awaiting callback --}}
-    <option value="completed" {{ $item->status === 'completed' ? 'selected' : '' }} 
-        {{ in_array($item->status, ['pending', 'callback_requested']) ? 'disabled' : '' }}>
-        Completed
-    </option>
+                                                            {{-- Canceled: Available on unpaid items. Block once processing begins --}}
+                                                            <option value="canceled" {{ $item->status === 'canceled' ? 'selected' : '' }} 
+                                                                {{ $item->status === 'processing' ? 'disabled' : '' }}>
+                                                                Canceled
+                                                            </option>
 
-    {{-- Canceled: Only enabled if unpaid. Disabled once the item enters processing --}}
-    <option value="canceled" {{ $item->status === 'canceled' ? 'selected' : '' }} 
-        {{ $item->status === 'processing' ? 'disabled' : '' }}>
-        Canceled
-    </option>
-    
-</select>
+                                                        </select>
                                                     </form>
                                                 @endif
+
                                             </td>
                                         </tr>
                                     @endforeach
