@@ -113,7 +113,6 @@
     $currentIdx = array_search($currentStatus, $statuses);
     $isPaid = $order->payment && $order->payment->status === 'successful';
 
-    // Fallback for Delivery Fee calculation
     $deliveryFee = $order->delivery_price ?? $order->shipping_fee ?? $order->shipping_price ?? 0;
 @endphp
 
@@ -131,10 +130,10 @@
         </div>
         <div class="mt-3 mt-md-0 d-flex gap-2">
             <button onclick="window.print()" class="btn btn-white border shadow-sm px-3 font-weight-bold">
-                <i class="fas fa-print mr-1"></i> Print
+                <i class="fas fa-print me-1"></i> Print
             </button>
             <a href="{{ route('admin.orders.index') }}" class="btn btn-primary shadow-sm px-3 font-weight-bold">
-                <i class="fas fa-arrow-left mr-1"></i> Back to Pipeline
+                <i class="fas fa-arrow-left me-1"></i> Back to Pipeline
             </a>
         </div>
     </div>
@@ -142,14 +141,14 @@
     {{-- Error Alerts from backend guards --}}
     @if(session('error'))
         <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-radius: 12px; border-left: 5px solid #dc3545 !important;">
-            <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
+            <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
         </div>
     @endif
 
     {{-- Urgent Callback Alert --}}
     @if($order->status === 'callback_requested')
         <div class="alert alert-danger blink_me d-flex align-items-center mb-4 border-0 shadow-sm" style="border-radius: 12px; background: #fff5f5; border-left: 5px solid #c92a2a !important;">
-            <div class="bg-white rounded-circle p-2 mr-3 shadow-sm text-danger" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <div class="bg-white rounded-circle p-2 me-3 shadow-sm text-danger" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                 <i class="fas fa-phone-alt"></i>
             </div>
             <div>
@@ -192,7 +191,7 @@
             {{-- Items Table --}}
             <div class="card shadow-sm mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-shopping-cart mr-2 text-primary"></i> Order Items</span>
+                    <span><i class="fas fa-shopping-cart me-2 text-primary"></i> Order Items</span>
                     <span class="badge badge-soft-primary px-3">{{ $order->orderItems->count() }} Positions</span>
                 </div>
                 <div class="card-body p-0">
@@ -212,7 +211,7 @@
                                 <tr>
                                     <td class="px-4 py-3">
                                         <div class="d-flex align-items-center">
-                                            <div class="mr-3">
+                                            <div class="me-3">
                                                 @php
                                                     $firstPhoto = $item->part->photos->first() ?? null;
                                                 @endphp
@@ -235,12 +234,12 @@
                                                     {{ $item->part->part_name ?? 'Unknown Part' }}
                                                 </span>
                                                 <div class="d-flex align-items-center mt-1">
-                                                    <span class="badge badge-soft-secondary mr-2" style="font-size: 0.6rem;">
+                                                    <span class="badge badge-soft-secondary me-2" style="font-size: 0.6rem;">
                                                         SKU: {{ $item->part->sku ?? 'N/A' }}
                                                     </span>
                                                     @if($item->part && $item->part->category)
                                                         <small class="text-muted text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.5px;">
-                                                            <i class="fas fa-tag mr-1"></i>{{ $item->part->category->name }}
+                                                            <i class="fas fa-tag me-1"></i>{{ $item->part->category->name }}
                                                         </small>
                                                     @endif
                                                 </div>
@@ -260,7 +259,7 @@
                                                 @endif
                                             </span>
                                             <span class="shop-badge">
-                                                <i class="fas fa-map-marker-alt mr-1" style="font-size: 0.5rem;"></i>
+                                                <i class="fas fa-map-marker-alt me-1" style="font-size: 0.5rem;"></i>
                                                 {{ $item->part->shop->address ?? 'Main Branch' }}
                                             </span>
                                         </div>
@@ -325,7 +324,7 @@
                                 </div>
                                 <div>
                                     <span class="info-label">Method</span>
-                                    <span class="info-value text-capitalize"><i class="fas fa-credit-card mr-1 text-muted"></i> {{ $order->payment->method }}</span>
+                                    <span class="info-value text-capitalize"><i class="fas fa-credit-card me-1 text-muted"></i> {{ $order->payment->method }}</span>
                                 </div>
                             @else
                                 <div class="text-center py-2">
@@ -348,7 +347,7 @@
                                 <div>
                                     <span class="info-label">Tracking Code</span>
                                     <span class="badge bg-light text-primary font-weight-bold px-2 py-2 w-100 text-left" style="font-size: 0.85rem;">
-                                        <i class="fas fa-barcode mr-2"></i> {{ $order->shipping->tracking_number }}
+                                        <i class="fas fa-barcode me-2"></i> {{ $order->shipping->tracking_number }}
                                     </span>
                                 </div>
                             @else
@@ -365,12 +364,11 @@
 
         {{-- Sidebar Controls --}}
         <div class="col-lg-4">
-            {{-- 1. Status Management Card --}}
+            {{-- Status Management Card --}}
             <div class="card shadow-sm status-control-card mb-4 no-print" style="border-top-color: {{ $isPaid ? 'var(--primary-deep)' : '#f08c00' }};">
                 <div class="card-body p-4">
                     
                     @if($currentStatus === 'canceled')
-                        {{-- Order is Canceled --}}
                         <div class="alert bg-danger-soft text-danger text-center border-0 mb-0 py-3">
                             <i class="fas fa-ban fa-2x mb-2"></i>
                             <div class="font-weight-bold h6 mb-1">Canceled</div>
@@ -378,7 +376,6 @@
                         </div>
 
                     @elseif($currentStatus === 'completed')
-                        {{-- Order is Completed --}}
                         <div class="alert bg-success-soft text-success text-center border-0 mb-0 py-3">
                             <i class="fas fa-check-double fa-2x mb-2"></i>
                             <div class="font-weight-bold h6 mb-1">Order Complete</div>
@@ -388,14 +385,12 @@
                         </div>
 
                     @elseif($currentStatus === 'callback_requested')
-                        {{-- Explicit Callback Display & Action --}}
                         <div class="alert text-center border-0 mb-0 py-3" style="background: rgba(201, 42, 42, 0.1); color: #c92a2a;">
                             <i class="fas fa-phone-volume fa-2x mb-2 text-danger blink_me"></i>
                             <div class="font-weight-bold h6 mb-1">Callback Action</div>
                             <small class="d-block text-muted mb-3">Customer requested direct callback. Call them at <strong>{{ $customerPhone }}</strong> immediately.</small>
                         </div>
 
-                        {{-- Allows admin to move out of callback requested once handled or paid --}}
                         <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mt-3">
                             @csrf @method('PUT')
                             <select name="status" class="form-control status-select shadow-none mb-3" onchange="this.form.submit()">
@@ -406,24 +401,21 @@
                         </form>
 
                     @elseif(!$isPaid)
-                        {{-- Order is UNPAID / Pending --}}
                         <div class="alert bg-warning-soft text-warning text-center border-0 mb-0 py-3" style="background: rgba(245, 159, 0, 0.1); color: #f59f00;">
                             <i class="fas fa-hourglass-half fa-2x mb-2 text-warning"></i>
                             <div class="font-weight-bold h6 mb-1 text-dark">Awaiting Payment</div>
                             <small class="d-block text-muted mb-3">The admin cannot process this order until the customer completes the payment.</small>
                         </div>
 
-                        {{-- Admin can ONLY cancel the order if it's unpaid --}}
                         <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mt-3">
                             @csrf @method('PUT')
                             <input type="hidden" name="status" value="canceled">
                             <button type="submit" class="btn btn-outline-danger btn-block py-2 font-weight-bold shadow-sm" onclick="return confirm('Are you sure you want to cancel this unpaid order?')">
-                                <i class="fas fa-times-circle mr-2"></i> Cancel Order
+                                <i class="fas fa-times-circle me-2"></i> Cancel Order
                             </button>
                         </form>
 
                     @else
-                        {{-- Order IS PAID & active (Processing, Shipped, or Delivered) --}}
                         <span class="info-label text-center mb-3">Update Order Progress</span>
                         
                         <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mb-3">
@@ -441,7 +433,7 @@
                             <form action="{{ route('admin.orders.finalize', $order->id) }}" method="POST" class="mt-2">
                                 @csrf
                                 <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm">
-                                    <i class="fas fa-handshake mr-2"></i> Confirm Customer Accepted
+                                    <i class="fas fa-handshake me-2"></i> Confirm Customer Accepted
                                 </button>
                                 <p class="text-muted small text-center mt-2 mb-0">Releases vendor wallet balance directly.</p>
                             </form>
@@ -451,14 +443,14 @@
                 </div>
             </div>
 
-            {{-- 2. Complete Customer Info Card (Always visible, even in callback requests) --}}
+            {{-- Complete Customer Info Card --}}
             <div class="card shadow-sm mb-4">
                 <div class="card-header d-flex align-items-center">
-                    <i class="fas fa-user-circle mr-2 text-primary"></i> Customer Contact
+                    <i class="fas fa-user-circle me-2 text-primary"></i> Customer Contact
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center mr-3 font-weight-bold" 
+                        <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-3 font-weight-bold" 
                              style="width: 42px; height: 42px; font-size: 1.1rem; border: 1px solid #eef2f7;">
                             {{ $initial }}
                         </div>
@@ -473,20 +465,19 @@
                     <div class="mb-3">
                         <span class="info-label">Direct Phone Line</span>
                         <span class="info-value font-weight-bold text-dark" style="font-size: 1.05rem;">
-                            <i class="fas fa-phone mr-1 text-primary"></i> {{ $customerPhone }}
+                            <i class="fas fa-phone me-1 text-primary"></i> {{ $customerPhone }}
                         </span>
                     </div>
 
                     <div>
                         <span class="info-label">Delivery Destination</span>
                         <span class="info-value text-muted" style="font-size: 0.85rem;">
-                            <i class="fas fa-map-marker-alt mr-1 text-danger"></i> 
+                            <i class="fas fa-map-marker-alt me-1 text-danger"></i> 
                             {{ $street }}, {{ $city }} {{ $country }}
                         </span>
                     </div>
                 </div>
             </div>
-            
         </div>
     </div>
 </div>
