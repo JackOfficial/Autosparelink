@@ -103,6 +103,9 @@
         $country = $order->country ?? $order->address->country ?? '';
         $initial = strtoupper(substr($customerName, 0, 1));
 
+        // Check if the order/client has already paid
+        $isPaid = optional($order->payment)->status === 'completed';
+
         // Subtotal calculation for the shop's items only
         $shopSubtotal = $order->orderItems->sum(function($item) {
             return $item->quantity * $item->unit_price;
@@ -134,17 +137,30 @@
         </div>
 
         {{-- Urgent Callback Alert --}}
-@if($order->status === 'callback_requested')
-    <div class="alert alert-warning d-flex align-items-center mb-4 shadow-sm border-0 p-3" style="border-radius: 12px;">
-        <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 text-warning" style="width: 40px; height: 40px;">
-            <i class="fas fa-headset"></i>
-        </div>
-        <div>
-            <h6 class="mb-0 fw-bold">Support Action Pending</h6>
-            <span class="small">The customer requested a call. Platform administrators are resolving it directly.</span>
-        </div>
-    </div>
-@endif
+        @if($order->status === 'callback_requested')
+            <div class="alert alert-warning d-flex align-items-center mb-4 shadow-sm border-0 p-3" style="border-radius: 12px;">
+                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 text-warning" style="width: 40px; height: 40px;">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold">Support Action Pending</h6>
+                    <span class="small">The customer requested a call. Platform administrators are resolving it directly.</span>
+                </div>
+            </div>
+        @endif
+
+        {{-- Unpaid Order Restriction Alert --}}
+        @if(!$isPaid)
+            <div class="alert alert-info d-flex align-items-center mb-4 shadow-sm border-0 p-3" style="border-radius: 12px;">
+                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 text-info" style="width: 40px; height: 40px;">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold text-dark">Awaiting Payment Completion</h6>
+                    <span class="small">Order processing is paused until the client completes payment.</span>
+                </div>
+            </div>
+        @endif
 
         {{-- Success/Error Alerts --}}
         @if(session('success')) 
@@ -217,12 +233,12 @@
                                             <td class="text-end fw-bold text-dark text-nowrap" style="font-size: 0.9rem;">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
                                             <td class="text-center no-print">
                                                 @php
-                                                    // Any item state past "ready_for_pickup" locks out shop edits
+                                                    // Locked out edits if past "ready_for_pickup" or if payment is NOT completed.
                                                     $isLocked = in_array($item->status, [
                                                         'ready_for_pickup', 'collected', 'at_hub', 
                                                         'delivered', 'completed', 'canceled', 
                                                         'disputed', 'returned'
-                                                    ]);
+                                                    ]) || !$isPaid;
                                                 @endphp
 
                                                 @if($isLocked)
