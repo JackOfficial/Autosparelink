@@ -177,12 +177,44 @@
                                                         @csrf
                                                         @method('PATCH')
                                                         <select name="status" class="form-select form-select-sm item-status-select" onchange="this.form.submit()">
-                                                            <option value="pending" {{ $item->status === 'pending' ? 'selected' : '' }} {{ $item->status === 'processing' ? 'disabled' : '' }}>Pending</option>
-                                                            <option value="processing" {{ $item->status === 'processing' ? 'selected' : '' }}>Processing</option>
-                                                            <option value="shipped" {{ $item->status === 'shipped' ? 'selected' : '' }}>Shipped</option>
-                                                            <option value="completed" {{ $item->status === 'completed' ? 'selected' : '' }}>Completed</option>
-                                                            <option value="canceled" {{ $item->status === 'canceled' ? 'selected' : '' }} {{ $item->status === 'processing' ? 'disabled' : '' }}>Canceled</option>
-                                                        </select>
+    
+    {{-- Pending: Disabled if already paid to prevent downgrades --}}
+    <option value="pending" {{ $item->status === 'pending' ? 'selected' : '' }} 
+        {{ $item->status === 'processing' ? 'disabled' : '' }}>
+        Pending
+    </option>
+
+    {{-- Callback Requested: Only enabled/selectable if unpaid --}}
+    <option value="callback_requested" {{ $item->status === 'callback_requested' ? 'selected' : '' }} 
+        {{ $item->status === 'processing' ? 'disabled' : '' }}>
+        Callback Requested
+    </option>
+
+    {{-- Processing: Disabled if unpaid or awaiting callback --}}
+    <option value="processing" {{ $item->status === 'processing' ? 'selected' : '' }} 
+        {{ in_array($item->status, ['pending', 'callback_requested']) ? 'disabled' : '' }}>
+        Processing
+    </option>
+
+    {{-- Shipped: Disabled if unpaid or awaiting callback --}}
+    <option value="shipped" {{ $item->status === 'shipped' ? 'selected' : '' }} 
+        {{ in_array($item->status, ['pending', 'callback_requested']) ? 'disabled' : '' }}>
+        Shipped
+    </option>
+
+    {{-- Completed: Disabled if unpaid or awaiting callback --}}
+    <option value="completed" {{ $item->status === 'completed' ? 'selected' : '' }} 
+        {{ in_array($item->status, ['pending', 'callback_requested']) ? 'disabled' : '' }}>
+        Completed
+    </option>
+
+    {{-- Canceled: Only enabled if unpaid. Disabled once the item enters processing --}}
+    <option value="canceled" {{ $item->status === 'canceled' ? 'selected' : '' }} 
+        {{ $item->status === 'processing' ? 'disabled' : '' }}>
+        Canceled
+    </option>
+    
+</select>
                                                     </form>
                                                 @endif
                                             </td>

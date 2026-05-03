@@ -66,47 +66,48 @@ class OrderController extends Controller
     /**
      * Update order item status safely.
      */
-    public function updateItemStatus(Request $request, string $orderItemId)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,processing,shipped,completed,canceled'
-        ]);
+   public function updateItemStatus(Request $request, string $orderItemId)
+{
+    $request->validate([
+        'status' => 'required|in:pending,processing,shipped,completed,canceled,callback_requested'
+    ]);
 
-        $shopId = Auth::user()->shop->id;
-        $newStatus = $request->status;
+    $shopId = Auth::user()->shop->id;
+    $newStatus = $request->status;
 
-        // Use a database transaction to acquire a lock immediately
-        return DB::transaction(function () use ($shopId, $orderItemId, $newStatus) {
-            
-            // 1. Lock the order item for update immediately
-            $item = OrderItem::where('shop_id', $shopId)
-                ->lockForUpdate()
-                ->findOrFail($orderItemId);
+    return DB::transaction(function () use ($shopId, $orderItemId, $newStatus) {
+        
+        $item = OrderItem::where('shop_id', $shopId)
+            ->lockForUpdate()
+            ->findOrFail($orderItemId);
 
-            // 2. Security Check: If it is already processing (paid), restrict back-actions
-            if ($item->status === 'processing') {
-                
-                // Block moving back to pending
-                if ($newStatus === 'pending') {
-                    abort(403, 'Cannot change a paid item back to pending.');
-                }
-
-                // Block cancelling paid items from the vendor panel
-                if ($newStatus === 'canceled') {
-                    abort(403, 'Cannot cancel an order item that has already been paid for.');
-                }
+        // --- UPDATED SECURITY CHECK: Prevent processing unpaid or callback orders ---
+        if (in_array($item->status, ['pending', 'callback_requested'])) {
+            // If the item is unpaid or awaiting a call, the shop CANNOT advance it
+            if (in_array($newStatus, ['processing', 'shipped', 'completed'])) {
+                abort(403, 'Cannot fulfill or process an item that has not been paid for yet.');
             }
+        }
 
-            // 3. Security Check: Block updating items that are already completed or canceled
-            if (in_array($item->status, ['completed', 'canceled'])) {
-                abort(403, "Cannot modify an item that is already marked as {$item->status}.");
+        // 2. Existing Security Check: If it is already processing (paid), restrict back-actions
+        if ($item->status === 'processing') {
+            if (in_array($newStatus, ['pending', 'callback_requested'])) {
+                abort(403, 'Cannot change a paid item back to pending or callback status.');
             }
+            if ($newStatus === 'canceled') {
+                abort(403, 'Cannot cancel an order item that has already been paid for.');
+            }
+        }
 
-            // 4. Update and save
-            $item->status = $newStatus;
-            $item->save(); 
+        // 3. Existing Security Check: Block updating terminal states
+        if (in_array($item->status, ['completed', 'canceled'])) {
+            abort(403, "Cannot modify an item that is already marked as {$item->status}.");
+        }
 
-            return back()->with('success', "Item status updated to {$newStatus}.");
-        });
-    }
+        $item->status = $newStatus;
+        $item->save(); 
+
+        return back()->with('success', "Item status updated to {$newStatus}.");
+    });
+}
 }
