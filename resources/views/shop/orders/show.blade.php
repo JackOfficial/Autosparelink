@@ -16,34 +16,36 @@
         .status-select { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 10px; font-weight: bold; }
         .status-select option { color: #333; }
 
+        .item-status-select { font-size: 0.85rem; border-radius: 8px; padding: 0.35rem 0.5rem; }
+
         .bg-light-soft { background-color: #f8f9fa; }
         
         @media print {
-            .btn, .status-control-card, nav, .breadcrumb { display: none !important; }
+            .btn, .status-control-card, nav, .breadcrumb, .no-print { display: none !important; }
             .card { border: 1px solid #ddd !important; shadow: none !important; }
             .container-fluid { padding: 0 !important; }
         }
 
         .img-stack-container {
-    position: relative;
-    width: 65px; /* Adjust based on your take(3) and offset */
-    height: 45px;
-}
+            position: relative;
+            width: 65px; 
+            height: 45px;
+        }
 
-.stack-img {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #fff;
-    position: absolute;
-    transition: transform 0.2s;
-}
+        .stack-img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            position: absolute;
+            transition: transform 0.2s;
+        }
 
-.stack-img:hover {
-    transform: translateY(-5px);
-    z-index: 20 !important;
-}
+        .stack-img:hover {
+            transform: translateY(-5px);
+            z-index: 20 !important;
+        }
     </style>
     @endpush
 
@@ -57,6 +59,11 @@
         $city = $order->city ?? $order->address->city ?? '';
         $country = $order->country ?? $order->address->country ?? '';
         $initial = strtoupper(substr($customerName, 0, 1));
+
+        // Subtotal calculation for the shop's items only
+        $shopSubtotal = $order->orderItems->sum(function($item) {
+            return $item->quantity * $item->unit_price;
+        });
     @endphp
 
     <div class="container-fluid py-4">
@@ -69,15 +76,15 @@
                         <li class="breadcrumb-item active">#{{ $order->id }}</li>
                     </ol>
                 </nav>
-                <h2 class="h3 mb-0 fw-bold">Order Details</h2>
+                <div class="d-flex align-items-center gap-2">
+                    <h2 class="h3 mb-0 fw-bold">Order Details</h2>
+                    <span class="badge bg-secondary text-uppercase">{{ str_replace('_', ' ', $order->status) }}</span>
+                </div>
             </div>
-            <div class="mt-3 mt-md-0 d-flex gap-2">
-                <button onclick="window.print()" class="btn btn-white border shadow-sm">
+            <div class="mt-3 mt-md-0 d-flex gap-2 no-print">
+                <button onclick="window.print()" class="btn btn-white border shadow-sm bg-white">
                     <i class="fas fa-print me-1 text-muted"></i> Print Invoice
                 </button>
-                <a href="{{ route('shop.orders.edit', $order->id) }}" class="btn btn-primary shadow-sm px-4">
-                    <i class="fas fa-edit me-1"></i> Edit Status
-                </a>
             </div>
         </div>
 
@@ -94,72 +101,116 @@
             </div>
         @endif
 
+        {{-- Success/Error Alerts for Status Changes --}}
+        @if(session('success'))
+            <div class="alert alert-success border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
+            </div>
+        @endif
+
         <div class="row g-4">
             <div class="col-lg-8">
                 {{-- Items Table --}}
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-white py-3 border-bottom">
-        <h6 class="mb-0 fw-bold text-uppercase small text-muted">
-            <i class="fas fa-shopping-basket me-2 text-primary"></i> Cart Items
-        </h6>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead class="bg-light-soft">
-                    <tr>
-                        <th class="ps-4 border-0 small text-muted">Product</th>
-                        <th class="text-center border-0 small text-muted">Qty</th>
-                        <th class="text-end border-0 small text-muted">Unit Price</th>
-                        <th class="text-end pe-4 border-0 small text-muted">Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-    @foreach($order->orderItems as $item)
-        <tr>
-            <td class="ps-4">
-                <div class="d-flex align-items-center">
-                    {{-- Part Image Logic --}}
-                    <div class="me-4 img-stack-container">
-                        @forelse($item->part->photos->take(3) as $index => $photo)
-                            <img src="{{ asset('storage/' . $photo->file_path) }}" 
-                                 class="stack-img shadow-sm" 
-                                 style="left: {{ $index * 12 }}px; z-index: {{ 10 - $index }};"
-                                 alt="Part Image">
-                        @empty
-                            <div class="bg-light rounded border d-flex align-items-center justify-content-center text-muted shadow-sm" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="fa fa-image small opacity-50"></i>
-                            </div>
-                        @endforelse
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h6 class="mb-0 fw-bold text-uppercase small text-muted">
+                            <i class="fas fa-shopping-basket me-2 text-primary"></i> Cart Items
+                        </h6>
                     </div>
-                    
-                    <div>
-                        <div class="fw-bold text-dark">{{ $item->part->part_name ?? 'Product Deleted' }}</div>
-                        <div class="text-muted" style="font-size: 0.75rem;">
-                            <span class="badge bg-light text-dark border-0 fw-normal">SKU: {{ $item->part->sku ?? 'N/A' }}</span>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="bg-light-soft">
+                                    <tr>
+                                        <th class="ps-4 border-0 small text-muted">Product</th>
+                                        <th class="text-center border-0 small text-muted">Qty</th>
+                                        <th class="text-end border-0 small text-muted">Unit Price</th>
+                                        <th class="text-end border-0 small text-muted">Subtotal</th>
+                                        <th class="text-center border-0 small text-muted no-print" style="width: 200px;">Item Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($order->orderItems as $item)
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center">
+                                                    {{-- Part Image Logic --}}
+                                                    <div class="me-4 img-stack-container">
+                                                        @forelse($item->part->photos->take(3) as $index => $photo)
+                                                            <img src="{{ asset('storage/' . $photo->file_path) }}" 
+                                                                 class="stack-img shadow-sm" 
+                                                                 style="left: {{ $index * 12 }}px; z-index: {{ 10 - $index }};"
+                                                                 alt="Part Image">
+                                                        @empty
+                                                            <div class="bg-light rounded border d-flex align-items-center justify-content-center text-muted shadow-sm" 
+                                                                 style="width: 40px; height: 40px;">
+                                                                <i class="fa fa-image small opacity-50"></i>
+                                                            </div>
+                                                        @endforelse
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <div class="fw-bold text-dark">{{ $item->part->part_name ?? 'Product Deleted' }}</div>
+                                                        <div class="text-muted" style="font-size: 0.75rem;">
+                                                            <span class="badge bg-light text-dark border-0 fw-normal">SKU: {{ $item->part->sku ?? 'N/A' }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center fw-bold">{{ $item->quantity }}</td>
+                                            <td class="text-end text-nowrap">{{ number_format($item->unit_price) }} <span class="small text-muted">RWF</span></td>
+                                            <td class="text-end fw-bold text-dark text-nowrap">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
+                                            <td class="text-center no-print">
+                                                {{-- Guard against updating completed/canceled items --}}
+                                                @if(in_array($item->status, ['completed', 'canceled']))
+                                                    <span class="badge bg-{{ $item->status === 'completed' ? 'success' : 'secondary' }} py-2 px-3">
+                                                        {{ strtoupper($item->status) }}
+                                                    </span>
+                                                @else
+                                                    <form action="{{ route('shop.orders.items.update-status', $item->id) }}" method="POST">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <select name="status" class="form-select form-select-sm item-status-select" onchange="this.form.submit()">
+                                                            <option value="pending" {{ $item->status === 'pending' ? 'selected' : '' }} {{ $item->status === 'processing' ? 'disabled' : '' }}>Pending</option>
+                                                            <option value="processing" {{ $item->status === 'processing' ? 'selected' : '' }}>Processing</option>
+                                                            <option value="shipped" {{ $item->status === 'shipped' ? 'selected' : '' }}>Shipped</option>
+                                                            <option value="completed" {{ $item->status === 'completed' ? 'selected' : '' }}>Completed</option>
+                                                            <option value="canceled" {{ $item->status === 'canceled' ? 'selected' : '' }} {{ $item->status === 'processing' ? 'disabled' : '' }}>Canceled</option>
+                                                        </select>
+                                                    </form>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot class="bg-light-soft">
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold py-2 border-0">Items Subtotal:</td>
+                                        <td colspan="2" class="text-end pe-4 fw-bold py-2 border-0">{{ number_format($shopSubtotal) }} RWF</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold py-2 border-0">Delivery Fee:</td>
+                                        <td colspan="2" class="text-end pe-4 fw-bold py-2 border-0">{{ number_format($order->delivery_price ?? 0) }} RWF</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold py-3 border-top border-secondary-subtle">Total Amount:</td>
+                                        <td colspan="2" class="text-end pe-4 fw-bold text-primary h5 py-3 border-top border-secondary-subtle">
+                                            {{ number_format($shopSubtotal + ($order->delivery_price ?? 0)) }} RWF
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </td>
-            <td class="text-center fw-bold">{{ $item->quantity }}</td>
-            <td class="text-end text-nowrap">{{ number_format($item->unit_price) }} <span class="small text-muted">RWF</span></td>
-            <td class="text-end pe-4 fw-bold text-dark text-nowrap">{{ number_format($item->quantity * $item->unit_price) }} RWF</td>
-        </tr>
-    @endforeach
-</tbody>
-                <tfoot class="bg-light-soft">
-                    <tr>
-                        <td colspan="3" class="text-end fw-bold py-3 border-0">Total Amount:</td>
-                        <td class="text-end pe-4 fw-bold text-primary h5 py-3 border-0">{{ number_format($order->total_amount) }} RWF</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
-</div>
 
-                <div class="row g-4">
+                <div class="row g-4 mb-4 mb-lg-0">
                     {{-- Payment Status --}}
                     <div class="col-md-6">
                         <div class="card shadow-sm h-100">
@@ -213,92 +264,74 @@
             </div>
 
             <div class="col-lg-4">
-                {{-- Quick Status Toggle --}}
-                <div class="card shadow-sm status-control-card mb-4 border-0">
-                    <div class="card-body text-center p-4">
-                        <h6 class="text-uppercase mb-3 fw-bold opacity-75 small">Change Status</h6>
-                        <form action="{{ route('shop.orders.update', $order->id) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <select name="status" class="form-select form-select-lg status-select shadow-none mb-0" onchange="this.form.submit()">
-                                @foreach(['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'callback_requested'] as $stat)
-                                    <option value="{{ $stat }}" {{ $order->status == $stat ? 'selected' : '' }}>
-                                        {{ ucfirst(str_replace('_', ' ', $stat)) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </form>
-                    </div>
-                </div>
-
                 {{-- Customer Profile Card --}}
-               <div class="card shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <span class="fw-bold small text-muted text-uppercase">Customer Profile</span>
-        @if(!$order->user_id)
-            <span class="badge bg-secondary rounded-pill" style="font-size: 0.6rem;">GUEST</span>
-        @endif
-    </div>
-    
-    <div class="card-body p-4">
-        {{-- Avatar & Identity Section --}}
-        <div class="d-flex align-items-center mb-4">
-            <div class="me-3 position-relative">
-                @if($order->user && $order->user->avatar)
-                    <img src="{{ $order->user->avatar }}" 
-                         alt="{{ $customerName }}" 
-                         class="rounded-circle shadow-sm object-fit-cover" 
-                         style="width: 55px; height: 55px; border: 2px solid #fff;">
-                @else
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                         style="width: 55px; height: 55px; font-size: 1.2rem; border: 2px solid #fff;">
-                        <span class="fw-bold">{{ $initial }}</span>
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold small text-muted text-uppercase">Customer Profile</span>
+                        @if(!$order->user_id)
+                            <span class="badge bg-secondary rounded-pill" style="font-size: 0.6rem;">GUEST</span>
+                        @endif
                     </div>
-                @endif
-                
-                <span class="position-absolute bottom-0 end-0 p-1 {{ $order->user_id ? 'bg-success' : 'bg-secondary' }} border border-white rounded-circle" 
-                      style="width: 12px; height: 12px;" 
-                      title="{{ $order->user_id ? 'Registered Member' : 'Guest' }}">
-                </span>
-            </div>
+                    
+                    <div class="card-body p-4">
+                        {{-- Avatar & Identity Section --}}
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="me-3 position-relative">
+                                @if($order->user && $order->user->avatar)
+                                    <img src="{{ $order->user->avatar }}" 
+                                         alt="{{ $customerName }}" 
+                                         class="rounded-circle shadow-sm object-fit-cover" 
+                                         style="width: 55px; height: 55px; border: 2px solid #fff;">
+                                @else
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                         style="width: 55px; height: 55px; font-size: 1.2rem; border: 2px solid #fff;">
+                                        <span class="fw-bold">{{ $initial }}</span>
+                                    </div>
+                                @endif
+                                
+                                <span class="position-absolute bottom-0 end-0 p-1 {{ $order->user_id ? 'bg-success' : 'bg-secondary' }} border border-white rounded-circle" 
+                                      style="width: 12px; height: 12px;" 
+                                      title="{{ $order->user_id ? 'Registered Member' : 'Guest' }}">
+                                </span>
+                            </div>
 
-            <div>
-                <div class="d-flex align-items-center">
-                    <h6 class="mb-0 fw-bold text-dark me-2">{{ $customerName }}</h6>
-                    @if($order->user_id)
-                        <span class="badge bg-soft-primary text-primary border border-primary-subtle rounded-pill" style="font-size: 0.65rem; padding: 0.25em 0.6em;">
-                            <i class="fas fa-user-check me-1"></i> MEMBER
-                        </span>
-                    @endif
+                            <div>
+                                <div class="d-flex align-items-center">
+                                    <h6 class="mb-0 fw-bold text-dark me-2">{{ $customerName }}</h6>
+                                    @if($order->user_id)
+                                        <span class="badge bg-soft-primary text-primary border border-primary-subtle rounded-pill" style="font-size: 0.65rem; padding: 0.25em 0.6em;">
+                                            <i class="fas fa-user-check me-1"></i> MEMBER
+                                        </span>
+                                    @endif
+                                </div>
+                                <span class="text-muted small">{{ $customerEmail }}</span>
+                            </div>
+                        </div>
+
+                        {{-- Shipping Info Section --}}
+                        <div class="mb-3">
+                            <span class="info-label">Shipping To:</span>
+                            <div class="info-value small lh-base">
+                                {{ $street }}<br>
+                                {{ $city }}{{ $city && $country ? ',' : '' }} {{ $country }}
+                            </div>
+                        </div>
+
+                        {{-- Contact Section --}}
+                        <div class="mt-4 no-print">
+                            <span class="info-label">Phone Connection</span>
+                            @if($customerPhone !== 'N/A')
+                                <a href="tel:{{ $customerPhone }}" class="btn btn-outline-primary w-100 btn-sm mt-1" style="border-radius: 8px;">
+                                    <i class="fas fa-phone-alt me-2"></i> {{ $customerPhone }}
+                                </a>
+                            @else
+                                <div class="text-muted small italic mt-1">
+                                    <i class="fas fa-info-circle me-1"></i> No contact provided
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
-                <span class="text-muted small">{{ $customerEmail }}</span>
-            </div>
-        </div>
-
-        {{-- Shipping Info Section --}}
-        <div class="mb-3">
-            <span class="info-label">Shipping To:</span>
-            <div class="info-value small lh-base">
-                {{ $street }}<br>
-                {{ $city }}{{ $city && $country ? ',' : '' }} {{ $country }}
-            </div>
-        </div>
-
-        {{-- Contact Section --}}
-        <div class="mt-4">
-            <span class="info-label">Phone Connection</span>
-            @if($customerPhone !== 'N/A')
-                <a href="tel:{{ $customerPhone }}" class="btn btn-outline-primary w-100 btn-sm mt-1" style="border-radius: 8px;">
-                    <i class="fas fa-phone-alt me-2"></i> {{ $customerPhone }}
-                </a>
-            @else
-                <div class="text-muted small italic mt-1">
-                    <i class="fas fa-info-circle me-1"></i> No contact provided
-                </div>
-            @endif
-        </div>
-    </div>
-</div>
             </div>
         </div>
     </div>
