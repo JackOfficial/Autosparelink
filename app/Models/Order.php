@@ -12,6 +12,7 @@ class Order extends Model
         'transaction_id',
         'user_id',
         'total_amount',
+        'delivery_price',
         'address_id',
         'guest_name',
         'guest_email',
