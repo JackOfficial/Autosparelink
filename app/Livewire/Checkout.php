@@ -165,11 +165,11 @@ class Checkout extends Component
                 if (Auth::check()) {
                     $address = Address::create(array_merge($this->new_address, ['user_id' => Auth::id()]));
                     $final_address_id = $address->id;
-                    // Refresh component collection to include the new address
                     $this->addresses = Auth::user()->addresses()->get();
                 }
             }
 
+            // 1. Calculate and explicitly bind the delivery rate for this order
             $shippingFee = $this->calculateAverageShippingPrice($city);
             $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
             $totalOrderAmount = $subtotal + $shippingFee;
@@ -184,11 +184,12 @@ class Checkout extends Component
 
             $localTransactionId = 'AST-' . strtoupper(Str::random(10));
 
+            // 2. Create the Order with frozen shipping_amount
             $order = Order::create([
                 'user_id'                => Auth::id(),
                 'address_id'             => $final_address_id,
                 'total_amount'           => $totalOrderAmount,
-                'shipping_amount'        => $shippingFee,
+                'shipping_amount'        => $shippingFee, // Delivery price is explicitly locked here
                 'paid_amount'            => 0,
                 'status'                 => $orderStatus,
                 'order_number'           => $localTransactionId, 
@@ -291,15 +292,17 @@ class Checkout extends Component
                 }
             }
 
+            // 1. Calculate frozen rates for the callback flow
             $shippingFee = $this->calculateAverageShippingPrice($city);
             $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
             $totalOrderAmount = $subtotal + $shippingFee;
             
+            // 2. Create Order capturing exactly what was quoted
             $order = Order::create([
                 'user_id'                => Auth::id(),
                 'address_id'             => $final_address_id,
                 'total_amount'           => $totalOrderAmount,
-                'shipping_amount'        => $shippingFee,
+                'shipping_amount'        => $shippingFee, // Permanently frozen
                 'status'                 => 'callback_requested',
                 'is_guest'               => !Auth::check(),
                 'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
