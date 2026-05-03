@@ -133,6 +133,19 @@
             </div>
         </div>
 
+        {{-- Urgent Callback Alert --}}
+@if($order->status === 'callback_requested')
+    <div class="alert alert-warning d-flex align-items-center mb-4 shadow-sm border-0 p-3" style="border-radius: 12px;">
+        <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 text-warning" style="width: 40px; height: 40px;">
+            <i class="fas fa-headset"></i>
+        </div>
+        <div>
+            <h6 class="mb-0 fw-bold">Support Action Pending</h6>
+            <span class="small">The customer requested a call. Platform administrators are resolving it directly.</span>
+        </div>
+    </div>
+@endif
+
         {{-- Success/Error Alerts --}}
         @if(session('success')) 
             <div class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4 py-3" style="border-radius: 12px;" role="alert">
@@ -370,7 +383,7 @@
                                     <h6 class="mb-0 fw-bold text-dark me-2" style="font-size: 0.95rem;">{{ $customerName }}</h6>
                                     @if($order->user_id)
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.62rem; padding: 0.25em 0.6em; font-weight: 700;">
-                                            MEMBER
+                                            <i class="fas fa-user-check me-1"></i> MEMBER
                                         </span>
                                     @endif
                                 </div>
