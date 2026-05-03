@@ -89,17 +89,17 @@
         </div>
 
         {{-- Urgent Callback Alert --}}
-        @if($order->status === 'callback_requested')
-            <div class="alert alert-danger blink_me d-flex align-items-center mb-4 shadow-sm border-0 p-3" style="border-radius: 12px;">
-                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 text-danger" style="width: 40px; height: 40px;">
-                    <i class="fas fa-phone-alt"></i>
-                </div>
-                <div>
-                    <h6 class="mb-0 fw-bold">Urgent Call Requested!</h6>
-                    <span class="small">Customer is waiting for a response at <strong>{{ $customerPhone }}</strong>.</span>
-                </div>
-            </div>
-        @endif
+@if($order->status === 'callback_requested')
+    <div class="alert alert-warning d-flex align-items-center mb-4 shadow-sm border-0 p-3" style="border-radius: 12px;">
+        <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 text-warning" style="width: 40px; height: 40px;">
+            <i class="fas fa-headset"></i>
+        </div>
+        <div>
+            <h6 class="mb-0 fw-bold">Support Action Pending</h6>
+            <span class="small">The customer requested a call. Platform administrators are resolving it directly.</span>
+        </div>
+    </div>
+@endif
 
         {{-- Success/Error Alerts for Status Changes --}}
         @if(session('success'))
@@ -303,73 +303,64 @@
 
             <div class="col-lg-4">
                 {{-- Customer Profile Card --}}
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                        <span class="fw-bold small text-muted text-uppercase">Customer Profile</span>
-                        @if(!$order->user_id)
-                            <span class="badge bg-secondary rounded-pill" style="font-size: 0.6rem;">GUEST</span>
-                        @endif
+<div class="card shadow-sm h-100">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <span class="fw-bold small text-muted text-uppercase">Customer Info</span>
+        @if(!$order->user_id)
+            <span class="badge bg-secondary rounded-pill" style="font-size: 0.6rem;">GUEST</span>
+        @endif
+    </div>
+    
+    <div class="card-body p-4">
+        {{-- Avatar & Identity Section --}}
+        <div class="d-flex align-items-center mb-4">
+            <div class="me-3 position-relative">
+                @if($order->user && $order->user->avatar)
+                    <img src="{{ $order->user->avatar }}" 
+                         alt="{{ $customerName }}" 
+                         class="rounded-circle shadow-sm object-fit-cover" 
+                         style="width: 55px; height: 55px; border: 2px solid #fff;">
+                @else
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                         style="width: 55px; height: 55px; font-size: 1.2rem; border: 2px solid #fff;">
+                        <span class="fw-bold">{{ $initial }}</span>
                     </div>
-                    
-                    <div class="card-body p-4">
-                        {{-- Avatar & Identity Section --}}
-                        <div class="d-flex align-items-center mb-4">
-                            <div class="me-3 position-relative">
-                                @if($order->user && $order->user->avatar)
-                                    <img src="{{ $order->user->avatar }}" 
-                                         alt="{{ $customerName }}" 
-                                         class="rounded-circle shadow-sm object-fit-cover" 
-                                         style="width: 55px; height: 55px; border: 2px solid #fff;">
-                                @else
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                                         style="width: 55px; height: 55px; font-size: 1.2rem; border: 2px solid #fff;">
-                                        <span class="fw-bold">{{ $initial }}</span>
-                                    </div>
-                                @endif
-                                
-                                <span class="position-absolute bottom-0 end-0 p-1 {{ $order->user_id ? 'bg-success' : 'bg-secondary' }} border border-white rounded-circle" 
-                                      style="width: 12px; height: 12px;" 
-                                      title="{{ $order->user_id ? 'Registered Member' : 'Guest' }}">
-                                </span>
-                            </div>
+                @endif
+            </div>
 
-                            <div>
-                                <div class="d-flex align-items-center">
-                                    <h6 class="mb-0 fw-bold text-dark me-2">{{ $customerName }}</h6>
-                                    @if($order->user_id)
-                                        <span class="badge bg-soft-primary text-primary border border-primary-subtle rounded-pill" style="font-size: 0.65rem; padding: 0.25em 0.6em;">
-                                            <i class="fas fa-user-check me-1"></i> MEMBER
-                                        </span>
-                                    @endif
-                                </div>
-                                <span class="text-muted small">{{ $customerEmail }}</span>
-                            </div>
-                        </div>
-
-                        {{-- Shipping Info Section --}}
-                        <div class="mb-3">
-                            <span class="info-label">Shipping To:</span>
-                            <div class="info-value small lh-base">
-                                {{ $street }}<br>
-                                {{ $city }}{{ $city && $country ? ',' : '' }} {{ $country }}
-                            </div>
-                        </div>
-
-                        {{-- Contact Section --}}
-                        <div class="mt-4 no-print">
-                            <span class="info-label">Phone Connection</span>
-                            @if($customerPhone !== 'N/A')
-                                <a href="tel:{{ $customerPhone }}" class="btn btn-outline-primary w-100 btn-sm mt-1" style="border-radius: 8px;">
-                                    <i class="fas fa-phone-alt me-2"></i> {{ $customerPhone }}
-                                </a>
-                            @else
-                                <div class="text-muted small italic mt-1">
-                                    <i class="fas fa-info-circle me-1"></i> No contact provided
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+            <div>
+                <div class="d-flex align-items-center">
+                    <h6 class="mb-0 fw-bold text-dark me-2">{{ $customerName }}</h6>
+                    @if($order->user_id)
+                        <span class="badge bg-soft-primary text-primary border border-primary-subtle rounded-pill" style="font-size: 0.65rem; padding: 0.25em 0.6em;">
+                            <i class="fas fa-user-check me-1"></i> MEMBER
+                        </span>
+                    @endif
                 </div>
+                <span class="text-muted small">Customer ID: #{{ $order->user_id ?? 'Guest' }}</span>
+            </div>
+        </div>
+
+        {{-- General Location Info Section --}}
+        <div class="mb-3">
+            <span class="info-label">Destination Region:</span>
+            <div class="info-value small lh-base text-dark">
+                {{ $city }}{{ $city && $country ? ',' : '' }} {{ $country }}<br>
+                <span class="text-muted" style="font-size: 0.8rem;">
+                    <i class="fas fa-shield-alt me-1"></i> Exact address hidden (Managed by Admin)
+                </span>
+            </div>
+        </div>
+
+        {{-- Hidden Contact Section --}}
+        <div class="mt-4 no-print">
+            <span class="info-label">Support</span>
+            <div class="p-2 border rounded bg-light-soft text-center text-muted" style="font-size: 0.8rem;">
+                <i class="fas fa-info-circle me-1"></i> For any delivery issues, contact platform support.
+            </div>
+        </div>
+    </div>
+</div>
             </div>
         </div>
     </div>
