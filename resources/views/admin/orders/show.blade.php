@@ -62,7 +62,7 @@
         margin-top: 4px;
     }
     
-    /* Order Stepper - Now supporting 5 standard stages */
+    /* Order Stepper - Supporting standard stages */
     .stepper-wrapper { display: flex; justify-content: space-between; margin-bottom: 2rem; padding: 0 1rem; }
     .stepper-item { position: relative; display: flex; flex-direction: column; align-items: center; flex: 1; }
     .stepper-item::before { position: absolute; content: ""; border-bottom: 2px solid #e9ecef; width: 100%; top: 18px; left: -50%; z-index: 1; }
@@ -108,11 +108,13 @@
     $country = $order->country ?? $order->address->country ?? '';
     $initial = strtoupper(substr($customerName, 0, 1));
 
-    // Refined Stepper logic - explicitly handling 'completed' & 'canceled' casing
     $statuses = ['pending', 'processing', 'shipped', 'delivered', 'completed'];
     $currentStatus = strtolower($order->status);
     $currentIdx = array_search($currentStatus, $statuses);
     $isPaid = $order->payment && $order->payment->status === 'successful';
+
+    // Fallback for Delivery Fee calculation
+    $deliveryFee = $order->delivery_price ?? $order->shipping_fee ?? $order->shipping_price ?? 0;
 @endphp
 
 <div class="container-fluid py-4">
@@ -282,7 +284,19 @@
                             </tbody>
                             <tfoot style="background: #fcfcfd; border-top: 2px solid #f1f4f8;">
                                 <tr>
-                                    <td colspan="4" class="text-right font-weight-bold py-3 text-muted">ORDER TOTAL:</td>
+                                    <td colspan="4" class="text-right font-weight-bold py-2 text-muted">ITEMS SUBTOTAL:</td>
+                                    <td class="text-right px-4 font-weight-bold text-dark py-2">
+                                        {{ number_format($order->orderItems->sum(fn($i) => $i->quantity * $i->unit_price)) }} RWF
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-right font-weight-bold py-2 text-muted">DELIVERY PRICE:</td>
+                                    <td class="text-right px-4 font-weight-bold text-dark py-2">
+                                        {{ number_format($deliveryFee) }} RWF
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-right font-weight-bold py-3 text-muted">TOTAL AMOUNT:</td>
                                     <td class="text-right px-4 h5 font-weight-bold text-primary py-3">
                                         {{ number_format($order->total_amount) }} RWF
                                     </td>
@@ -350,78 +364,130 @@
         </div>
 
         {{-- Sidebar Controls --}}
-<div class="col-lg-4">
-    <div class="card shadow-sm status-control-card mb-4 no-print" style="border-top-color: {{ $isPaid ? 'var(--primary-deep)' : '#f08c00' }};">
-        <div class="card-body p-4">
+        <div class="col-lg-4">
+            {{-- 1. Status Management Card --}}
+            <div class="card shadow-sm status-control-card mb-4 no-print" style="border-top-color: {{ $isPaid ? 'var(--primary-deep)' : '#f08c00' }};">
+                <div class="card-body p-4">
+                    
+                    @if($currentStatus === 'canceled')
+                        {{-- Order is Canceled --}}
+                        <div class="alert bg-danger-soft text-danger text-center border-0 mb-0 py-3">
+                            <i class="fas fa-ban fa-2x mb-2"></i>
+                            <div class="font-weight-bold h6 mb-1">Canceled</div>
+                            <small class="d-block">This order is non-actionable.</small>
+                        </div>
+
+                    @elseif($currentStatus === 'completed')
+                        {{-- Order is Completed --}}
+                        <div class="alert bg-success-soft text-success text-center border-0 mb-0 py-3">
+                            <i class="fas fa-check-double fa-2x mb-2"></i>
+                            <div class="font-weight-bold h6 mb-1">Order Complete</div>
+                            <small class="d-block mb-1">Transaction accepted by customer</small>
+                            <hr class="my-2" style="border-top: 1px solid rgba(40, 167, 69, 0.2);">
+                            <p class="extra-small mb-0 text-uppercase font-weight-bold">Payment Released to Vendor</p>
+                        </div>
+
+                    @elseif($currentStatus === 'callback_requested')
+                        {{-- Explicit Callback Display & Action --}}
+                        <div class="alert text-center border-0 mb-0 py-3" style="background: rgba(201, 42, 42, 0.1); color: #c92a2a;">
+                            <i class="fas fa-phone-volume fa-2x mb-2 text-danger blink_me"></i>
+                            <div class="font-weight-bold h6 mb-1">Callback Action</div>
+                            <small class="d-block text-muted mb-3">Customer requested direct callback. Call them at <strong>{{ $customerPhone }}</strong> immediately.</small>
+                        </div>
+
+                        {{-- Allows admin to move out of callback requested once handled or paid --}}
+                        <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mt-3">
+                            @csrf @method('PUT')
+                            <select name="status" class="form-control status-select shadow-none mb-3" onchange="this.form.submit()">
+                                <option value="callback_requested" selected>Callback Requested</option>
+                                <option value="pending">Pending Payment</option>
+                                <option value="canceled">Cancel Order</option>
+                            </select>
+                        </form>
+
+                    @elseif(!$isPaid)
+                        {{-- Order is UNPAID / Pending --}}
+                        <div class="alert bg-warning-soft text-warning text-center border-0 mb-0 py-3" style="background: rgba(245, 159, 0, 0.1); color: #f59f00;">
+                            <i class="fas fa-hourglass-half fa-2x mb-2 text-warning"></i>
+                            <div class="font-weight-bold h6 mb-1 text-dark">Awaiting Payment</div>
+                            <small class="d-block text-muted mb-3">The admin cannot process this order until the customer completes the payment.</small>
+                        </div>
+
+                        {{-- Admin can ONLY cancel the order if it's unpaid --}}
+                        <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mt-3">
+                            @csrf @method('PUT')
+                            <input type="hidden" name="status" value="canceled">
+                            <button type="submit" class="btn btn-outline-danger btn-block py-2 font-weight-bold shadow-sm" onclick="return confirm('Are you sure you want to cancel this unpaid order?')">
+                                <i class="fas fa-times-circle mr-2"></i> Cancel Order
+                            </button>
+                        </form>
+
+                    @else
+                        {{-- Order IS PAID & active (Processing, Shipped, or Delivered) --}}
+                        <span class="info-label text-center mb-3">Update Order Progress</span>
+                        
+                        <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mb-3">
+                            @csrf @method('PUT')
+                            <select name="status" class="form-control status-select shadow-none mb-3" onchange="this.form.submit()">
+                                @foreach(['processing', 'shipped', 'delivered', 'canceled'] as $stat)
+                                    <option value="{{ $stat }}" {{ $currentStatus === $stat ? 'selected' : '' }}>
+                                        {{ ucfirst(str_replace('_', ' ', $stat)) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+
+                        @if($currentStatus === 'delivered')
+                            <form action="{{ route('admin.orders.finalize', $order->id) }}" method="POST" class="mt-2">
+                                @csrf
+                                <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm">
+                                    <i class="fas fa-handshake mr-2"></i> Confirm Customer Accepted
+                                </button>
+                                <p class="text-muted small text-center mt-2 mb-0">Releases vendor wallet balance directly.</p>
+                            </form>
+                        @endif
+
+                    @endif
+                </div>
+            </div>
+
+            {{-- 2. Complete Customer Info Card (Always visible, even in callback requests) --}}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-user-circle mr-2 text-primary"></i> Customer Contact
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center mr-3 font-weight-bold" 
+                             style="width: 42px; height: 42px; font-size: 1.1rem; border: 1px solid #eef2f7;">
+                            {{ $initial }}
+                        </div>
+                        <div>
+                            <h6 class="mb-0 font-weight-bold text-dark">{{ $customerName }}</h6>
+                            <span class="text-muted small">{{ $customerEmail }}</span>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-3" style="border-top: 1px solid #f1f4f8;">
+                    
+                    <div class="mb-3">
+                        <span class="info-label">Direct Phone Line</span>
+                        <span class="info-value font-weight-bold text-dark" style="font-size: 1.05rem;">
+                            <i class="fas fa-phone mr-1 text-primary"></i> {{ $customerPhone }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <span class="info-label">Delivery Destination</span>
+                        <span class="info-value text-muted" style="font-size: 0.85rem;">
+                            <i class="fas fa-map-marker-alt mr-1 text-danger"></i> 
+                            {{ $street }}, {{ $city }} {{ $country }}
+                        </span>
+                    </div>
+                </div>
+            </div>
             
-            @if($currentStatus === 'canceled')
-                {{-- Order is Canceled --}}
-                <div class="alert bg-danger-soft text-danger text-center border-0 mb-0 py-3">
-                    <i class="fas fa-ban fa-2x mb-2"></i>
-                    <div class="font-weight-bold h6 mb-1">Canceled</div>
-                    <small class="d-block">This order is non-actionable.</small>
-                </div>
-
-            @elseif($currentStatus === 'completed')
-                {{-- Order is Completed --}}
-                <div class="alert bg-success-soft text-success text-center border-0 mb-0 py-3">
-                    <i class="fas fa-check-double fa-2x mb-2"></i>
-                    <div class="font-weight-bold h6 mb-1">Order Complete</div>
-                    <small class="d-block mb-1">Transaction accepted by customer</small>
-                    <hr class="my-2" style="border-top: 1px solid rgba(40, 167, 69, 0.2);">
-                    <p class="extra-small mb-0 text-uppercase font-weight-bold">Payment Released to Vendor</p>
-                </div>
-
-            @elseif(!$isPaid)
-                {{-- Order is UNPAID --}}
-                <div class="alert bg-warning-soft text-warning text-center border-0 mb-0 py-3" style="background: rgba(245, 159, 0, 0.1); color: #f59f00;">
-                    <i class="fas fa-hourglass-half fa-2x mb-2 text-warning"></i>
-                    <div class="font-weight-bold h6 mb-1 text-dark">Awaiting Payment</div>
-                    <small class="d-block text-muted mb-3">The admin cannot process this order until the customer completes the payment.</small>
-                </div>
-
-                {{-- Admin can ONLY cancel the order if it's unpaid --}}
-                <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mt-3">
-                    @csrf @method('PUT')
-                    <input type="hidden" name="status" value="canceled">
-                    <button type="submit" class="btn btn-outline-danger btn-block py-2 font-weight-bold shadow-sm" onclick="return confirm('Are you sure you want to cancel this unpaid order?')">
-                        <i class="fas fa-times-circle mr-2"></i> Cancel Order
-                    </button>
-                </form>
-
-            @else
-                {{-- Order IS PAID & active (Processing, Shipped, or Delivered) --}}
-                <span class="info-label text-center mb-3">Update Order Progress</span>
-                
-                <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="mb-3">
-                    @csrf @method('PUT')
-                    <select name="status" class="form-control status-select shadow-none mb-3" onchange="this.form.submit()">
-                        {{-- Admin can only move between advanced active statuses or cancel --}}
-                        @foreach(['processing', 'shipped', 'delivered', 'canceled'] as $stat)
-                            <option value="{{ $stat }}" {{ $currentStatus === $stat ? 'selected' : '' }}>
-                                {{ ucfirst(str_replace('_', ' ', $stat)) }}
-                            </option>
-                        @endforeach
-                    </select>
-                </form>
-
-                {{-- Delivered action button to trigger Finalize --}}
-                @if($currentStatus === 'delivered')
-                    <form action="{{ route('admin.orders.finalize', $order->id) }}" method="POST" class="mt-2">
-                        @csrf
-                        <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm">
-                            <i class="fas fa-handshake mr-2"></i> Confirm Customer Accepted
-                        </button>
-                        <p class="text-muted small text-center mt-2 mb-0">Releases vendor wallet balance directly.</p>
-                    </form>
-                @endif
-
-            @endif
         </div>
-    </div>
-    
-    {{-- Rest of Customer Card & Activity Feed remains unchanged --}}
-</div>
     </div>
 </div>
 @endsection
