@@ -23,7 +23,8 @@
         "livewire/livewire": "^3.7",
         "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-permission": "^6.21",
-        "staudenmeir/eloquent-has-many-deep": "^1.21"
+        "staudenmeir/eloquent-has-many-deep": "^1.21",
+        "sweetalert2/laravel": "^1.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

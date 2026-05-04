@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Gloudemans\Shoppingcart\Facades\Cart;
+use SweetAlert2\Laravel\Swal; // Import the SweetAlert2 Facade
 
 class ProductInfo extends Component
 {
@@ -25,7 +26,7 @@ class ProductInfo extends Component
         $this->part = $part;
         $this->shareUrl  = urlencode(request()->fullUrl());
         
-        // Update: Use unit_price (Markup Price) for the share text
+        // Use unit_price (Markup Price) for the share text
         $this->shareText = urlencode($this->part->part_name . ' - Only ' . number_format($this->part->unit_price, 0) . ' RWF');
     }
 
@@ -33,6 +34,12 @@ class ProductInfo extends Component
     {
         if ($this->quantity < $this->part->stock_quantity) {
             $this->quantity++;
+        } else {
+            Swal::warning([
+                'title' => 'Stock Limit',
+                'text' => "We only have {$this->part->stock_quantity} available in stock.",
+                'timer' => 2500
+            ]);
         }
     }
 
@@ -46,7 +53,11 @@ class ProductInfo extends Component
     public function addToCart()
     {
         if ($this->quantity > $this->part->stock_quantity) {
-            $this->dispatch('notify', message: 'Not enough stock available!');
+            Swal::error([
+                'title' => 'Out of Stock',
+                'text' => 'Not enough stock available to fulfill your request.',
+                'timer' => 3000
+            ]);
             return;
         }
 
@@ -56,8 +67,7 @@ class ProductInfo extends Component
             'id'      => $this->part->id,
             'name'    => $this->part->part_name,
             'qty'     => $this->quantity,
-            // Update: Pass the unit_price (Markup Price) to the cart
-            'price'   => $this->part->unit_price,
+            'price'   => (float) $this->part->unit_price,
             'weight'  => 0,
             'options' => [
                 'brand'         => $this->part->partBrand?->name,
@@ -66,7 +76,7 @@ class ProductInfo extends Component
                 'shop_name'     => $this->part->shop?->shop_name,
                 'shop_id'       => $this->part->shop_id,
                 'shop_location' => $this->part->shop?->address,
-                'base_price'    => $this->part->price, // Optional: keep record of original cost
+                'base_price'    => (float) $this->part->price,
             ]
         ]);
 
@@ -74,8 +84,17 @@ class ProductInfo extends Component
             $this->syncCartWithDatabase('default');
         }
 
+        // Beautiful Toast confirmation
+        Swal::success([
+            'title' => 'Done!',
+            'text' => 'Item added to your cart!',
+            'timer' => 2000,
+            'toast' => true,
+            'position' => 'top-end',
+            'showConfirmButton' => false
+        ]);
+
         $this->dispatch('cartUpdated');
-        $this->dispatch('notify', message: 'Item added to cart!');
     }
 
     public function addToWishlist()
@@ -85,7 +104,12 @@ class ProductInfo extends Component
             ->isNotEmpty();
 
         if ($exists) {
-            $this->dispatch('notify', message: 'Already in wishlist.');
+            Swal::info([
+                'text' => 'Item is already in your wishlist.',
+                'toast' => true,
+                'position' => 'top-end',
+                'timer' => 2500
+            ]);
             return;
         }
 
@@ -93,8 +117,7 @@ class ProductInfo extends Component
             'id'      => $this->part->id,
             'name'    => $this->part->part_name,
             'qty'     => 1,
-            // Update: Use unit_price for wishlist accuracy
-            'price'   => $this->part->unit_price,
+            'price'   => (float) $this->part->unit_price,
             'weight'  => 0,
             'options' => [
                 'brand'         => $this->part->partBrand?->name,
@@ -108,8 +131,16 @@ class ProductInfo extends Component
             $this->syncCartWithDatabase('wishlist');
         }
 
+        Swal::success([
+            'title' => 'Saved!',
+            'text' => 'Added to your wishlist.',
+            'timer' => 2000,
+            'toast' => true,
+            'position' => 'top-end',
+            'showConfirmButton' => false
+        ]);
+
         $this->dispatch('wishlistUpdated');
-        $this->dispatch('notify', message: 'Added to wishlist!');
     }
 
     protected function syncCartWithDatabase($instance)
