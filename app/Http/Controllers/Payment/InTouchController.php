@@ -97,7 +97,7 @@ class InTouchController extends Controller
                     // C. Handle Items & Inventory
                     foreach ($order->orderItems as $item) {
                         if ($item->status != 'completed') {
-                            $item->status = 'pending';
+                            $item->status = 'processing';
                             $item->save(); 
 
                             if ($item->part) {
