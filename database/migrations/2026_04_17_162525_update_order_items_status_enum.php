@@ -15,6 +15,7 @@ return new class extends Migration
             // Adding 'disputed' and 'returned' to the allowed statuses
             $table->enum('status', [
                 'pending', 
+                'processing', 
                 'packed', 
                 'ready_for_pickup', 
                 'collected', 
@@ -42,6 +43,7 @@ return new class extends Migration
         Schema::table('order_items', function (Blueprint $table) {
             $table->enum('status', [
                 'pending', 
+                'processing', 
                 'packed', 
                 'ready_for_pickup', 
                 'collected', 
