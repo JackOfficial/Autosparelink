@@ -202,6 +202,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::prefix('user')->name('user.')->group(function () {
          Route::resource('orders', OrderController::class);
+         Route::get('orders/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
+         Route::post('orders/{order}/pay', [OrderController::class, 'processPayment'])->name('orders.process-payment');
          Route::resource('addresses', UserAddressController::class);
          Route::resource('vehicles', VehicleController::class);
          Route::resource('tickets', TicketController::class);

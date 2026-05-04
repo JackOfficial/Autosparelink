@@ -55,6 +55,7 @@ class Checkout extends Component
 
     public function updated($propertyName)
     {
+        // Re-calculate the total if relevant fields change.
         if (in_array($propertyName, ['address_id', 'use_new_address', 'new_address.city'])) {
             $city = $this->getCurrentCity();
             $shippingFee = $this->calculateAverageShippingPrice($city);
@@ -97,11 +98,14 @@ class Checkout extends Component
 
         $totalShipping = 0;
         $validItemCount = 0;
-
         $fallbackFee = (strtolower(trim($city)) === 'kigali') ? 3000 : 5000;
 
+        // Optimized Query: Load all categories in one trip to the database
+        $itemIds = $cartItems->pluck('id')->toArray();
+        $parts = Part::with('category')->whereIn('id', $itemIds)->get()->keyBy('id');
+
         foreach ($cartItems as $item) {
-            $part = Part::with('category')->find($item->id);
+            $part = $parts->get($item->id);
 
             if ($part) {
                 if ($part->category && $part->category->shipping_price > 0) {
@@ -114,6 +118,54 @@ class Checkout extends Component
         }
 
         return $validItemCount > 0 ? ($totalShipping / $validItemCount) : $fallbackFee;
+    }
+
+    private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
+    {
+        $cartItems = Cart::instance('default')->content();
+
+        // 1. Create the base Order record
+        $order = Order::create([
+            'user_id'                => Auth::id(),
+            'address_id'             => $finalAddressId,
+            'total_amount'           => $totalOrderAmount,
+            'shipping_amount'        => $shippingFee, 
+            'paid_amount'            => 0,
+            'status'                 => $orderStatus,
+            'order_number'           => $localTransactionId, 
+            'payment_method'         => $this->payment_method,
+            'is_guest'               => !Auth::check(),
+            'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
+            'guest_email'            => $this->guest_email,
+            'guest_phone'            => $this->new_address['phone'],
+            'guest_shipping_address' => !Auth::check() 
+                ? ($this->new_address['street_address'] . ', ' . $city . ', ' . $this->new_address['country']) 
+                : null,
+        ]);
+
+        // 2. Fetch required related data in advance to optimize database calls
+        $itemIds = $cartItems->pluck('id')->toArray();
+        $parts = Part::whereIn('id', $itemIds)->get()->keyBy('id');
+        $rate = Commission::getRate();
+
+        // 3. Generate individual Order Items
+        foreach ($cartItems as $item) {
+            $part = $parts->get($item->id);
+            if ($part) {
+                OrderItem::create([
+                    'order_id'          => $order->id,
+                    'part_id'           => $item->id,
+                    'shop_id'           => $part->shop_id,
+                    'part_name'         => $item->name,
+                    'quantity'          => $item->qty,
+                    'unit_price'        => $item->price,
+                    'commission_amount' => (($item->price * $item->qty) * $rate) / 100,
+                    'status'            => 'pending',
+                ]);
+            }
+        }
+
+        return $order;
     }
 
     public function placeOrder(InTouchPaymentService $inTouch)
@@ -169,14 +221,13 @@ class Checkout extends Component
                 }
             }
 
-            // 1. Calculate and explicitly bind the delivery rate for this order
             $shippingFee = $this->calculateAverageShippingPrice($city);
             $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
             $totalOrderAmount = $subtotal + $shippingFee;
 
             if ($this->payment_method === 'cod') {
                 $payableNow = $shippingFee;
-                $orderStatus = 'awaiting_commitment_fee';
+                $orderStatus = 'callback_requested';
             } else {
                 $payableNow = $totalOrderAmount;
                 $orderStatus = 'pending';
@@ -184,41 +235,8 @@ class Checkout extends Component
 
             $localTransactionId = 'AST-' . strtoupper(Str::random(10));
 
-            // 2. Create the Order with frozen shipping_amount
-            $order = Order::create([
-                'user_id'                => Auth::id(),
-                'address_id'             => $final_address_id,
-                'total_amount'           => $totalOrderAmount,
-                'shipping_amount'        => $shippingFee, // Delivery price is explicitly locked here
-                'paid_amount'            => 0,
-                'status'                 => $orderStatus,
-                'order_number'           => $localTransactionId, 
-                'payment_method'         => $this->payment_method,
-                'is_guest'               => !Auth::check(),
-                'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
-                'guest_email'            => $this->guest_email,
-                'guest_phone'            => $this->new_address['phone'],
-                'guest_shipping_address' => !Auth::check() 
-                    ? ($this->new_address['street_address'] . ', ' . $city . ', ' . $this->new_address['country']) 
-                    : null,
-            ]);
-
-            foreach ($cartItems as $item) {
-                $part = Part::find($item->id);
-                if ($part) {
-                    $rate = Commission::getRate();
-                    OrderItem::create([
-                        'order_id'          => $order->id,
-                        'part_id'           => $item->id,
-                        'shop_id'           => $part->shop_id,
-                        'part_name'         => $item->name,
-                        'quantity'          => $item->qty,
-                        'unit_price'        => $item->price,
-                        'commission_amount' => (($item->price * $item->qty) * $rate) / 100,
-                        'status'            => 'pending',
-                    ]);
-                }
-            }
+            // Extract order and items generation to centralized method
+            $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city);
 
             $response = $inTouch->requestPayment($paymentPhone, $payableNow, $localTransactionId);
 
@@ -260,8 +278,9 @@ class Checkout extends Component
             $rules = array_merge($rules, [
                 'new_address.full_name'      => 'required|string|max:255',
                 'new_address.phone'          => 'required|string|max:20',
-                'new_address.street_address' => 'required|string',
-                'new_address.city'           => 'required|string',
+                'new_address.street_address' => 'required|string|max:255',
+                'new_address.city'           => 'required|string|max:100',
+                'new_address.country'        => 'required|string|max:100',
             ]);
         } elseif (!$this->address_id) {
             $this->dispatch('notify', message: 'Please select an address.');
@@ -292,45 +311,13 @@ class Checkout extends Component
                 }
             }
 
-            // 1. Calculate frozen rates for the callback flow
             $shippingFee = $this->calculateAverageShippingPrice($city);
             $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
             $totalOrderAmount = $subtotal + $shippingFee;
-            
-            // 2. Create Order capturing exactly what was quoted
-            $order = Order::create([
-                'user_id'                => Auth::id(),
-                'address_id'             => $final_address_id,
-                'total_amount'           => $totalOrderAmount,
-                'shipping_amount'        => $shippingFee, // Permanently frozen
-                'status'                 => 'callback_requested',
-                'is_guest'               => !Auth::check(),
-                'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
-                'guest_email'            => $this->guest_email,
-                'guest_phone'            => $this->new_address['phone'],
-                'guest_shipping_address' => !Auth::check() 
-                    ? ($this->new_address['street_address'] . ', ' . $this->new_address['city']) 
-                    : null,
-            ]);
+            $localTransactionId = 'AST-' . strtoupper(Str::random(10));
 
-            foreach ($cartItems as $item) {
-                $part = Part::find($item->id);
-                if ($part) {
-                    $rate = Commission::getRate();
-                    $commissionAmount = (($item->price * $item->qty) * $rate) / 100;
-
-                    OrderItem::create([
-                        'order_id'          => $order->id,
-                        'part_id'           => $item->id,
-                        'shop_id'           => $part->shop_id,
-                        'part_name'         => $item->name,
-                        'quantity'          => $item->qty,
-                        'unit_price'        => $item->price,
-                        'commission_amount' => $commissionAmount,
-                        'status'            => 'pending',
-                    ]);
-                }
-            }
+            // Generate using shared dynamic function
+            $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, 'callback_requested', $localTransactionId, $city);
 
             DB::commit();
             $this->saveGuestCookies();
