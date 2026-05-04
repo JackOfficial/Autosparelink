@@ -136,7 +136,7 @@ public function show(Order $order)
      */
     public function processPayment(Request $request, Order $order, InTouchPaymentService $inTouch)
     {
-        if ($order->user_id !== auth()->id()) {
+        if ($order->user_id != auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
 
