@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Gloudemans\Shoppingcart\Facades\Cart;
-use SweetAlert2\Laravel\Swal; // Import the SweetAlert2 Facade
+use Illuminate\Support\Facades\DB;
 
 class ProductInfo extends Component
 {
@@ -35,9 +35,10 @@ class ProductInfo extends Component
         if ($this->quantity < $this->part->stock_quantity) {
             $this->quantity++;
         } else {
-            Swal::warning([
+            $this->dispatch('swal', [
+                'icon'  => 'warning',
                 'title' => 'Stock Limit',
-                'text' => "We only have {$this->part->stock_quantity} available in stock.",
+                'text'  => "We only have {$this->part->stock_quantity} available in stock.",
                 'timer' => 2500
             ]);
         }
@@ -53,9 +54,10 @@ class ProductInfo extends Component
     public function addToCart()
     {
         if ($this->quantity > $this->part->stock_quantity) {
-            Swal::error([
+            $this->dispatch('swal', [
+                'icon'  => 'error',
                 'title' => 'Out of Stock',
-                'text' => 'Not enough stock available to fulfill your request.',
+                'text'  => 'Not enough stock available to fulfill your request.',
                 'timer' => 3000
             ]);
             return;
@@ -84,14 +86,14 @@ class ProductInfo extends Component
             $this->syncCartWithDatabase('default');
         }
 
-        // Beautiful Toast confirmation
-        Swal::success([
-            'title' => 'Done!',
-            'text' => 'Item added to your cart!',
-            'timer' => 2000,
-            'toast' => true,
-            'position' => 'top-end',
-            'showConfirmButton' => false
+        // Trigger JS Success Toast
+        $this->dispatch('swal', [
+            'icon'     => 'success',
+            'title'    => 'Done!',
+            'text'     => 'Item added to your cart!',
+            'timer'    => 2000,
+            'toast'    => true,
+            'position' => 'top-end'
         ]);
 
         $this->dispatch('cartUpdated');
@@ -104,11 +106,12 @@ class ProductInfo extends Component
             ->isNotEmpty();
 
         if ($exists) {
-            Swal::info([
-                'text' => 'Item is already in your wishlist.',
-                'toast' => true,
+            $this->dispatch('swal', [
+                'icon'     => 'info',
+                'text'     => 'Item is already in your wishlist.',
+                'toast'    => true,
                 'position' => 'top-end',
-                'timer' => 2500
+                'timer'    => 2500
             ]);
             return;
         }
@@ -131,13 +134,13 @@ class ProductInfo extends Component
             $this->syncCartWithDatabase('wishlist');
         }
 
-        Swal::success([
-            'title' => 'Saved!',
-            'text' => 'Added to your wishlist.',
-            'timer' => 2000,
-            'toast' => true,
-            'position' => 'top-end',
-            'showConfirmButton' => false
+        $this->dispatch('swal', [
+            'icon'     => 'success',
+            'title'    => 'Saved!',
+            'text'     => 'Added to your wishlist.',
+            'timer'    => 2000,
+            'toast'    => true,
+            'position' => 'top-end'
         ]);
 
         $this->dispatch('wishlistUpdated');
@@ -145,12 +148,15 @@ class ProductInfo extends Component
 
     protected function syncCartWithDatabase($instance)
     {
-        try {
-            Cart::instance($instance)->store(auth()->id());
-        } catch (\Gloudemans\Shoppingcart\Exceptions\CartAlreadyStoredException $e) {
-            Cart::instance($instance)->erase(auth()->id());
-            Cart::instance($instance)->store(auth()->id());
-        }
+        // Using a more robust deletion before storage to avoid duplicates
+        $identifier = auth()->id() . ($instance === 'wishlist' ? '_wishlist' : '');
+        
+        DB::table('shoppingcart')
+            ->where('identifier', $identifier)
+            ->where('instance', $instance)
+            ->delete();
+            
+        Cart::instance($instance)->store($identifier);
     }
 
     public function render()

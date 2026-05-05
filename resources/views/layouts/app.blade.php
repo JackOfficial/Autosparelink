@@ -301,6 +301,7 @@
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('frontend/lib/easing/easing.min.js') }}"></script>
     <script src="{{ asset('frontend/lib/owlcarousel/owl.carousel.min.js') }}"></script>
 
@@ -313,14 +314,24 @@
     {{-- Page-specific scripts --}}
 
     <script>
-          window.addEventListener('notify', event => {
-        alert(event.detail.message); // Replace with toast if you like
+    window.addEventListener('swal', event => {
+        let data = event.detail[0]; 
+        
+        Swal.fire({
+            icon: data.icon || 'success',
+            title: data.title || '',
+            text: data.text || '',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+        });
     });
-    </script>
+</script>
 
     @stack('scripts')
     @livewireScripts
-    @include('sweetalert2::index')
 </body>
 
 </html>

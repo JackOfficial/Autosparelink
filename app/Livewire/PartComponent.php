@@ -6,7 +6,6 @@ use Livewire\Component;
 use App\Models\Part;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\{Auth, DB};
-use SweetAlert2\Laravel\Swal; // Import the SweetAlert2 Facade
 
 class PartComponent extends Component
 {
@@ -26,10 +25,10 @@ class PartComponent extends Component
     {
         // 1. Validation: Check Stock
         if ($this->part->stock_quantity < $this->quantity) {
-            Swal::error([
+            $this->dispatch('swal', [
+                'icon'  => 'error',
                 'title' => 'Out of Stock',
-                'text' => "Only {$this->part->stock_quantity} left in stock!",
-                'timer' => 3000
+                'text'  => "Only {$this->part->stock_quantity} left in stock!",
             ]);
             return;
         }
@@ -50,9 +49,10 @@ class PartComponent extends Component
 
         // 2. Validation: Prevent over-ordering based on stock
         if ($newTotalQty > $this->part->stock_quantity) {
-            Swal::warning([
+            $this->dispatch('swal', [
+                'icon'  => 'warning',
                 'title' => 'Cart Limit',
-                'text' => "Cannot add more. You already have {$currentQtyInCart} in cart.",
+                'text'  => "Cannot add more. You already have {$currentQtyInCart} in cart.",
             ]);
             
             if (Auth::check()) { 
@@ -90,14 +90,14 @@ class PartComponent extends Component
             $this->saveCartToDb($identifier, $instance);
         }
 
-        // Trigger Success Toast
-        Swal::success([
-            'title' => 'Done!',
-            'text' => $message,
-            'timer' => 2000,
-            'toast' => true,
+        // Trigger Success Toast via JS Dispatch
+        $this->dispatch('swal', [
+            'icon'     => 'success',
+            'title'    => 'Done!',
+            'text'     => $message,
+            'toast'    => true,
             'position' => 'top-end',
-            'showConfirmButton' => false
+            'timer'    => 2000
         ]);
 
         $this->dispatch('cartUpdated', part_id: $this->part->id);
@@ -115,11 +115,12 @@ class PartComponent extends Component
         $exists = Cart::instance($instance)->search(fn($cartItem) => $cartItem->id === $this->part->id);
 
         if ($exists->isNotEmpty()) {
-            Swal::info([
-                'text' => 'Item is already in your wishlist!',
-                'toast' => true,
+            $this->dispatch('swal', [
+                'icon'     => 'info',
+                'text'     => 'Item is already in your wishlist!',
+                'toast'    => true,
                 'position' => 'top-end',
-                'timer' => 3000
+                'timer'    => 3000
             ]);
             
             if (Auth::check()) { $this->saveCartToDb($identifier, $instance); }
@@ -135,7 +136,7 @@ class PartComponent extends Component
             'price' => (float) $this->part->unit_price,
             'weight'=> 0,
             'options' => [
-                'brand'         => $this->part->partBrand?->name,
+                'brand'         => $this->part->partBrand??->name,
                 'image'         => $mainPhoto,
                 'shop_name'     => $this->part->shop?->shop_name,
                 'shop_id'       => $this->part->shop_id,
@@ -147,13 +148,13 @@ class PartComponent extends Component
             $this->saveCartToDb($identifier, $instance);
         }
 
-        Swal::success([
-            'title' => 'Saved',
-            'text' => 'Added to wishlist!',
-            'timer' => 2000,
-            'toast' => true,
+        $this->dispatch('swal', [
+            'icon'     => 'success',
+            'title'    => 'Saved',
+            'text'     => 'Added to wishlist!',
+            'toast'    => true,
             'position' => 'top-end',
-            'showConfirmButton' => false
+            'timer'    => 2000
         ]);
 
         $this->dispatch('wishlistUpdated');
