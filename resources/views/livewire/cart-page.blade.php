@@ -170,9 +170,8 @@
             reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
-                // Use $wire instead of @this.call
-                // This is globally available inside Livewire components
-                $wire.clearCart(); 
+                // Use @this to ensure the call reaches this specific component
+                @this.clearCart(); 
             }
         })
     }
