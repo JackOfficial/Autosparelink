@@ -155,7 +155,7 @@
             </div>
         </div>
     </div>
-    @push('scripts')
+
 <script>
     function confirmClearCart() {
         Swal.fire({
@@ -177,5 +177,5 @@
         })
     }
 </script>
-@endpush
+
 </div>
