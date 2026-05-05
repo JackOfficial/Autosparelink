@@ -72,19 +72,37 @@ class CartPage extends Component
         ]);
     }
 
-    public function clearCart()
-    {
-        Cart::instance(self::DEFAULT_CART)->destroy();
+  public function clearCart()
+{
+    $instance = self::DEFAULT_CART;
 
-        if (Auth::check()) {
+    // 1. Clear the current session instance immediately
+    Cart::instance($instance)->destroy();
+
+    // 2. Clear from database if the user is authenticated
+    if (Auth::check()) {
+        // Use a transaction to ensure the delete is completed safely
+        DB::transaction(function () use ($instance) {
             DB::table('shoppingcart')
                 ->where('identifier', Auth::id())
-                ->where('instance', self::DEFAULT_CART)
+                ->where('instance', $instance)
                 ->delete();
-        }
-
-        $this->syncAndNotify('cartUpdated', 'Cart cleared!');
+        });
     }
+
+    // 3. Dispatch success notification via SweetAlert2
+    $this->dispatch('swal', [
+        'icon'     => 'success',
+        'title'    => 'Cart Cleared',
+        'text'     => 'All items have been removed from your cart.',
+        'toast'    => true,
+        'position' => 'top-end',
+        'timer'    => 2000
+    ]);
+
+    // 4. Trigger global updates for components like Cart Count
+    $this->syncAndNotify('cartUpdated', 'Cart cleared!');
+}
 
     /**
      * Unified helper for syncing, dispatching, and notifying

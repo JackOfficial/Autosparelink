@@ -30,4 +30,27 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    <script>
+    function confirmClearCart() {
+        Swal.fire({
+            title: 'Empty entire cart?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, clear it!',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // This calls the clearCart method in your Livewire component
+                @this.call('clearCart');
+            }
+        })
+    }
+</script>
+@endpush
 @endsection

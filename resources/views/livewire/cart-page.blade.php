@@ -15,15 +15,14 @@
                 </div>
                 
                 @if($cartContent->count() > 0)
-                    <button class="btn btn-outline-danger btn-sm rounded-pill px-4" 
-                            wire:click="clearCart" 
-                            wire:confirm="Empty entire cart?"
-                            wire:loading.attr="disabled">
-                        <i class="fas fa-trash-alt mr-2"></i>
-                        <span wire:loading.remove wire:target="clearCart">Clear Cart</span>
-                        <span wire:loading wire:target="clearCart">Clearing...</span>
-                    </button>
-                @endif
+    <button class="btn btn-outline-danger btn-sm rounded-pill px-4" 
+            onclick="confirmClearCart()" 
+            wire:loading.attr="disabled">
+        <i class="fas fa-trash-alt mr-2"></i>
+        <span wire:loading.remove wire:target="clearCart">Clear Cart</span>
+        <span wire:loading wire:target="clearCart">Clearing...</span>
+    </button>
+@endif
             </div>
         </div>
 
