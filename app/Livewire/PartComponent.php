@@ -136,7 +136,7 @@ class PartComponent extends Component
             'price' => (float) $this->part->unit_price,
             'weight'=> 0,
             'options' => [
-                'brand'         => $this->part->partBrand??->name,
+                'brand'         => $this->part->partBrand?->name,
                 'image'         => $mainPhoto,
                 'shop_name'     => $this->part->shop?->shop_name,
                 'shop_id'       => $this->part->shop_id,
