@@ -155,4 +155,27 @@
             </div>
         </div>
     </div>
+    @push('scripts')
+<script>
+    function confirmClearCart() {
+        Swal.fire({
+            title: 'Empty entire cart?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, clear it!',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Use $wire instead of @this.call
+                // This is globally available inside Livewire components
+                $wire.clearCart(); 
+            }
+        })
+    }
+</script>
+@endpush
 </div>
