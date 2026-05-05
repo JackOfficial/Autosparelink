@@ -22,18 +22,18 @@ class SubscribeComponent extends Component
         if ($subscribe) {
             $this->reset('email');
 
-            // Dispatched to Alpine.js listener for a centered, large modal
+            // Dispatching for a prominent, centered modal
             $this->dispatch('swal', [
-                'icon'  => 'success',
-                'title' => 'Awesome!',
-                'text'  => 'You have subscribed successfully to our newsletter.',
-                // Note: Removing 'toast' and 'position' makes it center/large
+                'icon'        => 'success',
+                'title'       => 'Welcome to the Family!',
+                'text'        => 'Your subscription was successful. Stay tuned for updates!',
+                'isPremium'   => true, // Custom flag for our Alpine listener
             ]);
         } else {
             $this->dispatch('swal', [
                 'icon'  => 'error',
-                'title' => 'Subscription Failed',
-                'text'  => 'We could not process your subscription at this time.',
+                'title' => 'System Error',
+                'text'  => 'We couldn’t process that. Please try again later.',
             ]);
         }
     }

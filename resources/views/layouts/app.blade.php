@@ -315,19 +315,47 @@
 
     <script>
     window.addEventListener('swal', event => {
-        let data = event.detail[0]; 
-        
+    const data = event.detail[0];
+
+    // If it's a 'premium' popup (like subscription), make it big and centered
+    if (data.isPremium) {
         Swal.fire({
-            icon: data.icon || 'success',
+            title: data.title,
+            text: data.text,
+            icon: data.icon,
+            width: '450px', // Larger width for impact
+            padding: '3em',
+            color: '#716add',
+            background: '#fff',
+            backdrop: `
+                rgba(0,0,123,0.4)
+                left top
+                no-repeat
+            `,
+            showConfirmButton: true,
+            confirmButtonText: 'Got it!',
+            confirmButtonColor: '#28a745', // Matches your Bootstrap 4 success color
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown' // High visual impact
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp'
+            }
+        });
+    } else {
+        // Fallback to the normal top-corner toast for cart/wishlist
+        Swal.fire({
+            icon: data.icon || 'info',
             title: data.title || '',
             text: data.text || '',
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
+            toast: data.toast || false,
+            position: data.position || 'top-end',
+            timer: data.timer || 3000,
             timerProgressBar: true,
+            showConfirmButton: false,
         });
-    });
+    }
+});
 </script>
 
     @stack('scripts')
