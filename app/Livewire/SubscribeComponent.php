@@ -9,21 +9,32 @@ class SubscribeComponent extends Component
 {
     public $email = '';
 
-    public function subscribe(){
+    public function subscribe()
+    {
         $this->validate([
-         'email' => 'required|email|unique:subscriptions,email'
+            'email' => 'required|email|unique:subscriptions,email'
         ]);
 
         $subscribe = Subscription::create([
             'email' => $this->email
         ]);
 
-        if($subscribe){
+        if ($subscribe) {
             $this->reset('email');
-            session()->flash('subscribeSuccess', 'You have subscribed successfully');
-        }
-        else{
-            $this->flush('subscribeFail', 'You could not be subscribed');
+
+            // Dispatched to Alpine.js listener for a centered, large modal
+            $this->dispatch('swal', [
+                'icon'  => 'success',
+                'title' => 'Awesome!',
+                'text'  => 'You have subscribed successfully to our newsletter.',
+                // Note: Removing 'toast' and 'position' makes it center/large
+            ]);
+        } else {
+            $this->dispatch('swal', [
+                'icon'  => 'error',
+                'title' => 'Subscription Failed',
+                'text'  => 'We could not process your subscription at this time.',
+            ]);
         }
     }
 

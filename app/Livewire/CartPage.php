@@ -18,6 +18,8 @@ class CartPage extends Component
         if ($qty < 1) return;
 
         Cart::instance(self::DEFAULT_CART)->update($rowId, $qty);
+        
+        // Silent update (no popup) or simple toast
         $this->syncAndNotify('cartUpdated');
     }
 
@@ -32,11 +34,15 @@ class CartPage extends Component
         $item = Cart::instance(self::DEFAULT_CART)->get($rowId);
 
         if (!$item) {
-            $this->dispatch('notify', message: 'Item not found!');
+            $this->dispatch('swal', [
+                'icon'  => 'error',
+                'title' => 'Oops!',
+                'text'  => 'Item not found!',
+            ]);
             return;
         }
 
-        // Add to wishlist (copying all options including part_state_id)
+        // Add to wishlist
         Cart::instance(self::WISHLIST)->add([
             'id'      => $item->id,
             'name'    => $item->name,
@@ -56,7 +62,14 @@ class CartPage extends Component
 
         $this->dispatch('cartUpdated');
         $this->dispatch('wishlistUpdated');
-        $this->dispatch('notify', message: 'Item moved to wishlist!');
+        
+        $this->dispatch('swal', [
+            'icon'     => 'success',
+            'text'     => 'Item moved to wishlist!',
+            'toast'    => true,
+            'position' => 'top-end',
+            'timer'    => 2500
+        ]);
     }
 
     public function clearCart()
@@ -85,7 +98,13 @@ class CartPage extends Component
         $this->dispatch($event);
         
         if ($message) {
-            $this->dispatch('notify', message: $message);
+            $this->dispatch('swal', [
+                'icon'     => 'success',
+                'text'     => $message,
+                'toast'    => true,
+                'position' => 'top-end',
+                'timer'    => 2000
+            ]);
         }
     }
 
@@ -110,7 +129,6 @@ class CartPage extends Component
 
         return view('livewire.cart-page', [
             'cartContent' => $cart->content(),
-            // Ensure numeric values for RWF formatting in Blade
             'subTotal'    => $cart->subtotal(0, '', ''), 
             'total'       => $cart->subtotal(0, '', ''),
         ]);

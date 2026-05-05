@@ -38,7 +38,15 @@ class WishlistPage extends Component
         }
 
         $this->dispatch('wishlistUpdated');
-        $this->dispatch('notify', message: 'Removed from wishlist.');
+
+        // Dispatch a SweetAlert toast for the Alpine listener
+        $this->dispatch('swal', [
+            'icon'     => 'success',
+            'text'     => 'Removed from wishlist.',
+            'toast'    => true,
+            'position' => 'top-end',
+            'timer'    => 2000
+        ]);
     }
 
     /**
@@ -54,7 +62,11 @@ class WishlistPage extends Component
         $item = Cart::instance($wishlistInstance)->get($rowId);
 
         if (!$item) {
-            $this->dispatch('notify', message: 'Item not found in wishlist!');
+            $this->dispatch('swal', [
+                'icon'  => 'error',
+                'title' => 'Error',
+                'text'  => 'Item not found in wishlist!',
+            ]);
             return;
         }
 
@@ -80,7 +92,16 @@ class WishlistPage extends Component
         // 5. Update UI via events
         $this->dispatch('wishlistUpdated');
         $this->dispatch('cartUpdated');
-        $this->dispatch('notify', message: 'Item moved to cart!');
+
+        // Dispatch a SweetAlert toast via Alpine.js
+        $this->dispatch('swal', [
+            'icon'     => 'success',
+            'title'    => 'Moved!',
+            'text'     => 'Item moved to cart.',
+            'toast'    => true,
+            'position' => 'top-end',
+            'timer'    => 2500
+        ]);
     }
 
     /**
