@@ -25,7 +25,7 @@ class SubscribeComponent extends Component
             // Dispatching for a prominent, centered modal
             $this->dispatch('swal', [
                 'icon'        => 'success',
-                'title'       => 'Welcome to the Family!',
+                'title'       => 'Welcome to the AutoSpareLink!',
                 'text'        => 'Your subscription was successful. Stay tuned for updates!',
                 'isPremium'   => true, // Custom flag for our Alpine listener
             ]);
