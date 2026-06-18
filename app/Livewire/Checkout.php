@@ -166,13 +166,13 @@ class Checkout extends Component
             }
         }
 
-        dd("Hello");
-
         return $order;
     }
 
     public function placeOrder(InTouchPaymentService $inTouch)
     {
+        dd("Hello");
+        
         $cartItems = Cart::instance('default')->content();
 
         if ($cartItems->isEmpty()) {
