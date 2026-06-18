@@ -122,7 +122,6 @@ class Checkout extends Component
 
     private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
     {
-        dd("Hello");
         
         $cartItems = Cart::instance('default')->content();
 
@@ -166,6 +165,8 @@ class Checkout extends Component
                 ]);
             }
         }
+
+        dd("Hello");
 
         return $order;
     }
