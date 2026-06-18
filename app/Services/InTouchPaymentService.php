@@ -57,7 +57,18 @@ class InTouchPaymentService
         'request_id' => $requestId
     ]);
 
-    $response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
+    //$response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
+
+    // Updated to bind to your whitelisted IP address interface
+$response = Http::asForm()
+    ->withOptions([
+        'curl' => [
+            CURLOPT_INTERFACE => '198.54.114.176',
+        ],
+    ])
+    ->timeout(60)
+    ->connectTimeout(30)
+    ->post($url, $data);
 
     return $response->json();
 }
