@@ -242,7 +242,7 @@ class Checkout extends Component
 
             $response = $inTouch->requestPayment($paymentPhone, $payableNow, $localTransactionId);
 
-                    dd($response);
+            //dd($response);
 
             if ($response && isset($response['success']) && $response['success'] == true) {
                 $order->update(['transaction_id' => $response['transactionid'] ?? null]);
