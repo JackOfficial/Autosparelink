@@ -171,8 +171,7 @@ class Checkout extends Component
 
     public function placeOrder(InTouchPaymentService $inTouch)
     {
-        dd("Hello");
-        
+
         $cartItems = Cart::instance('default')->content();
 
         if ($cartItems->isEmpty()) {
@@ -237,6 +236,8 @@ class Checkout extends Component
             }
 
             $localTransactionId = 'AST-' . strtoupper(Str::random(10));
+
+                   dd("Hello");
 
             // Extract order and items generation to centralized method
             $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city);
