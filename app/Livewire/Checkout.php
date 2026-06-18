@@ -122,6 +122,8 @@ class Checkout extends Component
 
     private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
     {
+        dd("Hello");
+        
         $cartItems = Cart::instance('default')->content();
 
         // 1. Create the base Order record
