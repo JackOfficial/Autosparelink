@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem; // Required to target specific shop items
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
