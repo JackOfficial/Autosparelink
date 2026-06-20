@@ -74,6 +74,7 @@ use App\Http\Controllers\Admin\TicketController as Ticket;
 use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Shop\DashboardController;
 use App\Http\Controllers\Shop\OnboardingController;
 use App\Http\Controllers\Shop\OrderController as ShopOrderController;
@@ -178,6 +179,9 @@ Route::resource('cart', CartController::class);
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 
+Route::middleware(['auth'])->group(function () {
+    Route::post('/reviews', [ReviewController::class, 'storeWeb'])->name('reviews.store');
+});
 
 // =============================================================
 // PAYMENT GATEWAY (FLUTTERWAVE)

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Part extends Model
 {
@@ -116,6 +117,16 @@ class Part extends Model
             $q->where('specifications.id', $specId);
         });
     }
+
+    public function reviews(): MorphMany
+{
+    return $this->morphMany(Review::class, 'reviewable')->where('status', 'approved');
+}
+
+public function getAverageRatingAttribute(): float
+{
+    return (float) $this->reviews()->avg('rating') ?: 0.0;
+}
 
     public function isAvailable($requestedQuantity = 1)
     {

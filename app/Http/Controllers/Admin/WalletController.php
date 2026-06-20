@@ -22,13 +22,29 @@ class WalletController extends Controller
     /**
      * Display all shop wallets with their current balances.
      */
+  /**
+     * Display all shop wallets with their current balances.
+     */
     public function index()
     {
-        $wallets = Wallet::with('shop')
+        // Option A: Only load wallets that actually have an active shop
+        $wallets = Wallet::has('shop')
+            ->with('shop')
             ->latest('updated_at')
             ->paginate(15);
 
         $wallets->getCollection()->transform(function ($wallet) {
+            // Option B: Extra defensive guard check just in case
+            if (!$wallet->shop) {
+                $wallet->audited_gross      = 0;
+                $wallet->commission_rate    = 0;
+                $wallet->audited_commission = 0;
+                $wallet->audited_net        = 0;
+                $wallet->audited_locked     = 0;
+                $wallet->audited_balance    = 0;
+                return $wallet;
+            }
+
             $audit = $wallet->shop->getFinancialAudit();
             $wallet->audited_gross      = $audit['totalGross'];
             $wallet->commission_rate    = $audit['commissionRate'];
