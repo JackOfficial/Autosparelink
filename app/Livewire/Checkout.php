@@ -229,7 +229,7 @@ class Checkout extends Component
 
             if ($this->payment_method === 'cod') {
                 $payableNow = $shippingFee;
-                $orderStatus = 'callback_requested';
+                $orderStatus = 'pending';
             } else {
                 $payableNow = $totalOrderAmount;
                 $orderStatus = 'pending';
