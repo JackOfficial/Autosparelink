@@ -56,7 +56,8 @@
         </a>
 
         <div class="product-action">
-            <button wire:click="addToCart" class="btn btn-light btn-square shadow-sm mx-1"><i class="fa fa-shopping-cart"></i></button>
+            <button wire:click="buyNow" class="btn btn-light btn-square shadow-sm mx-1" title="Buy Now"><i class="fa fa-bolt text-warning"></i></button>
+            <button wire:click="addToCart" class="btn btn-light btn-square shadow-sm mx-1" title="Add to Cart"><i class="fa fa-shopping-cart"></i></button>
             <button wire:click="addToWishlist" class="btn btn-light btn-square shadow-sm mx-1"><i class="far fa-heart"></i></button>
             <a href="{{ route('spare-parts.show', $part->sku) }}" class="btn btn-light btn-square shadow-sm mx-1"><i class="fa fa-search"></i></a>
         </div>
@@ -103,17 +104,32 @@
                 @endif
             </div>
 
-            <div class="px-2" x-data="{ success: false }" @cart-updated.window="if($event.detail.part_id == {{ $part->id }}) { success = true; setTimeout(() => success = false, 2000) }">
+            <div class="px-1" x-data="{ success: false }" @cart-updated.window="if($event.detail.part_id == {{ $part->id }}) { success = true; setTimeout(() => success = false, 2000) }">
                 @if($part->stock_quantity > 0)
-                    <button wire:click="addToCart" 
-                            class="btn btn-primary btn-block btn-sm rounded-pill py-2 transition-all shadow-sm" 
-                            :class="success ? 'btn-success' : 'btn-primary'"
-                            wire:loading.attr="disabled">
-                        <i x-show="success" class="fa fa-check mr-1"></i>
-                        <span wire:loading wire:target="addToCart" class="spinner-border spinner-border-sm mr-1"></span>
-                        <i x-show="!success" wire:loading.remove wire:target="addToCart" class="fa fa-shopping-cart mr-1"></i>
-                        <span x-text="success ? 'Added!' : 'Add to Cart'"></span>
-                    </button>
+                    <div class="row no-gutters mx-n1">
+                        {{-- Add to Cart Button --}}
+                        <div class="col-6 px-1">
+                            <button wire:click="addToCart" 
+                                    class="btn btn-primary btn-block btn-sm rounded-pill py-2 transition-all shadow-sm font-weight-semi-bold" 
+                                    :class="success ? 'btn-success' : 'btn-primary'"
+                                    wire:loading.attr="disabled">
+                                <i x-show="success" class="fa fa-check mr-1"></i>
+                                <span wire:loading wire:target="addToCart" class="spinner-border spinner-border-sm"></span>
+                                <i x-show="!success" wire:loading.remove wire:target="addToCart" class="fa fa-shopping-cart mr-1"></i>
+                                <span x-text="success ? 'Added!' : 'Cart'"></span>
+                            </button>
+                        </div>
+                        
+                        {{-- Buy Now Button --}}
+                        <div class="col-6 px-1">
+                            <button wire:click="buyNow" 
+                                    class="btn btn-outline-primary btn-block btn-sm rounded-pill py-2 transition-all shadow-sm font-weight-semi-bold"
+                                    wire:loading.attr="disabled">
+                                <span wire:loading wire:target="buyNow" class="spinner-border spinner-border-sm"></span>
+                                <i wire:loading.remove wire:target="buyNow" class="fa fa-bolt mr-1"></i> Buy Now
+                            </button>
+                        </div>
+                    </div>
                 @else
                     <button class="btn btn-secondary btn-block btn-sm rounded-pill py-2" disabled>
                         <i class="fa fa-clock mr-1"></i> Out of Stock
