@@ -320,7 +320,7 @@
                             @if($order->payment)
                                 <div class="mb-3">
                                     <span class="info-label">Transaction ID</span>
-                                    <span class="info-value text-monospace">{{ $order->payment->transaction_id ?? '---' }}</span>
+                                    <span class="info-value text-monospace">{{ $order->payment->transaction_reference ?? '---' }}</span>
                                 </div>
                                 <div>
                                     <span class="info-label">Method</span>
