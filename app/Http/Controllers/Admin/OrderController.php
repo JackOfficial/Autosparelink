@@ -12,15 +12,11 @@ class OrderController extends Controller
     /**
      * Display all orders with high-priority statuses at the top.
      */
-   public function index()
+public function index()
 {
-    // Sort high priority actionable statuses first, then sort within groups by latest
+    // Simply fetch all orders sorted by ID in descending order (newest first)
     $orders = Order::with(['user', 'orderItems.part', 'payment', 'shipping', 'address'])
-        ->orderByRaw("CASE 
-            WHEN status IN ('callback_requested', 'awaiting_commitment_fee') THEN 0 
-            ELSE 1 
-          END ASC")
-        ->latest() // This now applies perfectly within both blocks
+        ->latest('id') // or ->orderBy('id', 'desc')
         ->paginate(15);
 
     return view('admin.orders.index', compact('orders'));
