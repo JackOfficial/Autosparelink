@@ -12,16 +12,19 @@ class OrderController extends Controller
     /**
      * Display all orders with high-priority statuses at the top.
      */
-    public function index()
-    {
-        // Sort high priority actionable statuses first, then sort by latest
-        $orders = Order::with(['user', 'orderItems.part', 'payment', 'shipping', 'address'])
-            ->orderByRaw("FIELD(status, 'callback_requested', 'awaiting_commitment_fee') DESC")
-            ->latest()
-            ->paginate(15);
+   public function index()
+{
+    // Sort high priority actionable statuses first, then sort within groups by latest
+    $orders = Order::with(['user', 'orderItems.part', 'payment', 'shipping', 'address'])
+        ->orderByRaw("CASE 
+            WHEN status IN ('callback_requested', 'awaiting_commitment_fee') THEN 0 
+            ELSE 1 
+          END ASC")
+        ->latest() // This now applies perfectly within both blocks
+        ->paginate(15);
 
-        return view('admin.orders.index', compact('orders'));
-    }
+    return view('admin.orders.index', compact('orders'));
+}
 
     public function show(string $id)
     {
