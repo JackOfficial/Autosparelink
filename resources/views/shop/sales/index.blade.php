@@ -105,14 +105,9 @@
                                         <div class="d-flex align-items-center">
                                             <div class="img-stack-container me-2">
                                                 @foreach($sale->orderItems->take(3) as $index => $item)
-
-
-                                               
-
-                                                    @php $photo = $item->part->photos;
-                                                    dd($photo)
+                                                    @php
+                                                    $photo = $item->part?->photos?->first();
                                                     @endphp
-                                                     <h1><?php echo $photo; ?></h1>
                                                     @if($photo)
                                                         <img src="{{ asset('storage/' . $photo->file_path) }}" 
                                                              class="stack-img shadow-sm" 
