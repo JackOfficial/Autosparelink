@@ -183,6 +183,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reviews', [ReviewController::class, 'storeWeb'])->name('reviews.store');
 });
 
+Route::get('/orders/{order}/status', function (\App\Models\Order $order) {
+    return response()->json(['status' => $order->status]);
+})->name('orders.status');
+
 // =============================================================
 // PAYMENT GATEWAY (FLUTTERWAVE)
 // =============================================================
