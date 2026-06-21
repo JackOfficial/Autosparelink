@@ -146,7 +146,7 @@ public function show(Order $order)
         }
 
         $request->validate([
-            'phone' => 'required|string|max:20',
+            'phone' => 'required|string|max:13',
         ]);
 
         DB::beginTransaction();

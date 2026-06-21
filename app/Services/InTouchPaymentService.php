@@ -105,7 +105,17 @@ $response = Http::asForm()
     $url = rtrim($this->baseUrl, '/') . '/requestdeposit/';
     
     // Use the same robust timeout settings as requestPayment
-    $response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
+    //$response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
+
+    $response = Http::asForm()
+    ->withOptions([
+        'curl' => [
+            CURLOPT_INTERFACE => '198.54.114.176',
+        ],
+    ])
+    ->timeout(60)
+    ->connectTimeout(30)
+    ->post($url, $data);
 
     return $response->json();
 }
