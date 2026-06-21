@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use App\Models\Part;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,9 +18,23 @@ class CartPage extends Component
     {
         if ($qty < 1) return;
 
+        // 1. Fetch current item context to validate real-time stock
+        $item = Cart::instance(self::DEFAULT_CART)->get($rowId);
+        if ($item) {
+            $part = Part::find($item->id);
+            if ($part && $qty > $part->stock_quantity) {
+                $this->dispatch('swal', [
+                    'icon'  => 'warning',
+                    'title' => 'Insufficient Stock',
+                    'text'  => "Only {$part->stock_quantity} items are available in stock.",
+                ]);
+                return;
+            }
+        }
+
         Cart::instance(self::DEFAULT_CART)->update($rowId, $qty);
         
-        // Silent update (no popup) or simple toast
+        // Silent database sync & broad broadcast
         $this->syncAndNotify('cartUpdated');
     }
 
@@ -72,37 +87,34 @@ class CartPage extends Component
         ]);
     }
 
-  public function clearCart()
-{
-    $instance = self::DEFAULT_CART;
+    public function clearCart()
+    {
+        $instance = self::DEFAULT_CART;
 
-    // 1. Clear the current session instance immediately
-    Cart::instance($instance)->destroy();
+        // 1. Clear the current session instance immediately
+        Cart::instance($instance)->destroy();
 
-    // 2. Clear from database if the user is authenticated
-    if (Auth::check()) {
-        // Use a transaction to ensure the delete is completed safely
-        DB::transaction(function () use ($instance) {
-            DB::table('shoppingcart')
-                ->where('identifier', Auth::id())
-                ->where('instance', $instance)
-                ->delete();
-        });
+        // 2. Clear from database if the user is authenticated
+        if (Auth::check()) {
+            DB::transaction(function () use ($instance) {
+                DB::table('shoppingcart')
+                    ->where('identifier', Auth::id())
+                    ->where('instance', $instance)
+                    ->delete();
+            });
+        }
+
+        // 3. Trigger global updates and dispatch single clean SweetAlert notification
+        $this->dispatch('cartUpdated');
+        $this->dispatch('swal', [
+            'icon'     => 'success',
+            'title'    => 'Cart Cleared',
+            'text'     => 'All items have been removed from your cart.',
+            'toast'    => true,
+            'position' => 'top-end',
+            'timer'    => 2000
+        ]);
     }
-
-    // 3. Dispatch success notification via SweetAlert2
-    $this->dispatch('swal', [
-        'icon'     => 'success',
-        'title'    => 'Cart Cleared',
-        'text'     => 'All items have been removed from your cart.',
-        'toast'    => true,
-        'position' => 'top-end',
-        'timer'    => 2000
-    ]);
-
-    // 4. Trigger global updates for components like Cart Count
-    $this->syncAndNotify('cartUpdated', 'Cart cleared!');
-}
 
     /**
      * Unified helper for syncing, dispatching, and notifying

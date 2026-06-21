@@ -45,7 +45,7 @@ class PartComponent extends Component
         }
 
         // 4. Everything checked out perfectly, send them straight to payment checkout
-        return redirect()->route('checkout');
+        return redirect()->route('checkout.index');
     }
 
     public function addToCart()
