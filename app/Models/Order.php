@@ -13,6 +13,7 @@ class Order extends Model
         'user_id',
         'total_amount',
         'delivery_price',
+        'payment_method',
         'address_id',
         'guest_name',
         'guest_email',
