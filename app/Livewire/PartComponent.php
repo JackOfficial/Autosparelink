@@ -21,6 +21,33 @@ class PartComponent extends Component
         $this->isCompatible = $isCompatible;
     }
 
+    /**
+     * Immediate checkout flow for the current item.
+     */
+    public function buyNow()
+    {
+        // 1. Run the strict stock checks and add item to cart instance safely
+        $this->addToCart();
+
+        // 2. Fetch cart instance to confirm the item was successfully injected
+        $instance = 'default';
+        if (Auth::check()) {
+            Cart::instance($instance)->restore(Auth::id());
+        }
+
+        $hasItem = Cart::instance($instance)->search(function ($cartItem) {
+            return $cartItem->id === $this->part->id;
+        })->isNotEmpty();
+
+        // 3. If validation failed in addToCart(), don't redirect
+        if (!$hasItem) {
+            return;
+        }
+
+        // 4. Everything checked out perfectly, send them straight to payment checkout
+        return redirect()->route('checkout');
+    }
+
     public function addToCart()
     {
         // 1. Validation: Check Stock
