@@ -106,8 +106,11 @@
                                             <div class="img-stack-container me-2">
                                                 @foreach($sale->orderItems->take(3) as $index => $item)
 
-                                                    @php $photo = $item->part->photos->first(); 
-                                                   
+
+                                               
+
+                                                    @php $photo = $item->part->photos;
+                                                    dd($photo)
                                                     @endphp
                                                      <h1><?php echo $photo; ?></h1>
                                                     @if($photo)
