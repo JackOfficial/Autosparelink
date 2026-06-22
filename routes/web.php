@@ -63,6 +63,7 @@ use App\Http\Controllers\Admin\PartFitmentController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PayoutController as AdminPayoutController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ShippingController;
 use App\Http\Controllers\Admin\ShopController;
@@ -315,6 +316,14 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
     Route::post('/add-task', [AdminController::class, 'addTask'])->name('addTask');
     Route::post('/task-done/{id}', [AdminController::class, 'taskDone'])->name('taskDone');
+
+    Route::get('/', [AdminReviewController::class, 'index'])->name('index');
+    
+    // 2. Action to approve a review
+    Route::patch('/{review}/approve', [AdminReviewController::class, 'approve'])->name('approve');
+    
+    // 3. Action to reject/delete a review
+    Route::delete('/{review}/reject', [AdminReviewController::class, 'reject'])->name('reject');
 
     // Content Management
     Route::resource('blog-categories', BlogCategoryController::class);
