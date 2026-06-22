@@ -7,7 +7,7 @@ use App\Models\Review;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
-class AdminReviewController extends Controller
+class ReviewController extends Controller
 {
     /**
      * Display a listing of pending reviews.
