@@ -79,17 +79,13 @@ class Shop extends Model
     /**
      * Get all of the reviews for the shop's spare parts.
      */
-    public function reviews(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            Review::class, // The final target model we want to access
-            Part::class,   // The intermediate model the shop owns
-            'shop_id',     // Foreign key on the parts table
-            'part_id',     // Foreign key on the reviews table
-            'id',          // Local key on the shops table
-            'id'           // Local key on the parts table
-        );
-    }
+    /**
+ * Get all of the shop's direct polymorphic reviews.
+ */
+public function reviews(): MorphMany
+{
+    return $this->morphMany(Review::class, 'reviewable');
+}
 
     /**
      * Updated Financial Audit for Markup Model

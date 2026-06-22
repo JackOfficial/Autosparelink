@@ -11,13 +11,13 @@ class PublicShopPartController extends Controller
 {
     public function show(int $id): View
     {
-       $shop = Shop::with([
-    'parts',
-    'reviews' => function ($query) {
-        // ALWAYS qualify the column name with the table name here:
-        $query->where('reviews.status', 'approved')->with('user');
-    }
-])->findOrFail($id);
+        // Eager load the shop's specific polymorphic reviews cleanly
+        $shop = Shop::with([
+            'parts',
+            'reviews' => function ($query) {
+                $query->where('status', 'approved')->with('user');
+            }
+        ])->findOrFail($id);
 
         return view('frontend.shops.show', compact('shop'));
     }
