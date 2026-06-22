@@ -149,7 +149,7 @@ Route::controller(CareersController::class)->group(function () {
 
 Route::get('/shop/products', [ProductController::class, 'products']);
 
-Route::get('/spare-parts/{sku}', [PublicShopPartController::class, 'show'])->name('spare-parts.show');
+Route::get('/spare-parts/{sku}', [PublicShopPartController::class, 'show'])->name('shop.spare-parts.show');
 
 Route::get('/shops/{id}', [PublicShopController::class, 'show'])->name('shops.show');
 
