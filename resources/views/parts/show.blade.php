@@ -68,7 +68,7 @@
     .sub-image-wrapper { width: 64px; height: 64px; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 6px; }
     .sub-image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-      .x-small { 
+    .x-small { 
         font-size: 0.6rem; 
         padding: 2px 6px; 
         border-radius: 4px; 
@@ -81,7 +81,7 @@
     .badge-info { background-color: #e0f2fe; color: #075985; }
     .badge-primary { background-color: #e0e7ff; color: #3730a3; }
 
-        /* New Shop Styling */
+    /* New Shop Styling */
     .shop-avatar {
         width: 32px;
         height: 32px;
@@ -93,18 +93,30 @@
         justify-content: center;
         font-size: 0.8rem;
     }
-
-    .x-small { padding: 2px 6px; border-radius: 4px; }
     
     .part-link { color: #1e293b; text-decoration: none; transition: 0.2s; }
     .part-link:hover { color: var(--primary-blue); }
 
-    /* Re-stating necessary button styles for clarity */
     .btn-outline-primary {
         border-width: 2px;
         font-weight: 700;
         font-size: 0.75rem;
         text-transform: uppercase;
+    }
+
+    /* --- INTERACTIVE STAR RATING STYLES --- */
+    .star-rating input { display: none; }
+    .star-rating label {
+        font-size: 1.5rem;
+        color: #cbd5e1;
+        cursor: pointer;
+        margin-right: 6px;
+        transition: color 0.2s ease-in-out;
+    }
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: #ffb800;
     }
 
     @media (max-width: 991px) {
@@ -126,8 +138,7 @@
         </ol>
     </nav>
 
-    
-        <div class="row gx-lg-5">
+    <div class="row gx-lg-5">
         {{-- 2. IMAGE GALLERY --}}
         <div class="col-lg-7 mb-4">
             <div class="gallery-container shadow-sm" 
@@ -187,232 +198,315 @@
         </div>
     </div>
 
-{{-- 4. SUBSTITUTIONS --}}
-{{-- 4. SUBSTITUTIONS --}}
-@if($substitutions->isNotEmpty())
-<div class="row mt-5">
-    <div class="col-12">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <div class="d-flex align-items-center">
-                <div class="icon-box-sm bg-orange-soft mr-3">
-                    <i class="fas fa-exchange-alt text-orange"></i>
+    {{-- 4. SUBSTITUTIONS --}}
+    @if($substitutions->isNotEmpty())
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box-sm bg-orange-soft mr-3">
+                        <i class="fas fa-exchange-alt text-orange"></i>
+                    </div>
+                    <h4 class="section-title mb-0">Alternative Replacements</h4>
                 </div>
-                <h4 class="section-title mb-0">Alternative Replacements</h4>
+                <span class="badge badge-soft-primary px-3 py-2 rounded-pill small font-weight-bold">
+                    {{ $substitutions->count() }} Options Available
+                </span>
             </div>
-            <span class="badge badge-soft-primary px-3 py-2 rounded-pill small font-weight-bold">
-                {{ $substitutions->count() }} Options Available
-            </span>
-        </div>
-        
-        <div class="card tech-card border-0 shadow-sm overflow-hidden" style="border-radius: 16px;">
-            <div class="table-responsive">
-                <table class="table tech-table mb-0 align-middle">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="py-3 pl-4">Product & Specification</th>
-                            <th class="py-3">Brand</th>
-                            <th class="py-3">Vendor / Shop</th>
-                            <th class="py-3">Stock Status</th>
-                            <th class="py-3 text-right">Price (RWF)</th>
-                            <th class="py-3 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($substitutions as $sub)
-                        <tr>
-                            {{-- Product Details with Quality & State Badges --}}
-                            <td class="pl-4 py-3" style="min-width: 300px;">
-                                <div class="d-flex align-items-center">
-                                    <div class="sub-image-wrapper">
-                                        <img src="{{ $sub->photos->first() ? asset('storage/' . $sub->photos->first()->file_path) : asset('frontend/img/placeholder.jpg') }}" 
-                                             alt="{{ $sub->part_name }}">
-                                    </div>
-                                    <div class="ml-3">
-                                        <a href="{{ route('spare-parts.show', $sub->sku) }}" class="part-link font-weight-bold">
-                                            {{ $sub->part_number }}
-                                        </a>
-                                        <div class="text-muted small mb-1">{{ Str::limit($sub->part_name, 30) }}</div>
-                                        
-                                        <div class="d-flex gap-1 flex-wrap">
-                                            {{-- Fixed Condition State Badge Logic --}}
-                                            @php
-                                                // Access the slug string from the related PartState model
-                                                $stateSlug = $sub->state ? strtolower($sub->state->slug) : 'new';
-                                                
-                                                $stateClass = [
-                                                    'new'         => 'badge-success',
-                                                    'used'        => 'badge-warning',
-                                                    'refurbished' => 'badge-info'
-                                                ][$stateSlug] ?? 'badge-secondary';
-                                            @endphp
-                                            <span class="badge {{ $stateClass }} x-small text-uppercase">
-                                                {{ $sub->state->name ?? 'New' }}
-                                            </span>
+            
+            <div class="card tech-card border-0 shadow-sm overflow-hidden" style="border-radius: 16px;">
+                <div class="table-responsive">
+                    <table class="table tech-table mb-0 align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="py-3 pl-4">Product & Specification</th>
+                                <th class="py-3">Brand</th>
+                                <th class="py-3">Vendor / Shop</th>
+                                <th class="py-3">Stock Status</th>
+                                <th class="py-3 text-right">Price (RWF)</th>
+                                <th class="py-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($substitutions as $sub)
+                            <tr>
+                                <td class="pl-4 py-3" style="min-width: 300px;">
+                                    <div class="d-flex align-items-center">
+                                        <div class="sub-image-wrapper">
+                                            <img src="{{ $sub->photos->first() ? asset('storage/' . $sub->photos->first()->file_path) : asset('frontend/img/placeholder.jpg') }}" 
+                                                 alt="{{ $sub->part_name }}">
+                                        </div>
+                                        <div class="ml-3">
+                                            <a href="{{ route('spare-parts.show', $sub->sku) }}" class="part-link font-weight-bold">
+                                                {{ $sub->part_number }}
+                                            </a>
+                                            <div class="text-muted small mb-1">{{ Str::limit($sub->part_name, 30) }}</div>
+                                            
+                                            <div class="d-flex gap-1 flex-wrap">
+                                                @php
+                                                    $stateSlug = $sub->state ? strtolower($sub->state->slug) : 'new';
+                                                    $stateClass = [
+                                                        'new'         => 'badge-success',
+                                                        'used'        => 'badge-warning',
+                                                        'refurbished' => 'badge-info'
+                                                    ][$stateSlug] ?? 'badge-secondary';
+                                                @endphp
+                                                <span class="badge {{ $stateClass }} x-small text-uppercase">
+                                                    {{ $sub->state->name ?? 'New' }}
+                                                </span>
 
-                                            {{-- Quality Badge --}}
-                                            <span class="badge {{ $sub->is_genuine ? 'badge-primary' : 'badge-light' }} x-small text-uppercase">
-                                                {{ $sub->is_genuine ? 'GENUINE O.E.M' : 'AFTERMARKET' }}
-                                            </span>
+                                                <span class="badge {{ $sub->is_genuine ? 'badge-primary' : 'badge-light' }} x-small text-uppercase">
+                                                    {{ $sub->is_genuine ? 'GENUINE O.E.M' : 'AFTERMARKET' }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
+                                </td>
 
-                            {{-- Brand --}}
-                            <td>
-                                <div class="manufacturer-tag small font-weight-bold text-uppercase">
-                                    {{ $sub->partBrand->name ?? 'Generic' }}
-                                </div>
-                            </td>
-
-                            {{-- Shop / Vendor Information --}}
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="shop-avatar mr-2">
-                                        <i class="fas fa-store text-muted"></i>
+                                <td>
+                                    <div class="manufacturer-tag small font-weight-bold text-uppercase">
+                                        {{ $sub->partBrand->name ?? 'Generic' }}
                                     </div>
-                                    <div>
-                                        <a href="#" class="text-dark small font-weight-bold d-block mb-0">
-                                            {{ $sub->shop->name ?? 'AutoLink Official' }}
-                                        </a>
-                                        <div class="text-warning small" style="font-size: 0.7rem;">
-                                            <i class="fas fa-star"></i> 4.8 (120+ sales)
+                                </td>
+
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="shop-avatar mr-2">
+                                            <i class="fas fa-store text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <a href="#" class="text-dark small font-weight-bold d-block mb-0">
+                                                {{ $sub->shop->name ?? 'AutoLink Official' }}
+                                            </a>
+                                            <div class="text-warning small" style="font-size: 0.7rem;">
+                                                <i class="fas fa-star"></i> 4.8 (120+ sales)
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
+                                </td>
 
-                            {{-- Stock --}}
-                            <td>
-                                <div class="stock-indicator {{ $sub->stock_quantity > 0 ? 'is-in' : 'is-out' }}">
-                                    <span class="dot"></span>
-                                    {{ $sub->stock_quantity > 0 ? $sub->stock_quantity . ' in stock' : 'Out of Stock' }}
-                                </div>
-                            </td>
+                                <td>
+                                    <div class="stock-indicator {{ $sub->stock_quantity > 0 ? 'is-in' : 'is-out' }}">
+                                        <span class="dot"></span>
+                                        {{ $sub->stock_quantity > 0 ? $sub->stock_quantity . ' in stock' : 'Out of Stock' }}
+                                    </div>
+                                </td>
 
-                            {{-- Price --}}
-                            <td class="text-right pr-4">
-                                @if($sub->old_unit_price && $sub->old_unit_price > $sub->unit_price)
-                                    <del class="text-muted small d-block" style="font-size: 0.7rem;">{{ number_format($sub->old_unit_price, 0) }}</del>
-                                @endif
-                                <span class="price-text text-primary">{{ number_format($sub->unit_price ?? $sub->price, 0) }}</span>
-                            </td>
-
-                            {{-- View Button --}}
-                            <td class="text-center pr-4">
-                                <a href="{{ route('spare-parts.show', $sub->sku) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                    View
-                                </a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
-
-{{-- 5. COMPATIBILITY --}}
-@if($compatibilities->isNotEmpty())
-<div class="row mt-5 mb-5">
-    <div class="col-12">
-        <div class="d-flex align-items-center mb-4">
-            <div class="icon-box-sm bg-primary-soft mr-3">
-                <i class="fas fa-car-side text-primary"></i>
-            </div>
-            <h4 class="section-title mb-0">Exact Fitment Guide</h4>
-        </div>
-        
-        <div class="card tech-card border-0 shadow-sm overflow-hidden" style="border-radius: 16px;">
-            <div class="table-responsive">
-                <table class="table tech-table mb-0">
-                    <thead class="bg-soft-blue">
-                        <tr>
-                            <th class="py-3 pl-4">Vehicle Make</th>
-                            <th class="py-3">Model & Series</th>
-                            <th class="py-3">Engine / Trim</th>
-                            <th class="py-3 text-center">Production Years</th>
-                            <th class="py-3 text-center">Shop Category</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($compatibilities as $fitment)
-                      @php
-    $spec = $fitment->specification;
-    $model = $spec->vehicleModel;
-    $variant = $spec->variant;
-    
-    // 1. Use keys that match your Route placeholders exactly to avoid Query Strings (?)
-    $params = [
-        'brand'   => $model?->brand?->slug ?? 'all',
-        'model'   => $model?->slug ?? 'all',
-        'variant' => $variant?->slug ?? 'all'
-    ];
-
-    // 2. Only add search if it's actually set
-    if (request('search')) {
-        $params['search'] = request('search');
-    }
-
-    // This will now produce: /parts-catalog/kia/k5/kia-k5-hybrid...
-    // $catalogUrl = route('parts.catalog', $params);
-@endphp
-                        <tr class="hover-row"> 
-                            {{-- 1. Brand --}}
-                            <td class="pl-4">
-                                <span class="brand-badge">{{ $model?->brand?->brand_name ?? '—' }}</span>
-                            </td>
-
-                            {{-- 2. Model --}}
-                            <td>
-                                <div class="model-text">
-                                    {{ $model?->model_name ?? 'Universal Fit' }}
-                                    @if($model?->series)
-                                        <small class="text-muted d-block">{{ $model->series }}</small>
+                                <td class="text-right pr-4">
+                                    @if($sub->old_unit_price && $sub->old_unit_price > $sub->unit_price)
+                                        <del class="text-muted small d-block" style="font-size: 0.7rem;">{{ number_format($sub->old_unit_price, 0) }}</del>
                                     @endif
-                                </div>
-                            </td>
+                                    <span class="price-text text-primary">{{ number_format($sub->unit_price ?? $sub->price, 0) }}</span>
+                                </td>
 
-                            {{-- 3. Engine / Variant --}}
-                            <td>
-                                <div class="trim-box">
-                                    <i class="fas fa-microchip mr-2 text-muted small"></i>
-                                    {{ $variant?->name ?? 'Standard' }}
-                                </div>
-                            </td>
-
-                            {{-- 4. Years --}}
-                            <td class="text-center">
-                                @if($model?->production_start_year)
-                                    <div class="year-range">
-                                        <span class="year-tag">{{ $model->production_start_year }}</span>
-                                        <span class="year-divider"></span>
-                                        <span class="year-tag">{{ $model->production_end_year ?? 'Now' }}</span>
-                                    </div>
-                                @else
-                                    <span class="text-muted small">Universal</span>
-                                @endif
-                            </td>
-
-                            {{-- 5. Updated Interactive Button --}}
-                            <td class="text-center">
-                                <a href="#" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm font-weight-bold">
-                                    <i class="fas fa-search-plus mr-1"></i> See All Parts
-                                </a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                                <td class="text-center pr-4">
+                                    <a href="{{ route('spare-parts.show', $sub->sku) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <p class="mt-3 text-muted small px-2">
-            <i class="fas fa-info-circle mr-1"></i> Click "See All Parts" to view all components compatible with this specific vehicle configuration.
-        </p>
     </div>
-</div>
-@endif
+    @endif
+
+    {{-- 5. COMPATIBILITY --}}
+    @if($compatibilities->isNotEmpty())
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-4">
+                <div class="icon-box-sm bg-primary-soft mr-3">
+                    <i class="fas fa-car-side text-primary"></i>
+                </div>
+                <h4 class="section-title mb-0">Exact Fitment Guide</h4>
+            </div>
+            
+            <div class="card tech-card border-0 shadow-sm overflow-hidden" style="border-radius: 16px;">
+                <div class="table-responsive">
+                    <table class="table tech-table mb-0">
+                        <thead class="bg-soft-blue">
+                            <tr>
+                                <th class="py-3 pl-4">Vehicle Make</th>
+                                <th class="py-3">Model & Series</th>
+                                <th class="py-3">Engine / Trim</th>
+                                <th class="py-3 text-center">Production Years</th>
+                                <th class="py-3 text-center">Shop Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($compatibilities as $fitment)
+                            @php
+                                $spec = $fitment->specification;
+                                $model = $spec->vehicleModel;
+                                $variant = $spec->variant;
+                                
+                                $params = [
+                                    'brand'   => $model?->brand?->slug ?? 'all',
+                                    'model'   => $model?->slug ?? 'all',
+                                    'variant' => $variant?->slug ?? 'all'
+                                ];
+
+                                if (request('search')) {
+                                    $params['search'] = request('search');
+                                }
+                            @endphp
+                            <tr class="hover-row"> 
+                                <td class="pl-4">
+                                    <span class="brand-badge">{{ $model?->brand?->brand_name ?? '—' }}</span>
+                                </td>
+
+                                <td>
+                                    <div class="model-text">
+                                        {{ $model?->model_name ?? 'Universal Fit' }}
+                                        @if($model?->series)
+                                            <small class="text-muted d-block">{{ $model->series }}</small>
+                                        @endif
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="trim-box">
+                                        <i class="fas fa-microchip mr-2 text-muted small"></i>
+                                        {{ $variant?->name ?? 'Standard' }}
+                                    </div>
+                                </td>
+
+                                <td class="text-center">
+                                    @if($model?->production_start_year)
+                                        <div class="year-range">
+                                            <span class="year-tag">{{ $model->production_start_year }}</span>
+                                            <span class="year-divider"></span>
+                                            <span class="year-tag">{{ $model->production_end_year ?? 'Now' }}</span>
+                                        </div>
+                                    @else
+                                        <span class="text-muted small">Universal</span>
+                                    @endif
+                                </td>
+
+                                <td class="text-center">
+                                    <a href="#" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm font-weight-bold">
+                                        <i class="fas fa-search-plus mr-1"></i> See All Parts
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p class="mt-3 text-muted small px-2">
+                <i class="fas fa-info-circle mr-1"></i> Click "See All Parts" to view all components compatible with this specific vehicle configuration.
+            </p>
+        </div>
+    </div>
+    @endif
+
+    {{-- 6. VERIFIED PURCHASE CUSTOMER REVIEWS (PATH A) --}}
+    <div class="row mt-5 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm tech-card bg-white p-4" style="border-radius: 16px;">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="shop-avatar mr-3 bg-light text-primary">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-0">Customer Reviews</h4>
+                </div>
+
+                {{-- Status Alerts --}}
+                @if($errors->has('message'))
+                    <div class="alert alert-danger rounded-3 small border-0 shadow-sm">
+                        <i class="fas fa-exclamation-circle me-2"></i> {{ $errors->first('message') }}
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <div class="alert alert-success rounded-3 small border-0 shadow-sm">
+                        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                    </div>
+                @endif
+
+                {{-- Write Review Interface Block --}}
+                @auth
+                    <div class="border-bottom pb-4 mb-4">
+                        <form action="{{ route('reviews.store.web') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="reviewable_type" value="part">
+                            <input type="hidden" name="reviewable_id" value="{{ $part->id }}">
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted d-block mb-1">Your Rating</label>
+                                <div class="star-rating d-flex flex-row-reverse justify-content-end">
+                                    <input type="radio" id="star5" name="rating" value="5" {{ old('rating') == 5 ? 'checked' : '' }} required />
+                                    <label for="star5" title="5 stars"><i class="fas fa-star"></i></label>
+                                    
+                                    <input type="radio" id="star4" name="rating" value="4" {{ old('rating') == 4 ? 'checked' : '' }} />
+                                    <label for="star4" title="4 stars"><i class="fas fa-star"></i></label>
+                                    
+                                    <input type="radio" id="star3" name="rating" value="3" {{ old('rating') == 3 ? 'checked' : '' }} />
+                                    <label for="star3" title="3 stars"><i class="fas fa-star"></i></label>
+                                    
+                                    <input type="radio" id="star2" name="rating" value="2" {{ old('rating') == 2 ? 'checked' : '' }} />
+                                    <label for="star2" title="2 stars"><i class="fas fa-star"></i></label>
+                                    
+                                    <input type="radio" id="star1" name="rating" value="1" {{ old('rating') == 1 ? 'checked' : '' }} />
+                                    <label for="star1" title="1 star"><i class="fas fa-star"></i></label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="comment" class="form-label small fw-bold text-muted">Review Comments</label>
+                                <textarea class="form-control rounded-3 border-light-subtle" id="comment" name="comment" rows="3" placeholder="Share your experience with this spare part... (optional)">{{ old('comment') }}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary px-4 rounded-pill fw-bold btn-sm shadow-sm">
+                                Submit Review
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <div class="alert alert-light border rounded-3 p-4 text-center mb-4 bg-light">
+                        <p class="text-muted small mb-2">Only registered customers who purchased this item can leave a review.</p>
+                        <a href="{{ route('login') }}" class="btn btn-sm btn-outline-primary rounded-pill px-4">
+                            Log In to Review
+                        </a>
+                    </div>
+                @endauth
+
+                {{-- Approved Reviews Display List Loop --}}
+                <div class="review-list">
+                    @forelse($part->reviews()->where('status', 'approved')->latest()->get() as $review)
+                        <div class="d-flex mb-3 pb-3 border-bottom align-items-start">
+                            <div class="bg-light text-primary fw-bold rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 42px; height: 42px; min-width: 42px; font-size: 0.9rem;">
+                                {{ strtoupper(substr($review->user->name, 0, 1)) }}
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center mb-1">
+                                    <h6 class="fw-bold mb-0 me-2 text-dark small">{{ $review->user->name }}</h6>
+                                    <div class="text-warning small" style="font-size: 0.75rem;">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="{{ $i <= $review->rating ? 'fas' : 'far' }} fa-star"></i>
+                                        @endfor
+                                    </div>
+                                </div>
+                                <p class="text-muted small mb-1">{{ $review->comment ?? 'No written comment left.' }}</p>
+                                <small class="text-muted-50 text-uppercase tracking-wider fw-bold" style="font-size: 0.65rem;">
+                                    <i class="fas fa-check-circle text-success mr-1"></i> Verified Purchase &bull; {{ $review->created_at->diffForHumans() }}
+                                </small>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-4">
+                            <p class="text-muted small mb-0">No verified user evaluations left for this component yet.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection

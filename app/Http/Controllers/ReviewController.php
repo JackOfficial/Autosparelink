@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 
 class ReviewController extends Controller
 {
-   public function store(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'reviewable_type' => 'required|in:part,shop',
@@ -21,10 +21,14 @@ class ReviewController extends Controller
 
         $user = auth()->user();
         
-        // 1. Resolve Target
-        $target = $validated['reviewable_type'] === 'part' 
-            ? Part::find($validated['reviewable_id']) 
-            : Shop::find($validated['reviewable_id']);
+        // 1. Convert client strings to full qualified Eloquent Class Names
+        $modelMap = [
+            'part' => Part::class,
+            'shop' => Shop::class,
+        ];
+        
+        $modelClass = $modelMap[$validated['reviewable_type']];
+        $target = $modelClass::find($validated['reviewable_id']);
 
         if (!$target) {
             return response()->json(['message' => 'Target entity not found.'], 404);
@@ -39,7 +43,10 @@ class ReviewController extends Controller
                 if ($validated['reviewable_type'] === 'part') {
                     $query->where('part_id', $target->id);
                 } else {
-                    $query->where('shop_id', $target->id);
+                    // Safe verification: Check if they bought a part belonging to this shop
+                    $query->whereHas('part', function ($partQuery) use ($target) {
+                        $partQuery->where('shop_id', $target->id); // assuming part has shop_id
+                    });
                 }
             })->exists();
 
@@ -49,7 +56,7 @@ class ReviewController extends Controller
             ], 403);
         }
 
-        // 3. Prevent Double Entry
+        // 3. Prevent Double Entry (updateOrCreate will seamlessly match your migration unique key)
         $review = $target->reviews()->updateOrCreate(
             ['user_id' => $user->id],
             [
@@ -67,14 +74,14 @@ class ReviewController extends Controller
 
     public function storeWeb(Request $request)
     {
-     // Reuse the logic from your API response step
-     $response = $this->store($request);
-    
-     if ($response->getStatusCode() !== 201) {
-        return back()->withErrors(['message' => json_decode($response->getContent())->message]);
-     } 
+        $response = $this->store($request);
+        
+        if ($response->getStatusCode() !== 201) {
+            // Fix: Catch the decoded message array accurately
+            $responseData = json_decode($response->getContent(), true);
+            return back()->withErrors(['message' => $responseData['message'] ?? 'An error occurred.'])->withInput();
+        } 
 
-    return back()->with('success', 'Thank you! Your review is awaiting admin approval.');
+        return back()->with('success', 'Thank you! Your review is awaiting admin approval.');
     }
-
 }
