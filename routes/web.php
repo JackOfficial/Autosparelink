@@ -82,6 +82,8 @@ use App\Http\Controllers\Shop\OrderController as ShopOrderController;
 use App\Http\Controllers\Shop\Part;
 use App\Http\Controllers\Shop\PartController as ShopPartController;
 use App\Http\Controllers\Shop\PayoutController;
+use App\Http\Controllers\Shop\PublicShopController;
+use App\Http\Controllers\Shop\PublicShopPartController;
 use App\Http\Controllers\Shop\SaleController;
 use App\Http\Controllers\Shop\ShopProfileController;
 use App\Http\Controllers\Shop\TicketController as ShopTicketController;
@@ -146,6 +148,10 @@ Route::controller(CareersController::class)->group(function () {
 // =============================================================
 
 Route::get('/shop/products', [ProductController::class, 'products']);
+
+Route::get('/spare-parts/{sku}', [PublicShopPartController::class, 'show'])->name('spare-parts.show');
+
+Route::get('/shops/{id}', [PublicShopController::class, 'show'])->name('shops.show');
 
 Route::get('/models', [VehicleModelController::class, 'index']);
 Route::get('/models/{id}', [VehicleModelController::class, 'vehicle_model']);

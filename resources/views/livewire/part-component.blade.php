@@ -112,7 +112,7 @@
             {{-- SHOP INFO SECTION --}}
             <small class="text-muted d-block mb-2 text-truncate px-2">
                 <i class="fa fa-store mr-1 text-primary"></i> 
-                <span class="font-weight-bold text-dark">{{ $part->shop->shop_name ?? 'Shop' }}</span> 
+                <span class="font-weight-bold text-dark"><a href="{{ route('shops.show', $part->shop_id) }}" class="font-weight-bold text-dark hover-underline">{{ $part->shop->shop_name ?? 'Shop' }}</a></span> 
                 @if($part->shop?->address)
                     <span class="mx-1">|</span>
                     <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
