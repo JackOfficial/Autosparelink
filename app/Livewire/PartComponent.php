@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Part;
+use App\Models\OrderItem;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\{Auth, DB};
 
@@ -22,14 +23,54 @@ class PartComponent extends Component
     }
 
     /**
+     * Verify if the user can review this product, then trigger the review interface.
+     */
+    public function openReviewModal()
+    {
+        // 1. Enforce Authentication Guard
+        if (!Auth::check()) {
+            $this->dispatch('swal', [
+                'icon'  => 'error',
+                'title' => 'Authentication Required',
+                'text'  => 'Please log in to submit a review for this product.',
+            ]);
+            return;
+        }
+
+        $user = Auth::user();
+
+        // 2. Verified Purchase Guard Logic
+        $hasPurchased = OrderItem::where('status', 'completed')
+            ->whereHas('order', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->where('part_id', $this->part->id)
+            ->exists();
+
+        if (!$hasPurchased) {
+            $this->dispatch('swal', [
+                'icon'  => 'warning',
+                'title' => 'Access Denied',
+                'text'  => 'You can only review parts that you have successfully purchased and completed.',
+            ]);
+            return;
+        }
+
+        // 3. Dispatch data out to a global review layout modal or Alpine handler
+        $this->dispatch('openReviewFormModal', [
+            'reviewable_type' => 'part',
+            'reviewable_id'   => $this->part->id,
+            'name'            => $this->part->part_name
+        ]);
+    }
+
+    /**
      * Immediate checkout flow for the current item.
      */
     public function buyNow()
     {
-        // 1. Run the strict stock checks and add item to cart instance safely
         $this->addToCart();
 
-        // 2. Fetch cart instance to confirm the item was successfully injected
         $instance = 'default';
         if (Auth::check()) {
             Cart::instance($instance)->restore(Auth::id());
@@ -39,18 +80,15 @@ class PartComponent extends Component
             return $cartItem->id === $this->part->id;
         })->isNotEmpty();
 
-        // 3. If validation failed in addToCart(), don't redirect
         if (!$hasItem) {
             return;
         }
 
-        // 4. Everything checked out perfectly, send them straight to payment checkout
         return redirect()->route('checkout.index');
     }
 
     public function addToCart()
     {
-        // 1. Validation: Check Stock
         if ($this->part->stock_quantity < $this->quantity) {
             $this->dispatch('swal', [
                 'icon'  => 'error',
@@ -74,7 +112,6 @@ class PartComponent extends Component
         $currentQtyInCart = $cartItem ? $cartItem->qty : 0;
         $newTotalQty = $currentQtyInCart + $this->quantity;
 
-        // 2. Validation: Prevent over-ordering based on stock
         if ($newTotalQty > $this->part->stock_quantity) {
             $this->dispatch('swal', [
                 'icon'  => 'warning',
@@ -117,7 +154,6 @@ class PartComponent extends Component
             $this->saveCartToDb($identifier, $instance);
         }
 
-        // Trigger Success Toast via JS Dispatch
         $this->dispatch('swal', [
             'icon'     => 'success',
             'title'    => 'Done!',

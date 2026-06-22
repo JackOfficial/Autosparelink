@@ -18,6 +18,11 @@
     if ($firstSpec && $firstSpec->variant) {
         $descriptiveName = $firstSpec->variant->variant_name ?? $firstSpec->variant->name ?? 'Multiple vehicles';
     }
+
+    // Safely aggregate active scores for display formatting
+    $approvedReviews = $part->reviews->where('status', 'approved');
+    $reviewCount = $approvedReviews->count();
+    $averageRating = $reviewCount > 0 ? round($approvedReviews->avg('rating'), 1) : 0;
 @endphp
 
 <div class="product-item bg-white h-100 shadow-sm border-0 d-flex flex-column" style="border-radius: 12px; transition: 0.3s; position: relative;">
@@ -58,8 +63,14 @@
         <div class="product-action">
             <button wire:click="buyNow" class="btn btn-light btn-square shadow-sm mx-1" title="Buy Now"><i class="fa fa-bolt text-warning"></i></button>
             <button wire:click="addToCart" class="btn btn-light btn-square shadow-sm mx-1" title="Add to Cart"><i class="fa fa-shopping-cart"></i></button>
-            <button wire:click="addToWishlist" class="btn btn-light btn-square shadow-sm mx-1"><i class="far fa-heart"></i></button>
-            <a href="{{ route('spare-parts.show', $part->sku) }}" class="btn btn-light btn-square shadow-sm mx-1"><i class="fa fa-search"></i></a>
+            <button wire:click="addToWishlist" class="btn btn-light btn-square shadow-sm mx-1" title="Add to Wishlist"><i class="far fa-heart"></i></button>
+            
+            {{-- NEW: Interactive Trigger to open review verification guard workflow --}}
+            <button wire:click="openReviewModal" class="btn btn-light btn-square shadow-sm mx-1" title="Write a Review" wire:loading.attr="disabled">
+                <i class="fa fa-star text-warning"></i>
+            </button>
+            
+            <a href="{{ route('spare-parts.show', $part->sku) }}" class="btn btn-light btn-square shadow-sm mx-1" title="View Details"><i class="fa fa-search"></i></a>
         </div>
     </div>
 
@@ -67,6 +78,26 @@
         <a class="h6 text-truncate d-block mb-1 text-dark font-weight-bold px-2" href="{{ route('spare-parts.show', $part->sku) }}" title="{{ $part->part_name }}">
             {{ Str::limit($part->part_name, 35) }}
         </a>
+
+        {{-- NEW: Dynamic Live aggregate stars score block under the title header --}}
+        <div class="d-flex align-items-center justify-content-center mb-2" style="font-size: 0.82rem;">
+            <div class="text-warning mr-1">
+                @for($i = 1; $i <= 5; $i++)
+                    @if($i <= round($averageRating))
+                        <i class="fa fa-star"></i>
+                    @else
+                        <i class="far fa-star text-muted" style="opacity: 0.35;"></i>
+                    @endif
+                @endfor
+            </div>
+            <small class="text-muted font-weight-medium">
+                @if($reviewCount > 0)
+                    <strong>{{ $averageRating }}</strong> ({{ $reviewCount }})
+                @else
+                    <span class="text-muted" style="font-size: 0.72rem; opacity: 0.8;">No reviews yet</span>
+                @endif
+            </small>
+        </div>
 
         <div class="mt-auto"> 
             {{-- Vehicle & Part Number --}}
