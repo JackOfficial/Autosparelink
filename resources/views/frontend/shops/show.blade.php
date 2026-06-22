@@ -97,18 +97,13 @@
 
         <div class="col-lg-5 mb-5">
 
-            <div class="bg-light shadow-sm rounded overflow-hidden mb-4">
-                <iframe
-                    class="w-100"
-                    height="260"
-                    src="https://maps.google.com/maps?q={{ urlencode($shop->address ?? 'Gisozi, Kigali, Rwanda') }}&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                    frameborder="0"
-                    style="border:0;"
-                    allowfullscreen=""
-                    loading="lazy"
-                    aria-hidden="false"
-                    tabindex="0">
-                </iframe>
+            <div class="bg-white shadow-sm rounded p-4 mb-4 text-center d-flex align-items-center justify-content-center border-0" style="height: 260px;">
+                <img 
+                    src="{{ $shop->logo_url }}" 
+                    alt="{{ $shop->shop_name }} Logo" 
+                    class="img-fluid rounded" 
+                    style="max-height: 100%; max-width: 100%; object-fit: contain;"
+                >
             </div>
 
             <div class="bg-white shadow-sm p-4 rounded mb-4">
@@ -121,12 +116,12 @@
 
                 <div class="d-flex align-items-start mb-3">
                     <i class="fa fa-envelope text-primary fs-4 mr-3 mt-1"></i>
-                    <p class="mb-0 text-muted small">{{ $shop->email ?? 'info@autosparelink.com' }}</p>
+                    <p class="mb-0 text-muted small">{{ $shop->shop_email ?? 'info@autosparelink.com' }}</p>
                 </div>
 
                 <div class="d-flex align-items-start">
                     <i class="fa fa-phone-alt text-primary fs-4 mr-3 mt-1"></i>
-                    <p class="mb-0 text-muted small">{{ $shop->phone ?? '+250 788 430 122' }}</p>
+                    <p class="mb-0 text-muted small">{{ $shop->phone_number ?? '+250 788 430 122' }}</p>
                 </div>
             </div>
 
