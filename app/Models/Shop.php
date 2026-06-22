@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Shop extends Model
 {
@@ -73,6 +74,21 @@ class Shop extends Model
     public function isOperational(): bool
     {
         return $this->is_active && $this->is_verified;
+    }
+
+    /**
+     * Get all of the reviews for the shop's spare parts.
+     */
+    public function reviews(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Review::class, // The final target model we want to access
+            Part::class,   // The intermediate model the shop owns
+            'shop_id',     // Foreign key on the parts table
+            'part_id',     // Foreign key on the reviews table
+            'id',          // Local key on the shops table
+            'id'           // Local key on the parts table
+        );
     }
 
     /**
