@@ -4,24 +4,21 @@ namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Part;
+use App\Models\Shop;
 use Illuminate\View\View;
 
 class PublicShopPartController extends Controller
 {
-    public function show(string $sku): View
+    public function show(int $id): View
     {
-        // Explicitly scope 'reviews.status' to eliminate column ambiguity with 'parts.status'
-        $part = Part::with([
-            'shop', 
-            'photos', 
-            'state', 
-            'specifications.variant',
+        $shop = Shop::with([
+            'parts',
             'reviews' => function ($query) {
+                // Explicitly qualify the status column with the reviews table name
                 $query->where('reviews.status', 'approved')->with('user');
             }
-        ])->where('sku', $sku)->firstOrFail();
+        ])->findOrFail($id);
 
-        return view('frontend.shops.parts', compact('part'));
+        return view('frontend.shops.show', compact('shop'));
     }
 }
