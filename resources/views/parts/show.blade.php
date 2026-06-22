@@ -432,7 +432,7 @@
                 {{-- Write Review Interface Block --}}
                 @auth
                     <div class="border-bottom pb-4 mb-4">
-                        <form action="{{ route('reviews.store.web') }}" method="POST">
+                        <form action="{{ route('reviews.store') }}" method="POST">
                             @csrf
                             <input type="hidden" name="reviewable_type" value="part">
                             <input type="hidden" name="reviewable_id" value="{{ $part->id }}">
