@@ -180,7 +180,7 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 
 Route::middleware(['auth'])->group(function () {
-    Route::post('/reviews', [ReviewController::class, 'storeWeb'])->name('reviews.store');
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });
 
 Route::get('/orders/{order}/status', function (\App\Models\Order $order) {

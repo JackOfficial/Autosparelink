@@ -6,12 +6,16 @@ use Illuminate\Http\Request;
 use App\Models\Part;
 use App\Models\Shop;
 use App\Models\OrderItem;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class ReviewController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    /**
+     * Store a newly created review via web form.
+     */
+    public function store(Request $request): RedirectResponse
     {
+        // 1. Validation (Laravel automatically redirects back with errors if this fails)
         $validated = $request->validate([
             'reviewable_type' => 'required|in:part,shop',
             'reviewable_id'   => 'required|integer',
@@ -21,7 +25,7 @@ class ReviewController extends Controller
 
         $user = auth()->user();
         
-        // 1. Convert client strings to full qualified Eloquent Class Names
+        // 2. Convert client strings to full qualified Eloquent Class Names
         $modelMap = [
             'part' => Part::class,
             'shop' => Shop::class,
@@ -31,10 +35,10 @@ class ReviewController extends Controller
         $target = $modelClass::find($validated['reviewable_id']);
 
         if (!$target) {
-            return response()->json(['message' => 'Target entity not found.'], 404);
+            return back()->withErrors(['message' => 'Target entity not found.'])->withInput();
         }
 
-        // 2. Strict Verified Purchase Guard Logic
+        // 3. Strict Verified Purchase Guard Logic
         $hasPurchased = OrderItem::where('status', 'completed')
             ->whereHas('order', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -43,45 +47,30 @@ class ReviewController extends Controller
                 if ($validated['reviewable_type'] === 'part') {
                     $query->where('part_id', $target->id);
                 } else {
-                    // Safe verification: Check if they bought a part belonging to this shop
+                    // Check if they bought a part belonging to this shop
                     $query->whereHas('part', function ($partQuery) use ($target) {
-                        $partQuery->where('shop_id', $target->id); // assuming part has shop_id
+                        $partQuery->where('shop_id', $target->id);
                     });
                 }
             })->exists();
 
         if (!$hasPurchased) {
-            return response()->json([
+            return back()->withErrors([
                 'message' => 'You can only review parts or shops from which you have completed purchases.'
-            ], 403);
+            ])->withInput();
         }
 
-        // 3. Prevent Double Entry (updateOrCreate will seamlessly match your migration unique key)
-        $review = $target->reviews()->updateOrCreate(
+        // 4. Prevent Double Entry & Save
+        $target->reviews()->updateOrCreate(
             ['user_id' => $user->id],
             [
                 'rating' => $validated['rating'],
                 'comment' => $validated['comment'],
-                'status' => 'pending' // Admin must moderate auto parts comments
+                'status' => 'pending' // Admin moderation queue
             ]
         );
 
-        return response()->json([
-            'message' => 'Your review has been submitted and is awaiting moderation.',
-            'review' => $review
-        ], 201);
-    }
-
-    public function storeWeb(Request $request)
-    {
-        $response = $this->store($request);
-        
-        if ($response->getStatusCode() !== 201) {
-            // Fix: Catch the decoded message array accurately
-            $responseData = json_decode($response->getContent(), true);
-            return back()->withErrors(['message' => $responseData['message'] ?? 'An error occurred.'])->withInput();
-        } 
-
-        return back()->with('success', 'Thank you! Your review is awaiting admin approval.');
+        // 5. Direct Web Redirect
+        return back()->with('success', 'Thank you! Your review has been submitted and is awaiting moderation.');
     }
 }
