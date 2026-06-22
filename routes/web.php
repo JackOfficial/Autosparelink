@@ -317,13 +317,13 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::post('/add-task', [AdminController::class, 'addTask'])->name('addTask');
     Route::post('/task-done/{id}', [AdminController::class, 'taskDone'])->name('taskDone');
 
-    Route::get('/', [AdminReviewController::class, 'index'])->name('index');
+    Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
     
     // 2. Action to approve a review
-    Route::patch('/{review}/approve', [AdminReviewController::class, 'approve'])->name('approve');
+    Route::patch('/reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('reviews.approve');
     
     // 3. Action to reject/delete a review
-    Route::delete('/{review}/reject', [AdminReviewController::class, 'reject'])->name('reject');
+    Route::delete('/reviews/{review}/reject', [AdminReviewController::class, 'reject'])->name('reviews.reject');
 
     // Content Management
     Route::resource('blog-categories', BlogCategoryController::class);
