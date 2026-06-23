@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Payout, OrderItem, Commission};
+use App\Models\Payout;
 use App\Services\InTouchPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Log};
@@ -28,117 +28,110 @@ class PayoutController extends Controller
 
     public function show(string $id)
     {
-        $payout = Payout::with('shop')->findOrFail($id);
-        $shop = $payout->shop;
+        $payout = Payout::with('shop.wallet')->findOrFail($id);
+        
+        // Single point of truth math from our Shop model profile
+        $audit = $payout->shop->getFinancialAudit();
 
-        // Financial Audit Logic (Calculates net from completed orders minus other payouts)
-        $rate = (Commission::getRate() ?? 0) / 100;
-
-        $totalGross = OrderItem::where('shop_id', $shop->id)
-            ->where('status', 'completed')
-            ->whereHas('order', fn($q) => $q->where('status', 'completed'))
-            ->sum(DB::raw('unit_price * quantity')) ?? 0;
-
-        $netEarnings = $totalGross * (1 - $rate);
-
-        $otherDeductions = Payout::where('shop_id', $shop->id)
-            ->where('id', '!=', $payout->id)
-            ->whereIn('status', ['completed', 'pending', 'processing'])
-            ->sum('amount') ?? 0;
-
-        $actualAvailableBeforeThisPayout = $netEarnings - $otherDeductions;
+        // If the current request is already processing/pending, add it back to show what the pool looked like
+        $isLocked = in_array($payout->status, ['pending', 'processing']);
+        $actualAvailableBeforeThisPayout = $audit['availableBalance'] + ($isLocked ? $payout->amount : 0);
 
         return view('admin.payouts.show', compact('payout', 'actualAvailableBeforeThisPayout'));
     }
 
     /**
-     * Admin modification of Payout Status.
-     * If moved to 'completed' here, it triggers the InTouch API.
+     * Safely process payout transitions with proper ledger synchronization
      */
     public function update(Request $request, string $id)
     {
-        $payout = Payout::findOrFail($id);
-        
-        if (in_array($payout->status, ['completed', 'rejected'])) {
-            return back()->with('error', 'This payout has already been finalized.');
-        }
-
         $request->validate([
             'status' => 'required|in:processing,completed,rejected',
-            'admin_note' => $request->status == 'rejected' ? 'required|string|min:5' : 'nullable|string'
+            'admin_note' => $request->status === 'rejected' ? 'required|string|min:5' : 'nullable|string'
         ]);
 
-        // If Admin is marking as COMPLETED, we attempt the real-time transfer
-        if ($request->status == 'completed') {
+        return DB::transaction(function () use ($request, $id) {
+            // 1. Lock rows defensively to block concurrent modifications/webhooks
+            $payout = Payout::where('id', $id)->lockForUpdate()->firstOrFail();
+            $shop = $payout->shop;
+            $wallet = $shop->wallet()->lockForUpdate()->firstOrFail();
             
-            // 1. Final Audit Check
-            $rate = (Commission::getRate() ?? 0) / 100;
-            $totalGross = OrderItem::where('shop_id', $payout->shop_id)
-                ->where('status', 'completed')
-                ->whereHas('order', fn($q) => $q->where('status', 'completed'))
-                ->sum(DB::raw('unit_price * quantity')) ?? 0;
-
-            $currentAvailable = ($totalGross * (1 - $rate)) - 
-                Payout::where('shop_id', $payout->shop_id)
-                    ->where('id', '!=', $payout->id)
-                    ->whereIn('status', ['completed', 'pending', 'processing'])
-                    ->sum('amount');
-
-            if ($payout->amount > $currentAvailable) {
-                return back()->with('error', 'Insufficient audited funds to complete this transfer.');
+            if (in_array($payout->status, ['completed', 'rejected'])) {
+                return back()->with('error', 'This payout has already been finalized.');
             }
 
-            // 2. API Disbursement Attempt
-            try {
-                // Ensure a reference exists
-                $reference = $payout->reference ?? 'ADM-WD-' . time();
+            // ACTION: ADMIN MARKS AS COMPLETED (Triggers Gateway)
+            if ($request->status === 'completed') {
+                $audit = $shop->getFinancialAudit();
 
-                $response = $this->intouchService->requestDeposit(
-                    $payout->account_details, // The vendor's phone
-                    $payout->amount,
-                    $reference,
-                    "Admin Approved Payout: " . $payout->shop->name
-                );
-
-                // Check InTouch response (handling the 'Successfull' typo)
-                if (isset($response['status']) && (strtolower($response['status']) == 'successfull' || $response['responsecode'] == '01')) {
-                    $payout->update([
-                        'status' => 'completed',
-                        'admin_note' => $request->admin_note,
-                        'processed_at' => now(),
-                        'gateway_transaction_id' => $response['transactionid'] ?? null,
-                        'reference' => $reference
-                    ]);
-                    
-                    return redirect()->route('admin.payouts.index')->with('success', 'Payout successfully disbursed via InTouch.');
-                } else {
-                    Log::error("Admin Payout API Failure:", $response);
-                    return back()->with('error', 'InTouch Gateway Error: ' . ($response['statusdesc'] ?? 'Unknown Error'));
+                // Double check that the vendor actually has these funds available
+                if ($payout->amount > ($audit['availableBalance'] + $payout->amount)) {
+                    return back()->with('error', 'Overdraft Guard: Vendor does not have enough verified funds.');
                 }
 
-            } catch (\Exception $e) {
-                Log::error("Admin Payout Exception: " . $e->getMessage());
-                return back()->with('error', 'System Error: ' . $e->getMessage());
+                try {
+                    $reference = $payout->reference ?? 'ADM-WD-' . time();
+
+                    $response = $this->intouchService->requestDeposit(
+                        $payout->account_details,
+                        $payout->amount,
+                        $reference,
+                        "Payout to " . $shop->shop_name
+                    );
+
+                    if (isset($response['status']) && (strtolower($response['status']) === 'successfull' || $response['responsecode'] === '01')) {
+                        
+                        // Deduct money from persistent storage wallet row
+                        $wallet->decrement('balance', $payout->amount);
+
+                        $payout->update([
+                            'status' => 'completed',
+                            'admin_note' => $request->admin_note,
+                            'processed_at' => now(),
+                            'gateway_transaction_id' => $response['transactionid'] ?? null,
+                            'reference' => $reference
+                        ]);
+                        
+                        return redirect()->route('admin.payouts.index')->with('success', 'Payout cleared and disbursed successfully.');
+                    }
+
+                    Log::error("InTouch API Disburse Rejection:", $response);
+                    return back()->with('error', 'Gateway Error: ' . ($response['statusdesc'] ?? 'Disbursement refused.'));
+
+                } catch (\Exception $e) {
+                    Log::error("Disbursement Thread Panic Exception: " . $e->getMessage());
+                    return back()->with('error', 'Transport error running gateway handshake: ' . $e->getMessage());
+                }
             }
-        }
 
-        // Standard update for Rejection or Processing status
-        $payout->update([
-            'status' => $request->status,
-            'admin_note' => $request->admin_note,
-            'processed_at' => $request->status == 'rejected' ? now() : $payout->processed_at,
-        ]);
+            // ACTION: ADMIN MARKS AS REJECTED
+            if ($request->status === 'rejected') {
+                // Moving status to rejected automatically drops it from 'pendingPayouts' list,
+                // making it instantly spendable again on the dashboard through getFinancialAudit()
+                $payout->update([
+                    'status' => 'rejected',
+                    'admin_note' => $request->admin_note,
+                    'processed_at' => now()
+                ]);
 
-        return redirect()->route('admin.payouts.index')->with('success', "Payout status updated to {$request->status}.");
+                return redirect()->route('admin.payouts.index')->with('success', 'Payout rejected. Funds unlocked back into available balance.');
+            }
+
+            // Standard fallback state change (e.g., pending -> processing)
+            $payout->update([
+                'status' => $request->status,
+                'admin_note' => $request->admin_note
+            ]);
+
+            return redirect()->route('admin.payouts.index')->with('success', "Payout status updated to {$request->status}.");
+        });
     }
 
+    /**
+     * Block hard deletions of payout log history entries
+     */
     public function destroy(string $id)
     {
-        $payout = Payout::findOrFail($id);
-        if ($payout->status == 'pending') {
-            $payout->delete();
-            return back()->with('success', 'Payout request cancelled.');
-        }
-        return back()->with('error', 'Only pending requests can be deleted.');
+        return back()->with('error', 'Financial records cannot be hard deleted. Reject the request to free up balances instead.');
     }
 }

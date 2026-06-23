@@ -22,14 +22,12 @@ class Shop extends Model
         'address',
         'phone_number',
         'is_active',
-        'commission_rate',
         'is_verified',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'is_verified' => 'boolean',
-        'commission_rate' => 'decimal:2',
     ];
 
     public function documents(): MorphMany
@@ -85,9 +83,11 @@ class Shop extends Model
     {
         // 1. Fetch current centralized wallet metrics to guarantee single-source balance consistency
         $wallet = $this->wallet ?? $this->wallet()->create(['balance' => 0]);
-        $currentRate = (float) ($this->commission_rate ?? 0);
+        
+        // 2. Pull the uniform global rate from your central Commission Model configuration setting
+        $globalRate = (float) (\App\Models\Commission::getRate() ?? 0);
 
-        // 2. Perform fast aggregates optimized for execution indexing
+        // 3. Perform fast aggregates optimized for execution indexing
         $revenueData = $this->orderItems()
             ->where('status', 'completed')
             ->selectRaw("
@@ -100,7 +100,7 @@ class Shop extends Model
         $netEarnings = (float) ($revenueData->total_shop_revenue ?? 0);
         $totalCommission = $totalGross - $netEarnings;
 
-        // 3. Keep strict tracking on payouts using uniform states matching your PayoutController
+        // 4. Keep strict tracking on payouts using uniform states matching your PayoutController
         $deductions = $this->payouts()
             ->whereIn('status', ['completed', 'pending', 'processing'])
             ->selectRaw("
@@ -114,14 +114,13 @@ class Shop extends Model
 
         return [
             'totalGross'       => $totalGross,       // Absolute customer gross payment profile
-            'commissionRate'   => $currentRate,      // Fixed target base percentage
+            'commissionRate'   => $globalRate,       // Uniform platform percentage rate pulled directly from settings
             'totalCommission'  => $totalCommission,  // Platform markup capture yield
             'netEarnings'      => $netEarnings,      // All-time historic earned ledger index
             'totalWithdrawn'   => $withdrawn,        // Confirmed processed payout settlements
             'pendingPayouts'   => $locked,           // Retained transaction locks
             
-            // CRITICAL FIX: Base available balance on your audited Wallet balance row
-            // to stay aligned with updates from your PayoutController webhooks.
+            // Available balance calculation based on actual wallet balance row minus locked payout allocations
             'availableBalance' => (float) $wallet->balance - $locked
         ];
     }

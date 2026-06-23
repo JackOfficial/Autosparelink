@@ -22,29 +22,14 @@ class WalletController extends Controller
     /**
      * Display all shop wallets with their current balances.
      */
-  /**
-     * Display all shop wallets with their current balances.
-     */
     public function index()
     {
-        // Option A: Only load wallets that actually have an active shop
         $wallets = Wallet::has('shop')
-            ->with('shop')
+            ->with(['shop.orderItems', 'shop.payouts']) // Eager load to avoid N+1 query loops
             ->latest('updated_at')
             ->paginate(15);
 
         $wallets->getCollection()->transform(function ($wallet) {
-            // Option B: Extra defensive guard check just in case
-            if (!$wallet->shop) {
-                $wallet->audited_gross      = 0;
-                $wallet->commission_rate    = 0;
-                $wallet->audited_commission = 0;
-                $wallet->audited_net        = 0;
-                $wallet->audited_locked     = 0;
-                $wallet->audited_balance    = 0;
-                return $wallet;
-            }
-
             $audit = $wallet->shop->getFinancialAudit();
             $wallet->audited_gross      = $audit['totalGross'];
             $wallet->commission_rate    = $audit['commissionRate'];
@@ -55,7 +40,13 @@ class WalletController extends Controller
             return $wallet;
         });
 
-        $floatBalance = $this->intouchService->getBalance()['balance'] ?? 0;
+        // Safe fallback check if the gateway is unreachable
+        try {
+            $floatBalance = $this->intouchService->getBalance()['balance'] ?? 0;
+        } catch (\Exception $e) {
+            Log::warning("InTouch balance check failed on admin view: " . $e->getMessage());
+            $floatBalance = 'Unavailable';
+        }
 
         return view('admin.wallets.index', compact('wallets', 'floatBalance'));
     }
@@ -67,7 +58,7 @@ class WalletController extends Controller
     }
 
     /**
-     * Store manual adjustment and process payment via InTouch service.
+     * Store manual adjustment safely using outside-in network handling logic
      */
     public function store(Request $request)
     {
@@ -77,82 +68,89 @@ class WalletController extends Controller
             'amount'          => 'required|numeric|min:1',
             'description'     => 'required|string|max:255',
             'payout_method'   => 'required_if:type,debit|string|nullable',
-            'account_details' => 'required_if:type,debit|string|nullable', // Phone number for Intouch
+            'account_details' => 'required_if:type,debit|string|nullable',
         ]);
 
-        try {
-            return DB::transaction(function () use ($request) {
-                $wallet = Wallet::where('shop_id', $request->shop_id)->lockForUpdate()->first();
-                
-                if (!$wallet) {
-                    $wallet = Wallet::create(['shop_id' => $request->shop_id, 'balance' => 0]);
+        $shop = Shop::findOrFail($request->shop_id);
+        $payReference = 'WD-' . strtoupper(bin2hex(random_bytes(4))) . '-' . time();
+        $adjReference = 'ADJ-' . strtoupper(bin2hex(random_bytes(3))) . '-' . time();
+        $gatewayTransactionId = null;
+
+        // --- PRE-CHECK AND NETWORK API PROCESSING (OUTSIDE TRANSACTION) ---
+        if ($request->type === 'debit') {
+            $audit = $shop->getFinancialAudit();
+            if ($audit['availableBalance'] < $request->amount) {
+                return back()->with('error', 'Insufficient available balance to perform this payout.')->withInput();
+            }
+
+            try {
+                $response = $this->intouchService->requestDeposit(
+                    $request->account_details ?? $shop->phone_number,
+                    $request->amount,
+                    $payReference,
+                    "Admin Wallet Adjustment: " . $request->description
+                );
+
+                // Handle common InTouch success payloads safely
+                if (isset($response['status']) && (strtolower($response['status']) === 'successfull' || $response['responsecode'] === '01')) {
+                    $gatewayTransactionId = $response['transactionid'] ?? null;
+                } else {
+                    return back()->with('error', 'InTouch Gateway Rejected Transfer: ' . ($response['statusdesc'] ?? 'Unknown Reason'))->withInput();
                 }
+            } catch (\Exception $e) {
+                Log::error("Network Timeout or Failure on Admin Wallet Adjust: " . $e->getMessage());
+                return back()->with('error', 'Network Connection Timeout with InTouch. No money moved.')->withInput();
+            }
+        }
 
-                $adjReference = 'ADJ-' . strtoupper(bin2hex(random_bytes(3))) . '-' . time();
-                $payReference = 'WD-' . strtoupper(bin2hex(random_bytes(4))) . '-' . time();
-                $status = 'completed';
+        // --- DATABASE OPERATIONS (SHORT, ATOMIC MUTATION BLOCK) ---
+        try {
+            DB::transaction(function () use ($request, $shop, $payReference, $adjReference, $gatewayTransactionId) {
+                $wallet = Wallet::where('shop_id', $shop->id)->lockForUpdate()->firstOrCreate(
+                    ['shop_id' => $shop->id],
+                    ['balance' => 0]
+                );
 
-                // 1. Handle Debit (Manual Payout) via InTouch Service
-                if ($request->type == 'debit') {
-                    $audit = $wallet->shop->getFinancialAudit();
-                    if ($audit['availableBalance'] < $request->amount) {
-                         throw new \Exception('Insufficient available balance to perform this payout.');
-                    }
-
-                    // Create the Payout record first (Processing)
-                    $payout = $wallet->shop->payouts()->create([
-                        'amount'          => $request->amount,
-                        'payout_method'   => $request->payout_method ?? 'Admin Disbursement',
-                        'account_details' => $request->account_details ?? $wallet->shop->phone_number,
-                        'status'          => 'processing',
-                        'currency'        => 'RWF',
-                        'reference'       => $payReference,
+                if ($request->type === 'debit') {
+                    // 1. Log the corresponding complete payout record
+                    $shop->payouts()->create([
+                        'amount'                 => $request->amount,
+                        'payout_method'          => $request->payout_method ?? 'Admin Disbursement',
+                        'account_details'        => $request->account_details ?? $shop->phone_number,
+                        'status'                 => 'completed',
+                        'currency'               => 'RWF',
+                        'reference'              => $payReference,
+                        'gateway_transaction_id' => $gatewayTransactionId,
+                        'processed_at'           => now(),
                     ]);
 
-                    // Trigger the service call
-                    $response = $this->intouchService->requestDeposit(
-                        $request->account_details ?? $wallet->shop->phone_number,
-                        $request->amount,
-                        $payReference,
-                        "Admin Payout: " . $request->description
-                    );
-
-                    // Evaluate gateway response using your service's logic
-                    if (isset($response['status']) && (strtolower($response['status']) == 'successfull' || $response['responsecode'] == '01')) {
-                        $wallet->decrement('balance', $request->amount);
-                        
-                        $payout->update([
-                            'status' => 'completed',
-                            'gateway_transaction_id' => $response['transactionid'] ?? null
-                        ]);
-                    } else {
-                        $payout->update(['status' => 'failed', 'error_log' => $response['statusdesc'] ?? 'Gateway rejected transfer']);
-                        throw new \Exception($response['statusdesc'] ?? 'InTouch Gateway rejected the transfer.');
-                    }
+                    $wallet->decrement('balance', $request->amount);
                 } else {
-                    // 2. Handle Credit (Manual Addition)
+                    // Credit operations run purely on the database
                     $wallet->increment('balance', $request->amount);
                 }
 
-                // 3. Create the Ledger Entry
+                // 2. Log general Ledger Transaction Record
                 $wallet->transactions()->create([
                     'type'           => $request->type,
                     'amount'         => $request->amount,
                     'description'    => $request->description,
                     'status'         => 'completed',
                     'reference_type' => 'Admin Adjustment',
-                    'reference_id'   => auth()->id(), 
+                    'reference_id'   => auth()->id(),
                     'reference'      => $adjReference,
                 ]);
 
                 $wallet->updateQuietly(['last_transaction_at' => now()]);
-
-                return redirect()->route('admin.wallets.index')
-                    ->with('success', "Adjustment of " . number_format($request->amount) . " RWF processed successfully.");
             });
+
+            return redirect()->route('admin.wallets.index')
+                ->with('success', "Adjustment of " . number_format($request->amount) . " RWF completed successfully.");
+
         } catch (\Exception $e) {
-            Log::error("Financial Adjustment Failed: " . $e->getMessage());
-            return back()->with('error', 'Error: ' . $e->getMessage())->withInput();
+            Log::critical("CRITICAL LEDGER DESYNC FAILURE: Money moved via gateway, database failed to log details: " . $e->getMessage());
+            return redirect()->route('admin.wallets.index')
+                ->with('error', 'The money was moved via the gateway, but a system exception occurred while creating the transaction log. Please review logs immediately.');
         }
     }
 
