@@ -26,6 +26,8 @@ class PayoutController extends Controller
     public function index()
     {
         $summary = $this->getFinancialSummary();
+
+        dd($summary);
         
         $payouts = Payout::forCurrentSeller()
             ->latest()
