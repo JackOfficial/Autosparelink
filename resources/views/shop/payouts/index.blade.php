@@ -31,7 +31,7 @@
                 </div>
             </div>
 
-            {{-- Platform Fee - NOW DYNAMIC --}}
+            {{-- Platform Fee --}}
             <div class="col-md-3">
                 <div class="card balance-card shadow-sm h-100 border-start border-danger border-4 bg-soft-danger">
                     <div class="card-body">
@@ -106,14 +106,14 @@
                                     <td>
                                         @php
                                             $statusClasses = [
-                                                'completed' => 'bg-soft-success',
-                                                'pending'   => 'bg-soft-warning',
-                                                'processing'=> 'bg-soft-primary',
-                                                'rejected'  => 'bg-soft-danger'
+                                                'completed'  => 'bg-soft-success text-success',
+                                                'pending'    => 'bg-soft-warning text-warning',
+                                                'processing' => 'bg-soft-primary text-primary',
+                                                'failed'     => 'bg-soft-danger text-danger'
                                             ];
-                                            $currentClass = $statusClasses[$payout->status] ?? 'bg-light text-muted';
+                                            $currentClass = $statusClasses[strtolower($payout->status)] ?? 'bg-light text-muted';
                                         @endphp
-                                        <span class="badge {{ $currentClass }} text-dark py-2 px-3 rounded-pill uppercase smaller">
+                                        <span class="badge {{ $currentClass }} py-2 px-3 rounded-pill uppercase smaller fw-bold">
                                             {{ $payout->status }}
                                         </span>
                                     </td>
@@ -154,7 +154,7 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('shop.payouts.store') }}" method="POST">
+                        <form action="{{ route('shop.payouts.store') }}" method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true; this.querySelector('.spinner-border').classList.remove('d-none');">
                             @csrf
                             <div class="mb-3">
                                 <label class="small fw-bold text-muted mb-1 uppercase">Amount to Withdraw</label>
@@ -165,8 +165,10 @@
                                 </div>
                                 <div class="mt-1 d-flex justify-content-between">
                                     <small class="text-muted">Available: <strong>{{ number_format($availableBalance) }}</strong></small>
-                                    <button type="button" class="btn btn-link p-0 smaller text-primary text-decoration-none" 
-                                            onclick="document.getElementsByName('amount')[0].value = '{{ floor($availableBalance) }}'">Max</button>
+                                    @if($availableBalance >= 100)
+                                        <button type="button" class="btn btn-link p-0 smaller text-primary text-decoration-none" 
+                                                onclick="document.getElementsByName('amount')[0].value = '{{ floor($availableBalance) }}'">Max</button>
+                                    @endif
                                 </div>
                             </div>
 
@@ -175,22 +177,23 @@
                                 <select name="payout_method" class="form-select border rounded-3 py-2" required>
                                     <option value="MTN MoMo">MTN Mobile Money</option>
                                     <option value="Airtel Money">Airtel Money</option>
-                                    <option value="Bank Transfer">Bank Transfer</option>
+                                    {{-- Temporary hidden until controller backend array supports alternative arrays --}}
                                 </select>
                             </div>
 
                             <div class="mb-4">
                                 <label class="small fw-bold text-muted mb-1 uppercase">Account Details</label>
                                 <input type="text" name="account_details" class="form-control border rounded-3 py-2" 
-                                       placeholder="Phone number or Bank info" required>
+                                       placeholder="Enter mobile wallet number" required>
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm rounded-pill" 
                                     {{ $availableBalance < 100 ? 'disabled' : '' }}>
+                                <span class="spinner-border spinner-border-sm d-none me-1" role="status" aria-hidden="true"></span>
                                 <i class="ti ti-send me-1"></i> Request Payout
                             </button>
 
-                            @if($availableBalance < 5000)
+                            @if($availableBalance < 100)
                                 <div class="mt-3 p-2 bg-light rounded-3 text-center">
                                     <small class="text-danger fw-medium">
                                         Min. 100 RWF required to withdraw.
