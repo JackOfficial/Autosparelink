@@ -79,51 +79,48 @@ class Shop extends Model
      * Audited Financial Calculation Logic
      * Centralized to verify mathematical consistency against the Wallet System.
      */
-    public function getFinancialAudit(): array
-    {
-        // 1. Fetch current centralized wallet metrics to guarantee single-source balance consistency
-        $wallet = $this->wallet ?? $this->wallet()->create(['balance' => 0]);
-        
-        // 2. Pull the uniform global rate from your central Commission Model configuration setting
-        $globalRate = (float) (\App\Models\Commission::getRate() ?? 0);
+   public function getFinancialAudit(): array
+{
+    // 1. Fetch centralized wallet metrics to guarantee consistency
+    $wallet = $this->wallet ?? $this->wallet()->create(['balance' => 0]);
+    
+    // 2. Pull the cached global rate from your Commission Model configuration
+    $globalRate = (float) \App\Models\Commission::getRate();
 
-        // 3. Perform fast aggregates optimized for execution indexing
-        $revenueData = $this->orderItems()
-            ->where('status', 'completed')
-            ->selectRaw("
-                SUM(unit_price * quantity) as total_customer_paid,
-                SUM(shop_payout * quantity) as total_shop_revenue
-            ")
-            ->first();
+    // 3. Aggregate total customer sales safely
+    $revenueData = $this->orderItems()
+        ->where('status', 'completed')
+        ->selectRaw("SUM(unit_price * quantity) as total_customer_paid")
+        ->first();
 
-        $totalGross = (float) ($revenueData->total_customer_paid ?? 0);
-        $netEarnings = (float) ($revenueData->total_shop_revenue ?? 0);
-        $totalCommission = $totalGross - $netEarnings;
+    $totalGross = (float) ($revenueData->total_customer_paid ?? 0);
 
-        // 4. Keep strict tracking on payouts using uniform states matching your PayoutController
-        $deductions = $this->payouts()
-            ->whereIn('status', ['completed', 'pending', 'processing'])
-            ->selectRaw("
-                SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as total_withdrawn,
-                SUM(CASE WHEN status IN ('pending', 'processing') THEN amount ELSE 0 END) as total_locked
-            ")
-            ->first();
+    // 4. Calculate commission dynamically using your Commission Model configuration
+    $totalCommission = $totalGross * ($globalRate / 100); 
+    $netEarnings = $totalGross - $totalCommission;
 
-        $withdrawn = (float) ($deductions->total_withdrawn ?? 0);
-        $locked = (float) ($deductions->total_locked ?? 0);
+    // 5. Aggregate active payouts tracking matching your historical ledger status
+    $deductions = $this->payouts()
+        ->whereIn('status', ['completed', 'pending', 'processing'])
+        ->selectRaw("
+            SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as total_withdrawn,
+            SUM(CASE WHEN status IN ('pending', 'processing') THEN amount ELSE 0 END) as total_locked
+        ")
+        ->first();
 
-        return [
-            'totalGross'       => $totalGross,       // Absolute customer gross payment profile
-            'commissionRate'   => $globalRate,       // Uniform platform percentage rate pulled directly from settings
-            'totalCommission'  => $totalCommission,  // Platform markup capture yield
-            'netEarnings'      => $netEarnings,      // All-time historic earned ledger index
-            'totalWithdrawn'   => $withdrawn,        // Confirmed processed payout settlements
-            'pendingPayouts'   => $locked,           // Retained transaction locks
-            
-            // Available balance calculation based on actual wallet balance row minus locked payout allocations
-            'availableBalance' => (float) $wallet->balance - $locked
-        ];
-    }
+    $withdrawn = (float) ($deductions->total_withdrawn ?? 0);
+    $locked = (float) ($deductions->total_locked ?? 0);
+
+    return [
+        'totalGross'       => $totalGross,       // 85,300
+        'commissionRate'   => $globalRate,       // 10
+        'totalCommission'  => $totalCommission,  // 8,530 (Fixed!)
+        'netEarnings'      => $netEarnings,      // 76,770 (Fixed!)
+        'totalWithdrawn'   => $withdrawn,        // 76,700
+        'pendingPayouts'   => $locked,           // 0
+        'availableBalance' => (float) $wallet->balance - $locked // 76,770 (Or whatever liquid cash is remaining)
+    ];
+}
 
     protected static function booted()
     {
