@@ -13,6 +13,7 @@ class InTouchPaymentService
     protected string $username;
     protected string $accountNo;
     protected string $partnerPassword;
+    protected string $outgoingIp;
 
     public function __construct()
     {
@@ -20,137 +21,132 @@ class InTouchPaymentService
         $this->username = config('services.intouch.username');
         $this->accountNo = config('services.intouch.account_no');
         $this->partnerPassword = config('services.intouch.partner_password');
+        // Centralize whitelisted IP context
+        $this->outgoingIp = '198.54.114.176'; 
     }
 
     /**
-     * RequestPayment: Receiving payment from a customer
+     * RequestPayment: Collect mobile money from a subscriber
      */
-   public function requestPayment(string $phone, float $amount, string $requestId)
-{
-    $timestamp = Carbon::now('UTC')->format('YmdHis'); 
-    $password = $this->generatePassword($timestamp);
-    
-    // Force HTTPS for the callback to prevent POST data loss via redirects
-    // $callbackUrl = 'https://autospare-test.free.beeceptor.com';
-    
-    $callbackUrl = secure_url('api/payments/intouch/callback');
+    public function requestPayment(string $phone, float $amount, string $requestId)
+    {
+        $timestamp = Carbon::now('UTC')->format('YmdHis'); 
+        $password = $this->generatePassword($timestamp);
+        $callbackUrl = secure_url('api/payments/intouch/callback');
+        $formattedPhone = $this->formatNumber($phone);
 
-    $data = [
-        'username'             => $this->username,
-        'timestamp'            => $timestamp,
-        'amount'               => $amount,
-        'mobilephone'          => $this->formatNumber($phone), 
-        'mobilephoneno'        => $this->formatNumber($phone), 
-        'requesttransactionid' => $requestId,
-        'accountno'            => $this->accountNo,
-        'password'             => $password,
-        'callbackurl'          => $callbackUrl,
-    ];
+        $data = [
+            'username'             => $this->username,
+            'timestamp'            => $timestamp,
+            'amount'               => $amount,
+            'mobilephone'          => $formattedPhone, 
+            'mobilephoneno'        => $formattedPhone, 
+            'requesttransactionid' => $requestId,
+            'accountno'            => $this->accountNo,
+            'password'             => $password,
+            'callbackurl'          => $callbackUrl,
+        ];
 
-    Log::info("Sending Callback URL to InTouch: " . $callbackUrl);
+        $url = rtrim($this->baseUrl, '/') . '/requestpayment/';
 
-    $url = rtrim($this->baseUrl, '/') . '/requestpayment/';
+        try {
+            $response = Http::asForm()
+                ->withOptions([
+                    'curl' => [CURLOPT_INTERFACE => $this->outgoingIp],
+                ])
+                ->timeout(60)
+                ->connectTimeout(30)
+                ->post($url, $data);
 
-    Log::info('InTouch Payment Request Initiated:', [
-        'url' => $url,
-        'callback' => $callbackUrl,
-        'request_id' => $requestId
-    ]);
+            return $response->json() ?? ['success' => false, 'message' => 'Malformed or empty JSON response from gateway'];
 
-    //$response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
-
-    // Updated to bind to your whitelisted IP address interface
-$response = Http::asForm()
-    ->withOptions([
-        'curl' => [
-            CURLOPT_INTERFACE => '198.54.114.176',
-        ],
-    ])
-    ->timeout(60)
-    ->connectTimeout(30)
-    ->post($url, $data);
-
-    return $response->json();
-}
+        } catch (\Exception $e) {
+            Log::error('InTouch requestPayment Critical Exception: ' . $e->getMessage(), ['request_id' => $requestId]);
+            return ['success' => false, 'message' => 'Gateway connection failure: ' . $e->getMessage()];
+        }
+    }
 
     /**
-     * RequestDeposit: Sending payment to a vendor
+     * RequestDeposit: Send mobile money payout to a vendor/user wallet
      */
-   public function requestDeposit(string $phone, float $amount, string $requestId, string $reason = "Vendor Payout")
-{
-    $timestamp = Carbon::now('UTC')->format('YmdHis'); 
-    $formattedPhone = $this->formatNumber($phone);
-    
-    // Logic to determine SID (Service ID)
-    // 1 for MTN (078/079), 2 for Airtel (072/073) - Confirm these IDs with InTouch
-    $sid = 1; 
-    if (Str::startsWith($formattedPhone, '25072') || Str::startsWith($formattedPhone, '25073')) {
-        $sid = 2; 
+    public function requestDeposit(string $phone, float $amount, string $requestId, string $reason = "Vendor Payout")
+    {
+        $timestamp = Carbon::now('UTC')->format('YmdHis'); 
+        $formattedPhone = $this->formatNumber($phone);
+        
+        // Dynamically compute Rwandan carrier routing SIDs securely
+        $sid = $this->resolveServiceId($formattedPhone);
+
+        $data = [
+            'username'             => $this->username,
+            'timestamp'            => $timestamp,
+            'amount'               => $amount,
+            'mobilephone'          => $formattedPhone,
+            'mobilephoneno'        => $formattedPhone,
+            'requesttransactionid' => $requestId,
+            'accountno'            => $this->accountNo,
+            'password'             => $this->generatePassword($timestamp),
+            'withdrawcharge'       => 1, 
+            'reason'               => Str::limit($reason, 100, ''), // Clean bounds verification
+            'sid'                  => $sid, 
+        ];
+
+        $url = rtrim($this->baseUrl, '/') . '/requestdeposit/';
+        
+        try {
+            $response = Http::asForm()
+                ->withOptions([
+                    'curl' => [CURLOPT_INTERFACE => $this->outgoingIp],
+                ])
+                ->timeout(60)
+                ->connectTimeout(30)
+                ->post($url, $data);
+
+            return $response->json() ?? ['success' => false, 'message' => 'Malformed response signature during deposit request'];
+
+        } catch (\Exception $e) {
+            Log::error('InTouch requestDeposit Critical Exception: ' . $e->getMessage(), ['request_id' => $requestId]);
+            return ['success' => false, 'message' => 'Gateway payout communication exception: ' . $e->getMessage()];
+        }
     }
-
-    $data = [
-        'username'             => $this->username,
-        'timestamp'            => $timestamp,
-        'amount'               => $amount,
-        'mobilephone'          => $formattedPhone,
-        'mobilephoneno'        => $formattedPhone,
-        'requesttransactionid' => $requestId,
-        'accountno'            => $this->accountNo,
-        'password'             => $this->generatePassword($timestamp),
-        'withdrawcharge'       => 1, // Usually 1 means the vendor pays the fee
-        'reason'               => $reason,
-        'sid'                  => $sid, 
-    ];
-
-    $url = rtrim($this->baseUrl, '/') . '/requestdeposit/';
-    
-    // Use the same robust timeout settings as requestPayment
-    //$response = Http::asForm()->timeout(60)->connectTimeout(30)->post($url, $data);
-
-    $response = Http::asForm()
-    ->withOptions([
-        'curl' => [
-            CURLOPT_INTERFACE => '198.54.114.176',
-        ],
-    ])
-    ->timeout(60)
-    ->connectTimeout(30)
-    ->post($url, $data);
-
-    return $response->json();
-}
-
-/**
- * Get the current account balance (Float)
- */
-public function getBalance()
-{
-    $timestamp = Carbon::now('UTC')->format('YmdHis');
-    
-    $data = [
-        'username'  => $this->username,
-        'timestamp' => $timestamp,
-        'accountno' => $this->accountNo,
-        'password'  => $this->generatePassword($timestamp),
-    ];
-
-    $url = rtrim($this->baseUrl, '/') . '/getbalance/';
-
-    try {
-        $response = Http::asForm()->timeout(30)->post($url, $data);
-        return $response->json();
-    } catch (\Exception $e) {
-        Log::error('InTouch Balance Check Error: ' . $e->getMessage());
-        return ['success' => false, 'message' => 'Could not retrieve balance'];
-    }
-}
 
     /**
-     * Get Transaction Status
+     * Get the current account float balance
+     */
+    public function getBalance()
+    {
+        $timestamp = Carbon::now('UTC')->format('YmdHis');
+        
+        $data = [
+            'username'  => $this->username,
+            'timestamp' => $timestamp,
+            'accountno' => $this->accountNo,
+            'password'  => $this->generatePassword($timestamp),
+        ];
+
+        $url = rtrim($this->baseUrl, '/') . '/getbalance/';
+
+        try {
+            $response = Http::asForm()
+                ->withOptions([
+                    'curl' => [CURLOPT_INTERFACE => $this->outgoingIp],
+                ])
+                ->timeout(45)
+                ->connectTimeout(20)
+                ->post($url, $data);
+
+            return $response->json() ?? ['success' => false, 'message' => 'Invalid balance schema context'];
+        } catch (\Exception $e) {
+            Log::error('InTouch Balance Check Error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Could not retrieve balance due to transport failure'];
+        }
+    }
+
+    /**
+     * Get Transaction Status (Outbound Verification)
      */
     public function getTransactionStatus(string $requestId, string $gatewayTransactionId)
     {
-        // Note: Section 4.5 suggests yyyymmddss for this specific endpoint
         $timestamp = Carbon::now('UTC')->format('YmdHis');
 
         $data = [
@@ -162,31 +158,65 @@ public function getBalance()
         ];
 
         $url = rtrim($this->baseUrl, '/') . '/gettransactionstatus/';
-        $response = Http::asForm()->post($url, $data);
 
-        return $response->json();
+        try {
+            $response = Http::asForm()
+                ->withOptions([
+                    'curl' => [CURLOPT_INTERFACE => $this->outgoingIp],
+                ])
+                ->timeout(45)
+                ->connectTimeout(20)
+                ->post($url, $data);
+
+            return $response->json() ?? ['success' => false, 'message' => 'Invalid status schema context'];
+        } catch (\Exception $e) {
+            Log::error('InTouch Status Query Exception: ' . $e->getMessage(), ['request_id' => $requestId]);
+            return ['success' => false, 'message' => 'Status request failed: ' . $e->getMessage()];
+        }
     }
 
     /**
-     * Security: Generate SHA256 Hexdigest
+     * Security: Generate SHA256 Hash Signature matching InTouch specification rules
      */
     private function generatePassword(string $timestamp): string
     {
-        // Formula: Username+accountno+partnerpassword+timestamp
-        $rawString = $this->username . $this->accountNo . $this->partnerPassword . $timestamp;
-        
-        return hash('sha256', $rawString); 
+        return hash('sha256', $this->username . $this->accountNo . $this->partnerPassword . $timestamp); 
     }
 
+    /**
+     * Resilient formatting for local telephone allocations
+     */
     private function formatNumber(string $phone): string
     {
         $phone = preg_replace('/[^0-9]/', '', $phone);
         
-        // Ensure 250 prefix
+        // Handle local shorthand notation (e.g., 078...)
         if (Str::startsWith($phone, '0')) {
             return '250' . substr($phone, 1);
         }
         
+        // Handle raw notation missing prefix entirely (e.g., 788...)
+        if (strlen($phone) === 9 && (Str::startsWith($phone, '78') || Str::startsWith($phone, '79') || Str::startsWith($phone, '72') || Str::startsWith($phone, '73'))) {
+            return '250' . $phone;
+        }
+        
         return $phone;
+    }
+
+    /**
+     * Internal utility map matching network prefix pools to operational Service IDs
+     */
+    private function resolveServiceId(string $formattedPhone): int
+    {
+        // Strip 250 country code prefix out to analyze structural mobile subscriber roots safely
+        $localBody = substr($formattedPhone, 3);
+
+        // Airtel Rwanda Identification Prefixes
+        if (Str::startsWith($localBody, ['72', '73'])) {
+            return 2; 
+        }
+
+        // Default fallback to MTN Rwanda (SID 1) for standard '78' and split '79' allocations
+        return 1;
     }
 }

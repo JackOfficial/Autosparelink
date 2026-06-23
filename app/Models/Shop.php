@@ -3,13 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, MorphMany, HasOne};
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Shop extends Model
 {
@@ -66,6 +62,11 @@ class Shop extends Model
         return $this->hasOne(Wallet::class);
     }
 
+    public function reviews(): MorphMany
+    {
+        return $this->morphMany(Review::class, 'reviewable');
+    }
+
     public function getLogoUrlAttribute(): string
     {
         return $this->logo ? asset('storage/' . $this->logo) : asset('images/default-shop-logo.png');
@@ -77,30 +78,16 @@ class Shop extends Model
     }
 
     /**
-     * Get all of the reviews for the shop's spare parts.
+     * Audited Financial Calculation Logic
+     * Centralized to verify mathematical consistency against the Wallet System.
      */
-    /**
- * Get all of the shop's direct polymorphic reviews.
- */
-public function reviews(): MorphMany
-{
-    return $this->morphMany(Review::class, 'reviewable');
-}
-
-    /**
-     * Updated Financial Audit for Markup Model
-     * 
-     * In this model:
-     * - unit_price: Price paid by customer (Base + Commission)
-     * - shop_payout: Price set by shop (Base)
-     */
-    public function getFinancialAudit()
+    public function getFinancialAudit(): array
     {
-        // 1. Get the shop's specific commission rate
+        // 1. Fetch current centralized wallet metrics to guarantee single-source balance consistency
+        $wallet = $this->wallet ?? $this->wallet()->create(['balance' => 0]);
         $currentRate = (float) ($this->commission_rate ?? 0);
 
-        // 2. Aggregate Revenue Data for this shop's specific items
-        // We calculate based on 'shop_payout' because the shop receives 100% of their set price.
+        // 2. Perform fast aggregates optimized for execution indexing
         $revenueData = $this->orderItems()
             ->where('status', 'completed')
             ->selectRaw("
@@ -111,11 +98,9 @@ public function reviews(): MorphMany
 
         $totalGross = (float) ($revenueData->total_customer_paid ?? 0);
         $netEarnings = (float) ($revenueData->total_shop_revenue ?? 0);
-        
-        // The commission is the difference between what the customer paid and what the shop gets
         $totalCommission = $totalGross - $netEarnings;
 
-        // 3. Payout Deductions (Withdrawals)
+        // 3. Keep strict tracking on payouts using uniform states matching your PayoutController
         $deductions = $this->payouts()
             ->whereIn('status', ['completed', 'pending', 'processing'])
             ->selectRaw("
@@ -128,13 +113,16 @@ public function reviews(): MorphMany
         $locked = (float) ($deductions->total_locked ?? 0);
 
         return [
-            'totalGross'       => $totalGross,       // What customers paid for this shop's items
-            'commissionRate'   => $currentRate,      // The % added to this shop's prices
-            'totalCommission'  => $totalCommission,  // Revenue for the platform from this shop
-            'netEarnings'      => $netEarnings,      // Total the shop is entitled to (100% of their base price)
-            'totalWithdrawn'   => $withdrawn,
-            'pendingPayouts'   => $locked,
-            'availableBalance' => $netEarnings - ($withdrawn + $locked)
+            'totalGross'       => $totalGross,       // Absolute customer gross payment profile
+            'commissionRate'   => $currentRate,      // Fixed target base percentage
+            'totalCommission'  => $totalCommission,  // Platform markup capture yield
+            'netEarnings'      => $netEarnings,      // All-time historic earned ledger index
+            'totalWithdrawn'   => $withdrawn,        // Confirmed processed payout settlements
+            'pendingPayouts'   => $locked,           // Retained transaction locks
+            
+            // CRITICAL FIX: Base available balance on your audited Wallet balance row
+            // to stay aligned with updates from your PayoutController webhooks.
+            'availableBalance' => (float) $wallet->balance - $locked
         ];
     }
 
@@ -144,6 +132,11 @@ public function reviews(): MorphMany
             if ($shop->isDirty('shop_name')) {
                 $shop->slug = Str::slug($shop->shop_name);
             }
+        });
+
+        // Automatically provision an accompanying Wallet record whenever a new Shop is verified
+        static::created(function ($shop) {
+            $shop->wallet()->create(['balance' => 0]);
         });
     }
 }

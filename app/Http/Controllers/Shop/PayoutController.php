@@ -4,12 +4,10 @@ namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payout;
-use App\Models\WalletTransaction; // Added
+use App\Models\WalletTransaction;
 use App\Services\InTouchPaymentService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\{DB, Auth, Log};
 
 class PayoutController extends Controller
 {
@@ -22,7 +20,6 @@ class PayoutController extends Controller
 
     private function getFinancialSummary()
     {
-        // This method in Shop.php now uses shop_payout and unit_price logic
         return Auth::user()->shop->getFinancialAudit();
     }
 
@@ -47,16 +44,22 @@ class PayoutController extends Controller
             'account_details' => 'required|string|max:255', 
         ]);
 
-        return DB::transaction(function () use ($request) {
-            $shop = Auth::user()->shop;
+        $shop = Auth::user()->shop;
+        $payout = null;
+
+        // PHASE 1: Verify Balance and Secure the Intent Record (Short DB Lock)
+        DB::beginTransaction();
+        try {
+            // Lock the wallet row to prevent concurrent processing requests
+            $wallet = $shop->wallet()->lockForUpdate()->firstOrFail();
             $summary = $this->getFinancialSummary();
 
-            // Use the audited balance which accounts for the new commission markup logic
             if ($request->amount > $summary['availableBalance']) {
+                DB::rollBack();
                 return back()->with('error', 'Insufficient balance. Audited balance: ' . number_format($summary['availableBalance']) . ' RWF.');
             }
 
-            // 1. Create the local Payout record (The "Request" log)
+            // Create the record strictly as 'processing'
             $payout = $shop->payouts()->create([
                 'amount'          => $request->amount,
                 'payout_method'   => $request->payout_method,
@@ -66,51 +69,55 @@ class PayoutController extends Controller
                 'reference'       => 'WD-' . strtoupper(bin2hex(random_bytes(4))) . '-' . time(),
             ]);
 
-            try {
-                // 2. Trigger the real money transfer via InTouch
-                $response = $this->intouchService->requestDeposit(
-                    $request->account_details,
-                    $request->amount,
-                    $payout->reference,
-                    // FIXED: Corrected 'name' to 'shop_name'
-                    "Withdrawal for " . $shop->shop_name 
-                );
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Payout initialization failed for Shop {$shop->id}: " . $e->getMessage());
+            return back()->with('error', 'Could not process withdrawal request. Please retry.');
+        }
 
-                // 3. Evaluate the Gateway Response
-                if (isset($response['status']) && (strtolower($response['status']) == 'successfull' || $response['responsecode'] == '01')) {
-                    
-                    // 4. Record a Wallet Transaction to sync with your Wallet balance logic
-                    // Your WalletTransaction::booted() logic will automatically decrement the wallet balance
-                    $shop->wallet->transactions()->create([
-                        'type'           => 'debit',
-                        'amount'         => $request->amount,
-                        'status'         => 'completed',
-                        'reference_id'   => $payout->id,
-                        'reference_type' => Payout::class,
-                        'description'    => "Withdrawal to " . $request->account_details,
-                    ]);
+        // PHASE 2: External Gateway API Call (Completely outside DB Transaction Window)
+        try {
+            $response = $this->intouchService->requestDeposit(
+                $request->account_details,
+                $request->amount,
+                $payout->reference,
+                "Withdrawal for " . $shop->shop_name 
+            );
 
-                    $payout->update([
-                        'status' => 'completed',
-                        'gateway_transaction_id' => $response['transactionid'] ?? null
-                    ]);
+            $responseCode = $response['responsecode'] ?? null;
+            $statusStr = strtolower($response['status'] ?? '');
 
-                    return redirect()->route('shop.payouts.index')
-                        ->with('success', 'Transfer successful! ' . number_format($request->amount) . ' RWF has been sent to your account.');
-                } else {
-                    throw new \Exception($response['statusdesc'] ?? 'InTouch Gateway rejected the transfer.');
-                }
-
-            } catch (\Exception $e) {
-                Log::error("Payout Failed for Shop " . $shop->id . ": " . $e->getMessage());
+            // Check if submission was successfully received/accepted by the gateway
+            if ($statusStr === 'successfull' || $responseCode === '01' || $responseCode === '00') {
                 
+                // Keep status as processing. Save the transaction reference for callback verification.
                 $payout->update([
-                    'status' => 'failed', 
-                    'error_log' => $e->getMessage()
+                    'gateway_transaction_id' => $response['transactionid'] ?? null
                 ]);
-                
-                return back()->with('error', 'Payment provider error: ' . $e->getMessage());
+
+                return redirect()->route('shop.payouts.index')
+                    ->with('success', 'Withdrawal request initiated successfully. Funds will appear once settled by the network.');
             }
-        });
+
+            // Gateway explicitly rejected the transaction on handshake
+            $payout->update([
+                'status' => 'failed',
+                'error_log' => $response['statusdesc'] ?? 'Gateway rejected submission parameters.'
+            ]);
+
+            return back()->with('error', 'Payment provider rejected request: ' . ($response['statusdesc'] ?? 'Unknown Gateway Error'));
+
+        } catch (\Exception $e) {
+            Log::error("Payout Gateway Communication Failure for Payout #{$payout->id}: " . $e->getMessage());
+            
+            // Revert state back to pending so that it isn't permanently locked or lost due to a timeout
+            $payout->update([
+                'status' => 'pending',
+                'error_log' => 'Network/Connection Timeout: ' . $e->getMessage()
+            ]);
+            
+            return back()->with('error', 'Gateway communication timeout. Your balance is safe; please check your history or retry shortly.');
+        }
     }
 }

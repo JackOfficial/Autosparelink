@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Payment;
 
 use App\Http\Controllers\Controller;
 use App\Services\InTouchPaymentService;
-use App\Models\Order; // Or a Withdrawal/Payout model
+use App\Models\Payout;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\{DB, Log};
 
 class InTouchDepositController extends Controller
 {
@@ -18,69 +18,109 @@ class InTouchDepositController extends Controller
     }
 
     /**
-     * Trigger a payout to a vendor/user
+     * Trigger an administrative payout release safely
      */
     public function processPayout(Request $request)
     {
-        // 1. Validation (Ensure you have a phone and amount)
+        // Validate by the explicitly created Payout model ID rather than loose parameters
         $request->validate([
-            'phone' => 'required|string',
-            'amount' => 'required|numeric|min:100',
-            'order_id' => 'nullable|exists:orders,id'
+            'payout_id' => 'required|exists:payouts,id'
         ]);
 
-        // 2. Generate a unique Transaction ID for this payout
-        // Use a prefix like 'WD-' (Withdrawal) to distinguish from payments
-        $requestId = 'WD-' . strtoupper(bin2hex(random_bytes(4))) . '-' . time();
-
+        // 1. Lock and evaluate the local model state before touching an external gateway API
+        DB::beginTransaction();
         try {
-            // 3. Call the Service
+            $payout = Payout::where('id', $request->payout_id)
+                            ->lockForUpdate()
+                            ->firstOrFail();
+
+            // Fail-safe: stop processing if this payout was already handled
+            if ($payout->status !== 'pending') {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This payout request has already been processed or is currently active.'
+                ], 422);
+            }
+
+            // Transition status to processing to secure the row lock against concurrent attempts
+            $payout->update([
+                'status' => 'processing'
+            ]);
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Payout state locking failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Database concurrency error.'], 500);
+        }
+
+        // 2. Perform the external gateway interaction safely outside the main state lock
+        try {
+            // Note: your Payout model's booted method auto-generates $payout->reference ('WD-...') on creation
             $response = $this->intouchService->requestDeposit(
-                $request->phone,
-                $request->amount,
-                $requestId,
-                "Vendor Payout for Order #" . ($request->order_id ?? 'N/A')
+                $payout->account_details, // The phone number stored in the Payout row
+                $payout->amount,
+                $payout->reference,
+                "Vendor Payout for Shop #" . $payout->shop_id
             );
 
             Log::info('InTouch Deposit Response:', $response);
 
-            // 4. Handle InTouch Response
-            // Usually, '00' or '01' indicates success/initiated
-            if (isset($response['status']) && (strtolower($response['status']) == 'successfull' || $response['responsecode'] == '01')) {
+            $responseCode = $response['responsecode'] ?? null;
+            $statusStr = strtolower($response['status'] ?? '');
+
+            // 3. Evaluate the submission state
+            if ($statusStr === 'successfull' || $responseCode === '01' || $responseCode === '00') {
                 
-                // Update your local database here (e.g., mark withdrawal as completed)
-                // Withdrawal::where('id', ...)->update(['status' => 'completed']);
+                // Update local status safely. If InTouch processes this asynchronously,
+                // set to 'processing' here and expect a webhook callback to set 'completed'.
+                $payout->update([
+                    'status' => 'completed', 
+                    'gateway_transaction_id' => $response['transactionid'] ?? null,
+                    'processed_at' => now()
+                ]);
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Payout initiated successfully',
+                    'message' => 'Payout completed successfully',
                     'transaction_id' => $response['transactionid'] ?? null
                 ]);
             }
 
+            // Handle clean gateway rejections
+            $payout->update([
+                'status' => 'failed',
+                'error_log' => json_encode($response)
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => $response['statusdesc'] ?? 'Payout failed at gateway',
+                'message' => $response['statusdesc'] ?? 'Payout rejected by gateway',
                 'raw' => $response
             ], 400);
 
         } catch (\Exception $e) {
             Log::error('InTouch Deposit Error: ' . $e->getMessage());
+            
+            // Revert state back to pending if a network timeout occurs so it can be safely retried
+            $payout->update([
+                'status' => 'pending',
+                'error_log' => $e->getMessage()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'An internal error occurred while processing the payout.'
+                'message' => 'A gateway connection error occurred. State reverted safely to pending.'
             ], 500);
         }
     }
 
     public function checkBalance()
-{
-    // Ensure only Admins can see this!
-    // $this->authorize('admin-only'); 
-
-    $balanceData = $this->intouchService->getBalance();
-
-    return response()->json($balanceData);
-}
-
+    {
+        // Make sure your administration middlewares protect this route context securely!
+        $balanceData = $this->intouchService->getBalance();
+        return response()->json($balanceData);
+    }
 }

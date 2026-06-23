@@ -24,54 +24,52 @@ class OrderItemObserver
     /**
      * Credit the vendor wallet based on the markup model
      */
-    private function processVendorPayment(OrderItem $orderItem): void
-    {
-        $shop = $orderItem->shop;
+   private function processVendorPayment(OrderItem $orderItem): void
+{
+    $shop = $orderItem->shop;
+    if (!$shop || !$shop->wallet) {
+        Log::error("Payment failed: Shop or Wallet missing for OrderItem #{$orderItem->id}");
+        return;
+    }
+
+    $wallet = $shop->wallet;
+
+    DB::transaction(function () use ($wallet, $orderItem) {
         
-        if (!$shop || !$shop->wallet) {
-            Log::error("Payment failed: Shop or Wallet missing for OrderItem #{$orderItem->id}");
+        // CRITICAL FIX: Lock the primary wallet record row immediately!
+        // This stops any parallel request from executing code on this wallet.
+        $lockedWallet = DB::table('wallets')
+            ->where('id', $wallet->id)
+            ->lockForUpdate()
+            ->first();
+
+        // Re-check for existing transaction safely now that the room is locked
+        $alreadyPaid = WalletTransaction::where('reference_type', OrderItem::class)
+            ->where('reference_id', $orderItem->id)
+            ->exists();
+
+        if ($alreadyPaid) {
             return;
         }
 
-        $wallet = $shop->wallet;
+        $vendorNetEarnings = $orderItem->shop_payout * $orderItem->quantity;
+        $totalCustomerPaid = $orderItem->unit_price * $orderItem->quantity;
+        $adminMarkupRevenue = $totalCustomerPaid - $vendorNetEarnings;
 
-        // Wrapped in a transaction with lockForUpdate to prevent double payments
-        DB::transaction(function () use ($wallet, $orderItem) {
-            
-            // 1. Re-check for existing transaction to ensure integrity
-            $alreadyPaid = WalletTransaction::where('reference_type', OrderItem::class)
-                ->where('reference_id', $orderItem->id)
-                ->lockForUpdate()
-                ->exists();
+        $orderItem->updateQuietly([
+            'commission_amount' => $adminMarkupRevenue
+        ]);
 
-            if ($alreadyPaid) {
-                return;
-            }
-
-            // 2. Calculations (Markup Model Logic)
-            // Vendor gets 100% of their set shop_payout
-            $vendorNetEarnings = $orderItem->shop_payout * $orderItem->quantity;
-            
-            // Platform Revenue (The Markup) = Total Customer Paid - Vendor Base Price
-            $totalCustomerPaid = $orderItem->unit_price * $orderItem->quantity;
-            $adminMarkupRevenue = $totalCustomerPaid - $vendorNetEarnings;
-
-            // 3. Persist local record using updateQuietly to avoid infinite loops
-            $orderItem->updateQuietly([
-                'commission_amount' => $adminMarkupRevenue
-            ]);
-
-            // 4. Trigger the wallet flow
-            $wallet->transactions()->create([
-                'type'           => 'credit',
-                'amount'         => $vendorNetEarnings, // The base price the shop set
-                'service_fee'    => $adminMarkupRevenue, // The profit the platform made via markup
-                'fee_percentage' => $orderItem->applied_rate, // The rate applied at time of part creation
-                'reference_type' => OrderItem::class,
-                'reference_id'   => $orderItem->id,
-                'description'    => "Earnings for: " . ($orderItem->part->part_name ?? 'Spare Part'),
-                'status'         => 'completed',
-            ]);
-        });
-    }
+        $wallet->transactions()->create([
+            'type'           => 'credit',
+            'amount'         => $vendorNetEarnings,
+            'service_fee'    => $adminMarkupRevenue,
+            'fee_percentage' => $orderItem->applied_rate,
+            'reference_type' => OrderItem::class,
+            'reference_id'   => $orderItem->id,
+            'description'    => "Earnings for: " . ($orderItem->part->part_name ?? 'Spare Part'),
+            'status'         => 'completed',
+        ]);
+    });
+}
 }
