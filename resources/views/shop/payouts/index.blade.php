@@ -42,7 +42,7 @@
                 </div>
             </div>
 
-            {{-- Available Balance --}}
+            {{-- Available Balance (Ready to Withdraw) --}}
             <div class="col-md-3">
                 <div class="card balance-card shadow-sm h-100 border-start border-success border-4 bg-soft-success">
                     <div class="card-body">
@@ -54,8 +54,9 @@
                                 </span>
                             @endif
                         </div>
+                        {{-- Safely references the liquid balance calculated in your model audit --}}
                         <h4 class="fw-bold mb-0 text-success">{{ number_format($availableBalance) }} <small class="fs-6 text-success">RWF</small></h4>
-                        <div class="mt-2 small text-success-emphasis">Ready to withdraw</div>
+                        <div class="mt-2 small text-success-emphasis">Net funds ready to withdraw</div>
                     </div>
                 </div>
             </div>
@@ -109,7 +110,8 @@
                                                 'completed'  => 'bg-soft-success text-success',
                                                 'pending'    => 'bg-soft-warning text-warning',
                                                 'processing' => 'bg-soft-primary text-primary',
-                                                'failed'     => 'bg-soft-danger text-danger'
+                                                'failed'     => 'bg-soft-danger text-danger',
+                                                'rejected'   => 'bg-soft-danger text-danger'
                                             ];
                                             $currentClass = $statusClasses[strtolower($payout->status)] ?? 'bg-light text-muted';
                                         @endphp
@@ -160,11 +162,11 @@
                                 <label class="small fw-bold text-muted mb-1 uppercase">Amount to Withdraw</label>
                                 <div class="input-group border rounded-3 overflow-hidden">
                                     <input type="number" name="amount" class="form-control border-0 py-2" 
-                                           placeholder="Min. 100" min="100" required>
+                                           placeholder="Min. 100" min="100" max="{{ floor($availableBalance) }}" required>
                                     <span class="input-group-text bg-light border-0 small fw-bold">RWF</span>
                                 </div>
                                 <div class="mt-1 d-flex justify-content-between">
-                                    <small class="text-muted">Available: <strong>{{ number_format($availableBalance) }}</strong></small>
+                                    <small class="text-muted">Available: <strong>{{ number_format($availableBalance) }} RWF</strong></small>
                                     @if($availableBalance >= 100)
                                         <button type="button" class="btn btn-link p-0 smaller text-primary text-decoration-none" 
                                                 onclick="document.getElementsByName('amount')[0].value = '{{ floor($availableBalance) }}'">Max</button>
@@ -177,7 +179,6 @@
                                 <select name="payout_method" class="form-select border rounded-3 py-2" required>
                                     <option value="MTN MoMo">MTN Mobile Money</option>
                                     <option value="Airtel Money">Airtel Money</option>
-                                    {{-- Temporary hidden until controller backend array supports alternative arrays --}}
                                 </select>
                             </div>
 
