@@ -118,7 +118,7 @@ class Shop extends Model
         'netEarnings'      => $netEarnings,      // 76,770 (Fixed!)
         'totalWithdrawn'   => $withdrawn,        // 76,700
         'pendingPayouts'   => $locked,           // 0
-        'availableBalance' => (float) $wallet->balance - $locked // 76,770 (Or whatever liquid cash is remaining)
+        'availableBalance' => $netEarnings - $withdrawn - $locked // 76,770 (Or whatever liquid cash is remaining)
     ];
 }
 
