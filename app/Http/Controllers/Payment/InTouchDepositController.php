@@ -22,19 +22,18 @@ class InTouchDepositController extends Controller
      */
     public function processPayout(Request $request)
     {
-        // Validate by the explicitly created Payout model ID rather than loose parameters
         $request->validate([
             'payout_id' => 'required|exists:payouts,id'
         ]);
 
-        // 1. Lock and evaluate the local model state before touching an external gateway API
+        // 1. Lock and evaluate local model state within a micro-transaction
         DB::beginTransaction();
         try {
             $payout = Payout::where('id', $request->payout_id)
                             ->lockForUpdate()
                             ->firstOrFail();
 
-            // Fail-safe: stop processing if this payout was already handled
+            // Fail-safe: Stop dead if this row is not cleanly pending
             if ($payout->status !== 'pending') {
                 DB::rollBack();
                 return response()->json([
@@ -43,7 +42,7 @@ class InTouchDepositController extends Controller
                 ], 422);
             }
 
-            // Transition status to processing to secure the row lock against concurrent attempts
+            // Lock the status to 'processing' before exposing to the network
             $payout->update([
                 'status' => 'processing'
             ]);
@@ -56,11 +55,10 @@ class InTouchDepositController extends Controller
             return response()->json(['success' => false, 'message' => 'Database concurrency error.'], 500);
         }
 
-        // 2. Perform the external gateway interaction safely outside the main state lock
+        // 2. Perform external gateway interaction safely outside the database lock
         try {
-            // Note: your Payout model's booted method auto-generates $payout->reference ('WD-...') on creation
             $response = $this->intouchService->requestDeposit(
-                $payout->account_details, // The phone number stored in the Payout row
+                $payout->account_details, 
                 $payout->amount,
                 $payout->reference,
                 "Vendor Payout for Shop #" . $payout->shop_id
@@ -71,16 +69,18 @@ class InTouchDepositController extends Controller
             $responseCode = $response['responsecode'] ?? null;
             $statusStr = strtolower($response['status'] ?? '');
 
-            // 3. Evaluate the submission state
-            if ($statusStr === 'successfull' || $responseCode === '01' || $responseCode === '00') {
+            // 3. Evaluate the definitive submission state
+            // NOTE: Double-check if your gateway provider explicitly spells it 'successfull' with two 'l's
+            if ($statusStr === 'successfull' || $statusStr === 'successful' || $responseCode === '01' || $responseCode === '00') {
                 
-                // Update local status safely. If InTouch processes this asynchronously,
-                // set to 'processing' here and expect a webhook callback to set 'completed'.
                 $payout->update([
                     'status' => 'completed', 
                     'gateway_transaction_id' => $response['transactionid'] ?? null,
                     'processed_at' => now()
                 ]);
+
+                // NOTE: If you are not using a PayoutObserver to handle wallet balances,
+                // you should explicitly trigger your WalletTransaction debit ledger creation here.
 
                 return response()->json([
                     'success' => true,
@@ -89,7 +89,7 @@ class InTouchDepositController extends Controller
                 ]);
             }
 
-            // Handle clean gateway rejections
+            // Handle explicit API rejections cleanly (e.g., Insufficient Gateway Balance, Invalid Number)
             $payout->update([
                 'status' => 'failed',
                 'error_log' => json_encode($response)
@@ -97,29 +97,29 @@ class InTouchDepositController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $response['statusdesc'] ?? 'Payout rejected by gateway',
+                'message' => $response['statusdesc'] ?? 'Payout rejected by gateway.',
                 'raw' => $response
             ], 400);
 
         } catch (\Exception $e) {
-            Log::error('InTouch Deposit Error: ' . $e->getMessage());
+            Log::critical("InTouch Network Timeout or Critical Error for Payout #{$payout->id}: " . $e->getMessage());
             
-            // Revert state back to pending if a network timeout occurs so it can be safely retried
+            // SECURITY FIX: Leave status as 'processing' or flip to an 'indeterminate' state.
+            // NEVER automatically set it back to 'pending' during a network failure.
             $payout->update([
-                'status' => 'pending',
-                'error_log' => $e->getMessage()
+                'status' => 'processing', 
+                'error_log' => 'Network timeout/disconnection: Status unverified on gateway. ' . $e->getMessage()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'A gateway connection error occurred. State reverted safely to pending.'
+                'message' => 'A gateway connection error occurred. Handshake status is unverified; transaction locked to prevent duplicate charges.'
             ], 500);
         }
     }
 
     public function checkBalance()
     {
-        // Make sure your administration middlewares protect this route context securely!
         $balanceData = $this->intouchService->getBalance();
         return response()->json($balanceData);
     }

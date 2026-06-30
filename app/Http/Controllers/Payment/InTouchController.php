@@ -63,7 +63,7 @@ class InTouchController extends Controller
 
             // 5. Audit Trail - Log everything for troubleshooting
             PaymentLog::create([
-                'user_id'        => $order->user_id,
+                'user_id'        => $order->user_id, 
                 'tx_ref'         => $localRequestId,
                 'transaction_id' => $gatewayTransactionId,
                 'amount'         => $data['amount'] ?? $order->total_amount,
@@ -77,10 +77,17 @@ class InTouchController extends Controller
             if (!in_array($order->status, ['completed', 'processing'])) {
                 DB::beginTransaction();
                 try {
-                    $order = Order::where('id', $order->id)->lockForUpdate()->first();
+                    // Include 'user' here so the invoice method has it ready
+                    $order = Order::with(['orderItems.part', 'user'])
+                                  ->where('id', $order->id)
+                                  ->lockForUpdate()
+                                  ->first();
 
                     // A. Update Main Order
-                    $order->update(['status' => 'processing']);
+                    $order->update([
+                        'total_amount' => $data['amount'] ?? $order->total_amount,
+                        'status' => 'processing',
+                    ]);
 
                     // B. Finalize Payment Record
                     Payment::updateOrCreate(
@@ -94,7 +101,7 @@ class InTouchController extends Controller
                         ]
                     );
 
-                    // C. Handle Items & Inventory
+                    // C. Handle Items & Inventory (Individual saves keep your observers happy)
                     foreach ($order->orderItems as $item) {
                         if ($item->status != 'completed') {
                             $item->status = 'processing';
@@ -114,10 +121,9 @@ class InTouchController extends Controller
 
                     DB::commit();
 
-                    // E. Send Invoice
+                    // E. Send Invoice (Safely uses the eager-loaded user/guest data)
                     $this->sendInvoice($order);
 
-                    // Final Return format required by InTouch Support handshake
                     return response()->json([
                         'message' => 'success',
                         'success' => true,

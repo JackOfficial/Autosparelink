@@ -9,25 +9,50 @@ use Illuminate\Support\Facades\Log;
 class ShopObserver
 {
     /**
+     * Handle the Shop "created" event.
+     */
+    public function created(Shop $shop): void
+    {
+        // If created already verified (e.g., via Admin Panel), run full initialization
+        if ($shop->is_verified) {
+            $this->initializeVerifiedShop($shop);
+        }
+    }
+
+    /**
      * Handle the Shop "updated" event.
      */
     public function updated(Shop $shop): void
     {
-        // 1. Check if 'is_verified' flipped to true.
+        // Run full initialization if the verification flag just flipped to true
         if ($shop->isDirty('is_verified') && $shop->is_verified === true) {
-            
-            // 2. Initialize the Wallet if it doesn't exist.
-            if (!$shop->wallet()->exists()) {
-                $this->createShopWallet($shop);
-            }
+            $this->initializeVerifiedShop($shop);
+        }
+    }
 
-            // 3. Ensure a commission rate is set for the markup model.
-            // Using updateQuietly prevents re-triggering this observer.
-            if (is_null($shop->commission_rate)) {
-                $shop->updateQuietly([
-                    'commission_rate' => config('app.default_commission_rate', 10)
-                ]);
-            }
+    /**
+     * Handle the Shop "deleted" event.
+     */
+    public function deleted(Shop $shop): void
+    {
+        Log::warning("Shop ID #{$shop->id} was deleted. Wallet remains intact for financial audit trails.");
+    }
+
+    /**
+     * Centralized supervisor for onboarding verified shops cleanly
+     */
+    private function initializeVerifiedShop(Shop $shop): void
+    {
+        // 1. Initialize the Wallet securely if it doesn't exist
+        if (!$shop->wallet()->exists()) {
+            $this->createShopWallet($shop);
+        }
+
+        // 2. Ensure a commission rate is established for the markup pipeline
+        if (is_null($shop->commission_rate)) {
+            $shop->updateQuietly([
+                'commission_rate' => config('app.default_commission_rate', 10)
+            ]);
         }
     }
 
@@ -37,38 +62,20 @@ class ShopObserver
     private function createShopWallet(Shop $shop): void
     {
         DB::transaction(function () use ($shop) {
-            // Safety check inside the transaction
+            // Re-verify existence inside the isolated database transaction context
             if ($shop->wallet()->exists()) {
                 return;
             }
 
+            // FIX: Removed balance configurations and virtual accessors. 
+            // This relies cleanly on your database migration structural defaults (0.00) 
+            // and safely bypasses mass-assignment blocks.
             $shop->wallet()->create([
                 'currency'            => 'RWF',
-                'balance'             => 0,
-                'pending_balance'     => 0, // Explicitly set for dashboard stats accuracy
-                'total_earnings'      => 0,
                 'last_transaction_at' => now(),
             ]);
             
             Log::info("Wallet initialized for Shop ID: #{$shop->id} ({$shop->shop_name})");
         });
-    }
-
-    /**
-     * Handle immediate verification upon creation (e.g., admin-created shops).
-     */
-    public function created(Shop $shop): void
-    {
-        if ($shop->is_verified) {
-            $this->createShopWallet($shop);
-        }
-    }
-
-    /**
-     * Handle the Shop "deleted" event.
-     */
-    public function deleted(Shop $shop): void
-    {
-        Log::warning("Shop ID #{$shop->id} was deleted. Wallet remains for financial audit trails.");
     }
 }
