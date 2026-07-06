@@ -157,7 +157,7 @@
                                     class="btn btn-outline-primary btn-block btn-sm rounded-pill py-2 transition-all shadow-sm font-weight-semi-bold"
                                     wire:loading.attr="disabled">
                                 <span wire:loading wire:target="buyNow" class="spinner-border spinner-border-sm"></span>
-                                <i wire:loading.remove wire:target="buyNow" class="fa fa-bolt mr-1"></i> Buy Now
+                                <i wire:loading.remove wire:target="buyNow" class="fa fa-bolt mr-1"></i> Buy Now!
                             </button>
                         </div>
                     </div>
