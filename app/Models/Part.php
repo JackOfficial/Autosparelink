@@ -152,6 +152,25 @@ public function getAverageRatingAttribute(): float
         return $query;
     }
 
+    public function getUnitPriceAttribute(): float
+    {
+        return Commission::calculateMarkup((float) $this->price);
+    }
+
+    public function getOldUnitPriceAttribute(): ?float
+    {
+        if (empty($this->old_price)) {
+            return null;
+        }
+
+        return Commission::calculateMarkup((float) $this->old_price);
+    }
+
+    public function getAppliedRateAttribute(): float
+    {
+        return Commission::getRate();
+    }
+
     protected static function booted()
     {
         static::saving(function ($part) {
@@ -164,18 +183,18 @@ public function getAverageRatingAttribute(): float
              * 2. Global Markup Pricing Logic
              * Commission is applied to all shops equally.
              */
-            $globalRate = (float) Commission::getRate();
-            $part->applied_rate = $globalRate;
+            // $globalRate = (float) Commission::getRate();
+            // $part->applied_rate = $globalRate;
             
-            $multiplier = 1 + ($globalRate / 100);
+            // $multiplier = 1 + ($globalRate / 100);
             
-            // Calculate customer-facing unit_price (base + markup)
-            $part->unit_price = (float) $part->price * $multiplier;
+            // // Calculate customer-facing unit_price (base + markup)
+            // $part->unit_price = (float) $part->price * $multiplier;
 
-            // Mirror markup on old_price for consistent UI discount display
-            if (!empty($part->old_price)) {
-                $part->old_unit_price = (float) $part->old_price * $multiplier;
-            }
+            // // Mirror markup on old_price for consistent UI discount display
+            // if (!empty($part->old_price)) {
+            //     $part->old_unit_price = (float) $part->old_price * $multiplier;
+            // }
 
             // 3. SKU Generation
             if ($part->isDirty(['part_name', 'part_brand_id', 'category_id']) || empty($part->sku)) {
