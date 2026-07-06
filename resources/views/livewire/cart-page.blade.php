@@ -92,7 +92,7 @@
                                             <small class="text-muted">RWF</small>
                                         </td>
                                     </tr>
-                                    @foreach
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
