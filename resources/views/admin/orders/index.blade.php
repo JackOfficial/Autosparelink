@@ -193,7 +193,7 @@
                             @endphp
                             <tr x-show="showRow('{{ addslashes($searchData) }}', '{{ $order->status }}')" x-transition x-cloak>
                                 <td class="px-4">
-                                    <div class="font-weight-bold text-dark">#{{ $order->id }}</div>
+                                    <div class="font-weight-bold text-dark">#{{ $order->order_number }}</div>
                                     <small class="text-muted"><i class="far fa-calendar-alt mr-1"></i> {{ $order->created_at->format('M d, H:i') }}</small>
                                 </td>
                                 <td>
