@@ -180,7 +180,7 @@
                                                 $textColor = (strtolower($part->state->slug ?? $part->state->name) === 'used') ? '#c53030' : '#ffffff';
                                             @endphp
                                             <span class="badge-state" style="background-color: {{ $stateColor }}; color: {{ $textColor }};">
-                                                {{ $part->state->name }}
+                                                {{ $part->state->name }} 
                                             </span>
                                         @endif
                                     </div>
@@ -194,7 +194,7 @@
                                         <span class="badge badge-light border sku-copy text-muted mr-2" @click="copyToClipboard('{{ $part->sku }}')" title="Click to copy SKU">
                                             {{ $part->sku }}
                                         </span>
-                                        <small class="text-muted border-left pl-2">PN: {{ $part->part_number }}</small>
+                                        <small class="text-muted border-left pl-2">PN: {{ $part->part_number }} | cat: {{ $part->category->category_name ?? 'General' }}</small>
                                     </div>
                                 </div>
                             </div>
