@@ -77,9 +77,7 @@ class InTouchController extends Controller
             if (!in_array($order->status, ['completed', 'processing'])) {
                 DB::beginTransaction();
                 try {
-                    // Include 'user' here so the invoice method has it ready
-                    $order = Order::with(['orderItems.part', 'user'])
-                                  ->where('id', $order->id)
+                    $order = Order::where('id', $order->id)
                                   ->lockForUpdate()
                                   ->first();
 
@@ -101,10 +99,14 @@ class InTouchController extends Controller
                         ]
                     );
 
-                    // C. Handle Items & Inventory (Individual saves keep your observers happy)
-                    // FIX: Chain lockForUpdate()->get() to prevent relation caching traps
-                    foreach ($order->orderItems()->lockForUpdate()->get() as $item) {
-                        if ($item->status != 'completed') {
+                    // C. Handle Items & Inventory (Direct Query to completely bypass relation cache traps)
+                    $items = OrderItem::where('order_id', $order->id)
+                                      ->with('part')
+                                      ->lockForUpdate()
+                                      ->get();
+
+                    foreach ($items as $item) {
+                        if ($item->status !== 'completed') {
                             $item->status = 'processing';
                             $item->save(); 
 
@@ -122,6 +124,9 @@ class InTouchController extends Controller
 
                     DB::commit();
 
+                    // Force refresh fresh models state array context out of memory cache
+                    $order->load(['orderItems.part', 'user']);
+
                 } catch (\Exception $e) {
                     DB::rollBack();
                     Log::error("InTouch Callback Fatal Error: " . $e->getMessage());
@@ -133,6 +138,8 @@ class InTouchController extends Controller
                 }
             } else {
                 Log::info("InTouch Callback: Order #{$localRequestId} already processed.");
+                // Ensure context is loaded even if transaction branch was skipped
+                $order->load(['orderItems.part', 'user']);
             }
 
             /**
@@ -161,9 +168,14 @@ class InTouchController extends Controller
     private function sendInvoice($order)
     {
         try {
-            $recipientEmail = $order->user ? $order->user->email : $order->guest_email;
+            // Check user relation safely or cleanly default down to guest field values
+            $recipientEmail = ($order->user && !empty($order->user->email)) ? $order->user->email : $order->guest_email;
+
             if ($recipientEmail) {
                 Mail::to($recipientEmail)->send(new OrderPaidInvoice($order));
+                Log::info("InTouch Invoice sent successfully to: {$recipientEmail}");
+            } else {
+                Log::error("InTouch Invoice Failed: No valid email address located for Order ID #{$order->id}");
             }
         } catch (\Exception $e) {
             Log::error('InTouch Invoice Email Failed: ' . $e->getMessage());
