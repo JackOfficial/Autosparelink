@@ -55,7 +55,7 @@
 
             @auth
             <div style="text-align: center;">
-                <a href="{{ config('app.url') }}/orders/{{ $order->id }}" class="btn" style="color: #ffffff;">View Order Details</a>
+                <a href="{{ config('app.url') }}/user/orders/{{ $order->id }}" class="btn" style="color: #ffffff;">View Order Details</a>
             </div>
             @endauth
 
