@@ -15,14 +15,14 @@
                 </div>
                 
                 @if($cartContent->count() > 0)
-    <button class="btn btn-outline-danger btn-sm rounded-pill px-4" 
-            onclick="confirmClearCart()" 
-            wire:loading.attr="disabled">
-        <i class="fas fa-trash-alt mr-2"></i>
-        <span wire:loading.remove wire:target="clearCart">Clear Cart</span>
-        <span wire:loading wire:target="clearCart">Clearing...</span>
-    </button>
-@endif
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-4" 
+                            onclick="confirmClearCart()" 
+                            wire:loading.attr="disabled">
+                        <i class="fas fa-trash-alt mr-2"></i>
+                        <span wire:loading.remove wire:target="clearCart">Clear Cart</span>
+                        <span wire:loading wire:target="clearCart">Clearing...</span>
+                    </button>
+                @endif
             </div>
         </div>
 
@@ -92,7 +92,7 @@
                                             <small class="text-muted">RWF</small>
                                         </td>
                                     </tr>
-                                    @endforeach
+                                    @foreach
                                 </tbody>
                             </table>
                         </div>
@@ -125,8 +125,8 @@
                             <span class="font-weight-bold">{{ number_format((float)$subTotal, 0) }} RWF</span>
                         </div>
                         <div class="d-flex justify-content-between mb-3">
-                            <span class="text-muted">Shipping</span>
-                            <span class="text-success font-weight-bold">Free</span>
+                            <span class="text-muted">Est. Shipping</span>
+                            <span class="text-dark font-weight-bold">{{ number_format((float)$shippingFee, 0) }} RWF</span>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
