@@ -122,7 +122,6 @@ class Checkout extends Component
 
     private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
     {
-        
         $cartItems = Cart::instance('default')->content();
 
         // 1. Create the base Order record
@@ -130,7 +129,7 @@ class Checkout extends Component
             'user_id'                => Auth::id(),
             'address_id'             => $finalAddressId,
             'total_amount'           => $totalOrderAmount,
-            'delivery_price'        => $shippingFee, 
+            'delivery_price'         => $shippingFee, 
             'status'                 => $orderStatus,
             'order_number'           => $localTransactionId, 
             'payment_method'         => $this->payment_method,
@@ -152,6 +151,9 @@ class Checkout extends Component
         foreach ($cartItems as $item) {
             $part = $parts->get($item->id);
             if ($part) {
+                // Adjust '$part->vendor_cost' below if your Part table cost key uses a different property name
+                $baseShopPayout = $part->price;
+
                 OrderItem::create([
                     'order_id'          => $order->id,
                     'part_id'           => $item->id,
@@ -159,6 +161,7 @@ class Checkout extends Component
                     'part_name'         => $item->name,
                     'quantity'          => $item->qty,
                     'unit_price'        => $item->price,
+                    'shop_payout'       => $baseShopPayout, 
                     'commission_amount' => (($item->price * $item->qty) * $rate) / 100,
                     'status'            => 'pending',
                 ]);
@@ -170,7 +173,6 @@ class Checkout extends Component
 
     public function placeOrder(InTouchPaymentService $inTouch)
     {
-
         $cartItems = Cart::instance('default')->content();
 
         if ($cartItems->isEmpty()) {
@@ -240,8 +242,6 @@ class Checkout extends Component
             $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city);
 
             $response = $inTouch->requestPayment($paymentPhone, $payableNow, $localTransactionId);
-
-            //dd($response);
 
             if ($response && isset($response['success']) && $response['success'] == true) {
                 $order->update(['transaction_id' => $response['transactionid'] ?? null]);

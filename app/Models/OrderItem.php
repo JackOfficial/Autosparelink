@@ -12,6 +12,7 @@ class OrderItem extends Model
         'part_id',
         'shop_id',
         'shop_name',
+        'shop_payout',
         'quantity',
         'unit_price',
         'commission_amount',
