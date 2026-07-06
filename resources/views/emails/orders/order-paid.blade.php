@@ -12,7 +12,7 @@
         .footer { text-align: center; font-size: 12px; color: #777; padding: 20px; }
         .order-summary { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .order-summary th, .order-summary td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
-        .btn { display: inline-block; padding: 12px 24px; color: #fff !important; background-color: #28a745; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 20px; }
+        .btn { display: inline-block; padding: 12px 24px; color: #ffffff !important; background-color: #28a745; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 20px; }
         .status-badge { background: #d4edda; color: #155724; padding: 5px 10px; border-radius: 4px; font-size: 14px; }
     </style>
 </head>
@@ -41,9 +41,9 @@
                 <tbody>
                     @foreach($order->orderItems as $item)
                     <tr>
-                        <td>{{ $item->part->name ?? 'Spare Part' }}</td>
+                        <td>{{ $item->part->part_name ?? 'Spare Part' }}</td>
                         <td>{{ $item->quantity }}</td>
-                        <td>{{ number_format($item->price, 0) }} RWF</td>
+                        <td>{{ number_format($item->unit_price, 0) }} RWF</td>
                     </tr>
                     @endforeach
                     <tr>
@@ -53,9 +53,11 @@
                 </tbody>
             </table>
 
+            @auth
             <div style="text-align: center;">
-                <a href="{{ config('app.url') }}/orders/{{ $order->id }}" class="btn">View Order Details</a>
+                <a href="{{ config('app.url') }}/orders/{{ $order->id }}" class="btn" style="color: #ffffff;">View Order Details</a>
             </div>
+            @endauth
 
             <p style="margin-top: 30px;">
                 <strong>Note:</strong> We have attached a formal PDF invoice to this email for your records.

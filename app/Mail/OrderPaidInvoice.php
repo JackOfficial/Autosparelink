@@ -27,18 +27,21 @@ class OrderPaidInvoice extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.orders.order-paid', // Create this simple thank you view
+            view: 'emails.orders.order-paid',
         );
     }
 
     public function attachments(): array
     {
-        // Generate PDF in memory
-        $pdf = Pdf::loadView('pdf.invoice', ['order' => $this->order]);
-
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'Invoice-ASL-' . $this->order->id . '.pdf')
-                ->withMime('application/pdf'),
+            /**
+             * FIX: Generate the PDF internal to the closure.
+             * This prevents Serialization errors when using Laravel Queues.
+             */
+            Attachment::fromData(function () {
+                return Pdf::loadView('pdf.invoice', ['order' => $this->order])->output();
+            }, 'Invoice-ASL-' . $this->order->id . '.pdf')
+            ->withMime('application/pdf'),
         ];
     }
 }
