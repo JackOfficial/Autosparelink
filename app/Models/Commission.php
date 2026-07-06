@@ -7,36 +7,37 @@ use Illuminate\Support\Facades\Cache;
 
 class Commission extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     * Logic: Simplified to a global rate model for the entire app.
-     */
     protected $fillable = [
         'rate',
         'description',
         'is_active',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     */
     protected $casts = [
         'rate' => 'decimal:2',
         'is_active' => 'boolean',
     ];
 
     /**
+     * The "booted" method of the model.
+     * Automatically clears the commission cache whenever a record is saved or deleted.
+     */
+    protected static function booted(): void
+    {
+        $clearCache = function () {
+            Cache::forget('active_commission_rate');
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+    }
+
+    /**
      * Helper to retrieve the active global commission rate.
-     * 
-     * We've added caching here because this method is called frequently
-     * (every time a part is added or an order is processed).
-     * 
-     * @return float
      */
     public static function getRate(): float
     {
-        // Cache the rate for 24 hours (86400 seconds)
-        // This is cleared automatically by the CommissionController when updated.
+        // Cache the rate for 24 hours. Clear events handle updates automatically now.
         return Cache::remember('active_commission_rate', 86400, function () {
             $rate = self::where('is_active', true)
                 ->latest()
@@ -49,7 +50,6 @@ class Commission extends Model
 
     /**
      * Helper to calculate the markup price based on a base price.
-     * Useful for UI displays or Part model logic.
      */
     public static function calculateMarkup(float $basePrice): float
     {
