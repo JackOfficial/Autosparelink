@@ -122,7 +122,6 @@ class Checkout extends Component
 
     private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
     {
-        dd($shippingFee);
         
         $cartItems = Cart::instance('default')->content();
 
@@ -131,7 +130,7 @@ class Checkout extends Component
             'user_id'                => Auth::id(),
             'address_id'             => $finalAddressId,
             'total_amount'           => $totalOrderAmount,
-            'derivery_price'        => $shippingFee, 
+            'delivery_price'        => $shippingFee, 
             'status'                 => $orderStatus,
             'order_number'           => $localTransactionId, 
             'payment_method'         => $this->payment_method,
