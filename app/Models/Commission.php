@@ -44,7 +44,7 @@ class Commission extends Model
                 ->value('rate');
 
             // Fallback to 10% if no active rate exists
-            return $rate !== null ? (float) $rate : 10.00;
+            return $rate !== null ? (float) $rate : 12.00;
         });
     }
 
