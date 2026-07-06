@@ -131,7 +131,6 @@ class Checkout extends Component
             'address_id'             => $finalAddressId,
             'total_amount'           => $totalOrderAmount,
             'derivery_price'        => $shippingFee, 
-            'total_amount'            => 0,
             'status'                 => $orderStatus,
             'order_number'           => $localTransactionId, 
             'payment_method'         => $this->payment_method,
