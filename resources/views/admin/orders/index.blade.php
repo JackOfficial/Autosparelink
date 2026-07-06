@@ -177,7 +177,7 @@
                             @php
                                 $name = $order->user->name ?? $order->guest_name ?? 'Guest';
                                 $email = $order->user->email ?? $order->guest_email ?? 'No email';
-                                $searchData = "#{$order->id} {$name} {$email}";
+                                $searchData = "#{$order->order_number} {$name} {$email}";
                                 
                                 $style = match($order->status) {
                                     'pending' => 'background: var(--warning-soft); color: var(--warning-deep);',
