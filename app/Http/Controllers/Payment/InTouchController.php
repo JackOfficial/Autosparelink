@@ -102,7 +102,8 @@ class InTouchController extends Controller
                     );
 
                     // C. Handle Items & Inventory (Individual saves keep your observers happy)
-                    foreach ($order->orderItems as $item) {
+                    // FIX: Chain lockForUpdate()->get() to prevent relation caching traps
+                    foreach ($order->orderItems()->lockForUpdate()->get() as $item) {
                         if ($item->status != 'completed') {
                             $item->status = 'processing';
                             $item->save(); 
