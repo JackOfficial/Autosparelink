@@ -194,7 +194,7 @@
                                         <span class="badge badge-light border sku-copy text-muted mr-2" @click="copyToClipboard('{{ $part->sku }}')" title="Click to copy SKU">
                                             {{ $part->sku }}
                                         </span>
-                                        <small class="text-muted border-left pl-2">PN: {{ $part->part_number }} | cat: {{ $part->category->category_name ?? 'General' }}</small>
+                                        <small class="text-muted border-left pl-2">PN: {{ $part->part_number }} | category: {{ $part->category->category_name ?? 'General' }}</small>
                                     </div>
                                 </div>
                             </div>
