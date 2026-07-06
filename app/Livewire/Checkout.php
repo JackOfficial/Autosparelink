@@ -122,6 +122,7 @@ class Checkout extends Component
 
     private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
     {
+        dd($shippingFee);
         
         $cartItems = Cart::instance('default')->content();
 
