@@ -121,15 +121,6 @@ class InTouchController extends Controller
 
                     DB::commit();
 
-                    // E. Send Invoice (Safely uses the eager-loaded user/guest data)
-                    $this->sendInvoice($order);
-
-                    return response()->json([
-                        'message' => 'success',
-                        'success' => true,
-                        'request_id' => $localRequestId
-                    ], 200);
-
                 } catch (\Exception $e) {
                     DB::rollBack();
                     Log::error("InTouch Callback Fatal Error: " . $e->getMessage());
@@ -141,12 +132,20 @@ class InTouchController extends Controller
                 }
             } else {
                 Log::info("InTouch Callback: Order #{$localRequestId} already processed.");
-                return response()->json([
-                    'message' => 'success',
-                    'success' => true,
-                    'request_id' => $localRequestId
-                ], 200);
             }
+
+            /**
+             * FIX LOCATION: 
+             * Executed outside of the state modifier blocks. Regardless of whether this thread 
+             * changes the state or an alternate checkout redirection handles it first, the invoice is sent.
+             */
+            $this->sendInvoice($order);
+
+            return response()->json([
+                'message' => 'success',
+                'success' => true,
+                'request_id' => $localRequestId
+            ], 200);
         }
 
         // 7. Handle Failed/Canceled Payments
