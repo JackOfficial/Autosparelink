@@ -129,6 +129,7 @@ class Checkout extends Component
             'user_id'                => Auth::id(),
             'address_id'             => $finalAddressId,
             'total_amount'           => $totalOrderAmount,
+            'net_total_amount'       => 0, // Calculated dynamically below
             'delivery_price'         => $shippingFee, 
             'status'                 => $orderStatus,
             'order_number'           => $localTransactionId, 
@@ -145,14 +146,27 @@ class Checkout extends Component
         // 2. Fetch required related data in advance to optimize database calls
         $itemIds = $cartItems->pluck('id')->toArray();
         $parts = Part::whereIn('id', $itemIds)->get()->keyBy('id');
-        $rate = Commission::getRate();
+        $rate = Commission::getRate(); // e.g., 10 for 10%
+
+        $totalNetShopPayout = 0;
 
         // 3. Generate individual Order Items
         foreach ($cartItems as $item) {
             $part = $parts->get($item->id);
             if ($part) {
-                // Adjust '$part->vendor_cost' below if your Part table cost key uses a different property name
-                $baseShopPayout = $part->price;
+                $unitPublicPrice = (float) $item->price;
+
+                // Reverse the commission markup percentage to get the seller's base price
+                // Formula: shop_payout = public_price / (1 + (rate / 100))
+                $unitShopPayout = $unitPublicPrice / (1 + ($rate / 100));
+                
+                // Item level row summary figures
+                $itemTotalCustomerPaid = $unitPublicPrice * $item->qty;
+                $itemTotalShopPayout   = $unitShopPayout * $item->qty;
+                $itemCommissionAmount  = $itemTotalCustomerPaid - $itemTotalShopPayout;
+
+                // Track total shop earnings for parent order allocation
+                $totalNetShopPayout += $itemTotalShopPayout;
 
                 OrderItem::create([
                     'order_id'          => $order->id,
@@ -160,13 +174,18 @@ class Checkout extends Component
                     'shop_id'           => $part->shop_id,
                     'part_name'         => $item->name,
                     'quantity'          => $item->qty,
-                    'unit_price'        => $item->price,
-                    'shop_payout'       => $baseShopPayout, 
-                    'commission_amount' => (($item->price * $item->qty) * $rate) / 100,
+                    'unit_price'        => $unitPublicPrice,     // Public retail price paid by customer
+                    'shop_payout'       => $unitShopPayout,      // Vendor's base price configuration (panel/wallet tracking)
+                    'commission_amount' => $itemCommissionAmount, // Flat system markup margin profit
                     'status'            => 'pending',
                 ]);
             }
         }
+
+        // 4. Update parent order with the collective shop payout total
+        $order->update([
+            'net_total_amount' => $totalNetShopPayout
+        ]);
 
         return $order;
     }
@@ -226,6 +245,7 @@ class Checkout extends Component
 
             $shippingFee = $this->calculateAverageShippingPrice($city);
             $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
+            
             $totalOrderAmount = $subtotal + $shippingFee;
 
             if ($this->payment_method === 'cod') {

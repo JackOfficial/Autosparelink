@@ -132,25 +132,32 @@ public function getAverageRatingAttribute(): float
     {
         return $this->status === 'active' && $this->stock_quantity >= $requestedQuantity;
     }
-
+    
     public function scopeForCurrentSeller(Builder $query): Builder
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        if (!$user) {
-            return $query;
-        }
-
-        if ($user->hasRole('admin') || $user->hasRole('super-admin')) {
-            return $query;
-        }
-
-        if ($user->hasRole('seller') && $user->shop) {
-            return $query->where('shop_id', $user->shop->id);
-        }
-
+    if (!$user) {
         return $query;
     }
+
+    // If they are an admin OR super-admin but are actively browsing the Shop Panel,
+    // restrict them specifically to their shop's inventory.
+    if ($user->hasRole('admin') || $user->hasRole('super-admin')) {
+        if (request()->is('shop*') && $user->shop) {
+            return $query->where('shop_id', $user->shop->id);
+        }
+        
+        return $query; // Otherwise, let them see everything in the main Admin Panel
+    }
+
+    // Normal seller fallback
+    if ($user->hasRole('seller') && $user->shop) {
+        return $query->where('shop_id', $user->shop->id);
+    }
+
+    return $query;
+}
 
     public function getUnitPriceAttribute(): float
     {
@@ -174,26 +181,17 @@ public function getAverageRatingAttribute(): float
     protected static function booted()
     {
         static::saving(function ($part) {
+
+        // Assign Shop ID for anyone using the shop panel who has an attached shop
+    if (auth()->check() && empty($part->shop_id)) {
+        $user = auth()->user();
+        if (($user->hasRole('seller') || $user->hasRole('admin')) && $user->shop) {
+            $part->shop_id = $user->shop->id;
+        }
+        }
             // 1. Assign Shop ID for Sellers
-            if (auth()->check() && auth()->user()->hasRole('seller') && empty($part->shop_id)) {
-                $part->shop_id = auth()->user()->shop->id;
-            }
-
-            /**
-             * 2. Global Markup Pricing Logic
-             * Commission is applied to all shops equally.
-             */
-            // $globalRate = (float) Commission::getRate();
-            // $part->applied_rate = $globalRate;
-            
-            // $multiplier = 1 + ($globalRate / 100);
-            
-            // // Calculate customer-facing unit_price (base + markup)
-            // $part->unit_price = (float) $part->price * $multiplier;
-
-            // // Mirror markup on old_price for consistent UI discount display
-            // if (!empty($part->old_price)) {
-            //     $part->old_unit_price = (float) $part->old_price * $multiplier;
+            // if (auth()->check() && auth()->user()->hasRole('seller') && empty($part->shop_id)) {
+            //     $part->shop_id = auth()->user()->shop->id;
             // }
 
             // 3. SKU Generation
