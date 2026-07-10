@@ -10,6 +10,7 @@ class Payment extends Model
         'order_id',
         'amount',
         'method',
+        'gateway',
         'transaction_reference',
         'status',
         'paid_at',
