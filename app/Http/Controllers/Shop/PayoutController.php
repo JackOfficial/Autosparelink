@@ -46,27 +46,41 @@ class PayoutController extends Controller
 
         $shop = Auth::user()->shop;
         $payout = null;
+        $walletTransaction = null;
 
-        // PHASE 1: Verify Balance and Secure the Intent Record (Short DB Lock)
+        // PHASE 1: Validate, Lock Wallet Row, and Create Pending Audit Records
         DB::beginTransaction();
         try {
-            // Lock the wallet row to prevent concurrent processing requests
+            // lockForUpdate prevents concurrent requests from reading old balances
             $wallet = $shop->wallet()->lockForUpdate()->firstOrFail();
-            $summary = $this->getFinancialSummary();
-
-            if ($request->amount > $summary['availableBalance']) {
+            
+            if ($request->amount > $wallet->balance) {
                 DB::rollBack();
-                return back()->with('error', 'Insufficient balance. Audited balance: ' . number_format($summary['availableBalance']) . ' RWF.');
+                return back()->with('error', 'Insufficient balance. Available balance: ' . number_format($wallet->balance) . ' RWF.');
             }
 
-            // Create the record strictly as 'processing'
+            $referenceId = 'WD-' . strtoupper(bin2hex(random_bytes(4))) . '-' . time();
+
+            // 1. Log the payout request structure
             $payout = $shop->payouts()->create([
                 'amount'          => $request->amount,
                 'payout_method'   => $request->payout_method,
                 'account_details' => $request->account_details,
                 'status'          => 'processing', 
                 'currency'        => 'RWF',
-                'reference'       => 'WD-' . strtoupper(bin2hex(random_bytes(4))) . '-' . time(),
+                'reference'       => $referenceId,
+            ]);
+
+            // 2. Log underlying transaction—observer moves funds from balance to pending_balance
+            $walletTransaction = $wallet->transactions()->create([
+                'type'           => 'debit',
+                'amount'         => $request->amount,
+                'service_fee'    => 0,
+                'fee_percentage' => 0,
+                'reference_type' => Payout::class,
+                'reference_id'   => $payout->id,
+                'description'    => "Withdrawal via {$request->payout_method} to {$request->account_details}",
+                'status'         => 'pending',
             ]);
 
             DB::commit();
@@ -76,7 +90,7 @@ class PayoutController extends Controller
             return back()->with('error', 'Could not process withdrawal request. Please retry.');
         }
 
-        // PHASE 2: External Gateway API Call (Completely outside DB Transaction Window)
+        // PHASE 2: External Gateway API Call (Safe from DB Transaction lockups)
         try {
             $response = $this->intouchService->requestDeposit(
                 $request->account_details,
@@ -88,10 +102,10 @@ class PayoutController extends Controller
             $responseCode = $response['responsecode'] ?? null;
             $statusStr = strtolower($response['status'] ?? '');
 
-            // Check if submission was successfully received/accepted by the gateway
-            if ($statusStr === 'successfull' || $responseCode === '01' || $responseCode === '00') {
+            // Handshake Accepted successfully by provider network (handling typo variants like 'successful' or 'successfull')
+            if (str_contains($statusStr, 'success') || $statusStr === 'pending' || $responseCode === '01' || $responseCode === '00') {
                 
-                // Keep status as processing. Save the transaction reference for callback verification.
+                // Individual instance update fires the necessary model observers cleanly
                 $payout->update([
                     'gateway_transaction_id' => $response['transactionid'] ?? null
                 ]);
@@ -100,24 +114,29 @@ class PayoutController extends Controller
                     ->with('success', 'Withdrawal request initiated successfully. Funds will appear once settled by the network.');
             }
 
-            // Gateway explicitly rejected the transaction on handshake
+            // Gateway rejected it immediately
             $payout->update([
                 'status' => 'failed',
-                'error_log' => $response['statusdesc'] ?? 'Gateway rejected submission parameters.'
+                'error_log' => $response['statusdesc'] ?? 'Gateway rejected parameters.'
             ]);
 
-            return back()->with('error', 'Payment provider rejected request: ' . ($response['statusdesc'] ?? 'Unknown Gateway Error'));
+            // Triggers observer to safely reverse pending_balance back to balance
+            $walletTransaction->update(['status' => 'failed']);
+
+            return back()->with('error', 'Payment provider rejected request: ' . ($response['statusdesc'] ?? 'Unknown Error'));
 
         } catch (\Exception $e) {
-            Log::error("Payout Gateway Communication Failure for Payout #{$payout->id}: " . $e->getMessage());
+            Log::critical("Payout Gateway Timeout or Critical Error for Payout ID {$payout->id}: " . $e->getMessage());
             
-            // Revert state back to pending so that it isn't permanently locked or lost due to a timeout
+            // Do NOT touch the wallet transaction status here. Leave it 'pending'.
+            // Webhooks or background jobs will sweep up and reconcile this later.
             $payout->update([
-                'status' => 'pending',
-                'error_log' => 'Network/Connection Timeout: ' . $e->getMessage()
+                'status' => 'processing',
+                'error_log' => 'Timeout encountered. Verification pending structural audit. ' . $e->getMessage()
             ]);
             
-            return back()->with('error', 'Gateway communication timeout. Your balance is safe; please check your history or retry shortly.');
+            return redirect()->route('shop.payouts.index')
+                ->with('warning', 'Gateway transaction is processing. We are verifying the final state with the network.');
         }
     }
 }
