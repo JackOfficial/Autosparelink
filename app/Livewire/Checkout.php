@@ -133,7 +133,6 @@ class Checkout extends Component
         'delivery_price'         => $shippingFee, 
         'status'                 => $orderStatus,
         'order_number'           => $localTransactionId, 
-        'gateway'                => 'InTouch',
         'is_guest'               => !Auth::check(),
         'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
         'guest_email'            => $this->guest_email,
