@@ -9,8 +9,8 @@
     $oldDisplayPrice = $part->old_price;
     
     $discount = !empty($oldDisplayPrice) && $oldDisplayPrice > $displayPrice
-    ? round((($oldDisplayPrice - $displayPrice) / $oldDisplayPrice) * 100)
-    : null;
+        ? round((($oldDisplayPrice - $displayPrice) / $oldDisplayPrice) * 100)
+        : null;
     
     $firstSpec = $part->specifications->first();
     
@@ -25,7 +25,10 @@
     $averageRating = $reviewCount > 0 ? round($approvedReviews->avg('rating'), 1) : 0;
 @endphp
 
-<div class="product-item bg-white h-100 shadow-sm border-0 d-flex flex-column" style="border-radius: 12px; transition: 0.3s; position: relative;">
+<div class="product-item bg-white h-100 shadow-sm border-0 d-flex flex-column" 
+     wire:key="part-card-{{ $part->id }}" 
+     style="border-radius: 12px; transition: 0.3s; position: relative;">
+    
     <div class="product-img position-relative overflow-hidden" style="border-radius: 12px 12px 0 0;">
         
         {{-- Compatibility Badge --}}
@@ -65,7 +68,6 @@
             <button wire:click="addToCart" class="btn btn-light btn-square shadow-sm mx-1" title="Add to Cart"><i class="fa fa-shopping-cart"></i></button>
             <button wire:click="addToWishlist" class="btn btn-light btn-square shadow-sm mx-1" title="Add to Wishlist"><i class="far fa-heart"></i></button>
             
-            {{-- NEW: Interactive Trigger to open review verification guard workflow --}}
             <button wire:click="openReviewModal" class="btn btn-light btn-square shadow-sm mx-1" title="Write a Review" wire:loading.attr="disabled">
                 <i class="fa fa-star text-warning"></i>
             </button>
@@ -79,7 +81,7 @@
             {{ Str::limit($part->part_name, 35) }}
         </a>
 
-        {{-- NEW: Dynamic Live aggregate stars score block under the title header --}}
+        {{-- Dynamic Live aggregate stars score block under the title header --}}
         <div class="d-flex align-items-center justify-content-center mb-2" style="font-size: 0.82rem;">
             <div class="text-warning mr-1">
                 @for($i = 1; $i <= 5; $i++)
@@ -112,7 +114,11 @@
             {{-- SHOP INFO SECTION --}}
             <small class="text-muted d-block mb-2 text-truncate px-2">
                 <i class="fa fa-store mr-1 text-primary"></i> 
-                <span class="font-weight-bold text-dark"><a href="{{ route('shops.show', $part->shop_id) }}" class="font-weight-bold text-dark hover-underline">{{ $part->shop->shop_name ?? 'Shop' }}</a></span> 
+                <span class="font-weight-bold text-dark">
+                    <a href="{{ route('shops.show', $part->shop_id) }}" class="font-weight-bold text-dark hover-underline">
+                        {{ $part->shop->shop_name ?? 'Shop' }}
+                    </a>
+                </span> 
                 @if($part->shop?->address)
                     <span class="mx-1">|</span>
                     <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
@@ -130,12 +136,12 @@
             <div class="d-flex align-items-center justify-content-center mb-3">
                 {{-- DISPLAY UNIT_PRICE (Base + Markup) --}}
                 <h5 class="mb-0 text-primary font-weight-bold">{{ number_format($displayPrice, 0) }} {{ $currencySymbol ?? 'RWF' }}</h5>
-                @if(!empty($part->old_price))
-                    <small class="text-muted ml-2"><del>{{ number_format($part->old_price, 0) }}</del></small>
+                @if(!empty($oldDisplayPrice))
+                    <small class="text-muted ml-2"><del>{{ number_format($oldDisplayPrice, 0) }}</del></small>
                 @endif
             </div>
 
-            <div class="px-1" x-data="{ success: false }" @cart-updated.window="if($event.detail.part_id == {{ $part->id }}) { success = true; setTimeout(() => success = false, 2000) }">
+            <div class="px-1" x-data="{ success: false }" @cart-updated.window="if($event.detail.part_id == '{{ $part->id }}') { success = true; setTimeout(() => success = false, 2000) }">
                 @if($part->stock_quantity > 0)
                     <div class="row no-gutters mx-n1">
                         {{-- Add to Cart Button --}}
