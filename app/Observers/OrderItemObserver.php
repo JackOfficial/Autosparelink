@@ -59,9 +59,9 @@ class OrderItemObserver
             $adminMarkupRevenue = $totalCustomerPaid - $vendorNetEarnings;
 
             // 4. Update the order item silently to prevent loops
-            $orderItem->updateQuietly([
-                'commission_amount' => $adminMarkupRevenue
-            ]);
+            // $orderItem->updateQuietly([
+            //     'commission_amount' => $adminMarkupRevenue
+            // ]);
 
             // 5. UPDATE WALLET BALANCE (The missing step)
             DB::table('wallets')
@@ -73,7 +73,7 @@ class OrderItemObserver
                 'type'           => 'credit',
                 'amount'         => $vendorNetEarnings,
                 'service_fee'    => $adminMarkupRevenue,
-                'fee_percentage' => $orderItem->applied_rate ?? 0, // Fallback safety
+                'fee_percentage' => $orderItem->commission_amount ?? 0, // Fallback safety
                 'reference_type' => OrderItem::class,
                 'reference_id'   => $orderItem->id,
                 'description'    => "Earnings for: " . ($orderItem->part_name ?? $orderItem->part?->part_name ?? 'Spare Part'),
