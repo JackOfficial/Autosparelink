@@ -1,13 +1,11 @@
 @php
     $mainPhoto = $part->photos->first()?->file_path ?? $part->image ?? 'frontend/img/placeholder.png';
     
-    /**
-     * CRITICAL MARKUP UPDATE:
-     * Use unit_price (Base + Markup) for display and discount math.
-     */
-    $displayPrice = $part->price; 
-    $oldDisplayPrice = $part->old_price;
+    // FORCE ACCESSSORS FOR ON-THE-FLY CALCULATIONS
+    $displayPrice = $part->unit_price; 
+    $oldDisplayPrice = $part->old_unit_price;
     
+    // The discount badge math will now correctly evaluate the marked-up prices
     $discount = !empty($oldDisplayPrice) && $oldDisplayPrice > $displayPrice
         ? round((($oldDisplayPrice - $displayPrice) / $oldDisplayPrice) * 100)
         : null;
@@ -19,7 +17,6 @@
         $descriptiveName = $firstSpec->variant->variant_name ?? $firstSpec->variant->name ?? 'Multiple vehicles';
     }
 
-    // Safely aggregate active scores for display formatting
     $approvedReviews = $part->reviews->where('status', 'approved');
     $reviewCount = $approvedReviews->count();
     $averageRating = $reviewCount > 0 ? round($approvedReviews->avg('rating'), 1) : 0;
