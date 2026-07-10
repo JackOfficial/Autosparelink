@@ -255,7 +255,7 @@ class Checkout extends Component
             }
 
             $localTransactionId = 'AST-' . strtoupper(Str::random(10));
-            dd($paymentPhone);
+            dd($payableNow);
             // Extract order and items generation to centralized method
             $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city);
             
