@@ -256,10 +256,10 @@ class Checkout extends Component
 
             $localTransactionId = 'AST-' . strtoupper(Str::random(10));
             
-            dd($final_address_id, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city);
+            
             // Extract order and items generation to centralized method
             $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city);
-            
+            dd($order);
             $response = $inTouch->requestPayment($paymentPhone, $payableNow, $localTransactionId);
             
             if ($response && isset($response['success']) && $response['success'] == true) {
