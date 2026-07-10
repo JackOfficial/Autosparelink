@@ -96,7 +96,7 @@ class WalletTransaction extends Model
     /**
      * Automatic Wallet Balance Management
      */
-   protected static function booted()
+protected static function booted()
 {
     static::creating(function ($transaction) {
         if (!in_array($transaction->type, ['credit', 'debit'])) {
@@ -107,7 +107,6 @@ class WalletTransaction extends Model
     static::created(function ($transaction) {
         $wallet = $transaction->wallet;
 
-        // Use a DB transaction to ensure both transaction and wallet update together
         \DB::transaction(function () use ($transaction, $wallet) {
             if ($transaction->status == 'completed') {
                 if ($transaction->type == 'credit') {
@@ -115,8 +114,17 @@ class WalletTransaction extends Model
                 } elseif ($transaction->type == 'debit') {
                     $wallet->decrement('balance', $transaction->amount);
                 }
-            } elseif ($transaction->status == 'pending') {
-                $wallet->increment('pending_balance', $transaction->amount);
+            } 
+            // Handle pending transactions based on type
+            elseif ($transaction->status == 'pending') {
+                if ($transaction->type == 'credit') {
+                    // Customer payment coming in: hold in pending
+                    $wallet->increment('pending_balance', $transaction->amount);
+                } elseif ($transaction->type == 'debit') {
+                    // Payout going out: freeze it from active balance immediately!
+                    $wallet->decrement('balance', $transaction->amount);
+                    $wallet->increment('pending_balance', $transaction->amount);
+                }
             }
 
             $wallet->update(['last_transaction_at' => now()]);
@@ -129,18 +137,25 @@ class WalletTransaction extends Model
             $oldStatus = $transaction->getOriginal('status');
 
             \DB::transaction(function () use ($transaction, $wallet, $oldStatus) {
-                // Scenario: Pending -> Completed (Release to real balance)
+                // Scenario: Pending -> Completed (Release the lock)
                 if ($oldStatus == 'pending' && $transaction->status == 'completed') {
+                    // Both credit and debit held funds in pending_balance, so clear it out
                     $wallet->decrement('pending_balance', $transaction->amount);
+                    
+                    // If it's a credit, it now goes to real balance. 
+                    // (Debits were already deducted from real balance on creation!)
                     if ($transaction->type == 'credit') {
                         $wallet->increment('balance', $transaction->amount);
-                    } else {
-                        $wallet->decrement('balance', $transaction->amount);
                     }
                 } 
-                // Scenario: Pending -> Canceled/Failed (Remove from pending, do not add to balance)
+                // Scenario: Pending -> Canceled/Failed (Reverse the lock)
                 elseif ($oldStatus == 'pending' && in_array($transaction->status, ['canceled', 'failed'])) {
                     $wallet->decrement('pending_balance', $transaction->amount);
+                    
+                    // If a withdrawal fails, give the money BACK to the active balance
+                    if ($transaction->type == 'debit') {
+                        $wallet->increment('balance', $transaction->amount);
+                    }
                 }
             });
         }
