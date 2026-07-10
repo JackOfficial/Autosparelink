@@ -37,13 +37,14 @@ class OrderItemObserver
 
         DB::transaction(function () use ($wallet, $orderItem) {
             
-            // 1. Lock the wallet row in the DB to prevent race conditions
-            $lockedWallet = DB::table('wallets')
-                ->where('id', $wallet->id)
-                ->lockForUpdate()
-                ->first();
+            // 1. Lock the order item row to securely serialize concurrent processing attempts
+            $lockedItem = OrderItem::where('id', $orderItem->id)->lockForUpdate()->first();
 
-            // 2. Idempotency Check: Ensure this item hasn't already been credited
+            if (!$lockedItem || $lockedItem->status !== 'completed') {
+                return;
+            }
+
+            // 2. Idempotency Check: Now completely safe under the row lock
             $alreadyPaid = WalletTransaction::where('reference_type', OrderItem::class)
                 ->where('reference_id', $orderItem->id)
                 ->exists();
@@ -58,26 +59,24 @@ class OrderItemObserver
             $totalCustomerPaid = $orderItem->unit_price * $orderItem->quantity;
             $adminMarkupRevenue = $totalCustomerPaid - $vendorNetEarnings;
 
-            // 4. Update the order item silently to prevent loops
+            // 4. Update the order item silently if needed
             // $orderItem->updateQuietly([
             //     'commission_amount' => $adminMarkupRevenue
             // ]);
 
-            // 5. UPDATE WALLET BALANCE (The missing step)
-            DB::table('wallets')
-                ->where('id', $wallet->id)
-                ->increment('balance', $vendorNetEarnings);
+            // [STEP 5 REMOVED] -> DO NOT manually increment balance here. 
+            // The creation of the WalletTransaction below will auto-trigger the model event to increment it safely.
 
-            // 6. Log the audit transaction history record
+            // 5. Log the audit transaction history record (Triggers model boot event balance update)
             $wallet->transactions()->create([
                 'type'           => 'credit',
                 'amount'         => $vendorNetEarnings,
                 'service_fee'    => $adminMarkupRevenue,
-                'fee_percentage' => $orderItem->commission_amount ?? 0, // Fallback safety
+                'fee_percentage' => $orderItem->commission_amount ?? 0, 
                 'reference_type' => OrderItem::class,
                 'reference_id'   => $orderItem->id,
                 'description'    => "Earnings for: " . ($orderItem->part_name ?? $orderItem->part?->part_name ?? 'Spare Part'),
-                'status'         => 'completed',
+                'status'         => 'completed', // 'completed' matches the static::created criterion to update the wallet balance
             ]);
         });
     }
