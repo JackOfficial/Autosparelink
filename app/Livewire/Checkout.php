@@ -260,7 +260,7 @@ class Checkout extends Component
             $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city);
 
             $response = $inTouch->requestPayment($paymentPhone, $payableNow, $localTransactionId);
-
+            dd($response);
             if ($response && isset($response['success']) && $response['success'] == true) {
                 $order->update(['transaction_id' => $response['transactionid'] ?? null]);
 
