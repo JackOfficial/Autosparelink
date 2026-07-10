@@ -92,7 +92,8 @@ class InTouchController extends Controller
                         ['order_id' => $order->id],
                         [
                             'amount' => $order->total_amount,
-                            'method' => 'intouchpay',
+                            'method' => $order->method ?? 'momo',
+                            'gateway' => 'intouchpay',
                             'transaction_reference' => $gatewayTransactionId,
                             'status' => 'successful',
                             'paid_at' => now()
