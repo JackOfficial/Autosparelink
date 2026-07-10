@@ -212,7 +212,7 @@
                               :class="copiedSku === '{{ $part->sku }}' && 'sku-copied'">
                             <span x-text="copiedSku === '{{ $part->sku }}' ? 'Copied!' : '{{ $part->sku }}'"></span>
                         </span>
-                        <div><small class="text-muted border-start ps-2">PN: {{ $part->part_number }}</small></div>
+                        <div><small class="text-muted border-start ps-2">PN: {{ $part->part_number }} | Category: {{ $part->category->category_name ?? 'General'  }} </small></div>
                     </div>
                 </div>
             </div>
