@@ -66,7 +66,7 @@ class PayoutController extends Controller
                 'amount'          => $request->amount,
                 'payout_method'   => $request->payout_method,
                 'account_details' => $request->account_details,
-                'status'          => 'processing', 
+                'status'          => 'completed', 
                 'currency'        => 'RWF',
                 'reference'       => $referenceId,
             ]);
@@ -80,7 +80,7 @@ class PayoutController extends Controller
                 'reference_type' => Payout::class,
                 'reference_id'   => $payout->id,
                 'description'    => "Withdrawal via {$request->payout_method} to {$request->account_details}",
-                'status'         => 'pending',
+                'status'         => 'completed',
             ]);
 
             DB::commit();
