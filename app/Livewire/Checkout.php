@@ -120,9 +120,8 @@ class Checkout extends Component
         return $validItemCount > 0 ? ($totalShipping / $validItemCount) : $fallbackFee;
     }
 
- private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
+   private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
 {
-    dd("here");
     $cartItems = Cart::instance('default')->content();
 
     // 1. Create the base Order record
@@ -172,8 +171,8 @@ class Checkout extends Component
                 'part_id'           => $item->id,
                 'shop_id'           => $part->shop_id,
                 'part_name'         => $item->name,
-                'unit_price'        => $unitPublicPrice, 
                 'quantity'          => $item->qty,
+                'unit_price'        => $unitPublicPrice,     // Public price paid by client
                 'shop_payout'       => $unitShopPayout,      // Pristine payout matching shop panel configurations
                 'commission_amount' => $itemCommissionAmount, // Fixed admin margin margin
                 'status'            => 'pending',
