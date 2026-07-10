@@ -257,7 +257,7 @@ class Checkout extends Component
             
             // Extract order and items generation to centralized method
             $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city);
-            dd("Here");
+        
             $response = $inTouch->requestPayment($paymentPhone, $payableNow, $localTransactionId);
             
             if ($response && isset($response['success']) && $response['success'] == true) {
