@@ -79,27 +79,38 @@ class Shop extends Model
      * Audited Financial Calculation Logic
      * Centralized to verify mathematical consistency against the Wallet System.
      */
-   public function getFinancialAudit(): array
-{
-    // 1. Fetch centralized wallet metrics to guarantee consistency
-    $wallet = $this->wallet ?? $this->wallet()->create(['balance' => 0]);
     
-    // 2. Pull the cached global rate from your Commission Model configuration
-    $globalRate = (float) \App\Models\Commission::getRate();
-
-    // 3. Aggregate total customer sales safely
+    public function getFinancialAudit(): array
+{
+    // 1. Fetch wallet row safely
+    $wallet = $this->wallet ?: $this->wallet()->create(['balance' => 0]);
+    
+    // 2. Aggregate earnings using snapshot record metrics (safeguarded against future rate adjustments)
+    // If you haven't added these columns to your order_items yet, fall back to calculating them line-by-line,
+    // but migrating your order_items table to store 'commission_amount' and 'vendor_net_earnings' is best practice.
     $revenueData = $this->orderItems()
         ->where('status', 'completed')
-        ->selectRaw("SUM(unit_price * quantity) as total_customer_paid")
+        ->selectRaw("
+            SUM(unit_price * quantity) as total_gross,
+            SUM(commission_amount) as total_commission_paid,
+            SUM(shop_payout) as total_net_earnings
+        ")
         ->first();
 
-    $totalGross = (float) ($revenueData->total_customer_paid ?? 0);
+    // Fallback logic if you don't have snapshot columns yet:
+    $totalGross = (float) ($revenueData->total_gross ?? 0);
+    
+    // If you haven't migrated columns yet, keep your dynamic logic temporary, but plan to change it:
+    $globalRate = (float) \App\Models\Commission::getRate();
+    $totalCommission = $revenueData->total_commission_paid !== null 
+        ? (float) $revenueData->total_commission_paid 
+        : ($totalGross * ($globalRate / 100));
 
-    // 4. Calculate commission dynamically using your Commission Model configuration
-    $totalCommission = $totalGross * ($globalRate / 100); 
-    $netEarnings = $totalGross - $totalCommission;
+    $netEarnings = $revenueData->total_net_earnings !== null 
+        ? (float) $revenueData->total_net_earnings 
+        : ($totalGross - $totalCommission);
 
-    // 5. Aggregate active payouts tracking matching your historical ledger status
+    // 3. Aggregate historical and pending payout ledgers
     $deductions = $this->payouts()
         ->whereIn('status', ['completed', 'pending', 'processing'])
         ->selectRaw("
@@ -110,15 +121,22 @@ class Shop extends Model
 
     $withdrawn = (float) ($deductions->total_withdrawn ?? 0);
     $locked = (float) ($deductions->total_locked ?? 0);
+    
+    $calculatedBalance = $netEarnings - $withdrawn - $locked;
+
+    // 4. Integrity Check: Log an internal alert if your ledger drifts from live wallet rows
+    if (abs($calculatedBalance - (float) $wallet->balance) > 0.01) {
+        \Log::warning("Financial drift detected for Shop ID {$this->id}. Calculated ledger: {$calculatedBalance}, Live Wallet balance: {$wallet->balance}");
+    }
 
     return [
-        'totalGross'       => $totalGross,       // 85,300
-        'commissionRate'   => $globalRate,       // 10
-        'totalCommission'  => $totalCommission,  // 8,530 (Fixed!)
-        'netEarnings'      => $netEarnings,      // 76,770 (Fixed!)
-        'totalWithdrawn'   => $withdrawn,        // 76,700
-        'pendingPayouts'   => $locked,           // 0
-        'availableBalance' => $netEarnings - $withdrawn - $locked // 70 (available balance on his/her wallet remaining)
+        'totalGross'       => $totalGross,
+        'commissionRate'   => $globalRate, // Kept for layout UI context tracking
+        'totalCommission'  => $totalCommission,
+        'netEarnings'      => $netEarnings,
+        'totalWithdrawn'   => $withdrawn,
+        'pendingPayouts'   => $locked,
+        'availableBalance' => (float) $wallet->balance // Always drive the wallet view balance off your isolated single source of truth
     ];
 }
 
