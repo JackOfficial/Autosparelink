@@ -5,8 +5,8 @@
      * CRITICAL MARKUP UPDATE:
      * Use unit_price (Base + Markup) for display and discount math.
      */
-    $displayPrice = $part->unit_price; 
-    $oldDisplayPrice = $part->old_unit_price ?? $part->old_price;
+    $displayPrice = $part->price; 
+    $oldDisplayPrice = $part->old_price;
     
     $discount = !empty($oldDisplayPrice) && $oldDisplayPrice > $displayPrice
     ? round((($oldDisplayPrice - $displayPrice) / $oldDisplayPrice) * 100)
