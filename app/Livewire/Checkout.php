@@ -285,6 +285,8 @@ class Checkout extends Component
 
         } catch (\Exception $e) {
             DB::rollBack();
+            // Force the hidden error to crash onto your screen right now:
+    dd($e->getMessage(), $e->getFile(), $e->getLine());
             Log::error('Checkout API Error: ' . $e->getMessage());
             $this->dispatch('notify', message: 'Payment Error: ' . $e->getMessage());
         }
