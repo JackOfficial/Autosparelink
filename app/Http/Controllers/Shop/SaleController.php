@@ -15,54 +15,50 @@ class SaleController extends Controller
     /**
      * Display Sales History / Report
      */
-    public function index(Request $request)
-    {
-        $shopId = Auth::user()->shop->id;
+   public function index(Request $request)
+{
+    $shopId = Auth::user()->shop->id;
 
-        // 1. Filter Orders that contain items from THIS shop
-        $query = Order::whereHas('orderItems', function ($q) use ($shopId) {
-                $q->where('shop_id', $shopId);
-            })
-            ->whereIn('status', ['delivered', 'shipped', 'processing'])
-            ->with(['user', 'payment', 'orderItems' => function($q) use ($shopId) {
-                $q->where('shop_id', $shopId)->with('part.photos');
-            }]);
+    // 1. Filter Orders that contain items from THIS shop
+    $query = Order::whereHas('orderItems', function ($q) use ($shopId) {
+            $q->where('shop_id', $shopId);
+        })
+        ->whereIn('status', ['delivered', 'shipped', 'processing'])
+        ->with(['user', 'payment', 'orderItems' => function($q) use ($shopId) {
+            $q->where('shop_id', $shopId)->with('part.photos');
+        }]);
 
-        // Capture periods to reuse for accurate revenue calculation
-        $periodFilter = null;
-        if ($request->filled('period')) {
-            $periodFilter = $request->period;
-            if ($periodFilter == 'today') {
-                $query->whereDate('created_at', Carbon::today());
-            } elseif ($periodFilter == 'month') {
-                $query->whereMonth('created_at', Carbon::now()->month)
-                      ->whereYear('created_at', Carbon::now()->year);
-            }
-        }
-
-        $sales = $query->latest()->paginate(20)->withQueryString();
-
-        // 2. FIXED STATS: Target accurate matching ledger rows
-        $revenueQuery = OrderItem::where('shop_id', $shopId)
-            ->whereHas('order', function($q) use ($periodFilter) {
-                $q->whereIn('status', ['delivered', 'shipped', 'processing']);
-                
-                // Synchronize date filters with main list display
-                if ($periodFilter == 'today') {
-                    $q->whereDate('created_at', Carbon::today());
-                } elseif ($periodFilter == 'month') {
-                    $q->whereMonth('created_at', Carbon::now()->month)
-                      ->whereYear('created_at', Carbon::now()->year);
-                }
-            });
-
-        // Sum directly without multiplying quantity again if shop_payout is already a net column total
-        $totalRevenue = $revenueQuery->sum('shop_payout');
-
-        $salesCount = $sales->total();
-
-        return view('shop.sales.index', compact('sales', 'totalRevenue', 'salesCount'));
+    // Capture the period filter
+    $periodFilter = $request->input('period', 'all');
+    
+    if ($periodFilter == 'today') {
+        $query->whereDate('created_at', Carbon::today());
+    } elseif ($periodFilter == 'month') {
+        $query->whereMonth('created_at', Carbon::now()->month)
+              ->whereYear('created_at', Carbon::now()->year);
     }
+
+    $sales = $query->latest()->paginate(20)->withQueryString();
+
+    // 2. REVENUE CALCULATION: Track against item completion updates
+    $revenueQuery = OrderItem::where('shop_id', $shopId)
+        ->where('status', 'completed'); // Only calculate money that actually settled into the wallet
+
+    if ($periodFilter == 'today') {
+        // Track by the exact date the item was finalized/completed
+        $revenueQuery->whereDate('updated_at', Carbon::today());
+    } elseif ($periodFilter == 'month') {
+        $revenueQuery->whereMonth('updated_at', Carbon::now()->month)
+                     ->whereYear('updated_at', Carbon::now()->year);
+    }
+
+    // Sum the actual snapshot payout amounts
+    $totalRevenue = $revenueQuery->sum('shop_payout');
+
+    $salesCount = $sales->total();
+
+    return view('shop.sales.index', compact('sales', 'totalRevenue', 'salesCount'));
+}
 
     /**
      * Daily/Monthly Revenue Analytics
