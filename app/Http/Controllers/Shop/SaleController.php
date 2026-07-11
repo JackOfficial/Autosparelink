@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
-use App\Models\OrderItem; // Required to target specific shop items
+use App\Models\OrderItem; 
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -24,16 +24,17 @@ class SaleController extends Controller
                 $q->where('shop_id', $shopId);
             })
             ->whereIn('status', ['delivered', 'shipped', 'processing'])
-            // We only eager load THIS shop's items for clarity
             ->with(['user', 'payment', 'orderItems' => function($q) use ($shopId) {
                 $q->where('shop_id', $shopId)->with('part.photos');
             }]);
 
-        // Filter by Date
+        // Capture periods to reuse for accurate revenue calculation
+        $periodFilter = null;
         if ($request->filled('period')) {
-            if ($request->period == 'today') {
+            $periodFilter = $request->period;
+            if ($periodFilter == 'today') {
                 $query->whereDate('created_at', Carbon::today());
-            } elseif ($request->period == 'month') {
+            } elseif ($periodFilter == 'month') {
                 $query->whereMonth('created_at', Carbon::now()->month)
                       ->whereYear('created_at', Carbon::now()->year);
             }
@@ -41,14 +42,22 @@ class SaleController extends Controller
 
         $sales = $query->latest()->paginate(20)->withQueryString();
 
-        // 2. FIXED STATS: Calculate revenue based ONLY on this shop's order items
-        // We sum the 'shop_payout' column we added to OrderItems
-        $totalRevenue = OrderItem::where('shop_id', $shopId)
-            ->whereHas('order', function($q) use ($query) {
-                // This ensures we respect the date/status filters applied above
+        // 2. FIXED STATS: Target accurate matching ledger rows
+        $revenueQuery = OrderItem::where('shop_id', $shopId)
+            ->whereHas('order', function($q) use ($periodFilter) {
                 $q->whereIn('status', ['delivered', 'shipped', 'processing']);
-            })
-            ->sum(DB::raw('shop_payout * quantity'));
+                
+                // Synchronize date filters with main list display
+                if ($periodFilter == 'today') {
+                    $q->whereDate('created_at', Carbon::today());
+                } elseif ($periodFilter == 'month') {
+                    $q->whereMonth('created_at', Carbon::now()->month)
+                      ->whereYear('created_at', Carbon::now()->year);
+                }
+            });
+
+        // Sum directly without multiplying quantity again if shop_payout is already a net column total
+        $totalRevenue = $revenueQuery->sum('shop_payout');
 
         $salesCount = $sales->total();
 
@@ -62,11 +71,11 @@ class SaleController extends Controller
     {
         $shopId = Auth::user()->shop->id;
 
-        // Sum 'shop_payout' from OrderItems, grouped by the order date
+        // Grouped metrics tracking over the last 30 active days
         $revenueData = OrderItem::where('shop_id', $shopId)
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('orders.status', 'delivered')
-            ->selectRaw('DATE(orders.created_at) as date, SUM(order_items.shop_payout * order_items.quantity) as total')
+            ->selectRaw('DATE(orders.created_at) as date, SUM(order_items.shop_payout) as total')
             ->groupBy('date')
             ->orderBy('date', 'desc')
             ->take(30)
@@ -82,7 +91,6 @@ class SaleController extends Controller
     {
         $shopId = Auth::user()->shop->id;
 
-        // Ensure we only show the items belonging to this shop on the invoice
         $order = Order::whereHas('orderItems', function ($q) use ($shopId) {
                 $q->where('shop_id', $shopId);
             })
@@ -95,27 +103,33 @@ class SaleController extends Controller
     }
 
     /**
-     * Quick action to mark an order as Delivered
+     * Quick action to mark a single vendor's items as Completed
      */
     public function finalize(string $id)
     {
         $shopId = Auth::user()->shop->id;
 
-        // Security: Ensure this order actually contains this shop's items
+        // Security check: Verify order context ownership
         $order = Order::whereHas('orderItems', function ($q) use ($shopId) {
             $q->where('shop_id', $shopId);
         })->findOrFail($id);
         
         if ($order->status === 'cancelled') {
-            return back()->with('error', 'Cannot finalize a cancelled order.');
+            return back()->with('error', 'Cannot update items for a cancelled order.');
         }
 
-        // IMPORTANT: In a multi-vendor system, marking the WHOLE order as delivered
-        // affects other shops. Usually, you'd update specific OrderItems statuses.
-        $order->update([
-            'status' => 'delivered'
-        ]);
+        // Isolate updates strictly to items belonging to this specific vendor shop
+        $myItems = OrderItem::where('order_id', $order->id)
+            ->where('shop_id', $shopId)
+            ->get();
 
-        return back()->with('success', "Order #{$order->id} has been marked as completed.");
+        foreach ($myItems as $item) {
+            if ($item->status !== 'completed') {
+                $item->status = 'completed';
+                $item->save(); // Individual save triggers your vendor payment observer safely
+            }
+        }
+
+        return back()->with('success', 'Your items for this order have been successfully marked as completed.');
     }
 }
