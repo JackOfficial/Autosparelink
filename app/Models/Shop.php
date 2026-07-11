@@ -119,10 +119,11 @@ class Shop extends Model
         ")
         ->first();
 
-    $withdrawn = (float) ($deductions->total_withdrawn ?? 0);
-    $locked = (float) ($deductions->total_locked ?? 0);
+    $totalWithdrawn = (float) $this->payouts()
+    ->where('status', 'completed')
+    ->sum('amount');
     
-    $calculatedBalance = $netEarnings - $withdrawn - $locked;
+    $calculatedBalance = $netEarnings - $totalWithdrawn;
 
     // 4. Integrity Check: Log an internal alert if your ledger drifts from live wallet rows
     if (abs($calculatedBalance - (float) $wallet->balance) > 0.01) {
@@ -134,8 +135,8 @@ class Shop extends Model
         'commissionRate'   => $globalRate, // Kept for layout UI context tracking
         'totalCommission'  => $totalCommission,
         'netEarnings'      => $netEarnings,
-        'totalWithdrawn'   => $withdrawn,
-        'pendingPayouts'   => $locked,
+        'totalWithdrawn'   => $totalWithdrawn,
+        'pendingPayouts'   => 0,
         'availableBalance' => (float) $wallet->balance // Always drive the wallet view balance off your isolated single source of truth
     ];
 }
