@@ -48,7 +48,7 @@ class PayoutController extends Controller
         $payout = null;
         $walletTransaction = null;
 
-        // PHASE 1: Validate, Lock Wallet Row, and Create Pending Audit Records
+        // PHASE 1: Validate, Lock Wallet Row, and Create Completed Ledger Records
         DB::beginTransaction();
         try {
             // lockForUpdate prevents concurrent requests from reading old balances
@@ -61,17 +61,17 @@ class PayoutController extends Controller
 
             $referenceId = 'WD-' . strtoupper(bin2hex(random_bytes(4))) . '-' . time();
 
-            // 1. Log the payout request structure
+            // 1. Log the payout request structure as completed immediately
             $payout = $shop->payouts()->create([
                 'amount'          => $request->amount,
                 'payout_method'   => $request->payout_method,
                 'account_details' => $request->account_details,
-                'status'          => 'processing', 
+                'status'          => 'completed', 
                 'currency'        => 'RWF',
                 'reference'       => $referenceId,
             ]);
 
-            // 2. Log underlying transaction—observer moves funds from balance to pending_balance
+            // 2. Created as completed -> triggers the model event to instantly decrement real balance
             $walletTransaction = $wallet->transactions()->create([
                 'type'           => 'debit',
                 'amount'         => $request->amount,
@@ -80,7 +80,7 @@ class PayoutController extends Controller
                 'reference_type' => Payout::class,
                 'reference_id'   => $payout->id,
                 'description'    => "Withdrawal via {$request->payout_method} to {$request->account_details}",
-                'status'         => 'pending',
+                'status'         => 'completed',
             ]);
 
             DB::commit();
@@ -102,41 +102,40 @@ class PayoutController extends Controller
             $responseCode = $response['responsecode'] ?? null;
             $statusStr = strtolower($response['status'] ?? '');
 
-            // Handshake Accepted successfully by provider network (handling typo variants like 'successful' or 'successfull')
+            // Gateway accepted and funds dispatched successfully
             if (str_contains($statusStr, 'success') || $statusStr === 'pending' || $responseCode === '01' || $responseCode === '00') {
                 
-                // Individual instance update fires the necessary model observers cleanly
+                // Save gateway tracking ID cleanly
                 $payout->update([
                     'gateway_transaction_id' => $response['transactionid'] ?? null
                 ]);
 
                 return redirect()->route('shop.payouts.index')
-                    ->with('success', 'Withdrawal request initiated successfully. Funds will appear once settled by the network.');
+                    ->with('success', 'Withdrawal processed successfully! The funds have been transferred to your mobile money account.');
             }
 
-            // Gateway rejected it immediately
-            $payout->update([
-                'status' => 'failed',
-                'error_log' => $response['statusdesc'] ?? 'Gateway rejected parameters.'
-            ]);
-
-            // Triggers observer to safely reverse pending_balance back to balance
-            $walletTransaction->update(['status' => 'failed']);
-
-            return back()->with('error', 'Payment provider rejected request: ' . ($response['statusdesc'] ?? 'Unknown Error'));
+            // Gateway rejected it immediately -> throw exception to handle atomic reversal
+            throw new \Exception($response['statusdesc'] ?? 'Gateway rejected parameters.');
 
         } catch (\Exception $e) {
-            Log::critical("Payout Gateway Timeout or Critical Error for Payout ID {$payout->id}: " . $e->getMessage());
+            Log::critical("Payout Gateway Failure for Payout ID {$payout->id}: " . $e->getMessage());
             
-            // Do NOT touch the wallet transaction status here. Leave it 'pending'.
-            // Webhooks or background jobs will sweep up and reconcile this later.
+            // Mark payout record as failed
             $payout->update([
-                'status' => 'processing',
-                'error_log' => 'Timeout encountered. Verification pending structural audit. ' . $e->getMessage()
+                'status' => 'failed',
+                'error_log' => $e->getMessage()
             ]);
-            
+
+            // Refund the wallet balance directly since it was already deducted during Phase 1
+            DB::transaction(function () use ($walletTransaction, $shop) {
+                $walletTransaction->update(['status' => 'failed']);
+                
+                // Manually increment active balance back since the model event was skipped
+                $shop->wallet()->increment('balance', $walletTransaction->amount);
+            });
+
             return redirect()->route('shop.payouts.index')
-                ->with('warning', 'Gateway transaction is processing. We are verifying the final state with the network.');
+                ->with('error', 'Payment transfer failed: ' . $e->getMessage() . '. Your balance has been restored.');
         }
     }
 }
