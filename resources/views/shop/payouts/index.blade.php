@@ -19,7 +19,7 @@
         {{-- Financial Summary Row --}}
         <div class="row g-3 mb-4">
             {{-- Gross Revenue --}}
-            <div class="col-md-3">
+            <div class="col-md-3 d-none">
                 <div class="card balance-card shadow-sm h-100 border-start border-primary border-4">
                     <div class="card-body">
                         <p class="text-muted small fw-bold mb-1 uppercase">Gross Revenue</p>
@@ -32,7 +32,7 @@
             </div>
 
             {{-- Platform Fee --}}
-            <div class="col-md-3">
+            <div class="col-md-3 d-none">
                 <div class="card balance-card shadow-sm h-100 border-start border-danger border-4 bg-soft-danger">
                     <div class="card-body">
                         <p class="text-danger small fw-bold mb-1 uppercase">Platform Fee ({{ $commissionRate }}%)</p>
