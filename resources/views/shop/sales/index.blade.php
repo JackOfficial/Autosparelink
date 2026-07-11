@@ -84,7 +84,7 @@
                                 <th class="ps-4 border-0 small text-muted">ORDER & DATE</th>
                                 <th class="border-0 small text-muted">CUSTOMER</th>
                                 <th class="border-0 small text-muted">PARTS</th>
-                                <th class="border-0 small text-muted">TOTAL</th>
+                                <th class="border-0 small text-muted">YOUR TOTAL</th>
                                 <th class="border-0 small text-muted">PAYMENT</th>
                                 <th class="border-0 small text-muted">STATUS</th>
                                 <th class="text-end pe-4 border-0 small text-muted">ACTION</th>
@@ -106,7 +106,7 @@
                                             <div class="img-stack-container me-2">
                                                 @foreach($sale->orderItems->take(3) as $index => $item)
                                                     @php
-                                                    $photo = $item->part?->photos?->first();
+                                                        $photo = $item->part?->photos?->first();
                                                     @endphp
                                                     @if($photo)
                                                         <img src="{{ asset('storage/' . $photo->file_path) }}" 
@@ -125,7 +125,8 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="fw-bold text-dark">{{ number_format($sale->total_amount) }} RWF</td>
+                                    {{-- Scoped directly to the vendor payout revenue --}}
+                                    <td class="fw-bold text-dark">{{ number_format($sale->orderItems->sum('shop_payout')) }} RWF</td>
                                     <td>
                                         <span class="small text-uppercase fw-bold text-muted">{{ $sale->payment->method ?? 'Unpaid' }}</span>
                                     </td>
@@ -136,7 +137,8 @@
                                             {{ strtoupper($sale->status) }}
                                         </span>
                                     </td>
-                                    <td class="text-end pe-4">
+                                    <td class="text-end pe-4" onclick="event.stopPropagation();">
+                                        {{-- event.stopPropagation() ensures clicking the print button won't open the order route --}}
                                         <a href="{{ route('shop.sales.invoice', $sale->id) }}" class="btn btn-sm btn-white border shadow-sm" title="Print Invoice">
                                             <i class="fas fa-print text-muted"></i>
                                         </a>
