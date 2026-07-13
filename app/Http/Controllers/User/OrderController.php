@@ -168,50 +168,54 @@ class OrderController extends Controller
     /**
      * Process the payment request via InTouch.
      */
-    public function processPayment(Request $request, Order $order, InTouchPaymentService $inTouch)
-    {
-        if ($order->user_id != auth()->id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        if (!in_array($order->status, ['pending', 'callback_requested'])) {
-            return redirect()->route('user.orders.show', $order->id)
-                ->with('error', 'This order cannot be paid at this stage.');
-        }
-
-        $request->validate([
-            'phone' => 'required|string|max:13',
-        ]);
-
-        DB::beginTransaction();
-        try {
-            $paymentPhone = $request->input('phone');
-            $payableNow = $order->total_amount;
-
-            // Trigger InTouch API payment request
-            $response = $inTouch->requestPayment($paymentPhone, $payableNow, $order->order_number);
-
-            if ($response && isset($response['success']) && $response['success'] == true) {
-                // Update the transaction ID from the gateway
-                $order->update([
-                    'transaction_id' => $response['transactionid'] ?? null,
-                    'status' => 'pending' // Transition from callback_requested to pending if needed
-                ]);
-
-                DB::commit();
-
-                return redirect()->route('user.orders.show', $order->id)
-                    ->with('message', 'Payment request sent! Please approve it on your phone.');
-            } else {
-                throw new \Exception($response['message'] ?? "InTouch Gateway Connection Failed");
-            }
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('InTouch Payment Retry Failed: ' . $e->getMessage());
-            return back()->with('error', 'Payment Error: ' . $e->getMessage());
-        }
+public function processPayment(Request $request, Order $order, InTouchPaymentService $inTouch)
+{
+    if ($order->user_id != auth()->id()) {
+        abort(403, 'Unauthorized action.');
     }
+
+    if (!in_array($order->status, ['pending', 'callback_requested'])) {
+        return redirect()->route('user.orders.show', $order->id)
+            ->with('error', 'This order cannot be paid at this stage.');
+    }
+
+    // Optimized validation to ensure a clean local Rwandan format structure
+    $request->validate([
+        'phone' => ['required', 'string', 'regex:/^(078|079|072|073|25078|25079|25072|25073)\d{7}$/'],
+    ], [
+        'phone.regex' => 'Please enter a valid MoMo phone number (e.g., 078xxxxxxx or 25078xxxxxxx).'
+    ]);
+
+    DB::beginTransaction();
+    try {
+        $paymentPhone = $request->input('phone');
+        $payableNow = $order->total_amount;
+
+        // Trigger InTouch API payment request
+        $response = $inTouch->requestPayment($paymentPhone, $payableNow, $order->order_number);
+
+        if ($response && isset($response['success']) && $response['success'] == true) {
+            
+            $order->update([
+                'transaction_id' => $response['transactionid'] ?? null,
+                'status' => 'pending' // Smoothly keeps state or reverts from callback_requested
+            ]);
+
+            DB::commit();
+
+            // Swapped to 'success' to align safely with common Bootstrap layout alerts
+            return redirect()->route('user.orders.show', $order->id)
+                ->with('success', 'Payment request sent! Please approve the push prompt on your phone.');
+        } else {
+            throw new \Exception($response['message'] ?? "InTouch Gateway Connection Failed");
+        }
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('InTouch Payment Retry Failed for Order #' . $order->order_number . ': ' . $e->getMessage());
+        return back()->withInput()->with('error', 'Payment Error: ' . $e->getMessage());
+    }
+}
 
     public function success(Order $order)
     {
