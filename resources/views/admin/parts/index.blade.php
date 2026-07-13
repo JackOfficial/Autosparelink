@@ -83,7 +83,7 @@
                 </div>
             </div>
 
-            <a href="{{ route('admin.spare-parts.create') }}" class="btn btn-primary px-4 shadow-sm">
+            <a href="{{ route('admin.spare-parts.create') }}" class="btn btn-primary px-4 shadow-sm d-none">
                 <i class="fa fa-plus-circle mr-2"></i>New Part
             </a>
         </div>
