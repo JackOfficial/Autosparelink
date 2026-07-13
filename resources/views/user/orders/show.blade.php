@@ -83,7 +83,7 @@
                 {{-- Quick Mark as Completed Card --}}
                 <div class="card border-0 shadow-sm rounded-4 mb-4 bg-success-subtle border border-success-subtle">
                     <div class="card-body p-4">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 d-none">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                             <div>
                                 <h5 class="fw-bold text-success mb-1">
                                     <i class="fas fa-check-double me-2"></i>Everything Perfect?

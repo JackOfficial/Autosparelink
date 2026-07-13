@@ -20,6 +20,36 @@ class OrderItemObserver
         }
 
         $this->processVendorPayment($orderItem);
+
+        // --- NEW LOGIC: Automatically complete the parent Order if all items are resolved ---
+        $this->checkAndCompleteParentOrder($orderItem);
+    }
+
+    /**
+     * Check if all items belonging to the parent order are resolved, then complete the order.
+     */
+    private function checkAndCompleteParentOrder(OrderItem $orderItem): void
+    {
+        $order = $orderItem->order;
+
+        if (!$order) {
+            return;
+        }
+
+        // Count items that are not completed or disputed
+        $remainingOpenItems = $order->orderItems()
+            ->whereNotIn('status', ['completed', 'disputed'])
+            ->count();
+
+        // If no pending items remain, mark the parent order as completed
+        if ($remainingOpenItems === 0 && $order->status !== 'completed') {
+            // Using updateQuietly to explicitly modify status safely without loops
+            $order->updateQuietly([
+                'status' => 'completed'
+            ]);
+            
+            Log::info("Parent Order #{$order->id} auto-completed: All child items resolved.");
+        }
     }
 
     /**
