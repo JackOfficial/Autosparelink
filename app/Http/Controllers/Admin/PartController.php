@@ -23,10 +23,10 @@ class PartController extends Controller
     /* ============================
      | LIST
      ============================ */
-   public function index(Request $request)
+public function index(Request $request)
 {
     $parts = Part::with([
-            'category:id,category_name', // Selecting specific columns for performance
+            'category:id,category_name', 
             'partBrand:id,name',
             'shop',
             'photos',
@@ -34,13 +34,16 @@ class PartController extends Controller
             'fitments.vehicleModel.brand',
         ])
         ->when($request->search, function($query, $search) {
-            $query->where('part_name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%")
-                  ->orWhere('part_number', 'like', "%{$search}%");
+            // Grouping the OR clauses cleanly within brackets in SQL
+            $query->where(function($subQuery) use ($search) {
+                $subQuery->where('part_name', 'like', "%{$search}%")
+                         ->orWhere('sku', 'like', "%{$search}%")
+                         ->orWhere('part_number', 'like', "%{$search}%");
+            });
         })
         ->latest()
         ->paginate(15)
-        ->withQueryString(); // Keeps search parameters in pagination links
+        ->withQueryString();
 
     return view('admin.parts.index', compact('parts'));
 }
