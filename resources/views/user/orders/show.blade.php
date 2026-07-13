@@ -58,164 +58,198 @@
             </div>
 
             @if(session('success'))
-    <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
-        <i class="fas fa-check-circle me-3 fa-lg"></i>
-        <div>
-            <h6 class="mb-0 fw-bold">Inspection Submitted</h6>
-            <span class="small">{{ session('success') }}</span>
-        </div>
-    </div>
-@endif
-
-@if($errors->any())
-    <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
-        <ul class="mb-0 small">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
-            {{-- Inspection Form (Only if Delivered) --}}
-            @if($order->status === 'delivered')
-            <div class="card shadow-sm rounded-4 mb-4 border-start border-info border-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold text-dark"><i class="fas fa-search-plus text-info me-2"></i> Inspect Your Items</h5>
-                    <p class="text-muted small">Please inspect the parts below. Confirming "Accept" will release payment to the seller.</p>
-                    
-                    <form action="{{ route('user.orders.inspection', $order->id) }}" method="POST" 
-                     x-data="{ submitting: false }" @submit="submitting = true">
-                        @csrf
-                        @foreach($order->orderItems as $index => $item)
-                            <div class="inspection-item p-3 border rounded-4 mb-3 bg-light-subtle" x-data="{ action: 'accept' }">
-                                <input type="hidden" name="items[{{ $index }}][id]" value="{{ $item->id }}">
-                                <div class="d-flex align-items-center mb-3">
-                                    <img src="{{ $item->part->photos->first() ? asset('storage/'.$item->part->photos->first()->file_path) : asset('images/placeholder-part.png') }}" 
-                                         class="rounded-3 me-3" style="width: 50px; height: 50px; object-fit: cover;">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-0 fw-bold">{{ $item->part->part_name }}</h6>
-                                        <span class="small text-muted">{{ $item->part->partBrand->name }} | SKU: {{ $item->part->sku }}</span>
-                                    </div>
-                                    <div class="btn-group btn-group-sm rounded-pill overflow-hidden border">
-                                        <input type="radio" class="btn-check" name="items[{{ $index }}][action]" id="accept_{{ $item->id }}" value="accept" x-model="action" checked>
-                                        <label class="btn btn-outline-success border-0 px-3" for="accept_{{ $item->id }}">Accept</label>
-
-                                        <input type="radio" class="btn-check" name="items[{{ $index }}][action]" id="dispute_{{ $item->id }}" value="dispute" x-model="action">
-                                        <label class="btn btn-outline-danger border-0 px-3" for="dispute_{{ $item->id }}">Dispute</label>
-                                    </div>
-                                </div>
-                                <div x-show="action === 'dispute'" x-collapse>
-                                    <textarea name="items[{{ $index }}][reason]" class="form-control form-control-sm rounded-3" placeholder="Explain the issue (wrong part, damaged, etc.)..."></textarea>
-                                </div>
-                            </div>
-                        @endforeach
-                        <button type="submit" 
-            class="btn btn-dark w-100 rounded-pill py-2 fw-bold mt-2 shadow" 
-            :disabled="submitting">
-        <span x-show="!submitting">Submit Final Inspection</span>
-        <span x-show="submitting"><i class="fas fa-spinner fa-spin me-2"></i> Processing...</span>
-    </button>
-                    </form>
+                <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
+                    <i class="fas fa-check-circle me-3 fa-lg"></i>
+                    <div>
+                        <h6 class="mb-0 fw-bold">Inspection Submitted</h6>
+                        <span class="small">{{ session('success') }}</span>
+                    </div>
                 </div>
-            </div>
             @endif
 
-           {{-- Items Card --}}
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-    <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-        <div>
-            <h5 class="fw-bold mb-0">Spare Parts List</h5>
-            <p class="text-muted small mb-0">Review the items in your order</p>
-        </div>
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2">
-            {{ $order->orderItems->count() }} {{ Str::plural('Item', $order->orderItems->count()) }}
-        </span>
-    </div>
-    
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead class="bg-light-subtle">
-                    <tr class="small text-uppercase text-muted fw-bold">
-                        <th class="px-4 py-3 border-0">Part Description</th>
-                        <th class="py-3 border-0">Shop</th>
-                        <th class="py-3 border-0 text-center">Status</th>
-                        <th class="py-3 border-0 text-center">Qty</th>
-                        <th class="py-3 border-0 text-end">Price</th>
-                        <th class="px-4 py-3 border-0 text-end">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($order->orderItems as $item)
-                        @php
-                            $photoPath = $item->part?->photos?->first()?->file_path;
-                        @endphp
-                        <tr>
-                            <td class="px-4 py-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3">
-                                        @if($photoPath)
-                                            <img src="{{ asset('storage/' . $photoPath) }}" 
-                                                 class="rounded-3 border" 
-                                                 style="width: 52px; height: 52px; object-fit: cover;" 
-                                                 alt="Part">
-                                        @else
-                                            <div class="bg-light rounded-3 border d-flex align-items-center justify-content-center text-muted" 
-                                                 style="width: 52px; height: 52px;">
-                                                <i class="fas fa-tools small"></i>
-                                            </div>
-                                        @endif
-                                    </div>
+            @if($errors->any())
+                <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
+                    <ul class="mb-0 small">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            {{-- Inspection Form & Quick Completion (Only if Delivered) --}}
+            @if($order->status === 'delivered')
+            
+                {{-- Quick Mark as Completed Card --}}
+                <div class="card border-0 shadow-sm rounded-4 mb-4 bg-success-subtle border border-success-subtle">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div>
+                                <h5 class="fw-bold text-success mb-1">
+                                    <i class="fas fa-check-double me-2"></i>Everything Perfect?
+                                </h5>
+                                <p class="text-success-emphasis small mb-0">
+                                    If you have inspected all spare parts and have no disputes, you can instantly complete the entire order.
+                                </p>
+                            </div>
+                            <div>
+                                <form action="{{ route('user.orders.inspection', $order->id) }}" method="POST" 
+                                      x-data="{ autoSubmitting: false }" @submit="autoSubmitting = true">
+                                    @csrf
+                                    {{-- Pass a hidden marker or rely on all items implicitly accepting --}}
+                                    @foreach($order->orderItems as $index => $item)
+                                        <input type="hidden" name="items[{{ $index }}][id]" value="{{ $item->id }}">
+                                        <input type="hidden" name="items[{{ $index }}][action]" value="accept">
+                                    @endforeach
                                     
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ $item->part?->part_name ?? 'Unknown Part' }}</div>
-                                        <div class="small text-muted">
-                                            {{ $item->part?->partBrand?->name ?? 'Genuine' }} • {{ $item->part?->category?->category_name ?? 'General' }}
+                                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" :disabled="autoSubmitting">
+                                        <span x-show="!autoSubmitting"><i class="fas fa-box-open me-2"></i>Mark as Completed</span>
+                                        <span x-show="autoSubmitting"><i class="fas fa-spinner fa-spin me-2"></i>Completing...</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Detailed Item Inspection Form --}}
+                <div class="card shadow-sm rounded-4 mb-4 border-start border-info border-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold text-dark"><i class="fas fa-search-plus text-info me-2"></i> Inspect Your Items Separately</h5>
+                        <p class="text-muted small">Please inspect the parts below. If any items have problems, toggle <strong>Dispute</strong> next to that specific item.</p>
+                        
+                        <form action="{{ route('user.orders.inspection', $order->id) }}" method="POST" 
+                              x-data="{ submitting: false }" @submit="submitting = true">
+                            @csrf
+                            @foreach($order->orderItems as $index => $item)
+                                <div class="inspection-item p-3 border rounded-4 mb-3 bg-light-subtle" x-data="{ action: 'accept' }">
+                                    <input type="hidden" name="items[{{ $index }}][id]" value="{{ $item->id }}">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <img src="{{ $item->part->photos->first() ? asset('storage/'.$item->part->photos->first()->file_path) : asset('images/placeholder-part.png') }}" 
+                                             class="rounded-3 me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0 fw-bold">{{ $item->part->part_name }}</h6>
+                                            <span class="small text-muted">{{ $item->part->partBrand->name }} | SKU: {{ $item->part->sku }}</span>
+                                        </div>
+                                        <div class="btn-group btn-group-sm rounded-pill overflow-hidden border">
+                                            <input type="radio" class="btn-check" name="items[{{ $index }}][action]" id="accept_{{ $item->id }}" value="accept" x-model="action" checked>
+                                            <label class="btn btn-outline-success border-0 px-3" for="accept_{{ $item->id }}">Accept</label>
+
+                                            <input type="radio" class="btn-check" name="items[{{ $index }}][action]" id="dispute_{{ $item->id }}" value="dispute" x-model="action">
+                                            <label class="btn btn-outline-danger border-0 px-3" for="dispute_{{ $item->id }}">Dispute</label>
                                         </div>
                                     </div>
+                                    <div x-show="action === 'dispute'" x-collapse>
+                                        <textarea name="items[{{ $index }}][reason]" class="form-control form-control-sm rounded-3" placeholder="Explain the issue (wrong part, damaged, etc.)..."></textarea>
+                                    </div>
                                 </div>
-                            </td>
-                            <td class="py-3">
-                                <div class="d-flex flex-column">
-                                    <span class="fw-bold text-dark small mb-1">
-                                        <i class="fas fa-store me-1 text-primary"></i>{{ $item->shop->shop_name ?? 'N/A' }}
-                                    </span>
-                                    <span class="text-muted" style="font-size: 11px;">
-                                        <i class="fas fa-map-marker-alt me-1"></i>{{ $item->shop->address ?? 'Kigali, Rwanda' }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="py-3 text-center">
-                                @php
-                                    $statusClasses = [
-                                        'pending'   => 'bg-warning-subtle text-warning border-warning-subtle',
-                                        'delivered' => 'bg-info-subtle text-info border-info-subtle',
-                                        'completed' => 'bg-success-subtle text-success border-success-subtle',
-                                        'disputed'  => 'bg-danger-subtle text-danger border-danger-subtle',
-                                    ];
-                                    $currentClass = $statusClasses[$item->status] ?? 'bg-light text-muted';
-                                @endphp
-                                <span class="badge {{ $currentClass }} border rounded-pill px-2 py-1 text-uppercase" style="font-size: 10px;">
-                                    {{ $item->status }}
-                                </span>
-                            </td>
-                            <td class="py-3 text-center fw-medium">{{ $item->quantity }}</td>
-                            <td class="py-3 text-end text-muted small">RWF {{ number_format($item->unit_price, 0) }}</td>
-                            <td class="px-4 py-3 text-end fw-bold text-dark">RWF {{ number_format($item->unit_price * $item->quantity, 0) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-                <tfoot class="border-top">
-                    <tr class="bg-light-subtle">
-                        <td colspan="5" class="px-2 py-2 text-end fw-bold text-primary text-uppercase">Total Amount</td>
-                        <td class="px-2 py-2 text-end fw-bold text-primary">RWF {{ number_format($order->total_amount, 0) }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
-</div>
+                            @endforeach
+                            <button type="submit" 
+                                class="btn btn-dark w-100 rounded-pill py-2 fw-bold mt-2 shadow" 
+                                :disabled="submitting">
+                                <span x-show="!submitting">Submit Custom Inspection</span>
+                                <span x-show="submitting"><i class="fas fa-spinner fa-spin me-2"></i> Processing...</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Items Card --}}
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold mb-0">Spare Parts List</h5>
+                        <p class="text-muted small mb-0">Review the items in your order</p>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2">
+                        {{ $order->orderItems->count() }} {{ Str::plural('Item', $order->orderItems->count()) }}
+                    </span>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="bg-light-subtle">
+                                <tr class="small text-uppercase text-muted fw-bold">
+                                    <th class="px-4 py-3 border-0">Part Description</th>
+                                    <th class="py-3 border-0">Shop</th>
+                                    <th class="py-3 border-0 text-center">Status</th>
+                                    <th class="py-3 border-0 text-center">Qty</th>
+                                    <th class="py-3 border-0 text-end">Price</th>
+                                    <th class="px-4 py-3 border-0 text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($order->orderItems as $item)
+                                    @php
+                                        $photoPath = $item->part?->photos?->first()?->file_path;
+                                    @endphp
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    @if($photoPath)
+                                                        <img src="{{ asset('storage/' . $photoPath) }}" 
+                                                             class="rounded-3 border" 
+                                                             style="width: 52px; height: 52px; object-fit: cover;" 
+                                                             alt="Part">
+                                                    @else
+                                                        <div class="bg-light rounded-3 border d-flex align-items-center justify-content-center text-muted" 
+                                                             style="width: 52px; height: 52px;">
+                                                            <i class="fas fa-tools small"></i>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                
+                                                <div>
+                                                    <div class="fw-bold text-dark">{{ $item->part?->part_name ?? 'Unknown Part' }}</div>
+                                                    <div class="small text-muted">
+                                                        {{ $item->part?->partBrand?->name ?? 'Genuine' }} • {{ $item->part?->category?->category_name ?? 'General' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3">
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-dark small mb-1">
+                                                    <i class="fas fa-store me-1 text-primary"></i>{{ $item->shop->shop_name ?? 'N/A' }}
+                                                </span>
+                                                <span class="text-muted" style="font-size: 11px;">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>{{ $item->shop->address ?? 'Kigali, Rwanda' }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 text-center">
+                                            @php
+                                                $statusClasses = [
+                                                    'pending'   => 'bg-warning-subtle text-warning border-warning-subtle',
+                                                    'delivered' => 'bg-info-subtle text-info border-info-subtle',
+                                                    'completed' => 'bg-success-subtle text-success border-success-subtle',
+                                                    'disputed'  => 'bg-danger-subtle text-danger border-danger-subtle',
+                                                ];
+                                                $currentClass = $statusClasses[$item->status] ?? 'bg-light text-muted';
+                                            @endphp
+                                            <span class="badge {{ $currentClass }} border rounded-pill px-2 py-1 text-uppercase" style="font-size: 10px;">
+                                                {{ $item->status }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3 text-center fw-medium">{{ $item->quantity }}</td>
+                                        <td class="py-3 text-end text-muted small">RWF {{ number_format($item->unit_price, 0) }}</td>
+                                        <td class="px-4 py-3 text-end fw-bold text-dark">RWF {{ number_format($item->unit_price * $item->quantity, 0) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot class="border-top">
+                                <tr class="bg-light-subtle">
+                                    <td colspan="5" class="px-2 py-2 text-end fw-bold text-primary text-uppercase">Total Amount</td>
+                                    <td class="px-2 py-2 text-end fw-bold text-primary">RWF {{ number_format($order->total_amount, 0) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- Right Column: Side Info --}}
@@ -245,26 +279,25 @@
                     <hr class="opacity-10 my-4">
 
                     <div class="mb-0">
-    <label class="small text-muted text-uppercase fw-bold ls-1 mb-2 d-block">Deliver To</label>
-    <div class="d-flex">
-        <i class="fas fa-map-marker-alt text-danger me-3 mt-1"></i>
-        <div class="small text-dark mb-0 lh-base">
-            @if($order->address)
-                {{-- No manual decoding needed now! --}}
-                <div class="fw-bold text-dark">{{ $order->address['full_name'] ?? 'Recipient' }}</div>
-                <div class="text-muted">
-                    {{ $order->address['street_address'] ?? 'N/A' }}<br>
-                    {{ $order->address['city'] ?? '' }}{{ isset($order->address['country']) ? ', ' . $order->address['country'] : '' }}
-                </div>
-                <div class="mt-1 fw-medium text-primary">
-                    <i class="fas fa-phone-alt me-1 small"></i> {{ $order->address['phone'] ?? 'No Phone' }}
-                </div>
-            @else
-                <span class="text-muted italic">No delivery address specified.</span>
-            @endif
-        </div>
-    </div>
-</div>
+                        <label class="small text-muted text-uppercase fw-bold ls-1 mb-2 d-block">Deliver To</label>
+                        <div class="d-flex">
+                            <i class="fas fa-map-marker-alt text-danger me-3 mt-1"></i>
+                            <div class="small text-dark mb-0 lh-base">
+                                @if($order->address)
+                                    <div class="fw-bold text-dark">{{ $order->address['full_name'] ?? 'Recipient' }}</div>
+                                    <div class="text-muted">
+                                        {{ $order->address['street_address'] ?? 'N/A' }}<br>
+                                        {{ $order->address['city'] ?? '' }}{{ isset($order->address['country']) ? ', ' . $order->address['country'] : '' }}
+                                    </div>
+                                    <div class="mt-1 fw-medium text-primary">
+                                        <i class="fas fa-phone-alt me-1 small"></i> {{ $order->address['phone'] ?? 'No Phone' }}
+                                    </div>
+                                @else
+                                    <span class="text-muted italic">No delivery address specified.</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
