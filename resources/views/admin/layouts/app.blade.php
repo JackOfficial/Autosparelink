@@ -467,8 +467,8 @@
 
         {{-- Jobs --}}
         <li class="nav-header" x-show="search === ''">JOBS</li>
-        <li class="nav-item" x-show="isVisible($el)"><a href="/admin/careers" class="nav-link"><i class="nav-icon fas fa-briefcase"></i><p>Careers</p></a></li>
-        <li class="nav-item" x-show="isVisible($el)"><a href="/admin/applications" class="nav-link"><i class="nav-icon fas fa-file-invoice"></i><p>Applications</p></a></li>
+        <li class="nav-item" x-show="isVisible($el)"><a href="#" class="nav-link"><i class="nav-icon fas fa-briefcase"></i><p>Careers</p></a></li>
+        <li class="nav-item" x-show="isVisible($el)"><a href="#" class="nav-link"><i class="nav-icon fas fa-file-invoice"></i><p>Applications</p></a></li>
 
         {{-- Logout --}}
         @if(Auth::check())
