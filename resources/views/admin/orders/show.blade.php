@@ -116,6 +116,12 @@
     // Fallback for Delivery Fee calculation
     $deliveryFee = $order->delivery_price ?? 0;
 @endphp
+
+<div x-data="{ open: false }">
+    <button @click="open = !open">Toggle</button>
+    <p x-show="open">Alpine is running perfectly! 🎉</p>
+</div>
+
 <div class="container-fluid py-4">
     {{-- Header Section --}}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 no-print">
