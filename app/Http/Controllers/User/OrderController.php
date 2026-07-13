@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Shipping;
 use App\Services\InTouchPaymentService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -54,12 +55,13 @@ class OrderController extends Controller
             abort(403);
         }
 
-        // 2. Load relationships accurately without withTrashed()
+        // 2. Load relationships accurately without withTrashed() - added 'shipping'
         $order->load([
             'orderItems.part.partBrand',
             'orderItems.part.category',
             'orderItems.part.photos', 
             'orderItems.shop',
+            'shipping'
         ]);
 
         return view('user.orders.show', compact('order'));
@@ -81,34 +83,64 @@ class OrderController extends Controller
             'items.*.reason' => 'required_if:items.*.action,dispute|nullable|string|max:500',
         ]);
 
-        DB::transaction(function () use ($request, $order) {
-            foreach ($request->items as $itemData) {
-                // Lock the row to prevent double-processing/double-payment races
-                $item = OrderItem::where('id', $itemData['id'])
-                    ->where('order_id', $order->id) // Security scope restriction
-                    ->lockForUpdate() 
-                    ->firstOrFail();
+        try {
+            DB::transaction(function () use ($request, $order) {
+                $hasAcceptance = false;
 
-                // Skip items that aren't in a state to be inspected
-                if ($item->status !== 'delivered') {
-                    continue;
+                foreach ($request->items as $itemData) {
+                    // Lock the row to prevent double-processing/double-payment races
+                    $item = OrderItem::where('id', $itemData['id'])
+                        ->where('order_id', $order->id) // Security scope restriction
+                        ->lockForUpdate() 
+                        ->firstOrFail();
+
+                    // Skip items that aren't in a state to be inspected
+                    if ($item->status !== 'delivered') {
+                        continue;
+                    }
+
+                    if ($itemData['action'] === 'accept') {
+                        $item->status = 'completed';
+                        $item->notes = "Customer confirmed receipt via dashboard.";
+                        
+                        // Explicitly execute standard save() instance method to fire observers correctly
+                        $item->save(); 
+                        
+                        $hasAcceptance = true;
+                    } else {
+                        $item->status = 'disputed';
+                        $item->notes = "Dispute: " . ($itemData['reason'] ?? 'No reason provided.');
+                        
+                        // Save standard context updates smoothly
+                        $item->save(); 
+                    }
                 }
 
-                if ($itemData['action'] === 'accept') {
-                    $item->status = 'completed';
-                    $item->notes = "Customer confirmed receipt via dashboard.";
-                    
-                    // Explicitly execute standard save() instance method to fire observers correctly
-                    $item->save(); 
-                } else {
-                    $item->status = 'disputed';
-                    $item->notes = "Dispute: " . ($itemData['reason'] ?? 'No reason provided.');
-                    
-                    // Save standard context updates smoothly
-                    $item->save(); 
+                // COPIED LOGIC: If items were accepted, cascade the status adjustments down to the parent records
+                if ($hasAcceptance) {
+                    // 1. Finalize parent order status
+                    $order->update(['status' => 'completed']);
+
+                    // 2. Read current snapshot fresh to check timestamps accurately
+                    $existingShipping = Shipping::where('order_id', $order->id)->first();
+
+                    // 3. Sync single platform shipping status to delivered upon item completion
+                    Shipping::updateOrCreate(
+                        ['order_id' => $order->id],
+                        [
+                            'status'          => 'delivered',
+                            'shipped_at'      => $existingShipping->shipped_at ?? now(),
+                            'delivered_at'    => $existingShipping->delivered_at ?? now(),
+                            'carrier'         => $existingShipping->carrier ?? null,
+                            'tracking_number' => $existingShipping->tracking_number ?? null,
+                            'notes'           => $existingShipping->notes ?? null,
+                        ]
+                    );
                 }
-            }
-        });
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return redirect()->route('user.orders.show', $order->id)
             ->with('success', 'Thank you. Your inspection results have been submitted.');
