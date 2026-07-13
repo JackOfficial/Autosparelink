@@ -104,9 +104,30 @@ class OrderController extends Controller
                     $shippingStatus = $order->shipping->status ?? 'pending';
                 }
 
+                $shippingData = ['status' => $shippingStatus];
+
+                if ($shippingStatus === 'shipped') {
+    // Only set it if it hasn't been set before
+    $shippingData['shipped_at'] = $order->shipping->shipped_at ?? now();
+}
+
+if ($shippingStatus === 'delivered') {
+    $shippingData['delivered_at'] = $order->shipping->delivered_at ?? now();
+    
+    // Safety fallback: If an order jumps straight to delivered, ensure shipped_at isn't blank
+    if (empty($order->shipping->shipped_at)) {
+        $shippingData['shipped_at'] = now();
+    }
+}
+
+// 2. SMART ADDITION: Merge form inputs if the admin provided them, otherwise keep old data
+$shippingData['carrier']         = $request->input('carrier', $order->shipping->carrier ?? null);
+$shippingData['tracking_number'] = $request->input('tracking_number', $order->shipping->tracking_number ?? null);
+$shippingData['notes']           = $request->input('notes', $order->shipping->notes ?? null);
+
                 Shipping::updateOrCreate(
                     ['order_id' => $order->id],
-                    ['status' => $shippingStatus]
+                    $shippingData
                 );
 
                 // Update the main order status
@@ -146,10 +167,17 @@ class OrderController extends Controller
                 }
             }
 
+            // Load existing shipping snapshot fresh to check timestamps accurately
+    $existingShipping = Shipping::where('order_id', $order->id)->first();
+
             // Sync single platform shipping status to delivered upon finalization completion
             Shipping::updateOrCreate(
                 ['order_id' => $order->id],
-                ['status' => 'delivered']
+                [
+                    'status' => 'delivered',
+                    'shipped_at'   => $existingShipping->shipped_at ?? now(),
+                    'delivered_at' => $existingShipping->delivered_at ?? now(),
+                ]
             );
         });
 
