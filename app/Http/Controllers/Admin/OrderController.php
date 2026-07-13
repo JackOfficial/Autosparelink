@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Shipping;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
@@ -46,7 +47,7 @@ class OrderController extends Controller
             'status' => 'required|in:pending,awaiting_commitment_fee,callback_requested,processing,shipped,delivered,canceled,completed'
         ]);
 
-        $order = Order::with(['payment', 'orderItems'])->findOrFail($id);
+        $order = Order::with(['payment', 'orderItems', 'shipping'])->findOrFail($id);
 
         // 1. SECURITY GUARD: Check if the order has been paid before advancing the status
         $unpaidStatuses = ['pending', 'awaiting_commitment_fee', 'callback_requested'];
@@ -62,7 +63,8 @@ class OrderController extends Controller
         // 2. Process the status update safely
         try {
             DB::transaction(function () use ($request, $order) {
-                // If the admin is trying to cancel the order
+                
+                // Handle order cancellations smoothly
                 if ($request->status === 'canceled') {
                     $isPaid = $order->payment && $order->payment->status === 'successful';
                     
@@ -71,13 +73,13 @@ class OrderController extends Controller
                     }
 
                     foreach ($order->orderItems as $item) {
-                        $item->update(['status' => 'canceled']);
+                        $item->status = 'canceled';
+                        $item->save(); // Triggers observers cleanly
                     }
                 }
 
-                // --- FIX: HANDLE COMPLETION VIA DROP-DOWN UPDATE ---
+                // Handle system completion via drop-down update
                 if ($request->status === 'completed') {
-                    // Query directly with row-locking to circumvent any stale relationship caches
                     $items = OrderItem::where('order_id', $order->id)
                         ->lockForUpdate()
                         ->get();
@@ -85,10 +87,27 @@ class OrderController extends Controller
                     foreach ($items as $item) {
                         if ($item->status !== 'completed') {
                             $item->status = 'completed';
-                            $item->save(); // Explicit individual save triggers your Observer cleanly
+                            $item->save(); // Triggers your Observer to issue vendor payments
                         }
                     }
                 }
+
+                // Fix: Sync logistics package statuses perfectly with the order state transitions
+                $shippingStatus = 'pending';
+                if ($request->status === 'shipped') {
+                    $shippingStatus = 'shipped';
+                } elseif (in_array($request->status, ['delivered', 'completed'])) {
+                    $shippingStatus = 'delivered';
+                } elseif ($request->status === 'canceled') {
+                    $shippingStatus = 'canceled';
+                } else {
+                    $shippingStatus = $order->shipping->status ?? 'pending';
+                }
+
+                Shipping::updateOrCreate(
+                    ['order_id' => $order->id],
+                    ['status' => $shippingStatus]
+                );
 
                 // Update the main order status
                 $order->update(['status' => $request->status]);
@@ -102,6 +121,9 @@ class OrderController extends Controller
             ->with('success', "Order status updated to " . ucfirst($request->status));
     }
 
+    /**
+     * Explicit completion action button logic.
+     */
     public function finalize($id)
     {
         $order = Order::findOrFail($id);
@@ -113,7 +135,6 @@ class OrderController extends Controller
         DB::transaction(function () use ($order) {
             $order->update(['status' => 'completed']);
 
-            // FIX: Add explicit row-level verification query locking
             $items = OrderItem::where('order_id', $order->id)
                 ->lockForUpdate()
                 ->get();
@@ -124,6 +145,12 @@ class OrderController extends Controller
                     $item->save(); 
                 }
             }
+
+            // Sync single platform shipping status to delivered upon finalization completion
+            Shipping::updateOrCreate(
+                ['order_id' => $order->id],
+                ['status' => 'delivered']
+            );
         });
 
         return back()->with('success', 'Order finalized and vendor payments released.');

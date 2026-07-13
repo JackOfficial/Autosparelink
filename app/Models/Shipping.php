@@ -10,7 +10,7 @@ class Shipping extends Model
 {
     protected $fillable = [
         'order_id',
-        'shop_id',
+        'shop_id',          // Will be null for central platform-managed packages
         'address_id',       // Nullable: Linked to Address model for registered users
         'address_text',     // Snapshot: Full address string for Guest Checkouts
         'carrier',
@@ -32,7 +32,8 @@ class Shipping extends Model
     ];
 
     /**
-     * Smart Scope: Sellers only see their shipments; Admins see all.
+     * Smart Scope: Sellers see the shipment if their items are inside the order.
+     * Admins see everything.
      */
     public function scopeForCurrentSeller(Builder $query): Builder
     {
@@ -45,7 +46,12 @@ class Shipping extends Model
         }
 
         if ($user->hasRole('seller') && $user->shop) {
-            return $query->where('shop_id', $user->shop->id);
+            $shopId = $user->shop->id;
+            
+            // Fix: Check if the master order contains any items belonging to this seller's shop
+            return $query->whereHas('order.orderItems', function ($q) use ($shopId) {
+                $q->where('shop_id', $shopId);
+            });
         }
 
         return $query;
@@ -85,48 +91,46 @@ class Shipping extends Model
      */
     public function getFullAddressAttribute()
     {
-        // Prioritize the linked profile address if it exists
         if ($this->address_id && $this->address) {
             return $this->address->full_address_string;
         }
 
-        // Fallback to the snapshot text (Guest checkout)
         return $this->address_text ?? 'No address information available';
     }
 
     /**
-     * Boot logic: Automation and Finance Bridging.
+     * Boot logic: Automated status syncing.
      */
     protected static function booted()
     {
         static::creating(function ($shipping) {
-            // Auto-assign shop_id for sellers
+            // Safe null check for fallbacks, though checkouts assign null for hub fulfillment
             if (auth()->check() && auth()->user()->hasRole('seller') && empty($shipping->shop_id)) {
-                $shipping->shop_id = auth()->user()->shop->id;
+                $shipping->shop_id = auth()->user()->shop?->id;
             }
         });
 
         static::updated(function ($shipping) {
-    // 1. Tracking Notification Logic
-    if ($shipping->wasChanged('tracking_number') && !empty($shipping->tracking_number)) {
-        // Trigger notification: "Your package is moving! Tracking: {$shipping->tracking_number}"
-    }
+            // 1. Tracking Notification Logic
+            if ($shipping->wasChanged('tracking_number') && !empty($shipping->tracking_number)) {
+                // Trigger notification safely here
+            }
 
-    // 2. Logistics -> Inspection Bridge:
-    // When marked 'delivered', move OrderItems to 'delivered' status.
-    // We DO NOT set 'completed' here because the client needs time to inspect the part.
-    if ($shipping->wasChanged('status') && $shipping->status === 'delivered') {
-        $shipping->order->orderItems()
-            ->where('shop_id', $shipping->shop_id)
-            ->where('status', '!=', 'completed') // Safety: don't revert if already completed
-            ->get()
-            ->each(function($item) {
-                // We update to 'delivered'. 
-                // This does NOT trigger the vendor payment logic in your observer.
-                $item->status = 'delivered'; 
-                $item->save(); 
-            });
-    }
-});
+            // 2. Logistics -> Master Order Items Status Sync
+            if ($shipping->wasChanged('status') && $shipping->status === 'delivered') {
+                if ($shipping->order) {
+                    // Fix: Removed 'where shop_id' constraint because all vendors share this package
+                    $shipping->order->orderItems()
+                        ->where('status', '!=', 'completed')
+                        ->get()
+                        ->each(function($item) {
+                            // updateQuietly prevents infinite event cascades or loops
+                            $item->updateQuietly([
+                                'status' => 'delivered'
+                            ]);
+                        });
+                }
+            }
+        });
     }
 }

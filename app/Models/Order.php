@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Pest\Support\Str;
+use Illuminate\Support\Str; // Fixed: Use the standard Laravel framework helper
 
 class Order extends Model
 {
@@ -35,62 +35,58 @@ class Order extends Model
         return $this->belongsTo(Address::class);
     }
 
-    // public function items()
-    // {
-    //     return $this->hasMany(OrderItem::class);
-    // }
+    public function orderItems() 
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 
     public function payment()
     {
         return $this->hasOne(Payment::class);
     }
 
+    /**
+     * One single master package for consolidated shipping
+     */
     public function shipping()
     {
         return $this->hasOne(Shipping::class);
     }
 
-    public function orderItems() 
-{
-    return $this->hasMany(OrderItem::class);
-}
-
-    // Helper
+    // Helpers
     public function isPending() 
     {
         return $this->status === 'pending';
     }
 
-public function scopeForCurrentSeller($query)
-{
-    $shopId = auth()->user()->shop?->id;
+    public function scopeForCurrentSeller($query)
+    {
+        $shopId = auth()->user()->shop?->id;
 
-    if (!$shopId) {
-        return $query->whereRaw('1 = 0'); // Return empty result if no shop exists
+        if (!$shopId) {
+            return $query->whereRaw('1 = 0'); 
+        }
+
+        return $query->whereHas('orderItems.part', function ($q) use ($shopId) {
+            $q->where('shop_id', $shopId);
+        });
     }
 
-    return $query->whereHas('orderItems.part', function ($q) use ($shopId) {
-        $q->where('shop_id', $shopId);
-    });
-}
+    protected static function boot()
+    {
+        parent::boot();
 
-protected static function boot()
-{
-    parent::boot();
+        static::creating(function ($order) {
+            $order->order_number = self::generateUniqueOrderNumber();
+        });
+    }
 
-    static::creating(function ($order) {
-        $order->order_number = self::generateUniqueOrderNumber();
-    });
-}
+    private static function generateUniqueOrderNumber()
+    {
+        do {
+            $number = 'AS-' . strtoupper(Str::random(6));
+        } while (self::where('order_number', $number)->exists());
 
-private static function generateUniqueOrderNumber()
-{
-    do {
-        // Generate a 6-character random string
-        $number = 'AS-' . strtoupper(Str::random(6));
-    } while (self::where('order_number', $number)->exists());
-
-    return $number;
-}
-
+        return $number;
+    }
 }

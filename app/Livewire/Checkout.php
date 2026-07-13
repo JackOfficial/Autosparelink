@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Mail\{OrderCallbackAdmin, OrderCallbackClient};
 use Livewire\Component;
 use Gloudemans\Shoppingcart\Facades\Cart;
-use App\Models\{Order, OrderItem, Address, Commission, Part};
+use App\Models\{Order, OrderItem, Address, Commission, Part, Shipping};
 use Illuminate\Support\Facades\{Auth, DB, Mail, Log, Cookie};
 use App\Services\InTouchPaymentService;
 use Illuminate\Support\Str;
@@ -51,11 +51,16 @@ class Checkout extends Component
         if (Auth::check() && !$this->use_new_address && $this->addresses->isNotEmpty()) {
             $this->address_id = $this->addresses->first()->id;
         }
+
+        // Fix: Explicitly compute the initial total upon initial page load
+        $city = $this->getCurrentCity();
+        $shippingFee = $this->calculateAverageShippingPrice($city);
+        $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
+        $this->total = $subtotal + $shippingFee;
     }
 
     public function updated($propertyName)
     {
-        // Re-calculate the total if relevant fields change.
         if (in_array($propertyName, ['address_id', 'use_new_address', 'new_address.city'])) {
             $city = $this->getCurrentCity();
             $shippingFee = $this->calculateAverageShippingPrice($city);
@@ -100,7 +105,6 @@ class Checkout extends Component
         $validItemCount = 0;
         $fallbackFee = (strtolower(trim($city)) === 'kigali') ? 3000 : 5000;
 
-        // Optimized Query: Load all categories in one trip to the database
         $itemIds = $cartItems->pluck('id')->toArray();
         $parts = Part::with('category')->whereIn('id', $itemIds)->get()->keyBy('id');
 
@@ -120,71 +124,104 @@ class Checkout extends Component
         return $validItemCount > 0 ? ($totalShipping / $validItemCount) : $fallbackFee;
     }
 
-   private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
-{
-    $cartItems = Cart::instance('default')->content();
+    private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
+    {
+        $cartItems = Cart::instance('default')->content();
 
-    // 1. Create the base Order record
-    $order = Order::create([
-        'user_id'                => Auth::id(),
-        'address_id'             => $finalAddressId,
-        'total_amount'           => $totalOrderAmount,
-        'net_total_amount'       => 0, // Stamped dynamically below
-        'delivery_price'         => $shippingFee, 
-        'status'                 => $orderStatus,
-        'order_number'           => $localTransactionId, 
-        'is_guest'               => !Auth::check(),
-        'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
-        'guest_email'            => $this->guest_email,
-        'guest_phone'            => $this->new_address['phone'],
-        'guest_shipping_address' => !Auth::check() 
-            ? ($this->new_address['street_address'] . ', ' . $city . ', ' . $this->new_address['country']) 
-            : null,
-    ]);
+        // 1. Create the base Order record
+        $order = Order::create([
+            'user_id'                => Auth::id(),
+            'address_id'             => $finalAddressId,
+            'total_amount'           => $totalOrderAmount,
+            'net_total_amount'       => 0, 
+            'delivery_price'         => $shippingFee, 
+            'status'                 => $orderStatus,
+            'order_number'           => $localTransactionId, 
+            'is_guest'               => !Auth::check(),
+            'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
+            'guest_email'            => $this->guest_email,
+            'guest_phone'            => $this->new_address['phone'],
+            'guest_shipping_address' => !Auth::check() 
+                ? ($this->new_address['street_address'] . ', ' . $city . ', ' . $this->new_address['country']) 
+                : null,
+        ]);
 
-    // 2. Fetch required related data in advance to optimize database calls
-    $itemIds = $cartItems->pluck('id')->toArray();
-    $parts = Part::whereIn('id', $itemIds)->get()->keyBy('id');
+        $itemIds = $cartItems->pluck('id')->toArray();
+        $parts = Part::whereIn('id', $itemIds)->get()->keyBy('id');
 
-    $totalNetShopPayout = 0;
+        $totalNetShopPayout = 0;
 
-    // 3. Generate individual Order Items
-    foreach ($cartItems as $item) {
-        $part = $parts->get($item->id);
-        if ($part) {
-            // NEVER calculate backward using percentages. Read the true values:
-            $unitPublicPrice = (float) $item->price; // Total retail price customer saw
-            $unitShopPayout  = (float) $part->price; // Raw price set by vendor in the database
-            
-            // Calculate item totals precisely based on structural rules
-            $itemTotalCustomerPaid = $unitPublicPrice * $item->qty;
-            $itemTotalShopPayout   = $unitShopPayout * $item->qty;
-            $itemCommissionAmount  = $itemTotalCustomerPaid - $itemTotalShopPayout;
+        // 2. Generate individual Order Items
+        foreach ($cartItems as $item) {
+            $part = $parts->get($item->id);
+            if ($part) {
+                $unitPublicPrice = (float) $item->price; 
+                $unitShopPayout  = (float) $part->price; 
+                
+                $itemTotalCustomerPaid = $unitPublicPrice * $item->qty;
+                $itemTotalShopPayout   = $unitShopPayout * $item->qty;
+                $itemCommissionAmount  = $itemTotalCustomerPaid - $itemTotalShopPayout;
 
-            // Aggregate total shop earnings for parent order net tracking
-            $totalNetShopPayout += $itemTotalShopPayout;
+                $totalNetShopPayout += $itemTotalShopPayout;
 
-            OrderItem::create([
-                'order_id'          => $order->id,
-                'part_id'           => $item->id,
-                'shop_id'           => $part->shop_id,
-                'part_name'         => $item->name,
-                'quantity'          => $item->qty,
-                'unit_price'        => $unitPublicPrice,     // Public price paid by client
-                'shop_payout'       => $unitShopPayout,      // Pristine payout matching shop panel configurations
-                'commission_amount' => $itemCommissionAmount, // Fixed admin margin margin
-                'status'            => 'pending',
-            ]);
+                OrderItem::create([
+                    'order_id'          => $order->id,
+                    'part_id'           => $item->id,
+                    'shop_id'           => $part->shop_id,
+                    'part_name'         => $item->name,
+                    'quantity'          => $item->qty,
+                    'unit_price'        => $unitPublicPrice,     
+                    'shop_payout'       => $unitShopPayout,      
+                    'commission_amount' => $itemCommissionAmount, 
+                    'status'            => 'pending',
+                ]);
+            }
         }
+
+        // 3. Update parent order payouts snapshot
+        $order->update([
+            'net_total_amount' => $totalNetShopPayout
+        ]);
+
+        // 4. Generate metadata for the single shipping package snapshot
+        $compiledAddressText = '';
+        $recipientName = '';
+        $recipientPhone = '';
+
+        if (!Auth::check()) {
+            $compiledAddressText = $this->new_address['street_address'] . ', ' . $city . ', ' . $this->new_address['country'];
+            $recipientName = $this->new_address['full_name'];
+            $recipientPhone = $this->new_address['phone'];
+        } else {
+            $recipientName = Auth::user()->name;
+            if ($finalAddressId) {
+                $dbAddress = Address::find($finalAddressId);
+                if ($dbAddress) {
+                    $compiledAddressText = $dbAddress->street_address . ', ' . $dbAddress->city . ', ' . $dbAddress->country;
+                    $recipientPhone = $dbAddress->phone ?? Auth::user()->phone;
+                }
+            } else {
+                $recipientPhone = Auth::user()->phone;
+            }
+        }
+
+        // Fix: Removed vendor loop. Create exactly one package managed by the platform hub.
+        Shipping::create([
+            'order_id'        => $order->id,
+            'shop_id'         => null, // System package
+            'address_id'      => Auth::check() ? $finalAddressId : null,
+            'address_text'    => $compiledAddressText,
+            'carrier'         => null,
+            'shipping_method' => 'Standard',
+            'shipping_cost'   => $shippingFee, // Entire fee applied to the single package
+            'tracking_number' => null,
+            'status'          => 'pending',
+            'recipient_name'  => $recipientName,
+            'recipient_phone' => $recipientPhone,
+        ]);
+
+        return $order;
     }
-
-    // 4. Update parent order with the exact cumulative shop payout snapshot
-    $order->update([
-        'net_total_amount' => $totalNetShopPayout
-    ]);
-
-    return $order;
-}
 
     public function placeOrder(InTouchPaymentService $inTouch)
     {
@@ -241,21 +278,13 @@ class Checkout extends Component
 
             $shippingFee = $this->calculateAverageShippingPrice($city);
             $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
-            
             $totalOrderAmount = $subtotal + $shippingFee;
 
-            if ($this->payment_method === 'cod') {
-                $payableNow = $shippingFee;
-                $orderStatus = 'pending';
-            } else {
-                $payableNow = $totalOrderAmount;
-                $orderStatus = 'pending';
-            }
+            $payableNow = ($this->payment_method === 'cod') ? $shippingFee : $totalOrderAmount;
+            $orderStatus = 'pending';
 
             $localTransactionId = 'AST-' . strtoupper(Str::random(10));
             
-            
-            // Extract order and items generation to centralized method
             $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city);
         
             $response = $inTouch->requestPayment($paymentPhone, $payableNow, $localTransactionId);
@@ -283,8 +312,7 @@ class Checkout extends Component
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // Force the hidden error to crash onto your screen right now:
-    dd($e->getMessage(), $e->getFile(), $e->getLine());
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
             Log::error('Checkout API Error: ' . $e->getMessage());
             $this->dispatch('notify', message: 'Payment Error: ' . $e->getMessage());
         }
@@ -338,7 +366,6 @@ class Checkout extends Component
             $totalOrderAmount = $subtotal + $shippingFee;
             $localTransactionId = 'AST-' . strtoupper(Str::random(10));
 
-            // Generate using shared dynamic function
             $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, 'callback_requested', $localTransactionId, $city);
 
             DB::commit();
