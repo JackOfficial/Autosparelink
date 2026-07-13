@@ -194,6 +194,8 @@ Route::get('/orders/{order}/status', function (\App\Models\Order $order) {
     return response()->json(['status' => $order->status]);
 })->name('orders.status');
 
+Route::get('/order-success/{order}', [OrderController::class, 'success'])->name('order.success');
+
 // =============================================================
 // PAYMENT GATEWAY (FLUTTERWAVE)
 // =============================================================
@@ -240,8 +242,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
     });
-
-    Route::get('/order-success/{order}', [OrderController::class, 'success'])->name('order.success');
 
     Route::get('/home', [HomeContoller::class, 'index'])->name('home');
     // Dashboard & Profile
