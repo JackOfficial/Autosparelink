@@ -20,6 +20,7 @@ class Order extends Model
         'guest_name',
         'guest_email',
         'guest_phone',
+        'guest_shipping_address',
         'is_guest',
         'status'
     ];
