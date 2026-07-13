@@ -33,6 +33,7 @@
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
  <link rel="stylesheet" href="{{ asset('back/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
  <link rel="icon" type="image/png" href="{{ asset('frontend/img/logo.png') }}">
+ 
  @stack('styles')
 @livewireStyles
 </head>
@@ -563,7 +564,10 @@
 <script src="{{ asset('back/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{{ asset('back/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js') }}"></script>
- <x-head.tinymce-config/>
+<!-- Include Alpine.js via CDN -->
+<!-- Include Alpine.js via CDN -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<x-head.tinymce-config/>
 <!-- Page specific script -->
 <script>
     $(function () {
