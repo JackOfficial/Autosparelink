@@ -38,10 +38,21 @@
 
 <div class="container-fluid py-4" 
      x-data="{ 
-        search: '{{ request('search') }}', 
+        search: '', 
+        filterType: 'all',
         copyToClipboard(text) {
             navigator.clipboard.writeText(text);
-            // Optional: You could trigger an Alpine alert toast here
+        },
+        shouldShow(el, stock, status) {
+            const searchTerm = this.search.toLowerCase();
+            const textContent = el.innerText.toLowerCase();
+            const matchesSearch = searchTerm === '' || textContent.includes(searchTerm);
+            
+            let matchesFilter = true;
+            if (this.filterType === 'active') matchesFilter = status === 1;
+            if (this.filterType === 'out_of_stock') matchesFilter = stock <= 0;
+            
+            return matchesSearch && matchesFilter;
         }
      }">
     
@@ -56,17 +67,17 @@
             </nav>
             <h2 class="fw-bold mb-0">Spare Parts Management</h2>
         </div>
-        <div class="col-md-6 text-md-right text-left mt-3 mt-md-0">
+        <div class="col-md-6 text-right">
             <div class="dropdown d-inline-block mr-2">
                 <button class="btn btn-outline-secondary btn-sm dropdown-toggle shadow-none" type="button" data-toggle="dropdown">
                     <i class="fas fa-file-export mr-1"></i> Export
                 </button>
                 <div class="dropdown-menu dropdown-menu-right shadow border-0">
                     <h6 class="dropdown-header font-weight-bold">Download Report</h6>
-                    <a class="dropdown-item" href="{{ route('admin.export.excel', request().query()) }}">
+                    <a class="dropdown-item" :href="'{{ route('admin.export.excel') }}?search=' + search + '&filter=' + filterType">
                         <i class="fas fa-file-excel mr-2 text-success"></i> Excel (.xlsx)
                     </a>
-                    <a class="dropdown-item" href="{{ route('admin.export.pdf', request().query()) }}">
+                    <a class="dropdown-item" :href="'{{ route('admin.export.pdf') }}?search=' + search + '&filter=' + filterType">
                         <i class="fas fa-file-pdf mr-2 text-danger"></i> PDF (.pdf)
                     </a>
                 </div>
@@ -100,22 +111,32 @@
 
     <div class="card border-0 shadow-sm rounded-lg">
         <div class="card-header bg-white border-0 py-3">
-            {{-- Form for Database Scoping --}}
-            <form action="{{ url()->current() }}" method="GET">
-                <div class="row align-items-center">
-                    <div class="col-md-5">
-                        <div class="input-group border rounded-pill px-3 py-1 bg-light">
-                            <input type="text" name="search" x-model="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Search name, SKU, or part number...">
-                            <div class="input-group-append">
-                                <span class="btn btn-transparent p-0 text-muted d-flex align-items-center">
-                                    <button type="submit" class="btn btn-link p-0 text-muted"><i class="fa fa-search" x-show="search === ''"></i></button>
-                                    <a href="{{ url()->current() }}" class="text-muted" x-show="search !== ''" style="cursor:pointer" x-cloak><i class="fa fa-times"></i></a>
-                                </span>
-                            </div>
+            <div class="row align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group border rounded-pill px-3 py-1 bg-light">
+                        <input type="text" x-model="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Search name, SKU, shop or fitments...">
+                        <div class="input-group-append">
+                            <span class="btn btn-transparent p-0 text-muted d-flex align-items-center">
+                                <i class="fa fa-search" x-show="search === ''"></i>
+                                <i class="fa fa-times" x-show="search !== ''" @click="search = ''" style="cursor:pointer" x-cloak></i>
+                            </span>
                         </div>
                     </div>
                 </div>
-            </form>
+                <div class="col-md-7 text-right">
+                    <div class="btn-group btn-group-toggle shadow-none">
+                        <label class="btn btn-light btn-sm" :class="filterType === 'all' && 'active shadow-sm'">
+                            <input type="radio" x-model="filterType" value="all"> All
+                        </label>
+                        <label class="btn btn-light btn-sm" :class="filterType === 'active' && 'active shadow-sm'">
+                            <input type="radio" x-model="filterType" value="active"> Active
+                        </label>
+                        <label class="btn btn-light btn-sm" :class="filterType === 'out_of_stock' && 'active shadow-sm'">
+                            <input type="radio" x-model="filterType" value="out_of_stock"> Out of Stock
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="table-responsive">
@@ -132,21 +153,22 @@
                 </thead>
                 <tbody>
                     @forelse($parts as $part)
-                    <tr class="part-row">
+                    <tr class="part-row" 
+                        x-show="shouldShow($el, {{ $part->stock_quantity }}, {{ $part->status ? 1 : 0 }})"
+                        x-transition:enter.duration.300ms>
                         <td class="pl-4">
                             <div class="d-flex align-items-center">
                                 <div class="photo-stack mr-4">
                                     @forelse($part->photos->take(3) as $index => $photo)
-                                        <img src="{{ asset('storage/' . $photo->file_path) }}" class="stack-img shadow-sm" style="left: {{ $index * 10 }}px; z-index: {{ 10 - $index }};" alt="Part profile picture">
+                                        <img src="{{ asset('storage/' . $photo->file_path) }}" class="stack-img shadow-sm" style="left: {{ $index * 10 }}px; z-index: {{ 10 - $index }};">
                                     @empty
-                                        <div class="bg-light rounded border d-flex align-items-center justify-content-center" style="width:40px; height:40px; color: #6c757d;">
-                                            <i class="fa fa-image small"></i>
-                                        </div>
+                                        <div class="bg-light rounded border d-flex align-items-center justify-content-center" style="width:40px; height:40px text-muted"><i class="fa fa-image small"></i></div>
                                     @endforelse
                                 </div>
                                 <div>
                                     <div class="d-flex align-items-center mb-0">
                                         <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">{{ $part->part_name }}</div>
+                                        {{-- State Badge --}}
                                         @if($part->state)
                                             @php
                                                 $stateColor = match(strtolower($part->state->slug ?? $part->state->name)) {
@@ -163,29 +185,26 @@
                                         @endif
                                     </div>
                                     
+                                    {{-- Shop Name --}}
                                     <div class="text-primary small font-weight-bold mb-1">
-                                        @if($part->shop)
-                                            <a href="{{ route('admin.shops.show', $part->shop->id) }}"><i class="fas fa-store mr-1"></i> {{ $part->shop->shop_name }}</a>
-                                        @else
-                                            <span class="text-muted"><i class="fas fa-store mr-1"></i> Unknown Shop</span>
-                                        @endif
+                                        <a href="{{ route('admin.shops.show', $part->shop->id) }}" class="hre"><i class="fas fa-store mr-1"></i> {{ $part->shop->shop_name ?? 'Unknown Shop' }}</a>
                                     </div>
 
                                     <div class="d-flex align-items-center mt-1">
                                         <span class="badge badge-light border sku-copy text-muted mr-2" @click="copyToClipboard('{{ $part->sku }}')" title="Click to copy SKU">
                                             {{ $part->sku }}
                                         </span>
-                                        <small class="text-muted border-left pl-2">PN: {{ $part->part_number }} | Category: {{ $part->category->category_name ?? 'General' }}</small>
+                                        <small class="text-muted border-left pl-2">PN: {{ $part->part_number }} | category: {{ $part->category->category_name ?? 'General' }}</small>
                                     </div>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div class="small text-dark font-weight-bold mb-1">{{ $part->category->category_name ?? 'General' }}</div>
+                            <div class="small text-dark fw-500 mb-1">{{ $part->category->category_name ?? 'General' }}</div>
                             <div class="d-flex flex-wrap" style="max-width: 250px;">
                                 @forelse($part->fitments->take(3) as $fitment)
                                     <span class="compat-pill">
-                                        {{ $fitment->vehicleModel->brand->name ?? '' }} {{ $fitment->vehicleModel->name ?? 'Model' }}
+                                        {{ $fitment->specification->variant->name ?? 'Model' }}
                                     </span>
                                 @empty
                                     <span class="text-muted small">No specific fitments</span>
@@ -212,7 +231,7 @@
                                         <i class="fas fa-sync-alt mr-1" style="font-size: 0.6rem;"></i>{{ $sub->sku }}
                                     </span>
                                 @empty
-                                    <small class="text-muted font-italic" style="font-size: 0.75rem;">No alternatives</small>
+                                    <small class="text-muted italic" style="font-size: 0.75rem;">No alternatives</small>
                                 @endforelse
                             </div>
                         </td>
@@ -225,7 +244,7 @@
                         </td>
                         <td class="text-right pr-4">
                             <div class="dropdown">
-                                <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button class="btn btn-sm btn-light border dropdown-toggle no-caret" data-toggle="dropdown">
                                     <i class="fas fa-ellipsis-v text-muted"></i>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2">
@@ -235,7 +254,7 @@
                                     <div class="dropdown-divider"></div>
                                     <form action="{{ route('admin.spare-parts.destroy', $part->id) }}" method="POST" onsubmit="return confirm('Archive this part?');">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="dropdown-item text-danger"><i class="fas fa-trash-alt mr-2"></i> Delete Part</button>
+                                        <button class="dropdown-item text-danger"><i class="fas fa-trash-alt mr-2"></i> Delete Part</button>
                                     </form>
                                 </div>
                             </div>
@@ -251,9 +270,14 @@
         <div class="card-footer bg-white border-0 py-3">
             <div class="row align-items-center">
                 <div class="col-sm-6 text-muted small">
-                    Showing <b>{{ $parts->firstItem() ?? 0 }}</b> to <b>{{ $parts->lastItem() ?? 0 }}</b> of {{ $parts->total() }} results
+                    <span x-show="search === '' && filterType === 'all'">
+                        Showing <b>{{ $parts->firstItem() }}</b> to <b>{{ $parts->lastItem() }}</b> of {{ $parts->total() }} results
+                    </span>
+                    <span x-show="search !== '' || filterType !== 'all'" x-cloak>
+                        Filtering current view...
+                    </span>
                 </div>
-                <div class="col-sm-6 d-flex justify-content-end">
+                <div class="col-sm-6 d-flex justify-content-end" x-show="search === '' && filterType === 'all'">
                     {{ $parts->links('pagination::bootstrap-4') }}
                 </div>
             </div>
