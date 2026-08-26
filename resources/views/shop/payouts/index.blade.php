@@ -183,10 +183,15 @@
                             </div>
 
                             <div class="mb-4">
-                                <label class="small fw-bold text-muted mb-1 uppercase">Account Details</label>
-                                <input type="text" name="account_details" value="{{ $shop->phone_number }}" class="form-control border rounded-3 py-2" 
-                                       placeholder="Enter mobile wallet number" required>
-                            </div>
+    <label for="account_details" class="small fw-bold text-muted mb-1 text-uppercase">Account Details</label>
+    <input type="text" 
+           id="account_details"
+           name="account_details" 
+           value="{{ $shop->phone_number }}" 
+           class="form-control border rounded-3 py-2" 
+           placeholder="Enter mobile wallet number" 
+           readonly>
+</div>
 
                             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm rounded-pill" 
                                     {{ $availableBalance < 100 ? 'disabled' : '' }}>
