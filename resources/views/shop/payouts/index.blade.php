@@ -184,7 +184,7 @@
 
                             <div class="mb-4">
                                 <label class="small fw-bold text-muted mb-1 uppercase">Account Details</label>
-                                <input type="text" name="account_details" class="form-control border rounded-3 py-2" 
+                                <input type="text" name="account_details" value="{{ $shop->phone_number }}" class="form-control border rounded-3 py-2" 
                                        placeholder="Enter mobile wallet number" required>
                             </div>
 

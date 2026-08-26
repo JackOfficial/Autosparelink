@@ -31,8 +31,11 @@ class PayoutController extends Controller
             ->latest()
             ->paginate(15);
 
+        $shop = auth()->user()->shop;    
+
         return view('shop.payouts.index', array_merge($summary, [
-            'payouts' => $payouts
+            'payouts' => $payouts,
+            'shop' => $shop
         ]));
     }
 
