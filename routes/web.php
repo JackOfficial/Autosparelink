@@ -276,10 +276,10 @@ Route::middleware(['auth', 'role:seller'])->prefix('shop')->name('shop.')->group
    Route::patch('/orders/items/{orderItemId}/status', [ShopOrderController::class, 'updateItemStatus'])
         ->name('orders.items.update-status');
 
-    Route::prefix('profile')->name('profile.')->group(function () {
-          Route::get('/edit', [ShopProfileController::class, 'edit'])->name('edit');
-          Route::put('/update', [ShopProfileController::class, 'update'])->name('update');
-    });
+   Route::prefix('profile')->name('profile.')->middleware(['auth'])->group(function () {
+    Route::get('/edit', [ShopProfileController::class, 'edit'])->name('edit');
+    Route::put('/update', [ShopProfileController::class, 'update'])->name('update');
+});
 
     Route::prefix('support')->name('support.')->group(function () {
     Route::get('/', [ShopTicketController::class, 'index'])->name('index');

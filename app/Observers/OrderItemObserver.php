@@ -89,6 +89,11 @@ class OrderItemObserver
             $totalCustomerPaid = $orderItem->unit_price * $orderItem->quantity;
             $adminMarkupRevenue = $totalCustomerPaid - $vendorNetEarnings;
 
+            // FIX: Calculate actual fee percentage dynamically to fit DECIMAL(5,2) column restrictions
+            $calculatedFeePercentage = $vendorNetEarnings > 0 
+                ? round(($adminMarkupRevenue / $vendorNetEarnings) * 100, 2) 
+                : 0;
+
             // 4. Update the order item silently if needed
             // $orderItem->updateQuietly([
             //     'commission_amount' => $adminMarkupRevenue
@@ -102,7 +107,7 @@ class OrderItemObserver
                 'type'           => 'credit',
                 'amount'         => $vendorNetEarnings,
                 'service_fee'    => $adminMarkupRevenue,
-                'fee_percentage' => $orderItem->commission_amount ?? 0, 
+                'fee_percentage' => $calculatedFeePercentage, 
                 'reference_type' => OrderItem::class,
                 'reference_id'   => $orderItem->id,
                 'description'    => "Earnings for: " . ($orderItem->part_name ?? $orderItem->part?->part_name ?? 'Spare Part'),
