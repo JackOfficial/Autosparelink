@@ -104,9 +104,16 @@
                 <i class="fa fa-car mr-1"></i> {{ $descriptiveName }}
             </small>
 
-            <small class="text-muted d-block mb-2">
+            <small class="text-muted d-block mb-1">
                 <i class="fa fa-cog mr-1"></i> {{ $part->part_number }}
             </small>
+
+            {{-- SHOP LOCATION ONLY --}}
+            @if($part->shop?->address)
+                <small class="text-muted d-block mb-2 text-truncate px-2">
+                    <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
+                </small>
+            @endif
 
             @if($part->stock_quantity > 0)
                 <small class="badge {{ $part->stock_quantity < 5 ? 'badge-warning' : 'badge-light text-success' }} mb-2">
