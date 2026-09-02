@@ -104,22 +104,8 @@
                 <i class="fa fa-car mr-1"></i> {{ $descriptiveName }}
             </small>
 
-            <small class="text-muted d-block mb-1">
+            <small class="text-muted d-block mb-2">
                 <i class="fa fa-cog mr-1"></i> {{ $part->part_number }}
-            </small>
-
-            {{-- SHOP INFO SECTION --}}
-            <small class="text-muted d-block mb-2 text-truncate px-2">
-                <i class="fa fa-store mr-1 text-primary d-none"></i> 
-                <span class="font-weight-bold text-dark d-none">
-                    <a href="{{ route('shops.show', $part->shop_id) }}" class="font-weight-bold text-dark hover-underline">
-                        {{ $part->shop->shop_name ?? 'Shop' }}
-                    </a>
-                </span> 
-                @if($part->shop?->address)
-                    <span class="mx-1 d-none">|</span>
-                    <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
-                @endif
             </small>
 
             @if($part->stock_quantity > 0)
