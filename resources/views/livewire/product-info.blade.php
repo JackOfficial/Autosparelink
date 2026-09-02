@@ -43,10 +43,10 @@
     {{-- SHOP INFO --}}
     <div class="shop-detail-row mb-4 mt-2">
         <small class="text-muted">
-            <i class="fa fa-store mr-1 text-primary"></i> 
-            <span class="font-weight-bold text-dark">{{ $part->shop->shop_name ?? 'Official Store' }}</span>
+            <i class="fa fa-store mr-1 text-primary d-none"></i> 
+            <span class="font-weight-bold text-dark d-none">{{ $part->shop->shop_name ?? 'Official Store' }}</span>
             @if($part->shop?->address)
-                <span class="mx-2 text-light-gray">|</span>
+                <span class="mx-2 text-light-gray d-none">|</span>
                 <i class="fa fa-map-marker-alt mr-1 text-danger"></i> {{ $part->shop->address }}
             @endif
         </small>
