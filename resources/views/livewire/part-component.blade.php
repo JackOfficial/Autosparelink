@@ -110,7 +110,7 @@
 
             {{-- SHOP INFO SECTION --}}
             <small class="text-muted d-block mb-2 text-truncate px-2">
-                <i class="fa fa-store mr-1 text-primary"></i> 
+                <i class="fa fa-store mr-1 text-primary d-none"></i> 
                 <span class="font-weight-bold text-dark d-none">
                     <a href="{{ route('shops.show', $part->shop_id) }}" class="font-weight-bold text-dark hover-underline">
                         {{ $part->shop->shop_name ?? 'Shop' }}
