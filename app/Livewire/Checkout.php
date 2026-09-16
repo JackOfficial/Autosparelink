@@ -101,27 +101,46 @@ class Checkout extends Component
             return 0;
         }
 
-        $totalShipping = 0;
-        $validItemCount = 0;
-        $fallbackFee = (strtolower(trim($city)) === 'kigali') ? 3000 : 5000;
+        $cityClean = strtolower(trim($city));
+        $fallbackFee = ($cityClean === 'kigali') ? 3000 : 5000;
 
         $itemIds = $cartItems->pluck('id')->toArray();
         $parts = Part::with('category')->whereIn('id', $itemIds)->get()->keyBy('id');
+
+        $fees = [];
 
         foreach ($cartItems as $item) {
             $part = $parts->get($item->id);
 
             if ($part) {
                 if ($part->category && $part->category->shipping_price > 0) {
-                    $totalShipping += $part->category->shipping_price;
+                    $fees[] = (float) $part->category->shipping_price;
                 } else {
-                    $totalShipping += $fallbackFee;
+                    $fees[] = (float) $fallbackFee;
                 }
-                $validItemCount++;
+            } else {
+                $fees[] = (float) $fallbackFee;
             }
         }
 
-        return $validItemCount > 0 ? ($totalShipping / $validItemCount) : $fallbackFee;
+        if (empty($fees)) {
+            return $fallbackFee;
+        }
+
+        // 1. Highest fee wins
+        $highestFee = max($fees);
+
+        // 2. Count extra items (total items minus the first one)
+        $extraItemsCount = count($fees) - 1;
+
+        if ($extraItemsCount <= 0) {
+            return round($highestFee);
+        }
+
+        // 3. Add flat addition for each extra item (500 RWF)
+        $flatAddition = 500 * $extraItemsCount;
+
+        return round($highestFee + $flatAddition);
     }
 
     private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
@@ -130,17 +149,17 @@ class Checkout extends Component
 
         // 1. Create the base Order record
         $order = Order::create([
-            'user_id'                => Auth::id(),
-            'address_id'             => $finalAddressId,
-            'total_amount'           => $totalOrderAmount,
-            'net_total_amount'       => 0, 
-            'delivery_price'         => $shippingFee, 
-            'status'                 => $orderStatus,
-            'order_number'           => $localTransactionId, 
-            'is_guest'               => !Auth::check(),
-            'guest_name'             => !Auth::check() ? $this->new_address['full_name'] : null,
-            'guest_email'            => $this->guest_email,
-            'guest_phone'            => $this->new_address['phone'],
+            'user_id'                  => Auth::id(),
+            'address_id'               => $finalAddressId,
+            'total_amount'             => $totalOrderAmount,
+            'net_total_amount'         => 0, 
+            'delivery_price'           => $shippingFee, 
+            'status'                   => $orderStatus,
+            'order_number'             => $localTransactionId, 
+            'is_guest'                 => !Auth::check(),
+            'guest_name'               => !Auth::check() ? $this->new_address['full_name'] : null,
+            'guest_email'              => $this->guest_email,
+            'guest_phone'              => $this->new_address['phone'],
             'guest_shipping_address' => !Auth::check() 
                 ? ($this->new_address['street_address'] . ', ' . $city . ', ' . $this->new_address['country']) 
                 : null,
@@ -170,7 +189,7 @@ class Checkout extends Component
                     'shop_id'           => $part->shop_id,
                     'part_name'         => $item->name,
                     'quantity'          => $item->qty,
-                    'unit_price'        => $unitPublicPrice,     
+                    'unit_price'        => $unitPublicPrice,    
                     'shop_payout'       => $unitShopPayout,      
                     'commission_amount' => $itemCommissionAmount, 
                     'status'            => 'pending',
