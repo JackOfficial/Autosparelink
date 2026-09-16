@@ -159,37 +159,52 @@ class CartPage extends Component
     }
 
     /**
-     * Dynamic shipping core calculator synced directly with Checkout calculations
+     * Dynamic shipping calculation: Highest Fee Wins + 500 RWF flat addition per extra item
      */
-    private function calculateAverageShippingPrice($city)
+    private function calculateShippingPrice($city)
     {
         $cartItems = Cart::instance(self::DEFAULT_CART)->content();
         if ($cartItems->isEmpty()) {
             return 0;
         }
 
-        $totalShipping = 0;
-        $validItemCount = 0;
         $fallbackFee = (strtolower(trim($city)) === 'kigali') ? 3000 : 5000;
 
         // Optimized single trip query using category relations
         $itemIds = $cartItems->pluck('id')->toArray();
         $parts = Part::with('category')->whereIn('id', $itemIds)->get()->keyBy('id');
 
+        $fees = [];
+
         foreach ($cartItems as $item) {
             $part = $parts->get($item->id);
 
-            if ($part) {
-                if ($part->category && $part->category->shipping_price > 0) {
-                    $totalShipping += $part->category->shipping_price;
-                } else {
-                    $totalShipping += $fallbackFee;
-                }
-                $validItemCount++;
+            if ($part && $part->category && $part->category->shipping_price > 0) {
+                $fees[] = $part->category->shipping_price;
+            } else {
+                $fees[] = $fallbackFee;
             }
         }
 
-        return $validItemCount > 0 ? ($totalShipping / $validItemCount) : $fallbackFee;
+        if (empty($fees)) {
+            return $fallbackFee;
+        }
+
+        // 1. Find the highest delivery fee in the cart
+        $highestFee = max($fees);
+
+        // 2. Count extra items (total items minus the first item that set the base fee)
+        $extraItemsCount = count($fees) - 1;
+
+        if ($extraItemsCount <= 0) {
+            return $highestFee;
+        }
+
+        // 3. Add 500 RWF flat addition for each extra item
+        $flatAdditionPerExtraItem = 500;
+        $totalFlatAddition = $flatAdditionPerExtraItem * $extraItemsCount;
+
+        return $highestFee + $totalFlatAddition;
     }
 
     public function render()
@@ -200,7 +215,7 @@ class CartPage extends Component
         $city = Cookie::get('guest_city') ?? 'Kigali';
         
         $subtotal = (float) $cart->subtotal(2, '.', '');
-        $this->shippingFee = $this->calculateAverageShippingPrice($city);
+        $this->shippingFee = $this->calculateShippingPrice($city);
         $this->totalWithShipping = $subtotal + $this->shippingFee;
 
         return view('livewire.cart-page', [

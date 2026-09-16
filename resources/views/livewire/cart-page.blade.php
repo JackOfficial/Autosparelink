@@ -125,7 +125,10 @@
                             <span class="font-weight-bold">{{ number_format((float)$subTotal, 0) }} RWF</span>
                         </div>
                         <div class="d-flex justify-content-between mb-3">
-                            <span class="text-muted">Est. Shipping</span>
+                            <div>
+                                <span class="text-muted">Est. Shipping</span>
+                                <i class="fas fa-info-circle text-muted small ml-1" title="Highest category delivery fee + 500 RWF per extra item"></i>
+                            </div>
                             <span class="text-dark font-weight-bold">{{ number_format((float)$shippingFee, 0) }} RWF</span>
                         </div>
 
@@ -156,25 +159,24 @@
         </div>
     </div>
 
-<script>
-    function confirmClearCart() {
-        Swal.fire({
-            title: 'Empty entire cart?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, clear it!',
-            cancelButtonText: 'Cancel',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Use @this to ensure the call reaches this specific component
-                @this.clearCart(); 
-            }
-        })
-    }
-</script>
-
+    <script>
+        function confirmClearCart() {
+            Swal.fire({
+                title: 'Empty entire cart?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, clear it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Use @this to ensure the call reaches this specific component
+                    @this.clearCart(); 
+                }
+            })
+        }
+    </script>
 </div>
