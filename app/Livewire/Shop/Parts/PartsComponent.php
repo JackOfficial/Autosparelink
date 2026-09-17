@@ -59,6 +59,7 @@ class PartsComponent extends Component
     public function save()
     {
         $this->validate([
+            'part_number' => 'required|unique:parts,part_number',
             'part_name' => 'required|min:3',
             'category_id' => 'required',
             'part_brand_id' => 'required',

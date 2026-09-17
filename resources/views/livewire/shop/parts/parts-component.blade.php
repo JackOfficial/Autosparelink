@@ -84,7 +84,7 @@
                                 <label class="form-label small fw-bold">Part Number (Internal)</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0"><i class="fas fa-hashtag text-muted"></i></span>
-                                    <input type="text" class="form-control @error('part_number') is-invalid @enderror border-start-0" placeholder="SKU-XXXX" wire:model="part_number">
+                                    <input type="text" class="form-control @error('part_number') is-invalid @enderror border-start-0" placeholder="SKU-XXXX" wire:model="part_number" required>
                                     @error('part_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
