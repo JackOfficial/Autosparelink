@@ -13,7 +13,7 @@
             <span class="fw-bold fs-6 text-dark logo-text">
                 {{ $shop->shop_name ?? 'Vendor Panel' }}
             </span>
-        </a>.
+        </a>
     </div>
 
 {{-- Wallet Sidebar Component - Updated with Audited Stats --}}
