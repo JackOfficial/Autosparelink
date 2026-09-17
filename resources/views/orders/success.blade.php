@@ -17,9 +17,9 @@
                         </div>
                         <h3 class="font-weight-bold text-warning-dark mb-1">Waiting for Payment...</h3>
                         <p class="mb-0 text-muted px-lg-5">
-                            We have sent a Mobile Money payment prompt (push notification) to your phone {{ Auth::user()->addresses->phone ?? Cookie::get('guest_phone') ?? ''}} 
-                            Please check your screen, enter your **PIN**, and confirm the transaction.
-                        </p>
+    We have sent a Mobile Money payment prompt (push notification) to your phone {{ Auth::user()->addresses->first()?->phone ?? Cookie::get('guest_phone') ?? '' }} 
+    Please check your screen, enter your **PIN**, and confirm the transaction.
+</p>
                     </div>
                 </div>
 
