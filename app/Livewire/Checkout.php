@@ -37,7 +37,7 @@ class Checkout extends Component
 
         $this->new_address = [
             'full_name'      => Auth::check() ? Auth::user()->name : ($saved_name ?? ''),
-            'phone'          => Auth::check() ? (Auth::user()->phone ?? '') : ($saved_phone ?? ''),
+            'phone'          => Auth::check() ? (Auth::user()->addresses->phone ?? '') : ($saved_phone ?? ''),
             'street_address' => $saved_street ?? '',
             'city'           => $saved_city ?? '',
             'state'          => '',
@@ -217,10 +217,10 @@ class Checkout extends Component
                 $dbAddress = Address::find($finalAddressId);
                 if ($dbAddress) {
                     $compiledAddressText = $dbAddress->street_address . ', ' . $dbAddress->city . ', ' . $dbAddress->country;
-                    $recipientPhone = $dbAddress->phone ?? Auth::user()->phone;
+                    $recipientPhone = $dbAddress->phone ?? Auth::user()->addresses->phone ?? '';
                 }
             } else {
-                $recipientPhone = Auth::user()->phone;
+                $recipientPhone = Auth::user()->addresses->phone ?? '';
             }
         }
 
