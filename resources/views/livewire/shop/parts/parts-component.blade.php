@@ -46,6 +46,23 @@
     </style>
 
     <form wire:submit.prevent="save">
+
+        {{-- Global Validation Errors Alert --}}
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-exclamation-triangle me-2 fs-5"></i>
+                    <strong class="fs-6">Please correct the following errors before submitting:</strong>
+                </div>
+                <ul class="mb-0 ps-3">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <div class="row g-4">
             {{-- Left Column: Primary Data --}}
             <div class="col-lg-7">
@@ -78,73 +95,73 @@
                                 @error('oem_number') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
 
-                           <div class="col-md-6">
-    <label class="form-label small fw-bold">Category</label>
-    <select class="form-select" wire:model.live="parentCategoryId">
-        <option value="">-- Select Category --</option>
-        @foreach($parentCategories as $parent)
-            <option value="{{ $parent->id }}">{{ $parent->category_name }}</option>
-        @endforeach
-    </select>
-</div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Category</label>
+                                <select class="form-select" wire:model.live="parentCategoryId">
+                                    <option value="">-- Select Category --</option>
+                                    @foreach($parentCategories as $parent)
+                                        <option value="{{ $parent->id }}">{{ $parent->category_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-<div class="col-md-6">
-    <label class="form-label small fw-bold">Subcategory <span class="text-danger">*</span></label>
-    {{-- The 'disabled' attribute prevents selection until parentCategoryId is set --}}
-    <select class="form-select @error('category_id') is-invalid @enderror" 
-            wire:model="category_id" 
-            {{ !$parentCategoryId ? 'disabled' : '' }}>
-        <option value="">
-            {{ !$parentCategoryId ? '-- Select Parent First --' : '-- Select Child --' }}
-        </option>
-        @foreach($childCategories as $child)
-            <option value="{{ $child->id }}">{{ $child->category_name }}</option>
-        @endforeach
-    </select>
-    @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-</div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Subcategory <span class="text-danger">*</span></label>
+                                <select class="form-select @error('category_id') is-invalid @enderror" 
+                                        wire:model="category_id" 
+                                        {{ !$parentCategoryId ? 'disabled' : '' }}>
+                                    <option value="">
+                                        {{ !$parentCategoryId ? '-- Select Parent First --' : '-- Select Child --' }}
+                                    </option>
+                                    @foreach($childCategories as $child)
+                                        <option value="{{ $child->id }}">{{ $child->category_name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
 
                             <div class="col-md-6">
                                 <div class="row g-3">
-    <div class="col-md-6">
-        <label class="form-label small fw-bold">Part Brand <span class="text-danger">*</span></label>
-        <select class="form-select @error('part_brand_id') is-invalid @enderror" wire:model="part_brand_id">
-            <option value="">-- Select Brand --</option>
-            @foreach($brands as $brand)
-                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-            @endforeach
-        </select>
-        @error('part_brand_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Part Brand <span class="text-danger">*</span></label>
+                                        <select class="form-select @error('part_brand_id') is-invalid @enderror" wire:model="part_brand_id">
+                                            <option value="">-- Select Brand --</option>
+                                            @foreach($brands as $brand)
+                                                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('part_brand_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
 
-    {{-- Added Part State --}}
-    <div class="col-md-6">
-        <label class="form-label small fw-bold">Condition / State <span class="text-danger">*</span></label>
-        <select class="form-select @error('part_state_id') is-invalid @enderror" wire:model="part_state_id">
-            <option value="">-- Select Condition --</option>
-            @foreach($states as $state)
-                <option value="{{ $state->id }}">{{ $state->name }}</option>
-            @endforeach
-        </select>
-        @error('part_state_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-    </div>
-</div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Condition / State <span class="text-danger">*</span></label>
+                                        <select class="form-select @error('part_state_id') is-invalid @enderror" wire:model="part_state_id">
+                                            <option value="">-- Select Condition --</option>
+                                            @foreach($states as $state)
+                                                <option value="{{ $state->id }}">{{ $state->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('part_state_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="col-md-3">
                                 <label class="form-label small fw-bold">Price (RWF)</label>
-                                <input type="number" class="form-control" wire:model="price">
+                                <input type="number" class="form-control @error('price') is-invalid @enderror" wire:model="price">
+                                @error('price') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label small fw-bold">Stock</label>
-                                <input type="number" class="form-control" wire:model="stock_quantity">
+                                <input type="number" class="form-control @error('stock_quantity') is-invalid @enderror" wire:model="stock_quantity">
+                                @error('stock_quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="col-12 mb-0">
                                 <label class="form-label small fw-bold">Description / Technical Notes</label>
-                                <textarea class="form-control" wire:model="description" rows="4" 
+                                <textarea class="form-control @error('description') is-invalid @enderror" wire:model="description" rows="4" 
                                     placeholder="Add dimensions, materials, or special notes..."></textarea>
-                                @error('description') <small class="text-danger">{{ $message }}</small> @enderror
+                                @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
                     </div>
@@ -248,7 +265,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4" x-data="{ previews: [] }">
                         <label class="form-label small fw-bold mb-2">Part Gallery</label>
-                        <input type="file" multiple wire:model="photos" class="form-control form-control-sm" id="partPhotos"
+                        <input type="file" multiple wire:model="photos" class="form-control form-control-sm @error('photos.*') is-invalid @enderror" id="partPhotos"
                                @change="previews = []; [...$event.target.files].forEach(file => { let reader = new FileReader(); reader.onload = e => previews.push(e.target.result); reader.readAsDataURL(file); })">
                         
                         <div class="d-flex flex-wrap gap-2 mt-3">
@@ -256,7 +273,7 @@
                                 <img :src="img" class="preview-img border shadow-sm">
                             </template>
                         </div>
-                        @error('photos.*') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
+                        @error('photos.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                 </div>
 
