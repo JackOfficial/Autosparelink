@@ -3,7 +3,7 @@
         <a href="/" class="d-flex align-items-center text-decoration-none">
             @if($shop && $shop->logo)
                 <img src="{{ asset('storage/' . $shop->logo) }}" 
-                     alt="{{ $shop->name }}" 
+                     alt="{{ $shop->shop_name }}" 
                      class="rounded-circle me-2" 
                      style="width: 32px; height: 32px; object-fit: cover;">
             @else
@@ -11,9 +11,9 @@
             @endif
 
             <span class="fw-bold fs-6 text-dark logo-text">
-                {{ $shop->name ?? 'Vendor Panel' }}
+                {{ $shop->shop_name ?? 'Vendor Panel' }}
             </span>
-        </a>
+        </a>.
     </div>
 
 {{-- Wallet Sidebar Component - Updated with Audited Stats --}}
