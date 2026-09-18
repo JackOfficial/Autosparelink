@@ -19,7 +19,7 @@
                         <p class="mb-0 text-muted px-lg-5">
     We have sent a Mobile Money payment prompt (push notification) to your phone {{ Auth::user()->addresses->first()?->phone ?? Cookie::get('guest_phone') ?? '' }} 
     Please check your screen, enter your **PIN**, and confirm the transaction.
-</p>
+    </p>
                     </div>
                 </div>
 
