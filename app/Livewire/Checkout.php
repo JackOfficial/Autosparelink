@@ -20,6 +20,8 @@ class Checkout extends Component
 
     public function mount()
     {
+        Log::info('[Checkout Mounted] User ID: ' . (Auth::id() ?? 'Guest'));
+
         $this->addresses = Auth::check() ? Auth::user()->addresses()->get() : collect();
 
         $saved_email   = Cookie::get('guest_email');
@@ -57,15 +59,32 @@ class Checkout extends Component
         $shippingFee = $this->calculateAverageShippingPrice($city);
         $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
         $this->total = $subtotal + $shippingFee;
+
+        Log::info('[Checkout Initialized]', [
+            'use_new_address' => $this->use_new_address,
+            'address_id' => $this->address_id,
+            'city' => $city,
+            'subtotal' => $subtotal,
+            'shipping_fee' => $shippingFee,
+            'total' => $this->total
+        ]);
     }
 
     public function updated($propertyName)
     {
+        Log::info("[Checkout Updated] Property changed: {$propertyName}");
+
         if (in_array($propertyName, ['address_id', 'use_new_address', 'new_address.city'])) {
             $city = $this->getCurrentCity();
             $shippingFee = $this->calculateAverageShippingPrice($city);
             $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
             $this->total = $subtotal + $shippingFee;
+
+            Log::info('[Checkout Re-calculated]', [
+                'city' => $city,
+                'shipping_fee' => $shippingFee,
+                'total' => $this->total
+            ]);
         }
     }
 
@@ -91,6 +110,12 @@ class Checkout extends Component
             Cookie::queue('guest_address', $this->new_address['street_address'], $duration);
             Cookie::queue('guest_city', $this->new_address['city'], $duration);
             Cookie::queue('guest_postal_code', $this->new_address['postal_code'] ?? '', $duration);
+
+            Log::info('[Guest Cookies Saved]', [
+                'guest_email' => $this->guest_email,
+                'guest_name' => $this->new_address['full_name'],
+                'guest_city' => $this->new_address['city']
+            ]);
         }
     }
 
@@ -98,6 +123,7 @@ class Checkout extends Component
     {
         $cartItems = Cart::instance('default')->content();
         if ($cartItems->isEmpty()) {
+            Log::warning('[Shipping Calculation] Cart is empty during shipping calculation.');
             return 0;
         }
 
@@ -119,6 +145,7 @@ class Checkout extends Component
                     $fees[] = (float) $fallbackFee;
                 }
             } else {
+                Log::warning("[Shipping Calculation] Part ID {$item->id} not found in database.");
                 $fees[] = (float) $fallbackFee;
             }
         }
@@ -139,31 +166,53 @@ class Checkout extends Component
 
         // 3. Add flat addition for each extra item (500 RWF)
         $flatAddition = 500 * $extraItemsCount;
+        $calculatedShipping = round($highestFee + $flatAddition);
 
-        return round($highestFee + $flatAddition);
+        Log::info('[Shipping Calculated]', [
+            'city' => $city,
+            'city_clean' => $cityClean,
+            'item_count' => count($fees),
+            'highest_fee' => $highestFee,
+            'flat_addition' => $flatAddition,
+            'final_shipping' => $calculatedShipping
+        ]);
+
+        return $calculatedShipping;
     }
 
     private function createOrder($finalAddressId, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city)
     {
+        Log::info('[Create Order Initiated]', [
+            'user_id' => Auth::id(),
+            'final_address_id' => $finalAddressId,
+            'total_amount' => $totalOrderAmount,
+            'shipping_fee' => $shippingFee,
+            'order_status' => $orderStatus,
+            'order_number' => $localTransactionId,
+            'city' => $city
+        ]);
+
         $cartItems = Cart::instance('default')->content();
 
         // 1. Create the base Order record
         $order = Order::create([
-            'user_id'                  => Auth::id(),
-            'address_id'               => $finalAddressId,
-            'total_amount'             => $totalOrderAmount,
-            'net_total_amount'         => 0, 
-            'delivery_price'           => $shippingFee, 
-            'status'                   => $orderStatus,
-            'order_number'             => $localTransactionId, 
-            'is_guest'                 => !Auth::check(),
-            'guest_name'               => !Auth::check() ? $this->new_address['full_name'] : null,
-            'guest_email'              => $this->guest_email,
-            'guest_phone'              => $this->new_address['phone'],
+            'user_id'                 => Auth::id(),
+            'address_id'              => $finalAddressId,
+            'total_amount'            => $totalOrderAmount,
+            'net_total_amount'        => 0, 
+            'delivery_price'          => $shippingFee, 
+            'status'                  => $orderStatus,
+            'order_number'            => $localTransactionId, 
+            'is_guest'                => !Auth::check(),
+            'guest_name'              => !Auth::check() ? $this->new_address['full_name'] : null,
+            'guest_email'             => $this->guest_email,
+            'guest_phone'             => $this->new_address['phone'],
             'guest_shipping_address' => !Auth::check() 
                 ? ($this->new_address['street_address'] . ', ' . $city . ', ' . $this->new_address['country']) 
                 : null,
         ]);
+
+        Log::info("[Order Base Record Created] Order ID: {$order->id}");
 
         $itemIds = $cartItems->pluck('id')->toArray();
         $parts = Part::whereIn('id', $itemIds)->get()->keyBy('id');
@@ -183,7 +232,7 @@ class Checkout extends Component
 
                 $totalNetShopPayout += $itemTotalShopPayout;
 
-                OrderItem::create([
+                $orderItem = OrderItem::create([
                     'order_id'          => $order->id,
                     'part_id'           => $item->id,
                     'shop_id'           => $part->shop_id,
@@ -194,6 +243,17 @@ class Checkout extends Component
                     'commission_amount' => $itemCommissionAmount, 
                     'status'            => 'pending',
                 ]);
+
+                Log::info("[OrderItem Created] Item ID: {$orderItem->id}", [
+                    'part_id' => $item->id,
+                    'shop_id' => $part->shop_id,
+                    'quantity' => $item->qty,
+                    'unit_price' => $unitPublicPrice,
+                    'shop_payout' => $unitShopPayout,
+                    'commission' => $itemCommissionAmount
+                ]);
+            } else {
+                Log::error("[OrderItem Skipped] Part ID {$item->id} missing from database when creating order items.");
             }
         }
 
@@ -201,6 +261,8 @@ class Checkout extends Component
         $order->update([
             'net_total_amount' => $totalNetShopPayout
         ]);
+
+        Log::info("[Order Payout Snapshot Updated] Order ID: {$order->id}, Net Payout: {$totalNetShopPayout}");
 
         // 4. Generate metadata for the single shipping package snapshot
         $compiledAddressText = '';
@@ -225,7 +287,7 @@ class Checkout extends Component
         }
 
         // Fix: Removed vendor loop. Create exactly one package managed by the platform hub.
-        Shipping::create([
+        $shipping = Shipping::create([
             'order_id'        => $order->id,
             'shop_id'         => null, // System package
             'address_id'      => Auth::check() ? $finalAddressId : null,
@@ -239,14 +301,28 @@ class Checkout extends Component
             'recipient_phone' => $recipientPhone,
         ]);
 
+        Log::info("[Shipping Package Created] Shipping ID: {$shipping->id}", [
+            'order_id' => $order->id,
+            'recipient' => $recipientName,
+            'phone' => $recipientPhone,
+            'cost' => $shippingFee
+        ]);
+
         return $order;
     }
 
     public function placeOrder(InTouchPaymentService $inTouch)
     {
+        Log::info('[Place Order Attempt Initiated]', [
+            'payment_method' => $this->payment_method,
+            'is_authenticated' => Auth::check(),
+            'guest_email' => $this->guest_email
+        ]);
+
         $cartItems = Cart::instance('default')->content();
 
         if ($cartItems->isEmpty()) {
+            Log::warning('[Place Order Aborted] Cart is empty.');
             $this->dispatch('notify', message: 'Your cart is empty!');
             return;
         }
@@ -265,11 +341,13 @@ class Checkout extends Component
                 'new_address.country'        => 'required|string|max:100',
             ]);
         } elseif (!$this->address_id) {
+            Log::warning('[Place Order Aborted] No delivery address selected.');
             $this->dispatch('notify', message: 'Please select a delivery address.');
             return;
         }
 
         $this->validate($rules);
+        Log::info('[Place Order Validation Passed]');
 
         DB::beginTransaction();
         try {
@@ -292,6 +370,7 @@ class Checkout extends Component
                     $address = Address::create(array_merge($this->new_address, ['user_id' => Auth::id()]));
                     $final_address_id = $address->id;
                     $this->addresses = Auth::user()->addresses()->get();
+                    Log::info("[New Address Created] Address ID: {$address->id}");
                 }
             }
 
@@ -306,12 +385,22 @@ class Checkout extends Component
             
             $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, $orderStatus, $localTransactionId, $city);
         
+            Log::info('[InTouch Payment Requesting]', [
+                'phone' => $paymentPhone,
+                'amount' => $payableNow,
+                'transaction_id' => $localTransactionId
+            ]);
+
             $response = $inTouch->requestPayment($paymentPhone, $payableNow, $localTransactionId);
             
+            Log::info('[InTouch Payment Response Received]', ['response' => $response]);
+
             if ($response && isset($response['success']) && $response['success'] == true) {
                 $order->update(['transaction_id' => $response['transactionid'] ?? null]);
 
                 DB::commit();
+                Log::info("[Order Successful & Transaction Committed] Order ID: {$order->id}");
+
                 $this->saveGuestCookies();
                 Cart::instance('default')->destroy();
 
@@ -331,14 +420,23 @@ class Checkout extends Component
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Checkout API Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
             dd($e->getMessage(), $e->getFile(), $e->getLine());
-            Log::error('Checkout API Error: ' . $e->getMessage());
             $this->dispatch('notify', message: 'Payment Error: ' . $e->getMessage());
         }
     }
 
     public function requestCallback() 
     {
+        Log::info('[Request Callback Initiated]', [
+            'is_authenticated' => Auth::check(),
+            'guest_email' => $this->guest_email
+        ]);
+
         $rules = [
             'guest_email' => Auth::check() ? 'nullable|email' : 'required|email',
         ];
@@ -352,6 +450,7 @@ class Checkout extends Component
                 'new_address.country'        => 'required|string|max:100',
             ]);
         } elseif (!$this->address_id) {
+            Log::warning('[Request Callback Aborted] No address selected.');
             $this->dispatch('notify', message: 'Please select an address.');
             return;
         }
@@ -359,6 +458,7 @@ class Checkout extends Component
 
         $cartItems = Cart::instance('default')->content();
         if ($cartItems->isEmpty()) {
+            Log::warning('[Request Callback Aborted] Cart is empty.');
             $this->dispatch('notify', message: 'Your cart is empty!');
             return;
         }
@@ -375,6 +475,7 @@ class Checkout extends Component
                     ]));
                     $final_address_id = $address->id;
                     $this->addresses = Auth::user()->addresses()->get();
+                    Log::info("[Callback New Address Created] Address ID: {$address->id}");
                 } else {
                     $final_address_id = $this->address_id;
                 }
@@ -388,6 +489,8 @@ class Checkout extends Component
             $order = $this->createOrder($final_address_id, $totalOrderAmount, $shippingFee, 'callback_requested', $localTransactionId, $city);
 
             DB::commit();
+            Log::info("[Callback Order Committed] Order ID: {$order->id}");
+
             $this->saveGuestCookies();
             Cart::instance('default')->destroy();
 
@@ -397,12 +500,18 @@ class Checkout extends Component
 
             try {
                 Mail::to('musengimanajacques@gmail.com')->send(new OrderCallbackAdmin($order));
+                Log::info("[Admin Callback Email Sent] Order ID: {$order->id}");
+
                 $targetEmail = Auth::check() ? Auth::user()->email : $this->guest_email;
                 if ($targetEmail) {
                     Mail::to($targetEmail)->send(new OrderCallbackClient($order));
+                    Log::info("[Client Callback Email Sent] Recipient: {$targetEmail}");
                 }
             } catch (\Exception $e) {
-                Log::error('Callback Email Failed: ' . $e->getMessage());
+                Log::error('Callback Email Failed: ' . $e->getMessage(), [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]);
             }
 
             return redirect()->route('order.success', ['order' => $order->id])
@@ -410,7 +519,11 @@ class Checkout extends Component
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Order Callback Failed: ' . $e->getMessage());
+            Log::error('Order Callback Failed: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
             $this->dispatch('notify', message: 'Something went wrong.');
         }
     }
