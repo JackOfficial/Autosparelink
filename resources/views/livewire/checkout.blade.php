@@ -266,7 +266,7 @@
                                         @if($payment_method === 'cod')
                                             Pay Shipping Fee: {{ number_format($shippingFee, 0) }} RWF
                                         @else
-                                            Pay {{ number_format($subtotal + $shippingFee, 0) }} RWF
+                                            Pay {{ $subtotal + $shippingFee }} RWF
                                         @endif
                                     </span>
                                     <span wire:loading wire:target="placeOrder">
