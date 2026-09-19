@@ -376,9 +376,9 @@ class Checkout extends Component
 
             $shippingFee = $this->calculateAverageShippingPrice($city);
             $subtotal = (float) Cart::instance('default')->subtotal(2, '.', '');
-            $totalOrderAmount = $subtotal + $shippingFee;
 
-            $payableNow = ($this->payment_method === 'cod') ? $shippingFee : $totalOrderAmount;
+            $totalOrderAmount = (int) ceil($subtotal + $shippingFee); 
+            $payableNow = ($this->payment_method === 'cod') ? (int) ceil($shippingFee) : $totalOrderAmount;
             $orderStatus = 'pending';
 
             $localTransactionId = 'AST-' . strtoupper(Str::random(10));
