@@ -268,7 +268,7 @@
                                         @else
                                             Pay {{ number_format($subtotal + $shippingFee, 0) }} RWF
                                         @endif
-                                    </span>
+                                    </span>                              
                                     <span wire:loading wire:target="placeOrder">
                                         <i class="fa fa-circle-notch fa-spin mr-2"></i>Processing...
                                     </span>

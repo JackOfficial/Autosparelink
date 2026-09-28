@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\{DB, Auth, Log};
 class PayoutController extends Controller
 {
     protected $intouchService;
+    protected const WITHDRAWAL_FEE = 300; // Fixed fee in RWF
 
     public function __construct(InTouchPaymentService $intouchService)
     {
@@ -51,22 +52,27 @@ class PayoutController extends Controller
         $payout = null;
         $walletTransaction = null;
 
+        $requestedAmount = (float) $request->amount;
+        $fee = self::WITHDRAWAL_FEE;
+        $totalDeduction = $requestedAmount + $fee;
+
         // PHASE 1: Validate, Lock Wallet Row, and Create Completed Ledger Records
         DB::beginTransaction();
         try {
             // lockForUpdate prevents concurrent requests from reading old balances
             $wallet = $shop->wallet()->lockForUpdate()->firstOrFail();
             
-            if ($request->amount > $wallet->balance) {
+            // Validate balance against requested amount + 300 RWF fee
+            if ($totalDeduction > $wallet->balance) {
                 DB::rollBack();
-                return back()->with('error', 'Insufficient balance. Available balance: ' . number_format($wallet->balance) . ' RWF.');
+                return back()->with('error', 'Insufficient balance. You need ' . number_format($totalDeduction) . ' RWF (including ' . number_format($fee) . ' RWF service fee). Available balance: ' . number_format($wallet->balance) . ' RWF.');
             }
 
             $referenceId = 'WD-' . strtoupper(bin2hex(random_bytes(4))) . '-' . time();
 
-            // 1. Log the payout request structure as completed immediately
+            // 1. Log the payout record (net amount requested by seller)
             $payout = $shop->payouts()->create([
-                'amount'          => $request->amount,
+                'amount'          => $requestedAmount,
                 'payout_method'   => $request->payout_method,
                 'account_details' => $request->account_details,
                 'status'          => 'completed', 
@@ -74,15 +80,15 @@ class PayoutController extends Controller
                 'reference'       => $referenceId,
             ]);
 
-            // 2. Created as completed -> triggers the model event to instantly decrement real balance
+            // 2. Created as completed -> model event decrements totalDeduction ($requestedAmount + $fee) from balance
             $walletTransaction = $wallet->transactions()->create([
                 'type'           => 'debit',
-                'amount'         => $request->amount,
-                'service_fee'    => 0,
+                'amount'         => $totalDeduction,
+                'service_fee'    => $fee,
                 'fee_percentage' => 0,
                 'reference_type' => Payout::class,
                 'reference_id'   => $payout->id,
-                'description'    => "Withdrawal via {$request->payout_method} to {$request->account_details}",
+                'description'    => "Withdrawal of " . number_format($requestedAmount) . " RWF via {$request->payout_method} to {$request->account_details} (Fee: {$fee} RWF)",
                 'status'         => 'completed',
             ]);
 
@@ -93,11 +99,11 @@ class PayoutController extends Controller
             return back()->with('error', 'Could not process withdrawal request. Please retry.');
         }
 
-        // PHASE 2: External Gateway API Call (Safe from DB Transaction lockups)
+        // PHASE 2: External Gateway API Call (Transfer ONLY the net requested amount to vendor)
         try {
             $response = $this->intouchService->requestDeposit(
                 $request->account_details,
-                $request->amount,
+                $requestedAmount,
                 $payout->reference,
                 "Withdrawal for " . $shop->shop_name 
             );
@@ -114,7 +120,7 @@ class PayoutController extends Controller
                 ]);
 
                 return redirect()->route('shop.payouts.index')
-                    ->with('success', 'Withdrawal processed successfully! The funds have been transferred to your mobile money account.');
+                    ->with('success', 'Withdrawal processed successfully! ' . number_format($requestedAmount) . ' RWF has been transferred to your account.');
             }
 
             // Gateway rejected it immediately -> throw exception to handle atomic reversal
@@ -129,16 +135,16 @@ class PayoutController extends Controller
                 'error_log' => $e->getMessage()
             ]);
 
-            // Refund the wallet balance directly since it was already deducted during Phase 1
+            // Refund full deducted amount ($requestedAmount + $fee) back to active balance
             DB::transaction(function () use ($walletTransaction, $shop) {
                 $walletTransaction->update(['status' => 'failed']);
                 
-                // Manually increment active balance back since the model event was skipped
+                // Increment active balance back by full transaction amount (includes fee)
                 $shop->wallet()->increment('balance', $walletTransaction->amount);
             });
 
             return redirect()->route('shop.payouts.index')
-                ->with('error', 'Payment transfer failed: ' . $e->getMessage() . '. Your balance has been restored.');
+                ->with('error', 'Payment transfer failed: ' . $e->getMessage() . '. Your balance has been fully restored.');
         }
     }
 }

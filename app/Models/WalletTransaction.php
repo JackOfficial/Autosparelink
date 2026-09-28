@@ -83,13 +83,16 @@ class WalletTransaction extends Model
     }
 
     /**
-     * Net earnings after service fees.
+     * Net earnings or actual transferred amount.
      */
     public function getNetAmountAttribute(): float
     {
         return (float) $this->amount;
     }
 
+    /**
+     * Gross amount (Transferred amount + Service fee deducted from balance).
+     */
     public function getGrossAmountAttribute(): float
     {
         return (float) $this->amount + (float) $this->service_fee;
@@ -116,6 +119,7 @@ class WalletTransaction extends Model
                     if ($transaction->type == 'credit') {
                         $wallet->increment('balance', $transaction->amount);
                     } elseif ($transaction->type == 'debit') {
+                        // Decrements the total transaction amount from balance
                         $wallet->decrement('balance', $transaction->amount);
                     }
                 } 
