@@ -10,6 +10,7 @@ use App\Models\Variant;
 use App\Models\Specification;
 use App\Models\PartFitment;
 use App\Models\VehicleModel;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -259,6 +260,30 @@ public function exportPdf(Request $request)
     }
 
     return redirect()->route('admin.spare-parts.index')->with('success', 'Part updated successfully.');
+}
+
+public function shopParts(Request $request, Shop $shop)
+{
+    $parts = $shop->parts()
+        ->with([
+            'category:id,category_name', 
+            'partBrand:id,name',
+            'photos',
+            'state',
+            'fitments.vehicleModel.brand',
+        ])
+        ->when($request->search, function($query, $search) {
+            $query->where(function($subQuery) use ($search) {
+                $subQuery->where('part_name', 'like', "%{$search}%")
+                         ->orWhere('sku', 'like', "%{$search}%")
+                         ->orWhere('part_number', 'like', "%{$search}%");
+            });
+        })
+        ->latest()
+        ->paginate(15)
+        ->withQueryString();
+
+    return view('admin.parts.shop-index', compact('parts', 'shop'));
 }
 
     /* ============================

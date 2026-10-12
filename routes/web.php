@@ -345,7 +345,7 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::post('wallets/deduct', [WalletController::class, 'deductBalance'])->name('wallets.deduct');
     Route::put('shops/{shop}/approve', [ShopController::class, 'approve'])->name('shops.approve');
     Route::put('shops/{shop}/toggle', [ShopController::class, 'toggleStatus'])->name('shops.toggle');
-
+    Route::get('shops/{shop}/parts', [PartController::class, 'shopParts'])->name('shops.parts');
      // Route for viewing/streaming the document
     Route::get('/view-doc/{document}', [ShopController::class, 'viewDocument'])
         ->name('shops.view-doc');

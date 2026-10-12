@@ -99,7 +99,7 @@
                         </div>
                         <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
                             <span class="text-muted"><i class="fas fa-tools mr-2"></i> Inventory</span>
-                            <a href="{{ route('admin.parts.index', ['shop_id' => $shop->id]) }}" class="font-weight-bold text-primary text-decoration-none">
+                            <a href="{{ route('admin.shops.parts', $shop) }}" class="font-weight-bold text-primary text-decoration-none">
                                 {{ number_format($totalPartsCount ?? 0) }} Parts <i class="fas fa-external-link-alt small ml-1"></i>
                             </a>
                         </div>
