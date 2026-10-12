@@ -26,36 +26,38 @@ class ShopController extends Controller
     /**
      * Display the specific shop details using centralized audit logic.
      */
-    public function show(Shop $shop)
-    {
-        // 1. Load relationships and counts efficiently
-        $shop->load([
-            'user', 
-            'documents', 
-            'wallet', 
-            'payouts' => fn($q) => $q->latest()->take(5)
-        ])->loadCount([
-            'parts' => fn($q) => $q->where('status', 'active'),
-            'orderItems' => fn($q) => $q->where('status', 'completed')
-        ]);
+   public function show(Shop $shop)
+{
+    // 1. Load relationships and counts efficiently
+    $shop->load([
+        'user', 
+        'documents', 
+        'wallet', 
+        'payouts' => fn($q) => $q->latest()->take(5)
+    ])->loadCount([
+        'parts as total_parts_count', // Counts all spare parts uploaded by the shop
+        'parts as active_parts_count' => fn($q) => $q->where('status', 'active'),
+        'orderItems' => fn($q) => fn($query) => $query->where('status', 'completed')
+    ]);
 
-        // 2. CENTRALIZED FINANCIAL AUDIT
-        // This replaces the manual math and ensures Admin sees what the Seller sees.
-        $audit = $shop->getFinancialAudit();
+    // 2. CENTRALIZED FINANCIAL AUDIT
+    $audit = $shop->getFinancialAudit();
 
-        // 3. Recent Sales for the Table
-        $recentOrders = $shop->orderItems()
-            ->whereNotIn('status', ['pending', 'cancelled'])
-            ->with(['order.user', 'part'])
-            ->latest()
-            ->take(10)
-            ->get();
+    // 3. Recent Sales for the Table
+    $recentOrders = $shop->orderItems()
+        ->whereNotIn('status', ['pending', 'cancelled'])
+        ->with(['order.user', 'part'])
+        ->latest()
+        ->take(10)
+        ->get();
 
-        return view('admin.shops.show', array_merge($audit, [
-            'shop'         => $shop,
-            'recentOrders' => $recentOrders,
-        ]));
-    }
+    return view('admin.shops.show', array_merge($audit, [
+        'shop'              => $shop,
+        'recentOrders'      => $recentOrders,
+        'totalPartsCount'   => $shop->total_parts_count ?? 0,
+        'activePartsCount'  => $shop->active_parts_count ?? 0,
+    ]));
+}
 
     /**
      * View a verification document (PDF/Image) inline.

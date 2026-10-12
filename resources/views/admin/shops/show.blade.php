@@ -97,9 +97,11 @@
                             <span class="text-muted"><i class="fas fa-id-card mr-2"></i> TIN Number</span>
                             <span class="font-weight-bold text-primary">{{ $shop->tin_number }}</span>
                         </div>
-                        <div class="list-group-item px-0 py-3 d-flex justify-content-between">
+                        <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
                             <span class="text-muted"><i class="fas fa-tools mr-2"></i> Inventory</span>
-                            <span class="font-weight-bold">{{ number_format($shop->parts->count()) }} Parts</span>
+                            <a href="{{ route('admin.parts.index', ['shop_id' => $shop->id]) }}" class="font-weight-bold text-primary text-decoration-none">
+                                {{ number_format($totalPartsCount ?? 0) }} Parts <i class="fas fa-external-link-alt small ml-1"></i>
+                            </a>
                         </div>
                         <div class="list-group-item px-0 py-3 d-flex justify-content-between">
                             <span class="text-muted"><i class="fas fa-phone mr-2"></i> Contact</span>
