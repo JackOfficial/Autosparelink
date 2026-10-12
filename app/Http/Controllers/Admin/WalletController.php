@@ -163,6 +163,7 @@ class WalletController extends Controller
 
     public function deductBalance(Request $request)
 {
+  
     $request->validate([
         'shop_id'     => 'required|exists:shops,id',
         'amount'      => 'required|numeric|min:1',

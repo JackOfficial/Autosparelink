@@ -123,7 +123,7 @@
         <div class="modal-content border-0 rounded-4 shadow-lg">
             <form action="{{ route('admin.wallets.deduct') }}" method="POST">
                 @csrf
-                <input type="hidden" name="shop_id" value="{{ $wallet->shop_id }}">
+                <input type="text" name="shop_id" value="{{ $wallet->shop_id }}">
                 
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title font-weight-bold text-dark" id="deductWalletModalLabel">Deduct Funds from Wallet</h5>
