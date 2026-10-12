@@ -161,6 +161,51 @@ class WalletController extends Controller
         return view('admin.wallets.show', compact('wallet', 'audit'));
     }
 
+    public function deductBalance(Request $request)
+{
+    $request->validate([
+        'shop_id'     => 'required|exists:shops,id',
+        'amount'      => 'required|numeric|min:1',
+        'description' => 'required|string|max:255',
+    ]);
+
+    $shop = Shop::findOrFail($request->shop_id);
+    $adjReference = 'RET-' . strtoupper(bin2hex(random_bytes(3))) . '-' . time();
+
+    try {
+        DB::transaction(function () use ($request, $shop, $adjReference) {
+            $wallet = Wallet::where('shop_id', $shop->id)->lockForUpdate()->firstOrFail();
+
+            $audit = $shop->getFinancialAudit();
+            if ($audit['availableBalance'] < $request->amount) {
+                throw new \Exception('Insufficient available balance to perform this deduction.');
+            }
+
+            // 1. Decrement the wallet balance
+            $wallet->decrement('balance', $request->amount);
+
+            // 2. Log the transaction in the ledger
+            $wallet->transactions()->create([
+                'type'           => 'debit',
+                'amount'         => $request->amount,
+                'description'    => 'Wallet Return/Deduction: ' . $request->description,
+                'status'         => 'completed',
+                'reference_type' => 'Admin Adjustment',
+                'reference_id'   => auth()->id(),
+                'reference'      => $adjReference,
+            ]);
+
+            $wallet->updateQuietly(['last_transaction_at' => now()]);
+        });
+
+        return redirect()->route('admin.wallets.index')
+            ->with('success', "Successfully deducted " . number_format($request->amount) . " RWF from the wallet.");
+
+    } catch (\Exception $e) {
+        return back()->with('error', $e->getMessage())->withInput();
+    }
+}
+
     public function update(Request $request, string $id)
     {
         $request->validate(['description' => 'required|string|max:255']);

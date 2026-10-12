@@ -342,6 +342,7 @@ Route::middleware(['auth', 'role:admin|super-admin'])->prefix('admin')->name('ad
     Route::resource('users', UsersController::class);
     Route::resource('shops', ShopController::class);
     Route::resource('wallets', WalletController::class);
+    Route::post('wallets/deduct', [WalletController::class, 'deductBalance'])->name('wallets.deduct');
     Route::put('shops/{shop}/approve', [ShopController::class, 'approve'])->name('shops.approve');
     Route::put('shops/{shop}/toggle', [ShopController::class, 'toggleStatus'])->name('shops.toggle');
 
