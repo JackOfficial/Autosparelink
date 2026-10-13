@@ -6,7 +6,7 @@
 <div class="container-fluid py-4">
     {{-- Header & Stats --}}
     <div class="row mb-4 align-items-center">
-        <div class="col-12 col-lg-7 mb-3 mb-lg-0">
+        <div class="col-12 col-lg-6 mb-3 mb-lg-0">
             <div class="media align-items-center">
                 <a href="{{ route('admin.wallets.index') }}" class="btn btn-light rounded-circle mr-3 shadow-sm">
                     <i class="fas fa-arrow-left"></i>
@@ -17,15 +17,20 @@
                 </div>
             </div>
         </div>
-        <div class="col-12 col-lg-5 text-lg-right">
-            <div class="d-inline-flex align-items-center">
-                <div class="bg-white p-3 rounded-4 shadow-sm border-left border-primary text-left mr-3" style="border-left-width: 4px !important;">
+        <div class="col-12 col-lg-6 text-lg-right">
+            <div class="d-inline-flex align-items-center flex-wrap justify-content-lg-end">
+                <div class="bg-white p-3 rounded-4 shadow-sm border-left border-primary text-left mr-3 mb-2 mb-sm-0" style="border-left-width: 4px !important;">
                     <span class="text-muted small d-block">Current Balance</span>
                     <h3 class="font-weight-bold text-primary mb-0">{{ number_format($wallet->balance) }} RWF</h3>
                 </div>
-                <button type="button" class="btn btn-warning shadow-sm font-weight-bold px-3 py-3 rounded-4" data-toggle="modal" data-target="#deductWalletModal">
-                    <i class="fas fa-minus-circle mr-1"></i> Deduct Funds
-                </button>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success shadow-sm font-weight-bold px-3 py-3 rounded-left-4 mr-1" data-toggle="modal" data-target="#addWalletModal">
+                        <i class="fas fa-plus-circle mr-1"></i> Add Funds
+                    </button>
+                    <button type="button" class="btn btn-warning shadow-sm font-weight-bold px-3 py-3 rounded-right-4" data-toggle="modal" data-target="#deductWalletModal">
+                        <i class="fas fa-minus-circle mr-1"></i> Deduct Funds
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -77,7 +82,7 @@
                                 <span class="text-muted" style="font-size: 0.75rem;">{{ $trx->created_at->format('H:i A') }}</span>
                             </td>
                             <td>
-                                {!! $trx->type_badge !!}
+                                {!! $trx->type_badge ?? '<span class="badge badge-'.($trx->type == 'credit' ? 'success' : 'danger').'">'.ucfirst($trx->type).'</span>' !!}
                             </td>
                             <td>
                                 <span class="badge badge-light text-dark border font-weight-normal">
@@ -113,6 +118,51 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+{{-- Add Funds Modal --}}
+<div class="modal fade" id="addWalletModal" tabindex="-1" role="dialog" aria-labelledby="addWalletModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <form action="{{ route('admin.wallets.add') }}" method="POST">
+                @csrf
+                <input type="hidden" name="shop_id" value="{{ $wallet->shop_id }}">
+                
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-weight-bold text-dark" id="addWalletModalLabel">Add Funds to Wallet</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <div class="modal-body py-4">
+                    <p class="text-muted small mb-3">
+                        Credit additional funds into <strong>{{ $wallet->shop->shop_name }}</strong>'s wallet account balance.
+                    </p>
+
+                    <div class="form-group mb-3">
+                        <label for="add_amount" class="font-weight-bold small text-dark">Amount to Add (RWF) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" step="any" min="1" class="form-control @error('amount') is-invalid @enderror" id="add_amount" name="amount" value="{{ old('amount') }}" placeholder="e.g. 10000" required>
+                            <div class="input-group-append">
+                                <span class="input-group-text bg-light text-muted">RWF</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-0">
+                        <label for="add_description" class="font-weight-bold small text-dark">Reason / Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control @error('description') is-invalid @enderror" id="add_description" name="description" rows="3" placeholder="Provide a clear description for audit compliance..." required>{{ old('description') }}</textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success rounded-pill px-4 font-weight-bold">Confirm Credit</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
