@@ -164,7 +164,7 @@ class WalletController extends Controller
     /**
      * Add money (credit) to a shop's wallet safely.
      */
-    public function addBalance(Request $request)
+   public function addBalance(Request $request)
     {
         $request->validate([
             'shop_id'     => 'required|exists:shops,id',
@@ -182,10 +182,8 @@ class WalletController extends Controller
                     ['balance' => 0]
                 );
 
-                // 1. Increment the wallet balance
-                $wallet->increment('balance', $request->amount);
-
-                // 2. Log the transaction in the ledger
+                // ONLY create the transaction. 
+                // The WalletTransaction model observer will automatically increment the balance.
                 $wallet->transactions()->create([
                     'type'           => 'credit',
                     'amount'         => $request->amount,
@@ -195,8 +193,6 @@ class WalletController extends Controller
                     'reference_id'   => auth()->id(),
                     'reference'      => $adjReference,
                 ]);
-
-                $wallet->updateQuietly(['last_transaction_at' => now()]);
             });
 
             return redirect()->route('admin.wallets.index')
@@ -227,10 +223,8 @@ class WalletController extends Controller
                     throw new \Exception('Insufficient available balance to perform this deduction.');
                 }
 
-                // 1. Decrement the wallet balance
-                $wallet->decrement('balance', $request->amount);
-
-                // 2. Log the transaction in the ledger
+                // ONLY create the transaction. 
+                // The WalletTransaction model observer will automatically decrement the balance.
                 $wallet->transactions()->create([
                     'type'           => 'debit',
                     'amount'         => $request->amount,
@@ -240,8 +234,6 @@ class WalletController extends Controller
                     'reference_id'   => auth()->id(),
                     'reference'      => $adjReference,
                 ]);
-
-                $wallet->updateQuietly(['last_transaction_at' => now()]);
             });
 
             return redirect()->route('admin.wallets.index')
