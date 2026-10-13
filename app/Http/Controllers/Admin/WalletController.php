@@ -60,7 +60,7 @@ class WalletController extends Controller
     /**
      * Store manual adjustment safely using outside-in network handling logic
      */
-    public function store(Request $request)
+  public function store(Request $request)
     {
         $request->validate([
             'shop_id'         => 'required|exists:shops,id',
@@ -123,14 +123,10 @@ class WalletController extends Controller
                         'gateway_transaction_id' => $gatewayTransactionId,
                         'processed_at'           => now(),
                     ]);
-
-                    $wallet->decrement('balance', $request->amount);
-                } else {
-                    // Credit operations run purely on the database
-                    $wallet->increment('balance', $request->amount);
                 }
 
-                // 2. Log general Ledger Transaction Record
+                // 2. Log general Ledger Transaction Record 
+                // (The WalletTransaction model observer will automatically handle balance increment/decrement safely!)
                 $wallet->transactions()->create([
                     'type'           => $request->type,
                     'amount'         => $request->amount,
