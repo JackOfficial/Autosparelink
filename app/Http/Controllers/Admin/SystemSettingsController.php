@@ -6,21 +6,37 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Setting;
+use App\Services\InTouchPaymentService;
+use Illuminate\Support\Facades\Log;
 
 class SystemSettingsController extends Controller
 {
+    protected $intouchService;
+
+    public function __construct(InTouchPaymentService $intouchService)
+    {
+        $this->intouchService = $intouchService;
+    }
+
     /**
      * Display the system settings page.
      */
-    public function index()
+   public function index()
     {
-        // We no longer need to pluck everything here if we use the helper in the view,
-        // but keeping a small array for the form values is still clean.
+        // Safe fallback check if the gateway is unreachable
+        try {
+            $floatBalance = $this->intouchService->getBalance()['balance'] ?? 0;
+        } catch (\Exception $e) {
+            Log::warning("InTouch balance check failed on settings view: " . $e->getMessage());
+            $floatBalance = 'Unavailable';
+        }
+
         $settings = [
             'site_name'        => setting('site_name', 'Auto Spare Part'),
             'contact_email'    => setting('contact_email', 'admin@autosparepart.com'),
             'site_logo'        => setting('site_logo'),
-            'currency'         => setting('currency', 'USD'),
+            'balance'          => $floatBalance,
+            'currency'         => setting('currency', 'RWF'), // Changed default to RWF based on your platform currency
             'maintenance_mode' => setting('maintenance_mode', '0'),
         ];
 

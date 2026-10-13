@@ -80,10 +80,28 @@
         </div>
         
         <div class="col-lg-4">
+            {{-- InTouch Account Balance Widget --}}
+            <div class="card border-0 shadow-sm rounded-xl bg-white mb-3 border-left border-success" style="border-left-width: 4px !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small text-uppercase font-weight-bold text-muted">InTouch Float Balance</span>
+                        <span class="badge badge-success px-2 py-1">Live API</span>
+                    </div>
+                    <h3 class="font-weight-bold text-dark mb-1">
+                        @if(is_numeric($settings['balance']))
+                            {{ number_format($settings['balance']) }} <small class="h6 text-muted">RWF</small>
+                        @else
+                            <span class="text-danger h5">Unavailable</span>
+                        @endif
+                    </h3>
+                    <p class="text-muted extra-small mb-0"><i class="fas fa-wallet mr-1"></i> Available merchant float for instant payouts.</p>
+                </div>
+            </div>
+
             <div class="card border-0 shadow-sm rounded-xl bg-dark text-white mb-3">
                 <div class="card-body">
                     <h5 class="font-weight-bold text-primary"><i class="fa fa-shield-alt mr-2"></i> Security Info</h5>
-                    <p class="small opacity-75">Ensure your contact email is active. This address is used for critical system alerts and customer inquiry copies.</p>
+                    <p class="small opacity-75 mb-0">Ensure your contact email is active. This address is used for critical system alerts and customer inquiry copies.</p>
                 </div>
             </div>
 
