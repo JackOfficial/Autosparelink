@@ -19,7 +19,7 @@ class UsersController extends Controller
     public function index()
     {
         // Using pagination is better for "stunning" UI performance as the user base grows
-        $users = User::all();
+        $users = User::latest()->paginate(10);
         return view('admin.users.index', compact('users'));
     }
 
