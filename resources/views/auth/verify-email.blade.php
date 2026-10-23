@@ -50,6 +50,14 @@
                             </button>
                         </form>
 
+                        <!-- Optional: Logout form so users can fix a mistyped email -->
+<form method="POST" action="/logout" class="mt-3">
+    @csrf
+    <button type="submit" class="btn btn-link text-danger p-0 m-0 align-baseline">
+        Log Out
+    </button>
+</form>
+
                         <div class="mt-4">
                             <a href="/login" class="text-decoration-none">
                                 Back to Login
