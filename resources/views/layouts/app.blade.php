@@ -12,7 +12,7 @@
     @yield('meta_tags')
 
     <!-- Favicon -->
-    <link href="{{ asset('frontend/img/logo.png') }}" rel="icon">
+    <link href="{{ asset('frontend/img/autosparelink-favicon.png') }}" rel="icon">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
