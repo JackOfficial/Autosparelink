@@ -97,7 +97,7 @@ use App\Http\Controllers\User\VehicleController;
 // =============================================================
 
 Route::get('/email/verify/{id}/{hash}', CustomVerifyEmailController::class)
-    ->middleware(['auth', 'signed', 'throttle:6,1'])
+    ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
 
 Route::get('/', [HomeContoller::class, 'index']);
