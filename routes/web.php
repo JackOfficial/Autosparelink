@@ -96,10 +96,10 @@ use App\Http\Controllers\User\VehicleController;
 // PUBLIC FRONTEND ROUTES
 // =============================================================
 
-Route::get('/email/verify/{id}/{hash}', CustomVerifyEmailController::class)
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
-    
+// Route::get('/email/verify/{id}/{hash}', CustomVerifyEmailController::class)
+//     ->middleware(['signed', 'throttle:6,1'])
+//     ->name('verification.verify');
+
 Route::get('/', [HomeContoller::class, 'index']);
 
 Route::controller(PageController::class)->group(function () {
