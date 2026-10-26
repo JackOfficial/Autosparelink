@@ -7,8 +7,8 @@
     <meta name="description" content="Manage your shop inventory, sales, and analytics on the {{ $shop->name ?? 'Shop' }} dashboard.">
     <meta name="robots" content="noindex, nofollow"> <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('frontend/img/logo.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('frontend/img/logo.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('frontend/img/autosparelink-favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('frontend/img/autosparelink-favicon.png') }}">
 
     {{-- 1. Google Fonts are fine here (but preconnect first for speed) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

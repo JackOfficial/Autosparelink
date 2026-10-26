@@ -29,7 +29,7 @@
         <link href="{{ asset('frontend/css/style.css') }}" rel="stylesheet">
 
         <!-- Favicon -->
-        <link href="{{ asset('frontend/img/logo.png') }}" rel="icon">
+        <link href="{{ asset('frontend/img/autosparelink-favicon.png') }}" rel="icon">
 
         @livewireStyles
     </head>
